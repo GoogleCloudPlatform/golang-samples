@@ -33,7 +33,7 @@ func createKeyLabels(w io.Writer, parent, id string) error {
 	ctx := context.Background()
 	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create kms client: %v", err)
+		return fmt.Errorf("failed to create kms client: %w", err)
 	}
 	defer client.Close()
 
@@ -57,7 +57,7 @@ func createKeyLabels(w io.Writer, parent, id string) error {
 	// Call the API.
 	result, err := client.CreateCryptoKey(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to create key: %v", err)
+		return fmt.Errorf("failed to create key: %w", err)
 	}
 	fmt.Fprintf(w, "Created key: %s\n", result.Name)
 	return nil
