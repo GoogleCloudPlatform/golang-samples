@@ -34,7 +34,7 @@ func listFindingsWithMarks(w io.Writer, sourceName string) error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %v", err)
+		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -49,7 +49,7 @@ func listFindingsWithMarks(w io.Writer, sourceName string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("it.Next: %v", err)
+			return fmt.Errorf("it.Next: %w", err)
 		}
 		finding := result.Finding
 		fmt.Fprintf(w, "Finding Name: %s, ", finding.Name)

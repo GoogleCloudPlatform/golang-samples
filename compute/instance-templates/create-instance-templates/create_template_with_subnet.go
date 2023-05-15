@@ -35,7 +35,7 @@ func createTemplateWithSubnet(w io.Writer, projectID, network, subnetwork, templ
 	ctx := context.Background()
 	instanceTemplatesClient, err := compute.NewInstanceTemplatesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstanceTemplatesRESTClient: %v", err)
+		return fmt.Errorf("NewInstanceTemplatesRESTClient: %w", err)
 	}
 	defer instanceTemplatesClient.Close()
 
@@ -70,11 +70,11 @@ func createTemplateWithSubnet(w io.Writer, projectID, network, subnetwork, templ
 
 	op, err := instanceTemplatesClient.Insert(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to create instance template: %v", err)
+		return fmt.Errorf("unable to create instance template: %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Instance template created\n")
