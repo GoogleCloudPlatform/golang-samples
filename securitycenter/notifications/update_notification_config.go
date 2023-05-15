@@ -34,7 +34,7 @@ func updateNotificationConfig(w io.Writer, orgID string, notificationConfigID st
 	client, err := securitycenter.NewClient(ctx)
 
 	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %v", err)
+		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -58,7 +58,7 @@ func updateNotificationConfig(w io.Writer, orgID string, notificationConfigID st
 
 	notificationConfig, err := client.UpdateNotificationConfig(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Failed to update notification config: %v", err)
+		return fmt.Errorf("Failed to update notification config: %w", err)
 	}
 
 	fmt.Fprintln(w, "Updated NotificationConfig: ", notificationConfig)

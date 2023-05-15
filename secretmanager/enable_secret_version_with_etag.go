@@ -34,7 +34,7 @@ func enableSecretVersionWithEtag(name, etag string) error {
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create secretmanager client: %v", err)
+		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
 	defer client.Close()
 
@@ -46,7 +46,7 @@ func enableSecretVersionWithEtag(name, etag string) error {
 
 	// Call the API.
 	if _, err := client.EnableSecretVersion(ctx, req); err != nil {
-		return fmt.Errorf("failed to enable secret version: %v", err)
+		return fmt.Errorf("failed to enable secret version: %w", err)
 	}
 	return nil
 }

@@ -33,7 +33,7 @@ func createImportJob(w io.Writer, parent, id string) error {
 	ctx := context.Background()
 	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create kms client: %v", err)
+		return fmt.Errorf("failed to create kms client: %w", err)
 	}
 	defer client.Close()
 
@@ -54,7 +54,7 @@ func createImportJob(w io.Writer, parent, id string) error {
 	// Call the API.
 	result, err := client.CreateImportJob(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to create import job: %v", err)
+		return fmt.Errorf("failed to create import job: %w", err)
 	}
 	fmt.Fprintf(w, "Created import job: %s\n", result.Name)
 	return nil

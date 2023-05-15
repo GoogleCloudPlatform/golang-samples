@@ -28,12 +28,12 @@ func deleteKey(w io.Writer, fullKeyName string) error {
 	ctx := context.Background()
 	service, err := iam.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("iam.NewService: %v", err)
+		return fmt.Errorf("iam.NewService: %w", err)
 	}
 
 	_, err = service.Projects.ServiceAccounts.Keys.Delete(fullKeyName).Do()
 	if err != nil {
-		return fmt.Errorf("Projects.ServiceAccounts.Keys.Delete: %v", err)
+		return fmt.Errorf("Projects.ServiceAccounts.Keys.Delete: %w", err)
 	}
 	fmt.Fprintf(w, "Deleted key: %v", fullKeyName)
 	return nil

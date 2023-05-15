@@ -34,7 +34,7 @@ func updateSource(w io.Writer, sourceName string) error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %v", err)
+		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -51,7 +51,7 @@ func updateSource(w io.Writer, sourceName string) error {
 	}
 	source, err := client.UpdateSource(ctx, req)
 	if err != nil {
-		return fmt.Errorf("UpdateSource: %v", err)
+		return fmt.Errorf("UpdateSource: %w", err)
 	}
 	fmt.Fprintf(w, "Source Name: %s, ", source.Name)
 	fmt.Fprintf(w, "Display name: %s, ", source.DisplayName)

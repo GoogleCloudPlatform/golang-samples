@@ -30,7 +30,7 @@ func parseTemplate(filename string) *appTemplate {
 	path := filepath.Join("templates", filename)
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
-		panic(fmt.Errorf("could not read template: %v", err))
+		panic(fmt.Errorf("could not read template: %w", err))
 	}
 	template.Must(tmpl.New("body").Parse(string(b)))
 
