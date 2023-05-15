@@ -28,12 +28,12 @@ func deleteRole(w io.Writer, projectID, name string) error {
 	ctx := context.Background()
 	service, err := iam.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("iam.NewService: %v", err)
+		return fmt.Errorf("iam.NewService: %w", err)
 	}
 
 	_, err = service.Projects.Roles.Delete("projects/" + projectID + "/roles/" + name).Do()
 	if err != nil {
-		return fmt.Errorf("Projects.Roles.Delete: %v", err)
+		return fmt.Errorf("Projects.Roles.Delete: %w", err)
 	}
 	fmt.Fprintf(w, "Deleted role: %v", name)
 	return nil

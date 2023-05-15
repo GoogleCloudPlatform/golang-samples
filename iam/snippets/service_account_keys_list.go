@@ -28,13 +28,13 @@ func listKeys(w io.Writer, serviceAccountEmail string) ([]*iam.ServiceAccountKey
 	ctx := context.Background()
 	service, err := iam.NewService(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("iam.NewService: %v", err)
+		return nil, fmt.Errorf("iam.NewService: %w", err)
 	}
 
 	resource := "projects/-/serviceAccounts/" + serviceAccountEmail
 	response, err := service.Projects.ServiceAccounts.Keys.List(resource).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Projects.ServiceAccounts.Keys.List: %v", err)
+		return nil, fmt.Errorf("Projects.ServiceAccounts.Keys.List: %w", err)
 	}
 	for _, key := range response.Keys {
 		fmt.Fprintf(w, "Listing key: %v", key.Name)

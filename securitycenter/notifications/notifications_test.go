@@ -69,7 +69,7 @@ func addNotificationConfig(t *testing.T, notificationConfigID string) error {
 	client, err := securitycenter.NewClient(ctx)
 
 	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %v", err)
+		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -89,7 +89,7 @@ func addNotificationConfig(t *testing.T, notificationConfigID string) error {
 
 	_, err0 := client.CreateNotificationConfig(ctx, req)
 	if err0 != nil {
-		return fmt.Errorf("Failed to create notification config: %v", err0)
+		return fmt.Errorf("Failed to create notification config: %w", err0)
 	}
 
 	return nil
@@ -102,7 +102,7 @@ func cleanupNotificationConfig(t *testing.T, notificationConfigID string) error 
 	client, err := securitycenter.NewClient(ctx)
 
 	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %v", err)
+		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -112,7 +112,7 @@ func cleanupNotificationConfig(t *testing.T, notificationConfigID string) error 
 	}
 
 	if err = client.DeleteNotificationConfig(ctx, req); err != nil {
-		return fmt.Errorf("Failed to retrieve notification config: %v", err)
+		return fmt.Errorf("Failed to retrieve notification config: %w", err)
 	}
 
 	return nil

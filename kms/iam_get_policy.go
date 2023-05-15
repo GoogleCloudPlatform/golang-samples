@@ -35,14 +35,14 @@ func iamGetPolicy(w io.Writer, name string) error {
 	ctx := context.Background()
 	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create kms client: %v", err)
+		return fmt.Errorf("failed to create kms client: %w", err)
 	}
 	defer client.Close()
 
 	// Get the current policy.
 	policy, err := client.ResourceIAM(name).Policy(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to get IAM policy: %v", err)
+		return fmt.Errorf("failed to get IAM policy: %w", err)
 	}
 
 	// Print the policy members.

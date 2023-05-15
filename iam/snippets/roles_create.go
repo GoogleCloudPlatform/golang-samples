@@ -28,7 +28,7 @@ func createRole(w io.Writer, projectID, name, title, description, stage string, 
 	ctx := context.Background()
 	service, err := iam.NewService(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("iam.NewService: %v", err)
+		return nil, fmt.Errorf("iam.NewService: %w", err)
 	}
 
 	request := &iam.CreateRoleRequest{
@@ -42,7 +42,7 @@ func createRole(w io.Writer, projectID, name, title, description, stage string, 
 	}
 	role, err := service.Projects.Roles.Create("projects/"+projectID, request).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Projects.Roles.Create: %v", err)
+		return nil, fmt.Errorf("Projects.Roles.Create: %w", err)
 	}
 	fmt.Fprintf(w, "Created role: %v", role.Name)
 	return role, nil
