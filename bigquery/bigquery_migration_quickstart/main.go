@@ -50,13 +50,13 @@ func main() {
 	ctx := context.Background()
 	migClient, err := migration.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("migration.NewClient: %w", err)
+		log.Fatalf("migration.NewClient: %v", err)
 	}
 	defer migClient.Close()
 
 	workflow, err := executeTranslationWorkflow(ctx, migClient, *projectID, *location, *outputPath)
 	if err != nil {
-		log.Fatalf("workflow execution failed: %w", err)
+		log.Fatalf("workflow execution failed: %v", err)
 	}
 
 	reportWorkflowStatus(workflow)

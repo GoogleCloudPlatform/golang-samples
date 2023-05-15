@@ -59,7 +59,7 @@ func TestApp(t *testing.T) {
 	ctx := context.Background()
 	dataset, err, cleanup := createTestDataset(ctx, tc.ProjectID)
 	if err != nil {
-		t.Fatalf("failed to setup test dataset before running quickstart: %w", err)
+		t.Fatalf("failed to setup test dataset before running quickstart: %v", err)
 	}
 	defer cleanup()
 

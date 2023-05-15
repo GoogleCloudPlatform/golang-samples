@@ -30,7 +30,7 @@ func TestSimpleApp(t *testing.T) {
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, tc.ProjectID)
 	if err != nil {
-		t.Fatalf("bigquery.NewClient: %w", err)
+		t.Fatalf("bigquery.NewClient: %v", err)
 	}
 
 	rows, err := query(ctx, client)

@@ -38,7 +38,7 @@ func TestApp(t *testing.T) {
 	// Setup an output bucket.
 	bucket, cleanup, err := setupStorage(tc.ProjectID)
 	if err != nil {
-		t.Fatalf("error setting up storage: %w", err)
+		t.Fatalf("error setting up storage: %v", err)
 	}
 	defer cleanup()
 

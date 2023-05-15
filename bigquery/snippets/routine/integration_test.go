@@ -41,17 +41,17 @@ func TestRoutines(t *testing.T) {
 	}
 	testDatasetID, err := bqtestutil.UniqueBQName("snippet_routine_tests")
 	if err != nil {
-		t.Fatalf("couldn't generate unique resource name: %w", err)
+		t.Fatalf("couldn't generate unique resource name: %v", err)
 	}
 	if err := client.Dataset(testDatasetID).Create(ctx, meta); err != nil {
-		t.Fatalf("failed to create test dataset: %w", err)
+		t.Fatalf("failed to create test dataset: %v", err)
 	}
 	// Cleanup dataset at end of test.
 	defer client.Dataset(testDatasetID).DeleteWithContents(ctx)
 
 	testRoutineID, err := bqtestutil.UniqueBQName("testroutine")
 	if err != nil {
-		t.Fatalf("couldn't generate unique routine id: %w", err)
+		t.Fatalf("couldn't generate unique routine id: %v", err)
 	}
 	if err := createRoutineDDL(tc.ProjectID, testDatasetID, testRoutineID); err != nil {
 		t.Fatalf("createRoutineDDL(%q %q): %v", testDatasetID, testRoutineID, err)
@@ -59,7 +59,7 @@ func TestRoutines(t *testing.T) {
 
 	testRoutineID, err = bqtestutil.UniqueBQName("testroutine")
 	if err != nil {
-		t.Fatalf("couldn't generate unique routine id: %w", err)
+		t.Fatalf("couldn't generate unique routine id: %v", err)
 	}
 	if err := createRoutine(tc.ProjectID, testDatasetID, testRoutineID); err != nil {
 		t.Fatalf("createRoutine(%q %q): %v", testDatasetID, testRoutineID, err)

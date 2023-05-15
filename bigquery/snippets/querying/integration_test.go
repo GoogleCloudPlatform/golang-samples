@@ -39,14 +39,14 @@ func TestQueries(t *testing.T) {
 
 	testDatasetID, err := bqtestutil.UniqueBQName("snippet_table_tests")
 	if err != nil {
-		t.Fatalf("couldn't generate unique resource name: %w", err)
+		t.Fatalf("couldn't generate unique resource name: %v", err)
 	}
 
 	meta := &bigquery.DatasetMetadata{
 		Location: "US", // See https://cloud.google.com/bigquery/docs/locations
 	}
 	if err := client.Dataset(testDatasetID).Create(ctx, meta); err != nil {
-		t.Fatalf("failed to create test dataset: %w", err)
+		t.Fatalf("failed to create test dataset: %v", err)
 	}
 	// Cleanup dataset at end of test.
 	defer client.Dataset(testDatasetID).DeleteWithContents(ctx)
@@ -150,7 +150,7 @@ func TestQueries(t *testing.T) {
 			t.Parallel()
 			tableID := "bigquery_query_partitioned_table"
 			if err := preparePartitionedData(tc.ProjectID, testDatasetID, tableID); err != nil {
-				t.Fatalf("couldn't setup clustered table: %w", err)
+				t.Fatalf("couldn't setup clustered table: %v", err)
 			}
 			if err := queryPartitionedTable(ioutil.Discard, tc.ProjectID, testDatasetID, tableID); err != nil {
 				t.Errorf("queryPartitionedTable: %w", err)
@@ -160,7 +160,7 @@ func TestQueries(t *testing.T) {
 			t.Parallel()
 			tableID := "bigquery_query_clustered_table"
 			if err := prepareClusteredData(tc.ProjectID, testDatasetID, tableID); err != nil {
-				t.Fatalf("couldn't setup clustered table: %w", err)
+				t.Fatalf("couldn't setup clustered table: %v", err)
 			}
 			if err := queryClusteredTable(ioutil.Discard, tc.ProjectID, testDatasetID, tableID); err != nil {
 				t.Errorf("queryClusteredTable: %w", err)

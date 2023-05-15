@@ -78,7 +78,7 @@ func main() {
 	ctx := context.Background()
 	bqReadClient, err := bqStorage.NewBigQueryReadClient(ctx)
 	if err != nil {
-		log.Fatalf("NewBigQueryStorageClient: %w", err)
+		log.Fatalf("NewBigQueryStorageClient: %v", err)
 	}
 	defer bqReadClient.Close()
 
@@ -134,7 +134,7 @@ func main() {
 	// Create the session from the request.
 	session, err := bqReadClient.CreateReadSession(ctx, createReadSessionRequest, rpcOpts)
 	if err != nil {
-		log.Fatalf("CreateReadSession: %w", err)
+		log.Fatalf("CreateReadSession: %v", err)
 	}
 	fmt.Printf("Read session: %s\n", session.GetName())
 
@@ -158,7 +158,7 @@ func main() {
 	go func() {
 		defer wg.Done()
 		if err := processStream(ctx, bqReadClient, readStream, ch); err != nil {
-			log.Fatalf("processStream failure: %w", err)
+			log.Fatalf("processStream failure: %v", err)
 		}
 		close(ch)
 	}()

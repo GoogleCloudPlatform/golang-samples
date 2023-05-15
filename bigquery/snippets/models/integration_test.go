@@ -71,11 +71,11 @@ func TestModels(t *testing.T) {
 	)`, modelRef)
 	job, err := client.Query(sql).Run(ctx)
 	if err != nil {
-		t.Fatalf("failed to create model: %w", err)
+		t.Fatalf("failed to create model: %v", err)
 	}
 	_, err = job.Wait(ctx)
 	if err != nil {
-		t.Fatalf("waiting for job completion failed: %w", err)
+		t.Fatalf("waiting for job completion failed: %v", err)
 	}
 	if err := printModelInfo(ioutil.Discard, tc.ProjectID, datasetID, modelID); err != nil {
 		t.Errorf("printModelInfo(%q %q): %v", datasetID, modelID, err)

@@ -50,19 +50,19 @@ func main() {
 	ctx := context.Background()
 	bqResClient, err := reservation.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("NewClient: %w", err)
+		log.Fatalf("NewClient: %v", err)
 	}
 	defer bqResClient.Close()
 
 	s, err := reportCapacityCommitments(ctx, bqResClient, *projectID, *location)
 	if err != nil {
-		log.Fatalf("printCapacityCommitments: %w", err)
+		log.Fatalf("printCapacityCommitments: %v", err)
 	}
 	fmt.Println(s)
 
 	s, err = reportReservations(ctx, bqResClient, *projectID, *location)
 	if err != nil {
-		log.Fatalf("printReservations: %w", err)
+		log.Fatalf("printReservations: %v", err)
 	}
 	fmt.Println(s)
 }
