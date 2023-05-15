@@ -96,7 +96,7 @@ func streamTime(client pb.TimeServiceClient, duration uint) error {
 
 		ts, err := ptypes.Timestamp(msg.GetCurrentTime())
 		if err != nil {
-			return fmt.Errorf("failed to parse timestamp %v: %w", msg.GetCurrentTime(), err)
+			return fmt.Errorf("failed to parse timestamp %w: %w", msg.GetCurrentTime(), err)
 		}
 		log.Printf("received message: current_timestamp: %v", ts.Format(time.RFC3339))
 	}
