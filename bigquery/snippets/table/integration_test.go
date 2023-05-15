@@ -229,7 +229,7 @@ func TestTables(t *testing.T) {
 	sql := fmt.Sprintf("CREATE TABLE `%s`.%s.%s AS SELECT CURRENT_TIMESTAMP AS TimestampField, \"foo\" AS StringField, true as BooleanField",
 		tc.ProjectID, testDatasetID, baseTableID)
 	if _, err = client.Query(sql).Read(ctx); err != nil {
-		t.Errorf("setup materialized view base table failed: %w", err)
+		t.Errorf("setup materialized view base table failed: %v", err)
 	}
 	if err = createMaterializedView(tc.ProjectID, testDatasetID, baseTableID, matViewID); err != nil {
 		t.Fatalf("createMaterializedView(%q %q): %v", testDatasetID, matViewID, err)

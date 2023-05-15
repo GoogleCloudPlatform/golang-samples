@@ -67,7 +67,7 @@ func TestApp(t *testing.T) {
 		fmt.Sprintf("--project_id=%s", tc.ProjectID),
 		fmt.Sprintf("--dataset_source=%s", dataset))
 	if err != nil {
-		t.Errorf("execution failed: %w", err)
+		t.Errorf("execution failed: %v", err)
 	}
 
 	// Look for a known substring in the output
