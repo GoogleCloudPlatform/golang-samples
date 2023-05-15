@@ -63,7 +63,7 @@ func TestSignURL(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.testName, func(t *testing.T) {
 			if err := signURL(buf, c.url, c.keyName, privateTestKey, c.expiration); err != nil {
-				t.Errorf("signURL got err: %v", err)
+				t.Errorf("signURL got err: %w", err)
 			}
 			if got := buf.String(); !strings.Contains(got, c.out) {
 				t.Errorf("signed value incorrectly matched: got %q, want %q", got, c.out)
@@ -106,7 +106,7 @@ func TestSignURLPrefix(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.testName, func(t *testing.T) {
 			if err := signURLPrefix(buf, c.url, c.keyName, privateTestKey, c.expiration); err != nil {
-				t.Errorf("signURLPrefix got err: %v", err)
+				t.Errorf("signURLPrefix got err: %w", err)
 			}
 			if got := buf.String(); !strings.Contains(got, c.out) {
 				t.Errorf("signed value incorrectly matched: got %q, want %q", got, c.out)
@@ -142,7 +142,7 @@ func TestSignCookie(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.testName, func(t *testing.T) {
 			if err := signCookie(buf, c.url, c.keyName, privateTestKey, c.expiration); err != nil {
-				t.Errorf("signCookie got err: %v", err)
+				t.Errorf("signCookie got err: %w", err)
 			}
 			if got := buf.String(); !strings.Contains(got, c.out) {
 				t.Errorf("signed value incorrectly matched: got %q, want %q", got, c.out)
