@@ -29,14 +29,14 @@ func createKey(w io.Writer, serviceAccountEmail string) (*iam.ServiceAccountKey,
 	ctx := context.Background()
 	service, err := iam.NewService(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("iam.NewService: %v", err)
+		return nil, fmt.Errorf("iam.NewService: %w", err)
 	}
 
 	resource := "projects/-/serviceAccounts/" + serviceAccountEmail
 	request := &iam.CreateServiceAccountKeyRequest{}
 	key, err := service.Projects.ServiceAccounts.Keys.Create(resource, request).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Projects.ServiceAccounts.Keys.Create: %v", err)
+		return nil, fmt.Errorf("Projects.ServiceAccounts.Keys.Create: %w", err)
 	}
 	// The PrivateKeyData field contains the base64-encoded service account key
 	// in JSON format.

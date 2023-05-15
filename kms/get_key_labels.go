@@ -32,7 +32,7 @@ func getKeyLabels(w io.Writer, name string) error {
 	ctx := context.Background()
 	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create kms client: %v", err)
+		return fmt.Errorf("failed to create kms client: %w", err)
 	}
 	defer client.Close()
 
@@ -44,7 +44,7 @@ func getKeyLabels(w io.Writer, name string) error {
 	// Call the API.
 	result, err := client.GetCryptoKey(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to get key: %v", err)
+		return fmt.Errorf("failed to get key: %w", err)
 	}
 
 	// Extract and print the labels.

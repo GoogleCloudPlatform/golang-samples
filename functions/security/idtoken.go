@@ -44,16 +44,16 @@ func makeGetRequest(w io.Writer, targetURL string, audience string) error {
 	// to any requests made.
 	client, err := idtoken.NewClient(ctx, audience)
 	if err != nil {
-		return fmt.Errorf("idtoken.NewClient: %v", err)
+		return fmt.Errorf("idtoken.NewClient: %w", err)
 	}
 
 	resp, err := client.Get(targetURL)
 	if err != nil {
-		return fmt.Errorf("client.Get: %v", err)
+		return fmt.Errorf("client.Get: %w", err)
 	}
 	defer resp.Body.Close()
 	if _, err := io.Copy(w, resp.Body); err != nil {
-		return fmt.Errorf("io.Copy: %v", err)
+		return fmt.Errorf("io.Copy: %w", err)
 	}
 
 	return nil
