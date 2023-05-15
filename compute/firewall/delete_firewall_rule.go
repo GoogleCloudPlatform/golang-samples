@@ -32,7 +32,7 @@ func deleteFirewallRule(w io.Writer, projectID, firewallRuleName string) error {
 	ctx := context.Background()
 	firewallsClient, err := compute.NewFirewallsRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstancesRESTClient: %v", err)
+		return fmt.Errorf("NewInstancesRESTClient: %w", err)
 	}
 	defer firewallsClient.Close()
 
@@ -43,11 +43,11 @@ func deleteFirewallRule(w io.Writer, projectID, firewallRuleName string) error {
 
 	op, err := firewallsClient.Delete(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to delete firewall rule: %v", err)
+		return fmt.Errorf("unable to delete firewall rule: %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Firewall rule deleted\n")

@@ -33,7 +33,7 @@ func deleteTrigger(w io.Writer, triggerID string) error {
 
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return fmt.Errorf("dlp.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -42,7 +42,7 @@ func deleteTrigger(w io.Writer, triggerID string) error {
 	}
 
 	if err := client.DeleteJobTrigger(ctx, req); err != nil {
-		return fmt.Errorf("DeleteJobTrigger: %v", err)
+		return fmt.Errorf("DeleteJobTrigger: %w", err)
 	}
 	fmt.Fprintf(w, "Successfully deleted trigger %v", triggerID)
 	return nil

@@ -36,7 +36,7 @@ func accessSecretVersion(w io.Writer, name string) error {
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create secretmanager client: %v", err)
+		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
 	defer client.Close()
 
@@ -48,7 +48,7 @@ func accessSecretVersion(w io.Writer, name string) error {
 	// Call the API.
 	result, err := client.AccessSecretVersion(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to access secret version: %v", err)
+		return fmt.Errorf("failed to access secret version: %w", err)
 	}
 
 	// Verify the data checksum.
