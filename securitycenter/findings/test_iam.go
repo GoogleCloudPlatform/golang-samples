@@ -33,7 +33,7 @@ func testIam(w io.Writer, sourceName string) error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %v", err)
+		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 	// Check for create/update Permissions.
@@ -44,7 +44,7 @@ func testIam(w io.Writer, sourceName string) error {
 
 	policy, err := client.TestIamPermissions(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Error getting IAM policy: %v", err)
+		return fmt.Errorf("Error getting IAM policy: %w", err)
 	}
 	fmt.Fprintf(w, "Permision to create/update findings? %t",
 		len(policy.Permissions) > 0)
@@ -57,7 +57,7 @@ func testIam(w io.Writer, sourceName string) error {
 
 	policy, err = client.TestIamPermissions(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Error getting IAM policy: %v", err)
+		return fmt.Errorf("Error getting IAM policy: %w", err)
 	}
 	fmt.Fprintf(w, "Permision to update state? %t",
 		len(policy.Permissions) > 0)

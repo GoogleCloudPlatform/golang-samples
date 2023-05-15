@@ -35,7 +35,7 @@ func startInstanceWithEncKey(w io.Writer, projectID, zone, instanceName, key str
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstancesRESTClient: %v", err)
+		return fmt.Errorf("NewInstancesRESTClient: %w", err)
 	}
 	defer instancesClient.Close()
 
@@ -47,7 +47,7 @@ func startInstanceWithEncKey(w io.Writer, projectID, zone, instanceName, key str
 
 	instance, err := instancesClient.Get(ctx, instanceReq)
 	if err != nil {
-		return fmt.Errorf("unable to get instance: %v", err)
+		return fmt.Errorf("unable to get instance: %w", err)
 	}
 
 	req := &computepb.StartWithEncryptionKeyInstanceRequest{
@@ -68,11 +68,11 @@ func startInstanceWithEncKey(w io.Writer, projectID, zone, instanceName, key str
 
 	op, err := instancesClient.StartWithEncryptionKey(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to start instance with encryption key: %v", err)
+		return fmt.Errorf("unable to start instance with encryption key: %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Instance with encryption key started\n")
