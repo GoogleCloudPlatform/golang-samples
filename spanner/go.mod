@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go v0.110.0
 	cloud.google.com/go/kms v1.10.0
 	cloud.google.com/go/longrunning v0.4.1
-	cloud.google.com/go/spanner v1.44.0
+	cloud.google.com/go/spanner v1.46.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.14
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230324221613-82da276a923c
 	github.com/golang/protobuf v1.5.3
