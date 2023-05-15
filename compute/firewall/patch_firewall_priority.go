@@ -34,7 +34,7 @@ func patchFirewallPriority(w io.Writer, projectID, firewallRuleName string, prio
 	ctx := context.Background()
 	firewallsClient, err := compute.NewFirewallsRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstancesRESTClient: %v", err)
+		return fmt.Errorf("NewInstancesRESTClient: %w", err)
 	}
 	defer firewallsClient.Close()
 
@@ -52,11 +52,11 @@ func patchFirewallPriority(w io.Writer, projectID, firewallRuleName string, prio
 	// the values that were set in it, in this case it will only change the priority.
 	op, err := firewallsClient.Patch(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to patch firewall rule: %v", err)
+		return fmt.Errorf("unable to patch firewall rule: %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Firewall rule updated\n")

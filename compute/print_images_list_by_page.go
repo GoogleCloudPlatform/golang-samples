@@ -34,7 +34,7 @@ func printImagesListByPage(w io.Writer, projectID string, pageSize uint32) error
 	ctx := context.Background()
 	imagesClient, err := compute.NewImagesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewImagesRESTClient: %v", err)
+		return fmt.Errorf("NewImagesRESTClient: %w", err)
 	}
 	defer imagesClient.Close()
 
@@ -54,7 +54,7 @@ func printImagesListByPage(w io.Writer, projectID string, pageSize uint32) error
 		var items []*computepb.Image
 		pageToken, err := p.NextPage(&items)
 		if err != nil {
-			return fmt.Errorf("iterator paging failed: %v", err)
+			return fmt.Errorf("iterator paging failed: %w", err)
 		}
 		fmt.Fprintf(w, "Page %d: %v\n", page, items)
 		if pageToken == "" {

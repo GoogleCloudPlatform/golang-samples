@@ -35,7 +35,7 @@ func deidentifyExceptionList(w io.Writer, projectID, input string) error {
 	// call the Close method to cleanup its resources.
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return fmt.Errorf("dlp.NewClient: %w", err)
 	}
 
 	// Closing the client safely cleans up background resousrces.
