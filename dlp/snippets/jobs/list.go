@@ -33,7 +33,7 @@ func listJobs(w io.Writer, projectID, filter, jobType string) error {
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return fmt.Errorf("dlp.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -51,7 +51,7 @@ func listJobs(w io.Writer, projectID, filter, jobType string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("Next: %v", err)
+			return fmt.Errorf("Next: %w", err)
 		}
 		fmt.Fprintf(w, "Job %v status: %v\n", j.GetName(), j.GetState())
 	}

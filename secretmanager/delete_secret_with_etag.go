@@ -32,7 +32,7 @@ func deleteSecretWithEtag(name, etag string) error {
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create secretmanager client: %v", err)
+		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
 	defer client.Close()
 
@@ -44,7 +44,7 @@ func deleteSecretWithEtag(name, etag string) error {
 
 	// Call the API.
 	if err := client.DeleteSecret(ctx, req); err != nil {
-		return fmt.Errorf("failed to delete secret: %v", err)
+		return fmt.Errorf("failed to delete secret: %w", err)
 	}
 	return nil
 }
