@@ -33,7 +33,7 @@ func disableSecretVersion(name string) error {
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create secretmanager client: %v", err)
+		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
 	defer client.Close()
 
@@ -44,7 +44,7 @@ func disableSecretVersion(name string) error {
 
 	// Call the API.
 	if _, err := client.DisableSecretVersion(ctx, req); err != nil {
-		return fmt.Errorf("failed to disable secret version: %v", err)
+		return fmt.Errorf("failed to disable secret version: %w", err)
 	}
 	return nil
 }

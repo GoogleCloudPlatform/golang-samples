@@ -32,7 +32,7 @@ func deleteInstanceTemplate(w io.Writer, projectID, templateName string) error {
 	ctx := context.Background()
 	instanceTemplatesClient, err := compute.NewInstanceTemplatesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstanceTemplatesRESTClient: %v", err)
+		return fmt.Errorf("NewInstanceTemplatesRESTClient: %w", err)
 	}
 	defer instanceTemplatesClient.Close()
 
@@ -43,11 +43,11 @@ func deleteInstanceTemplate(w io.Writer, projectID, templateName string) error {
 
 	op, err := instanceTemplatesClient.Delete(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to delete instance template: %v", err)
+		return fmt.Errorf("unable to delete instance template: %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Instance template deleted\n")

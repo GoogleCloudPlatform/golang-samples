@@ -42,7 +42,7 @@ func createSnapshot(
 
 	snapshotsClient, err := compute.NewSnapshotsRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewSnapshotsRESTClient: %v", err)
+		return fmt.Errorf("NewSnapshotsRESTClient: %w", err)
 	}
 	defer snapshotsClient.Close()
 
@@ -67,7 +67,7 @@ func createSnapshot(
 	if zone != "" {
 		disksClient, err := compute.NewDisksRESTClient(ctx)
 		if err != nil {
-			return fmt.Errorf("NewDisksRESTClient: %v", err)
+			return fmt.Errorf("NewDisksRESTClient: %w", err)
 		}
 		defer disksClient.Close()
 
@@ -79,12 +79,12 @@ func createSnapshot(
 
 		disk, err = disksClient.Get(ctx, getDiskReq)
 		if err != nil {
-			return fmt.Errorf("unable to create disk: %v", err)
+			return fmt.Errorf("unable to create disk: %w", err)
 		}
 	} else {
 		regionDisksClient, err := compute.NewRegionDisksRESTClient(ctx)
 		if err != nil {
-			return fmt.Errorf("NewRegionDisksRESTClient: %v", err)
+			return fmt.Errorf("NewRegionDisksRESTClient: %w", err)
 		}
 		defer regionDisksClient.Close()
 
@@ -96,7 +96,7 @@ func createSnapshot(
 
 		disk, err = regionDisksClient.Get(ctx, getDiskReq)
 		if err != nil {
-			return fmt.Errorf("unable to create disk: %v", err)
+			return fmt.Errorf("unable to create disk: %w", err)
 		}
 	}
 
@@ -111,11 +111,11 @@ func createSnapshot(
 
 	op, err := snapshotsClient.Insert(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to create snapshot: %v", err)
+		return fmt.Errorf("unable to create snapshot: %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Snapshot created\n")
