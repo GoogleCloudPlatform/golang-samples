@@ -33,7 +33,7 @@ func getInstanceHostname(w io.Writer, projectID, zone, instanceName string) erro
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstancesRESTClient: %v", err)
+		return fmt.Errorf("NewInstancesRESTClient: %w", err)
 	}
 	defer instancesClient.Close()
 
@@ -45,7 +45,7 @@ func getInstanceHostname(w io.Writer, projectID, zone, instanceName string) erro
 
 	instance, err := instancesClient.Get(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to get instance: %v", err)
+		return fmt.Errorf("unable to get instance: %w", err)
 	}
 
 	// If a custom hostname is not set, the output for instance.GetHostname() will be ""

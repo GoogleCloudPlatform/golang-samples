@@ -31,7 +31,7 @@ func getUsageExportBucket(w io.Writer, projectID string) error {
 	ctx := context.Background()
 	projectsClient, err := compute.NewProjectsRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewProjectsRESTClient: %v", err)
+		return fmt.Errorf("NewProjectsRESTClient: %w", err)
 	}
 	defer projectsClient.Close()
 
@@ -42,7 +42,7 @@ func getUsageExportBucket(w io.Writer, projectID string) error {
 
 	project, err := projectsClient.Get(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to get project: %v", err)
+		return fmt.Errorf("unable to get project: %w", err)
 	}
 
 	usageExportLocation := project.GetUsageExportLocation()

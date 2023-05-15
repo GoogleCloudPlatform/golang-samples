@@ -39,7 +39,7 @@ func createFirewallRuleForWindowsActivationHost(
 	ctx := context.Background()
 	firewallsClient, err := compute.NewFirewallsRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewFirewallsRESTClient: %v", err)
+		return fmt.Errorf("NewFirewallsRESTClient: %w", err)
 	}
 	defer firewallsClient.Close()
 
@@ -62,11 +62,11 @@ func createFirewallRuleForWindowsActivationHost(
 
 	op, err := firewallsClient.Insert(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to create firewall rule: %v", err)
+		return fmt.Errorf("unable to create firewall rule: %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Firewall rule created\n")
