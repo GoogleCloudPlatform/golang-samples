@@ -37,7 +37,7 @@ var untouchedFindingName = ""
 func createTestFinding(ctx context.Context, client *securitycenter.Client, findingID string, category string) (*securitycenterpb.Finding, error) {
 	eventTime, err := ptypes.TimestampProto(time.Now())
 	if err != nil {
-		return nil, fmt.Errorf("TimestampProto: %v", err)
+		return nil, fmt.Errorf("TimestampProto: %w", err)
 	}
 
 	req := &securitycenterpb.CreateFindingRequest{
@@ -68,7 +68,7 @@ func setupEntities() error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %v", err)
+		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -81,17 +81,17 @@ func setupEntities() error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("CreateSource: %v", err)
+		return fmt.Errorf("CreateSource: %w", err)
 	}
 	sourceName = source.Name
 	finding, err := createTestFinding(ctx, client, "updated", "MEDIUM_RISK_ONE")
 	if err != nil {
-		return fmt.Errorf("createTestFinding: %v", err)
+		return fmt.Errorf("createTestFinding: %w", err)
 	}
 	findingName = finding.Name
 	finding, err = createTestFinding(ctx, client, "untouched", "XSS")
 	if err != nil {
-		return fmt.Errorf("createTestFinding: %v", err)
+		return fmt.Errorf("createTestFinding: %w", err)
 	}
 	untouchedFindingName = finding.Name
 	return nil

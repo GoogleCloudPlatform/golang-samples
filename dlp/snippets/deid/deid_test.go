@@ -244,7 +244,7 @@ func TestDeidentifyTableConditionInfoTypes(t *testing.T) {
 		t.Errorf("deidentifyTableConditionInfoTypes got %q, want %q", got, want)
 	}
 	if want := "values:{string_value:\"[PERSON_NAME] name was a curse invented by [PERSON_NAME].\"}}"; !strings.Contains(got, want) {
-		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
+		t.Errorf("deidentifyTableConditionInfoTypes got %q, want %q", got, want)
 	}
 }
 

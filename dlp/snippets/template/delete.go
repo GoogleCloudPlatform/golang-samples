@@ -33,7 +33,7 @@ func deleteInspectTemplate(w io.Writer, templateID string) error {
 
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return fmt.Errorf("dlp.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -42,7 +42,7 @@ func deleteInspectTemplate(w io.Writer, templateID string) error {
 	}
 
 	if err := client.DeleteInspectTemplate(ctx, req); err != nil {
-		return fmt.Errorf("DeleteInspectTemplate: %v", err)
+		return fmt.Errorf("DeleteInspectTemplate: %w", err)
 	}
 	fmt.Fprintf(w, "Successfully deleted inspect template %v", templateID)
 	return nil

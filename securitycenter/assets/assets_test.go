@@ -49,7 +49,7 @@ func getRandomAsset(client *securitycenter.Client, orgID string) (*securitycente
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("it.Next(): %v", err)
+			return nil, fmt.Errorf("it.Next(): %w", err)
 		}
 		assetsCount++
 		if rand.Float64() < 1.0/float64(assetsCount) {
@@ -95,7 +95,7 @@ func attemptLease(client *securitycenter.Client, asset *securitycenterpb.Asset, 
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("UpdateSecurityMarks: %v", err)
+		return fmt.Errorf("UpdateSecurityMarks: %w", err)
 	}
 	// Randomize wake-up in case we are in the edge case of two writes
 	time.Sleep(time.Duration((100 * rand.Int63n(20))) * time.Millisecond)
@@ -109,7 +109,7 @@ func attemptLease(client *securitycenter.Client, asset *securitycenterpb.Asset, 
 		return fmt.Errorf("didn't find asset %s", asset.Name)
 	}
 	if err != nil {
-		return fmt.Errorf("it.Next: %v", err)
+		return fmt.Errorf("it.Next: %w", err)
 	}
 	asset = result.Asset
 
@@ -130,7 +130,7 @@ func initAssetForManipulation() error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %v", err)
+		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
