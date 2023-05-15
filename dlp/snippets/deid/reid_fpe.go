@@ -39,13 +39,13 @@ func reidentifyFPE(w io.Writer, projectID, input, keyFileName, cryptoKeyName, su
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return fmt.Errorf("dlp.NewClient: %w", err)
 	}
 	defer client.Close()
 	// Read the key file.
 	keyBytes, err := ioutil.ReadFile(keyFileName)
 	if err != nil {
-		return fmt.Errorf("ReadFile: %v", err)
+		return fmt.Errorf("ReadFile: %w", err)
 	}
 	// Create a configured request.
 	req := &dlppb.ReidentifyContentRequest{
@@ -106,7 +106,7 @@ func reidentifyFPE(w io.Writer, projectID, input, keyFileName, cryptoKeyName, su
 	// Send the request.
 	r, err := client.ReidentifyContent(ctx, req)
 	if err != nil {
-		return fmt.Errorf("ReidentifyContent: %v", err)
+		return fmt.Errorf("ReidentifyContent: %w", err)
 	}
 	// Print the result.
 	fmt.Fprint(w, r.GetItem().GetValue())
