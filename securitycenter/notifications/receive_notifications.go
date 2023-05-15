@@ -34,7 +34,7 @@ func receiveMessages(w io.Writer, projectID string, subscriptionName string) err
 
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -49,7 +49,7 @@ func receiveMessages(w io.Writer, projectID string, subscriptionName string) err
 		cancel()
 	})
 	if err != nil {
-		return fmt.Errorf("Receive: %v", err)
+		return fmt.Errorf("Receive: %w", err)
 	}
 
 	return nil
