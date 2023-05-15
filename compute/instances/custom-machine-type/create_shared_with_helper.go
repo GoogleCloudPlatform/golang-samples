@@ -117,7 +117,7 @@ func customMachineTypeSharedCoreURI(zone, cpuSeries string, memory int) (string,
 	}
 
 	if !containsString([]string{e2Micro, e2Small, e2Medium}, cpuSeries) {
-		return "", fmt.Errorf("incorrect cpu type: %w", cpuSeries)
+		return "", fmt.Errorf("incorrect cpu type: %v", cpuSeries)
 	}
 
 	coreCount := 2

@@ -117,7 +117,7 @@ func customMachineTypeURI(zone, cpuSeries string, coreCount, memory int) (string
 	}
 
 	if !containsString([]string{e2, n1, n2, n2d}, cpuSeries) {
-		return "", fmt.Errorf("incorrect cpu type: %w", cpuSeries)
+		return "", fmt.Errorf("incorrect cpu type: %v", cpuSeries)
 	}
 
 	tl := typeLimitsMap[cpuSeries]
