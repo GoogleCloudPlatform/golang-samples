@@ -8,16 +8,14 @@ references:
   - https://www.jit.io
 tags: []
 items:
-  - name: Scan your code dependencies for vulnerabilities (SCA)
-    uses: jitsecurity-controls/jit-plans/items/code/item-dependency-check.yml@latest
-  - name: Scan code for hard-coded secrets
-    uses: jitsecurity-controls/jit-plans/items/code/item-secret-detection.yml@latest
   - name: Scan your code for vulnerabilities (SAST)
     uses: >-
       jitsecurity-controls/jit-plans/items/code/item-code-vulnerability.yml@latest
   - name: Scan your Dockerfiles for vulnerabilities
     uses: >-
       jitsecurity-controls/jit-plans/items/infrastructure/item-container-scan.yml@latest
+  - name: Scan your code dependencies for vulnerabilities (SCA)
+    uses: jitsecurity-controls/jit-plans/items/code/item-dependency-check.yml@latest
   - name: Scan Kubernetes configuration files
     uses: >-
       jitsecurity-controls/jit-plans/items/infrastructure/item-iac-kubernetes.yml@latest
@@ -27,4 +25,9 @@ items:
   - name: Verify that MFA for your GitHub organization is enabled
     uses: >-
       jitsecurity-controls/jit-plans/items/third_party_app/item-mfa-scm.yml@latest
+  - name: Scan code for hard-coded secrets
+    uses: jitsecurity-controls/jit-plans/items/code/item-secret-detection.yml@latest
+  - name: Verify that Github Branch Protection is properly configured
+    uses: >-
+      jitsecurity-controls/jit-plans/items/third_party_app/item-branch-protection-scm.yml@latest
 
