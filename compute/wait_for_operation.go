@@ -32,7 +32,7 @@ func waitForOperation(w io.Writer, projectID string, operation *compute.Operatio
 	ctx := context.Background()
 
 	if err := operation.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Operation finished\n")
