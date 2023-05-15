@@ -37,7 +37,7 @@ func listSecretVersionsWithFilter(w io.Writer, parent string, filter string) err
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create secretmanager client: %v", err)
+		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
 	defer client.Close()
 
@@ -56,7 +56,7 @@ func listSecretVersionsWithFilter(w io.Writer, parent string, filter string) err
 		}
 
 		if err != nil {
-			return fmt.Errorf("failed to list secret versions: %v", err)
+			return fmt.Errorf("failed to list secret versions: %w", err)
 		}
 
 		fmt.Fprintf(w, "Found secret version %s with state %s\n",
