@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"regexp"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	adminpb "cloud.google.com/go/spanner/admin/database/apiv1/databasepb"
@@ -27,15 +26,11 @@ import (
 )
 
 func updateDatabase(ctx context.Context, w io.Writer, db string) error {
-	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
-	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("Invalid database id %s", db)
-	}
-
+	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
 	// Instantiate database admin client.
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("updateDatabase.NewDatabaseAdminClient: %v", err)
 	}
 	defer adminClient.Close()
 
@@ -50,13 +45,13 @@ func updateDatabase(ctx context.Context, w io.Writer, db string) error {
 		},
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("updateDatabase.UpdateDatabase: %v", err)
 	}
 
 	// Wait for update database operation to complete.
 	fmt.Fprintf(w, "Waiting for update database operation to complete [%s]\n", db)
 	if _, err := op.Wait(ctx); err != nil {
-		return err
+		return fmt.Errorf("updateDatabase.Wait: %v", err)
 	}
 	fmt.Fprintf(w, "Updated database [%s]\n", db)
 	return nil
