@@ -99,7 +99,7 @@ func validate(cmt *customMachineType) error {
 			}
 		}
 		if !coreExists {
-			return fmt.Errorf("invalid number of cores requested. Allowed number of cores for %v is: %v", cmt.cpuSeries, cmt.typeLimit.allowedCores)
+			return fmt.Errorf("invalid number of cores requested. Allowed number of cores for %w is: %w", cmt.cpuSeries, cmt.typeLimit.allowedCores)
 		}
 	}
 
@@ -110,15 +110,15 @@ func validate(cmt *customMachineType) error {
 
 	// Check if the requested memory isn't too little
 	if cmt.memoryMb < cmt.coreCount*cmt.typeLimit.minMemPerCore {
-		return fmt.Errorf("requested memory is too low. Minimal memory for %v is %v MB per core", cmt.cpuSeries, cmt.typeLimit.minMemPerCore)
+		return fmt.Errorf("requested memory is too low. Minimal memory for %w is %w MB per core", cmt.cpuSeries, cmt.typeLimit.minMemPerCore)
 	}
 
 	// Check if the requested memory isn't too much
 	if cmt.memoryMb > cmt.coreCount*cmt.typeLimit.maxMemPerCore && !cmt.typeLimit.allowExtraMemory {
-		return fmt.Errorf("requested memory is too large. Maximum memory allowed for %v is %v MB per core", cmt.cpuSeries, cmt.typeLimit.maxMemPerCore)
+		return fmt.Errorf("requested memory is too large. Maximum memory allowed for %w is %w MB per core", cmt.cpuSeries, cmt.typeLimit.maxMemPerCore)
 	}
 	if cmt.memoryMb > cmt.typeLimit.extraMemoryLimit && cmt.typeLimit.allowExtraMemory {
-		return fmt.Errorf("requested memory is too large. Maximum memory allowed for %v is %v MB", cmt.cpuSeries, cmt.typeLimit.extraMemoryLimit)
+		return fmt.Errorf("requested memory is too large. Maximum memory allowed for %w is %w MB", cmt.cpuSeries, cmt.typeLimit.extraMemoryLimit)
 	}
 
 	return nil
