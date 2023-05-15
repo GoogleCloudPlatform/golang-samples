@@ -28,20 +28,20 @@ func renameServiceAccount(w io.Writer, email, newDisplayName string) (*iam.Servi
 	ctx := context.Background()
 	service, err := iam.NewService(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("iam.NewService: %v", err)
+		return nil, fmt.Errorf("iam.NewService: %w", err)
 	}
 
 	// First, get a ServiceAccount using List() or Get().
 	resource := "projects/-/serviceAccounts/" + email
 	serviceAccount, err := service.Projects.ServiceAccounts.Get(resource).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Projects.ServiceAccounts.Get: %v", err)
+		return nil, fmt.Errorf("Projects.ServiceAccounts.Get: %w", err)
 	}
 	// Then you can update the display name.
 	serviceAccount.DisplayName = newDisplayName
 	serviceAccount, err = service.Projects.ServiceAccounts.Update(resource, serviceAccount).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Projects.ServiceAccounts.Update: %v", err)
+		return nil, fmt.Errorf("Projects.ServiceAccounts.Update: %w", err)
 	}
 
 	fmt.Fprintf(w, "Updated service account: %v", serviceAccount.Email)

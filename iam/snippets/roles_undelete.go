@@ -28,14 +28,14 @@ func undeleteRole(w io.Writer, projectID, name string) (*iam.Role, error) {
 	ctx := context.Background()
 	service, err := iam.NewService(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("iam.NewService: %v", err)
+		return nil, fmt.Errorf("iam.NewService: %w", err)
 	}
 
 	resource := "projects/" + projectID + "/roles/" + name
 	request := &iam.UndeleteRoleRequest{}
 	role, err := service.Projects.Roles.Undelete(resource, request).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Projects.Roles.Undelete: %v", err)
+		return nil, fmt.Errorf("Projects.Roles.Undelete: %w", err)
 	}
 	fmt.Fprintf(w, "Undeleted role: %v", role.Name)
 	return role, nil

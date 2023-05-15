@@ -39,20 +39,20 @@ func riskKAnonymity(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub,
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return fmt.Errorf("dlp.NewClient: %w", err)
 	}
 
 	// Create a PubSub Client used to listen for when the inspect job finishes.
 	pubsubClient, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("Error creating PubSub client: %v", err)
+		return fmt.Errorf("Error creating PubSub client: %w", err)
 	}
 	defer pubsubClient.Close()
 
 	// Create a PubSub subscription we can use to listen for messages.
 	s, err := setupPubSub(projectID, pubSubTopic, pubSubSub)
 	if err != nil {
-		return fmt.Errorf("setupPubSub: %v", err)
+		return fmt.Errorf("setupPubSub: %w", err)
 	}
 
 	// topic is the PubSub topic string where messages should be sent.
@@ -99,7 +99,7 @@ func riskKAnonymity(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub,
 	// Create the risk job.
 	j, err := client.CreateDlpJob(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateDlpJob: %v", err)
+		return fmt.Errorf("CreateDlpJob: %w", err)
 	}
 	fmt.Fprintf(w, "Created job: %v\n", j.GetName())
 
@@ -141,7 +141,7 @@ func riskKAnonymity(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub,
 		cancel()
 	})
 	if err != nil {
-		return fmt.Errorf("Receive: %v", err)
+		return fmt.Errorf("Receive: %w", err)
 	}
 	return nil
 }

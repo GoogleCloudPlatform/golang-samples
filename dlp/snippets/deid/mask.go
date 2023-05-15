@@ -37,7 +37,7 @@ func mask(w io.Writer, projectID, input string, infoTypeNames []string, maskingC
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return fmt.Errorf("dlp.NewClient: %w", err)
 	}
 	defer client.Close()
 	// Convert the info type strings to a list of InfoTypes.
@@ -80,7 +80,7 @@ func mask(w io.Writer, projectID, input string, infoTypeNames []string, maskingC
 	// Send the request.
 	r, err := client.DeidentifyContent(ctx, req)
 	if err != nil {
-		return fmt.Errorf("DeidentifyContent: %v", err)
+		return fmt.Errorf("DeidentifyContent: %w", err)
 	}
 	// Print the result.
 	fmt.Fprint(w, r.GetItem().GetValue())

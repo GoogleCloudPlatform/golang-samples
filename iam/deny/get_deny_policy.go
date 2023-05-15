@@ -32,7 +32,7 @@ func getDenyPolicy(w io.Writer, projectID, policyID string) error {
 	ctx := context.Background()
 	policiesClient, err := iam.NewPoliciesClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewPoliciesClient: %v", err)
+		return fmt.Errorf("NewPoliciesClient: %w", err)
 	}
 	defer policiesClient.Close()
 
@@ -58,7 +58,7 @@ func getDenyPolicy(w io.Writer, projectID, policyID string) error {
 	}
 	policy, err := policiesClient.GetPolicy(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to get policy: %v", err)
+		return fmt.Errorf("unable to get policy: %w", err)
 	}
 
 	fmt.Fprintf(w, "Policy %s retrieved\n", policy.GetName())
