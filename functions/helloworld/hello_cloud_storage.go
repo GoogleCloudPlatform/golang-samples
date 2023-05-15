@@ -65,7 +65,7 @@ type GCSEvent struct {
 func HelloGCS(ctx context.Context, e GCSEvent) error {
 	meta, err := metadata.FromContext(ctx)
 	if err != nil {
-		return fmt.Errorf("metadata.FromContext: %v", err)
+		return fmt.Errorf("metadata.FromContext: %w", err)
 	}
 	log.Printf("Event ID: %v\n", meta.EventID)
 	log.Printf("Event type: %v\n", meta.EventType)

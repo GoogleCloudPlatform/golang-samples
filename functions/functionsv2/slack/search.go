@@ -132,7 +132,7 @@ func verifyWebHook(r *http.Request, body []byte, slackSigningSecret string) (boo
 
 	t, err := strconv.ParseInt(timeStamp, 10, 64)
 	if err != nil {
-		return false, fmt.Errorf("strconv.ParseInt(%s): %v", timeStamp, err)
+		return false, fmt.Errorf("strconv.ParseInt(%s): %w", timeStamp, err)
 	}
 
 	if ageOk, age := checkTimestamp(t); !ageOk {
@@ -151,7 +151,7 @@ func verifyWebHook(r *http.Request, body []byte, slackSigningSecret string) (boo
 	signatureInHeader, err := hex.DecodeString(trimmed)
 
 	if err != nil {
-		return false, fmt.Errorf("hex.DecodeString(%v): %v", trimmed, err)
+		return false, fmt.Errorf("hex.DecodeString(%v): %w", trimmed, err)
 	}
 
 	return hmac.Equal(signature, signatureInHeader), nil

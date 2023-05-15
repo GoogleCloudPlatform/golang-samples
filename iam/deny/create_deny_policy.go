@@ -41,7 +41,7 @@ func createDenyPolicy(w io.Writer, projectID, policyID string) error {
 	ctx := context.Background()
 	policiesClient, err := iam.NewPoliciesClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewPoliciesClient: %v", err)
+		return fmt.Errorf("NewPoliciesClient: %w", err)
 	}
 	defer policiesClient.Close()
 
@@ -117,12 +117,12 @@ func createDenyPolicy(w io.Writer, projectID, policyID string) error {
 	}
 	op, err := policiesClient.CreatePolicy(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to create policy: %v", err)
+		return fmt.Errorf("unable to create policy: %w", err)
 	}
 
 	policy, err = op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Policy %s created\n", policy.GetName())
