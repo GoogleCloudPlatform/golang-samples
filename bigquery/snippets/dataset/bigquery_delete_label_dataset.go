@@ -30,7 +30,7 @@ func deleteDatasetLabel(projectID, datasetID string) error {
 
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %w", err)
+		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
 	defer client.Close()
 

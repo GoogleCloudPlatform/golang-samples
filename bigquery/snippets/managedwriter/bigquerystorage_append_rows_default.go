@@ -115,7 +115,7 @@ func appendToDefaultStream(w io.Writer, projectID, datasetID, tableID string) er
 		managedwriter.WithMultiplexing(), // Enables connection sharing.
 	)
 	if err != nil {
-		return fmt.Errorf("managedwriter.NewClient: %w", err)
+		return fmt.Errorf("managedwriter.NewClient: %v", err)
 	}
 	// Close the client when we exit the function.
 	defer client.Close()
@@ -127,7 +127,7 @@ func appendToDefaultStream(w io.Writer, projectID, datasetID, tableID string) er
 	var m *exampleproto.SampleData
 	descriptorProto, err := adapt.NormalizeDescriptor(m.ProtoReflect().Descriptor())
 	if err != nil {
-		return fmt.Errorf("NormalizeDescriptor: %w", err)
+		return fmt.Errorf("NormalizeDescriptor: %v", err)
 	}
 
 	// Build the formatted reference to the destination table.
@@ -142,7 +142,7 @@ func appendToDefaultStream(w io.Writer, projectID, datasetID, tableID string) er
 		managedwriter.WithSchemaDescriptor(descriptorProto),
 	)
 	if err != nil {
-		return fmt.Errorf("NewManagedStream: %w", err)
+		return fmt.Errorf("NewManagedStream: %v", err)
 	}
 	// Automatically close the writer when we're done.
 	defer managedStream.Close()
@@ -150,7 +150,7 @@ func appendToDefaultStream(w io.Writer, projectID, datasetID, tableID string) er
 	// First, we'll append a single row.
 	rows, err := generateExampleDefaultMessages(1)
 	if err != nil {
-		return fmt.Errorf("generateExampleMessages: %w", err)
+		return fmt.Errorf("generateExampleMessages: %v", err)
 	}
 
 	// We can append data asyncronously, so we'll check our appends at the end.
@@ -158,29 +158,29 @@ func appendToDefaultStream(w io.Writer, projectID, datasetID, tableID string) er
 
 	result, err := managedStream.AppendRows(ctx, rows)
 	if err != nil {
-		return fmt.Errorf("AppendRows first call error: %w", err)
+		return fmt.Errorf("AppendRows first call error: %v", err)
 	}
 	results = append(results, result)
 
 	// This time, we'll append three more rows in a single request.
 	rows, err = generateExampleMessages(3)
 	if err != nil {
-		return fmt.Errorf("generateExampleMessages: %w", err)
+		return fmt.Errorf("generateExampleMessages: %v", err)
 	}
 	result, err = managedStream.AppendRows(ctx, rows)
 	if err != nil {
-		return fmt.Errorf("AppendRows second call error: %w", err)
+		return fmt.Errorf("AppendRows second call error: %v", err)
 	}
 	results = append(results, result)
 
 	// Finally, we'll append two more rows.
 	rows, err = generateExampleMessages(2)
 	if err != nil {
-		return fmt.Errorf("generateExampleMessages: %w", err)
+		return fmt.Errorf("generateExampleMessages: %v", err)
 	}
 	result, err = managedStream.AppendRows(ctx, rows)
 	if err != nil {
-		return fmt.Errorf("AppendRows third call error: %w", err)
+		return fmt.Errorf("AppendRows third call error: %v", err)
 	}
 	results = append(results, result)
 

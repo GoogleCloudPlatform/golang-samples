@@ -35,7 +35,7 @@ func createScheduledQuery(projectID, datasetID, query string) error {
 	ctx := context.Background()
 	dtc, err := datatransfer.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("datatransfer.NewClient: %w", err)
+		return fmt.Errorf("datatransfer.NewClient: %v", err)
 	}
 	defer dtc.Close()
 
@@ -46,7 +46,7 @@ func createScheduledQuery(projectID, datasetID, query string) error {
 	paramsMap["query"] = query
 	params, err := structpb.NewStruct(paramsMap)
 	if err != nil {
-		return fmt.Errorf("structpb.NewStruct: %w", err)
+		return fmt.Errorf("structpb.NewStruct: %v", err)
 	}
 
 	req := &datatransferpb.CreateTransferConfigRequest{
@@ -64,7 +64,7 @@ func createScheduledQuery(projectID, datasetID, query string) error {
 
 	_, err = dtc.CreateTransferConfig(ctx, req)
 	if err != nil {
-		return fmt.Errorf("dtc.CreateTransferConfig: %w", err)
+		return fmt.Errorf("dtc.CreateTransferConfig: %v", err)
 	}
 
 	return nil

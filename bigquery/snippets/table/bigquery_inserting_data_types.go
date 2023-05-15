@@ -50,7 +50,7 @@ func insertingDataTypes(projectID, datasetID, tableID string) error {
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %w", err)
+		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
 	defer client.Close()
 
@@ -76,23 +76,23 @@ func insertingDataTypes(projectID, datasetID, tableID string) error {
 		Schema: schema,
 	})
 	if err != nil {
-		return fmt.Errorf("table.Create: %w", err)
+		return fmt.Errorf("table.Create: %v", err)
 	}
 	day, err := civil.ParseDate("2019-01-12")
 	if err != nil {
-		return fmt.Errorf("civil.ParseDate: %w", err)
+		return fmt.Errorf("civil.ParseDate: %v", err)
 	}
 	firstTime, err := civil.ParseDateTime("2019-02-17T11:24:00.000")
 	if err != nil {
-		return fmt.Errorf("civil.ParseDateTime: %w", err)
+		return fmt.Errorf("civil.ParseDateTime: %v", err)
 	}
 	secondTime, err := civil.ParseTime("14:00:00")
 	if err != nil {
-		return fmt.Errorf("civil.ParseTime: %w", err)
+		return fmt.Errorf("civil.ParseTime: %v", err)
 	}
 	thirdTime, err := time.Parse(time.RFC3339Nano, "2020-04-27T18:07:25.356Z")
 	if err != nil {
-		return fmt.Errorf("time.Parse: %w", err)
+		return fmt.Errorf("time.Parse: %v", err)
 	}
 	row := &ComplexType{
 		Name:         "Tom",

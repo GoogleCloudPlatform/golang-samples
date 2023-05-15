@@ -111,7 +111,7 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 	// Instantiate a managedwriter client to handle interactions with the service.
 	client, err := managedwriter.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("managedwriter.NewClient: %w", err)
+		return fmt.Errorf("managedwriter.NewClient: %v", err)
 	}
 	// Close the client when we exit the function.
 	defer client.Close()
@@ -124,7 +124,7 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("CreateWriteStream: %w", err)
+		return fmt.Errorf("CreateWriteStream: %v", err)
 	}
 
 	// We need to communicate the descriptor of the protocol buffer message we're using, which
@@ -134,7 +134,7 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 	m := &exampleproto.SampleData{}
 	descriptorProto, err := adapt.NormalizeDescriptor(m.ProtoReflect().Descriptor())
 	if err != nil {
-		return fmt.Errorf("NormalizeDescriptor: %w", err)
+		return fmt.Errorf("NormalizeDescriptor: %v", err)
 	}
 
 	// Instantiate a ManagedStream, which manages low level details like connection state and provides
@@ -143,14 +143,14 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 	managedStream, err := client.NewManagedStream(ctx, managedwriter.WithStreamName(pendingStream.GetName()),
 		managedwriter.WithSchemaDescriptor(descriptorProto))
 	if err != nil {
-		return fmt.Errorf("NewManagedStream: %w", err)
+		return fmt.Errorf("NewManagedStream: %v", err)
 	}
 	defer managedStream.Close()
 
 	// First, we'll append a single row.
 	rows, err := generateExampleMessages(1)
 	if err != nil {
-		return fmt.Errorf("generateExampleMessages: %w", err)
+		return fmt.Errorf("generateExampleMessages: %v", err)
 	}
 
 	// We'll keep track of the current offset in the stream with curOffset.
@@ -160,7 +160,7 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 
 	result, err := managedStream.AppendRows(ctx, rows, managedwriter.WithOffset(0))
 	if err != nil {
-		return fmt.Errorf("AppendRows first call error: %w", err)
+		return fmt.Errorf("AppendRows first call error: %v", err)
 	}
 	results = append(results, result)
 
@@ -170,11 +170,11 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 	// This time, we'll append three more rows in a single request.
 	rows, err = generateExampleMessages(3)
 	if err != nil {
-		return fmt.Errorf("generateExampleMessages: %w", err)
+		return fmt.Errorf("generateExampleMessages: %v", err)
 	}
 	result, err = managedStream.AppendRows(ctx, rows, managedwriter.WithOffset(curOffset))
 	if err != nil {
-		return fmt.Errorf("AppendRows second call error: %w", err)
+		return fmt.Errorf("AppendRows second call error: %v", err)
 	}
 	results = append(results, result)
 
@@ -184,11 +184,11 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 	// Finally, we'll append two more rows.
 	rows, err = generateExampleMessages(2)
 	if err != nil {
-		return fmt.Errorf("generateExampleMessages: %w", err)
+		return fmt.Errorf("generateExampleMessages: %v", err)
 	}
 	result, err = managedStream.AppendRows(ctx, rows, managedwriter.WithOffset(curOffset))
 	if err != nil {
-		return fmt.Errorf("AppendRows third call error: %w", err)
+		return fmt.Errorf("AppendRows third call error: %v", err)
 	}
 	results = append(results, result)
 
@@ -207,7 +207,7 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 	// further appends.
 	rowCount, err := managedStream.Finalize(ctx)
 	if err != nil {
-		return fmt.Errorf("error during Finalize: %w", err)
+		return fmt.Errorf("error during Finalize: %v", err)
 	}
 
 	fmt.Fprintf(w, "Stream %s finalized with %d rows.\n", managedStream.StreamName(), rowCount)
@@ -221,7 +221,7 @@ func appendToPendingStream(w io.Writer, projectID, datasetID, tableID string) er
 
 	resp, err := client.BatchCommitWriteStreams(ctx, req)
 	if err != nil {
-		return fmt.Errorf("client.BatchCommit: %w", err)
+		return fmt.Errorf("client.BatchCommit: %v", err)
 	}
 	if len(resp.GetStreamErrors()) > 0 {
 		return fmt.Errorf("stream errors present: %v", resp.GetStreamErrors())

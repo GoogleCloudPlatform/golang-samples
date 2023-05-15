@@ -90,7 +90,7 @@ func printResults(w io.Writer, iter *bigquery.RowIterator) error {
 			return nil
 		}
 		if err != nil {
-			return fmt.Errorf("error iterating through results: %w", err)
+			return fmt.Errorf("error iterating through results: %v", err)
 		}
 
 		fmt.Fprintf(w, "url: %s views: %d\n", row.URL, row.ViewCount)

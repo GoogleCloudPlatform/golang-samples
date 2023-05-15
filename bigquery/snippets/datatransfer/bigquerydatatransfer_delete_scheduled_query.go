@@ -34,7 +34,7 @@ func deleteScheduledQuery(transferConfigID string) error {
 	ctx := context.Background()
 	dtc, err := datatransfer.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("datatransfer.NewClient: %w", err)
+		return fmt.Errorf("datatransfer.NewClient: %v", err)
 	}
 	defer dtc.Close()
 
@@ -43,7 +43,7 @@ func deleteScheduledQuery(transferConfigID string) error {
 	}
 	err = dtc.DeleteTransferConfig(ctx, req)
 	if err != nil {
-		return fmt.Errorf("dtc.DeleteTransferConfig: %w", err)
+		return fmt.Errorf("dtc.DeleteTransferConfig: %v", err)
 	}
 
 	return nil

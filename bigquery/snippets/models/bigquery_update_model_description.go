@@ -31,20 +31,20 @@ func updateModelDescription(projectID, datasetID, modelID string) error {
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %w", err)
+		return fmt.Errorf("bigquery.NewClient: %v", err)
 	}
 	defer client.Close()
 
 	model := client.Dataset(datasetID).Model(modelID)
 	oldMeta, err := model.Metadata(ctx)
 	if err != nil {
-		return fmt.Errorf("couldn't retrieve model metadata: %w", err)
+		return fmt.Errorf("couldn't retrieve model metadata: %v", err)
 	}
 	update := bigquery.ModelMetadataToUpdate{
 		Description: "This model was modified from a Go program",
 	}
 	if _, err = model.Update(ctx, update, oldMeta.ETag); err != nil {
-		return fmt.Errorf("couldn't update model: %w", err)
+		return fmt.Errorf("couldn't update model: %v", err)
 	}
 	return nil
 }

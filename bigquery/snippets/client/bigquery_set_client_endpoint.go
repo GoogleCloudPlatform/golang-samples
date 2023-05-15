@@ -31,7 +31,7 @@ func setClientEndpoint(endpoint, projectID string) (*bigquery.Client, error) {
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID, option.WithEndpoint(endpoint))
 	if err != nil {
-		return nil, fmt.Errorf("bigquery.NewClient: %w", err)
+		return nil, fmt.Errorf("bigquery.NewClient: %v", err)
 	}
 	defer client.Close()
 

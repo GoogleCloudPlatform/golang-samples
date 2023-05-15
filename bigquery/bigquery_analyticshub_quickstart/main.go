@@ -123,7 +123,7 @@ func createOrGetDataExchange(ctx context.Context, client *dataexchange.Analytics
 			}
 			resp, err = client.GetDataExchange(ctx, getReq)
 			if err != nil {
-				return nil, fmt.Errorf("error getting dataExchange: %w", err)
+				return nil, fmt.Errorf("error getting dataExchange: %v", err)
 			}
 			return resp, nil
 		}
