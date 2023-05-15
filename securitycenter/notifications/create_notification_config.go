@@ -33,7 +33,7 @@ func createNotificationConfig(w io.Writer, orgID string, pubsubTopic string, not
 	client, err := securitycenter.NewClient(ctx)
 
 	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %v", err)
+		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -53,7 +53,7 @@ func createNotificationConfig(w io.Writer, orgID string, pubsubTopic string, not
 
 	notificationConfig, err := client.CreateNotificationConfig(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Failed to create notification config: %v", err)
+		return fmt.Errorf("Failed to create notification config: %w", err)
 	}
 	fmt.Fprintln(w, "New NotificationConfig created: ", notificationConfig)
 
