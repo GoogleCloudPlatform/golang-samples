@@ -6,6 +6,23 @@ on:
           description: The Client payload
           required: true
 jobs:
+  docker-scan:
+    if: fromJSON(github.event.inputs.client_payload).payload.workflow_job_name == 'docker-scan'
+    runs-on: ubuntu-20.04
+    steps:
+    - name: trivy
+      uses: jitsecurity-controls/jit-github-action@v2.2
+      with:
+        docker_user: jit-bot
+        docker_password: ${{fromJSON(github.event.inputs.client_payload).payload.container_registry_token}}
+        
+        security_control: ghcr.io/jitsecurity-controls/control-trivy-alpine:latest
+        security_control_args: --quiet config --severity HIGH,CRITICAL -f json --ignorefile /opt/.trivyignore \${WORK_DIR:-.}
+        
+        dispatch_type: workflow
+        context: ${{toJSON(fromJSON(github.event.inputs.client_payload).context)}}
+        runner_setup: ${{toJSON(fromJSON(github.event.inputs.client_payload).context.job.runner.setup)}}
+
   enrich:
     if: fromJSON(github.event.inputs.client_payload).payload.workflow_job_name == 'enrich'
     runs-on: ubuntu-20.04
