@@ -43,7 +43,7 @@ func main() {
 
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		log.Fatalf("bigquery.NewClient: %v", err)
+		log.Fatalf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 	// [END bigquery_simple_app_client]

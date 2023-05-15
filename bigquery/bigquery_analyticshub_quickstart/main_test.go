@@ -59,7 +59,7 @@ func TestApp(t *testing.T) {
 	ctx := context.Background()
 	dataset, err, cleanup := createTestDataset(ctx, tc.ProjectID)
 	if err != nil {
-		t.Fatalf("failed to setup test dataset before running quickstart: %v", err)
+		t.Fatalf("failed to setup test dataset before running quickstart: %w", err)
 	}
 	defer cleanup()
 
@@ -67,7 +67,7 @@ func TestApp(t *testing.T) {
 		fmt.Sprintf("--project_id=%s", tc.ProjectID),
 		fmt.Sprintf("--dataset_source=%s", dataset))
 	if err != nil {
-		t.Errorf("execution failed: %v", err)
+		t.Errorf("execution failed: %w", err)
 	}
 
 	// Look for a known substring in the output

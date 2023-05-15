@@ -39,14 +39,14 @@ func TestImportSnippets(t *testing.T) {
 	// Control a job lifecycle explicitly: create, report status, cancel.
 	testDatasetID, err := bqtestutil.UniqueBQName("golang_snippets_loading")
 	if err != nil {
-		t.Fatalf("couldn't generate unique resource name: %v", err)
+		t.Fatalf("couldn't generate unique resource name: %w", err)
 	}
 
 	meta := &bigquery.DatasetMetadata{
 		Location: "US", // See https://cloud.google.com/bigquery/docs/locations
 	}
 	if err := client.Dataset(testDatasetID).Create(ctx, meta); err != nil {
-		t.Fatalf("failed to create test dataset: %v", err)
+		t.Fatalf("failed to create test dataset: %w", err)
 	}
 	// Cleanup dataset at end of test.
 	defer client.Dataset(testDatasetID).DeleteWithContents(ctx)

@@ -42,27 +42,27 @@ func TestTables(t *testing.T) {
 	}
 	testDatasetID, err := bqtestutil.UniqueBQName("snippet_table_tests")
 	if err != nil {
-		t.Fatalf("couldn't generate unique resource name: %v", err)
+		t.Fatalf("couldn't generate unique resource name: %w", err)
 	}
 	if err := client.Dataset(testDatasetID).Create(ctx, meta); err != nil {
-		t.Fatalf("failed to create test dataset: %v", err)
+		t.Fatalf("failed to create test dataset: %w", err)
 	}
 	// Cleanup dataset at end of test.
 	defer client.Dataset(testDatasetID).DeleteWithContents(ctx)
 
 	testDatasetID2, err := bqtestutil.UniqueBQName("second_snippet_table_tests")
 	if err != nil {
-		t.Fatalf("couldn't generate unique resource name: %v", err)
+		t.Fatalf("couldn't generate unique resource name: %w", err)
 	}
 	if err := client.Dataset(testDatasetID2).Create(ctx, meta); err != nil {
-		t.Fatalf("failed to create test dataset: %v", err)
+		t.Fatalf("failed to create test dataset: %w", err)
 	}
 	// Cleanup dataset at end of test.
 	defer client.Dataset(testDatasetID2).DeleteWithContents(ctx)
 
 	testTableID, err := bqtestutil.UniqueBQName("testtable")
 	if err != nil {
-		t.Fatalf("couldn't generate unique table id: %v", err)
+		t.Fatalf("couldn't generate unique table id: %w", err)
 	}
 	if err := createTableExplicitSchema(tc.ProjectID, testDatasetID, testTableID); err != nil {
 		t.Fatalf("createTableExplicitSchema(%q %q): %v", testDatasetID, testTableID, err)
@@ -82,7 +82,7 @@ func TestTables(t *testing.T) {
 
 	testTableID, err = bqtestutil.UniqueBQName("testcomplextable")
 	if err != nil {
-		t.Fatalf("couldn't generate unique table id: %v", err)
+		t.Fatalf("couldn't generate unique table id: %w", err)
 	}
 	if err := insertingDataTypes(tc.ProjectID, testDatasetID, testTableID); err != nil {
 		t.Fatalf("insertingDataTypes(%q %q): %v", testDatasetID, testTableID, err)
@@ -90,7 +90,7 @@ func TestTables(t *testing.T) {
 
 	testTableID, err = bqtestutil.UniqueBQName("testtable")
 	if err != nil {
-		t.Fatalf("couldn't generate unique table id: %v", err)
+		t.Fatalf("couldn't generate unique table id: %w", err)
 	}
 	if err := createTableComplexSchema(ioutil.Discard, tc.ProjectID, testDatasetID, testTableID); err != nil {
 		t.Fatalf("createTableComplexSchema(%q %q): %v", testDatasetID, testTableID, err)
@@ -104,7 +104,7 @@ func TestTables(t *testing.T) {
 
 	testTableID, err = bqtestutil.UniqueBQName("testtable")
 	if err != nil {
-		t.Fatalf("couldn't generate unique table id: %v", err)
+		t.Fatalf("couldn't generate unique table id: %w", err)
 	}
 	if err := createTableFromTemplateTable("bigquery-public-data", "samples", "shakespeare", tc.ProjectID, testDatasetID, testTableID); err != nil {
 		t.Fatalf("createTableFromTemplateTable(%q %q): %v", testDatasetID, testTableID, err)
@@ -112,7 +112,7 @@ func TestTables(t *testing.T) {
 
 	testTableID, err = bqtestutil.UniqueBQName("testtable")
 	if err != nil {
-		t.Fatalf("couldn't generate unique table id: %v", err)
+		t.Fatalf("couldn't generate unique table id: %w", err)
 	}
 	if err := createTablePartitioned(tc.ProjectID, testDatasetID, testTableID); err != nil {
 		t.Fatalf("createTablePartitioned(%q %q): %v", testDatasetID, testTableID, err)
@@ -120,7 +120,7 @@ func TestTables(t *testing.T) {
 
 	testTableID, err = bqtestutil.UniqueBQName("testtable")
 	if err != nil {
-		t.Fatalf("couldn't generate unique table id: %v", err)
+		t.Fatalf("couldn't generate unique table id: %w", err)
 	}
 	if err := createTableRangePartitioned(tc.ProjectID, testDatasetID, testTableID); err != nil {
 		t.Fatalf("createTableRangePartitioned(%q %q): %v", testDatasetID, testTableID, err)
@@ -128,7 +128,7 @@ func TestTables(t *testing.T) {
 
 	testTableID, err = bqtestutil.UniqueBQName("testtable")
 	if err != nil {
-		t.Fatalf("couldn't generate unique table id: %v", err)
+		t.Fatalf("couldn't generate unique table id: %w", err)
 	}
 	if err := createTableClustered(tc.ProjectID, testDatasetID, testTableID); err != nil {
 		t.Fatalf("createTableClustered(%q %q): %v", testDatasetID, testTableID, err)
@@ -139,7 +139,7 @@ func TestTables(t *testing.T) {
 
 	testTableID, err = bqtestutil.UniqueBQName("testtable")
 	if err != nil {
-		t.Fatalf("couldn't generate unique table id: %v", err)
+		t.Fatalf("couldn't generate unique table id: %w", err)
 	}
 
 	t.Run("cmektests", func(t *testing.T) {
@@ -156,7 +156,7 @@ func TestTables(t *testing.T) {
 
 	testTableID, err = bqtestutil.UniqueBQName("testtable")
 	if err != nil {
-		t.Fatalf("couldn't generate unique table id: %v", err)
+		t.Fatalf("couldn't generate unique table id: %w", err)
 	}
 	if err := createView(tc.ProjectID, testDatasetID, testTableID); err != nil {
 		t.Fatalf("createView(%q %q): %v", testDatasetID, testTableID, err)
@@ -170,7 +170,7 @@ func TestTables(t *testing.T) {
 
 	testTableID, err = bqtestutil.UniqueBQName("testtable")
 	if err != nil {
-		t.Fatalf("couldn't generate unique table id: %v", err)
+		t.Fatalf("couldn't generate unique table id: %w", err)
 	}
 	if err := relaxTableAPI(tc.ProjectID, testDatasetID, testTableID); err != nil {
 		t.Fatalf("relaxTableAPI(%q %q): %v", testDatasetID, testTableID, err)
@@ -182,7 +182,7 @@ func TestTables(t *testing.T) {
 	// Change tables to avoid hitting metadata update limits in a short period.
 	testTableID, err = bqtestutil.UniqueBQName("testtable")
 	if err != nil {
-		t.Fatalf("couldn't generate unique table id: %v", err)
+		t.Fatalf("couldn't generate unique table id: %w", err)
 	}
 	if err := tableExists(tc.ProjectID, testDatasetID, testTableID); err == nil {
 		t.Fatalf("expect table(%q %q) to not exist: %v", testDatasetID, testTableID, err)
@@ -212,7 +212,7 @@ func TestTables(t *testing.T) {
 
 	testTableID, err = bqtestutil.UniqueBQName("testtable")
 	if err != nil {
-		t.Fatalf("couldn't generate unique table id: %v", err)
+		t.Fatalf("couldn't generate unique table id: %w", err)
 	}
 	if err := createTableExternalHivePartitioned(tc.ProjectID, testDatasetID, testTableID); err != nil {
 		t.Fatalf("createTableExternalHivePartitioned(%q %q): %v", testDatasetID, testTableID, err)
@@ -220,16 +220,16 @@ func TestTables(t *testing.T) {
 
 	baseTableID, err := bqtestutil.UniqueBQName("basetable")
 	if err != nil {
-		t.Fatalf("couldn't generate unique base table id: %v", err)
+		t.Fatalf("couldn't generate unique base table id: %w", err)
 	}
 	matViewID, err := bqtestutil.UniqueBQName("matview")
 	if err != nil {
-		t.Fatalf("couldn't generate unique materialized view id: %v", err)
+		t.Fatalf("couldn't generate unique materialized view id: %w", err)
 	}
 	sql := fmt.Sprintf("CREATE TABLE `%s`.%s.%s AS SELECT CURRENT_TIMESTAMP AS TimestampField, \"foo\" AS StringField, true as BooleanField",
 		tc.ProjectID, testDatasetID, baseTableID)
 	if _, err = client.Query(sql).Read(ctx); err != nil {
-		t.Errorf("setup materialized view base table failed: %v", err)
+		t.Errorf("setup materialized view base table failed: %w", err)
 	}
 	if err = createMaterializedView(tc.ProjectID, testDatasetID, baseTableID, matViewID); err != nil {
 		t.Fatalf("createMaterializedView(%q %q): %v", testDatasetID, matViewID, err)

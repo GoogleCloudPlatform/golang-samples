@@ -39,17 +39,17 @@ func TestAppends(t *testing.T) {
 	}
 	testDatasetID, err := bqtestutil.UniqueBQName("snippet_managedwriter_tests")
 	if err != nil {
-		t.Fatalf("couldn't generate unique resource name: %v", err)
+		t.Fatalf("couldn't generate unique resource name: %w", err)
 	}
 	if err := client.Dataset(testDatasetID).Create(ctx, meta); err != nil {
-		t.Fatalf("failed to create test dataset: %v", err)
+		t.Fatalf("failed to create test dataset: %w", err)
 	}
 	// Cleanup dataset at end of test.
 	defer client.Dataset(testDatasetID).DeleteWithContents(ctx)
 
 	testTableID, err := bqtestutil.UniqueBQName("testtable")
 	if err != nil {
-		t.Fatalf("couldn't generate unique table id: %v", err)
+		t.Fatalf("couldn't generate unique table id: %w", err)
 	}
 
 	pendingSchema := bigquery.Schema{

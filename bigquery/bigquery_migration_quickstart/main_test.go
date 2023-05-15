@@ -38,13 +38,13 @@ func TestApp(t *testing.T) {
 	// Setup an output bucket.
 	bucket, cleanup, err := setupStorage(tc.ProjectID)
 	if err != nil {
-		t.Fatalf("error setting up storage: %v", err)
+		t.Fatalf("error setting up storage: %w", err)
 	}
 	defer cleanup()
 
 	stdOut, stdErr, err := m.Run(nil, 30*time.Second, fmt.Sprintf("--project_id=%s", tc.ProjectID), fmt.Sprintf("--output=%s", bucket))
 	if err != nil {
-		t.Errorf("execution failed: %v", err)
+		t.Errorf("execution failed: %w", err)
 	}
 
 	// Look for a known substring in the output
@@ -71,11 +71,11 @@ func setupStorage(projectID string) (string, func(), error) {
 	bucket, err := bqtestutil.UniqueBucketName("golang-migration", "")
 	if err != nil {
 		storageClient.Close()
-		return "", nil, fmt.Errorf("couldn't construct unique bucket name: %v", err)
+		return "", nil, fmt.Errorf("couldn't construct unique bucket name: %w", err)
 	}
 	if err := storageClient.Bucket(bucket).Create(ctx, projectID, nil); err != nil {
 		storageClient.Close()
-		return "", nil, fmt.Errorf("error creating output bucket: %v", err)
+		return "", nil, fmt.Errorf("error creating output bucket: %w", err)
 	}
 	return fmt.Sprintf("gs://%s/", bucket), func() {
 		storageClient.Bucket(bucket).Delete(ctx)

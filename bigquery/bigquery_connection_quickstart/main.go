@@ -49,13 +49,13 @@ func main() {
 	ctx := context.Background()
 	connClient, err := connection.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("NewClient: %v", err)
+		log.Fatalf("NewClient: %w", err)
 	}
 	defer connClient.Close()
 
 	s, err := reportConnections(ctx, connClient, *projectID, *location)
 	if err != nil {
-		log.Fatalf("printCapacityCommitments: %v", err)
+		log.Fatalf("printCapacityCommitments: %w", err)
 	}
 	fmt.Println(s)
 }

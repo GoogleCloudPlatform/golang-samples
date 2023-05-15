@@ -38,7 +38,7 @@ func main() {
 	// Creates a client.
 	client, err := datatransfer.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
+		log.Fatalf("Failed to create client: %w", err)
 	}
 	defer client.Close()
 
@@ -53,7 +53,7 @@ func main() {
 			break
 		}
 		if err != nil {
-			log.Fatalf("Failed to list sources: %v", err)
+			log.Fatalf("Failed to list sources: %w", err)
 		}
 		fmt.Println(ds.DisplayName)
 		fmt.Println("\tID: ", ds.DataSourceId)

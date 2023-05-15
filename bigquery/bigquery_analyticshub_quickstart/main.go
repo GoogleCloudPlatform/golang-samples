@@ -54,7 +54,7 @@ func main() {
 	ctx := context.Background()
 	dataExchClient, err := dataexchange.NewAnalyticsHubClient(ctx)
 	if err != nil {
-		log.Fatalf("NewClient: %v", err)
+		log.Fatalf("NewClient: %w", err)
 	}
 	defer dataExchClient.Close()
 
@@ -62,7 +62,7 @@ func main() {
 	// print information about it.
 	exchange, err := createOrGetDataExchange(ctx, dataExchClient, *projectID, *location, *exchangeID)
 	if err != nil {
-		log.Fatalf("failed to get information about the exchange: %v", err)
+		log.Fatalf("failed to get information about the exchange: %w", err)
 	}
 	fmt.Printf("\nData Exchange Information\n")
 	fmt.Printf("Exchange Name: %s\n", exchange.GetName())
@@ -73,7 +73,7 @@ func main() {
 	// Finally, create a listing within the data exchange and print information about it.
 	listing, err := createListing(ctx, dataExchClient, *projectID, *location, *exchangeID, *listingID, *exampleDatasetSource)
 	if err != nil {
-		log.Fatalf("failed to create the listing within the exchange: %v", err)
+		log.Fatalf("failed to create the listing within the exchange: %w", err)
 	}
 	fmt.Printf("\n\nListing Information\n")
 	fmt.Printf("Listing Name: %s\n", listing.GetName())
@@ -92,7 +92,7 @@ func main() {
 	if *delete {
 		fmt.Printf("\n\n")
 		if err := deleteDataExchange(ctx, dataExchClient, *projectID, *location, *exchangeID); err != nil {
-			log.Fatalf("failed to delete exchange: %v", err)
+			log.Fatalf("failed to delete exchange: %w", err)
 		}
 		fmt.Printf("Exchange projects/%s/locations/%s/dataExchanges/%s was deleted.\n", *projectID, *location, *exchangeID)
 	}

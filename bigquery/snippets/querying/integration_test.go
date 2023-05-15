@@ -39,14 +39,14 @@ func TestQueries(t *testing.T) {
 
 	testDatasetID, err := bqtestutil.UniqueBQName("snippet_table_tests")
 	if err != nil {
-		t.Fatalf("couldn't generate unique resource name: %v", err)
+		t.Fatalf("couldn't generate unique resource name: %w", err)
 	}
 
 	meta := &bigquery.DatasetMetadata{
 		Location: "US", // See https://cloud.google.com/bigquery/docs/locations
 	}
 	if err := client.Dataset(testDatasetID).Create(ctx, meta); err != nil {
-		t.Fatalf("failed to create test dataset: %v", err)
+		t.Fatalf("failed to create test dataset: %w", err)
 	}
 	// Cleanup dataset at end of test.
 	defer client.Dataset(testDatasetID).DeleteWithContents(ctx)
@@ -56,7 +56,7 @@ func TestQueries(t *testing.T) {
 		t.Run("queryBasic", func(t *testing.T) {
 			t.Parallel()
 			if err := queryBasic(ioutil.Discard, tc.ProjectID); err != nil {
-				t.Errorf("queryBasic: %v", err)
+				t.Errorf("queryBasic: %w", err)
 			}
 		})
 		t.Run("queryBatch", func(t *testing.T) {
@@ -69,41 +69,41 @@ func TestQueries(t *testing.T) {
 		t.Run("queryDisableCache", func(t *testing.T) {
 			t.Parallel()
 			if err := queryDisableCache(ioutil.Discard, tc.ProjectID); err != nil {
-				t.Errorf("queryDisableCache: %v", err)
+				t.Errorf("queryDisableCache: %w", err)
 			}
 		})
 		t.Run("queryDryRun", func(t *testing.T) {
 			t.Parallel()
 			if err := queryDryRun(ioutil.Discard, tc.ProjectID); err != nil {
-				t.Errorf("queryDryRun: %v", err)
+				t.Errorf("queryDryRun: %w", err)
 			}
 		})
 		t.Run("queryLegacy", func(t *testing.T) {
 			t.Parallel()
 			sql := "SELECT 17 as foo"
 			if err := queryLegacy(ioutil.Discard, tc.ProjectID, sql); err != nil {
-				t.Errorf("queryLegacy: %v", err)
+				t.Errorf("queryLegacy: %w", err)
 			}
 		})
 		t.Run("queryLegacyLargeResults", func(t *testing.T) {
 			t.Parallel()
 			tableID := "bigquery_query_legacy_large_results"
 			if err := queryLegacyLargeResults(ioutil.Discard, tc.ProjectID, testDatasetID, tableID); err != nil {
-				t.Errorf("queryLegacyLargeResults: %v", err)
+				t.Errorf("queryLegacyLargeResults: %w", err)
 			}
 		})
 		t.Run("createTableAndWidenQuery", func(t *testing.T) {
 			t.Parallel()
 			tableID := "bigquery_add_column_query_append"
 			if err := createTableAndWidenQuery(tc.ProjectID, testDatasetID, tableID); err != nil {
-				t.Errorf("createTableAndWidenQuery: %v", err)
+				t.Errorf("createTableAndWidenQuery: %w", err)
 			}
 		})
 		t.Run("queryWithDestination", func(t *testing.T) {
 			t.Parallel()
 			tableID := "bigquery_query_destination_table"
 			if err := queryWithDestination(ioutil.Discard, tc.ProjectID, testDatasetID, tableID); err != nil {
-				t.Errorf("queryWithDestination: %v", err)
+				t.Errorf("queryWithDestination: %w", err)
 			}
 		})
 		t.Run("queryWithDestinationCMEK", func(t *testing.T) {
@@ -113,57 +113,57 @@ func TestQueries(t *testing.T) {
 			t.Parallel()
 			tableID := "bigquery_query_destination_table_cmek"
 			if err := queryWithDestinationCMEK(ioutil.Discard, tc.ProjectID, testDatasetID, tableID); err != nil {
-				t.Errorf("queryWithDestinationCMEK: %v", err)
+				t.Errorf("queryWithDestinationCMEK: %w", err)
 			}
 		})
 		t.Run("queryWithArrayParams", func(t *testing.T) {
 			t.Parallel()
 			if err := queryWithArrayParams(ioutil.Discard, tc.ProjectID); err != nil {
-				t.Errorf("queryWithArrayParams: %v", err)
+				t.Errorf("queryWithArrayParams: %w", err)
 			}
 		})
 		t.Run("queryWithNamedParams", func(t *testing.T) {
 			t.Parallel()
 			if err := queryWithNamedParams(ioutil.Discard, tc.ProjectID); err != nil {
-				t.Errorf("queryWithNamedParams: %v", err)
+				t.Errorf("queryWithNamedParams: %w", err)
 			}
 		})
 		t.Run("queryWithPositionalParams", func(t *testing.T) {
 			t.Parallel()
 			if err := queryWithPositionalParams(ioutil.Discard, tc.ProjectID); err != nil {
-				t.Errorf("queryWithPositionalParams: %v", err)
+				t.Errorf("queryWithPositionalParams: %w", err)
 			}
 		})
 		t.Run("queryWithStructParam", func(t *testing.T) {
 			t.Parallel()
 			if err := queryWithStructParam(ioutil.Discard, tc.ProjectID); err != nil {
-				t.Errorf("queryWithStructParam: %v", err)
+				t.Errorf("queryWithStructParam: %w", err)
 			}
 		})
 		t.Run("queryWithTimestampParam", func(t *testing.T) {
 			t.Parallel()
 			if err := queryWithTimestampParam(ioutil.Discard, tc.ProjectID); err != nil {
-				t.Errorf("queryWithTimestampParam: %v", err)
+				t.Errorf("queryWithTimestampParam: %w", err)
 			}
 		})
 		t.Run("queryPartitionedTable", func(t *testing.T) {
 			t.Parallel()
 			tableID := "bigquery_query_partitioned_table"
 			if err := preparePartitionedData(tc.ProjectID, testDatasetID, tableID); err != nil {
-				t.Fatalf("couldn't setup clustered table: %v", err)
+				t.Fatalf("couldn't setup clustered table: %w", err)
 			}
 			if err := queryPartitionedTable(ioutil.Discard, tc.ProjectID, testDatasetID, tableID); err != nil {
-				t.Errorf("queryPartitionedTable: %v", err)
+				t.Errorf("queryPartitionedTable: %w", err)
 			}
 		})
 		t.Run("queryClusteredTable", func(t *testing.T) {
 			t.Parallel()
 			tableID := "bigquery_query_clustered_table"
 			if err := prepareClusteredData(tc.ProjectID, testDatasetID, tableID); err != nil {
-				t.Fatalf("couldn't setup clustered table: %v", err)
+				t.Fatalf("couldn't setup clustered table: %w", err)
 			}
 			if err := queryClusteredTable(ioutil.Discard, tc.ProjectID, testDatasetID, tableID); err != nil {
-				t.Errorf("queryClusteredTable: %v", err)
+				t.Errorf("queryClusteredTable: %w", err)
 			}
 		})
 	})
@@ -175,7 +175,7 @@ func preparePartitionedData(projectID, datasetID, tableID string) error {
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %v", err)
+		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 
 	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/us-states/us-states-by-date.csv")
@@ -205,7 +205,7 @@ func prepareClusteredData(projectID, datasetID, tableID string) error {
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %v", err)
+		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 
 	gcsRef := bigquery.NewGCSReference("gs://cloud-samples-data/bigquery/sample-transactions/transactions.csv")

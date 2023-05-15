@@ -34,7 +34,7 @@ func TestApp(t *testing.T) {
 
 	stdOut, stdErr, err := m.Run(nil, 30*time.Second, fmt.Sprintf("--project_id=%s", tc.ProjectID))
 	if err != nil {
-		t.Errorf("execution failed: %v", err)
+		t.Errorf("execution failed: %w", err)
 	}
 
 	// Look for a known substring in the output

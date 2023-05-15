@@ -44,7 +44,7 @@ func TestJobs(t *testing.T) {
 	// Control a job lifecycle explicitly: create, report status, cancel.
 	exampleJobID, err := bqtestutil.UniqueBQName("golang_example_job")
 	if err != nil {
-		t.Fatalf("couldn't generate unique resource name: %v", err)
+		t.Fatalf("couldn't generate unique resource name: %w", err)
 	}
 	q := client.Query("Select 17 as foo")
 	q.JobID = exampleJobID
@@ -57,7 +57,7 @@ func TestJobs(t *testing.T) {
 		t.Errorf("cancelJobInfo(%s): %v", exampleJobID, err)
 	}
 	if err := listJobs(ioutil.Discard, tc.ProjectID); err != nil {
-		t.Errorf("listJobs: %v", err)
+		t.Errorf("listJobs: %w", err)
 	}
 }
 
@@ -76,24 +76,24 @@ func TestCopiesAndExtracts(t *testing.T) {
 	}
 	testDatasetID, err := bqtestutil.UniqueBQName("snippet_table_tests")
 	if err != nil {
-		t.Fatalf("couldn't generate unique resource name: %v", err)
+		t.Fatalf("couldn't generate unique resource name: %w", err)
 	}
 	if err := client.Dataset(testDatasetID).Create(ctx, meta); err != nil {
-		t.Fatalf("failed to create test dataset: %v", err)
+		t.Fatalf("failed to create test dataset: %w", err)
 	}
 	// Cleanup dataset at end of test.
 	defer client.Dataset(testDatasetID).DeleteWithContents(ctx)
 
 	// Generate some dummy tables via a quick CTAS.
 	if err := generateTableCTAS(client, testDatasetID, "table1"); err != nil {
-		t.Fatalf("failed to generate example table1: %v", err)
+		t.Fatalf("failed to generate example table1: %w", err)
 	}
 	if err := generateTableCTAS(client, testDatasetID, "table2"); err != nil {
-		t.Fatalf("failed to generate example table2: %v", err)
+		t.Fatalf("failed to generate example table2: %w", err)
 	}
 
 	if err := createJob(tc.ProjectID, "SELECT 17 as foo"); err != nil {
-		t.Errorf("createJob: %v", err)
+		t.Errorf("createJob: %w", err)
 	}
 
 	// Run copy job tests in parallel.
@@ -132,15 +132,15 @@ func TestCopiesAndExtracts(t *testing.T) {
 
 	bucket, err := bqtestutil.UniqueBucketName("golang-example-bucket", tc.ProjectID)
 	if err != nil {
-		t.Fatalf("cannot generate unique bucket name: %v", err)
+		t.Fatalf("cannot generate unique bucket name: %w", err)
 	}
 	if err := storageClient.Bucket(bucket).Create(ctx, tc.ProjectID, nil); err != nil {
-		t.Fatalf("cannot create bucket: %v", err)
+		t.Fatalf("cannot create bucket: %w", err)
 	}
 
 	model := client.DatasetInProject(tc.ProjectID, testDatasetID).Model("model")
 	if err := generateModel(client, tc.ProjectID, testDatasetID, model.ModelID); err != nil {
-		t.Fatalf("cannot create BQ ML model: %v", err)
+		t.Fatalf("cannot create BQ ML model: %w", err)
 	}
 	defer model.Delete(ctx)
 
@@ -185,12 +185,12 @@ func TestCopiesAndExtracts(t *testing.T) {
 			break
 		}
 		if err := storageClient.Bucket(bucket).Object(objAttrs.Name).Delete(ctx); err != nil {
-			t.Errorf("failed to cleanup the GCS object: %v", err)
+			t.Errorf("failed to cleanup the GCS object: %w", err)
 		}
 	}
 	time.Sleep(time.Second) // Give it a second, due to eventual consistency.
 	if err := storageClient.Bucket(bucket).Delete(ctx); err != nil {
-		t.Errorf("failed to cleanup the GCS bucket: %v", err)
+		t.Errorf("failed to cleanup the GCS bucket: %w", err)
 	}
 
 }

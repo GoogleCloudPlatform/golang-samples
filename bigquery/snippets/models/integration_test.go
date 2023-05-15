@@ -40,7 +40,7 @@ func TestModels(t *testing.T) {
 
 	datasetID, err := bqtestutil.UniqueBQName("golang_example_dataset_model")
 	if err != nil {
-		t.Errorf("UniqueBQName:%v", err)
+		t.Errorf("UniqueBQName:%w", err)
 	}
 	if err := client.Dataset(datasetID).Create(ctx,
 		&bigquery.DatasetMetadata{
@@ -52,7 +52,7 @@ func TestModels(t *testing.T) {
 
 	modelID, err := bqtestutil.UniqueBQName("golang_example_model")
 	if err != nil {
-		t.Errorf("UniqueBQName: %v", err)
+		t.Errorf("UniqueBQName: %w", err)
 	}
 	modelRef := fmt.Sprintf("%s.%s.%s", tc.ProjectID, datasetID, modelID)
 
@@ -71,11 +71,11 @@ func TestModels(t *testing.T) {
 	)`, modelRef)
 	job, err := client.Query(sql).Run(ctx)
 	if err != nil {
-		t.Fatalf("failed to create model: %v", err)
+		t.Fatalf("failed to create model: %w", err)
 	}
 	_, err = job.Wait(ctx)
 	if err != nil {
-		t.Fatalf("waiting for job completion failed: %v", err)
+		t.Fatalf("waiting for job completion failed: %w", err)
 	}
 	if err := printModelInfo(ioutil.Discard, tc.ProjectID, datasetID, modelID); err != nil {
 		t.Errorf("printModelInfo(%q %q): %v", datasetID, modelID, err)
