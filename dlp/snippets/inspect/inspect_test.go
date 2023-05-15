@@ -277,6 +277,22 @@ func TestInspectBigquery(t *testing.T) {
 	}
 }
 
+func TestInspectTable(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	var buf bytes.Buffer
+	if err := inspectTable(&buf, tc.ProjectID); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "Infotype Name: PHONE_NUMBER"; !strings.Contains(got, want) {
+		t.Errorf("InspectTable got %q, want %q", got, want)
+	}
+	if want := "Likelihood: VERY_LIKELY"; !strings.Contains(got, want) {
+		t.Errorf("InspectTable got %q, want %q", got, want)
+	}
+}
+
 func TestInspectStringWithExclusionRegex(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
