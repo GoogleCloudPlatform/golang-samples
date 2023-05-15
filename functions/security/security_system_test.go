@@ -65,7 +65,7 @@ func setupAndRun(m *testing.M) (int, error) {
 	log.Printf("Running: %s %s", cmd.Path, strings.Join(cmd.Args, " "))
 	if _, err := cmd.Output(); err != nil {
 		log.Println(string(err.(*exec.ExitError).Stderr))
-		return 1, fmt.Errorf("Setup: Deploy target function: %w", err)
+		return 1, fmt.Errorf("Setup: Deploy target function: %v", err)
 	}
 	defer teardown(targetName)
 
@@ -82,7 +82,7 @@ func setupAndRun(m *testing.M) (int, error) {
 	log.Printf("Running: %s %s", cmd.Path, strings.Join(cmd.Args, " "))
 	if _, err := cmd.Output(); err != nil {
 		log.Println(string(err.(*exec.ExitError).Stderr))
-		return 1, fmt.Errorf("Setup: Deploy relay function: %w", err)
+		return 1, fmt.Errorf("Setup: Deploy relay function: %v", err)
 	}
 	defer teardown(entryPoint)
 

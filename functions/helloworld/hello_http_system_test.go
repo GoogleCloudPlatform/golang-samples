@@ -64,7 +64,7 @@ func setupAndRun(m *testing.M) (int, error) {
 	log.Printf("Running: %s %s", cmd.Path, strings.Join(cmd.Args, " "))
 	if _, err := cmd.Output(); err != nil {
 		log.Println(string(err.(*exec.ExitError).Stderr))
-		return 1, fmt.Errorf("Setup: Deploy function: %w", err)
+		return 1, fmt.Errorf("Setup: Deploy function: %v", err)
 	}
 
 	// Tear down the deployed function.
@@ -83,10 +83,10 @@ func setupAndRun(m *testing.M) (int, error) {
 	out, err := cmd.Output()
 	if err != nil {
 		log.Println(string(err.(*exec.ExitError).Stderr))
-		return 1, fmt.Errorf("Setup: Get function URL: %w", err)
+		return 1, fmt.Errorf("Setup: Get function URL: %v", err)
 	}
 	if err := os.Setenv("BASE_URL", strings.TrimSpace(string(out))); err != nil {
-		return 1, fmt.Errorf("Setup: os.Setenv: %w", err)
+		return 1, fmt.Errorf("Setup: os.Setenv: %v", err)
 	}
 
 	// Run the tests.

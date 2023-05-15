@@ -39,7 +39,7 @@ func helloStorage(ctx context.Context, e event.Event) error {
 
 	var data storagedata.StorageObjectData
 	if err := protojson.Unmarshal(e.Data(), &data); err != nil {
-		return fmt.Errorf("protojson.Unmarshal: %w", err)
+		return fmt.Errorf("protojson.Unmarshal: %v", err)
 	}
 
 	log.Printf("Bucket: %s", data.GetBucket())

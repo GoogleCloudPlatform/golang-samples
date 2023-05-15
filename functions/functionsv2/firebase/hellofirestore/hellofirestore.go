@@ -35,7 +35,7 @@ func init() {
 func HelloFirestore(ctx context.Context, event event.Event) error {
 	var data firestoredata.DocumentEventData
 	if err := proto.Unmarshal(event.Data(), &data); err != nil {
-		return fmt.Errorf("proto.Unmarshal: %w", err)
+		return fmt.Errorf("proto.Unmarshal: %v", err)
 	}
 
 	fmt.Printf("Function triggered by change to: %v\n", event.Source())

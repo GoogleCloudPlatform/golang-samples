@@ -66,7 +66,7 @@ func init() {
 func MakeUpperCase(ctx context.Context, e event.Event) error {
 	var data firestoredata.DocumentEventData
 	if err := proto.Unmarshal(e.Data(), &data); err != nil {
-		return fmt.Errorf("proto.Unmarshal: %w", err)
+		return fmt.Errorf("proto.Unmarshal: %v", err)
 	}
 
 	if data.GetValue() == nil {
@@ -95,7 +95,7 @@ func MakeUpperCase(ctx context.Context, e event.Event) error {
 	newDocumentEntry := map[string]string{"original": newValue}
 	_, err := client.Collection(collection).Doc(doc).Set(ctx, newDocumentEntry)
 	if err != nil {
-		return fmt.Errorf("Set: %w", err)
+		return fmt.Errorf("Set: %v", err)
 	}
 	return nil
 }

@@ -39,7 +39,7 @@ func HelloRTDB(ctx context.Context, e event.Event) error {
 
 	var data databasedata.ReferenceEventData
 	if err := unmarshalOptions.Unmarshal(e.Data(), &data); err != nil {
-		return fmt.Errorf("Unmarshal: %w", err)
+		return fmt.Errorf("Unmarshal: %v", err)
 	}
 	log.Printf("Function triggered by change to: %v", e.Source())
 	log.Printf("Data: %+v", data.GetData())

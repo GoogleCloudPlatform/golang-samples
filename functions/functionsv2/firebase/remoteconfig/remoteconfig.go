@@ -38,7 +38,7 @@ func HelloRemoteConfig(ctx context.Context, e event.Event) error {
 
 	var data remoteconfigdata.RemoteConfigEventData
 	if err := unmarshalOptions.Unmarshal(e.Data(), &data); err != nil {
-		return fmt.Errorf("UnmarshalTo: %w", err)
+		return fmt.Errorf("UnmarshalTo: %v", err)
 	}
 
 	log.Printf("Update type: %+v", data.GetUpdateType())

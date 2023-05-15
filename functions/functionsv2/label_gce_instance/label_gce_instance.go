@@ -64,7 +64,7 @@ func labelGceInstance(ctx context.Context, ev event.Event) error {
 	// Extract parameters from the Cloud Event and Cloud Audit Log data
 	logentry := &AuditLogEntry{}
 	if err := ev.DataAs(logentry); err != nil {
-		err = fmt.Errorf("event.DataAs() : %w", err)
+		err = fmt.Errorf("event.DataAs() : %v", err)
 		log.Printf("Error parsing proto payload: %s", err)
 		return err
 	}
