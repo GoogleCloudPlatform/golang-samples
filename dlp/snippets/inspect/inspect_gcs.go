@@ -41,7 +41,7 @@ func inspectGCSFile(w io.Writer, projectID string, infoTypeNames []string, custo
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return fmt.Errorf("dlp.NewClient: %w", err)
 	}
 
 	// Convert the info type strings to a list of InfoTypes.
@@ -83,7 +83,7 @@ func inspectGCSFile(w io.Writer, projectID string, infoTypeNames []string, custo
 	// Create a PubSub Client used to listen for when the inspect job finishes.
 	pubsubClient, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer pubsubClient.Close()
 
@@ -91,20 +91,20 @@ func inspectGCSFile(w io.Writer, projectID string, infoTypeNames []string, custo
 	// Create the Topic if it doesn't exist.
 	t := pubsubClient.Topic(pubSubTopic)
 	if exists, err := t.Exists(ctx); err != nil {
-		return fmt.Errorf("t.Exists: %v", err)
+		return fmt.Errorf("t.Exists: %w", err)
 	} else if !exists {
 		if t, err = pubsubClient.CreateTopic(ctx, pubSubTopic); err != nil {
-			return fmt.Errorf("CreateTopic: %v", err)
+			return fmt.Errorf("CreateTopic: %w", err)
 		}
 	}
 
 	// Create the Subscription if it doesn't exist.
 	s := pubsubClient.Subscription(pubSubSub)
 	if exists, err := s.Exists(ctx); err != nil {
-		return fmt.Errorf("s.Exists: %v", err)
+		return fmt.Errorf("s.Exists: %w", err)
 	} else if !exists {
 		if s, err = pubsubClient.CreateSubscription(ctx, pubSubSub, pubsub.SubscriptionConfig{Topic: t}); err != nil {
-			return fmt.Errorf("CreateSubscription: %v", err)
+			return fmt.Errorf("CreateSubscription: %w", err)
 		}
 	}
 
@@ -152,7 +152,7 @@ func inspectGCSFile(w io.Writer, projectID string, infoTypeNames []string, custo
 	// Create the inspect job.
 	j, err := client.CreateDlpJob(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateDlpJob: %v", err)
+		return fmt.Errorf("CreateDlpJob: %w", err)
 	}
 	fmt.Fprintf(w, "Created job: %v\n", j.GetName())
 
@@ -188,7 +188,7 @@ func inspectGCSFile(w io.Writer, projectID string, infoTypeNames []string, custo
 		}
 	})
 	if err != nil {
-		return fmt.Errorf("Receive: %v", err)
+		return fmt.Errorf("Receive: %w", err)
 	}
 	return nil
 }

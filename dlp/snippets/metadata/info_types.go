@@ -31,7 +31,7 @@ func infoTypes(w io.Writer, languageCode, filter string) error {
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return fmt.Errorf("dlp.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -41,7 +41,7 @@ func infoTypes(w io.Writer, languageCode, filter string) error {
 	}
 	resp, err := client.ListInfoTypes(ctx, req)
 	if err != nil {
-		return fmt.Errorf("ListInfoTypes: %v", err)
+		return fmt.Errorf("ListInfoTypes: %w", err)
 	}
 	for _, it := range resp.GetInfoTypes() {
 		fmt.Fprintln(w, it.GetName())
