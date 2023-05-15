@@ -56,7 +56,7 @@ func TestQueries(t *testing.T) {
 		t.Run("queryBasic", func(t *testing.T) {
 			t.Parallel()
 			if err := queryBasic(ioutil.Discard, tc.ProjectID); err != nil {
-				t.Errorf("queryBasic: %w", err)
+				t.Errorf("queryBasic: %v", err)
 			}
 		})
 		t.Run("queryBatch", func(t *testing.T) {
@@ -69,41 +69,41 @@ func TestQueries(t *testing.T) {
 		t.Run("queryDisableCache", func(t *testing.T) {
 			t.Parallel()
 			if err := queryDisableCache(ioutil.Discard, tc.ProjectID); err != nil {
-				t.Errorf("queryDisableCache: %w", err)
+				t.Errorf("queryDisableCache: %v", err)
 			}
 		})
 		t.Run("queryDryRun", func(t *testing.T) {
 			t.Parallel()
 			if err := queryDryRun(ioutil.Discard, tc.ProjectID); err != nil {
-				t.Errorf("queryDryRun: %w", err)
+				t.Errorf("queryDryRun: %v", err)
 			}
 		})
 		t.Run("queryLegacy", func(t *testing.T) {
 			t.Parallel()
 			sql := "SELECT 17 as foo"
 			if err := queryLegacy(ioutil.Discard, tc.ProjectID, sql); err != nil {
-				t.Errorf("queryLegacy: %w", err)
+				t.Errorf("queryLegacy: %v", err)
 			}
 		})
 		t.Run("queryLegacyLargeResults", func(t *testing.T) {
 			t.Parallel()
 			tableID := "bigquery_query_legacy_large_results"
 			if err := queryLegacyLargeResults(ioutil.Discard, tc.ProjectID, testDatasetID, tableID); err != nil {
-				t.Errorf("queryLegacyLargeResults: %w", err)
+				t.Errorf("queryLegacyLargeResults: %v", err)
 			}
 		})
 		t.Run("createTableAndWidenQuery", func(t *testing.T) {
 			t.Parallel()
 			tableID := "bigquery_add_column_query_append"
 			if err := createTableAndWidenQuery(tc.ProjectID, testDatasetID, tableID); err != nil {
-				t.Errorf("createTableAndWidenQuery: %w", err)
+				t.Errorf("createTableAndWidenQuery: %v", err)
 			}
 		})
 		t.Run("queryWithDestination", func(t *testing.T) {
 			t.Parallel()
 			tableID := "bigquery_query_destination_table"
 			if err := queryWithDestination(ioutil.Discard, tc.ProjectID, testDatasetID, tableID); err != nil {
-				t.Errorf("queryWithDestination: %w", err)
+				t.Errorf("queryWithDestination: %v", err)
 			}
 		})
 		t.Run("queryWithDestinationCMEK", func(t *testing.T) {
@@ -113,37 +113,37 @@ func TestQueries(t *testing.T) {
 			t.Parallel()
 			tableID := "bigquery_query_destination_table_cmek"
 			if err := queryWithDestinationCMEK(ioutil.Discard, tc.ProjectID, testDatasetID, tableID); err != nil {
-				t.Errorf("queryWithDestinationCMEK: %w", err)
+				t.Errorf("queryWithDestinationCMEK: %v", err)
 			}
 		})
 		t.Run("queryWithArrayParams", func(t *testing.T) {
 			t.Parallel()
 			if err := queryWithArrayParams(ioutil.Discard, tc.ProjectID); err != nil {
-				t.Errorf("queryWithArrayParams: %w", err)
+				t.Errorf("queryWithArrayParams: %v", err)
 			}
 		})
 		t.Run("queryWithNamedParams", func(t *testing.T) {
 			t.Parallel()
 			if err := queryWithNamedParams(ioutil.Discard, tc.ProjectID); err != nil {
-				t.Errorf("queryWithNamedParams: %w", err)
+				t.Errorf("queryWithNamedParams: %v", err)
 			}
 		})
 		t.Run("queryWithPositionalParams", func(t *testing.T) {
 			t.Parallel()
 			if err := queryWithPositionalParams(ioutil.Discard, tc.ProjectID); err != nil {
-				t.Errorf("queryWithPositionalParams: %w", err)
+				t.Errorf("queryWithPositionalParams: %v", err)
 			}
 		})
 		t.Run("queryWithStructParam", func(t *testing.T) {
 			t.Parallel()
 			if err := queryWithStructParam(ioutil.Discard, tc.ProjectID); err != nil {
-				t.Errorf("queryWithStructParam: %w", err)
+				t.Errorf("queryWithStructParam: %v", err)
 			}
 		})
 		t.Run("queryWithTimestampParam", func(t *testing.T) {
 			t.Parallel()
 			if err := queryWithTimestampParam(ioutil.Discard, tc.ProjectID); err != nil {
-				t.Errorf("queryWithTimestampParam: %w", err)
+				t.Errorf("queryWithTimestampParam: %v", err)
 			}
 		})
 		t.Run("queryPartitionedTable", func(t *testing.T) {
@@ -153,7 +153,7 @@ func TestQueries(t *testing.T) {
 				t.Fatalf("couldn't setup clustered table: %v", err)
 			}
 			if err := queryPartitionedTable(ioutil.Discard, tc.ProjectID, testDatasetID, tableID); err != nil {
-				t.Errorf("queryPartitionedTable: %w", err)
+				t.Errorf("queryPartitionedTable: %v", err)
 			}
 		})
 		t.Run("queryClusteredTable", func(t *testing.T) {
@@ -163,7 +163,7 @@ func TestQueries(t *testing.T) {
 				t.Fatalf("couldn't setup clustered table: %v", err)
 			}
 			if err := queryClusteredTable(ioutil.Discard, tc.ProjectID, testDatasetID, tableID); err != nil {
-				t.Errorf("queryClusteredTable: %w", err)
+				t.Errorf("queryClusteredTable: %v", err)
 			}
 		})
 	})

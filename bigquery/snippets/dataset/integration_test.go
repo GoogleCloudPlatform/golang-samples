@@ -57,7 +57,7 @@ func TestDatasets(t *testing.T) {
 		t.Errorf("revokeDatasetAccess(%q): %v", datasetID, err)
 	}
 	if err := addDatasetLabel(tc.ProjectID, datasetID); err != nil {
-		t.Errorf("updateDatasetAddLabel: %w", err)
+		t.Errorf("updateDatasetAddLabel: %v", err)
 	}
 
 	buf := &bytes.Buffer{}
@@ -70,20 +70,20 @@ func TestDatasets(t *testing.T) {
 	}
 
 	if err := addDatasetLabel(tc.ProjectID, datasetID); err != nil {
-		t.Errorf("updateDatasetAddLabel: %w", err)
+		t.Errorf("updateDatasetAddLabel: %v", err)
 	}
 	buf.Reset()
 	if err := listDatasetsByLabel(buf, tc.ProjectID); err != nil {
-		t.Errorf("listDatasetsByLabel: %w", err)
+		t.Errorf("listDatasetsByLabel: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, datasetID) {
 		t.Errorf("listDatasetsByLabel expected %q to contain %q", got, want)
 	}
 	if err := deleteDatasetLabel(tc.ProjectID, datasetID); err != nil {
-		t.Errorf("updateDatasetDeleteLabel: %w", err)
+		t.Errorf("updateDatasetDeleteLabel: %v", err)
 	}
 	if err := printDatasetInfo(ioutil.Discard, tc.ProjectID, datasetID); err != nil {
-		t.Errorf("printDatasetInfo: %w", err)
+		t.Errorf("printDatasetInfo: %v", err)
 	}
 
 	// Test empty dataset creation/ttl/delete.
@@ -105,7 +105,7 @@ func TestDatasets(t *testing.T) {
 		t.Errorf("updateDatasetDescription(%q): %v", datasetID, err)
 	}
 	if err := listDatasets(tc.ProjectID, ioutil.Discard); err != nil {
-		t.Errorf("listDatasets: %w", err)
+		t.Errorf("listDatasets: %v", err)
 	}
 
 }

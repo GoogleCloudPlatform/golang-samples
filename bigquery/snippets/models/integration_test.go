@@ -40,7 +40,7 @@ func TestModels(t *testing.T) {
 
 	datasetID, err := bqtestutil.UniqueBQName("golang_example_dataset_model")
 	if err != nil {
-		t.Errorf("UniqueBQName:%w", err)
+		t.Errorf("UniqueBQName:%v", err)
 	}
 	if err := client.Dataset(datasetID).Create(ctx,
 		&bigquery.DatasetMetadata{
@@ -52,7 +52,7 @@ func TestModels(t *testing.T) {
 
 	modelID, err := bqtestutil.UniqueBQName("golang_example_model")
 	if err != nil {
-		t.Errorf("UniqueBQName: %w", err)
+		t.Errorf("UniqueBQName: %v", err)
 	}
 	modelRef := fmt.Sprintf("%s.%s.%s", tc.ProjectID, datasetID, modelID)
 

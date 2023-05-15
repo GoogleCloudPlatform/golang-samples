@@ -57,7 +57,7 @@ func TestJobs(t *testing.T) {
 		t.Errorf("cancelJobInfo(%s): %v", exampleJobID, err)
 	}
 	if err := listJobs(ioutil.Discard, tc.ProjectID); err != nil {
-		t.Errorf("listJobs: %w", err)
+		t.Errorf("listJobs: %v", err)
 	}
 }
 
@@ -93,7 +93,7 @@ func TestCopiesAndExtracts(t *testing.T) {
 	}
 
 	if err := createJob(tc.ProjectID, "SELECT 17 as foo"); err != nil {
-		t.Errorf("createJob: %w", err)
+		t.Errorf("createJob: %v", err)
 	}
 
 	// Run copy job tests in parallel.
@@ -185,12 +185,12 @@ func TestCopiesAndExtracts(t *testing.T) {
 			break
 		}
 		if err := storageClient.Bucket(bucket).Object(objAttrs.Name).Delete(ctx); err != nil {
-			t.Errorf("failed to cleanup the GCS object: %w", err)
+			t.Errorf("failed to cleanup the GCS object: %v", err)
 		}
 	}
 	time.Sleep(time.Second) // Give it a second, due to eventual consistency.
 	if err := storageClient.Bucket(bucket).Delete(ctx); err != nil {
-		t.Errorf("failed to cleanup the GCS bucket: %w", err)
+		t.Errorf("failed to cleanup the GCS bucket: %v", err)
 	}
 
 }
