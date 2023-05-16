@@ -48,7 +48,7 @@ func listGCSBuckets(w io.Writer, googleAccessKeyID string, googleAccessKeySecret
 	defer cancel()
 	result, err := client.ListBucketsWithContext(ctx, &s3.ListBucketsInput{})
 	if err != nil {
-		return fmt.Errorf("ListBucketsWithContext: %v", err)
+		return fmt.Errorf("ListBucketsWithContext: %w", err)
 	}
 
 	fmt.Fprintf(w, "Buckets:")

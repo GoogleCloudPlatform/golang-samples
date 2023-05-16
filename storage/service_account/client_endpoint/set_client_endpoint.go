@@ -34,7 +34,7 @@ func setClientEndpoint(w io.Writer, customEndpoint string, opts ...option.Client
 	opts = append(opts, option.WithEndpoint(customEndpoint))
 	client, err := storage.NewClient(ctx, opts...)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 

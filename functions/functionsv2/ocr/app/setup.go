@@ -77,28 +77,28 @@ func setup(ctx context.Context) error {
 	if visionClient == nil {
 		visionClient, err = vision.NewImageAnnotatorClient(ctx)
 		if err != nil {
-			return fmt.Errorf("vision.NewImageAnnotatorClient: %v", err)
+			return fmt.Errorf("vision.NewImageAnnotatorClient: %w", err)
 		}
 	}
 
 	if translateClient == nil {
 		translateClient, err = translate.NewClient(ctx)
 		if err != nil {
-			return fmt.Errorf("translate.NewClient: %v", err)
+			return fmt.Errorf("translate.NewClient: %w", err)
 		}
 	}
 
 	if pubsubClient == nil {
 		pubsubClient, err = pubsub.NewClient(ctx, projectID)
 		if err != nil {
-			return fmt.Errorf("translate.NewClient: %v", err)
+			return fmt.Errorf("translate.NewClient: %w", err)
 		}
 	}
 
 	if storageClient == nil {
 		storageClient, err = storage.NewClient(ctx)
 		if err != nil {
-			return fmt.Errorf("storage.NewClient: %v", err)
+			return fmt.Errorf("storage.NewClient: %w", err)
 		}
 	}
 	return nil

@@ -31,7 +31,7 @@ func removeBucketIAMMember(w io.Writer, bucketName string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -41,7 +41,7 @@ func removeBucketIAMMember(w io.Writer, bucketName string) error {
 	bucket := client.Bucket(bucketName)
 	policy, err := bucket.IAM().Policy(ctx)
 	if err != nil {
-		return fmt.Errorf("Bucket(%q).IAM().Policy: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).IAM().Policy: %w", bucketName, err)
 	}
 	// Other valid prefixes are "serviceAccount:", "user:"
 	// See the documentation for more values.
@@ -52,7 +52,7 @@ func removeBucketIAMMember(w io.Writer, bucketName string) error {
 
 	policy.Remove(identity, role)
 	if err := bucket.IAM().SetPolicy(ctx, policy); err != nil {
-		return fmt.Errorf("Bucket(%q).IAM().SetPolicy: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).IAM().SetPolicy: %w", bucketName, err)
 	}
 	// NOTE: It may be necessary to retry this operation if IAM policies are
 	// being modified concurrently. SetPolicy will return an error if the policy

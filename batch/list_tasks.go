@@ -35,7 +35,7 @@ func listTasks(w io.Writer, projectID, region, jobName, taskGroup string) error 
 	ctx := context.Background()
 	batchClient, err := batch.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer batchClient.Close()
 
@@ -52,7 +52,7 @@ func listTasks(w io.Writer, projectID, region, jobName, taskGroup string) error 
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("unable to list tasks: %v", err)
+			return fmt.Errorf("unable to list tasks: %w", err)
 		}
 		tasks = append(tasks, task)
 	}

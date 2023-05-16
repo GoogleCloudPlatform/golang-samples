@@ -38,10 +38,10 @@ func init() {
 func TranslateText(ctx context.Context, cloudevent event.Event) error {
 	var event MessagePublishedData
 	if err := setup(ctx); err != nil {
-		return fmt.Errorf("setup: %v", err)
+		return fmt.Errorf("setup: %w", err)
 	}
 	if err := cloudevent.DataAs(&event); err != nil {
-		return fmt.Errorf("Failed to parse CloudEvent data: %v", err)
+		return fmt.Errorf("Failed to parse CloudEvent data: %w", err)
 	}
 	if event.Message.Data == nil {
 		log.Printf("event: %s", event)
@@ -49,7 +49,7 @@ func TranslateText(ctx context.Context, cloudevent event.Event) error {
 	}
 	var message ocrMessage
 	if err := json.Unmarshal(event.Message.Data, &message); err != nil {
-		return fmt.Errorf("json.Unmarshal: %v", err)
+		return fmt.Errorf("json.Unmarshal: %w", err)
 	}
 
 	log.Printf("Translating text into %s.", message.Lang.String())
@@ -58,7 +58,7 @@ func TranslateText(ctx context.Context, cloudevent event.Event) error {
 	}
 	translateResponse, err := translateClient.Translate(ctx, []string{message.Text}, message.Lang, &opts)
 	if err != nil {
-		return fmt.Errorf("Translate: %v", err)
+		return fmt.Errorf("Translate: %w", err)
 	}
 	if len(translateResponse) == 0 {
 		return fmt.Errorf("Empty Translate response")
@@ -72,25 +72,25 @@ func TranslateText(ctx context.Context, cloudevent event.Event) error {
 		SrcLang:  message.SrcLang,
 	})
 	if err != nil {
-		return fmt.Errorf("json.Marshal: %v", err)
+		return fmt.Errorf("json.Marshal: %w", err)
 	}
 
 	topic := pubsubClient.Topic(resultTopic)
 	ok, err := topic.Exists(ctx)
 	if err != nil {
-		return fmt.Errorf("Exists: %v", err)
+		return fmt.Errorf("Exists: %w", err)
 	}
 	if !ok {
 		topic, err = pubsubClient.CreateTopic(ctx, resultTopic)
 		if err != nil {
-			return fmt.Errorf("CreateTopic: %v", err)
+			return fmt.Errorf("CreateTopic: %w", err)
 		}
 	}
 	msg := &pubsub.Message{
 		Data: messageData,
 	}
 	if _, err = topic.Publish(ctx, msg).Get(ctx); err != nil {
-		return fmt.Errorf("Get: %v", err)
+		return fmt.Errorf("Get: %w", err)
 	}
 	log.Printf("Sent translation: %q", translatedText.Text)
 	return nil

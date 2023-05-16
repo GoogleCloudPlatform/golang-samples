@@ -30,7 +30,7 @@ func removeRetentionPolicy(w io.Writer, bucketName string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -40,7 +40,7 @@ func removeRetentionPolicy(w io.Writer, bucketName string) error {
 	bucket := client.Bucket(bucketName)
 	attrs, err := bucket.Attrs(ctx)
 	if err != nil {
-		return fmt.Errorf("Bucket(%q).Attrs: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Attrs: %w", bucketName, err)
 	}
 	if attrs.RetentionPolicy.IsLocked {
 		return fmt.Errorf("retention policy is locked")
@@ -50,7 +50,7 @@ func removeRetentionPolicy(w io.Writer, bucketName string) error {
 		RetentionPolicy: &storage.RetentionPolicy{},
 	}
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
-		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Update: %w", bucketName, err)
 	}
 	fmt.Fprintf(w, "Retention period for %v has been removed\n", bucketName)
 	return nil
