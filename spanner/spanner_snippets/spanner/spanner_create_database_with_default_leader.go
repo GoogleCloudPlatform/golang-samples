@@ -67,11 +67,11 @@ func createDatabaseWithDefaultLeader(w io.Writer, db string, defaultLeader strin
 	}
 	op, err := adminClient.CreateDatabase(ctx, &req)
 	if err != nil {
-		return fmt.Errorf("createDatabaseWithDefaultLeader.CreateDatabase: %v", err)
+		return fmt.Errorf("createDatabaseWithDefaultLeader.CreateDatabase: %w", err)
 	}
 	dbObj, err := op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("createDatabaseWithDefaultLeader.Wait: %v", err)
+		return fmt.Errorf("createDatabaseWithDefaultLeader.Wait: %w", err)
 	}
 	fmt.Fprintf(w, "Created database [%s] with default leader%q\n", dbObj.Name, dbObj.DefaultLeader)
 	return nil
