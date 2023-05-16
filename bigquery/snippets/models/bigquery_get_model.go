@@ -38,7 +38,7 @@ func printModelInfo(w io.Writer, projectID, datasetID, modelID string) error {
 
 	meta, err := client.Dataset(datasetID).Model(modelID).Metadata(ctx)
 	if err != nil {
-		return fmt.Errorf("couldn't retrieve metadata: %v", err)
+		return fmt.Errorf("couldn't retrieve metadata: %w", err)
 	}
 	fmt.Fprintf(w, "Got model '%q' with friendly name '%q'\n", modelID, meta.Name)
 	return nil
