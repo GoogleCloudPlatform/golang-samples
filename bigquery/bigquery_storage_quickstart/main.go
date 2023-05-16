@@ -272,7 +272,7 @@ func processStream(ctx context.Context, client *bqStorage.BigQueryReadClient, st
 			Offset:     offset,
 		}, rpcOpts)
 		if err != nil {
-			return fmt.Errorf("couldn't invoke ReadRows: %v", err)
+			return fmt.Errorf("couldn't invoke ReadRows: %w", err)
 		}
 
 		// Process the streamed responses.
@@ -303,7 +303,7 @@ func processStream(ctx context.Context, client *bqStorage.BigQueryReadClient, st
 				} else {
 					retries++
 					if retries >= retryLimit {
-						return fmt.Errorf("processStream retries exhausted: %v", err)
+						return fmt.Errorf("processStream retries exhausted: %w", err)
 					}
 				}
 				// break the inner loop, and try to recover by starting a new streaming
@@ -378,7 +378,7 @@ func processAvro(ctx context.Context, schema string, ch <-chan *bqStoragepb.Read
 	// can be long-lived.
 	codec, err := goavro.NewCodec(schema)
 	if err != nil {
-		return fmt.Errorf("couldn't create codec: %v", err)
+		return fmt.Errorf("couldn't create codec: %w", err)
 	}
 
 	for {
