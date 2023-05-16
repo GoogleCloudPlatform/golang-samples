@@ -69,7 +69,7 @@ func connectWithConnector() (*sql.DB, error) {
 	dbURI := stdlib.RegisterConnConfig(config)
 	dbPool, err := sql.Open("pgx", dbURI)
 	if err != nil {
-		return nil, fmt.Errorf("sql.Open: %v", err)
+		return nil, fmt.Errorf("sql.Open: %w", err)
 	}
 	return dbPool, nil
 }
