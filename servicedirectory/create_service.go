@@ -34,7 +34,7 @@ func createService(w io.Writer, projectID string) error {
 	// Create a registration client.
 	client, err := servicedirectory.NewRegistrationClient(ctx)
 	if err != nil {
-		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
+		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %w", err)
 	}
 
 	defer client.Close()
@@ -51,7 +51,7 @@ func createService(w io.Writer, projectID string) error {
 	}
 	service, err := client.CreateService(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateSerice: %v", err)
+		return fmt.Errorf("CreateSerice: %w", err)
 	}
 	fmt.Fprintf(w, "servicedirectory.Createservice result %s\n", service.Name)
 	return nil
