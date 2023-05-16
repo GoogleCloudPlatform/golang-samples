@@ -30,13 +30,13 @@ func printFileACL(w io.Writer, bucket, object string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
 	rules, err := client.Bucket(bucket).Object(object).ACL().List(ctx)
 	if err != nil {
-		return fmt.Errorf("ACLHandle.List: %v", err)
+		return fmt.Errorf("ACLHandle.List: %w", err)
 	}
 	for _, rule := range rules {
 		fmt.Fprintf(w, "ACL rule: %v\n", rule)
