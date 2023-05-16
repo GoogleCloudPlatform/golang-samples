@@ -49,7 +49,7 @@ func connectWithConnectorIAMAuthN() (*sql.DB, error) {
 
 	d, err := cloudsqlconn.NewDialer(context.Background(), cloudsqlconn.WithIAMAuthN())
 	if err != nil {
-		return nil, fmt.Errorf("cloudsqlconn.NewDialer: %v", err)
+		return nil, fmt.Errorf("cloudsqlconn.NewDialer: %w", err)
 	}
 	var opts []cloudsqlconn.DialOption
 	if usePrivate != "" {
@@ -68,7 +68,7 @@ func connectWithConnectorIAMAuthN() (*sql.DB, error) {
 	dbURI := stdlib.RegisterConnConfig(config)
 	dbPool, err := sql.Open("pgx", dbURI)
 	if err != nil {
-		return nil, fmt.Errorf("sql.Open: %v", err)
+		return nil, fmt.Errorf("sql.Open: %w", err)
 	}
 	return dbPool, nil
 }
