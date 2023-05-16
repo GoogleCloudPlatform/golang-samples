@@ -112,7 +112,7 @@ func TestList(t *testing.T) {
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		topics, err := list(tc.ProjectID)
 		if err != nil {
-			r.Errorf("failed to list topics: %v", err)
+			r.Errorf("failed to list topics: %w", err)
 		}
 
 		for _, t := range topics {
@@ -138,7 +138,7 @@ func TestPublish(t *testing.T) {
 	client.CreateTopic(ctx, topicID)
 	buf := new(bytes.Buffer)
 	if err := publish(buf, tc.ProjectID, topicID, "hello world"); err != nil {
-		t.Errorf("failed to publish message: %v", err)
+		t.Errorf("failed to publish message: %w", err)
 	}
 }
 
@@ -149,7 +149,7 @@ func TestPublishThatScales(t *testing.T) {
 	client.CreateTopic(ctx, topicID)
 	buf := new(bytes.Buffer)
 	if err := publishThatScales(buf, tc.ProjectID, topicID, 10); err != nil {
-		t.Errorf("failed to publish message: %v", err)
+		t.Errorf("failed to publish message: %w", err)
 	}
 }
 
@@ -159,7 +159,7 @@ func TestPublishWithSettings(t *testing.T) {
 	client := setup(t)
 	client.CreateTopic(ctx, topicID)
 	if err := publishWithSettings(ioutil.Discard, tc.ProjectID, topicID); err != nil {
-		t.Errorf("failed to publish message: %v", err)
+		t.Errorf("failed to publish message: %w", err)
 	}
 }
 
@@ -170,7 +170,7 @@ func TestPublishCustomAttributes(t *testing.T) {
 	client.CreateTopic(ctx, topicID)
 	buf := new(bytes.Buffer)
 	if err := publishCustomAttributes(buf, tc.ProjectID, topicID); err != nil {
-		t.Errorf("failed to publish message: %v", err)
+		t.Errorf("failed to publish message: %w", err)
 	}
 }
 
@@ -184,7 +184,7 @@ func TestIAM(t *testing.T) {
 		buf := new(bytes.Buffer)
 		perms, err := testPermissions(buf, tc.ProjectID, topicID)
 		if err != nil {
-			r.Errorf("testPermissions: %v", err)
+			r.Errorf("testPermissions: %w", err)
 		}
 		if len(perms) == 0 {
 			r.Errorf("want non-zero perms")
@@ -193,7 +193,7 @@ func TestIAM(t *testing.T) {
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		if err := addUsers(tc.ProjectID, topicID); err != nil {
-			r.Errorf("addUsers: %v", err)
+			r.Errorf("addUsers: %w", err)
 		}
 	})
 
@@ -201,7 +201,7 @@ func TestIAM(t *testing.T) {
 		buf := new(bytes.Buffer)
 		policy, err := policy(buf, tc.ProjectID, topicID)
 		if err != nil {
-			r.Errorf("policy: %v", err)
+			r.Errorf("policy: %w", err)
 		}
 		if role, member := iam.Editor, "group:cloud-logs@google.com"; !policy.HasRole(member, role) {
 			r.Errorf("want %q as viewer, policy=%v", member, policy)
@@ -249,7 +249,7 @@ func TestPublishWithFlowControl(t *testing.T) {
 	client.CreateTopic(ctx, topicID)
 	buf := new(bytes.Buffer)
 	if err := publishWithFlowControlSettings(buf, tc.ProjectID, topicID); err != nil {
-		t.Errorf("failed to publish message: %v", err)
+		t.Errorf("failed to publish message: %w", err)
 	}
 }
 
