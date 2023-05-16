@@ -40,7 +40,7 @@ func restoreBackupWithCustomerManagedEncryptionKey(ctx context.Context, w io.Wri
 
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("restoreBackupWithCustomerManagedEncryptionKey.NewDatabaseAdminClient: %v", err)
+		return fmt.Errorf("restoreBackupWithCustomerManagedEncryptionKey.NewDatabaseAdminClient: %w", err)
 	}
 	defer adminClient.Close()
 
@@ -57,12 +57,12 @@ func restoreBackupWithCustomerManagedEncryptionKey(ctx context.Context, w io.Wri
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("restoreBackupWithCustomerManagedEncryptionKey.RestoreDatabase: %v", err)
+		return fmt.Errorf("restoreBackupWithCustomerManagedEncryptionKey.RestoreDatabase: %w", err)
 	}
 	// Wait for restore operation to complete.
 	restoredDatabase, err := restoreOp.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("restoreBackupWithCustomerManagedEncryptionKey.Wait: %v", err)
+		return fmt.Errorf("restoreBackupWithCustomerManagedEncryptionKey.Wait: %w", err)
 	}
 	// Get the information from the newly restored database.
 	backupInfo := restoredDatabase.RestoreInfo.GetBackupInfo()
