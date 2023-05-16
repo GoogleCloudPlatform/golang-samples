@@ -31,7 +31,7 @@ func getBucketPolicy(w io.Writer, bucketName string) (*iam.Policy3, error) {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("storage.NewClient: %v", err)
+		return nil, fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -40,7 +40,7 @@ func getBucketPolicy(w io.Writer, bucketName string) (*iam.Policy3, error) {
 
 	policy, err := client.Bucket(bucketName).IAM().V3().Policy(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Bucket(%q).IAM().V3().Policy: %v", bucketName, err)
+		return nil, fmt.Errorf("Bucket(%q).IAM().V3().Policy: %w", bucketName, err)
 	}
 	for _, binding := range policy.Bindings {
 		fmt.Fprintf(w, "%q: %q (condition: %v)\n", binding.Role, binding.Members, binding.Condition)

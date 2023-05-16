@@ -38,7 +38,7 @@ func createBucketDualRegion(w io.Writer, projectID, bucketName string) error {
 
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -53,12 +53,12 @@ func createBucketDualRegion(w io.Writer, projectID, bucketName string) error {
 	}
 	bucket := client.Bucket(bucketName)
 	if err := bucket.Create(ctx, projectID, storageDualRegion); err != nil {
-		return fmt.Errorf("Bucket(%q).Create: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Create: %w", bucketName, err)
 	}
 
 	attrs, err := bucket.Attrs(ctx)
 	if err != nil {
-		return fmt.Errorf("Bucket(%q).Attrs: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Attrs: %w", bucketName, err)
 	}
 	fmt.Fprintf(w, "Created bucket %v", bucketName)
 	fmt.Fprintf(w, " - location: %v", attrs.Location)

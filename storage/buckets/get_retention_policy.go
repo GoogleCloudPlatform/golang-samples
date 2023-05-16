@@ -30,7 +30,7 @@ func getRetentionPolicy(w io.Writer, bucketName string) (*storage.BucketAttrs, e
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("storage.NewClient: %v", err)
+		return nil, fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -39,7 +39,7 @@ func getRetentionPolicy(w io.Writer, bucketName string) (*storage.BucketAttrs, e
 
 	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Bucket(%q).Attrs: %v", bucketName, err)
+		return nil, fmt.Errorf("Bucket(%q).Attrs: %w", bucketName, err)
 	}
 	if attrs.RetentionPolicy != nil {
 		fmt.Fprintln(w, "Retention Policy")

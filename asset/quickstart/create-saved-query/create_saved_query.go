@@ -32,7 +32,7 @@ func createSavedQuery(w io.Writer, projectID, savedQueryID string) error {
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("asset.NewClient: %v", err)
+		return fmt.Errorf("asset.NewClient: %w", err)
 	}
 	defer client.Close()
 	parent := fmt.Sprintf("projects/%s", projectID)
@@ -53,7 +53,7 @@ func createSavedQuery(w io.Writer, projectID, savedQueryID string) error {
 		}}
 	response, err := client.CreateSavedQuery(ctx, req)
 	if err != nil {
-		return fmt.Errorf("client.CreateSavedQuery: %v", err)
+		return fmt.Errorf("client.CreateSavedQuery: %w", err)
 	}
 	fmt.Fprintf(w, "Query Name: %s\n", response.Name)
 	fmt.Fprintf(w, "Query Description:%s\n", response.Description)
