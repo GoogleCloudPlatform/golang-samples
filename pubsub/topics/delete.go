@@ -37,7 +37,7 @@ func delete(w io.Writer, projectID, topicID string) error {
 	if err := t.Delete(ctx); err != nil {
 		return fmt.Errorf("Delete: %w", err)
 	}
-	fmt.Fprintf(w, "Deleted topic: %w\n", t)
+	fmt.Fprintf(w, "Deleted topic: %v\n", t)
 	return nil
 }
 
