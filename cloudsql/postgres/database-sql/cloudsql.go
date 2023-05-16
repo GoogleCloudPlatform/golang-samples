@@ -62,7 +62,7 @@ func migrateDB(db *sql.DB) error {
 func recentVotes(db *sql.DB) ([]vote, error) {
 	rows, err := db.Query("SELECT candidate, created_at FROM votes ORDER BY created_at DESC LIMIT 5")
 	if err != nil {
-		return nil, fmt.Errorf("DB.Query: %v", err)
+		return nil, fmt.Errorf("DB.Query: %w", err)
 	}
 	defer rows.Close()
 
@@ -74,7 +74,7 @@ func recentVotes(db *sql.DB) ([]vote, error) {
 		)
 		err := rows.Scan(&candidate, &voteTime)
 		if err != nil {
-			return nil, fmt.Errorf("Rows.Scan: %v", err)
+			return nil, fmt.Errorf("Rows.Scan: %w", err)
 		}
 		votes = append(votes, vote{Candidate: candidate, VoteTime: voteTime})
 	}
@@ -109,16 +109,16 @@ func currentTotals(db *sql.DB) (votingData, error) {
 	)
 	err := db.QueryRow("SELECT count(id) FROM votes WHERE candidate='TABS'").Scan(&tabs)
 	if err != nil {
-		return votingData{}, fmt.Errorf("DB.QueryRow: %v", err)
+		return votingData{}, fmt.Errorf("DB.QueryRow: %w", err)
 	}
 	err = db.QueryRow("SELECT count(id) FROM votes WHERE candidate='SPACES'").Scan(&spaces)
 	if err != nil {
-		return votingData{}, fmt.Errorf("DB.QueryRow: %v", err)
+		return votingData{}, fmt.Errorf("DB.QueryRow: %w", err)
 	}
 
 	recent, err := recentVotes(db)
 	if err != nil {
-		return votingData{}, fmt.Errorf("recentVotes: %v", err)
+		return votingData{}, fmt.Errorf("recentVotes: %w", err)
 	}
 
 	return votingData{
