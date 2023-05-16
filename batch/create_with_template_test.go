@@ -68,13 +68,13 @@ func createTemplate(projectID, templateName string) error {
 	ctx := context.Background()
 	instanceTemplatesClient, err := compute.NewInstanceTemplatesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstanceTemplatesRESTClient: %v", err)
+		return fmt.Errorf("NewInstanceTemplatesRESTClient: %w", err)
 	}
 	defer instanceTemplatesClient.Close()
 
 	projectNumber, err := projectIDtoNumber(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("Could not resolve project ID '%s' to project number: %v", projectID, err)
+		return fmt.Errorf("Could not resolve project ID '%s' to project number: %w", projectID, err)
 	}
 
 	serviceAccountAddress := fmt.Sprintf("%d-compute@developer.gserviceaccount.com", projectNumber)
@@ -129,11 +129,11 @@ func createTemplate(projectID, templateName string) error {
 
 	op, err := instanceTemplatesClient.Insert(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to create instance template: %v", err)
+		return fmt.Errorf("unable to create instance template: %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	return nil
@@ -143,13 +143,13 @@ func projectIDtoNumber(ctx context.Context, projectID string) (int64, error) {
 	// Resolve the project ID to project number
 	resourceManagerClient, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
-		return 0, fmt.Errorf("cloudresourcemanager.NewService: %v", err)
+		return 0, fmt.Errorf("cloudresourcemanager.NewService: %w", err)
 	}
 	// resourceManagerClient doesn't have a Close() method
 	projectsClient := cloudresourcemanager.NewProjectsService(resourceManagerClient)
 	projectData, err := projectsClient.Get(projectID).Do()
 	if err != nil {
-		return 0, fmt.Errorf("Could not resolve project ID '%s' to project number: %v", projectID, err)
+		return 0, fmt.Errorf("Could not resolve project ID '%s' to project number: %w", projectID, err)
 	}
 	return projectData.ProjectNumber, nil
 }
@@ -158,7 +158,7 @@ func deleteInstanceTemplate(projectID, templateName string) error {
 	ctx := context.Background()
 	instanceTemplatesClient, err := compute.NewInstanceTemplatesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstanceTemplatesRESTClient: %v", err)
+		return fmt.Errorf("NewInstanceTemplatesRESTClient: %w", err)
 	}
 	defer instanceTemplatesClient.Close()
 
@@ -169,11 +169,11 @@ func deleteInstanceTemplate(projectID, templateName string) error {
 
 	op, err := instanceTemplatesClient.Delete(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to delete instance template: %v", err)
+		return fmt.Errorf("unable to delete instance template: %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 	return nil
 }
