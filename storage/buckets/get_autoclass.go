@@ -31,7 +31,7 @@ func getAutoclass(w io.Writer, bucketName string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -40,7 +40,7 @@ func getAutoclass(w io.Writer, bucketName string) error {
 
 	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
-		return fmt.Errorf("Bucket(%q).Attrs: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Attrs: %w", bucketName, err)
 	}
 	fmt.Fprintf(w, "Autoclass enabled was set to %v on bucket %q at %v", attrs.Autoclass.Enabled, bucketName, attrs.Autoclass.ToggleTime)
 	return nil
