@@ -32,7 +32,7 @@ func listInstanceTemplates(w io.Writer, projectID string) error {
 	ctx := context.Background()
 	instanceTemplatesClient, err := compute.NewInstanceTemplatesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstanceTemplatesRESTClient: %v", err)
+		return fmt.Errorf("NewInstanceTemplatesRESTClient: %w", err)
 	}
 	defer instanceTemplatesClient.Close()
 

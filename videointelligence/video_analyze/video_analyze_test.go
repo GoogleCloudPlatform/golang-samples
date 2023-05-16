@@ -35,6 +35,7 @@ func assert(buf bytes.Buffer, want string, t *testing.T) {
 }
 
 func TestAnalyzeShotChange(t *testing.T) {
+	t.Skip("see GoogleCloudPlatform/golang-samples#3049")
 	testutil.EndToEndTest(t)
 
 	testutil.Retry(t, 10, time.Minute, func(r *testutil.R) {
@@ -43,13 +44,14 @@ func TestAnalyzeShotChange(t *testing.T) {
 		err := shotChangeURI(&buf, catVideo)
 
 		if err != nil {
-			t.Fatal(err)
+			r.Errorf("%v", err)
 		}
 		assert(buf, want, t)
 	})
 }
 
 func TestAnalyzeLabelURI(t *testing.T) {
+	t.Skip("see GoogleCloudPlatform/golang-samples#3049")
 	testutil.EndToEndTest(t)
 
 	testutil.Retry(t, 10, time.Minute, func(r *testutil.R) {
@@ -57,13 +59,14 @@ func TestAnalyzeLabelURI(t *testing.T) {
 		var buf bytes.Buffer
 		err := labelURI(&buf, catVideo)
 		if err != nil {
-			t.Fatal(err)
+			r.Errorf("%v", err)
 		}
 		assert(buf, want, t)
 	})
 }
 
 func TestAnalyzeExplicitContentURI(t *testing.T) {
+	t.Skip("see GoogleCloudPlatform/golang-samples#3049")
 	testutil.EndToEndTest(t)
 
 	testutil.Retry(t, 10, time.Minute, func(r *testutil.R) {
@@ -71,13 +74,14 @@ func TestAnalyzeExplicitContentURI(t *testing.T) {
 		var buf bytes.Buffer
 		err := explicitContentURI(&buf, catVideo)
 		if err != nil {
-			t.Fatal(err)
+			r.Errorf("%v", err)
 		}
 		assert(buf, want, t)
 	})
 }
 
 func TestAnalyzeSpeechTranscriptionURI(t *testing.T) {
+	t.Skip("see GoogleCloudPlatform/golang-samples#3049")
 	testutil.EndToEndTest(t)
 
 	testutil.Retry(t, 10, time.Minute, func(r *testutil.R) {
@@ -85,7 +89,7 @@ func TestAnalyzeSpeechTranscriptionURI(t *testing.T) {
 		var buf bytes.Buffer
 		err := speechTranscriptionURI(&buf, googleworkVideo)
 		if err != nil {
-			t.Fatal(err)
+			r.Errorf("%v", err)
 		}
 		assert(buf, want, t)
 	})

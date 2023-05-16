@@ -28,7 +28,7 @@ func queryTestablePermissions(w io.Writer, fullResourceName string) ([]*iam.Perm
 	ctx := context.Background()
 	service, err := iam.NewService(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("iam.NewService: %v", err)
+		return nil, fmt.Errorf("iam.NewService: %w", err)
 	}
 
 	request := &iam.QueryTestablePermissionsRequest{
@@ -36,7 +36,7 @@ func queryTestablePermissions(w io.Writer, fullResourceName string) ([]*iam.Perm
 	}
 	response, err := service.Permissions.QueryTestablePermissions(request).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Permissions.QueryTestablePermissions: %v", err)
+		return nil, fmt.Errorf("Permissions.QueryTestablePermissions: %w", err)
 	}
 	for _, p := range response.Permissions {
 		fmt.Fprintf(w, "Found permissions: %v", p.Name)

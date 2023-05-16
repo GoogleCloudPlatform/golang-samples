@@ -38,7 +38,7 @@ func preemptionHisory(w io.Writer, projectID, zone, instanceName, customFilter s
 	ctx := context.Background()
 	operationsClient, err := compute.NewZoneOperationsRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewZoneOperationsRESTClient: %v", err)
+		return fmt.Errorf("NewZoneOperationsRESTClient: %w", err)
 	}
 	defer operationsClient.Close()
 

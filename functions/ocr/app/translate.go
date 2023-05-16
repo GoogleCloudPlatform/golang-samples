@@ -31,14 +31,14 @@ import (
 // the text using the Google Translate API.
 func TranslateText(ctx context.Context, event PubSubMessage) error {
 	if err := setup(ctx); err != nil {
-		return fmt.Errorf("setup: %v", err)
+		return fmt.Errorf("setup: %w", err)
 	}
 	if event.Data == nil {
 		return fmt.Errorf("empty data")
 	}
 	var message ocrMessage
 	if err := json.Unmarshal(event.Data, &message); err != nil {
-		return fmt.Errorf("json.Unmarshal: %v", err)
+		return fmt.Errorf("json.Unmarshal: %w", err)
 	}
 
 	log.Printf("Translating text into %s.", message.Lang.String())
@@ -47,7 +47,7 @@ func TranslateText(ctx context.Context, event PubSubMessage) error {
 	}
 	translateResponse, err := translateClient.Translate(ctx, []string{message.Text}, message.Lang, &opts)
 	if err != nil {
-		return fmt.Errorf("Translate: %v", err)
+		return fmt.Errorf("Translate: %w", err)
 	}
 	if len(translateResponse) == 0 {
 		return fmt.Errorf("Empty Translate response")
@@ -61,25 +61,25 @@ func TranslateText(ctx context.Context, event PubSubMessage) error {
 		SrcLang:  message.SrcLang,
 	})
 	if err != nil {
-		return fmt.Errorf("json.Marshal: %v", err)
+		return fmt.Errorf("json.Marshal: %w", err)
 	}
 
 	topic := pubsubClient.Topic(resultTopic)
 	ok, err := topic.Exists(ctx)
 	if err != nil {
-		return fmt.Errorf("Exists: %v", err)
+		return fmt.Errorf("Exists: %w", err)
 	}
 	if !ok {
 		topic, err = pubsubClient.CreateTopic(ctx, resultTopic)
 		if err != nil {
-			return fmt.Errorf("CreateTopic: %v", err)
+			return fmt.Errorf("CreateTopic: %w", err)
 		}
 	}
 	msg := &pubsub.Message{
 		Data: messageData,
 	}
 	if _, err = topic.Publish(ctx, msg).Get(ctx); err != nil {
-		return fmt.Errorf("Get: %v", err)
+		return fmt.Errorf("Get: %w", err)
 	}
 	log.Printf("Sent translation: %q", translatedText.Text)
 	return nil
