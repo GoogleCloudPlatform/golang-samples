@@ -642,12 +642,12 @@ func pgWriteWithTransactionUsingDML(ctx context.Context, w io.Writer, client *sp
 			key := spanner.Key{albumID, singerID}
 			row, err := txn.ReadRow(ctx, "Albums", key, []string{"MarketingBudget"})
 			if err != nil {
-				return 0, fmt.Errorf("error reading marketing budget for album_id=%v,singer_id=%v: %v",
+				return 0, fmt.Errorf("error reading marketing budget for album_id=%v,singer_id=%v: %w",
 					albumID, singerID, err)
 			}
 			var budget int64
 			if err := row.Column(0, &budget); err != nil {
-				return 0, fmt.Errorf("error decoding marketing budget for album_id=%v,singer_id=%v: %v",
+				return 0, fmt.Errorf("error decoding marketing budget for album_id=%v,singer_id=%v: %w",
 					albumID, singerID, err)
 			}
 			return budget, nil
@@ -704,10 +704,10 @@ func pgAddStoringIndex(ctx context.Context, w io.Writer, adminClient *database.D
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("failed to execute spanner database DDL request: %v", err)
+		return fmt.Errorf("failed to execute spanner database DDL request: %w", err)
 	}
 	if err := op.Wait(ctx); err != nil {
-		return fmt.Errorf("failed to complete spanner database DDL request: %v", err)
+		return fmt.Errorf("failed to complete spanner database DDL request: %w", err)
 	}
 	fmt.Fprintf(w, "Added storing index\n")
 	return nil
