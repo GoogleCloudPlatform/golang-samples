@@ -42,11 +42,11 @@ func TopScores(ctx context.Context, client *firestore.Client) ([]ScoreData, erro
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("iter.Next: %v", err)
+			return nil, fmt.Errorf("iter.Next: %w", err)
 		}
 		var d ScoreData
 		if err = doc.DataTo(&d); err != nil {
-			return nil, fmt.Errorf("doc.DataTo: %v", err)
+			return nil, fmt.Errorf("doc.DataTo: %w", err)
 		}
 		top = append(top, d)
 	}
@@ -59,11 +59,11 @@ func AddScore(ctx context.Context, client *firestore.Client, d ScoreData) (strin
 	iter := client.Collection("leaderboard").Query.Limit(1).Where("name", "==", d.Name).Documents(ctx)
 	doc, err := iter.Next()
 	if err != iterator.Done && err != nil {
-		return "", fmt.Errorf("iter.Next: %v", err)
+		return "", fmt.Errorf("iter.Next: %w", err)
 	}
 	if err != iterator.Done {
 		if err = doc.DataTo(&oldD); err != nil {
-			return "", fmt.Errorf("doc.DataTo: %v", err)
+			return "", fmt.Errorf("doc.DataTo: %w", err)
 		}
 	}
 	s := ""
@@ -77,7 +77,7 @@ func AddScore(ctx context.Context, client *firestore.Client, d ScoreData) (strin
 			"combo":    d.Combo,
 		})
 		if err != nil {
-			return "", fmt.Errorf("Doc(%v).Set: %v", d.Name, err)
+			return "", fmt.Errorf("Doc(%v).Set: %w", d.Name, err)
 		}
 	}
 	return s, nil
