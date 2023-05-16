@@ -39,7 +39,7 @@ func createScriptJobWithTemplate(w io.Writer, projectID, region, jobName, templa
 	ctx := context.Background()
 	batchClient, err := batch.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer batchClient.Close()
 
@@ -111,7 +111,7 @@ func createScriptJobWithTemplate(w io.Writer, projectID, region, jobName, templa
 
 	created_job, err := batchClient.CreateJob(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to create job: %v", err)
+		return fmt.Errorf("unable to create job: %w", err)
 	}
 
 	fmt.Fprintf(w, "Job created: %v\n", created_job)
