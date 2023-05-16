@@ -34,7 +34,7 @@ func checkLatestTransferOperation(w io.Writer, projectID string, jobName string)
 	ctx := context.Background()
 	client, err := storagetransfer.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("storagetransfer.NewClient: %v", err)
+		return nil, fmt.Errorf("storagetransfer.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -43,7 +43,7 @@ func checkLatestTransferOperation(w io.Writer, projectID string, jobName string)
 		ProjectId: projectID,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to get transfer job: %v", err)
+		return nil, fmt.Errorf("failed to get transfer job: %w", err)
 	}
 
 	latestOpName := job.LatestOperationName
@@ -52,7 +52,7 @@ func checkLatestTransferOperation(w io.Writer, projectID string, jobName string)
 			Name: latestOpName,
 		})
 		if err != nil {
-			return nil, fmt.Errorf("failed to get transfer operation: %v", err)
+			return nil, fmt.Errorf("failed to get transfer operation: %w", err)
 		}
 		latestOp := &storagetransferpb.TransferOperation{}
 		lro.Metadata.UnmarshalTo(latestOp)
