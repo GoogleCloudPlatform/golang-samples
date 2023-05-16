@@ -15,6 +15,7 @@
 package firestore
 
 // [START fs_update_multiple_fields]
+// [START firestore_update_multiple_fields]
 
 import (
 	"context"
@@ -46,4 +47,5 @@ func updateDocMultiple(ctx context.Context, client *firestore.Client) error {
 	return err
 }
 
+// [END firestore_update_multiple_fields]
 // [END fs_update_multiple_fields]
