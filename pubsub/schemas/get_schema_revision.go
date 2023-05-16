@@ -29,13 +29,13 @@ func getSchemaRevision(w io.Writer, projectID, schemaID string) error {
 	ctx := context.Background()
 	client, err := pubsub.NewSchemaClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewSchemaClient: %v", err)
+		return fmt.Errorf("pubsub.NewSchemaClient: %w", err)
 	}
 	defer client.Close()
 
 	s, err := client.Schema(ctx, schemaID, pubsub.SchemaViewFull)
 	if err != nil {
-		return fmt.Errorf("client.Schema revision: %v", err)
+		return fmt.Errorf("client.Schema revision: %w", err)
 	}
 	fmt.Fprintf(w, "Got schema revision: %#v\n", s)
 	return nil
