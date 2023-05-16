@@ -43,10 +43,10 @@ func createCaPool(w io.Writer, projectID string, location string, caPoolId strin
 		Tier: privatecapb.CaPool_ENTERPRISE,
 	}
 
-	locationPath := "projects/" + projectID + "/locations/" + location
+	locationPath := fmt.Sprintf("projects/%s/locations/%s", projectID, location)
 
+	// See https://pkg.go.dev/cloud.google.com/go/security/privateca/apiv1/privatecapb#CreateCaPoolRequest.
 	req := &privatecapb.CreateCaPoolRequest{
-		// See https://pkg.go.dev/cloud.google.com/go/security/privateca/apiv1/privatecapb#CreateCaPoolRequest.
 		Parent:   locationPath,
 		CaPoolId: caPoolId,
 		CaPool:   caPool,

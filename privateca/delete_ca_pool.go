@@ -38,10 +38,10 @@ func deleteCaPool(w io.Writer, projectID string, location string, caPoolId strin
 	}
 	defer caClient.Close()
 
-	fullCaPoolName := "projects/" + projectID + "/locations/" + location + "/caPools/" + caPoolId
+	fullCaPoolName := fmt.Sprintf("projects/%s/locations/%s/caPools/%s", projectID, location, caPoolId)
 
+	// See https://pkg.go.dev/cloud.google.com/go/security/privateca/apiv1/privatecapb#DeleteCaPoolRequest.
 	req := &privatecapb.DeleteCaPoolRequest{
-		// See https://pkg.go.dev/cloud.google.com/go/security/privateca/apiv1/privatecapb#CreateCaPoolRequest.
 		Name: fullCaPoolName,
 	}
 

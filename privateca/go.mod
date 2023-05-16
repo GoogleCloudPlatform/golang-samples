@@ -1,10 +1,11 @@
-module create_ca_pool.go
+module github.com/GoogleCloudPlatform/golang-samples/privateca
 
 go 1.20
 
 require (
 	cloud.google.com/go/security v1.14.1
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230516114122-5f7feb80fcba
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230516204147-345f398ad180
+	google.golang.org/api v0.118.0
 )
 
 require (
@@ -28,7 +29,6 @@ require (
 	golang.org/x/sys v0.7.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
-	google.golang.org/api v0.118.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
 	google.golang.org/grpc v1.55.0 // indirect
