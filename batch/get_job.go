@@ -33,7 +33,7 @@ func getJob(w io.Writer, projectID, region, jobName string) (*batchpb.Job, error
 	ctx := context.Background()
 	batchClient, err := batch.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("NewClient: %v", err)
+		return nil, fmt.Errorf("NewClient: %w", err)
 	}
 	defer batchClient.Close()
 
@@ -43,7 +43,7 @@ func getJob(w io.Writer, projectID, region, jobName string) (*batchpb.Job, error
 
 	response, err := batchClient.GetJob(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("unable to get job: %v", err)
+		return nil, fmt.Errorf("unable to get job: %w", err)
 	}
 
 	fmt.Fprintf(w, "Job info: %v\n", response)

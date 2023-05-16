@@ -37,7 +37,7 @@ func authenticateExplicitWithAdc(w io.Writer) error {
 	// if you are on a GCE (or other metadata server supported environments).
 	credentials, err := google.FindDefaultCredentials(ctx, "https://www.googleapis.com/auth/cloud-platform")
 	if err != nil {
-		return fmt.Errorf("failed to generate default credentials: %v", err)
+		return fmt.Errorf("failed to generate default credentials: %w", err)
 	}
 	// If you are authenticating to a Cloud API, you can let the library include the default scope,
 	// https://www.googleapis.com/auth/cloud-platform, because IAM is used to provide fine-grained
@@ -48,7 +48,7 @@ func authenticateExplicitWithAdc(w io.Writer) error {
 	// Construct the Storage client.
 	client, err := storage.NewClient(ctx, option.WithCredentials(credentials))
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 

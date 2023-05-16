@@ -36,13 +36,13 @@ func initializeCredentials(accessBoundary []downscope.AccessBoundaryRule) error 
 	// Application Default Credentials.
 	rootSource, err := google.DefaultTokenSource(ctx, "https://www.googleapis.com/auth/cloud-platform")
 	if err != nil {
-		return fmt.Errorf("failed to generate rootSource: %v", err)
+		return fmt.Errorf("failed to generate rootSource: %w", err)
 	}
 
 	// downscope.NewTokenSource constructs the token source with the configuration provided.
 	dts, err := downscope.NewTokenSource(ctx, downscope.DownscopingConfig{RootSource: rootSource, Rules: accessBoundary})
 	if err != nil {
-		return fmt.Errorf("failed to generate downscoped token source: %v", err)
+		return fmt.Errorf("failed to generate downscoped token source: %w", err)
 	}
 	_ = dts
 	// You can now use dts to access Google Storage resources.
