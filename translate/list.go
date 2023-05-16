@@ -31,18 +31,18 @@ func listSupportedLanguages(w io.Writer, targetLanguage string) error {
 
 	lang, err := language.Parse(targetLanguage)
 	if err != nil {
-		return fmt.Errorf("language.Parse: %v", err)
+		return fmt.Errorf("language.Parse: %w", err)
 	}
 
 	client, err := translate.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("translate.NewClient: %v", err)
+		return fmt.Errorf("translate.NewClient: %w", err)
 	}
 	defer client.Close()
 
 	langs, err := client.SupportedLanguages(ctx, lang)
 	if err != nil {
-		return fmt.Errorf("SupportedLanguages: %v", err)
+		return fmt.Errorf("SupportedLanguages: %w", err)
 	}
 
 	for _, lang := range langs {
