@@ -35,7 +35,7 @@ func downloadByteRange(w io.Writer, bucket, object string, startByte int64, endB
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -44,22 +44,22 @@ func downloadByteRange(w io.Writer, bucket, object string, startByte int64, endB
 
 	f, err := os.Create(destFileName)
 	if err != nil {
-		return fmt.Errorf("os.Create: %v", err)
+		return fmt.Errorf("os.Create: %w", err)
 	}
 
 	length := endByte - startByte
 	rc, err := client.Bucket(bucket).Object(object).NewRangeReader(ctx, startByte, length)
 	if err != nil {
-		return fmt.Errorf("Object(%q).NewReader: %v", object, err)
+		return fmt.Errorf("Object(%q).NewReader: %w", object, err)
 	}
 	defer rc.Close()
 
 	if _, err := io.Copy(f, rc); err != nil {
-		return fmt.Errorf("io.Copy: %v", err)
+		return fmt.Errorf("io.Copy: %w", err)
 	}
 
 	if err = f.Close(); err != nil {
-		return fmt.Errorf("f.Close: %v", err)
+		return fmt.Errorf("f.Close: %w", err)
 	}
 
 	fmt.Fprintf(w, "Bytes %v to %v of blob %v downloaded to local file %v\n", startByte, startByte+length, object, destFileName)

@@ -113,7 +113,7 @@ func grpcRequest(host string, audience string, fn func(context.Context, *grpc.Cl
 	opts = append(opts, grpc.WithTransportCredentials(cred))
 	conn, err := grpc.Dial(host, opts...)
 	if err != nil {
-		return nil, fmt.Errorf("grpc.Dial: %v", err)
+		return nil, fmt.Errorf("grpc.Dial: %w", err)
 	}
 	defer conn.Close()
 
@@ -122,7 +122,7 @@ func grpcRequest(host string, audience string, fn func(context.Context, *grpc.Cl
 	defer cancel()
 	idToken, err := cloudrunci.CreateIDToken(audience)
 	if err != nil {
-		return nil, fmt.Errorf("cloudrunci.CreateIDToken: %v", err)
+		return nil, fmt.Errorf("cloudrunci.CreateIDToken: %w", err)
 	}
 	ctx = metadata.AppendToOutgoingContext(ctx, "authorization", "Bearer "+idToken)
 

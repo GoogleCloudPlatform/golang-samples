@@ -32,7 +32,7 @@ func copyFile(w io.Writer, dstBucket, srcBucket, srcObject string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -52,12 +52,12 @@ func copyFile(w io.Writer, dstBucket, srcBucket, srcObject string) error {
 	// generation-match precondition using its generation number.
 	// attrs, err := dst.Attrs(ctx)
 	// if err != nil {
-	// 	return fmt.Errorf("object.Attrs: %v", err)
+	// 	return fmt.Errorf("object.Attrs: %w", err)
 	// }
 	// dst = dst.If(storage.Conditions{GenerationMatch: attrs.Generation})
 
 	if _, err := dst.CopierFrom(src).Run(ctx); err != nil {
-		return fmt.Errorf("Object(%q).CopierFrom(%q).Run: %v", dstObject, srcObject, err)
+		return fmt.Errorf("Object(%q).CopierFrom(%q).Run: %w", dstObject, srcObject, err)
 	}
 	fmt.Fprintf(w, "Blob %v in bucket %v copied to blob %v in bucket %v.\n", srcObject, srcBucket, dstObject, dstBucket)
 	return nil

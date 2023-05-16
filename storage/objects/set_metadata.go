@@ -31,7 +31,7 @@ func setMetadata(w io.Writer, bucket, object string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -45,7 +45,7 @@ func setMetadata(w io.Writer, bucket, object string) error {
 	// object's metageneration does not match your precondition.
 	attrs, err := o.Attrs(ctx)
 	if err != nil {
-		return fmt.Errorf("object.Attrs: %v", err)
+		return fmt.Errorf("object.Attrs: %w", err)
 	}
 	o = o.If(storage.Conditions{MetagenerationMatch: attrs.Metageneration})
 
@@ -56,7 +56,7 @@ func setMetadata(w io.Writer, bucket, object string) error {
 		},
 	}
 	if _, err := o.Update(ctx, objectAttrsToUpdate); err != nil {
-		return fmt.Errorf("ObjectHandle(%q).Update: %v", object, err)
+		return fmt.Errorf("ObjectHandle(%q).Update: %w", object, err)
 	}
 	fmt.Fprintf(w, "Updated custom metadata for object %v in bucket %v.\n", object, bucket)
 	return nil

@@ -30,7 +30,7 @@ func disableUniformBucketLevelAccess(w io.Writer, bucketName string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -44,7 +44,7 @@ func disableUniformBucketLevelAccess(w io.Writer, bucketName string) error {
 		},
 	}
 	if _, err := bucket.Update(ctx, disableUniformBucketLevelAccess); err != nil {
-		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Update: %w", bucketName, err)
 	}
 	fmt.Fprintf(w, "Uniform bucket-level access was disabled for %v\n", bucketName)
 	return nil
