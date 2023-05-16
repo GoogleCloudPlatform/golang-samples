@@ -73,7 +73,7 @@ func BlurOffensiveImages(ctx context.Context, e GCSEvent) error {
 
 	resp, err := visionClient.DetectSafeSearch(ctx, img, nil)
 	if err != nil {
-		return fmt.Errorf("AnnotateImage: %v", err)
+		return fmt.Errorf("AnnotateImage: %w", err)
 	}
 
 	if resp.GetAdult() == visionpb.Likelihood_VERY_LIKELY ||
@@ -94,7 +94,7 @@ func blur(ctx context.Context, inputBucket, outputBucket, name string) error {
 	inputBlob := storageClient.Bucket(inputBucket).Object(name)
 	r, err := inputBlob.NewReader(ctx)
 	if err != nil {
-		return fmt.Errorf("NewReader: %v", err)
+		return fmt.Errorf("NewReader: %w", err)
 	}
 
 	outputBlob := storageClient.Bucket(outputBucket).Object(name)
@@ -107,7 +107,7 @@ func blur(ctx context.Context, inputBucket, outputBucket, name string) error {
 	cmd.Stdout = w
 
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("cmd.Run: %v", err)
+		return fmt.Errorf("cmd.Run: %w", err)
 	}
 
 	log.Printf("Blurred image uploaded to gs://%s/%s", outputBlob.BucketName(), outputBlob.ObjectName())
