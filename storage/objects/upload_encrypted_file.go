@@ -32,7 +32,7 @@ func uploadEncryptedFile(w io.Writer, bucket, object string, secretKey []byte) e
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -50,17 +50,17 @@ func uploadEncryptedFile(w io.Writer, bucket, object string, secretKey []byte) e
 	// generation-match precondition using the live object's generation number.
 	// attrs, err := o.Attrs(ctx)
 	// if err != nil {
-	// 	return fmt.Errorf("object.Attrs: %v", err)
+	// 	return fmt.Errorf("object.Attrs: %w", err)
 	// }
 	// o = o.If(storage.Conditions{GenerationMatch: attrs.Generation})
 
 	// Encrypt the object's contents.
 	wc := o.Key(secretKey).NewWriter(ctx)
 	if _, err := wc.Write([]byte("top secret")); err != nil {
-		return fmt.Errorf("Writer.Write: %v", err)
+		return fmt.Errorf("Writer.Write: %w", err)
 	}
 	if err := wc.Close(); err != nil {
-		return fmt.Errorf("Writer.Close: %v", err)
+		return fmt.Errorf("Writer.Close: %w", err)
 	}
 	fmt.Fprintf(w, "Uploaded encrypted object %v.\n", object)
 	return nil
