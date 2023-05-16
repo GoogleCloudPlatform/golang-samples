@@ -36,7 +36,7 @@ func getPublicKey(w io.Writer, name string) error {
 	ctx := context.Background()
 	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create kms client: %v", err)
+		return fmt.Errorf("failed to create kms client: %w", err)
 	}
 	defer client.Close()
 
@@ -48,7 +48,7 @@ func getPublicKey(w io.Writer, name string) error {
 	// Call the API.
 	result, err := client.GetPublicKey(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to get public key: %v", err)
+		return fmt.Errorf("failed to get public key: %w", err)
 	}
 
 	// The 'Pem' field is the raw string representation of the public key.
@@ -71,7 +71,7 @@ func getPublicKey(w io.Writer, name string) error {
 	block, _ := pem.Decode(key)
 	publicKey, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
-		return fmt.Errorf("failed to parse public key: %v", err)
+		return fmt.Errorf("failed to parse public key: %w", err)
 	}
 	fmt.Fprintf(w, "Retrieved public key: %v\n", publicKey)
 	return nil
