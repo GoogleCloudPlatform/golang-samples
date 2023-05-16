@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/privateca
 
-go 1.20
+go 1.19
 
 require (
 	cloud.google.com/go/security v1.14.1
