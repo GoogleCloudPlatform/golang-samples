@@ -32,7 +32,7 @@ func getSupportedLanguages(w io.Writer, projectID string) error {
 	ctx := context.Background()
 	client, err := translate.NewTranslationClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewTranslationClient: %v", err)
+		return fmt.Errorf("NewTranslationClient: %w", err)
 	}
 	defer client.Close()
 
@@ -42,7 +42,7 @@ func getSupportedLanguages(w io.Writer, projectID string) error {
 
 	resp, err := client.GetSupportedLanguages(ctx, req)
 	if err != nil {
-		return fmt.Errorf("GetSupportedLanguages: %v", err)
+		return fmt.Errorf("GetSupportedLanguages: %w", err)
 	}
 
 	// List language codes of supported languages
