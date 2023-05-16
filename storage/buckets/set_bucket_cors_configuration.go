@@ -34,7 +34,7 @@ func setBucketCORSConfiguration(w io.Writer, bucketName string, maxAge time.Dura
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -52,7 +52,7 @@ func setBucketCORSConfiguration(w io.Writer, bucketName string, maxAge time.Dura
 			}},
 	}
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
-		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Update: %w", bucketName, err)
 	}
 	fmt.Fprintf(w, "Bucket %v was updated with a CORS config to allow %v requests from %v sharing %v responses across origins\n", bucketName, methods, origins, responseHeaders)
 	return nil
