@@ -34,7 +34,7 @@ func undeployModel(w io.Writer, projectID string, location string, modelID strin
 	ctx := context.Background()
 	client, err := automl.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -44,12 +44,12 @@ func undeployModel(w io.Writer, projectID string, location string, modelID strin
 
 	op, err := client.UndeployModel(ctx, req)
 	if err != nil {
-		return fmt.Errorf("DeployModel: %v", err)
+		return fmt.Errorf("DeployModel: %w", err)
 	}
 	fmt.Fprintf(w, "Processing operation name: %q\n", op.Name())
 
 	if err := op.Wait(ctx); err != nil {
-		return fmt.Errorf("Wait: %v", err)
+		return fmt.Errorf("Wait: %w", err)
 	}
 
 	fmt.Fprintf(w, "Model undeployed.\n")
