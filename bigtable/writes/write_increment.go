@@ -31,7 +31,7 @@ func writeIncrement(w io.Writer, projectID, instanceID string, tableName string)
 	ctx := context.Background()
 	client, err := bigtable.NewClient(ctx, projectID, instanceID)
 	if err != nil {
-		return fmt.Errorf("bigtable.NewAdminClient: %v", err)
+		return fmt.Errorf("bigtable.NewAdminClient: %w", err)
 	}
 	defer client.Close()
 	tbl := client.Open(tableName)
@@ -42,7 +42,7 @@ func writeIncrement(w io.Writer, projectID, instanceID string, tableName string)
 
 	rowKey := "phone#4c410523#20190501"
 	if _, err := tbl.ApplyReadModifyWrite(ctx, rowKey, increment); err != nil {
-		return fmt.Errorf("ApplyReadModifyWrite: %v", err)
+		return fmt.Errorf("ApplyReadModifyWrite: %w", err)
 	}
 
 	fmt.Fprintf(w, "Successfully updated row: %s\n", rowKey)
