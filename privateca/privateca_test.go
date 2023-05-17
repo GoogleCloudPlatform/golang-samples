@@ -100,3 +100,34 @@ func TestCreateCaPool(t *testing.T) {
 		}
 	})
 }
+
+func TestCreateCa(t *testing.T) {
+	setupTests(t)
+	caPoolId, teardownCaPoolTests := setupCaPool(t)
+	defer teardownCaPoolTests(t)
+
+	t.Run("createCa", func(t *testing.T) {
+		caId := fmt.Sprintf("test-ca-%v-%v", time.Now().Format("2006-01-02"), r.Int())
+		caCommonName := fmt.Sprintf("CN - %s", caId)
+		org := "ORGANIZATION"
+		caDuration := int64(2592000) // 30 days
+
+		buf.Reset()
+		if err := createCa(&buf, projectId, location, caPoolId, caId, caCommonName, org, caDuration); err != nil {
+			t.Fatal("createCa got err:", err)
+		}
+
+		expectedResult := "CA created"
+		if got := buf.String(); !strings.Contains(got, expectedResult) {
+			t.Errorf("createCa got %q, want %q", got, expectedResult)
+		}
+
+		fmt.Print("Wait for it...")
+		time.Sleep(15 * time.Second)
+		fmt.Print("Clean up")
+
+		// if err := deleteCa(&buf, projectId, location, caPoolId); err != nil {
+		// 	t.Fatal("createCa teardown got err:", err)
+		// }
+	})
+}
