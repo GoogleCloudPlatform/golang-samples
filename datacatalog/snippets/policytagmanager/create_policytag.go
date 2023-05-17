@@ -35,7 +35,7 @@ func createPolicyTag(w io.Writer, parent, displayName, parentPolicyTag string) (
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)
 	if err != nil {
-		return "", fmt.Errorf("datacatalog.NewPolicyTagManagerClient: %v", err)
+		return "", fmt.Errorf("datacatalog.NewPolicyTagManagerClient: %w", err)
 	}
 	defer policyClient.Close()
 
@@ -51,7 +51,7 @@ func createPolicyTag(w io.Writer, parent, displayName, parentPolicyTag string) (
 	}
 	resp, err := policyClient.CreatePolicyTag(ctx, req)
 	if err != nil {
-		return "", fmt.Errorf("CreatePolicyTag: %v", err)
+		return "", fmt.Errorf("CreatePolicyTag: %w", err)
 	}
 
 	fmt.Fprintf(w, "PolicyTag %s was created.\n", resp.Name)
