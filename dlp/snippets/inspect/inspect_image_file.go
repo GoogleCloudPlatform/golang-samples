@@ -78,7 +78,6 @@ func inspectImageFile(w io.Writer, projectID, filePath string) error {
 	// Send the request.
 	resp, err := client.InspectContent(ctx, req)
 	if err != nil {
-		fmt.Fprintf(w, "InspectContent: %v", err)
 		return err
 	}
 
