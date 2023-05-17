@@ -32,7 +32,7 @@ func startChannel(w io.Writer, projectID, location, channelID string) error {
 	ctx := context.Background()
 	client, err := livestream.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -42,11 +42,11 @@ func startChannel(w io.Writer, projectID, location, channelID string) error {
 
 	op, err := client.StartChannel(ctx, req)
 	if err != nil {
-		return fmt.Errorf("StartChannel: %v", err)
+		return fmt.Errorf("StartChannel: %w", err)
 	}
 	_, err = op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("Wait: %v", err)
+		return fmt.Errorf("Wait: %w", err)
 	}
 
 	fmt.Fprintf(w, "Started channel")
