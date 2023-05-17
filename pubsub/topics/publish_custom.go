@@ -29,7 +29,7 @@ func publishCustomAttributes(w io.Writer, projectID, topicID string) error {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -45,7 +45,7 @@ func publishCustomAttributes(w io.Writer, projectID, topicID string) error {
 	// ID is returned for the published message.
 	id, err := result.Get(ctx)
 	if err != nil {
-		return fmt.Errorf("Get: %v", err)
+		return fmt.Errorf("Get: %w", err)
 	}
 	fmt.Fprintf(w, "Published message with custom attributes; msg ID: %v\n", id)
 	return nil

@@ -31,7 +31,7 @@ func addProductToProductSet(w io.Writer, projectID string, location string, prod
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewProductSearchClient: %v", err)
+		return fmt.Errorf("NewProductSearchClient: %w", err)
 	}
 	defer c.Close()
 
@@ -41,7 +41,7 @@ func addProductToProductSet(w io.Writer, projectID string, location string, prod
 	}
 
 	if err = c.AddProductToProductSet(ctx, req); err != nil {
-		return fmt.Errorf("NewProductSearchClient: %v", err)
+		return fmt.Errorf("NewProductSearchClient: %w", err)
 	}
 
 	fmt.Fprintf(w, "Product added to product set.\n")
