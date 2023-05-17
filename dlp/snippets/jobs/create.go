@@ -13,7 +13,7 @@
 // limitations under the License.
 package jobs
 
-// [START dlp_create_jobs]
+// [START dlp_create_job]
 import (
 	"context"
 	"fmt"
@@ -101,4 +101,4 @@ func createJob(w io.Writer, projectID, gcsPath string, infoTypeNames []string) e
 	return nil
 }
 
-// [END dlp_create_jobs]
+// [END dlp_create_job]
