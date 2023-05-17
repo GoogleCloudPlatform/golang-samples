@@ -387,6 +387,11 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "Updated data to VenueDetails column\n")
 	out = runSample(t, queryWithJsonParameter, dbName, "failed to query with json parameter")
 	assertContains(t, out, "The venue details for venue id 19")
+
+	out = runSampleWithContext(ctx, t, createSequence, dbName, "failed to create table with bit reverse sequence enabled")
+	assertContains(t, out, "Created Customers table with bit reverse sequence keys\n")
+	assertContains(t, out, "Inserted customer record with CustomerId")
+	assertContains(t, out, "record(s) inserted")
 }
 
 func TestBackupSample(t *testing.T) {
