@@ -32,7 +32,7 @@ func listProductsInProductSet(w io.Writer, projectID string, location string, pr
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewProductSearchClient: %v", err)
+		return fmt.Errorf("NewProductSearchClient: %w", err)
 	}
 	defer c.Close()
 
@@ -47,7 +47,7 @@ func listProductsInProductSet(w io.Writer, projectID string, location string, pr
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("Next: %v", err)
+			return fmt.Errorf("Next: %w", err)
 		}
 
 		fmt.Fprintf(w, "Product name: %s\n", resp.Name)
