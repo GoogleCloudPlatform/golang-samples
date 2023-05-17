@@ -41,6 +41,7 @@ func deleteMuteRule(w io.Writer, parent string, muteConfigId string) error {
 	if err != nil {
 		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
+	defer client.Close()
 
 	req := &securitycenterpb.DeleteMuteConfigRequest{
 		Name: fmt.Sprintf("%s/muteConfigs/%s", parent, muteConfigId),

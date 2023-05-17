@@ -40,6 +40,7 @@ func setMute(w io.Writer, findingPath string) error {
 	if err != nil {
 		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
+	defer client.Close()
 
 	req := &securitycenterpb.SetMuteRequest{
 		Name: findingPath,

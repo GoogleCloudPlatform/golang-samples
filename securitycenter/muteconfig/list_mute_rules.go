@@ -40,6 +40,7 @@ func listMuteRules(w io.Writer, parent string) error {
 	if err != nil {
 		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
+	defer client.Close()
 
 	req := &securitycenterpb.ListMuteConfigsRequest{Parent: parent}
 

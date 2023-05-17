@@ -41,6 +41,7 @@ func createMuteRule(w io.Writer, parent string, muteConfigId string) error {
 	if err != nil {
 		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
+	defer client.Close()
 
 	muteConfig := &securitycenterpb.MuteConfig{
 		Description: "Mute low-medium IAM grants excluding 'compute' ",

@@ -40,6 +40,7 @@ func updateMuteRule(w io.Writer, muteConfigName string) error {
 	if err != nil {
 		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
+	defer client.Close()
 
 	updateMuteConfig := &securitycenterpb.MuteConfig{
 		Name:        muteConfigName,

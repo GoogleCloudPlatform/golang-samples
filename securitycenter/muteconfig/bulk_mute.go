@@ -43,6 +43,7 @@ func bulkMute(w io.Writer, parent string, muteRule string) error {
 	if err != nil {
 		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
+	defer client.Close()
 
 	req := &securitycenterpb.BulkMuteFindingsRequest{
 		Parent: parent,
