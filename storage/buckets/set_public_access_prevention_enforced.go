@@ -31,7 +31,7 @@ func setPublicAccessPreventionEnforced(w io.Writer, bucketName string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -43,7 +43,7 @@ func setPublicAccessPreventionEnforced(w io.Writer, bucketName string) error {
 		PublicAccessPrevention: storage.PublicAccessPreventionEnforced,
 	}
 	if _, err := bucket.Update(ctx, setPublicAccessPrevention); err != nil {
-		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Update: %w", bucketName, err)
 	}
 	fmt.Fprintf(w, "Public access prevention is 'enforced' for %v", bucketName)
 	return nil

@@ -45,12 +45,12 @@ func createInstance(w io.Writer, projectID, instanceID string) error {
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("could not create instance %s: %v", fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID), err)
+		return fmt.Errorf("could not create instance %s: %w", fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID), err)
 	}
 	// Wait for the instance creation to finish.
 	i, err := op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("waiting for instance creation to finish failed: %v", err)
+		return fmt.Errorf("waiting for instance creation to finish failed: %w", err)
 	}
 	// The instance may not be ready to serve yet.
 	if i.State != instancepb.Instance_READY {

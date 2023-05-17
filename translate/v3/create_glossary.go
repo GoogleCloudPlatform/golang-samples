@@ -35,7 +35,7 @@ func createGlossary(w io.Writer, projectID string, location string, glossaryID s
 	ctx := context.Background()
 	client, err := translate.NewTranslationClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewTranslationClient: %v", err)
+		return fmt.Errorf("NewTranslationClient: %w", err)
 	}
 	defer client.Close()
 
@@ -61,13 +61,13 @@ func createGlossary(w io.Writer, projectID string, location string, glossaryID s
 	// The CreateGlossary operation is async.
 	op, err := client.CreateGlossary(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateGlossary: %v", err)
+		return fmt.Errorf("CreateGlossary: %w", err)
 	}
 	fmt.Fprintf(w, "Processing operation name: %q\n", op.Name())
 
 	resp, err := op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("Wait: %v", err)
+		return fmt.Errorf("Wait: %w", err)
 	}
 
 	fmt.Fprintf(w, "Created: %v\n", resp.GetName())

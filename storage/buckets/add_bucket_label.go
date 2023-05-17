@@ -32,7 +32,7 @@ func addBucketLabel(w io.Writer, bucketName, labelName, labelValue string) error
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -43,7 +43,7 @@ func addBucketLabel(w io.Writer, bucketName, labelName, labelValue string) error
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{}
 	bucketAttrsToUpdate.SetLabel(labelName, labelValue)
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
-		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Update: %w", bucketName, err)
 	}
 	fmt.Fprintf(w, "Added label %q with value %q to bucket %v\n", labelName, labelValue, bucketName)
 	return nil
