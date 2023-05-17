@@ -85,7 +85,7 @@ func main() {
 
 	case "delete":
 		log.Print("Deleting log.")
-		if err := deleteLog(adminClient); err != nil {
+		if err := deleteLog(projID); err != nil {
 			log.Fatalf("Could not delete log: %v", err)
 		}
 
@@ -121,17 +121,23 @@ func structuredWrite(client *logging.Client) {
 	// [END write_structured_log_entry]
 }
 
-func deleteLog(adminClient *logadmin.Client) error {
+// [START logging_delete_log]
+func deleteLog(projectID string) error {
 	ctx := context.Background()
+	adminClient, err := logadmin.NewClient(ctx, projectID)
+	if err != nil {
+		log.Fatalf("Failed to create logadmin client: %v", err)
+	}
+	defer adminClient.Close()
 
-	// [START logging_delete_log]
 	const name = "log-example"
 	if err := adminClient.DeleteLog(ctx, name); err != nil {
 		return err
 	}
-	// [END logging_delete_log]
 	return nil
 }
+
+// [END logging_delete_log]
 
 func getEntries(adminClient *logadmin.Client, projID string) ([]*logging.Entry, error) {
 	ctx := context.Background()
