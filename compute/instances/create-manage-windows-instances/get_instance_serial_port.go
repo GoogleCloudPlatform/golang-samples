@@ -33,7 +33,7 @@ func getInstanceSerialPort(w io.Writer, projectID, zone, instanceName string) er
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstancesRESTClient: %v", err)
+		return fmt.Errorf("NewInstancesRESTClient: %w", err)
 	}
 	defer instancesClient.Close()
 
@@ -45,7 +45,7 @@ func getInstanceSerialPort(w io.Writer, projectID, zone, instanceName string) er
 
 	output, err := instancesClient.GetSerialPortOutput(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to get serial port output: %v", err)
+		return fmt.Errorf("unable to get serial port output: %w", err)
 	}
 
 	fmt.Fprintf(w, "Output from instance serial port: %s", output.GetContents())

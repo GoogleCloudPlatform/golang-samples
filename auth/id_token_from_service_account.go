@@ -43,12 +43,12 @@ func getIdTokenFromServiceAccount(w io.Writer, jsonCredentialsPath, url string) 
 
 	data, err := ioutil.ReadFile(jsonCredentialsPath)
 	if err != nil {
-		return fmt.Errorf("failed to read json file: %v", err)
+		return fmt.Errorf("failed to read json file: %w", err)
 	}
 
 	ts, err := idtoken.NewTokenSource(ctx, url, option.WithCredentialsJSON(data))
 	if err != nil {
-		return fmt.Errorf("failed to create NewTokenSource: %v", err)
+		return fmt.Errorf("failed to create NewTokenSource: %w", err)
 	}
 
 	// Get the ID token.
@@ -56,7 +56,7 @@ func getIdTokenFromServiceAccount(w io.Writer, jsonCredentialsPath, url string) 
 	// to the target audience.
 	_, err = ts.Token()
 	if err != nil {
-		return fmt.Errorf("failed to receive token: %v", err)
+		return fmt.Errorf("failed to receive token: %w", err)
 	}
 	fmt.Fprintf(w, "Generated ID token. \n")
 

@@ -34,7 +34,7 @@ func getBucketMetadata(w io.Writer, bucketName string) (*storage.BucketAttrs, er
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("storage.NewClient: %v", err)
+		return nil, fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -42,7 +42,7 @@ func getBucketMetadata(w io.Writer, bucketName string) (*storage.BucketAttrs, er
 	defer cancel()
 	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Bucket(%q).Attrs: %v", bucketName, err)
+		return nil, fmt.Errorf("Bucket(%q).Attrs: %w", bucketName, err)
 	}
 	fmt.Fprintf(w, "BucketName: %v\n", attrs.Name)
 	fmt.Fprintf(w, "Location: %v\n", attrs.Location)

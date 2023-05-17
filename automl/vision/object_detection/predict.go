@@ -37,18 +37,18 @@ func visionObjectDetectionPredict(w io.Writer, projectID string, location string
 	ctx := context.Background()
 	client, err := automl.NewPredictionClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewPredictionClient: %v", err)
+		return fmt.Errorf("NewPredictionClient: %w", err)
 	}
 	defer client.Close()
 
 	file, err := os.Open(filePath)
 	if err != nil {
-		return fmt.Errorf("Open: %v", err)
+		return fmt.Errorf("Open: %w", err)
 	}
 	defer file.Close()
 	bytes, err := ioutil.ReadAll(file)
 	if err != nil {
-		return fmt.Errorf("ReadAll: %v", err)
+		return fmt.Errorf("ReadAll: %w", err)
 	}
 
 	req := &automlpb.PredictRequest{
@@ -71,7 +71,7 @@ func visionObjectDetectionPredict(w io.Writer, projectID string, location string
 
 	resp, err := client.Predict(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Predict: %v", err)
+		return fmt.Errorf("Predict: %w", err)
 	}
 
 	for _, payload := range resp.GetPayload() {

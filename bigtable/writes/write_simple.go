@@ -35,7 +35,7 @@ func writeSimple(w io.Writer, projectID, instanceID string, tableName string) er
 	ctx := context.Background()
 	client, err := bigtable.NewClient(ctx, projectID, instanceID)
 	if err != nil {
-		return fmt.Errorf("bigtable.NewClient: %v", err)
+		return fmt.Errorf("bigtable.NewClient: %w", err)
 	}
 	defer client.Close()
 	tbl := client.Open(tableName)
@@ -52,7 +52,7 @@ func writeSimple(w io.Writer, projectID, instanceID string, tableName string) er
 
 	rowKey := "phone#4c410523#20190501"
 	if err := tbl.Apply(ctx, rowKey, mut); err != nil {
-		return fmt.Errorf("Apply: %v", err)
+		return fmt.Errorf("Apply: %w", err)
 	}
 
 	fmt.Fprintf(w, "Successfully wrote row: %s\n", rowKey)

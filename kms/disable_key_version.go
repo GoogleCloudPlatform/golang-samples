@@ -33,7 +33,7 @@ func disableKeyVersion(w io.Writer, name string) error {
 	ctx := context.Background()
 	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create kms client: %v", err)
+		return fmt.Errorf("failed to create kms client: %w", err)
 	}
 	defer client.Close()
 
@@ -51,7 +51,7 @@ func disableKeyVersion(w io.Writer, name string) error {
 	// Call the API.
 	result, err := client.UpdateCryptoKeyVersion(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to update key version: %v", err)
+		return fmt.Errorf("failed to update key version: %w", err)
 	}
 	fmt.Fprintf(w, "Disabled key version: %s\n", result)
 	return nil

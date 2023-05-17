@@ -33,7 +33,7 @@ func deleteJob(w io.Writer, projectID, region, jobName string) error {
 	ctx := context.Background()
 	batchClient, err := batch.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer batchClient.Close()
 
@@ -43,7 +43,7 @@ func deleteJob(w io.Writer, projectID, region, jobName string) error {
 
 	response, err := batchClient.DeleteJob(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to delete job: %v", err)
+		return fmt.Errorf("unable to delete job: %w", err)
 	}
 
 	fmt.Fprintf(w, "Job deleted: %v\n", response)

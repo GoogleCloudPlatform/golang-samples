@@ -34,7 +34,7 @@ func removeRotationSchedule(w io.Writer, name string) error {
 	ctx := context.Background()
 	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create kms client: %v", err)
+		return fmt.Errorf("failed to create kms client: %w", err)
 	}
 	defer client.Close()
 
@@ -56,7 +56,7 @@ func removeRotationSchedule(w io.Writer, name string) error {
 	// Call the API.
 	result, err := client.UpdateCryptoKey(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to update key: %v", err)
+		return fmt.Errorf("failed to update key: %w", err)
 	}
 	fmt.Fprintf(w, "Updated key: %s\n", result.Name)
 	return nil

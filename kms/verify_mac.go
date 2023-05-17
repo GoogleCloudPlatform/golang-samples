@@ -34,7 +34,7 @@ func verifyMac(w io.Writer, name string, data, signature []byte) error {
 	ctx := context.Background()
 	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create kms client: %v", err)
+		return fmt.Errorf("failed to create kms client: %w", err)
 	}
 	defer client.Close()
 
@@ -48,7 +48,7 @@ func verifyMac(w io.Writer, name string, data, signature []byte) error {
 	// Verify the signature.
 	result, err := client.MacVerify(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to verify signature: %v", err)
+		return fmt.Errorf("failed to verify signature: %w", err)
 	}
 
 	fmt.Fprintf(w, "Verified: %t", result.Success)
