@@ -21,14 +21,12 @@ import (
 	"os"
 	"time"
 
-	// [START imports]
 	"context"
 
 	"cloud.google.com/go/logging"
 	"cloud.google.com/go/logging/logadmin"
 
 	"google.golang.org/api/iterator"
-	// [END imports]
 )
 
 func main() {
@@ -71,7 +69,7 @@ func main() {
 
 	case "read":
 		log.Print("Fetching and printing log entries.")
-		entries, err := getEntries(adminClient, projID)
+		entries, err := getEntries(projID)
 		if err != nil {
 			log.Fatalf("Could not get entries: %v", err)
 		}
@@ -144,17 +142,22 @@ func deleteLog(projectID string) error {
 
 // [END logging_delete_log]
 
-func getEntries(adminClient *logadmin.Client, projID string) ([]*logging.Entry, error) {
+// [START logging_list_log_entries]
+func getEntries(projectID string) ([]*logging.Entry, error) {
 	ctx := context.Background()
+	adminClient, err := logadmin.NewClient(ctx, projectID)
+	if err != nil {
+		log.Fatalf("Failed to create logadmin client: %v", err)
+	}
+	defer adminClient.Close()
 
-	// [START logging_list_log_entries]
 	var entries []*logging.Entry
 	const name = "log-example"
 	lastHour := time.Now().Add(-1 * time.Hour).Format(time.RFC3339)
 
 	iter := adminClient.Entries(ctx,
 		// Only get entries from the "log-example" log within the last hour.
-		logadmin.Filter(fmt.Sprintf(`logName = "projects/%s/logs/%s" AND timestamp > "%s"`, projID, name, lastHour)),
+		logadmin.Filter(fmt.Sprintf(`logName = "projects/%s/logs/%s" AND timestamp > "%s"`, projectID, name, lastHour)),
 		// Get most recent entries first.
 		logadmin.NewestFirst(),
 	)
@@ -171,8 +174,9 @@ func getEntries(adminClient *logadmin.Client, projID string) ([]*logging.Entry, 
 		entries = append(entries, entry)
 	}
 	return entries, nil
-	// [END logging_list_log_entries]
 }
+
+// [END logging_list_log_entries]
 
 func usage(msg string) {
 	if msg != "" {

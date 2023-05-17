@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/logging"
-	"cloud.google.com/go/logging/logadmin"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
@@ -34,10 +33,6 @@ func TestSimplelog(t *testing.T) {
 	client, err := logging.NewClient(ctx, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("logging.NewClient: %v", err)
-	}
-	adminClient, err := logadmin.NewClient(ctx, tc.ProjectID)
-	if err != nil {
-		t.Fatalf("logadmin.NewClient: %v", err)
 	}
 	defer func() {
 		if err := client.Close(); err != nil {
@@ -61,7 +56,7 @@ func TestSimplelog(t *testing.T) {
 	structuredWrite(tc.ProjectID)
 
 	testutil.Retry(t, 20, 10*time.Second, func(r *testutil.R) {
-		entries, err := getEntries(adminClient, tc.ProjectID)
+		entries, err := getEntries(tc.ProjectID)
 		if err != nil {
 			r.Errorf("getEntries: %v", err)
 			return
