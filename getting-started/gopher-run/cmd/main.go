@@ -195,11 +195,11 @@ func newApp(projectID string) (*app, error) {
 	ctx := context.Background()
 	fsClient, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
-		return nil, fmt.Errorf("firestore.NewClient: %v", err)
+		return nil, fmt.Errorf("firestore.NewClient: %w", err)
 	}
 	csClient, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("storage.NewClient: %v", err)
+		return nil, fmt.Errorf("storage.NewClient: %w", err)
 	}
 	bName := os.Getenv("GOPHER_RUN_BUCKET")
 	if bName == "" {
