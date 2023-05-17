@@ -35,7 +35,7 @@ func languageSentimentAnalysisPredict(w io.Writer, projectID string, location st
 	ctx := context.Background()
 	client, err := automl.NewPredictionClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewPredictionClient: %v", err)
+		return fmt.Errorf("NewPredictionClient: %w", err)
 	}
 	defer client.Close()
 
@@ -53,7 +53,7 @@ func languageSentimentAnalysisPredict(w io.Writer, projectID string, location st
 
 	resp, err := client.Predict(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Predict: %v", err)
+		return fmt.Errorf("Predict: %w", err)
 	}
 
 	for _, payload := range resp.GetPayload() {
