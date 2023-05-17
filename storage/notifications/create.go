@@ -32,7 +32,7 @@ func createBucketNotification(w io.Writer, projectID, bucketName, topic string) 
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -44,7 +44,7 @@ func createBucketNotification(w io.Writer, projectID, bucketName, topic string) 
 
 	createdNotification, err := client.Bucket(bucketName).AddNotification(ctx, &notification)
 	if err != nil {
-		return fmt.Errorf("Bucket.AddNotification: %v", err)
+		return fmt.Errorf("Bucket.AddNotification: %w", err)
 	}
 	fmt.Fprintf(w, "Successfully created notification with ID %s for bucket %s.\n", createdNotification.ID, bucketName)
 	return nil

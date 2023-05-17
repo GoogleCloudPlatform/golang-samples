@@ -30,7 +30,7 @@ func disableDefaultEventBasedHold(w io.Writer, bucketName string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -42,7 +42,7 @@ func disableDefaultEventBasedHold(w io.Writer, bucketName string) error {
 		DefaultEventBasedHold: false,
 	}
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
-		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Update: %w", bucketName, err)
 	}
 	fmt.Fprintf(w, "Default event-based hold was disabled for %v\n", bucketName)
 	return nil

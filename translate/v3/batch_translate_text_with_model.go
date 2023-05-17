@@ -38,7 +38,7 @@ func batchTranslateTextWithModel(w io.Writer, projectID string, location string,
 	ctx := context.Background()
 	client, err := translate.NewTranslationClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewTranslationClient: %v", err)
+		return fmt.Errorf("NewTranslationClient: %w", err)
 	}
 	defer client.Close()
 
@@ -70,13 +70,13 @@ func batchTranslateTextWithModel(w io.Writer, projectID string, location string,
 	// The BatchTranslateText operation is async.
 	op, err := client.BatchTranslateText(ctx, req)
 	if err != nil {
-		return fmt.Errorf("BatchTranslateText: %v", err)
+		return fmt.Errorf("BatchTranslateText: %w", err)
 	}
 	fmt.Fprintf(w, "Processing operation name: %q\n", op.Name())
 
 	resp, err := op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("Wait: %v", err)
+		return fmt.Errorf("Wait: %w", err)
 	}
 
 	fmt.Fprintf(w, "Total characters: %v\n", resp.GetTotalCharacters())
