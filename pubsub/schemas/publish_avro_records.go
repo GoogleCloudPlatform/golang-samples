@@ -66,7 +66,7 @@ func publishAvroRecords(w io.Writer, projectID, topicID, avscFile string) error 
 			return fmt.Errorf("codec.TextualFromNative err: %w", err)
 		}
 	default:
-		return fmt.Errorf("invalid encoding: %w", encoding)
+		return fmt.Errorf("invalid encoding: %v", encoding)
 	}
 
 	result := t.Publish(ctx, &pubsub.Message{

@@ -61,7 +61,7 @@ func publishProtoMessages(w io.Writer, projectID, topicID string) error {
 			return fmt.Errorf("protojson.Marshal err: %w", err)
 		}
 	default:
-		return fmt.Errorf("invalid encoding: %w", encoding)
+		return fmt.Errorf("invalid encoding: %v", encoding)
 	}
 
 	result := t.Publish(ctx, &pubsub.Message{
