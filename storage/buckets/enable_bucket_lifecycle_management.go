@@ -31,7 +31,7 @@ func enableBucketLifecycleManagement(w io.Writer, bucketName string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -54,7 +54,7 @@ func enableBucketLifecycleManagement(w io.Writer, bucketName string) error {
 
 	attrs, err := bucket.Update(ctx, bucketAttrsToUpdate)
 	if err != nil {
-		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Update: %w", bucketName, err)
 	}
 	fmt.Fprintf(w, "Lifecycle management is enabled for bucket %v\n and the rules are:\n", bucketName)
 	for _, rule := range attrs.Lifecycle.Rules {

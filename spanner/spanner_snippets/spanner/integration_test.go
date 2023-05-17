@@ -1350,12 +1350,12 @@ func cleanupInstanceWithName(instanceName string) error {
 	ctx := context.Background()
 	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("cannot create instance databaseAdmin client: %v", err)
+		return fmt.Errorf("cannot create instance databaseAdmin client: %w", err)
 	}
 	defer instanceAdmin.Close()
 
 	if err := instanceAdmin.DeleteInstance(ctx, &instancepb.DeleteInstanceRequest{Name: instanceName}); err != nil {
-		return fmt.Errorf("failed to delete instance %s (error %v), might need a manual removal",
+		return fmt.Errorf("failed to delete instance %s (error %w), might need a manual removal",
 			instanceName, err)
 	}
 	return nil
@@ -1366,7 +1366,7 @@ func cleanupInstanceConfigs(projectID string) error {
 	ctx := context.Background()
 	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("cannot create instance admin client: %v", err)
+		return fmt.Errorf("cannot create instance admin client: %w", err)
 	}
 	defer instanceAdmin.Close()
 	configIter := instanceAdmin.ListInstanceConfigs(ctx, &instancepb.ListInstanceConfigsRequest{
