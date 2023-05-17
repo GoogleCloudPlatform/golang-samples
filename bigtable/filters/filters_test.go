@@ -532,7 +532,7 @@ Column Family stats_summary
 		t.Run(tt.name, func(t *testing.T) {
 			buf := new(bytes.Buffer)
 			if err = tt.filter(buf, project, instance, tableName); err != nil {
-				t.Errorf("Testing %s: %v", tt.name, err)
+				t.Errorf("Testing %s: %w", tt.name, err)
 			}
 
 			got := buf.String()
@@ -546,7 +546,7 @@ Column Family stats_summary
 	// Test row sample
 	buf := new(bytes.Buffer)
 	if err = filterLimitRowSample(buf, project, instance, tableName); err != nil {
-		t.Errorf("TestFilterLimitRowSample: %v", err)
+		t.Errorf("TestFilterLimitRowSample: %w", err)
 	}
 
 	got := buf.String()
@@ -608,6 +608,6 @@ func writeTestData(err error, ctx context.Context, project string, instance stri
 	muts = append(muts, mut)
 
 	if _, err := tbl.ApplyBulk(ctx, rowKeys, muts); err != nil {
-		t.Errorf("ApplyBulk: %v", err)
+		t.Errorf("ApplyBulk: %w", err)
 	}
 }
