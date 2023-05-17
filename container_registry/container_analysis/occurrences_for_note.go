@@ -33,7 +33,7 @@ func getOccurrencesForNote(w io.Writer, noteID, projectID string) (int, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
-		return -1, fmt.Errorf("NewClient: %v", err)
+		return -1, fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -48,7 +48,7 @@ func getOccurrencesForNote(w io.Writer, noteID, projectID string) (int, error) {
 			break
 		}
 		if err != nil {
-			return -1, fmt.Errorf("occurrence iteration error: %v", err)
+			return -1, fmt.Errorf("occurrence iteration error: %w", err)
 		}
 		// Write custom code to process each Occurrence here.
 		fmt.Fprintln(w, occ)
