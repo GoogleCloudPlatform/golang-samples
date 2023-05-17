@@ -3,10 +3,10 @@ module github.com/GoogleCloudPlatform/functions/functionsv2/firebase/hellofirest
 go 1.20
 
 require (
-	github.com/GoogleCloudPlatform/functions-framework-go v1.6.1
-	github.com/cloudevents/sdk-go/v2 v2.6.1
-	github.com/googleapis/google-cloudevents-go v0.3.0
-	google.golang.org/protobuf v1.28.1
+	github.com/GoogleCloudPlatform/functions-framework-go v1.7.3
+	github.com/cloudevents/sdk-go/v2 v2.14.0
+	github.com/googleapis/google-cloudevents-go v0.4.0
+	google.golang.org/protobuf v1.30.0
 )
 
 require (
