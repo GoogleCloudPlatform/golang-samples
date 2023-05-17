@@ -31,12 +31,12 @@ func basicLocationSearch(w io.Writer, projectID, companyName, location string, d
 
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %v", err)
+		return nil, fmt.Errorf("google.DefaultClient: %w", err)
 	}
 	// Create the jobs service client.
 	service, err := talent.New(client)
 	if err != nil {
-		return nil, fmt.Errorf("talent.New: %v", err)
+		return nil, fmt.Errorf("talent.New: %w", err)
 	}
 
 	jobQuery := &talent.JobQuery{
@@ -71,7 +71,7 @@ func basicLocationSearch(w io.Writer, projectID, companyName, location string, d
 	}
 	resp, err := service.Projects.Jobs.Search(parent, req).Do()
 	if err != nil {
-		return nil, fmt.Errorf("failed to search for jobs with basic location %s within %f miles: %v", location, distance, err)
+		return nil, fmt.Errorf("failed to search for jobs with basic location %s within %f miles: %w", location, distance, err)
 	}
 
 	fmt.Fprintln(w, "Jobs:")
@@ -92,12 +92,12 @@ func cityLocationSearch(w io.Writer, projectID, companyName, location string) (*
 
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %v", err)
+		return nil, fmt.Errorf("google.DefaultClient: %w", err)
 	}
 	// Create the jobs service client.
 	service, err := talent.New(client)
 	if err != nil {
-		return nil, fmt.Errorf("talent.New: %v", err)
+		return nil, fmt.Errorf("talent.New: %w", err)
 	}
 
 	jobQuery := &talent.JobQuery{
@@ -131,7 +131,7 @@ func cityLocationSearch(w io.Writer, projectID, companyName, location string) (*
 	}
 	resp, err := service.Projects.Jobs.Search(parent, req).Do()
 	if err != nil {
-		return nil, fmt.Errorf("failed to search for jobs with city location %s: %v", location, err)
+		return nil, fmt.Errorf("failed to search for jobs with city location %s: %w", location, err)
 	}
 
 	fmt.Fprintln(w, "Jobs:")
@@ -153,12 +153,12 @@ func broadeningLocationSearch(w io.Writer, projectID, companyName, location stri
 
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %v", err)
+		return nil, fmt.Errorf("google.DefaultClient: %w", err)
 	}
 	// Create the jobs service client.
 	service, err := talent.New(client)
 	if err != nil {
-		return nil, fmt.Errorf("talent.New: %v", err)
+		return nil, fmt.Errorf("talent.New: %w", err)
 	}
 
 	jobQuery := &talent.JobQuery{
@@ -193,7 +193,7 @@ func broadeningLocationSearch(w io.Writer, projectID, companyName, location stri
 	}
 	resp, err := service.Projects.Jobs.Search(parent, req).Do()
 	if err != nil {
-		return nil, fmt.Errorf("failed to search for jobs with broadening location %v: %v", location, err)
+		return nil, fmt.Errorf("failed to search for jobs with broadening location %v: %w", location, err)
 	}
 
 	fmt.Fprintln(w, "Jobs:")
@@ -215,12 +215,12 @@ func keywordLocationSearch(w io.Writer, projectID, companyName, location string,
 
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %v", err)
+		return nil, fmt.Errorf("google.DefaultClient: %w", err)
 	}
 	// Create the jobs service client.
 	service, err := talent.New(client)
 	if err != nil {
-		return nil, fmt.Errorf("talent.New: %v", err)
+		return nil, fmt.Errorf("talent.New: %w", err)
 	}
 
 	jobQuery := &talent.JobQuery{
@@ -256,7 +256,7 @@ func keywordLocationSearch(w io.Writer, projectID, companyName, location string,
 	}
 	resp, err := service.Projects.Jobs.Search(parent, req).Do()
 	if err != nil {
-		return nil, fmt.Errorf("failed to search for jobs with keyword %q in location %v within %f miles: %v", keyword, location, distance, err)
+		return nil, fmt.Errorf("failed to search for jobs with keyword %q in location %v within %f miles: %w", keyword, location, distance, err)
 	}
 
 	fmt.Fprintln(w, "Jobs:")
@@ -278,12 +278,12 @@ func multiLocationsSearch(w io.Writer, projectID, companyName, location, locatio
 
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %v", err)
+		return nil, fmt.Errorf("google.DefaultClient: %w", err)
 	}
 	// Create the jobs service client.
 	service, err := talent.New(client)
 	if err != nil {
-		return nil, fmt.Errorf("talent.New: %v", err)
+		return nil, fmt.Errorf("talent.New: %w", err)
 	}
 
 	jobQuery := &talent.JobQuery{
@@ -322,7 +322,7 @@ func multiLocationsSearch(w io.Writer, projectID, companyName, location, locatio
 	}
 	resp, err := service.Projects.Jobs.Search(parent, req).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Failed to search for jobs with multi locations %s and %s within %f miles, Err: %v", location, location2, distance, err)
+		return nil, fmt.Errorf("Failed to search for jobs with multi locations %s and %s within %f miles, Err: %w", location, location2, distance, err)
 	}
 
 	fmt.Fprintln(w, "Jobs:")
