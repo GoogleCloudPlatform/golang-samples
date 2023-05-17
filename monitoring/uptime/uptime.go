@@ -36,7 +36,7 @@ func createGet(w io.Writer, projectID string) (*monitoringpb.UptimeCheckConfig, 
 	ctx := context.Background()
 	client, err := monitoring.NewUptimeCheckClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("NewUptimeCheckClient: %v", err)
+		return nil, fmt.Errorf("NewUptimeCheckClient: %w", err)
 	}
 	defer client.Close()
 	req := &monitoringpb.CreateUptimeCheckConfigRequest{
@@ -64,7 +64,7 @@ func createGet(w io.Writer, projectID string) (*monitoringpb.UptimeCheckConfig, 
 	}
 	config, err := client.CreateUptimeCheckConfig(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("CreateUptimeCheckConfig GET: %v", err)
+		return nil, fmt.Errorf("CreateUptimeCheckConfig GET: %w", err)
 	}
 	fmt.Fprintf(w, "Successfully created GET uptime check %q\n", config.GetDisplayName())
 	return config, nil
@@ -75,7 +75,7 @@ func createPost(w io.Writer, projectID string) (*monitoringpb.UptimeCheckConfig,
 	ctx := context.Background()
 	client, err := monitoring.NewUptimeCheckClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("NewUptimeCheckClient: %v", err)
+		return nil, fmt.Errorf("NewUptimeCheckClient: %w", err)
 	}
 	defer client.Close()
 	req := &monitoringpb.CreateUptimeCheckConfigRequest{
@@ -105,7 +105,7 @@ func createPost(w io.Writer, projectID string) (*monitoringpb.UptimeCheckConfig,
 	}
 	config, err := client.CreateUptimeCheckConfig(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("CreateUptimeCheckConfig POST: %v", err)
+		return nil, fmt.Errorf("CreateUptimeCheckConfig POST: %w", err)
 	}
 	fmt.Fprintf(w, "Successfully created POST uptime check %q\n", config.GetDisplayName())
 	return config, nil
@@ -120,7 +120,7 @@ func list(w io.Writer, projectID string) error {
 	ctx := context.Background()
 	client, err := monitoring.NewUptimeCheckClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewUptimeCheckClient: %v", err)
+		return fmt.Errorf("NewUptimeCheckClient: %w", err)
 	}
 	defer client.Close()
 	req := &monitoringpb.ListUptimeCheckConfigsRequest{
@@ -133,7 +133,7 @@ func list(w io.Writer, projectID string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("ListUptimeCheckConfigs: %v", err)
+			return fmt.Errorf("ListUptimeCheckConfigs: %w", err)
 		}
 		fmt.Fprintln(w, config)
 	}
@@ -150,7 +150,7 @@ func listIPs(w io.Writer) error {
 	ctx := context.Background()
 	client, err := monitoring.NewUptimeCheckClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewUptimeCheckClient: %v", err)
+		return fmt.Errorf("NewUptimeCheckClient: %w", err)
 	}
 	defer client.Close()
 	req := &monitoringpb.ListUptimeCheckIpsRequest{}
@@ -161,7 +161,7 @@ func listIPs(w io.Writer) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("ListUptimeCheckIps: %v", err)
+			return fmt.Errorf("ListUptimeCheckIps: %w", err)
 		}
 		fmt.Fprintln(w, config)
 	}
@@ -179,7 +179,7 @@ func get(w io.Writer, resourceName string) (*monitoringpb.UptimeCheckConfig, err
 	ctx := context.Background()
 	client, err := monitoring.NewUptimeCheckClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("NewUptimeCheckClient: %v", err)
+		return nil, fmt.Errorf("NewUptimeCheckClient: %w", err)
 	}
 	defer client.Close()
 	req := &monitoringpb.GetUptimeCheckConfigRequest{
@@ -187,7 +187,7 @@ func get(w io.Writer, resourceName string) (*monitoringpb.UptimeCheckConfig, err
 	}
 	config, err := client.GetUptimeCheckConfig(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("GetUptimeCheckConfig: %v", err)
+		return nil, fmt.Errorf("GetUptimeCheckConfig: %w", err)
 	}
 	fmt.Fprintf(w, "Config: %v", config)
 	return config, nil
@@ -203,7 +203,7 @@ func update(w io.Writer, resourceName, displayName, httpCheckPath string) (*moni
 	ctx := context.Background()
 	client, err := monitoring.NewUptimeCheckClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("NewUptimeCheckClient: %v", err)
+		return nil, fmt.Errorf("NewUptimeCheckClient: %w", err)
 	}
 	defer client.Close()
 	getReq := &monitoringpb.GetUptimeCheckConfigRequest{
@@ -211,7 +211,7 @@ func update(w io.Writer, resourceName, displayName, httpCheckPath string) (*moni
 	}
 	config, err := client.GetUptimeCheckConfig(ctx, getReq)
 	if err != nil {
-		return nil, fmt.Errorf("GetUptimeCheckConfig: %v", err)
+		return nil, fmt.Errorf("GetUptimeCheckConfig: %w", err)
 	}
 	config.DisplayName = displayName
 	config.GetHttpCheck().Path = httpCheckPath
@@ -223,7 +223,7 @@ func update(w io.Writer, resourceName, displayName, httpCheckPath string) (*moni
 	}
 	config, err = client.UpdateUptimeCheckConfig(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("UpdateUptimeCheckConfig: %v", err)
+		return nil, fmt.Errorf("UpdateUptimeCheckConfig: %w", err)
 	}
 	fmt.Fprintf(w, "Successfully updated %v", resourceName)
 	return config, nil
@@ -239,14 +239,14 @@ func delete(w io.Writer, resourceName string) error {
 	ctx := context.Background()
 	client, err := monitoring.NewUptimeCheckClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewUptimeCheckClient: %v", err)
+		return fmt.Errorf("NewUptimeCheckClient: %w", err)
 	}
 	defer client.Close()
 	req := &monitoringpb.DeleteUptimeCheckConfigRequest{
 		Name: resourceName,
 	}
 	if err := client.DeleteUptimeCheckConfig(ctx, req); err != nil {
-		return fmt.Errorf("DeleteUptimeCheckConfig: %v", err)
+		return fmt.Errorf("DeleteUptimeCheckConfig: %w", err)
 	}
 	fmt.Fprintf(w, "Successfully deleted %q", resourceName)
 	return nil
