@@ -34,7 +34,7 @@ func enableAssetDiscovery(w io.Writer, orgID string) error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %v", err)
+		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -50,7 +50,7 @@ func enableAssetDiscovery(w io.Writer, orgID string) error {
 	}
 	settings, err := client.UpdateOrganizationSettings(ctx, req)
 	if err != nil {
-		return fmt.Errorf("UpdateOrganizationSettings: %v", err)
+		return fmt.Errorf("UpdateOrganizationSettings: %w", err)
 	}
 	fmt.Fprintf(w, "Updated Settings for: %s\n", settings.Name)
 	fmt.Fprintf(w, "Asset discovery on? %v\n", settings.EnableAssetDiscovery)

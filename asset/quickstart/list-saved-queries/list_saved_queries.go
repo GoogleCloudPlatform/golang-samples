@@ -34,18 +34,18 @@ func listSavedQueries(w io.Writer, projectID string) error {
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("asset.NewClient: %v", err)
+		return fmt.Errorf("asset.NewClient: %w", err)
 	}
 	defer client.Close()
 
 	cloudResourceManagerClient, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("cloudresourcemanager.NewService: %v", err)
+		return fmt.Errorf("cloudresourcemanager.NewService: %w", err)
 	}
 
 	project, err := cloudResourceManagerClient.Projects.Get(projectID).Do()
 	if err != nil {
-		return fmt.Errorf("cloudResourceManagerClient.Projects.Get.Do: %v", err)
+		return fmt.Errorf("cloudResourceManagerClient.Projects.Get.Do: %w", err)
 	}
 	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
 	// query name is defined as 'projects/PROJECT_NUMBER'/savedQueries/SAVED_QUERY_ID.
@@ -60,7 +60,7 @@ func listSavedQueries(w io.Writer, projectID string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("error getting saved queries:%v", err)
+			return fmt.Errorf("error getting saved queries:%w", err)
 		}
 		fmt.Fprintf(w, "Query Name: %s\n", response.Name)
 		fmt.Fprintf(w, "Query Description:%s\n", response.Description)

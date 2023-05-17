@@ -33,7 +33,7 @@ func createDatabaseWithRetentionPeriod(ctx context.Context, w io.Writer, db stri
 
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("createDatabaseWithRetentionPeriod.NewDatabaseAdminClient: %v", err)
+		return fmt.Errorf("createDatabaseWithRetentionPeriod.NewDatabaseAdminClient: %w", err)
 	}
 	defer adminClient.Close()
 
@@ -64,10 +64,10 @@ func createDatabaseWithRetentionPeriod(ctx context.Context, w io.Writer, db stri
 	}
 	op, err := adminClient.CreateDatabase(ctx, &req)
 	if err != nil {
-		return fmt.Errorf("createDatabaseWithRetentionPeriod.CreateDatabase: %v", err)
+		return fmt.Errorf("createDatabaseWithRetentionPeriod.CreateDatabase: %w", err)
 	}
 	if _, err := op.Wait(ctx); err != nil {
-		return fmt.Errorf("createDatabaseWithRetentionPeriod.Wait: %v", err)
+		return fmt.Errorf("createDatabaseWithRetentionPeriod.Wait: %w", err)
 	}
 	fmt.Fprintf(w, "Created database [%s] with version retention period %q\n", db, retentionPeriod)
 	return nil

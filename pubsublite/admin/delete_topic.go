@@ -33,14 +33,14 @@ func deleteTopic(w io.Writer, projectID, region, location, topicID string) error
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
-		return fmt.Errorf("pubsublite.NewAdminClient: %v", err)
+		return fmt.Errorf("pubsublite.NewAdminClient: %w", err)
 	}
 	defer client.Close()
 
 	topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, location, topicID)
 	err = client.DeleteTopic(ctx, topicPath)
 	if err != nil {
-		return fmt.Errorf("client.DeleteTopic got err: %v", err)
+		return fmt.Errorf("client.DeleteTopic got err: %w", err)
 	}
 	fmt.Fprint(w, "Deleted topic\n")
 	return nil

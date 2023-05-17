@@ -33,7 +33,7 @@ func createHTTPTask(projectID, locationID, queueID, url, message string) (*tasks
 	ctx := context.Background()
 	client, err := cloudtasks.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("NewClient: %v", err)
+		return nil, fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -60,7 +60,7 @@ func createHTTPTask(projectID, locationID, queueID, url, message string) (*tasks
 
 	createdTask, err := client.CreateTask(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("cloudtasks.CreateTask: %v", err)
+		return nil, fmt.Errorf("cloudtasks.CreateTask: %w", err)
 	}
 
 	return createdTask, nil
