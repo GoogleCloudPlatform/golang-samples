@@ -483,7 +483,9 @@ func TestInspectWithCustomRegex(t *testing.T) {
 
 func TestInspectImageFile(t *testing.T) {
 	tc := testutil.SystemTest(t)
+
 	var buf bytes.Buffer
+
 	pathToImage := "testdata/test.png"
 
 	if err := inspectImageFile(&buf, tc.ProjectID, pathToImage); err != nil {
