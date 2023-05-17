@@ -29,7 +29,7 @@ func testPermissions(w io.Writer, projectID, topicID string) ([]string, error) {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return nil, fmt.Errorf("pubsub.NewClient: %v", err)
+		return nil, fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 
 	topic := client.Topic(topicID)
@@ -38,7 +38,7 @@ func testPermissions(w io.Writer, projectID, topicID string) ([]string, error) {
 		"pubsub.topics.update",
 	})
 	if err != nil {
-		return nil, fmt.Errorf("TestPermissions: %v", err)
+		return nil, fmt.Errorf("TestPermissions: %w", err)
 	}
 	for _, perm := range perms {
 		fmt.Fprintf(w, "Allowed: %v\n", perm)
