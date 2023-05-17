@@ -54,7 +54,7 @@ func setup(t *testing.T, projectID string) {
 
 	sc, err := storage.NewClient(ctx)
 	if err != nil {
-		t.Errorf("storage.NewClient: %v", err)
+		t.Errorf("storage.NewClient: %w", err)
 	}
 
 	testutil.CleanBucket(ctx, t, projectID, bktName)
@@ -66,13 +66,13 @@ func setup(t *testing.T, projectID string) {
 
 	if _, err := fmt.Fprintf(w, code); err != nil {
 		if err2 := w.Close(); err != nil {
-			t.Errorf("Error writing to file and closing it: %v", err2)
+			t.Errorf("Error writing to file and closing it: %w", err2)
 		}
-		t.Errorf("Error writing to file: %v", err)
+		t.Errorf("Error writing to file: %w", err)
 	}
 
 	if err := w.Close(); err != nil {
-		t.Errorf("Error closing file: %v", err)
+		t.Errorf("Error closing file: %w", err)
 	}
 
 	// Opportunistically delete colliding cluster name.  Ignore errors.
@@ -84,15 +84,15 @@ func teardown(t *testing.T, projectID string) {
 
 	sc, err := storage.NewClient(ctx)
 	if err != nil {
-		t.Errorf("storage.NewClient: %v", err)
+		t.Errorf("storage.NewClient: %w", err)
 	}
 
 	if err := sc.Bucket(bktName).Object(jobFName).Delete(ctx); err != nil {
-		t.Errorf("Error deleting object: %v", err)
+		t.Errorf("Error deleting object: %w", err)
 	}
 
 	if err := sc.Bucket(bktName).Delete(ctx); err != nil {
-		t.Errorf("Error deleting bucket: %v", err)
+		t.Errorf("Error deleting bucket: %w", err)
 	}
 
 	// Post-hoc cleanup, ignore errors.
@@ -103,17 +103,17 @@ func deleteCluster(ctx context.Context, projectID, region, clusterName string) e
 	endpoint := fmt.Sprintf("%s-dataproc.googleapis.com:443", region)
 	client, err := dataproc.NewClusterControllerClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
-		return fmt.Errorf("dataproc.NewClusterControllerClient: %v", err)
+		return fmt.Errorf("dataproc.NewClusterControllerClient: %w", err)
 	}
 
 	dReq := &dataprocpb.DeleteClusterRequest{ProjectId: projectID, Region: region, ClusterName: clusterName}
 	op, err := client.DeleteCluster(ctx, dReq)
 	if err != nil {
-		return fmt.Errorf("DeleteCluster: %v", err)
+		return fmt.Errorf("DeleteCluster: %w", err)
 	}
 
 	if err := op.Wait(ctx); err != nil {
-		return fmt.Errorf("DeleteCluster.Wait: %v", err)
+		return fmt.Errorf("DeleteCluster.Wait: %w", err)
 	}
 	return nil
 }
@@ -139,7 +139,7 @@ func TestQuickstart(t *testing.T) {
 		if err != nil {
 			r.Errorf("stdout: %v", string(stdOut))
 			r.Errorf("stderr: %v", string(stdErr))
-			r.Errorf("execution failed: %v", err)
+			r.Errorf("execution failed: %w", err)
 			// We may have created the cluster in the failed invocation; try deleting.
 			deleteCluster(context.Background(), tc.ProjectID, region, clusterName)
 			return
