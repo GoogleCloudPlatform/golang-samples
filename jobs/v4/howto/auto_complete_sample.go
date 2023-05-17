@@ -32,7 +32,7 @@ func jobTitleAutocomplete(w io.Writer, projectID, query string) (*talentpb.Compl
 	// Initialize a completionService client.
 	c, err := talent.NewCompletionClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("talent.NewCompletionClient: %v", err)
+		return nil, fmt.Errorf("talent.NewCompletionClient: %w", err)
 	}
 	defer c.Close()
 
@@ -48,7 +48,7 @@ func jobTitleAutocomplete(w io.Writer, projectID, query string) (*talentpb.Compl
 
 	resp, err := c.CompleteQuery(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("CompleteQuery(%s): %v", query, err)
+		return nil, fmt.Errorf("CompleteQuery(%s): %w", query, err)
 	}
 
 	fmt.Fprintf(w, "Auto complete results:")

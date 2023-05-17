@@ -31,7 +31,7 @@ func createJob(w io.Writer, projectID, companyID, requisitionID, title, URI, des
 	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("talent.NewJobClient: %v", err)
+		return nil, fmt.Errorf("talent.NewJobClient: %w", err)
 	}
 	defer c.Close()
 
@@ -55,7 +55,7 @@ func createJob(w io.Writer, projectID, companyID, requisitionID, title, URI, des
 
 	resp, err := c.CreateJob(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("CreateJob: %v", err)
+		return nil, fmt.Errorf("CreateJob: %w", err)
 	}
 
 	fmt.Fprintf(w, "Created job: %q\n", resp.GetName())
