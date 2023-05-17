@@ -36,7 +36,7 @@ func createPubsubExportSubscription(w io.Writer, projectID, region, location, to
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
-		return fmt.Errorf("pubsublite.NewAdminClient: %v", err)
+		return fmt.Errorf("pubsublite.NewAdminClient: %w", err)
 	}
 	defer client.Close()
 
@@ -57,7 +57,7 @@ func createPubsubExportSubscription(w io.Writer, projectID, region, location, to
 		},
 	}, targetLocation)
 	if err != nil {
-		return fmt.Errorf("client.CreateSubscription got err: %v", err)
+		return fmt.Errorf("client.CreateSubscription got err: %w", err)
 	}
 	fmt.Fprintf(w, "Created export subscription: %s\n", sub.Name)
 	return nil

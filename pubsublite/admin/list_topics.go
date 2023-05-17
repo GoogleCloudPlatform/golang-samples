@@ -31,7 +31,7 @@ func listTopics(w io.Writer, projectID, region, zone string) error {
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
-		return fmt.Errorf("pubsublite.NewAdminClient: %v", err)
+		return fmt.Errorf("pubsublite.NewAdminClient: %w", err)
 	}
 	defer client.Close()
 
@@ -43,7 +43,7 @@ func listTopics(w io.Writer, projectID, region, zone string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("topicIter.Next got err: %v", err)
+			return fmt.Errorf("topicIter.Next got err: %w", err)
 		}
 		fmt.Fprintf(w, "Got topic: %#v\n", topic)
 	}

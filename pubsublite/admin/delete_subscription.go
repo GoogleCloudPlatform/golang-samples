@@ -33,13 +33,13 @@ func deleteSubscription(w io.Writer, projectID, region, location, subID string) 
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
-		return fmt.Errorf("pubsublite.NewAdminClient: %v", err)
+		return fmt.Errorf("pubsublite.NewAdminClient: %w", err)
 	}
 	defer client.Close()
 
 	err = client.DeleteSubscription(ctx, fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, location, subID))
 	if err != nil {
-		return fmt.Errorf("client.DeleteSubscription got err: %v", err)
+		return fmt.Errorf("client.DeleteSubscription got err: %w", err)
 	}
 	fmt.Fprintf(w, "Deleted subscription\n")
 	return nil
