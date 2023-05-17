@@ -67,7 +67,7 @@ func main() {
 	case "write":
 		log.Print("Writing some log entries.")
 		writeEntry(client)
-		structuredWrite(client)
+		structuredWrite(projID)
 
 	case "read":
 		log.Print("Fetching and printing log entries.")
@@ -103,9 +103,14 @@ func writeEntry(client *logging.Client) {
 	infolog.Printf("infolog is a standard Go log.Logger with INFO severity.")
 }
 
-func structuredWrite(client *logging.Client) {
-	// [START write_structured_log_entry]
-	// [START logging_write_log_entry]
+// [START logging_write_log_entry]
+func structuredWrite(projectID string) {
+	ctx := context.Background()
+	client, err := logging.NewClient(ctx, projectID)
+	if err != nil {
+		log.Fatalf("Failed to create logging client: %v", err)
+	}
+	defer client.Close()
 	const name = "log-example"
 	logger := client.Logger(name)
 	defer logger.Flush() // Ensure the entry is written.
@@ -117,9 +122,9 @@ func structuredWrite(client *logging.Client) {
 		},
 		Severity: logging.Debug,
 	})
-	// [END logging_write_log_entry]
-	// [END write_structured_log_entry]
 }
+
+// [END logging_write_log_entry]
 
 // [START logging_delete_log]
 func deleteLog(projectID string) error {

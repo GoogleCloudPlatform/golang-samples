@@ -58,7 +58,7 @@ func TestSimplelog(t *testing.T) {
 	}
 
 	writeEntry(client)
-	structuredWrite(client)
+	structuredWrite(tc.ProjectID)
 
 	testutil.Retry(t, 20, 10*time.Second, func(r *testutil.R) {
 		entries, err := getEntries(adminClient, tc.ProjectID)
