@@ -29,12 +29,12 @@ func deleteSchema(w io.Writer, projectID, schemaID string) error {
 	ctx := context.Background()
 	client, err := pubsub.NewSchemaClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewSchemaClient: %v", err)
+		return fmt.Errorf("pubsub.NewSchemaClient: %w", err)
 	}
 	defer client.Close()
 
 	if err := client.DeleteSchema(ctx, schemaID); err != nil {
-		return fmt.Errorf("client.DeleteSchema: %v", err)
+		return fmt.Errorf("client.DeleteSchema: %w", err)
 	}
 	fmt.Fprintf(w, "Deleted schema: %s", schemaID)
 	return nil
