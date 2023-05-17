@@ -37,7 +37,7 @@ func createDatabaseWithCustomerManagedEncryptionKey(ctx context.Context, w io.Wr
 
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("createDatabaseWithCustomerManagedEncryptionKey.NewDatabaseAdminClient: %v", err)
+		return fmt.Errorf("createDatabaseWithCustomerManagedEncryptionKey.NewDatabaseAdminClient: %w", err)
 	}
 	defer adminClient.Close()
 
@@ -63,11 +63,11 @@ func createDatabaseWithCustomerManagedEncryptionKey(ctx context.Context, w io.Wr
 	}
 	op, err := adminClient.CreateDatabase(ctx, &req)
 	if err != nil {
-		return fmt.Errorf("createDatabaseWithCustomerManagedEncryptionKey.CreateDatabase: %v", err)
+		return fmt.Errorf("createDatabaseWithCustomerManagedEncryptionKey.CreateDatabase: %w", err)
 	}
 	dbObj, err := op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("createDatabaseWithCustomerManagedEncryptionKey.Wait: %v", err)
+		return fmt.Errorf("createDatabaseWithCustomerManagedEncryptionKey.Wait: %w", err)
 	}
 	fmt.Fprintf(w, "Created database [%s] using encryption key %q\n", dbObj.Name, dbObj.EncryptionConfig.KmsKeyName)
 	return nil

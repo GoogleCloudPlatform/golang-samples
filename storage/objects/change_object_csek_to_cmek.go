@@ -39,7 +39,7 @@ func сhangeObjectCSEKToKMS(w io.Writer, bucket, object string, encryptionKey []
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -53,7 +53,7 @@ func сhangeObjectCSEKToKMS(w io.Writer, bucket, object string, encryptionKey []
 	// object's generation number does not match your precondition.
 	attrs, err := o.Attrs(ctx)
 	if err != nil {
-		return fmt.Errorf("object.Attrs: %v", err)
+		return fmt.Errorf("object.Attrs: %w", err)
 	}
 	o = o.If(storage.Conditions{GenerationMatch: attrs.Generation})
 
@@ -63,7 +63,7 @@ func сhangeObjectCSEKToKMS(w io.Writer, bucket, object string, encryptionKey []
 	c := o.CopierFrom(src)
 	c.DestinationKMSKeyName = kmsKeyName
 	if _, err := c.Run(ctx); err != nil {
-		return fmt.Errorf("Copier.Run: %v", err)
+		return fmt.Errorf("Copier.Run: %w", err)
 	}
 	fmt.Fprintf(w, "Object %v in bucket %v is now managed by the KMS key %v instead of a customer-supplied encryption key\n", object, bucket, kmsKeyName)
 	return nil
