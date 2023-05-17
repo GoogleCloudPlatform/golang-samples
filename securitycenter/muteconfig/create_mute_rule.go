@@ -17,11 +17,12 @@ package muteconfig
 // [START securitycenter_create_mute_config]
 
 import (
-	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"context"
 	"fmt"
 	"io"
+
+	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 )
 
 // createMuteRule: Creates a mute configuration under a given scope that will mute

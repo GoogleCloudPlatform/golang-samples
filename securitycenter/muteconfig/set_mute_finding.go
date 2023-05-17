@@ -16,11 +16,12 @@ package muteconfig
 
 // [START securitycenter_set_mute]
 import (
-	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"context"
 	"fmt"
 	"io"
+
+	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 )
 
 // setMute mutes an individual finding.

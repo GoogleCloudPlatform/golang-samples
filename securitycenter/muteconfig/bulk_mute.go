@@ -17,11 +17,12 @@ package muteconfig
 // [START securitycenter_bulk_mute]
 
 import (
-	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"context"
 	"fmt"
 	"io"
+
+	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 )
 
 // bulkMute kicks off a long-running operation (LRO) to bulk mute findings for a parent based on a filter.

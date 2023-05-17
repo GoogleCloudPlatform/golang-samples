@@ -17,12 +17,13 @@ package muteconfig
 // [START securitycenter_update_mute_config]
 
 import (
-	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"context"
 	"fmt"
-	"google.golang.org/protobuf/types/known/fieldmaskpb"
 	"io"
+
+	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
 // updateMuteRule Updates an existing mute configuration.

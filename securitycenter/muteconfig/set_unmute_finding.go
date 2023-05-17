@@ -17,11 +17,12 @@ package muteconfig
 // [START securitycenter_set_unmute]
 
 import (
-	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"context"
 	"fmt"
 	"io"
+
+	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 )
 
 // setUnmute unmutes an individual finding.

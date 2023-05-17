@@ -16,17 +16,18 @@ package muteconfig
 
 import (
 	"bytes"
-	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"context"
 	"fmt"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/google/uuid"
 	"io"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
+	"github.com/golang/protobuf/ptypes"
+	"github.com/google/uuid"
 )
 
 var orgID = os.Getenv("SCC_PROJECT_ORG_ID")

@@ -17,11 +17,12 @@ package muteconfig
 // [START securitycenter_delete_mute_config]
 
 import (
-	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"context"
 	"fmt"
 	"io"
+
+	securitycenter "cloud.google.com/go/securitycenter/apiv1"
+	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 )
 
 // deleteMuteRule deletes a mute configuration given its resource name.
