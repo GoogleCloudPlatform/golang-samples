@@ -31,7 +31,7 @@ func batchDeleteJobs(w io.Writer, projectID, companyID, requisitionID string) er
 	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		return fmt.Errorf("talent.NewJobClient: %v", err)
+		return fmt.Errorf("talent.NewJobClient: %w", err)
 	}
 	defer c.Close()
 
@@ -46,7 +46,7 @@ func batchDeleteJobs(w io.Writer, projectID, companyID, requisitionID string) er
 	}
 
 	if err := c.BatchDeleteJobs(ctx, req); err != nil {
-		return fmt.Errorf("BatchDeleteJobs(%s): %v", filter, err)
+		return fmt.Errorf("BatchDeleteJobs(%s): %w", filter, err)
 	}
 
 	fmt.Fprintf(w, "Batch deleted jobs from %s\n", filter)

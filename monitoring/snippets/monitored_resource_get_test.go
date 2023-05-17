@@ -63,7 +63,7 @@ func randomMonitoredResource(projectID string) (string, error) {
 		return "", fmt.Errorf("no resources")
 	}
 	if err != nil {
-		return "", fmt.Errorf("Could not list time series: %v", err)
+		return "", fmt.Errorf("Could not list time series: %w", err)
 	}
 	return resp.GetName(), nil
 }
