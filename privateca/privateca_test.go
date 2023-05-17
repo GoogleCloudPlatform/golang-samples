@@ -18,12 +18,13 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"google.golang.org/api/googleapi"
 	"math/rand"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"google.golang.org/api/googleapi"
 )
 
 // Global variables used in testing
