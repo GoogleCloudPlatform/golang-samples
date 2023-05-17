@@ -34,7 +34,7 @@ func deleteDataset(w io.Writer, projectID string, location string, datasetID str
 	ctx := context.Background()
 	client, err := automl.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -44,12 +44,12 @@ func deleteDataset(w io.Writer, projectID string, location string, datasetID str
 
 	op, err := client.DeleteDataset(ctx, req)
 	if err != nil {
-		return fmt.Errorf("DeleteDataset: %v", err)
+		return fmt.Errorf("DeleteDataset: %w", err)
 	}
 	fmt.Fprintf(w, "Processing operation name: %q\n", op.Name())
 
 	if err := op.Wait(ctx); err != nil {
-		return fmt.Errorf("Wait: %v", err)
+		return fmt.Errorf("Wait: %w", err)
 	}
 
 	fmt.Fprintf(w, "Dataset deleted.\n")

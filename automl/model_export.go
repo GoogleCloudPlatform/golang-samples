@@ -35,7 +35,7 @@ func exportModel(w io.Writer, projectID string, location string, modelID string,
 	ctx := context.Background()
 	client, err := automl.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -52,12 +52,12 @@ func exportModel(w io.Writer, projectID string, location string, modelID string,
 
 	op, err := client.ExportModel(ctx, req)
 	if err != nil {
-		return fmt.Errorf("ExportModel: %v", err)
+		return fmt.Errorf("ExportModel: %w", err)
 	}
 	fmt.Fprintf(w, "Processing operation name: %q\n", op.Name())
 
 	if err := op.Wait(ctx); err != nil {
-		return fmt.Errorf("Wait: %v", err)
+		return fmt.Errorf("Wait: %w", err)
 	}
 
 	fmt.Fprintf(w, "Model exported.\n")
