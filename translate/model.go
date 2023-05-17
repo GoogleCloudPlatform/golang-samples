@@ -32,12 +32,12 @@ func translateTextWithModel(targetLanguage, text, model string) (string, error) 
 
 	lang, err := language.Parse(targetLanguage)
 	if err != nil {
-		return "", fmt.Errorf("language.Parse: %v", err)
+		return "", fmt.Errorf("language.Parse: %w", err)
 	}
 
 	client, err := translate.NewClient(ctx)
 	if err != nil {
-		return "", fmt.Errorf("translate.NewClient: %v", err)
+		return "", fmt.Errorf("translate.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -45,7 +45,7 @@ func translateTextWithModel(targetLanguage, text, model string) (string, error) 
 		Model: model, // Either "nmt" or "base".
 	})
 	if err != nil {
-		return "", fmt.Errorf("Translate: %v", err)
+		return "", fmt.Errorf("Translate: %w", err)
 	}
 	if len(resp) == 0 {
 		return "", nil
