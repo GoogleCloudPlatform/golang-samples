@@ -9,6 +9,7 @@ require (
 	cloud.google.com/go/datastore v1.10.0
 	cloud.google.com/go/errorreporting v0.3.0
 	cloud.google.com/go/logging v1.7.0
+	cloud.google.com/go/security v1.13.0
 	cloud.google.com/go/storage v1.30.1
 	cloud.google.com/go/vision v1.2.0
 	github.com/bmatcuk/doublestar/v2 v2.0.4
