@@ -93,7 +93,7 @@ func createJob(w io.Writer, projectID, gcsPath string, infoTypeNames []string) e
 	// Send the request.
 	response, err := client.CreateDlpJob(ctx, &req)
 	if err != nil {
-		return fmt.Errorf("create Dlp Jobs: %v", err)
+		return err
 	}
 
 	// Print the results.
