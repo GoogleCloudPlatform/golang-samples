@@ -33,7 +33,7 @@ func updateSubscription(w io.Writer, projectID, region, location, subID string) 
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
-		return fmt.Errorf("pubsublite.NewAdminClient: %v", err)
+		return fmt.Errorf("pubsublite.NewAdminClient: %w", err)
 	}
 	defer client.Close()
 
@@ -44,7 +44,7 @@ func updateSubscription(w io.Writer, projectID, region, location, subID string) 
 	}
 	updatedCfg, err := client.UpdateSubscription(ctx, config)
 	if err != nil {
-		return fmt.Errorf("client.UpdateSubscription got err: %v", err)
+		return fmt.Errorf("client.UpdateSubscription got err: %w", err)
 	}
 	fmt.Fprintf(w, "Updated subscription: %#v\n", updatedCfg)
 	return nil

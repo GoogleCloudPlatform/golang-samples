@@ -38,7 +38,7 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 
 	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("NewClient: %v", err)
+		return nil, fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -75,7 +75,7 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 				break
 			}
 			if err != nil {
-				return nil, fmt.Errorf("it.Next: %v", err)
+				return nil, fmt.Errorf("it.Next: %w", err)
 			}
 			if result.GetDiscovery() != nil {
 				discoveryOccurrence = result
@@ -93,7 +93,7 @@ func pollDiscoveryOccurrenceFinished(resourceURL, projectID string, timeout time
 			req := &grafeaspb.GetOccurrenceRequest{Name: discoveryOccurrence.GetName()}
 			updated, err := client.GetGrafeasClient().GetOccurrence(ctx, req)
 			if err != nil {
-				return nil, fmt.Errorf("GetOccurrence: %v", err)
+				return nil, fmt.Errorf("GetOccurrence: %w", err)
 			}
 			switch updated.GetDiscovery().GetAnalysisStatus() {
 			case grafeaspb.DiscoveryOccurrence_FINISHED_SUCCESS,

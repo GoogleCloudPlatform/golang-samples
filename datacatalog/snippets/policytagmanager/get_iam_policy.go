@@ -32,7 +32,7 @@ func getIAMPolicy(w io.Writer, resourceID string) error {
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)
 	if err != nil {
-		return fmt.Errorf("datacatalog.NewPolicyTagManagerClient: %v", err)
+		return fmt.Errorf("datacatalog.NewPolicyTagManagerClient: %w", err)
 	}
 	defer policyClient.Close()
 
@@ -44,7 +44,7 @@ func getIAMPolicy(w io.Writer, resourceID string) error {
 	}
 	policy, err := policyClient.GetIamPolicy(ctx, req)
 	if err != nil {
-		return fmt.Errorf("GetIamPolicy: %v", err)
+		return fmt.Errorf("GetIamPolicy: %w", err)
 	}
 	fmt.Fprintf(w, "Policy has version %d with Etag %x and %d bindings\n", policy.Version, policy.Etag, len(policy.Bindings))
 	if len(policy.Bindings) > 0 {

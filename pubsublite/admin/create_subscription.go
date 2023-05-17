@@ -35,7 +35,7 @@ func createSubscription(w io.Writer, projectID, region, location, topicID, subID
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
-		return fmt.Errorf("pubsublite.NewAdminClient: %v", err)
+		return fmt.Errorf("pubsublite.NewAdminClient: %w", err)
 	}
 	defer client.Close()
 
@@ -45,7 +45,7 @@ func createSubscription(w io.Writer, projectID, region, location, topicID, subID
 		DeliveryRequirement: pubsublite.DeliverImmediately, // can also be DeliverAfterStored
 	})
 	if err != nil {
-		return fmt.Errorf("client.CreateSubscription got err: %v", err)
+		return fmt.Errorf("client.CreateSubscription got err: %w", err)
 	}
 	fmt.Fprintf(w, "Created subscription: %s\n", sub.Name)
 	return nil

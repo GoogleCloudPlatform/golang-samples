@@ -33,7 +33,7 @@ func listSubscriptionsInProject(w io.Writer, projectID, region, location string)
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
-		return fmt.Errorf("pubsublite.NewAdminClient: %v", err)
+		return fmt.Errorf("pubsublite.NewAdminClient: %w", err)
 	}
 	defer client.Close()
 
@@ -46,7 +46,7 @@ func listSubscriptionsInProject(w io.Writer, projectID, region, location string)
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("subIter.Next() got err: %v", err)
+			return fmt.Errorf("subIter.Next() got err: %w", err)
 		}
 		fmt.Fprintf(w, "Got subscription config: %v", sub)
 	}
