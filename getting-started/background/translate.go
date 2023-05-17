@@ -73,7 +73,7 @@ func initializeClients() error {
 		// Use context.Background() so the client can be reused.
 		translateClient, err = translate.NewClient(context.Background())
 		if err != nil {
-			return fmt.Errorf("translate.NewClient: %v", err)
+			return fmt.Errorf("translate.NewClient: %w", err)
 		}
 	}
 	if firestoreClient == nil {
@@ -82,7 +82,7 @@ func initializeClients() error {
 		// Use context.Background() so the client can be reused.
 		firestoreClient, err = firestore.NewClient(context.Background(), projectID)
 		if err != nil {
-			return fmt.Errorf("firestore.NewClient: %v", err)
+			return fmt.Errorf("firestore.NewClient: %w", err)
 		}
 	}
 	return nil
@@ -99,12 +99,12 @@ func initializeClients() error {
 func translateString(ctx context.Context, text string, lang string) (translated string, originalLang string, err error) {
 	l, err := language.Parse(lang)
 	if err != nil {
-		return "", "", fmt.Errorf("language.Parse: %v", err)
+		return "", "", fmt.Errorf("language.Parse: %w", err)
 	}
 
 	outs, err := translateClient.Translate(ctx, []string{text}, l, nil)
 	if err != nil {
-		return "", "", fmt.Errorf("Translate: %v", err)
+		return "", "", fmt.Errorf("Translate: %w", err)
 	}
 
 	if len(outs) < 1 {
@@ -124,7 +124,7 @@ func Translate(ctx context.Context, m PubSubMessage) error {
 
 	t := Translation{}
 	if err := json.Unmarshal(m.Data, &t); err != nil {
-		return fmt.Errorf("json.Unmarshal: %v", err)
+		return fmt.Errorf("json.Unmarshal: %w", err)
 	}
 
 	// Use a unique document name to prevent duplicate translations.
@@ -141,7 +141,7 @@ func Translate(ctx context.Context, m PubSubMessage) error {
 	err := firestoreClient.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
 		doc, err := tx.Get(ref)
 		if err != nil && status.Code(err) != codes.NotFound {
-			return fmt.Errorf("Get: %v", err)
+			return fmt.Errorf("Get: %w", err)
 		}
 		// Do nothing if the document already exists.
 		if doc.Exists() {
@@ -150,19 +150,19 @@ func Translate(ctx context.Context, m PubSubMessage) error {
 
 		translated, originalLang, err := translateString(ctx, t.Original, t.Language)
 		if err != nil {
-			return fmt.Errorf("translateString: %v", err)
+			return fmt.Errorf("translateString: %w", err)
 		}
 		t.Translated = translated
 		t.OriginalLanguage = originalLang
 
 		if err := tx.Set(ref, t); err != nil {
-			return fmt.Errorf("Set: %v", err)
+			return fmt.Errorf("Set: %w", err)
 		}
 		return nil
 	})
 
 	if err != nil {
-		return fmt.Errorf("RunTransaction: %v", err)
+		return fmt.Errorf("RunTransaction: %w", err)
 	}
 	return nil
 }
