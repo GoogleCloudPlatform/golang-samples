@@ -37,7 +37,7 @@ func createBackup(ctx context.Context, w io.Writer, db, backupID string, version
 
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("createBackup.NewDatabaseAdminClient: %v", err)
+		return fmt.Errorf("createBackup.NewDatabaseAdminClient: %w", err)
 	}
 	defer adminClient.Close()
 
@@ -54,12 +54,12 @@ func createBackup(ctx context.Context, w io.Writer, db, backupID string, version
 	}
 	op, err := adminClient.CreateBackup(ctx, &req)
 	if err != nil {
-		return fmt.Errorf("createBackup.CreateBackup: %v", err)
+		return fmt.Errorf("createBackup.CreateBackup: %w", err)
 	}
 	// Wait for backup operation to complete.
 	backup, err := op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("createBackup.Wait: %v", err)
+		return fmt.Errorf("createBackup.Wait: %w", err)
 	}
 
 	// Get the name, create time, version time and backup size.

@@ -29,7 +29,7 @@ func translateText(targetLanguage, text string) (string, error) {
 
 	lang, err := language.Parse(targetLanguage)
 	if err != nil {
-		return "", fmt.Errorf("language.Parse: %v", err)
+		return "", fmt.Errorf("language.Parse: %w", err)
 	}
 
 	client, err := translate.NewClient(ctx)
@@ -40,7 +40,7 @@ func translateText(targetLanguage, text string) (string, error) {
 
 	resp, err := client.Translate(ctx, []string{text}, lang, nil)
 	if err != nil {
-		return "", fmt.Errorf("Translate: %v", err)
+		return "", fmt.Errorf("Translate: %w", err)
 	}
 	if len(resp) == 0 {
 		return "", fmt.Errorf("Translate returned empty response to text: %s", text)

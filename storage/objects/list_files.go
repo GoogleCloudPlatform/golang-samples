@@ -31,7 +31,7 @@ func listFiles(w io.Writer, bucket string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -45,7 +45,7 @@ func listFiles(w io.Writer, bucket string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("Bucket(%q).Objects: %v", bucket, err)
+			return fmt.Errorf("Bucket(%q).Objects: %w", bucket, err)
 		}
 		fmt.Fprintln(w, attrs.Name)
 	}

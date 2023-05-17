@@ -30,7 +30,7 @@ func enableVersioning(w io.Writer, bucketName string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -42,7 +42,7 @@ func enableVersioning(w io.Writer, bucketName string) error {
 		VersioningEnabled: true,
 	}
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
-		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Update: %w", bucketName, err)
 	}
 	fmt.Fprintf(w, "Versioning was enabled for %v\n", bucketName)
 	return nil
