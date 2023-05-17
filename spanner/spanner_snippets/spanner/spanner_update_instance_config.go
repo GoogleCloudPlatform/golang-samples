@@ -45,7 +45,7 @@ func updateInstanceConfig(w io.Writer, projectID, userConfigID string) error {
 		Name: fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, userConfigID),
 	})
 	if err != nil {
-		return fmt.Errorf("updateInstanceConfig.GetInstanceConfig: %v", err)
+		return fmt.Errorf("updateInstanceConfig.GetInstanceConfig: %w", err)
 	}
 	config.DisplayName = "updated custom instance config"
 	config.Labels["updated"] = "true"
@@ -63,7 +63,7 @@ func updateInstanceConfig(w io.Writer, projectID, userConfigID string) error {
 	// Wait for the instance configuration creation to finish.
 	i, err := op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("Waiting for instance config creation to finish failed: %v", err)
+		return fmt.Errorf("Waiting for instance config creation to finish failed: %w", err)
 	}
 	// The instance configuration may not be ready to serve yet.
 	if i.State != instancepb.InstanceConfig_READY {

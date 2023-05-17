@@ -35,7 +35,7 @@ func copyOldVersionOfObject(w io.Writer, bucket, srcObject, dstObject string, ge
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -54,12 +54,12 @@ func copyOldVersionOfObject(w io.Writer, bucket, srcObject, dstObject string, ge
 	// generation-match precondition using its generation number.
 	// attrs, err := dst.Attrs(ctx)
 	// if err != nil {
-	// 	return fmt.Errorf("object.Attrs: %v", err)
+	// 	return fmt.Errorf("object.Attrs: %w", err)
 	// }
 	// dst = dst.If(storage.Conditions{GenerationMatch: attrs.Generation})
 
 	if _, err := dst.CopierFrom(src.Generation(gen)).Run(ctx); err != nil {
-		return fmt.Errorf("Object(%q).CopierFrom(%q).Generation(%v).Run: %v", dstObject, srcObject, gen, err)
+		return fmt.Errorf("Object(%q).CopierFrom(%q).Generation(%v).Run: %w", dstObject, srcObject, gen, err)
 	}
 	fmt.Fprintf(w, "Generation %v of object %v in bucket %v was copied to %v\n", gen, srcObject, bucket, dstObject)
 	return nil
