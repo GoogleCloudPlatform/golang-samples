@@ -392,6 +392,11 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "Created Customers table with bit reverse sequence keys\n")
 	assertContains(t, out, "Inserted customer record with CustomerId")
 	assertContains(t, out, "record(s) inserted")
+	out = runSampleWithContext(ctx, t, alterSequence, dbName, "failed to alter table with bit reverse sequence enabled")
+	assertContains(t, out, "Altered Seq sequence to skip an inclusive range between 1000 and 5000000\n")
+	assertContains(t, out, "Inserted customer record with CustomerId")
+	assertContains(t, out, "record(s) inserted")
+
 }
 
 func TestBackupSample(t *testing.T) {
