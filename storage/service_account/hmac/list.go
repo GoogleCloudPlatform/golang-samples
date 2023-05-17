@@ -32,7 +32,7 @@ func listHMACKeys(w io.Writer, projectID string) ([]*storage.HMACKey, error) {
 	// Initialize client.
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("storage.NewClient: %v", err)
+		return nil, fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -46,7 +46,7 @@ func listHMACKeys(w io.Writer, projectID string) ([]*storage.HMACKey, error) {
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("ListHMACKeys: %v", err)
+			return nil, fmt.Errorf("ListHMACKeys: %w", err)
 		}
 		fmt.Fprintf(w, "Service Account Email: %s\n", key.ServiceAccountEmail)
 		fmt.Fprintf(w, "Access ID: %s\n", key.AccessID)

@@ -32,7 +32,7 @@ func listNotificationConfigs(w io.Writer, orgID string) error {
 	client, err := securitycenter.NewClient(ctx)
 
 	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %v", err)
+		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -47,7 +47,7 @@ func listNotificationConfigs(w io.Writer, orgID string) error {
 		}
 
 		if err != nil {
-			return fmt.Errorf("it.Next: %v", err)
+			return fmt.Errorf("it.Next: %w", err)
 		}
 
 		fmt.Fprintln(w, "NotificationConfig: ", result)

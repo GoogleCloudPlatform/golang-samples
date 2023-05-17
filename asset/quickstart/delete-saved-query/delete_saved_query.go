@@ -33,18 +33,18 @@ func deleteSavedQuery(w io.Writer, projectID, savedQueryID string) error {
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("asset.NewClient: %v", err)
+		return fmt.Errorf("asset.NewClient: %w", err)
 	}
 	defer client.Close()
 
 	cloudResourceManagerClient, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("cloudresourcemanager.NewService: %v", err)
+		return fmt.Errorf("cloudresourcemanager.NewService: %w", err)
 	}
 
 	project, err := cloudResourceManagerClient.Projects.Get(projectID).Do()
 	if err != nil {
-		return fmt.Errorf("cloudResourceManagerClient.Projects.Get.Do: %v", err)
+		return fmt.Errorf("cloudResourceManagerClient.Projects.Get.Do: %w", err)
 	}
 	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
 	savedQueryName := fmt.Sprintf("projects/%s/savedQueries/%s", projectNumber, savedQueryID)
@@ -52,7 +52,7 @@ func deleteSavedQuery(w io.Writer, projectID, savedQueryID string) error {
 		Name: savedQueryName,
 	}
 	if err = client.DeleteSavedQuery(ctx, req); err != nil {
-		return fmt.Errorf("client.DeleteSavedQuery: %v", err)
+		return fmt.Errorf("client.DeleteSavedQuery: %w", err)
 	}
 	fmt.Fprintf(w, "Deleted Saved Query")
 	return nil

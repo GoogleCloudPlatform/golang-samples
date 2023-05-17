@@ -32,7 +32,7 @@ func checkStateImportJob(w io.Writer, name string) error {
 	ctx := context.Background()
 	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create kms client: %v", err)
+		return fmt.Errorf("failed to create kms client: %w", err)
 	}
 	defer client.Close()
 
@@ -41,7 +41,7 @@ func checkStateImportJob(w io.Writer, name string) error {
 		Name: name,
 	})
 	if err != nil {
-		return fmt.Errorf("failed to get import job: %v", err)
+		return fmt.Errorf("failed to get import job: %w", err)
 	}
 	fmt.Fprintf(w, "Current state of import job %q: %s\n", result.Name, result.State)
 	return nil

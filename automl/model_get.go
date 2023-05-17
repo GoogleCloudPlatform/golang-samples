@@ -34,7 +34,7 @@ func getModel(w io.Writer, projectID string, location string, modelID string) er
 	ctx := context.Background()
 	client, err := automl.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -44,7 +44,7 @@ func getModel(w io.Writer, projectID string, location string, modelID string) er
 
 	model, err := client.GetModel(ctx, req)
 	if err != nil {
-		return fmt.Errorf("GetModel: %v", err)
+		return fmt.Errorf("GetModel: %w", err)
 	}
 
 	// Retrieve deployment state.

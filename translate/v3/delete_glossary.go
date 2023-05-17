@@ -34,7 +34,7 @@ func deleteGlossary(w io.Writer, projectID string, location string, glossaryID s
 	ctx := context.Background()
 	client, err := translate.NewTranslationClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewTranslationClient: %v", err)
+		return fmt.Errorf("NewTranslationClient: %w", err)
 	}
 	defer client.Close()
 
@@ -45,13 +45,13 @@ func deleteGlossary(w io.Writer, projectID string, location string, glossaryID s
 	// The DeleteGlossary operation is async.
 	op, err := client.DeleteGlossary(ctx, req)
 	if err != nil {
-		return fmt.Errorf("DeleteGlossary: %v", err)
+		return fmt.Errorf("DeleteGlossary: %w", err)
 	}
 	fmt.Fprintf(w, "Processing operation name: %q\n", op.Name())
 
 	resp, err := op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("Wait: %v", err)
+		return fmt.Errorf("Wait: %w", err)
 	}
 
 	fmt.Fprintf(w, "Deleted: %v\n", resp.GetName())

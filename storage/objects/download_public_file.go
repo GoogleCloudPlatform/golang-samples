@@ -34,7 +34,7 @@ func downloadPublicFile(w io.Writer, bucket, object string) ([]byte, error) {
 	// Create a client that does not authenticate with the server.
 	client, err := storage.NewClient(ctx, option.WithoutAuthentication())
 	if err != nil {
-		return nil, fmt.Errorf("storage.NewClient: %v", err)
+		return nil, fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -43,13 +43,13 @@ func downloadPublicFile(w io.Writer, bucket, object string) ([]byte, error) {
 
 	rc, err := client.Bucket(bucket).Object(object).NewReader(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Object(%q).NewReader: %v", object, err)
+		return nil, fmt.Errorf("Object(%q).NewReader: %w", object, err)
 	}
 	defer rc.Close()
 
 	data, err := ioutil.ReadAll(rc)
 	if err != nil {
-		return nil, fmt.Errorf("ioutil.ReadAll: %v", err)
+		return nil, fmt.Errorf("ioutil.ReadAll: %w", err)
 	}
 	fmt.Fprintf(w, "Blob %v downloaded.\n", object)
 	return data, nil

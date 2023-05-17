@@ -34,25 +34,25 @@ func setupPubSub(projectID, topic, sub string) (*pubsub.Subscription, error) {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return nil, fmt.Errorf("pubsub.NewClient: %v", err)
+		return nil, fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	// Create the Topic if it doesn't exist.
 	t := client.Topic(topic)
 	if exists, err := t.Exists(ctx); err != nil {
-		return nil, fmt.Errorf("error checking PubSub topic: %v", err)
+		return nil, fmt.Errorf("error checking PubSub topic: %w", err)
 	} else if !exists {
 		if t, err = client.CreateTopic(ctx, topic); err != nil {
-			return nil, fmt.Errorf("error creating PubSub topic: %v", err)
+			return nil, fmt.Errorf("error creating PubSub topic: %w", err)
 		}
 	}
 
 	// Create the Subscription if it doesn't exist.
 	s := client.Subscription(sub)
 	if exists, err := s.Exists(ctx); err != nil {
-		return nil, fmt.Errorf("error checking for subscription: %v", err)
+		return nil, fmt.Errorf("error checking for subscription: %w", err)
 	} else if !exists {
 		if s, err = client.CreateSubscription(ctx, sub, pubsub.SubscriptionConfig{Topic: t}); err != nil {
-			return nil, fmt.Errorf("failed to create subscription: %v", err)
+			return nil, fmt.Errorf("failed to create subscription: %w", err)
 		}
 	}
 
@@ -64,19 +64,19 @@ func riskNumerical(projectID, dataProject, pubSubTopic, pubSubSub, datasetID, ta
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return fmt.Errorf("dlp.NewClient: %w", err)
 	}
 	// Create a PubSub Client used to listen for when the inspect job finishes.
 	pubsubClient, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("Error creating PubSub client: %v", err)
+		return fmt.Errorf("Error creating PubSub client: %w", err)
 	}
 	defer pubsubClient.Close()
 
 	// Create a PubSub subscription we can use to listen for messages.
 	s, err := setupPubSub(projectID, pubSubTopic, pubSubSub)
 	if err != nil {
-		return fmt.Errorf("setupPubSub: %v", err)
+		return fmt.Errorf("setupPubSub: %w", err)
 	}
 
 	// topic is the PubSub topic string where messages should be sent.
@@ -119,7 +119,7 @@ func riskNumerical(projectID, dataProject, pubSubTopic, pubSubSub, datasetID, ta
 	// Create the risk job.
 	j, err := client.CreateDlpJob(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateDlpJob: %v", err)
+		return fmt.Errorf("CreateDlpJob: %w", err)
 	}
 
 	// Wait for the risk job to finish by waiting for a PubSub message.
@@ -135,7 +135,7 @@ func riskNumerical(projectID, dataProject, pubSubTopic, pubSubSub, datasetID, ta
 		cancel()
 	})
 	if err != nil {
-		return fmt.Errorf("Recieve: %v", err)
+		return fmt.Errorf("Recieve: %w", err)
 	}
 	return nil
 }

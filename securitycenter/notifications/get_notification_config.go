@@ -32,7 +32,7 @@ func getNotificationConfig(w io.Writer, orgID string, notificationConfigID strin
 	client, err := securitycenter.NewClient(ctx)
 
 	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %v", err)
+		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -42,7 +42,7 @@ func getNotificationConfig(w io.Writer, orgID string, notificationConfigID strin
 
 	notificationConfig, err := client.GetNotificationConfig(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Failed to retrieve notification config: %v", err)
+		return fmt.Errorf("Failed to retrieve notification config: %w", err)
 	}
 	fmt.Fprintln(w, "Received config: ", notificationConfig)
 
