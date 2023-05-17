@@ -47,7 +47,7 @@ func listMetrics(w io.Writer, projectID string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("Could not list metrics: %v", err)
+			return fmt.Errorf("Could not list metrics: %w", err)
 		}
 		fmt.Fprintf(w, "%v\n", resp.GetType())
 	}
