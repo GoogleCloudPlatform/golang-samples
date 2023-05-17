@@ -35,7 +35,7 @@ func languageEntityExtractionCreateModel(w io.Writer, projectID string, location
 	ctx := context.Background()
 	client, err := automl.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -52,7 +52,7 @@ func languageEntityExtractionCreateModel(w io.Writer, projectID string, location
 
 	op, err := client.CreateModel(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateModel: %v", err)
+		return fmt.Errorf("CreateModel: %w", err)
 	}
 	fmt.Fprintf(w, "Processing operation name: %q\n", op.Name())
 	fmt.Fprintf(w, "Training started...\n")
