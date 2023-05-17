@@ -28,7 +28,7 @@ func list(projectID string) ([]*pubsub.Subscription, error) {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return nil, fmt.Errorf("pubsub.NewClient: %v", err)
+		return nil, fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -40,7 +40,7 @@ func list(projectID string) ([]*pubsub.Subscription, error) {
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("Next: %v", err)
+			return nil, fmt.Errorf("Next: %w", err)
 		}
 		subs = append(subs, s)
 	}
