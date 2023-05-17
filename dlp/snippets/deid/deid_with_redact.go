@@ -36,7 +36,7 @@ func deidentifyWithRedact(w io.Writer, projectID, inputStr string, infoTypeNames
 	// call the Close method to cleanup its resources.
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %w", err)
+		return fmt.Errorf("dlp.NewClient: %v", err)
 	}
 
 	// Closing the client safely cleans up background resources.

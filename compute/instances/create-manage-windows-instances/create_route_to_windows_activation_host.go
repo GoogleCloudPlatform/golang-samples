@@ -38,7 +38,7 @@ func createRouteToWindowsActivationHost(
 	ctx := context.Background()
 	routesClient, err := compute.NewRoutesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewRoutesRESTClient: %w", err)
+		return fmt.Errorf("NewRoutesRESTClient: %v", err)
 	}
 	defer routesClient.Close()
 
@@ -61,11 +61,11 @@ func createRouteToWindowsActivationHost(
 
 	op, err := routesClient.Insert(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to create route: %w", err)
+		return fmt.Errorf("unable to create route: %v", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %w", err)
+		return fmt.Errorf("unable to wait for the operation: %v", err)
 	}
 
 	fmt.Fprintf(w, "Route created\n")

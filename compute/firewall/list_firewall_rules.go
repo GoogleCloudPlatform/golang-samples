@@ -32,7 +32,7 @@ func listFirewallRules(w io.Writer, projectID string) error {
 	ctx := context.Background()
 	firewallsClient, err := compute.NewFirewallsRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstancesRESTClient: %w", err)
+		return fmt.Errorf("NewInstancesRESTClient: %v", err)
 	}
 	defer firewallsClient.Close()
 

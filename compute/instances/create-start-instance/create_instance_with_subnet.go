@@ -36,13 +36,13 @@ func createInstanceWithSubnet(w io.Writer, projectID, zone, instanceName, networ
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstancesRESTClient: %w", err)
+		return fmt.Errorf("NewInstancesRESTClient: %v", err)
 	}
 	defer instancesClient.Close()
 
 	imagesClient, err := compute.NewImagesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewImagesRESTClient: %w", err)
+		return fmt.Errorf("NewImagesRESTClient: %v", err)
 	}
 	defer imagesClient.Close()
 
@@ -53,7 +53,7 @@ func createInstanceWithSubnet(w io.Writer, projectID, zone, instanceName, networ
 	}
 	newestDebian, err := imagesClient.GetFromFamily(ctx, newestDebianReq)
 	if err != nil {
-		return fmt.Errorf("unable to get image from family: %w", err)
+		return fmt.Errorf("unable to get image from family: %v", err)
 	}
 
 	req := &computepb.InsertInstanceRequest{
@@ -85,11 +85,11 @@ func createInstanceWithSubnet(w io.Writer, projectID, zone, instanceName, networ
 
 	op, err := instancesClient.Insert(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to create instance: %w", err)
+		return fmt.Errorf("unable to create instance: %v", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %w", err)
+		return fmt.Errorf("unable to wait for the operation: %v", err)
 	}
 
 	fmt.Fprintf(w, "Instance created\n")

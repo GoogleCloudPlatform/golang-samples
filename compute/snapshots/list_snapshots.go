@@ -34,7 +34,7 @@ func listSnapshots(w io.Writer, projectID, filter string) error {
 	ctx := context.Background()
 	snapshotsClient, err := compute.NewSnapshotsRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewSnapshotsRESTClient: %w", err)
+		return fmt.Errorf("NewSnapshotsRESTClient: %v", err)
 	}
 	defer snapshotsClient.Close()
 

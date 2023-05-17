@@ -1,10 +1,5 @@
 assign_issues_by:
 - labels:
-  - "api: asset"
-  to:
-  - GoogleCloudPlatform/cloud-asset-analysis-team
-  - GoogleCloudPlatform/cloud-asset-platform-team
-- labels:
   - 'api: bigtable'
   - 'api: datastore'
   - 'api: firestore'
@@ -40,11 +35,15 @@ assign_issues_by:
 - labels:
   - 'api: run'
   to:
-  - GoogleCloudPlatform/torus-dpe
+  - grayside
 - labels:
   - 'api: spanner'
   to:
   - rahul2393
+- labels:
+  - 'api: cloudiot'
+  to:
+  - attilagargyan
 - labels:
   - 'api: cloudsql'
   to:
@@ -56,10 +55,9 @@ assign_issues_by:
 
 assign_prs_by:
 - labels:
-  - "api: asset"
+  - 'api: cloudiot'
   to:
-  - GoogleCloudPlatform/cloud-asset-analysis-team
-  - GoogleCloudPlatform/cloud-asset-platform-team
+  - attilagargyan
 - labels:
   - 'api: bigtable'
   - 'api: datastore'

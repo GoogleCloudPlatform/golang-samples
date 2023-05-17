@@ -32,7 +32,7 @@ func getInstanceTemplate(projectID, templateName string) (*computepb.InstanceTem
 	ctx := context.Background()
 	instanceTemplatesClient, err := compute.NewInstanceTemplatesRESTClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("NewInstanceTemplatesRESTClient: %w", err)
+		return nil, fmt.Errorf("NewInstanceTemplatesRESTClient: %v", err)
 	}
 	defer instanceTemplatesClient.Close()
 

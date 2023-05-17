@@ -198,13 +198,13 @@ func createInstanceWithCustomSharedCore(
 
 	machineType, err := customMachineTypeSharedCoreURI(zone, cpuSeries, memory)
 	if err != nil {
-		return fmt.Errorf("unable to create custom machine type string: %w", err)
+		return fmt.Errorf("unable to create custom machine type string: %v", err)
 	}
 
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstancesRESTClient: %w", err)
+		return fmt.Errorf("NewInstancesRESTClient: %v", err)
 	}
 	defer instancesClient.Close()
 
@@ -237,11 +237,11 @@ func createInstanceWithCustomSharedCore(
 
 	op, err := instancesClient.Insert(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to create instance: %w", err)
+		return fmt.Errorf("unable to create instance: %v", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %w", err)
+		return fmt.Errorf("unable to wait for the operation: %v", err)
 	}
 
 	fmt.Fprintf(w, "Instance created\n")

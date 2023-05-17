@@ -39,7 +39,7 @@ func listDatasets(w io.Writer, projectID string, location string) error {
 	ctx := context.Background()
 	client, err := automl.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %w", err)
+		return fmt.Errorf("NewClient: %v", err)
 	}
 	defer client.Close()
 
@@ -56,7 +56,7 @@ func listDatasets(w io.Writer, projectID string, location string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("ListGlossaries.Next: %w", err)
+			return fmt.Errorf("ListGlossaries.Next: %v", err)
 		}
 
 		fmt.Fprintf(w, "Dataset name: %v\n", dataset.GetName())

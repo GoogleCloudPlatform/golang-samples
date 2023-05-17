@@ -33,7 +33,7 @@ func getInstance(w io.Writer, projectID, zone, instanceName string) error {
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstancesRESTClient: %w", err)
+		return fmt.Errorf("NewInstancesRESTClient: %v", err)
 	}
 	defer instancesClient.Close()
 
@@ -45,7 +45,7 @@ func getInstance(w io.Writer, projectID, zone, instanceName string) error {
 
 	instance, err := instancesClient.Get(ctx, reqInstance)
 	if err != nil {
-		return fmt.Errorf("unable to get instance: %w", err)
+		return fmt.Errorf("unable to get instance: %v", err)
 	}
 
 	fmt.Fprintf(w, "Instance: %s\n", instance.GetName())

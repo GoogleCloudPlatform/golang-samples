@@ -32,7 +32,7 @@ func listAllInstances(w io.Writer, projectID string) error {
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstancesRESTClient: %w", err)
+		return fmt.Errorf("NewInstancesRESTClient: %v", err)
 	}
 	defer instancesClient.Close()
 

@@ -39,7 +39,7 @@ func changeMachineType(
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstancesRESTClient: %w", err)
+		return fmt.Errorf("NewInstancesRESTClient: %v", err)
 	}
 	defer instancesClient.Close()
 
@@ -51,7 +51,7 @@ func changeMachineType(
 
 	instance, err := instancesClient.Get(ctx, reqInstance)
 	if err != nil {
-		return fmt.Errorf("unable to get instance: %w", err)
+		return fmt.Errorf("unable to get instance: %v", err)
 	}
 
 	containsString := func(s []string, str string) bool {
@@ -74,11 +74,11 @@ func changeMachineType(
 
 		op, err := instancesClient.Stop(ctx, reqStop)
 		if err != nil {
-			return fmt.Errorf("unable to stop instance: %w", err)
+			return fmt.Errorf("unable to stop instance: %v", err)
 		}
 
 		if err = op.Wait(ctx); err != nil {
-			return fmt.Errorf("unable to wait for the operation: %w", err)
+			return fmt.Errorf("unable to wait for the operation: %v", err)
 		}
 	}
 
@@ -95,11 +95,11 @@ func changeMachineType(
 	}
 	op, err := instancesClient.SetMachineType(ctx, updateReq)
 	if err != nil {
-		return fmt.Errorf("unable to update instance: %w", err)
+		return fmt.Errorf("unable to update instance: %v", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %w", err)
+		return fmt.Errorf("unable to wait for the operation: %v", err)
 	}
 
 	fmt.Fprintf(w, "Instance updated\n")
