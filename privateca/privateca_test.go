@@ -54,7 +54,7 @@ func setupCaPool(t *testing.T) (string, func(t *testing.T)) {
 			var gerr *googleapi.Error
 			if errors.As(err, &gerr) {
 				if gerr.Code == 404 {
-					t.Log("setupCaPool teardown - skipped CA Pool deletion (not found error)")
+					t.Log("setupCaPool teardown - skipped CA Pool deletion (not found)")
 				} else {
 					t.Errorf("setupCaPool teardown got err: %v", err)
 				}
