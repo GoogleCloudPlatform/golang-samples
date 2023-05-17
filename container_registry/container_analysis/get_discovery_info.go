@@ -36,7 +36,7 @@ func getDiscoveryInfo(w io.Writer, resourceURL, projectID string) error {
 	ctx := context.Background()
 	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -51,7 +51,7 @@ func getDiscoveryInfo(w io.Writer, resourceURL, projectID string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("occurrence iteration error: %v", err)
+			return fmt.Errorf("occurrence iteration error: %w", err)
 		}
 		fmt.Fprintln(w, occ)
 	}
