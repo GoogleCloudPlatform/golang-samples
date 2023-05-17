@@ -47,7 +47,7 @@ func listMonitoredResources(w io.Writer, projectID string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("Could not list time series: %v", err)
+			return fmt.Errorf("Could not list time series: %w", err)
 		}
 		fmt.Fprintf(w, "%v\n", resp)
 	}

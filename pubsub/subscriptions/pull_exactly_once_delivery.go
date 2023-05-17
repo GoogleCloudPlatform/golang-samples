@@ -35,7 +35,7 @@ func receiveMessagesWithExactlyOnceDeliveryEnabled(w io.Writer, projectID, subID
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -75,7 +75,7 @@ func receiveMessagesWithExactlyOnceDeliveryEnabled(w io.Writer, projectID, subID
 		}
 	})
 	if err != nil {
-		return fmt.Errorf("got err from sub.Receive: %v", err)
+		return fmt.Errorf("got err from sub.Receive: %w", err)
 	}
 	return nil
 }
