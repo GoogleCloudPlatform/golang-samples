@@ -87,7 +87,7 @@ func newApp(projectID string) (*app, error) {
 
 	tmpl, err := template.New("Index").Parse(`<body>{{.views}} {{if eq .views 1.0}}view{{else}}views{{end}} for "{{.greeting}}"</body>`)
 	if err != nil {
-		return nil, fmt.Errorf("template.New: %v", err)
+		return nil, fmt.Errorf("template.New: %w", err)
 	}
 
 	return &app{
