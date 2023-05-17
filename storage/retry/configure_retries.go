@@ -32,7 +32,7 @@ func configureRetries(w io.Writer, bucket, object string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -61,7 +61,7 @@ func configureRetries(w io.Writer, bucket, object string) error {
 
 	// Delete an object using the specified retry policy.
 	if err := o.Delete(ctx); err != nil {
-		return fmt.Errorf("Object(%q).Delete: %v", object, err)
+		return fmt.Errorf("Object(%q).Delete: %w", object, err)
 	}
 	fmt.Fprintf(w, "Blob %v deleted with a customized retry strategy.\n", object)
 	return nil

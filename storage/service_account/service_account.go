@@ -31,7 +31,7 @@ func getServiceAccount(w io.Writer, projectID string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -40,7 +40,7 @@ func getServiceAccount(w io.Writer, projectID string) error {
 
 	serviceAccount, err := client.ServiceAccount(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("ServiceAccount: %v", err)
+		return fmt.Errorf("ServiceAccount: %w", err)
 	}
 
 	fmt.Fprintf(w, "The GCS service account for project %v is: %v\n", projectID, serviceAccount)

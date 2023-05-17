@@ -34,7 +34,7 @@ func listGlossaries(w io.Writer, projectID string, location string) error {
 	ctx := context.Background()
 	client, err := translate.NewTranslationClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewTranslationClient: %v", err)
+		return fmt.Errorf("NewTranslationClient: %w", err)
 	}
 	defer client.Close()
 
@@ -51,7 +51,7 @@ func listGlossaries(w io.Writer, projectID string, location string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("ListGlossaries.Next: %v", err)
+			return fmt.Errorf("ListGlossaries.Next: %w", err)
 		}
 		fmt.Fprintf(w, "Name: %v\n", glossary.GetName())
 		fmt.Fprintf(w, "Entry count: %v\n", glossary.GetEntryCount())
