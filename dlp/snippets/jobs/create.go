@@ -52,14 +52,14 @@ func createJob(w io.Writer, projectID, gcsPath string, infoTypeNames []string) e
 			},
 		},
 
-		// Set autoPopulateTimespan to true to scan only new content
+		// Set autoPopulateTimespan to true to scan only new content.
 		TimespanConfig: &dlppb.StorageConfig_TimespanConfig{
 			EnableAutoPopulationOfTimespanConfig: true,
 		},
 	}
 
 	// Specify the type of info the inspection will look for.
-	// See https://cloud.google.com/dlp/docs/infotypes-reference for complete list of info types
+	// See https://cloud.google.com/dlp/docs/infotypes-reference for complete list of info types.
 	var infoTypes []*dlppb.InfoType
 	for _, c := range infoTypeNames {
 		infoTypes = append(infoTypes, &dlppb.InfoType{Name: c})

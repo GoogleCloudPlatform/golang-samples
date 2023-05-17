@@ -19,6 +19,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"regexp"
 	"strings"
 	"testing"
@@ -26,6 +28,7 @@ import (
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
@@ -184,9 +187,12 @@ func TestDeleteJob(t *testing.T) {
 
 func TestCreateJob(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
 
-	gcsPath := "gs://dlp-crest-test/test.txt"
+	buf := new(bytes.Buffer)
+	// createBucketForCreatJob will create a bucket and upload a txt file
+	createBucketForCreatJob(t, tc.ProjectID)
+
+	gcsPath := "gs://dlp-go-lang-test/test.txt"
 	infoTypeNames := []string{"EMAIL_ADDRESS", "PERSON_NAME", "LOCATION", "PHONE_NUMBER"}
 
 	if err := createJob(buf, tc.ProjectID, gcsPath, infoTypeNames); err != nil {
@@ -197,4 +203,111 @@ func TestCreateJob(t *testing.T) {
 	if want := "Created a Dlp Job "; !strings.Contains(got, want) {
 		t.Errorf("TestInspectWithCustomRegex got %q, want %q", got, want)
 	}
+
+	defer deleteAssetsOfCreateJobTest(t, tc.ProjectID)
+}
+
+func createBucketForCreatJob(t *testing.T, projectID string) error {
+	t.Helper()
+
+	ctx := context.Background()
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	bucketName := "dlp-job-go-lang-test"
+
+	// Check if the bucket already exists.
+	bucketExists := false
+	_, err = client.Bucket(bucketName).Attrs(ctx)
+	if err == nil {
+		bucketExists = true
+	}
+
+	// If the bucket doesn't exist, create it.
+	if !bucketExists {
+		if err := client.Bucket(bucketName).Create(ctx, projectID, &storage.BucketAttrs{
+			StorageClass: "STANDARD",
+			Location:     "us-central1",
+		}); err != nil {
+			log.Fatalf("---Failed to create bucket: %v", err)
+		}
+		fmt.Printf("---Bucket '%s' created successfully.\n", bucketName)
+	} else {
+		fmt.Printf("---Bucket '%s' already exists.\n", bucketName)
+	}
+
+	filePathToUpload := "testdata/test.txt"
+
+	// Open local file.
+	file, err := ioutil.ReadFile(filePathToUpload)
+	if err != nil {
+		log.Fatalf("Failed to read file: %v", err)
+	}
+
+	// Get a reference to the bucket
+	bucket := client.Bucket(bucketName)
+
+	// Upload the file
+	fileName := "test.txt"
+	object := bucket.Object(fileName)
+	writer := object.NewWriter(ctx)
+	_, err = writer.Write(file)
+	if err != nil {
+		log.Fatalf("---Failed to write file: %v", err)
+	}
+	err = writer.Close()
+	if err != nil {
+		log.Fatalf("---Failed to close writer: %v", err)
+	}
+	fmt.Printf("---File uploaded successfully: %v\n", fileName)
+
+	// Check if the file exists in the bucket
+	_, err = bucket.Object(fileName).Attrs(ctx)
+	if err != nil {
+		if err == storage.ErrObjectNotExist {
+			fmt.Printf("---File %v does not exist in bucket %v\n", fileName, bucketName)
+		} else {
+			log.Fatalf("---Failed to check file existence: %v", err)
+		}
+	} else {
+		fmt.Printf("---File %v exists in bucket %v\n", fileName, bucketName)
+	}
+
+	return err
+}
+
+func deleteAssetsOfCreateJobTest(t *testing.T, projectID string) error {
+	t.Helper()
+
+	bucketName := "dlp-job-go-lang-test"
+
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	objectName := "test.txt"
+
+	o := client.Bucket(bucketName).Object(objectName)
+	attrs, err := o.Attrs(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	o = o.If(storage.Conditions{GenerationMatch: attrs.Generation})
+
+	if err := o.Delete(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	bucket := client.Bucket(bucketName)
+	if err := bucket.Delete(ctx); err != nil {
+		t.Fatal(err)
+	}
+	return nil
 }
