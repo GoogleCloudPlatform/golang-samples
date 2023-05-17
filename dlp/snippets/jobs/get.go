@@ -36,7 +36,7 @@ func jobsGet(w io.Writer, projectID string, jobName string) error {
 	// call the Close method to cleanup its resources.
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return err
 	}
 
 	// Closing the client safely cleans up background resources.

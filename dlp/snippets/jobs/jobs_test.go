@@ -184,22 +184,22 @@ func TestDeleteJob(t *testing.T) {
 
 func TestJobsGet(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
-	listJobs(buf, tc.ProjectID, "", "RISK_ANALYSIS_JOB")
+	listJobs(&buf, tc.ProjectID, "", "RISK_ANALYSIS_JOB")
 	s := buf.String()
 	if len(s) == 0 {
 		// Create job.
 		riskNumerical(tc.ProjectID, "bigquery-public-data", "risk-topic", "risk-sub", "nhtsa_traffic_fatalities", "accident_2015", "state_number")
 		buf.Reset()
-		listJobs(buf, tc.ProjectID, "", "RISK_ANALYSIS_JOB")
+		listJobs(&buf, tc.ProjectID, "", "RISK_ANALYSIS_JOB")
 		s = buf.String()
 	}
 
 	jobName := string(jobIDRegexp.FindSubmatch([]byte(s))[1])
 	buf.Reset()
 
-	if err := jobsGet(buf, tc.ProjectID, jobName); err != nil {
+	if err := jobsGet(&buf, tc.ProjectID, jobName); err != nil {
 		t.Fatal(err)
 	}
 
