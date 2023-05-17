@@ -53,7 +53,7 @@ func main() {
 	endpoint := fmt.Sprintf("%s-dataproc.googleapis.com:443", region)
 	clusterClient, err := dataproc.NewClusterControllerClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
-		log.Fatalf("error creating the cluster client: %w\n", err)
+		log.Fatalf("error creating the cluster client: %s\n", err)
 	}
 
 	// Create the cluster config.
@@ -79,12 +79,12 @@ func main() {
 	// Create the cluster.
 	createOp, err := clusterClient.CreateCluster(ctx, createReq)
 	if err != nil {
-		log.Fatalf("error submitting the cluster creation request: %w\n", err)
+		log.Fatalf("error submitting the cluster creation request: %v\n", err)
 	}
 
 	createResp, err := createOp.Wait(ctx)
 	if err != nil {
-		log.Fatalf("error creating the cluster: %w\n", err)
+		log.Fatalf("error creating the cluster: %v\n", err)
 	}
 
 	// Defer cluster deletion.
@@ -127,13 +127,13 @@ func main() {
 
 	submitJobOp, err := jobClient.SubmitJobAsOperation(ctx, submitJobReq)
 	if err != nil {
-		fmt.Printf("error with request to submitting job: %w\n", err)
+		fmt.Printf("error with request to submitting job: %v\n", err)
 		return
 	}
 
 	submitJobResp, err := submitJobOp.Wait(ctx)
 	if err != nil {
-		fmt.Printf("error submitting job: %w\n", err)
+		fmt.Printf("error submitting job: %v\n", err)
 		return
 	}
 
@@ -148,14 +148,14 @@ func main() {
 	// Dataproc job outget gets saved to a GCS bucket allocated to it.
 	storageClient, err := storage.NewClient(ctx)
 	if err != nil {
-		fmt.Printf("error creating storage client: %w\n", err)
+		fmt.Printf("error creating storage client: %v\n", err)
 		return
 	}
 
 	obj := fmt.Sprintf("%s.000000000", matches[2])
 	reader, err := storageClient.Bucket(matches[1]).Object(obj).NewReader(ctx)
 	if err != nil {
-		fmt.Printf("error reading job output: %w\n", err)
+		fmt.Printf("error reading job output: %v\n", err)
 		return
 	}
 
@@ -163,7 +163,7 @@ func main() {
 
 	body, err := ioutil.ReadAll(reader)
 	if err != nil {
-		fmt.Printf("could not read output from Dataproc Job: %w\n", err)
+		fmt.Printf("could not read output from Dataproc Job: %v\n", err)
 		return
 	}
 
