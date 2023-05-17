@@ -33,7 +33,7 @@ func downloadEncryptedFile(w io.Writer, bucket, object string, secretKey []byte)
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("storage.NewClient: %v", err)
+		return nil, fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -44,13 +44,13 @@ func downloadEncryptedFile(w io.Writer, bucket, object string, secretKey []byte)
 
 	rc, err := obj.Key(secretKey).NewReader(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Object(%q).Key(%q).NewReader: %v", object, secretKey, err)
+		return nil, fmt.Errorf("Object(%q).Key(%q).NewReader: %w", object, secretKey, err)
 	}
 	defer rc.Close()
 
 	data, err := ioutil.ReadAll(rc)
 	if err != nil {
-		return nil, fmt.Errorf("ioutil.ReadAll: %v", err)
+		return nil, fmt.Errorf("ioutil.ReadAll: %w", err)
 	}
 	fmt.Fprintf(w, "File %v downloaded with encryption key.\n", object)
 	return data, nil

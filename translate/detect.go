@@ -27,12 +27,12 @@ func detectLanguage(text string) (*translate.Detection, error) {
 	ctx := context.Background()
 	client, err := translate.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("translate.NewClient: %v", err)
+		return nil, fmt.Errorf("translate.NewClient: %w", err)
 	}
 	defer client.Close()
 	lang, err := client.DetectLanguage(ctx, []string{text})
 	if err != nil {
-		return nil, fmt.Errorf("DetectLanguage: %v", err)
+		return nil, fmt.Errorf("DetectLanguage: %w", err)
 	}
 	if len(lang) == 0 || len(lang[0]) == 0 {
 		return nil, fmt.Errorf("DetectLanguage return value empty")

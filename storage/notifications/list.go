@@ -30,13 +30,13 @@ func listBucketNotifications(w io.Writer, bucketName string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
 	notifications, err := client.Bucket(bucketName).Notifications(ctx)
 	if err != nil {
-		return fmt.Errorf("Bucket.Notifications: %v", err)
+		return fmt.Errorf("Bucket.Notifications: %w", err)
 	}
 
 	for nID, n := range notifications {

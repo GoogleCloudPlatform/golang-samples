@@ -39,7 +39,7 @@ func getInstanceConfig(w io.Writer, instanceConfigName string) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("could not get instance config %s: %v", instanceConfigName, err)
+		return fmt.Errorf("could not get instance config %s: %w", instanceConfigName, err)
 	}
 
 	fmt.Fprintf(w, "Available leader options for instance config %s: %v", instanceConfigName, ic.LeaderOptions)
