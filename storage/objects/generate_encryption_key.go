@@ -30,7 +30,7 @@ func generateEncryptionKey(w io.Writer) error {
 	// comprehensive security policy.
 	key := make([]byte, 32)
 	if _, err := rand.Read(key); err != nil {
-		return fmt.Errorf("rand.Read: %v", err)
+		return fmt.Errorf("rand.Read: %w", err)
 	}
 	encryptionKey := base64.StdEncoding.EncodeToString(key)
 	fmt.Fprintf(w, "Generated base64-encoded encryption key: %v\n", encryptionKey)

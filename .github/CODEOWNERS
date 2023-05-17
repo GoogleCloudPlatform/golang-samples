@@ -63,6 +63,7 @@
 /iam/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
 /iap/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
 /kms/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
+/privateca/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
 /securitycenter/                       @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
 /secretmanager/                        @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
 /mediacdn/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra @justin-mp
