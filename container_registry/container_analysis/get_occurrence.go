@@ -30,7 +30,7 @@ func getOccurrence(occurrenceID, projectID string) (*grafeaspb.Occurrence, error
 	ctx := context.Background()
 	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("NewClient: %v", err)
+		return nil, fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -39,7 +39,7 @@ func getOccurrence(occurrenceID, projectID string) (*grafeaspb.Occurrence, error
 	}
 	occ, err := client.GetGrafeasClient().GetOccurrence(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("client.GetOccurrence: %v", err)
+		return nil, fmt.Errorf("client.GetOccurrence: %w", err)
 	}
 	return occ, nil
 }
