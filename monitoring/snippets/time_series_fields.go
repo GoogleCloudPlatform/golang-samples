@@ -34,7 +34,7 @@ func readTimeSeriesFields(w io.Writer, projectID string) error {
 	ctx := context.Background()
 	client, err := monitoring.NewMetricClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewMetricClient: %v", err)
+		return fmt.Errorf("NewMetricClient: %w", err)
 	}
 	defer client.Close()
 	startTime := time.Now().UTC().Add(time.Minute * -20)
@@ -60,7 +60,7 @@ func readTimeSeriesFields(w io.Writer, projectID string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("could not read time series value: %v", err)
+			return fmt.Errorf("could not read time series value: %w", err)
 		}
 		fmt.Fprintf(w, "\t%v\n", resp.GetMetric().GetLabels()["instance_name"])
 	}

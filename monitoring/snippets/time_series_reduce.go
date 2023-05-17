@@ -35,7 +35,7 @@ func readTimeSeriesReduce(w io.Writer, projectID string) error {
 	ctx := context.Background()
 	client, err := monitoring.NewMetricClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewMetricClient: %v", err)
+		return fmt.Errorf("NewMetricClient: %w", err)
 	}
 	defer client.Close()
 	startTime := time.Now().UTC().Add(time.Minute * -20)
@@ -66,7 +66,7 @@ func readTimeSeriesReduce(w io.Writer, projectID string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("could not read time series value: %v", err)
+			return fmt.Errorf("could not read time series value: %w", err)
 		}
 		fmt.Fprintln(w, "Average CPU utilization across all GCE instances:")
 		fmt.Fprintf(w, "\tNow: %.4f\n", resp.GetPoints()[0].GetValue().GetDoubleValue())
