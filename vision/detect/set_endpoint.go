@@ -30,7 +30,7 @@ func setEndpoint(endpoint string) error {
 	ctx := context.Background()
 	client, err := vision.NewImageAnnotatorClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
-		return fmt.Errorf("NewImageAnnotatorClient: %v", err)
+		return fmt.Errorf("NewImageAnnotatorClient: %w", err)
 	}
 	defer client.Close()
 
