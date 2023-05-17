@@ -35,7 +35,7 @@ func exportDataset(w io.Writer, projectID string, location string, datasetID str
 	ctx := context.Background()
 	client, err := automl.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -52,12 +52,12 @@ func exportDataset(w io.Writer, projectID string, location string, datasetID str
 
 	op, err := client.ExportData(ctx, req)
 	if err != nil {
-		return fmt.Errorf("ExportData: %v", err)
+		return fmt.Errorf("ExportData: %w", err)
 	}
 	fmt.Fprintf(w, "Processing operation name: %q\n", op.Name())
 
 	if err := op.Wait(ctx); err != nil {
-		return fmt.Errorf("Wait: %v", err)
+		return fmt.Errorf("Wait: %w", err)
 	}
 
 	fmt.Fprintf(w, "Dataset exported.\n")
