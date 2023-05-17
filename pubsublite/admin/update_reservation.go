@@ -31,7 +31,7 @@ func updateReservation(w io.Writer, projectID, region, reservationID string, thr
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
-		return fmt.Errorf("pubsublite.NewAdminClient: %v", err)
+		return fmt.Errorf("pubsublite.NewAdminClient: %w", err)
 	}
 	defer client.Close()
 
@@ -42,7 +42,7 @@ func updateReservation(w io.Writer, projectID, region, reservationID string, thr
 	}
 	updatedCfg, err := client.UpdateReservation(ctx, config)
 	if err != nil {
-		return fmt.Errorf("client.UpdateReservation got err: %v", err)
+		return fmt.Errorf("client.UpdateReservation got err: %w", err)
 	}
 	fmt.Fprintf(w, "Updated reservation: %#v\n", updatedCfg)
 	return nil

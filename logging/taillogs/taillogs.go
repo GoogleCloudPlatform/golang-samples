@@ -31,13 +31,13 @@ func tailLogs(projectID string) error {
 	ctx := context.Background()
 	client, err := logging.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient error: %v", err)
+		return fmt.Errorf("NewClient error: %w", err)
 	}
 	defer client.Close()
 
 	stream, err := client.TailLogEntries(ctx)
 	if err != nil {
-		return fmt.Errorf("TailLogEntries error: %v", err)
+		return fmt.Errorf("TailLogEntries error: %w", err)
 	}
 	defer stream.CloseSend()
 
@@ -47,7 +47,7 @@ func tailLogs(projectID string) error {
 		},
 	}
 	if err := stream.Send(req); err != nil {
-		return fmt.Errorf("stream.Send error: %v", err)
+		return fmt.Errorf("stream.Send error: %w", err)
 	}
 
 	// read and print two or more streamed log entries
@@ -57,7 +57,7 @@ func tailLogs(projectID string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("stream.Recv error: %v", err)
+			return fmt.Errorf("stream.Recv error: %w", err)
 		}
 		fmt.Printf("received:\n%v\n", resp)
 		if resp.Entries != nil {
