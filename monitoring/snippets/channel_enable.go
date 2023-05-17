@@ -48,7 +48,7 @@ func enableChannel(w io.Writer, channelName string) error {
 	}
 
 	if _, err := client.UpdateNotificationChannel(ctx, req); err != nil {
-		return fmt.Errorf("EnableNotificationChannel: %v", err)
+		return fmt.Errorf("EnableNotificationChannel: %w", err)
 	}
 
 	fmt.Fprintf(w, "Enabled channel %q", channelName)
