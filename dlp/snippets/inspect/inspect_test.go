@@ -360,3 +360,21 @@ func TestInspectStringCustomOmitOverlap(t *testing.T) {
 		t.Errorf("inspectStringCustomOmitOverlap got %q, want %q", got, want)
 	}
 }
+
+func TestInspectImageFile(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+	pathToImage := "testdata/test.png"
+
+	if err := inspectImageFile(&buf, tc.ProjectID, pathToImage); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectImageFile got %q, want %q", got, want)
+	}
+	if want := "Info type: EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectImageFile got %q, want %q", got, want)
+	}
+}
