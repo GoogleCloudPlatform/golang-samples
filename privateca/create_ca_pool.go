@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package privateca
+package snippets
 
 // [START privateca_create_ca_pool]
 import (
