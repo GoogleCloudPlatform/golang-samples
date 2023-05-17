@@ -34,7 +34,7 @@ func removeBucketConditionalIAMBinding(w io.Writer, bucketName, role, title, des
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -44,7 +44,7 @@ func removeBucketConditionalIAMBinding(w io.Writer, bucketName, role, title, des
 	bucket := client.Bucket(bucketName)
 	policy, err := bucket.IAM().V3().Policy(ctx)
 	if err != nil {
-		return fmt.Errorf("Bucket(%q).IAM().V3().Policy: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).IAM().V3().Policy: %w", bucketName, err)
 	}
 
 	// Find the index of the binding matching inputs.
@@ -68,7 +68,7 @@ func removeBucketConditionalIAMBinding(w io.Writer, bucketName, role, title, des
 	policy.Bindings = append(policy.Bindings[:i], policy.Bindings[i+1:]...)
 
 	if err := bucket.IAM().V3().SetPolicy(ctx, policy); err != nil {
-		return fmt.Errorf("Bucket(%q).IAM().V3().SetPolicy: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).IAM().V3().SetPolicy: %w", bucketName, err)
 	}
 	// NOTE: It may be necessary to retry this operation if IAM policies are
 	// being modified concurrently. SetPolicy will return an error if the policy

@@ -30,7 +30,7 @@ func lockRetentionPolicy(w io.Writer, bucketName string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -40,19 +40,19 @@ func lockRetentionPolicy(w io.Writer, bucketName string) error {
 	bucket := client.Bucket(bucketName)
 	attrs, err := bucket.Attrs(ctx)
 	if err != nil {
-		return fmt.Errorf("Bucket(%q).Attrs: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Attrs: %w", bucketName, err)
 	}
 
 	conditions := storage.BucketConditions{
 		MetagenerationMatch: attrs.MetaGeneration,
 	}
 	if err := bucket.If(conditions).LockRetentionPolicy(ctx); err != nil {
-		return fmt.Errorf("Bucket(%q).LockRetentionPolicy: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).LockRetentionPolicy: %w", bucketName, err)
 	}
 
 	lockedAttrs, err := bucket.Attrs(ctx)
 	if err != nil {
-		return fmt.Errorf("Bucket(%q).Attrs: lockedAttrs: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Attrs: lockedAttrs: %w", bucketName, err)
 	}
 
 	fmt.Fprintf(w, "Retention policy for %v is now locked\n", bucketName)

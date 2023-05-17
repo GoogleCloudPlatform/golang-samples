@@ -40,7 +40,7 @@ func translateText(w io.Writer, projectID string, sourceLang string, targetLang 
 	ctx := context.Background()
 	client, err := translate.NewTranslationClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewTranslationClient: %v", err)
+		return fmt.Errorf("NewTranslationClient: %w", err)
 	}
 	defer client.Close()
 	// [END translate_v3_translate_text_1]
@@ -57,7 +57,7 @@ func translateText(w io.Writer, projectID string, sourceLang string, targetLang 
 
 	resp, err := client.TranslateText(ctx, req)
 	if err != nil {
-		return fmt.Errorf("TranslateText: %v", err)
+		return fmt.Errorf("TranslateText: %w", err)
 	}
 	// [END translate_v3_translate_text_2]
 

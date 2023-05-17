@@ -49,7 +49,7 @@ func connectWithConnector() (*sql.DB, error) {
 
 	d, err := cloudsqlconn.NewDialer(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("cloudsqlconn.NewDialer: %v", err)
+		return nil, fmt.Errorf("cloudsqlconn.NewDialer: %w", err)
 	}
 	var opts []cloudsqlconn.DialOption
 	if usePrivate != "" {
@@ -65,7 +65,7 @@ func connectWithConnector() (*sql.DB, error) {
 
 	dbPool, err := sql.Open("mysql", dbURI)
 	if err != nil {
-		return nil, fmt.Errorf("sql.Open: %v", err)
+		return nil, fmt.Errorf("sql.Open: %w", err)
 	}
 	return dbPool, nil
 }
