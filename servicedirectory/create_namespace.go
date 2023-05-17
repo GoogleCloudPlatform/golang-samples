@@ -33,7 +33,7 @@ func createNamespace(w io.Writer, projectID string) error {
 	// Create a registration client.
 	client, err := servicedirectory.NewRegistrationClient(ctx)
 	if err != nil {
-		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
+		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %w", err)
 	}
 
 	defer client.Close()
@@ -44,7 +44,7 @@ func createNamespace(w io.Writer, projectID string) error {
 	}
 	resp, err := client.CreateNamespace(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateNamespace: %v", err)
+		return fmt.Errorf("CreateNamespace: %w", err)
 	}
 	fmt.Fprintf(w, "servicedirectory.CreateNamespace result: %s\n", resp.Name)
 	return nil
