@@ -33,7 +33,7 @@ func rotateEncryptionKey(w io.Writer, bucket, object string, key, newKey []byte)
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -43,11 +43,11 @@ func rotateEncryptionKey(w io.Writer, bucket, object string, key, newKey []byte)
 	o := client.Bucket(bucket).Object(object)
 
 	// Optional: set a generation-match precondition to avoid potential race
-	// conditions and data corruptions. The request to upload is aborted if the
+	// conditions and data corruptions. The request to copy is aborted if the
 	// object's generation number does not match your precondition.
 	attrs, err := o.Attrs(ctx)
 	if err != nil {
-		return fmt.Errorf("object.Attrs: %v", err)
+		return fmt.Errorf("object.Attrs: %w", err)
 	}
 	o = o.If(storage.Conditions{GenerationMatch: attrs.Generation})
 
@@ -55,7 +55,7 @@ func rotateEncryptionKey(w io.Writer, bucket, object string, key, newKey []byte)
 	// object using the new key.
 	_, err = o.Key(newKey).CopierFrom(o.Key(key)).Run(ctx)
 	if err != nil {
-		return fmt.Errorf("Key(%q).CopierFrom(%q).Run: %v", newKey, key, err)
+		return fmt.Errorf("Key(%q).CopierFrom(%q).Run: %w", newKey, key, err)
 	}
 	fmt.Fprintf(w, "Key rotation complete for blob %v.\n", object)
 	return nil

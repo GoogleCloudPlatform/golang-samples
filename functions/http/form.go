@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
 
 // UploadFile processes a 'multipart/form-data' upload request.
@@ -59,6 +61,10 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+}
+
+func init() {
+	functions.HTTP("UploadFile", UploadFile)
 }
 
 // [END functions_http_form_data]

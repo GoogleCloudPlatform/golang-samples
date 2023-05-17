@@ -35,7 +35,7 @@ func connectTCPSocket() (*sql.DB, error) {
 	mustGetenv := func(k string) string {
 		v := os.Getenv(k)
 		if v == "" {
-			log.Fatalf("Warning: %s environment variable not set.", k)
+			log.Fatalf("Fatal Error in connect_tcp.go: %s environment variable not set.", k)
 		}
 		return v
 	}
@@ -72,7 +72,7 @@ func connectTCPSocket() (*sql.DB, error) {
 	// dbPool is the pool of database connections.
 	dbPool, err := sql.Open("pgx", dbURI)
 	if err != nil {
-		return nil, fmt.Errorf("sql.Open: %v", err)
+		return nil, fmt.Errorf("sql.Open: %w", err)
 	}
 
 	// [START_EXCLUDE]

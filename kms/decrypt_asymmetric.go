@@ -36,7 +36,7 @@ func decryptAsymmetric(w io.Writer, name string, ciphertext []byte) error {
 	ctx := context.Background()
 	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create kms client: %v", err)
+		return fmt.Errorf("failed to create kms client: %w", err)
 	}
 	defer client.Close()
 
@@ -57,7 +57,7 @@ func decryptAsymmetric(w io.Writer, name string, ciphertext []byte) error {
 	// Call the API.
 	result, err := client.AsymmetricDecrypt(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to decrypt ciphertext: %v", err)
+		return fmt.Errorf("failed to decrypt ciphertext: %w", err)
 	}
 
 	// Optional, but recommended: perform integrity verification on result.

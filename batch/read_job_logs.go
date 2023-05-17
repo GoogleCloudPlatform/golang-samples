@@ -27,21 +27,20 @@ import (
 	batchpb "google.golang.org/genproto/googleapis/cloud/batch/v1"
 )
 
-// Lists all jobs in the given project and region
+// Retrieve the logs written by the given job to Cloud Logging
 func printJobLogs(w io.Writer, projectID string, job *batchpb.Job) error {
 	// projectID := "your_project_id"
-	// region := "us-central1"
 
 	ctx := context.Background()
 	batchClient, err := batch.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer batchClient.Close()
 
 	adminClient, err := logadmin.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("Failed to create logadmin client: %v", err)
+		return fmt.Errorf("Failed to create logadmin client: %w", err)
 	}
 	defer adminClient.Close()
 
@@ -60,7 +59,7 @@ func printJobLogs(w io.Writer, projectID string, job *batchpb.Job) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("unable to fetch log entry: %v", err)
+			return fmt.Errorf("unable to fetch log entry: %w", err)
 		}
 		entries = append(entries, logEntry)
 		fmt.Fprintf(w, "%s\n", logEntry.Payload)

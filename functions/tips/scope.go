@@ -18,6 +18,8 @@ package tips
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
 
 // [START functions_tips_scopes]
@@ -31,6 +33,7 @@ var h string
 // an instance's cold start.
 func init() {
 	h = heavyComputation()
+	functions.HTTP("ScopeDemo", ScopeDemo)
 }
 
 // ScopeDemo is an example of using globally and locally

@@ -36,7 +36,7 @@ func listSecretsWithFilter(w io.Writer, parent string, filter string) error {
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create secretmanager client: %v", err)
+		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
 	defer client.Close()
 
@@ -55,7 +55,7 @@ func listSecretsWithFilter(w io.Writer, parent string, filter string) error {
 		}
 
 		if err != nil {
-			return fmt.Errorf("failed to list secrets: %v", err)
+			return fmt.Errorf("failed to list secrets: %w", err)
 		}
 
 		fmt.Fprintf(w, "Found secret %s\n", resp.Name)

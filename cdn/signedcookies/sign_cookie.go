@@ -16,7 +16,7 @@
 // given key.
 package signedcookie
 
-// [START cdn_signedcookie_example]
+// [START cloudcdn_sign_cookie]
 import (
 	"crypto/hmac"
 	"crypto/sha1"
@@ -52,6 +52,8 @@ func signCookie(urlPrefix, keyName string, key []byte, expiration time.Time) (st
 
 	return signedValue, nil
 }
+
+// [END cloudcdn_sign_cookie]
 
 // readKeyFile reads the base64url-encoded key file and decodes it.
 func readKeyFile(path string) ([]byte, error) {
@@ -109,5 +111,3 @@ func generateSignedCookie(w io.Writer) error {
 
 	return nil
 }
-
-// [END cdn_signedcookie_example]

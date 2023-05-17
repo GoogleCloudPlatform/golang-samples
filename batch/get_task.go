@@ -35,7 +35,7 @@ func getTask(w io.Writer, projectID, region, jobName, taskGroup string, taskNumb
 	ctx := context.Background()
 	batchClient, err := batch.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer batchClient.Close()
 
@@ -46,7 +46,7 @@ func getTask(w io.Writer, projectID, region, jobName, taskGroup string, taskNumb
 
 	response, err := batchClient.GetTask(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to get task: %v", err)
+		return fmt.Errorf("unable to get task: %w", err)
 	}
 
 	fmt.Fprintf(w, "Task info: %v\n", response)

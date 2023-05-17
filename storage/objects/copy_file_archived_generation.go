@@ -35,7 +35,7 @@ func copyOldVersionOfObject(w io.Writer, bucket, srcObject, dstObject string, ge
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -46,7 +46,7 @@ func copyOldVersionOfObject(w io.Writer, bucket, srcObject, dstObject string, ge
 	dst := client.Bucket(bucket).Object(dstObject)
 
 	// Optional: set a generation-match precondition to avoid potential race
-	// conditions and data corruptions. The request to upload is aborted if the
+	// conditions and data corruptions. The request to copy is aborted if the
 	// object's generation number does not match your precondition.
 	// For a dst object that does not yet exist, set the DoesNotExist precondition.
 	dst = dst.If(storage.Conditions{DoesNotExist: true})
@@ -54,12 +54,12 @@ func copyOldVersionOfObject(w io.Writer, bucket, srcObject, dstObject string, ge
 	// generation-match precondition using its generation number.
 	// attrs, err := dst.Attrs(ctx)
 	// if err != nil {
-	// 	return fmt.Errorf("object.Attrs: %v", err)
+	// 	return fmt.Errorf("object.Attrs: %w", err)
 	// }
 	// dst = dst.If(storage.Conditions{GenerationMatch: attrs.Generation})
 
 	if _, err := dst.CopierFrom(src.Generation(gen)).Run(ctx); err != nil {
-		return fmt.Errorf("Object(%q).CopierFrom(%q).Generation(%v).Run: %v", dstObject, srcObject, gen, err)
+		return fmt.Errorf("Object(%q).CopierFrom(%q).Generation(%v).Run: %w", dstObject, srcObject, gen, err)
 	}
 	fmt.Fprintf(w, "Generation %v of object %v in bucket %v was copied to %v\n", gen, srcObject, bucket, dstObject)
 	return nil

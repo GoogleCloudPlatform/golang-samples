@@ -110,6 +110,17 @@ func TestComputeSnippets(t *testing.T) {
 		t.Errorf("createInstance got err: %v", err)
 	}
 
+	buf.Reset()
+
+	if err := changeMachineType(buf, tc.ProjectID, zone, instanceName2, "e2-standard-2"); err != nil {
+		t.Errorf("changeMachineType got err: %v", err)
+	}
+
+	expectedResult = "Instance updated"
+	if got := buf.String(); !strings.Contains(got, expectedResult) {
+		t.Errorf("waitForOperation got %q, want %q", got, expectedResult)
+	}
+
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {

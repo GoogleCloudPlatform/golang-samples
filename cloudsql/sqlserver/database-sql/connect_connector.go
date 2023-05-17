@@ -46,7 +46,7 @@ func connectWithConnector() (*sql.DB, error) {
 	mustGetenv := func(k string) string {
 		v := os.Getenv(k)
 		if v == "" {
-			log.Fatalf("Warning: %s environment variable not set.\n", k)
+			log.Fatalf("Fatal Error in connect_connector.go: %s environment variable not set.\n", k)
 		}
 		return v
 	}
@@ -65,11 +65,11 @@ func connectWithConnector() (*sql.DB, error) {
 	dbURI := fmt.Sprintf("user id=%s;password=%s;database=%s;", dbUser, dbPwd, dbName)
 	c, err := mssql.NewConnector(dbURI)
 	if err != nil {
-		return nil, fmt.Errorf("mssql.NewConnector: %v", err)
+		return nil, fmt.Errorf("mssql.NewConnector: %w", err)
 	}
 	dialer, err := cloudsqlconn.NewDialer(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("cloudsqlconn.NewDailer: %v", err)
+		return nil, fmt.Errorf("cloudsqlconn.NewDailer: %w", err)
 	}
 	c.Dialer = &csqlDialer{
 		dialer:     dialer,
@@ -79,7 +79,7 @@ func connectWithConnector() (*sql.DB, error) {
 
 	dbPool := sql.OpenDB(c)
 	if err != nil {
-		return nil, fmt.Errorf("sql.Open: %v", err)
+		return nil, fmt.Errorf("sql.Open: %w", err)
 	}
 	return dbPool, nil
 }

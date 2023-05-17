@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/storage"
@@ -37,16 +36,6 @@ type ocrMessage struct {
 	FileName string       `json:"fileName"`
 	Lang     language.Tag `json:"lang"`
 	SrcLang  language.Tag `json:"srcLang"`
-}
-
-// GCSEvent is the payload of a GCS event.
-type GCSEvent struct {
-	Bucket         string    `json:"bucket"`
-	Name           string    `json:"name"`
-	Metageneration string    `json:"metageneration"`
-	ResourceState  string    `json:"resourceState"`
-	TimeCreated    time.Time `json:"timeCreated"`
-	Updated        time.Time `json:"updated"`
 }
 
 // Eventarc sends a MessagePublishedData object.
@@ -88,28 +77,28 @@ func setup(ctx context.Context) error {
 	if visionClient == nil {
 		visionClient, err = vision.NewImageAnnotatorClient(ctx)
 		if err != nil {
-			return fmt.Errorf("vision.NewImageAnnotatorClient: %v", err)
+			return fmt.Errorf("vision.NewImageAnnotatorClient: %w", err)
 		}
 	}
 
 	if translateClient == nil {
 		translateClient, err = translate.NewClient(ctx)
 		if err != nil {
-			return fmt.Errorf("translate.NewClient: %v", err)
+			return fmt.Errorf("translate.NewClient: %w", err)
 		}
 	}
 
 	if pubsubClient == nil {
 		pubsubClient, err = pubsub.NewClient(ctx, projectID)
 		if err != nil {
-			return fmt.Errorf("translate.NewClient: %v", err)
+			return fmt.Errorf("translate.NewClient: %w", err)
 		}
 	}
 
 	if storageClient == nil {
 		storageClient, err = storage.NewClient(ctx)
 		if err != nil {
-			return fmt.Errorf("storage.NewClient: %v", err)
+			return fmt.Errorf("storage.NewClient: %w", err)
 		}
 	}
 	return nil

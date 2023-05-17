@@ -19,7 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 
 	"cloud.google.com/go/pubsub"
 	"github.com/linkedin/goavro/v2"
@@ -35,7 +35,7 @@ func publishAvroRecords(w io.Writer, projectID, topicID, avscFile string) error 
 		return fmt.Errorf("pubsub.NewClient: %v", err)
 	}
 
-	avroSource, err := ioutil.ReadFile(avscFile)
+	avroSource, err := os.ReadFile(avscFile)
 	if err != nil {
 		return fmt.Errorf("ioutil.ReadFile err: %v", err)
 	}

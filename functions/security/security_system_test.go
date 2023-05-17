@@ -24,7 +24,7 @@ import (
 	"testing"
 )
 
-const RuntimeVersion = "go113"
+const RuntimeVersion = "go118"
 const FunctionsRegion = "us-central1"
 
 func TestMain(m *testing.M) {

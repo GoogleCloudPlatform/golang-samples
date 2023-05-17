@@ -39,7 +39,7 @@ func getIdTokenFromImpersonatedCredentials(w io.Writer, scope, targetAudience, i
 	// working environment.
 	credentials, err := google.FindDefaultCredentials(ctx, scope)
 	if err != nil {
-		return fmt.Errorf("failed to generate default credentials: %v", err)
+		return fmt.Errorf("failed to generate default credentials: %w", err)
 	}
 
 	ts, err := impersonate.IDTokenSource(ctx, impersonate.IDTokenConfig{
@@ -53,7 +53,7 @@ func getIdTokenFromImpersonatedCredentials(w io.Writer, scope, targetAudience, i
 		Delegates: []string{},
 	}, option.WithCredentials(credentials))
 	if err != nil {
-		return fmt.Errorf("IDTokenSource error: %v", err)
+		return fmt.Errorf("IDTokenSource error: %w", err)
 	}
 
 	// Get the ID token.
@@ -61,7 +61,7 @@ func getIdTokenFromImpersonatedCredentials(w io.Writer, scope, targetAudience, i
 	// to the target audience.
 	_, err = ts.Token()
 	if err != nil {
-		return fmt.Errorf("failed to receive token: %v", err)
+		return fmt.Errorf("failed to receive token: %w", err)
 	}
 	fmt.Fprintf(w, "Generated ID token.\n")
 

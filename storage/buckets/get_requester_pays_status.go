@@ -30,7 +30,7 @@ func getRequesterPaysStatus(w io.Writer, bucketName string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -39,7 +39,7 @@ func getRequesterPaysStatus(w io.Writer, bucketName string) error {
 
 	attrs, err := client.Bucket(bucketName).Attrs(ctx)
 	if err != nil {
-		return fmt.Errorf("Bucket(%q).Attrs: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Attrs: %w", bucketName, err)
 	}
 	fmt.Fprintf(w, "Is requester pays enabled? %v\n", attrs.RequesterPays)
 	return nil

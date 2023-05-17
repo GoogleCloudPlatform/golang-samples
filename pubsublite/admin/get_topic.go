@@ -33,14 +33,14 @@ func getTopic(w io.Writer, projectID, region, location, topicID string) error {
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
-		return fmt.Errorf("pubsublite.NewAdminClient: %v", err)
+		return fmt.Errorf("pubsublite.NewAdminClient: %w", err)
 	}
 	defer client.Close()
 
 	topicPath := fmt.Sprintf("projects/%s/locations/%s/topics/%s", projectID, location, topicID)
 	topic, err := client.Topic(ctx, topicPath)
 	if err != nil {
-		return fmt.Errorf("client.Topic got err: %v", err)
+		return fmt.Errorf("client.Topic got err: %w", err)
 	}
 	fmt.Fprintf(w, "Got topic: %#v\n", *topic)
 	return nil

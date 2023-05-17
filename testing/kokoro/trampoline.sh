@@ -20,19 +20,21 @@ date
 
 cd github/golang-samples || exit 1
 
-SIGNIFICANT_CHANGES="$(git --no-pager diff --name-only main..HEAD | grep -Ev '(\.md$|^\.github)' || true)"
+# SIGNIFICANT_CHANGES="$(git --no-pager diff --name-only main..HEAD | grep -Ev '(\.md$|^\.github)' || true)"
 
-# If this is a PR with only insignificant changes, don't run any tests.
-if [[ -n ${KOKORO_GITHUB_PULL_REQUEST_NUMBER:-} ]] && [[ -z "$SIGNIFICANT_CHANGES" ]]; then
-  echo "No big changes. Not running any tests."
-  exit 0
-fi
+# # If this is a PR with only insignificant changes, don't run any tests.
+# if [[ -n ${KOKORO_GITHUB_PULL_REQUEST_NUMBER:-} ]] && [[ -z "$SIGNIFICANT_CHANGES" ]]; then
+#   echo "No big changes. Not running any tests."
+#   exit 0
+# fi
 
 cd - || exit 1
 
 function cleanup() {
-    chmod +x "${KOKORO_GFILE_DIR}"/trampoline_cleanup.sh
-    "${KOKORO_GFILE_DIR}"/trampoline_cleanup.sh
+    # This clutters logs with chmod errors when used in a docker context.
+    # TODO(muncus): determine if we ever need this, or make it conditional.
+    # chmod +x "${KOKORO_GFILE_DIR}"/trampoline_cleanup.sh
+    # "${KOKORO_GFILE_DIR}"/trampoline_cleanup.sh
     echo "cleanup";
 }
 trap cleanup EXIT

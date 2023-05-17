@@ -15,6 +15,7 @@
 package cloudsql
 
 // [START cloud_sql_mysql_databasesql_connect_auto_iam_authn]
+// [START cloud_sql_mysql_databasesql_auto_iam_authn]
 import (
 	"context"
 	"database/sql"
@@ -40,7 +41,7 @@ func connectWithConnectorIAMAuthN() (*sql.DB, error) {
 	// Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
 	// keep secrets safe.
 	var (
-		dbUser                 = mustGetenv("DB_IAM_USER")              // e.g. 'my-db-user'
+		dbUser                 = mustGetenv("DB_IAM_USER")              // e.g. 'service-account-name'
 		dbName                 = mustGetenv("DB_NAME")                  // e.g. 'my-database'
 		instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME") // e.g. 'project:region:instance'
 		usePrivate             = os.Getenv("PRIVATE_IP")
@@ -48,7 +49,7 @@ func connectWithConnectorIAMAuthN() (*sql.DB, error) {
 
 	d, err := cloudsqlconn.NewDialer(context.Background(), cloudsqlconn.WithIAMAuthN())
 	if err != nil {
-		return nil, fmt.Errorf("cloudsqlconn.NewDialer: %v", err)
+		return nil, fmt.Errorf("cloudsqlconn.NewDialer: %w", err)
 	}
 	var opts []cloudsqlconn.DialOption
 	if usePrivate != "" {
@@ -64,9 +65,10 @@ func connectWithConnectorIAMAuthN() (*sql.DB, error) {
 
 	dbPool, err := sql.Open("mysql", dbURI)
 	if err != nil {
-		return nil, fmt.Errorf("sql.Open: %v", err)
+		return nil, fmt.Errorf("sql.Open: %w", err)
 	}
 	return dbPool, nil
 }
 
+// [END cloud_sql_mysql_databasesql_auto_iam_authn]
 // [END cloud_sql_mysql_databasesql_connect_auto_iam_authn]

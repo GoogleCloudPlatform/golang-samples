@@ -31,12 +31,13 @@ import (
 	"cloud.google.com/go/kms/apiv1/kmspb"
 	"cloud.google.com/go/spanner"
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
+	adminpb "cloud.google.com/go/spanner/admin/database/apiv1/databasepb"
 	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
 	"google.golang.org/api/iterator"
-	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
+	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -162,6 +163,15 @@ func TestSample(t *testing.T) {
 	runSample(t, delete, dbName, "failed to delete data")
 	runSample(t, write, dbName, "failed to insert data")
 	writeTime := time.Now()
+
+	runSample(t, addAndDropDatabaseRole, dbName, "failed to add database role")
+	out = runSample(t, func(w io.Writer, dbName string) error { return readDataWithDatabaseRole(w, dbName, "parent") }, dbName, "failed to read data with database role")
+	assertContains(t, out, "1 1 Total Junk")
+	out = runSample(t, listDatabaseRoles, dbName, "failed to list database roles")
+	assertContains(t, out, "parent")
+	assertContains(t, out, "public")
+	assertContains(t, out, "spanner_info_reader")
+	assertContains(t, out, "spanner_sys_reader")
 
 	out = runSample(t, read, dbName, "failed to read data")
 	assertContains(t, out, "1 1 Total Junk")
@@ -571,6 +581,57 @@ func TestCreateDatabaseWithDefaultLeaderSample(t *testing.T) {
 	}
 	out = b.String()
 	assertContains(t, out, "The result of the query to get")
+}
+
+func TestUpdateDatabaseSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	_, dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+
+	var out string
+	mustRunSample(t, createDatabase, dbName, "failed to create a database")
+	out = runSampleWithContext(ctx, t, updateDatabase, dbName, "failed to update database")
+	assertContains(t, out, fmt.Sprintf("Updated database [%s]\n", dbName))
+
+	databaseAdmin, err := database.NewDatabaseAdminClient(ctx)
+	if err != nil {
+		log.Fatalf("cannot create databaseAdmin client: %v", err)
+	}
+
+	database, err := databaseAdmin.GetDatabase(ctx, &adminpb.GetDatabaseRequest{Name: dbName})
+	if err != nil {
+		log.Fatalf("error during GetDatabase for db %v: %v", dbName, err)
+	}
+	// Verify if the EnableDropProtection field got enabled
+	if !database.GetEnableDropProtection() {
+		t.Errorf("got output %t; want it to contain %t", database.GetEnableDropProtection(), true)
+	}
+
+	// Disable Drop db protection for the cleanup to delete the databases
+	testutil.Retry(t, 20, time.Minute, func(r *testutil.R) {
+		opUpdate, err := databaseAdmin.UpdateDatabase(ctx, &adminpb.UpdateDatabaseRequest{
+			Database: &adminpb.Database{
+				Name:                 dbName,
+				EnableDropProtection: false,
+			},
+			UpdateMask: &field_mask.FieldMask{
+				Paths: []string{"enable_drop_protection"},
+			},
+		})
+		if err != nil {
+			// Retry if the database could not be updated due to some transient error
+			r.Errorf("UpdateDatabase operation to DB %v failed: %v", dbName, err)
+			return
+		}
+		if _, err := opUpdate.Wait(ctx); err != nil {
+			t.Fatalf("UpdateDatabase operation to DB %v failed: %v", dbName, err)
+		}
+	})
 }
 
 func TestCustomInstanceConfigSample(t *testing.T) {
@@ -1289,12 +1350,12 @@ func cleanupInstanceWithName(instanceName string) error {
 	ctx := context.Background()
 	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("cannot create instance databaseAdmin client: %v", err)
+		return fmt.Errorf("cannot create instance databaseAdmin client: %w", err)
 	}
 	defer instanceAdmin.Close()
 
 	if err := instanceAdmin.DeleteInstance(ctx, &instancepb.DeleteInstanceRequest{Name: instanceName}); err != nil {
-		return fmt.Errorf("failed to delete instance %s (error %v), might need a manual removal",
+		return fmt.Errorf("failed to delete instance %s (error %w), might need a manual removal",
 			instanceName, err)
 	}
 	return nil
@@ -1305,7 +1366,7 @@ func cleanupInstanceConfigs(projectID string) error {
 	ctx := context.Background()
 	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("cannot create instance admin client: %v", err)
+		return fmt.Errorf("cannot create instance admin client: %w", err)
 	}
 	defer instanceAdmin.Close()
 	configIter := instanceAdmin.ListInstanceConfigs(ctx, &instancepb.ListInstanceConfigsRequest{

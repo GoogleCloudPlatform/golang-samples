@@ -29,6 +29,7 @@ import (
 	"os"
 
 	"cloud.google.com/go/pubsub"
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
 
 // GOOGLE_CLOUD_PROJECT is a user-set environment variable.
@@ -47,6 +48,9 @@ func init() {
 	if err != nil {
 		log.Fatalf("pubsub.NewClient: %v", err)
 	}
+
+	// register http function
+	functions.HTTP("PublishMessage", PublishMessage)
 }
 
 type publishRequest struct {

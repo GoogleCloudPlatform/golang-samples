@@ -22,7 +22,13 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
+
+func init() {
+	functions.HTTP("ListFiles", ListFiles)
+}
 
 // ListFiles lists the files in the current directory.
 // Uses directory "serverless_function_source_code" as defined in the Go

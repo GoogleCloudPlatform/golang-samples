@@ -26,26 +26,26 @@ func setupPubSub(projectID, topic, sub string) (*pubsub.Subscription, error) {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return nil, fmt.Errorf("pubsub.NewClient: %v", err)
+		return nil, fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 	// Create the Topic if it doesn't exist.
 	t := client.Topic(topic)
 	if exists, err := t.Exists(ctx); err != nil {
-		return nil, fmt.Errorf("error checking PubSub topic: %v", err)
+		return nil, fmt.Errorf("error checking PubSub topic: %w", err)
 	} else if !exists {
 		if t, err = client.CreateTopic(ctx, topic); err != nil {
-			return nil, fmt.Errorf("error creating PubSub topic: %v", err)
+			return nil, fmt.Errorf("error creating PubSub topic: %w", err)
 		}
 	}
 
 	// Create the Subscription if it doesn't exist.
 	s := client.Subscription(sub)
 	if exists, err := s.Exists(ctx); err != nil {
-		return nil, fmt.Errorf("error checking for subscription: %v", err)
+		return nil, fmt.Errorf("error checking for subscription: %w", err)
 	} else if !exists {
 		if s, err = client.CreateSubscription(ctx, sub, pubsub.SubscriptionConfig{Topic: t}); err != nil {
-			return nil, fmt.Errorf("failed to create subscription: %v", err)
+			return nil, fmt.Errorf("failed to create subscription: %w", err)
 		}
 	}
 

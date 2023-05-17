@@ -30,7 +30,7 @@ func connectUnixSocket() (*sql.DB, error) {
 	mustGetenv := func(k string) string {
 		v := os.Getenv(k)
 		if v == "" {
-			log.Fatalf("Warning: %s environment variable not set.", k)
+			log.Fatalf("Fatal Error in connect_unix.go: %s environment variable not set.", k)
 		}
 		return v
 	}
@@ -45,13 +45,13 @@ func connectUnixSocket() (*sql.DB, error) {
 		unixSocketPath = mustGetenv("INSTANCE_UNIX_SOCKET") // e.g. '/cloudsql/project:region:instance'
 	)
 
-	dbURI := fmt.Sprintf("%s:%s@unix(/%s)/%s?parseTime=true",
+	dbURI := fmt.Sprintf("%s:%s@unix(%s)/%s?parseTime=true",
 		dbUser, dbPwd, unixSocketPath, dbName)
 
 	// dbPool is the pool of database connections.
 	dbPool, err := sql.Open("mysql", dbURI)
 	if err != nil {
-		return nil, fmt.Errorf("sql.Open: %v", err)
+		return nil, fmt.Errorf("sql.Open: %w", err)
 	}
 
 	// [START_EXCLUDE]

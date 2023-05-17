@@ -32,7 +32,7 @@ func listPolicyTags(w io.Writer, parentTaxonomyID string) error {
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)
 	if err != nil {
-		return fmt.Errorf("datacatalog.NewPolicyTagManagerClient: %v", err)
+		return fmt.Errorf("datacatalog.NewPolicyTagManagerClient: %w", err)
 	}
 	defer policyClient.Close()
 
@@ -47,7 +47,7 @@ func listPolicyTags(w io.Writer, parentTaxonomyID string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("ListPolicyTags iteration error: %v", err)
+			return fmt.Errorf("ListPolicyTags iteration error: %w", err)
 		}
 
 		fmt.Fprintf(w, "\t- %s (%s)", resp.Name, resp.DisplayName)

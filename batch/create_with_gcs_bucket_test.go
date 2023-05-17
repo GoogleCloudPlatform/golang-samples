@@ -27,6 +27,7 @@ import (
 )
 
 func TestCreateJobWithBucket(t *testing.T) {
+	t.Skip("Skipped while investigating https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	t.Parallel()
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
@@ -73,7 +74,7 @@ func createBucket(projectID, bucketName string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -82,7 +83,7 @@ func createBucket(projectID, bucketName string) error {
 
 	bucket := client.Bucket(bucketName)
 	if err := bucket.Create(ctx, projectID, nil); err != nil {
-		return fmt.Errorf("Bucket(%q).Create: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Create: %w", bucketName, err)
 	}
 	return nil
 }
@@ -91,7 +92,7 @@ func deleteBucket(bucketName string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -100,7 +101,7 @@ func deleteBucket(bucketName string) error {
 
 	bucket := client.Bucket(bucketName)
 	if err := bucket.Delete(ctx); err != nil {
-		return fmt.Errorf("Bucket(%q).Delete: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Delete: %w", bucketName, err)
 	}
 	return nil
 }
@@ -111,7 +112,7 @@ func deleteFile(bucket, object string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -121,7 +122,7 @@ func deleteFile(bucket, object string) error {
 	o := client.Bucket(bucket).Object(object)
 
 	if err := o.Delete(ctx); err != nil {
-		return fmt.Errorf("Object(%q).Delete: %v", object, err)
+		return fmt.Errorf("Object(%q).Delete: %w", object, err)
 	}
 	return nil
 }

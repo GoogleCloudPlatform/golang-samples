@@ -31,14 +31,14 @@ func connectWithConnector() (*sql.DB, error) {
 	mustGetenv := func(k string) string {
 		v := os.Getenv(k)
 		if v == "" {
-			log.Fatalf("Warning: %s environment variable not set.", k)
+			log.Fatalf("Fatal Error in connect_connector.go: %s environment variable not set.", k)
 		}
 		return v
 	}
 	// Note: Saving credentials in environment variables is convenient, but not
 	// secure - consider a more secure solution such as
 	// Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
-	// keep secrets safe.
+	// keep passwords and other secrets safe.
 	var (
 		dbUser                 = mustGetenv("DB_USER")                  // e.g. 'my-db-user'
 		dbPwd                  = mustGetenv("DB_PASS")                  // e.g. 'my-db-password'
@@ -49,7 +49,7 @@ func connectWithConnector() (*sql.DB, error) {
 
 	d, err := cloudsqlconn.NewDialer(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("cloudsqlconn.NewDialer: %v", err)
+		return nil, fmt.Errorf("cloudsqlconn.NewDialer: %w", err)
 	}
 	var opts []cloudsqlconn.DialOption
 	if usePrivate != "" {
@@ -65,7 +65,7 @@ func connectWithConnector() (*sql.DB, error) {
 
 	dbPool, err := sql.Open("mysql", dbURI)
 	if err != nil {
-		return nil, fmt.Errorf("sql.Open: %v", err)
+		return nil, fmt.Errorf("sql.Open: %w", err)
 	}
 	return dbPool, nil
 }

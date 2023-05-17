@@ -26,6 +26,7 @@ import (
 )
 
 func TestBatchJobCRUD(t *testing.T) {
+	t.Skip("Skipped while investigating https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	t.Parallel()
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
@@ -100,6 +101,7 @@ func TestBatchJobCRUD(t *testing.T) {
 }
 
 func TestBatchContainerJob(t *testing.T) {
+	t.Skip("Skipped while investigating https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	t.Parallel()
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))

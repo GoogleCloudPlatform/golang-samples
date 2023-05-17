@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
 
 var urlString = "https://example.com"
@@ -30,6 +32,10 @@ var urlString = "https://example.com"
 // http.Clients should be reused instead of created as needed.
 var client = &http.Client{
 	Timeout: 10 * time.Second,
+}
+
+func init() {
+	functions.HTTP("MakeRequest", MakeRequest)
 }
 
 // MakeRequest is an example of making an HTTP request. MakeRequest uses a

@@ -38,7 +38,7 @@ func redactImage(w io.Writer, projectID string, infoTypeNames []string, bytesTyp
 
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return fmt.Errorf("dlp.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -61,7 +61,7 @@ func redactImage(w io.Writer, projectID string, infoTypeNames []string, bytesTyp
 	// Read the input file.
 	b, err := ioutil.ReadFile(inputPath)
 	if err != nil {
-		return fmt.Errorf("ioutil.ReadFile: %v", err)
+		return fmt.Errorf("ioutil.ReadFile: %w", err)
 	}
 
 	// Create a configured request.
@@ -81,11 +81,11 @@ func redactImage(w io.Writer, projectID string, infoTypeNames []string, bytesTyp
 	// Send the request.
 	resp, err := client.RedactImage(ctx, req)
 	if err != nil {
-		return fmt.Errorf("RedactImage: %v", err)
+		return fmt.Errorf("RedactImage: %w", err)
 	}
 	// Write the output file.
 	if err := ioutil.WriteFile(outputPath, resp.GetRedactedImage(), 0644); err != nil {
-		return fmt.Errorf("ioutil.WriteFile: %v", err)
+		return fmt.Errorf("ioutil.WriteFile: %w", err)
 	}
 	fmt.Fprintf(w, "Wrote output to %s", outputPath)
 	return nil

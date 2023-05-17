@@ -24,7 +24,14 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
+
+func init() {
+	// Register an HTTP function with the Functions Framework
+	functions.HTTP("HelloContentType", HelloContentType)
+}
 
 // HelloContentType is an HTTP Cloud function.
 // It uses the Content-Type header to identify the request payload format.

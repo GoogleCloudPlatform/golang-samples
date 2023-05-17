@@ -31,7 +31,7 @@ func moveFile(w io.Writer, bucket, object string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -43,23 +43,23 @@ func moveFile(w io.Writer, bucket, object string) error {
 	dst := client.Bucket(bucket).Object(dstName)
 
 	// Optional: set a generation-match precondition to avoid potential race
-	// conditions and data corruptions. The request to upload is aborted if the
-	// object's generation number does not match your precondition.
+	// conditions and data corruptions. The request to copy the file is aborted
+	// if the object's generation number does not match your precondition.
 	// For a dst object that does not yet exist, set the DoesNotExist precondition.
 	dst = dst.If(storage.Conditions{DoesNotExist: true})
 	// If the destination object already exists in your bucket, set instead a
 	// generation-match precondition using its generation number.
 	// attrs, err := dst.Attrs(ctx)
 	// if err != nil {
-	// 	return fmt.Errorf("object.Attrs: %v", err)
+	// 	return fmt.Errorf("object.Attrs: %w", err)
 	// }
 	// dst = dst.If(storage.Conditions{GenerationMatch: attrs.Generation})
 
 	if _, err := dst.CopierFrom(src).Run(ctx); err != nil {
-		return fmt.Errorf("Object(%q).CopierFrom(%q).Run: %v", dstName, object, err)
+		return fmt.Errorf("Object(%q).CopierFrom(%q).Run: %w", dstName, object, err)
 	}
 	if err := src.Delete(ctx); err != nil {
-		return fmt.Errorf("Object(%q).Delete: %v", object, err)
+		return fmt.Errorf("Object(%q).Delete: %w", object, err)
 	}
 	fmt.Fprintf(w, "Blob %v moved to %v.\n", object, dstName)
 	return nil

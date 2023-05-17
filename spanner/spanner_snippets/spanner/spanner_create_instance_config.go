@@ -45,7 +45,7 @@ func createInstanceConfig(w io.Writer, projectID, userConfigID, baseConfigID str
 		Name: fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, baseConfigID),
 	})
 	if err != nil {
-		return fmt.Errorf("createInstanceConfig.GetInstanceConfig: %v", err)
+		return fmt.Errorf("createInstanceConfig.GetInstanceConfig: %w", err)
 	}
 	if baseConfig.OptionalReplicas == nil || len(baseConfig.OptionalReplicas) == 0 {
 		return fmt.Errorf("CreateInstanceConfig expects base config with at least from the list of optional replicas")
@@ -73,7 +73,7 @@ func createInstanceConfig(w io.Writer, projectID, userConfigID, baseConfigID str
 	// Wait for the instance configuration creation to finish.
 	i, err := op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("Waiting for instance config creation to finish failed: %v", err)
+		return fmt.Errorf("Waiting for instance config creation to finish failed: %w", err)
 	}
 	// The instance configuration may not be ready to serve yet.
 	if i.State != instancepb.InstanceConfig_READY {

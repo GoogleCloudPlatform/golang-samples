@@ -25,14 +25,17 @@ import (
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// updateCdnKey updates a CDN key.
-func updateCdnKey(w io.Writer, projectID, cdnKeyID, hostname, gcdnKeyname, gcdnPrivateKey, akamaiTokenKey string) error {
+// updateCDNKey updates a CDN key. A CDN key is used to retrieve protected media.
+// If isMediaCDN is true, update a Media CDN key. If false, update a Cloud
+// CDN key. To create an updated privateKey value for Media CDN, see
+// https://cloud.google.com/video-stitcher/docs/how-to/managing-cdn-keys#create-private-key-media-cdn.
+func updateCDNKey(w io.Writer, projectID, keyID, hostname, keyName, privateKey string, isMediaCDN bool) error {
 	// projectID := "my-project-id"
-	// cdnKeyID := "my-cdn-key"
-	// hostname := "cdn.example.com"
-	// gcdnKeyname := "gcdn-key"
-	// gcdnPrivateKey := "VGhpcyBpcyBhIHRlc3Qgc3RyaW5nLg=="
-	// akamaiTokenKey := "VGhpcyBpcyBhIHRlc3Qgc3RyaW5nLg=="
+	// keyID := "my-cdn-key"
+	// hostname := "updated.cdn.example.com"
+	// keyName := "cdn-key"
+	// privateKey := "my-updated-private-key"
+	// isMediaCDN := true
 	location := "us-central1"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
@@ -42,20 +45,21 @@ func updateCdnKey(w io.Writer, projectID, cdnKeyID, hostname, gcdnKeyname, gcdnP
 	defer client.Close()
 
 	var req *stitcherpb.UpdateCdnKeyRequest
-	if akamaiTokenKey != "" {
+	if isMediaCDN {
 		req = &stitcherpb.UpdateCdnKeyRequest{
 			CdnKey: &stitcherpb.CdnKey{
-				CdnKeyConfig: &stitcherpb.CdnKey_AkamaiCdnKey{
-					AkamaiCdnKey: &stitcherpb.AkamaiCdnKey{
-						TokenKey: []byte(akamaiTokenKey),
+				CdnKeyConfig: &stitcherpb.CdnKey_MediaCdnKey{
+					MediaCdnKey: &stitcherpb.MediaCdnKey{
+						KeyName:    keyName,
+						PrivateKey: []byte(privateKey),
 					},
 				},
-				Name:     fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectID, location, cdnKeyID),
+				Name:     fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectID, location, keyID),
 				Hostname: hostname,
 			},
 			UpdateMask: &fieldmaskpb.FieldMask{
 				Paths: []string{
-					"hostname", "akamai_cdn_key",
+					"hostname", "media_cdn_key",
 				},
 			},
 		}
@@ -64,11 +68,11 @@ func updateCdnKey(w io.Writer, projectID, cdnKeyID, hostname, gcdnKeyname, gcdnP
 			CdnKey: &stitcherpb.CdnKey{
 				CdnKeyConfig: &stitcherpb.CdnKey_GoogleCdnKey{
 					GoogleCdnKey: &stitcherpb.GoogleCdnKey{
-						KeyName:    gcdnKeyname,
-						PrivateKey: []byte(gcdnPrivateKey),
+						KeyName:    keyName,
+						PrivateKey: []byte(privateKey),
 					},
 				},
-				Name:     fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectID, location, cdnKeyID),
+				Name:     fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectID, location, keyID),
 				Hostname: hostname,
 			},
 			UpdateMask: &fieldmaskpb.FieldMask{
