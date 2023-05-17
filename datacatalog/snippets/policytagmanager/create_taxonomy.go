@@ -35,7 +35,7 @@ func createTaxonomy(w io.Writer, projectID, location, displayName string) (strin
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)
 	if err != nil {
-		return "", fmt.Errorf("datacatalog.NewPolicyTagManagerClient: %v", err)
+		return "", fmt.Errorf("datacatalog.NewPolicyTagManagerClient: %w", err)
 	}
 	defer policyClient.Close()
 
@@ -51,7 +51,7 @@ func createTaxonomy(w io.Writer, projectID, location, displayName string) (strin
 	}
 	resp, err := policyClient.CreateTaxonomy(ctx, req)
 	if err != nil {
-		return "", fmt.Errorf("CreateTaxonomy: %v", err)
+		return "", fmt.Errorf("CreateTaxonomy: %w", err)
 	}
 
 	fmt.Fprintf(w, "Taxonomy %s was created.\n", resp.Name)
