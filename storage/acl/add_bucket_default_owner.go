@@ -31,13 +31,13 @@ func addBucketDefaultOwner(bucket string, entity storage.ACLEntity) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
 	acl := client.Bucket(bucket).DefaultObjectACL()
 	if err := acl.Set(ctx, entity, role); err != nil {
-		return fmt.Errorf("ACLHandle.Set: %v", err)
+		return fmt.Errorf("ACLHandle.Set: %w", err)
 	}
 	return nil
 }
