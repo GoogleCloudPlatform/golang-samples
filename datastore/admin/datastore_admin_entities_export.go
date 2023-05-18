@@ -32,7 +32,7 @@ func entitiesExport(w io.Writer, projectID, outputURLPrefix string) (*adminpb.Ex
 	ctx := context.Background()
 	client, err := admin.NewDatastoreAdminClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("admin.NewDatastoreAdminClient: %v", err)
+		return nil, fmt.Errorf("admin.NewDatastoreAdminClient: %w", err)
 	}
 	defer client.Close()
 
@@ -42,11 +42,11 @@ func entitiesExport(w io.Writer, projectID, outputURLPrefix string) (*adminpb.Ex
 	}
 	op, err := client.ExportEntities(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("ExportEntities: %v", err)
+		return nil, fmt.Errorf("ExportEntities: %w", err)
 	}
 	resp, err := op.Wait(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Wait: %v", err)
+		return nil, fmt.Errorf("Wait: %w", err)
 	}
 	fmt.Fprintln(w, "Entities were exported")
 	return resp, nil
