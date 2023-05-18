@@ -91,7 +91,7 @@ func readFiles(ctx context.Context, bucketName, prefix string) ([]string, error)
 			break
 		}
 		if err != nil {
-			return []string{}, fmt.Errorf("failed to iterate over files in %s starting with %s: %v", bucketName, prefix, err)
+			return []string{}, fmt.Errorf("failed to iterate over files in %s starting with %s: %w", bucketName, prefix, err)
 		}
 		if attrs.Name != "" {
 			paths = append(paths, attrs.Name)

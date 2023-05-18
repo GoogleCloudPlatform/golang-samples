@@ -34,7 +34,7 @@ func listenErrors(ctx context.Context, w io.Writer, projectID, collection string
 
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("firestore.NewClient: %v", err)
+		return fmt.Errorf("firestore.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -47,7 +47,7 @@ func listenErrors(ctx context.Context, w io.Writer, projectID, collection string
 			return nil
 		}
 		if err != nil {
-			return fmt.Errorf("Snapshots.Next: %v", err)
+			return fmt.Errorf("Snapshots.Next: %w", err)
 		}
 		if snap != nil {
 			for _, change := range snap.Changes {
