@@ -35,7 +35,7 @@ func updateSlate(w io.Writer, projectID, slateID, slateURI string) error {
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
-		return fmt.Errorf("stitcher.NewVideoStitcherClient: %v", err)
+		return fmt.Errorf("stitcher.NewVideoStitcherClient: %w", err)
 	}
 	defer client.Close()
 
@@ -53,7 +53,7 @@ func updateSlate(w io.Writer, projectID, slateID, slateURI string) error {
 	// Updates the slate.
 	response, err := client.UpdateSlate(ctx, req)
 	if err != nil {
-		return fmt.Errorf("client.UpdateSlate: %v", err)
+		return fmt.Errorf("client.UpdateSlate: %w", err)
 	}
 
 	fmt.Fprintf(w, "Updated slate: %+v", response)
