@@ -33,7 +33,7 @@ func createJobWithCustomAttributes(w io.Writer, projectID, companyID, jobTitle s
 	// Initialize a job service client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("talent.NewJobClient: %v", err)
+		return nil, fmt.Errorf("talent.NewJobClient: %w", err)
 	}
 	defer c.Close()
 
@@ -85,7 +85,7 @@ func createJobWithCustomAttributes(w io.Writer, projectID, companyID, jobTitle s
 
 	resp, err := c.CreateJob(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("CreateJob: %v", err)
+		return nil, fmt.Errorf("CreateJob: %w", err)
 	}
 
 	fmt.Fprintf(w, "Created job with custom attributres: %q\n", resp.GetName())

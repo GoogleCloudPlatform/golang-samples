@@ -37,7 +37,7 @@ func createJobWithEmbeddedCaptions(w io.Writer, projectID string, location strin
 	ctx := context.Background()
 	client, err := transcoder.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -147,7 +147,7 @@ func createJobWithEmbeddedCaptions(w io.Writer, projectID string, location strin
 	// You can query for the job state; see getJob() in get_job.go.
 	response, err := client.CreateJob(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateJob: %v", err)
+		return fmt.Errorf("CreateJob: %w", err)
 	}
 
 	fmt.Fprintf(w, "Job: %v", response.GetName())

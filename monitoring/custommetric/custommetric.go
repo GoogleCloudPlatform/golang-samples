@@ -78,7 +78,7 @@ func writeTimeSeriesValue(projectID, metricType string) error {
 
 	err = c.CreateTimeSeries(ctx, req)
 	if err != nil {
-		return fmt.Errorf("could not write time series value, %v ", err)
+		return fmt.Errorf("could not write time series value, %w ", err)
 	}
 	return nil
 }
@@ -114,7 +114,7 @@ func readTimeSeriesValue(projectID, metricType string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("could not read time series value, %v ", err)
+			return fmt.Errorf("could not read time series value, %w ", err)
 		}
 		log.Printf("%+v\n", resp)
 	}
