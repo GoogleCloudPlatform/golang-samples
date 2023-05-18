@@ -31,7 +31,7 @@ func getCompany(w io.Writer, projectID, companyID string) (*talentpb.Company, er
 	// Initialize a companyService client.
 	c, err := talent.NewCompanyClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("talent.NewCompanyClient: %v", err)
+		return nil, fmt.Errorf("talent.NewCompanyClient: %w", err)
 	}
 	defer c.Close()
 
@@ -45,7 +45,7 @@ func getCompany(w io.Writer, projectID, companyID string) (*talentpb.Company, er
 
 	resp, err := c.GetCompany(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("GetCompany: %v", err)
+		return nil, fmt.Errorf("GetCompany: %w", err)
 	}
 
 	fmt.Fprintf(w, "Company: %q\n", resp.GetName())

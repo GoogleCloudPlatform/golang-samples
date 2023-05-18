@@ -32,7 +32,7 @@ func publishProtoMessages(w io.Writer, projectID, topicID string) error {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 
 	state := &statepb.State{
@@ -44,7 +44,7 @@ func publishProtoMessages(w io.Writer, projectID, topicID string) error {
 	t := client.Topic(topicID)
 	cfg, err := t.Config(ctx)
 	if err != nil {
-		return fmt.Errorf("topic.Config err: %v", err)
+		return fmt.Errorf("topic.Config err: %w", err)
 	}
 	encoding := cfg.SchemaSettings.Encoding
 
@@ -53,12 +53,12 @@ func publishProtoMessages(w io.Writer, projectID, topicID string) error {
 	case pubsub.EncodingBinary:
 		msg, err = proto.Marshal(state)
 		if err != nil {
-			return fmt.Errorf("proto.Marshal err: %v", err)
+			return fmt.Errorf("proto.Marshal err: %w", err)
 		}
 	case pubsub.EncodingJSON:
 		msg, err = protojson.Marshal(state)
 		if err != nil {
-			return fmt.Errorf("protojson.Marshal err: %v", err)
+			return fmt.Errorf("protojson.Marshal err: %w", err)
 		}
 	default:
 		return fmt.Errorf("invalid encoding: %v", encoding)
@@ -69,7 +69,7 @@ func publishProtoMessages(w io.Writer, projectID, topicID string) error {
 	})
 	_, err = result.Get(ctx)
 	if err != nil {
-		return fmt.Errorf("result.Get: %v", err)
+		return fmt.Errorf("result.Get: %w", err)
 	}
 	fmt.Fprintf(w, "Published proto message with %#v encoding: %s\n", encoding, string(msg))
 	return nil
