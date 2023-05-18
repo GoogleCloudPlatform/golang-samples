@@ -32,7 +32,7 @@ func deleteSlate(w io.Writer, projectID, slateID string) error {
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
-		return fmt.Errorf("stitcher.NewVideoStitcherClient: %v", err)
+		return fmt.Errorf("stitcher.NewVideoStitcherClient: %w", err)
 	}
 	defer client.Close()
 
@@ -44,7 +44,7 @@ func deleteSlate(w io.Writer, projectID, slateID string) error {
 
 	err = client.DeleteSlate(ctx, req)
 	if err != nil {
-		return fmt.Errorf("client.DeleteSlate: %v", err)
+		return fmt.Errorf("client.DeleteSlate: %w", err)
 	}
 
 	fmt.Fprintf(w, "Deleted slate: %s", name)
