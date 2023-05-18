@@ -31,7 +31,7 @@ func updateTopicSchema(w io.Writer, projectID, topicID, firstRevisionID, lastRev
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	t := client.Topic(topicID)
 

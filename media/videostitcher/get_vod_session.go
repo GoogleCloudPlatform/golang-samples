@@ -33,7 +33,7 @@ func getVodSession(w io.Writer, projectID, sessionID string) error {
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
-		return fmt.Errorf("stitcher.NewVideoStitcherClient: %v", err)
+		return fmt.Errorf("stitcher.NewVideoStitcherClient: %w", err)
 	}
 	defer client.Close()
 
@@ -43,11 +43,11 @@ func getVodSession(w io.Writer, projectID, sessionID string) error {
 	// Gets the session.
 	response, err := client.GetVodSession(ctx, req)
 	if err != nil {
-		return fmt.Errorf("client.GetVodSession: %v", err)
+		return fmt.Errorf("client.GetVodSession: %w", err)
 	}
 	b, err := json.MarshalIndent(response, "", " ")
 	if err != nil {
-		return fmt.Errorf("json.MarshalIndent: %v", err)
+		return fmt.Errorf("json.MarshalIndent: %w", err)
 	}
 
 	fmt.Fprintf(w, "VOD session:\n%s", string(b))
