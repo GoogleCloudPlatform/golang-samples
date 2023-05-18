@@ -32,7 +32,7 @@ func createSource(w io.Writer, orgID string) error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %v", err)
+		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -45,7 +45,7 @@ func createSource(w io.Writer, orgID string) error {
 	}
 	source, err := client.CreateSource(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateSource: %v", err)
+		return fmt.Errorf("CreateSource: %w", err)
 	}
 
 	fmt.Fprintf(w, "New source created: %s\n", source.Name)

@@ -45,7 +45,7 @@ func generateSignedPostPolicyV4(w io.Writer, bucket, object string) (*storage.Po
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("storage.NewClient: %v", err)
+		return nil, fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -71,12 +71,12 @@ func generateSignedPostPolicyV4(w io.Writer, bucket, object string) (*storage.Po
 
 	policy, err := client.Bucket(bucket).GenerateSignedPostPolicyV4(object, opts)
 	if err != nil {
-		return nil, fmt.Errorf("storage.GenerateSignedPostPolicyV4: %v", err)
+		return nil, fmt.Errorf("storage.GenerateSignedPostPolicyV4: %w", err)
 	}
 
 	// Generate the form, using the data from the policy.
 	if err = tmpl.Execute(w, policy); err != nil {
-		return policy, fmt.Errorf("executing template: %v", err)
+		return policy, fmt.Errorf("executing template: %w", err)
 	}
 
 	return policy, nil

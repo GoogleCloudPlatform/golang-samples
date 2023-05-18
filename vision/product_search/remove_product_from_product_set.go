@@ -31,7 +31,7 @@ func removeProductFromProductSet(w io.Writer, projectID string, location string,
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewProductSearchClient: %v", err)
+		return fmt.Errorf("NewProductSearchClient: %w", err)
 	}
 	defer c.Close()
 
@@ -41,7 +41,7 @@ func removeProductFromProductSet(w io.Writer, projectID string, location string,
 	}
 
 	if err = c.RemoveProductFromProductSet(ctx, req); err != nil {
-		return fmt.Errorf("NewProductSearchClient: %v", err)
+		return fmt.Errorf("NewProductSearchClient: %w", err)
 	}
 
 	fmt.Fprintf(w, "Product removed from product set.\n")

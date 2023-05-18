@@ -32,13 +32,13 @@ func createFamilyGCNested(w io.Writer, projectID, instanceID string, tableName s
 
 	adminClient, err := bigtable.NewAdminClient(ctx, projectID, instanceID)
 	if err != nil {
-		return fmt.Errorf("bigtable.NewAdminClient: %v", err)
+		return fmt.Errorf("bigtable.NewAdminClient: %w", err)
 	}
 	defer adminClient.Close()
 
 	columnFamilyName := "cf5"
 	if err := adminClient.CreateColumnFamily(ctx, tableName, columnFamilyName); err != nil {
-		return fmt.Errorf("CreateColumnFamily(%s): %v", columnFamilyName, err)
+		return fmt.Errorf("CreateColumnFamily(%s): %w", columnFamilyName, err)
 	}
 
 	// Create a nested GC rule:
@@ -53,7 +53,7 @@ func createFamilyGCNested(w io.Writer, projectID, instanceID string, tableName s
 			bigtable.MaxVersionsPolicy(2),
 			maxAgePolicy))
 	if err := adminClient.SetGCPolicy(ctx, tableName, columnFamilyName, policy); err != nil {
-		return fmt.Errorf("SetGCPolicy(%s): %v", policy, err)
+		return fmt.Errorf("SetGCPolicy(%s): %w", policy, err)
 	}
 
 	fmt.Fprintf(w, "created column family %s with policy: %v\n", columnFamilyName, policy)

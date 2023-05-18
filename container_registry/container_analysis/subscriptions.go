@@ -35,7 +35,7 @@ func occurrencePubsub(w io.Writer, subscriptionID string, timeout time.Duration,
 	var mu sync.Mutex
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return -1, fmt.Errorf("pubsub.NewClient: %v", err)
+		return -1, fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	// Subscribe to the requested Pub/Sub channel.
 	sub := client.Subscription(subscriptionID)
@@ -52,7 +52,7 @@ func occurrencePubsub(w io.Writer, subscriptionID string, timeout time.Duration,
 		mu.Unlock()
 	})
 	if err != nil {
-		return -1, fmt.Errorf("sub.Receive: %v", err)
+		return -1, fmt.Errorf("sub.Receive: %w", err)
 	}
 	// Print and return the number of Pub/Sub messages received.
 	fmt.Fprintln(w, count)
@@ -65,7 +65,7 @@ func createOccurrenceSubscription(subscriptionID, projectID string) error {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -74,7 +74,7 @@ func createOccurrenceSubscription(subscriptionID, projectID string) error {
 	topic := client.Topic(topicID)
 	config := pubsub.SubscriptionConfig{Topic: topic}
 	_, err = client.CreateSubscription(ctx, subscriptionID, config)
-	return fmt.Errorf("client.CreateSubscription: %v", err)
+	return fmt.Errorf("client.CreateSubscription: %w", err)
 }
 
 // [END containeranalysis_pubsub]

@@ -28,12 +28,12 @@ func deleteServiceAccount(w io.Writer, email string) error {
 	ctx := context.Background()
 	service, err := iam.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("iam.NewService: %v", err)
+		return fmt.Errorf("iam.NewService: %w", err)
 	}
 
 	_, err = service.Projects.ServiceAccounts.Delete("projects/-/serviceAccounts/" + email).Do()
 	if err != nil {
-		return fmt.Errorf("Projects.ServiceAccounts.Delete: %v", err)
+		return fmt.Errorf("Projects.ServiceAccounts.Delete: %w", err)
 	}
 	fmt.Fprintf(w, "Deleted service account: %v", email)
 	return nil

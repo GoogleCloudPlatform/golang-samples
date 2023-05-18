@@ -34,18 +34,18 @@ func updateSavedQuery(w io.Writer, projectID, savedQueryID, newDescription strin
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("asset.NewClient: %v", err)
+		return fmt.Errorf("asset.NewClient: %w", err)
 	}
 	defer client.Close()
 
 	cloudResourceManagerClient, err := cloudresourcemanager.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("cloudresourcemanager.NewService: %v", err)
+		return fmt.Errorf("cloudresourcemanager.NewService: %w", err)
 	}
 
 	project, err := cloudResourceManagerClient.Projects.Get(projectID).Do()
 	if err != nil {
-		return fmt.Errorf("cloudResourceManagerClient.Projects.Get.Do: %v", err)
+		return fmt.Errorf("cloudResourceManagerClient.Projects.Get.Do: %w", err)
 	}
 	projectNumber := strconv.FormatInt(project.ProjectNumber, 10)
 	savedQueryName := fmt.Sprintf("projects/%s/savedQueries/%s", projectNumber, savedQueryID)
@@ -61,7 +61,7 @@ func updateSavedQuery(w io.Writer, projectID, savedQueryID, newDescription strin
 	}
 	response, err := client.UpdateSavedQuery(ctx, req)
 	if err != nil {
-		return fmt.Errorf("client.UpdateSavedQuery: %v", err)
+		return fmt.Errorf("client.UpdateSavedQuery: %w", err)
 	}
 	fmt.Fprintf(w, "Query Name: %s\n", response.Name)
 	fmt.Fprintf(w, "Query Description:%s\n", response.Description)

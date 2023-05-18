@@ -36,7 +36,7 @@ func iamAddMember(w io.Writer, name, member string) error {
 	ctx := context.Background()
 	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create kms client: %v", err)
+		return fmt.Errorf("failed to create kms client: %w", err)
 	}
 	defer client.Close()
 
@@ -44,14 +44,14 @@ func iamAddMember(w io.Writer, name, member string) error {
 	handle := client.ResourceIAM(name)
 	policy, err := handle.Policy(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to get IAM policy: %v", err)
+		return fmt.Errorf("failed to get IAM policy: %w", err)
 	}
 
 	// Grant the member permissions. This example grants permission to use the key
 	// to encrypt data.
 	policy.Add(member, "roles/cloudkms.cryptoKeyEncrypterDecrypter")
 	if err := handle.SetPolicy(ctx, policy); err != nil {
-		return fmt.Errorf("failed to save policy: %v", err)
+		return fmt.Errorf("failed to save policy: %w", err)
 	}
 
 	fmt.Fprintf(w, "Updated IAM policy for %s\n", name)

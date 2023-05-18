@@ -71,7 +71,7 @@ func formatSlackMessage(query string, response *kgsearch.SearchResponse) (*Messa
 	}
 	r := &ItemList{}
 	if err := json.Unmarshal(jsonstring, r); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal json: %v", err)
+		return nil, fmt.Errorf("failed to unmarshal json: %w", err)
 	}
 	result := r.Items[0].Result
 

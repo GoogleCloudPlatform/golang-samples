@@ -81,7 +81,7 @@ func NewBookshelf(projectID string, db BookDatabase) (*Bookshelf, error) {
 	bucketName := projectID + "_bucket"
 	storageClient, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("storage.NewClient: %v", err)
+		return nil, fmt.Errorf("storage.NewClient: %w", err)
 	}
 
 	errorClient, err := errorreporting.NewClient(ctx, projectID, errorreporting.Config{
@@ -91,7 +91,7 @@ func NewBookshelf(projectID string, db BookDatabase) (*Bookshelf, error) {
 		},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("errorreporting.NewClient: %v", err)
+		return nil, fmt.Errorf("errorreporting.NewClient: %w", err)
 	}
 
 	b := &Bookshelf{

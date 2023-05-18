@@ -54,7 +54,7 @@ func initializeRedis() (*redis.Pool, error) {
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial("tcp", redisAddr)
 			if err != nil {
-				return nil, fmt.Errorf("redis.Dial: %v", err)
+				return nil, fmt.Errorf("redis.Dial: %w", err)
 			}
 			return c, err
 		},
