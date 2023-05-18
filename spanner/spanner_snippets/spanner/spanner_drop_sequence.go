@@ -15,6 +15,7 @@
 package spanner
 
 // [START spanner_drop_sequence]
+// [START spanner_postgresql_drop_sequence]
 
 import (
 	"context"
@@ -56,3 +57,4 @@ func dropSequence(w io.Writer, db string) error {
 }
 
 // [END spanner_drop_sequence]
+// [END spanner_postgresql_drop_sequence]
