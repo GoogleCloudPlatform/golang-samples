@@ -34,7 +34,7 @@ func deleteCluster(projectID string, clusterName, region string) error {
 
 	clusterClient, err := dataproc.NewClusterControllerClient(ctx, option.WithEndpoint(fmt.Sprintf("%s-dataproc.googleapis.com:443", region)))
 	if err != nil {
-		return fmt.Errorf("dataproc.NewClusterControllerClient: %v", err)
+		return fmt.Errorf("dataproc.NewClusterControllerClient: %w", err)
 	}
 
 	req := &dataprocpb.DeleteClusterRequest{
@@ -44,11 +44,11 @@ func deleteCluster(projectID string, clusterName, region string) error {
 	}
 	op, err := clusterClient.DeleteCluster(ctx, req)
 	if err != nil {
-		return fmt.Errorf("DeleteCluster: %v", err)
+		return fmt.Errorf("DeleteCluster: %w", err)
 	}
 
 	if err := op.Wait(ctx); err != nil {
-		return fmt.Errorf("DeleteCluster.Wait: %v", err)
+		return fmt.Errorf("DeleteCluster.Wait: %w", err)
 	}
 	return nil
 }

@@ -28,7 +28,7 @@ func collectionGroupSetup(projectID, cityCollection string) error {
 
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("firestore.NewClient: %v", err)
+		return fmt.Errorf("firestore.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -53,7 +53,7 @@ func collectionGroupSetup(projectID, cityCollection string) error {
 			"name": l.name,
 			"type": l.t,
 		}); err != nil {
-			return fmt.Errorf("Set: %v", err)
+			return fmt.Errorf("Set: %w", err)
 		}
 	}
 
