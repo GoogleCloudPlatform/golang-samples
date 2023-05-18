@@ -279,9 +279,9 @@ func TestInspectBigquery(t *testing.T) {
 
 func TestInspectPhoneNumber(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
-	if err := inspectPhoneNumber(buf, tc.ProjectID, "I'm Gary and my phone number is (415) 555-0890"); err != nil {
+	if err := inspectPhoneNumber(&buf, tc.ProjectID, "I'm Gary and my phone number is (415) 555-0890"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -293,9 +293,9 @@ func TestInspectPhoneNumber(t *testing.T) {
 
 func TestInspectStringCustomHotWord(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
-	if err := inspectStringCustomHotWord(buf, tc.ProjectID, "patient name: John Doe", "patient", "PERSON_NAME"); err != nil {
+	if err := inspectStringCustomHotWord(&buf, tc.ProjectID, "patient name: John Doe", "patient", "PERSON_NAME"); err != nil {
 		t.Errorf("inspectStringCustomHotWord: %v", err)
 	}
 	got := buf.String()
@@ -306,9 +306,9 @@ func TestInspectStringCustomHotWord(t *testing.T) {
 
 func TestInspectStringWithExclusionDictSubstring(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
-	if err := inspectStringWithExclusionDictSubstring(buf, tc.ProjectID, "Some email addresses: gary@example.com, TEST@example.com", []string{"TEST"}); err != nil {
+	if err := inspectStringWithExclusionDictSubstring(&buf, tc.ProjectID, "Some email addresses: gary@example.com, TEST@example.com", []string{"TEST"}); err != nil {
 		t.Fatal(err)
 	}
 	got := buf.String()
@@ -324,9 +324,9 @@ func TestInspectStringWithExclusionDictSubstring(t *testing.T) {
 
 func TestInspectStringOmitOverlap(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
-	if err := inspectStringOmitOverlap(buf, tc.ProjectID, "gary@example.com"); err != nil {
+	if err := inspectStringOmitOverlap(&buf, tc.ProjectID, "gary@example.com"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -342,9 +342,9 @@ func TestInspectStringOmitOverlap(t *testing.T) {
 
 func TestInspectStringCustomOmitOverlap(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
-	if err := inspectStringCustomOmitOverlap(buf, tc.ProjectID, "Name: Jane Doe. Name: Larry Page.", "VIP_DETECTOR", "PERSON_NAME", "Larry Page|Sergey Brin"); err != nil {
+	if err := inspectStringCustomOmitOverlap(&buf, tc.ProjectID, "Name: Jane Doe. Name: Larry Page.", "VIP_DETECTOR", "PERSON_NAME", "Larry Page|Sergey Brin"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -363,10 +363,10 @@ func TestInspectStringCustomOmitOverlap(t *testing.T) {
 
 func TestInspectImageFileListedInfoTypes(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
-	pathToImage := "./testdata/image.jpg"
+	var buf bytes.Buffer
+	pathToImage := "testdata/test.png"
 
-	if err := inspectImageFileListedInfoTypes(buf, tc.ProjectID, pathToImage); err != nil {
+	if err := inspectImageFileListedInfoTypes(&buf, tc.ProjectID, pathToImage); err != nil {
 		t.Fatal(err)
 	}
 
@@ -377,7 +377,7 @@ func TestInspectImageFileListedInfoTypes(t *testing.T) {
 	if want := "Info type: EMAIL_ADDRESS"; !strings.Contains(got, want) {
 		t.Errorf("inspectTextFile got %q, want %q", got, want)
 	}
-	if want := "Info type: US_SOCIAL_SECURITY_NUMBER"; !strings.Contains(got, want) {
+	if want := "Info type: US_SOCIAL_SECURITY_NUMBER"; strings.Contains(got, want) {
 		t.Errorf("inspectTextFile got %q, want %q", got, want)
 	}
 }
