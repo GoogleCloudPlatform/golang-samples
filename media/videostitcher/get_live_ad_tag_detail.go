@@ -34,7 +34,7 @@ func getLiveAdTagDetail(w io.Writer, projectID, sessionID, adTagDetailID string)
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
-		return fmt.Errorf("stitcher.NewVideoStitcherClient: %v", err)
+		return fmt.Errorf("stitcher.NewVideoStitcherClient: %w", err)
 	}
 	defer client.Close()
 
@@ -44,11 +44,11 @@ func getLiveAdTagDetail(w io.Writer, projectID, sessionID, adTagDetailID string)
 	// Gets the ad tag detail.
 	response, err := client.GetLiveAdTagDetail(ctx, req)
 	if err != nil {
-		return fmt.Errorf("client.GetLiveAdTagDetail: %v", err)
+		return fmt.Errorf("client.GetLiveAdTagDetail: %w", err)
 	}
 	b, err := json.MarshalIndent(response, "", " ")
 	if err != nil {
-		return fmt.Errorf("json.MarshalIndent: %v", err)
+		return fmt.Errorf("json.MarshalIndent: %w", err)
 	}
 	fmt.Fprintf(w, "Live ad tag detail:\n%v", string(b))
 	return nil
