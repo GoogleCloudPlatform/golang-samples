@@ -37,12 +37,12 @@ func createCa(
 	org string,
 	caDuration int64) error {
 	// projectID := "your_project_id"
-	// location := "us-central1"	// For a list of locations, see: https://cloud.google.com/certificate-authority-service/docs/locations.
-	// caPoolId := "ca-pool-id"		// A unique id/name for the ca pool.
-	// caId := "ca-id"				// A unique id/name for the ca.
-	// caCommonName := "ca-name"	// A common name for your certificate authority.
-	// org := "ca-org"				// The name of your company for your certificate authority.
-	// ca_duration := 31536000		// The validity of the certificate authority in seconds.
+	// location := "us-central1"		// For a list of locations, see: https://cloud.google.com/certificate-authority-service/docs/locations.
+	// caPoolId := "ca-pool-id"			// The CA Pool id under which the CA should be created.
+	// caId := "ca-id"					// A unique id/name for the ca.
+	// caCommonName := "ca-name"		// A common name for your certificate authority.
+	// org := "ca-org"					// The name of your company for your certificate authority.
+	// ca_duration := int64(31536000)	// The validity of the certificate authority in seconds.
 
 	ctx := context.Background()
 	caClient, err := privateca.NewCertificateAuthorityClient(ctx)
@@ -105,14 +105,14 @@ func createCa(
 
 	op, err := caClient.CreateCertificateAuthority(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateCaPool failed: %w", err)
+		return fmt.Errorf("CreateCertificateAuthority failed: %w", err)
 	}
 
 	if _, err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("CreateCaPool failed during wait: %w", err)
+		return fmt.Errorf("CreateCertificateAuthority failed during wait: %w", err)
 	}
 
-	fmt.Fprintf(w, "CA created")
+	fmt.Fprintf(w, "CA %s created", caId)
 
 	return nil
 }
