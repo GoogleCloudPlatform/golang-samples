@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	cloud.google.com/go/security v1.14.1
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230517040748-5b807c48c3ca
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230517211646-da4d8a7e0e9b
 	google.golang.org/api v0.122.0
 )
 
