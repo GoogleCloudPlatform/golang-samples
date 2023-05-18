@@ -27,13 +27,17 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func createSequence(ctx context.Context, w io.Writer, db string) error {
+func createSequence(w io.Writer, db string) error {
+	// db := "projects/my-project/instances/my-instance/databases/my-database"
+	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err
 	}
 	defer adminClient.Close()
 
+	// List of DDL statements to be applied to the database.
+	// Create a sequence, and then use the sequence as auto generated primary key in Customers table.
 	ddl := []string{
 		"CREATE SEQUENCE Seq OPTIONS (sequence_kind = 'bit_reversed_positive')",
 		"CREATE TABLE Customers (CustomerId INT64 DEFAULT (GET_NEXT_SEQUENCE_VALUE('Seq')), CustomerName STRING(1024)) PRIMARY KEY (CustomerId)",
@@ -45,8 +49,9 @@ func createSequence(ctx context.Context, w io.Writer, db string) error {
 	if err != nil {
 		return err
 	}
+	// Wait for the UpdateDatabaseDdl operation to finish.
 	if err := op.Wait(ctx); err != nil {
-		return err
+		return fmt.Errorf("waiting for bit reverse sequenece creation to finish failed: %w", err)
 	}
 	fmt.Fprintf(w, "Created Customers table with bit reverse sequence keys\n")
 
@@ -56,6 +61,9 @@ func createSequence(ctx context.Context, w io.Writer, db string) error {
 	}
 	defer client.Close()
 
+	// Inserts records into the Customers table.
+	// The ReadWriteTransaction function returns the commit timestamp and an error.
+	// The commit timestamp is ignored in this case.
 	_, err = client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		stmt := spanner.Statement{
 			SQL: `INSERT INTO Customers (CustomerName) VALUES ('Alice'), ('David'), ('Marc') THEN RETURN CustomerId`,

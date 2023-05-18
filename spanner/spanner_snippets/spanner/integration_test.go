@@ -388,15 +388,16 @@ func TestSample(t *testing.T) {
 	out = runSample(t, queryWithJsonParameter, dbName, "failed to query with json parameter")
 	assertContains(t, out, "The venue details for venue id 19")
 
-	out = runSampleWithContext(ctx, t, createSequence, dbName, "failed to create table with bit reverse sequence enabled")
+	out = runSample(t, createSequence, dbName, "failed to create table with bit reverse sequence enabled")
 	assertContains(t, out, "Created Customers table with bit reverse sequence keys\n")
 	assertContains(t, out, "Inserted customer record with CustomerId")
 	assertContains(t, out, "record(s) inserted")
-	out = runSampleWithContext(ctx, t, alterSequence, dbName, "failed to alter table with bit reverse sequence enabled")
+	out = runSample(t, alterSequence, dbName, "failed to alter table with bit reverse sequence enabled")
 	assertContains(t, out, "Altered Seq sequence to skip an inclusive range between 1000 and 5000000\n")
 	assertContains(t, out, "Inserted customer record with CustomerId")
 	assertContains(t, out, "record(s) inserted")
-
+	out = runSample(t, dropSequence, dbName, "failed to drop bit reverse sequence column")
+	assertContains(t, out, "Altered Customers table to drop DEFAULT from CustomerId column and dropped the Seq sequence\n")
 }
 
 func TestBackupSample(t *testing.T) {

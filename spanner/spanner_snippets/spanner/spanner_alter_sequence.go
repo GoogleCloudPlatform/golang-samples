@@ -27,13 +27,17 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func alterSequence(ctx context.Context, w io.Writer, db string) error {
+func alterSequence(w io.Writer, db string) error {
+	// db := "projects/my-project/instances/my-instance/databases/my-database"
+	ctx := context.Background()
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err
 	}
 	defer adminClient.Close()
 
+	// List of DDL statements to be applied to the database.
+	// Alter the sequence to skip range [1000-5000000] for new keys.
 	ddl := []string{
 		"ALTER SEQUENCE Seq SET OPTIONS (skip_range_min = 1000, skip_range_max = 5000000)",
 	}
@@ -44,8 +48,9 @@ func alterSequence(ctx context.Context, w io.Writer, db string) error {
 	if err != nil {
 		return err
 	}
+	// Wait for the UpdateDatabaseDdl operation to finish.
 	if err := op.Wait(ctx); err != nil {
-		return err
+		return fmt.Errorf("waiting for bit reverse sequenece skip range to finish failed: %w", err)
 	}
 	fmt.Fprintf(w, "Altered Seq sequence to skip an inclusive range between 1000 and 5000000\n")
 
@@ -55,6 +60,9 @@ func alterSequence(ctx context.Context, w io.Writer, db string) error {
 	}
 	defer client.Close()
 
+	// Inserts records into the Customers table.
+	// The ReadWriteTransaction function returns the commit timestamp and an error.
+	// The commit timestamp is ignored in this case.
 	_, err = client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		stmt := spanner.Statement{
 			SQL: `INSERT INTO Customers (CustomerName) VALUES ('Lea'), ('Catalina'), ('Smith') THEN RETURN CustomerId`,
