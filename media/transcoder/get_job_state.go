@@ -34,7 +34,7 @@ func getJobState(w io.Writer, projectID string, location string, jobID string) e
 	ctx := context.Background()
 	client, err := transcoder.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -44,7 +44,7 @@ func getJobState(w io.Writer, projectID string, location string, jobID string) e
 
 	response, err := client.GetJob(ctx, req)
 	if err != nil {
-		return fmt.Errorf("GetJob: %v", err)
+		return fmt.Errorf("GetJob: %w", err)
 	}
 	fmt.Fprintf(w, "Job state: %v\n----\nJob failure reason:%v\n", response.State, response.Error)
 	return nil
