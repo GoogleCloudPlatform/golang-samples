@@ -36,7 +36,7 @@ func createJobFromPreset(w io.Writer, projectID string, location string, inputUR
 	ctx := context.Background()
 	client, err := transcoder.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -54,7 +54,7 @@ func createJobFromPreset(w io.Writer, projectID string, location string, inputUR
 	// You can query for the job state.
 	response, err := client.CreateJob(ctx, req)
 	if err != nil {
-		return fmt.Errorf("createJobFromPreset: %v", err)
+		return fmt.Errorf("createJobFromPreset: %w", err)
 	}
 
 	fmt.Fprintf(w, "Job: %v", response.GetName())
