@@ -70,7 +70,7 @@ func createChannel(projectID string) (*monitoringpb.NotificationChannel, error) 
 
 	channel, err := client.CreateNotificationChannel(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("CreateNotificationChannel: %v", err)
+		return nil, fmt.Errorf("CreateNotificationChannel: %w", err)
 	}
 
 	return channel, nil

@@ -31,7 +31,7 @@ func create(w io.Writer, projectID, subID string, topic *pubsub.Topic) error {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -40,7 +40,7 @@ func create(w io.Writer, projectID, subID string, topic *pubsub.Topic) error {
 		AckDeadline: 20 * time.Second,
 	})
 	if err != nil {
-		return fmt.Errorf("CreateSubscription: %v", err)
+		return fmt.Errorf("CreateSubscription: %w", err)
 	}
 	fmt.Fprintf(w, "Created subscription: %v\n", sub)
 	return nil

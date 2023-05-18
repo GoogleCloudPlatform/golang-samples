@@ -64,12 +64,12 @@ func filterOnStringValueCustomAttribute(w io.Writer, projectID string) (*talent.
 
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %v", err)
+		return nil, fmt.Errorf("google.DefaultClient: %w", err)
 	}
 	// Create the jobs service client.
 	service, err := talent.New(client)
 	if err != nil {
-		return nil, fmt.Errorf("talent.New: %v", err)
+		return nil, fmt.Errorf("talent.New: %w", err)
 	}
 
 	parent := "projects/" + projectID
@@ -91,7 +91,7 @@ func filterOnStringValueCustomAttribute(w io.Writer, projectID string) (*talent.
 	}
 	resp, err := service.Projects.Jobs.Search(parent, req).Do()
 	if err != nil {
-		return nil, fmt.Errorf("failed to search for jobs with string value custom attribute: %v", err)
+		return nil, fmt.Errorf("failed to search for jobs with string value custom attribute: %w", err)
 	}
 
 	fmt.Fprintln(w, "Jobs:")
@@ -113,12 +113,12 @@ func filterOnLongValueCustomAttribute(w io.Writer, projectID string) (*talent.Se
 
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %v", err)
+		return nil, fmt.Errorf("google.DefaultClient: %w", err)
 	}
 	// Create the jobs service client.
 	service, err := talent.New(client)
 	if err != nil {
-		return nil, fmt.Errorf("talent.New: %v", err)
+		return nil, fmt.Errorf("talent.New: %w", err)
 	}
 
 	parent := "projects/" + projectID
@@ -140,7 +140,7 @@ func filterOnLongValueCustomAttribute(w io.Writer, projectID string) (*talent.Se
 	}
 	resp, err := service.Projects.Jobs.Search(parent, req).Do()
 	if err != nil {
-		return nil, fmt.Errorf("failed to search for jobs with long value custom attribute: %v", err)
+		return nil, fmt.Errorf("failed to search for jobs with long value custom attribute: %w", err)
 	}
 
 	fmt.Fprintln(w, "Jobs:")
@@ -162,12 +162,12 @@ func filterOnMultiCustomAttributes(w io.Writer, projectID string) (*talent.Searc
 
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %v", err)
+		return nil, fmt.Errorf("google.DefaultClient: %w", err)
 	}
 	// Create the jobs service client.
 	service, err := talent.New(client)
 	if err != nil {
-		return nil, fmt.Errorf("talent.New: %v", err)
+		return nil, fmt.Errorf("talent.New: %w", err)
 	}
 
 	parent := "projects/" + projectID
@@ -189,7 +189,7 @@ func filterOnMultiCustomAttributes(w io.Writer, projectID string) (*talent.Searc
 	}
 	resp, err := service.Projects.Jobs.Search(parent, req).Do()
 	if err != nil {
-		return nil, fmt.Errorf("failed to search for jobs with multiple custom attributes: %v", err)
+		return nil, fmt.Errorf("failed to search for jobs with multiple custom attributes: %w", err)
 	}
 
 	fmt.Fprintln(w, "Jobs:")

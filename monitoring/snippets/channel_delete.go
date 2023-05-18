@@ -42,7 +42,7 @@ func deleteChannel(w io.Writer, channelName string) error {
 	}
 
 	if err := client.DeleteNotificationChannel(ctx, req); err != nil {
-		return fmt.Errorf("DeleteNotificationChannel: %v", err)
+		return fmt.Errorf("DeleteNotificationChannel: %w", err)
 	}
 
 	fmt.Fprintf(w, "Deleted channel %q", channelName)

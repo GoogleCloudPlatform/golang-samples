@@ -39,7 +39,7 @@ func deleteMetric(w io.Writer, name string) error {
 	}
 
 	if err := c.DeleteMetricDescriptor(ctx, req); err != nil {
-		return fmt.Errorf("could not delete metric: %v", err)
+		return fmt.Errorf("could not delete metric: %w", err)
 	}
 	fmt.Fprintf(w, "Deleted metric: %q\n", name)
 	return nil

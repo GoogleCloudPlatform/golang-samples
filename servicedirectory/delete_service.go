@@ -33,7 +33,7 @@ func deleteService(projectID string) error {
 	// Create a registration client.
 	client, err := servicedirectory.NewRegistrationClient(ctx)
 	if err != nil {
-		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
+		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %w", err)
 	}
 
 	defer client.Close()
@@ -42,7 +42,7 @@ func deleteService(projectID string) error {
 		Name: fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s", projectID, location, namespaceID, serviceID),
 	}
 	if err := client.DeleteService(ctx, req); err != nil {
-		return fmt.Errorf("DeleteService: %v", err)
+		return fmt.Errorf("DeleteService: %w", err)
 	}
 	return nil
 }
