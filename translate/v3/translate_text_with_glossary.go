@@ -37,7 +37,7 @@ func translateTextWithGlossary(w io.Writer, projectID string, location string, s
 	ctx := context.Background()
 	client, err := translate.NewTranslationClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewTranslationClient: %v", err)
+		return fmt.Errorf("NewTranslationClient: %w", err)
 	}
 	defer client.Close()
 
@@ -54,7 +54,7 @@ func translateTextWithGlossary(w io.Writer, projectID string, location string, s
 
 	resp, err := client.TranslateText(ctx, req)
 	if err != nil {
-		return fmt.Errorf("TranslateText: %v", err)
+		return fmt.Errorf("TranslateText: %w", err)
 	}
 
 	// Display the translation for each input text provided

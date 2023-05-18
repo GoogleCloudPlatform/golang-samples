@@ -29,13 +29,13 @@ func create(w io.Writer, projectID, topicID string) error {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 
 	t, err := client.CreateTopic(ctx, topicID)
 	if err != nil {
-		return fmt.Errorf("CreateTopic: %v", err)
+		return fmt.Errorf("CreateTopic: %w", err)
 	}
 	fmt.Fprintf(w, "Topic created: %v\n", t)
 	return nil

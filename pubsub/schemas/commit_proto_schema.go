@@ -32,7 +32,7 @@ func commitProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error
 	ctx := context.Background()
 	client, err := pubsub.NewSchemaClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewSchemaClient: %v", err)
+		return fmt.Errorf("pubsub.NewSchemaClient: %w", err)
 	}
 	defer client.Close()
 
@@ -49,7 +49,7 @@ func commitProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error
 	}
 	s, err := client.CommitSchema(ctx, schemaID, config)
 	if err != nil {
-		return fmt.Errorf("CommitSchema: %v", err)
+		return fmt.Errorf("CommitSchema: %w", err)
 	}
 	fmt.Fprintf(w, "Committed a schema using a protobuf schema: %#v\n", s)
 	return nil

@@ -38,7 +38,7 @@ func detectText(ctx context.Context, bucketName, fileName string) error {
 	}
 	annotations, err := visionClient.DetectTexts(ctx, image, &visionpb.ImageContext{}, maxResults)
 	if err != nil {
-		return fmt.Errorf("DetectTexts: %v", err)
+		return fmt.Errorf("DetectTexts: %w", err)
 	}
 	text := ""
 	if len(annotations) > 0 {
@@ -52,7 +52,7 @@ func detectText(ctx context.Context, bucketName, fileName string) error {
 
 	detectResponse, err := translateClient.DetectLanguage(ctx, []string{text})
 	if err != nil {
-		return fmt.Errorf("DetectLanguage: %v", err)
+		return fmt.Errorf("DetectLanguage: %w", err)
 	}
 	if len(detectResponse) == 0 || len(detectResponse[0]) == 0 {
 		return fmt.Errorf("DetectLanguage gave empty response")
@@ -68,11 +68,11 @@ func detectText(ctx context.Context, bucketName, fileName string) error {
 		}
 		targetTag, err := language.Parse(targetLang)
 		if err != nil {
-			return fmt.Errorf("language.Parse: %v", err)
+			return fmt.Errorf("language.Parse: %w", err)
 		}
 		srcTag, err := language.Parse(srcLang)
 		if err != nil {
-			return fmt.Errorf("language.Parse: %v", err)
+			return fmt.Errorf("language.Parse: %w", err)
 		}
 		message, err := json.Marshal(ocrMessage{
 			Text:     text,
@@ -81,24 +81,24 @@ func detectText(ctx context.Context, bucketName, fileName string) error {
 			SrcLang:  srcTag,
 		})
 		if err != nil {
-			return fmt.Errorf("json.Marshal: %v", err)
+			return fmt.Errorf("json.Marshal: %w", err)
 		}
 		topic := pubsubClient.Topic(topicName)
 		ok, err := topic.Exists(ctx)
 		if err != nil {
-			return fmt.Errorf("Exists: %v", err)
+			return fmt.Errorf("Exists: %w", err)
 		}
 		if !ok {
 			topic, err = pubsubClient.CreateTopic(ctx, topicName)
 			if err != nil {
-				return fmt.Errorf("CreateTopic: %v", err)
+				return fmt.Errorf("CreateTopic: %w", err)
 			}
 		}
 		msg := &pubsub.Message{
 			Data: []byte(message),
 		}
 		if _, err = topic.Publish(ctx, msg).Get(ctx); err != nil {
-			return fmt.Errorf("Get: %v", err)
+			return fmt.Errorf("Get: %w", err)
 		}
 	}
 	return nil

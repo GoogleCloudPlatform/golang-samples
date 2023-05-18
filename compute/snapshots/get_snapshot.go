@@ -32,7 +32,7 @@ func getSnapshot(w io.Writer, projectID, snapshotName string) error {
 	ctx := context.Background()
 	snapshotsClient, err := compute.NewSnapshotsRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewSnapshotsRESTClient: %v", err)
+		return fmt.Errorf("NewSnapshotsRESTClient: %w", err)
 	}
 	defer snapshotsClient.Close()
 
@@ -43,7 +43,7 @@ func getSnapshot(w io.Writer, projectID, snapshotName string) error {
 
 	snapshot, err := snapshotsClient.Get(ctx, reqSnapshot)
 	if err != nil {
-		return fmt.Errorf("unable to get snapshot: %v", err)
+		return fmt.Errorf("unable to get snapshot: %w", err)
 	}
 
 	fmt.Fprintf(w, "Found snapshot: %s\n", snapshot.GetName())

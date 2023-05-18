@@ -31,7 +31,7 @@ func activateHMACKey(w io.Writer, accessID string, projectID string) (*storage.H
 	// Initialize client.
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("storage.NewClient: %v", err)
+		return nil, fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -40,7 +40,7 @@ func activateHMACKey(w io.Writer, accessID string, projectID string) (*storage.H
 	defer cancel()
 	key, err := handle.Update(ctx, storage.HMACKeyAttrsToUpdate{State: "ACTIVE"})
 	if err != nil {
-		return nil, fmt.Errorf("Update: %v", err)
+		return nil, fmt.Errorf("Update: %w", err)
 	}
 
 	fmt.Fprintln(w, "The HMAC key metadata is:")

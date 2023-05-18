@@ -129,7 +129,7 @@ func (b *Bookshelf) bookFromRequest(r *http.Request) (*Book, error) {
 	}
 	book, err := b.DB.GetBook(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("could not find book: %v", err)
+		return nil, fmt.Errorf("could not find book: %w", err)
 	}
 	return book, nil
 }
@@ -167,7 +167,7 @@ func (b *Bookshelf) bookFromForm(r *http.Request) (*Book, error) {
 	ctx := r.Context()
 	imageURL, err := b.uploadFileFromForm(ctx, r)
 	if err != nil {
-		return nil, fmt.Errorf("could not upload file: %v", err)
+		return nil, fmt.Errorf("could not upload file: %w", err)
 	}
 	if imageURL == "" {
 		imageURL = r.FormValue("imageURL")
@@ -203,7 +203,7 @@ func (b *Bookshelf) uploadFileFromForm(ctx context.Context, r *http.Request) (ur
 		if err == storage.ErrBucketNotExist {
 			return "", fmt.Errorf("bucket %q does not exist: check bookshelf.go", b.StorageBucketName)
 		}
-		return "", fmt.Errorf("could not get bucket: %v", err)
+		return "", fmt.Errorf("could not get bucket: %w", err)
 	}
 
 	// random filename, retaining existing extension.

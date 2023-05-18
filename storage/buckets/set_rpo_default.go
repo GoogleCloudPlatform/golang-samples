@@ -31,7 +31,7 @@ func setRPODefault(w io.Writer, bucketName string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -43,7 +43,7 @@ func setRPODefault(w io.Writer, bucketName string) error {
 		RPO: storage.RPODefault,
 	}
 	if _, err := bucket.Update(ctx, setRPO); err != nil {
-		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Update: %w", bucketName, err)
 	}
 	fmt.Fprintf(w, "Turbo replication disabled for %v", bucketName)
 	return nil

@@ -55,11 +55,11 @@ func oauthClient() error {
 	// Exchange auth code for OAuth token.
 	token, err := config.Exchange(ctx, code)
 	if err != nil {
-		return fmt.Errorf("config.Exchange: %v", err)
+		return fmt.Errorf("config.Exchange: %w", err)
 	}
 	client, err := pubsub.NewClient(ctx, "your-project-id", option.WithTokenSource(config.TokenSource(ctx, token)))
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 
