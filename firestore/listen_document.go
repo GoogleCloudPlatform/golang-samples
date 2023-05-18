@@ -37,7 +37,7 @@ func listenDocument(ctx context.Context, w io.Writer, projectID, collection stri
 
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("firestore.NewClient: %v", err)
+		return fmt.Errorf("firestore.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -49,7 +49,7 @@ func listenDocument(ctx context.Context, w io.Writer, projectID, collection stri
 			return nil
 		}
 		if err != nil {
-			return fmt.Errorf("Snapshots.Next: %v", err)
+			return fmt.Errorf("Snapshots.Next: %w", err)
 		}
 		if !snap.Exists() {
 			fmt.Fprintf(w, "Document no longer exists\n")
