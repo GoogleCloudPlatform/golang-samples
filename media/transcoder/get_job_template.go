@@ -34,7 +34,7 @@ func getJobTemplate(w io.Writer, projectID string, location string, templateID s
 	ctx := context.Background()
 	client, err := transcoder.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -44,7 +44,7 @@ func getJobTemplate(w io.Writer, projectID string, location string, templateID s
 
 	response, err := client.GetJobTemplate(ctx, req)
 	if err != nil {
-		return fmt.Errorf("GetJobTemplate: %v", err)
+		return fmt.Errorf("GetJobTemplate: %w", err)
 	}
 
 	fmt.Fprintf(w, "Job template: %v", response.GetName())

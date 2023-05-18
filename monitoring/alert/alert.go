@@ -300,7 +300,7 @@ func replaceChannels(w io.Writer, projectID, alertPolicyID string, channelIDs []
 		},
 	}
 	if _, err := client.UpdateAlertPolicy(ctx, req); err != nil {
-		return fmt.Errorf("UpdateAlertPolicy: %v", err)
+		return fmt.Errorf("UpdateAlertPolicy: %w", err)
 	}
 	fmt.Fprintf(w, "Successfully replaced channels.")
 	return nil
