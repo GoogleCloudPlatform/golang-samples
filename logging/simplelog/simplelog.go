@@ -15,19 +15,24 @@
 // Sample simplelog writes some entries, lists them, then deletes the log.
 package main
 
+// [START logging_delete_log]
+// [START logging_list_log_entries]
+// [START logging_write_log_entry]
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"time"
 
-	"context"
-
 	"cloud.google.com/go/logging"
 	"cloud.google.com/go/logging/logadmin"
-
 	"google.golang.org/api/iterator"
 )
+
+// [END logging_delete_log]
+// [END logging_list_log_entries]
+// [END logging_write_log_entry]
 
 func main() {
 	if len(os.Args) == 2 {
@@ -40,31 +45,9 @@ func main() {
 	projID := os.Args[1]
 	command := os.Args[2]
 
-	// [START setup]
-	ctx := context.Background()
-	client, err := logging.NewClient(ctx, projID)
-	if err != nil {
-		log.Fatalf("Failed to create logging client: %v", err)
-	}
-	defer client.Close()
-
-	adminClient, err := logadmin.NewClient(ctx, projID)
-	if err != nil {
-		log.Fatalf("Failed to create logadmin client: %v", err)
-	}
-	defer adminClient.Close()
-
-	client.OnError = func(err error) {
-		// Print an error to the local log.
-		// For example, if Flush() failed.
-		log.Printf("client.OnError: %v", err)
-	}
-	// [END setup]
-
 	switch command {
 	case "write":
-		log.Print("Writing some log entries.")
-		writeEntry(client)
+		log.Print("Writing log entries.")
 		structuredWrite(projID)
 
 	case "read":
@@ -92,15 +75,6 @@ func main() {
 	}
 }
 
-func writeEntry(client *logging.Client) {
-	const name = "log-example"
-	logger := client.Logger(name)
-	defer logger.Flush() // Ensure the entry is written.
-
-	infolog := logger.StandardLogger(logging.Info)
-	infolog.Printf("infolog is a standard Go log.Logger with INFO severity.")
-}
-
 // [START logging_write_log_entry]
 func structuredWrite(projectID string) {
 	ctx := context.Background()
@@ -125,6 +99,7 @@ func structuredWrite(projectID string) {
 // [END logging_write_log_entry]
 
 // [START logging_delete_log]
+
 func deleteLog(projectID string) error {
 	ctx := context.Background()
 	adminClient, err := logadmin.NewClient(ctx, projectID)

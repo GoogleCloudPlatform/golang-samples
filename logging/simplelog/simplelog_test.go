@@ -52,7 +52,6 @@ func TestSimplelog(t *testing.T) {
 		t.Errorf("OnError: %v", err)
 	}
 
-	writeEntry(client)
 	structuredWrite(tc.ProjectID)
 
 	testutil.Retry(t, 20, 10*time.Second, func(r *testutil.R) {
@@ -62,15 +61,14 @@ func TestSimplelog(t *testing.T) {
 			return
 		}
 
-		if len(entries) < 2 {
-			r.Errorf("len(entries) = %d; want at least 2 entries", len(entries))
+		if len(entries) < 1 {
+			r.Errorf("len(entries) = %d; want at least 1 entry", len(entries))
 			return
 		}
 
 		wantContain := map[string]*logging.Entry{
-			"Anything":                            entries[0],
-			"The payload can be any type!":        entries[0],
-			"infolog is a standard Go log.Logger": entries[1],
+			"Anything":                     entries[0],
+			"The payload can be any type!": entries[0],
 		}
 
 		for want, entry := range wantContain {
