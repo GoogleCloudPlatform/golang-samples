@@ -37,7 +37,7 @@ func createCluster(w io.Writer, projectID, region, clusterName string) error {
 	endpoint := region + "-dataproc.googleapis.com:443"
 	clusterClient, err := dataproc.NewClusterControllerClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
-		return fmt.Errorf("dataproc.NewClusterControllerClient: %v", err)
+		return fmt.Errorf("dataproc.NewClusterControllerClient: %w", err)
 	}
 	defer clusterClient.Close()
 
@@ -64,12 +64,12 @@ func createCluster(w io.Writer, projectID, region, clusterName string) error {
 	// Create the cluster.
 	op, err := clusterClient.CreateCluster(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateCluster: %v", err)
+		return fmt.Errorf("CreateCluster: %w", err)
 	}
 
 	resp, err := op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("CreateCluster.Wait: %v", err)
+		return fmt.Errorf("CreateCluster.Wait: %w", err)
 	}
 
 	// Output a success message.

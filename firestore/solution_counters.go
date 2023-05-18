@@ -51,7 +51,7 @@ func (c *Counter) initCounter(ctx context.Context, docRef *firestore.DocumentRef
 		shard := Shard{0}
 
 		if _, err := colRef.Doc(strconv.Itoa(num)).Set(ctx, shard); err != nil {
-			return fmt.Errorf("Set: %v", err)
+			return fmt.Errorf("Set: %w", err)
 		}
 	}
 	return nil
@@ -85,7 +85,7 @@ func (c *Counter) getCount(ctx context.Context, docRef *firestore.DocumentRef) (
 			break
 		}
 		if err != nil {
-			return 0, fmt.Errorf("Next: %v", err)
+			return 0, fmt.Errorf("Next: %w", err)
 		}
 
 		vTotal := doc.Data()["Count"]
