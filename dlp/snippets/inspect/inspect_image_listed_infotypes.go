@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/dlp/apiv2/dlppb"
 )
 
-// inspectImageFileListedInfoTypes inspects an image for sensitive data listed infoTypes
+// inspectImageFileListedInfoTypes inspects an image for sensitive data listed infoTypes.
 func inspectImageFileListedInfoTypes(w io.Writer, projectID, filePath string) error {
 	// projectId := "my-project-id"
 	// filePath := "inspect/testdata/image.jpg"
