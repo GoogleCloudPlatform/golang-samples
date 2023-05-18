@@ -35,7 +35,7 @@ func publishWithOrderingKey(w io.Writer, projectID, zone, topicID string, messag
 	// Create the publisher client.
 	publisher, err := pscompat.NewPublisherClient(ctx, topicPath)
 	if err != nil {
-		return fmt.Errorf("pscompat.NewPublisherClient error: %v", err)
+		return fmt.Errorf("pscompat.NewPublisherClient error: %w", err)
 	}
 
 	// Ensure the publisher will be shut down.
@@ -70,7 +70,7 @@ func publishWithOrderingKey(w io.Writer, projectID, zone, topicID string, messag
 		// Metadata decoded from the id contains the partition and offset.
 		metadata, err := pscompat.ParseMessageMetadata(id)
 		if err != nil {
-			return fmt.Errorf("failed to parse message metadata %q: %v", id, err)
+			return fmt.Errorf("failed to parse message metadata %q: %w", id, err)
 		}
 		fmt.Fprintf(w, "Published: partition=%d, offset=%d\n", metadata.Partition, metadata.Offset)
 		publishedCount++
