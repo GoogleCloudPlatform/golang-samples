@@ -69,7 +69,7 @@ func setupCaPool(t *testing.T) (string, func(t *testing.T)) {
 
 // Setup and teardown functions for CaTests
 func setupCa(t *testing.T, caPoolId string) (string, func(t *testing.T)) {
-	caId := fmt.Sprintf("test-ca-%v-%v", time.Now().Format("2006-01-02"), r.Int())
+	caId := fmt.Sprintf("NEWtest-ca-%v-%v", time.Now().Format("2006-01-02"), r.Int())
 	caCommonName := fmt.Sprintf("CN - %s", caId)
 	org := "ORGANIZATION"
 	caDuration := int64(2592000) // 30 days
@@ -141,7 +141,7 @@ func TestCreateCaPool(t *testing.T) {
 		}
 
 		if err := deleteCaPool(&buf, projectId, location, caPoolId); err != nil {
-			t.Fatal("createCaPool teardown got err:", err)
+			t.Fatal("createCaPool teardown (deleteCaPool) got err:", err)
 		}
 	})
 
@@ -183,7 +183,7 @@ func TestCreateCa(t *testing.T) {
 		}
 
 		if err := deleteCaPerm(projectId, location, caPoolId, caId); err != nil {
-			t.Fatal("createCa teardown got err:", err)
+			t.Fatal("createCa teardown (deleteCaPerm) got err:", err)
 		}
 	})
 
@@ -198,6 +198,12 @@ func TestCreateCa(t *testing.T) {
 		expectedResult := fmt.Sprintf("Successfully deleted Certificate Authority: %s.", caId)
 		if got := buf.String(); !strings.Contains(got, expectedResult) {
 			t.Errorf("deleteCa got %q, want %q", got, expectedResult)
+		}
+
+		// Certificate Authority needs to be undeleted first, so we can delete it again permanently
+		// without 30d grace period to be able to clean up CA Pool afterwards
+		if err := unDeleteCa(&buf, projectId, location, caPoolId, caId); err != nil {
+			t.Error("createCa teardown (unDeleteCa) got err:", err)
 		}
 
 		// We need to make sure it's completely deleted (without graceperiod before we finish tests)
@@ -220,9 +226,6 @@ func TestCreateCa(t *testing.T) {
 			t.Errorf("enableCa got %q, want %q", got, expectedResult)
 		}
 
-		time.Sleep(15 * time.Second)
-		fmt.Println("Enabled - check it")
-
 		buf.Reset()
 		if err := disableCa(&buf, projectId, location, caPoolId, caId); err != nil {
 			t.Fatal("disableCa got err:", err)
@@ -232,8 +235,5 @@ func TestCreateCa(t *testing.T) {
 		if got := buf.String(); !strings.Contains(got, expectedResult) {
 			t.Errorf("disableCa got %q, want %q", got, expectedResult)
 		}
-
-		time.Sleep(15 * time.Second)
-		fmt.Println("Disabled - check it")
 	})
 }

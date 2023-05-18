@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START privateca_delete_ca]
+// [START privateca_undelete_ca]
 import (
 	"context"
 	"fmt"
@@ -24,13 +24,12 @@ import (
 	"cloud.google.com/go/security/privateca/apiv1/privatecapb"
 )
 
-// Delete a Certificate Authority from the specified CA pool.
-// Before deletion, the CA must be disabled or staged and must not contain any active certificates.
-func deleteCa(w io.Writer, projectID string, location string, caPoolId string, caId string) error {
+// Undelete a Certificate Authority from the specified CA pool.
+func unDeleteCa(w io.Writer, projectID string, location string, caPoolId string, caId string) error {
 	// projectID := "your_project_id"
 	// location := "us-central1"	// For a list of locations, see: https://cloud.google.com/certificate-authority-service/docs/locations.
 	// caPoolId := "ca-pool-id"		// The id of the CA pool under which the CA is present.
-	// caId := "ca-id"				// The id of the CA to be deleted.
+	// caId := "ca-id"				// The id of the CA to be undeleted.
 
 	ctx := context.Background()
 	caClient, err := privateca.NewCertificateAuthorityClient(ctx)
@@ -42,7 +41,7 @@ func deleteCa(w io.Writer, projectID string, location string, caPoolId string, c
 	fullCaName := fmt.Sprintf("projects/%s/locations/%s/caPools/%s/certificateAuthorities/%s",
 		projectID, location, caPoolId, caId)
 
-	// Check if the CA is disabled or staged.
+	// Check if the CA is deleted.
 	// See https://pkg.go.dev/cloud.google.com/go/security/privateca/apiv1/privatecapb#GetCertificateAuthorityRequest.
 	caReq := &privatecapb.GetCertificateAuthorityRequest{Name: fullCaName}
 	caResp, err := caClient.GetCertificateAuthority(ctx, caReq)
@@ -50,37 +49,30 @@ func deleteCa(w io.Writer, projectID string, location string, caPoolId string, c
 		return fmt.Errorf("GetCertificateAuthority failed: %w", err)
 	}
 
-	if caResp.State != privatecapb.CertificateAuthority_DISABLED &&
-		caResp.State != privatecapb.CertificateAuthority_STAGED {
-		return fmt.Errorf("you can only delete disabled or staged Certificate Authorities. %s is not disabled", caId)
+	if caResp.State != privatecapb.CertificateAuthority_DELETED {
+		return fmt.Errorf("you can only undelete deleted Certificate Authorities. %s is not deleted", caId)
 	}
 
-	// Create the DeleteCertificateAuthorityRequest.
-	// Setting the IgnoreActiveCertificates to True will delete the CA
-	// even if it contains active certificates. Care should be taken to re-anchor
-	// the certificates to new CA before deleting.
-	// See https://pkg.go.dev/cloud.google.com/go/security/privateca/apiv1/privatecapb#DeleteCertificateAuthorityRequest.
-	req := &privatecapb.DeleteCertificateAuthorityRequest{
-		Name:                     fullCaName,
-		IgnoreActiveCertificates: false,
-	}
+	// Create the UndeleteCertificateAuthority.
+	// See https://pkg.go.dev/cloud.google.com/go/security/privateca/apiv1/privatecapb#UndeleteCertificateAuthorityRequest.
+	req := &privatecapb.UndeleteCertificateAuthorityRequest{Name: fullCaName}
 
-	op, err := caClient.DeleteCertificateAuthority(ctx, req)
+	op, err := caClient.UndeleteCertificateAuthority(ctx, req)
 	if err != nil {
-		return fmt.Errorf("DeleteCertificateAuthority failed: %w", err)
+		return fmt.Errorf("UndeleteCertificateAuthority failed: %w", err)
 	}
 
 	if caResp, err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("DeleteCertificateAuthority failed during wait: %w", err)
+		return fmt.Errorf("UndeleteCertificateAuthority failed during wait: %w", err)
 	}
 
-	if caResp.State == privatecapb.CertificateAuthority_DELETED {
-		fmt.Fprintf(w, "Successfully deleted Certificate Authority: %s.", caId)
+	if caResp.State != privatecapb.CertificateAuthority_DELETED {
+		fmt.Fprintf(w, "Successfully undeleted Certificate Authority: %s.", caId)
 	} else {
-		return fmt.Errorf("unable to delete Certificate Authority. Current state: %s", caResp.State.String())
+		return fmt.Errorf("unable to undelete Certificate Authority. Current state: %s", caResp.State.String())
 	}
 
 	return nil
 }
 
-// [END privateca_delete_ca]
+// [END privateca_undelete_ca]
