@@ -296,7 +296,7 @@ func TestInspectStringCustomHotWord(t *testing.T) {
 	var buf bytes.Buffer
 
 	if err := inspectStringCustomHotWord(&buf, tc.ProjectID, "patient name: John Doe", "patient", "PERSON_NAME"); err != nil {
-		t.Errorf("inspectStringCustomHotWord: %v", err)
+		t.Fatal(err)
 	}
 
 	got := buf.String()

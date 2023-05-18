@@ -93,20 +93,20 @@ func inspectBigquery(w io.Writer, projectID string, infoTypeNames []string, cust
 	// Create the Topic if it doesn't exist.
 	t := pubsubClient.Topic(pubSubTopic)
 	if exists, err := t.Exists(ctx); err != nil {
-		return fmt.Errorf("t.Exists: %v", err)
+		return fmt.Errorf("t.Exists: %w", err)
 	} else if !exists {
 		if t, err = pubsubClient.CreateTopic(ctx, pubSubTopic); err != nil {
-			return fmt.Errorf("CreateTopic: %v", err)
+			return fmt.Errorf("CreateTopic: %w", err)
 		}
 	}
 
 	// Create the Subscription if it doesn't exist.
 	s := pubsubClient.Subscription(pubSubSub)
 	if exists, err := s.Exists(ctx); err != nil {
-		return fmt.Errorf("s.Exits: %v", err)
+		return fmt.Errorf("s.Exits: %w", err)
 	} else if !exists {
 		if s, err = pubsubClient.CreateSubscription(ctx, pubSubSub, pubsub.SubscriptionConfig{Topic: t}); err != nil {
-			return fmt.Errorf("CreateSubscription: %v", err)
+			return fmt.Errorf("CreateSubscription: %w", err)
 		}
 	}
 
@@ -156,7 +156,7 @@ func inspectBigquery(w io.Writer, projectID string, infoTypeNames []string, cust
 	// Create the inspect job.
 	j, err := client.CreateDlpJob(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateDlpJob: %v", err)
+		return fmt.Errorf("CreateDlpJob: %w", err)
 	}
 	fmt.Fprintf(w, "Created job: %v\n", j.GetName())
 
