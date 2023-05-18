@@ -31,7 +31,7 @@ func indexGet(w io.Writer, projectID, indexID string) (*adminpb.Index, error) {
 	ctx := context.Background()
 	client, err := admin.NewDatastoreAdminClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("admin.NewDatastoreAdminClient: %v", err)
+		return nil, fmt.Errorf("admin.NewDatastoreAdminClient: %w", err)
 	}
 	defer client.Close()
 
@@ -41,7 +41,7 @@ func indexGet(w io.Writer, projectID, indexID string) (*adminpb.Index, error) {
 	}
 	index, err := client.GetIndex(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("client.GetIndex: %v", err)
+		return nil, fmt.Errorf("client.GetIndex: %w", err)
 	}
 
 	fmt.Fprintf(w, "Got index: %v\n", index.IndexId)
