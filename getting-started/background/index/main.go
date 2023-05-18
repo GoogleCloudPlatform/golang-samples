@@ -78,20 +78,20 @@ func newApp(projectID, templateDir string) (*app, error) {
 
 	pubsubClient, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return nil, fmt.Errorf("pubsub.NewClient: %v", err)
+		return nil, fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 
 	pubsubTopic := pubsubClient.Topic(topicName)
 
 	firestoreClient, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
-		return nil, fmt.Errorf("firestore.NewClient: %v", err)
+		return nil, fmt.Errorf("firestore.NewClient: %w", err)
 	}
 
 	// Template referenced relative to the module/app root.
 	tmpl, err := template.ParseFiles(filepath.Join(templateDir, "index.html"))
 	if err != nil {
-		return nil, fmt.Errorf("template.New: %v", err)
+		return nil, fmt.Errorf("template.New: %w", err)
 	}
 
 	return &app{

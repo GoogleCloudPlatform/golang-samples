@@ -38,7 +38,7 @@ func instantiateInlineWorkflowTemplate(w io.Writer, projectID, region string) er
 	endpoint := region + "-dataproc.googleapis.com:443"
 	workflowTemplateClient, err := dataproc.NewWorkflowTemplateClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
-		return fmt.Errorf("dataproc.NewWorkflowTemplateClient: %v", err)
+		return fmt.Errorf("dataproc.NewWorkflowTemplateClient: %w", err)
 	}
 	defer workflowTemplateClient.Close()
 
@@ -109,11 +109,11 @@ func instantiateInlineWorkflowTemplate(w io.Writer, projectID, region string) er
 	// Create the cluster.
 	op, err := workflowTemplateClient.InstantiateInlineWorkflowTemplate(ctx, req)
 	if err != nil {
-		return fmt.Errorf("InstantiateInlineWorkflowTemplate: %v", err)
+		return fmt.Errorf("InstantiateInlineWorkflowTemplate: %w", err)
 	}
 
 	if err := op.Wait(ctx); err != nil {
-		return fmt.Errorf("InstantiateInlineWorkflowTemplate.Wait: %v", err)
+		return fmt.Errorf("InstantiateInlineWorkflowTemplate.Wait: %w", err)
 	}
 
 	// Output a success message.
