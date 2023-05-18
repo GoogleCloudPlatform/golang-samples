@@ -55,12 +55,11 @@ func disableCa(w io.Writer, projectID string, location string, caPoolId string, 
 		return fmt.Errorf("DisableCertificateAuthority failed during wait: %w", err)
 	}
 
-	if caResp.State == privatecapb.CertificateAuthority_DISABLED {
-		fmt.Fprintf(w, "Successfully disabled Certificate Authority: %s.", caId)
-	} else {
+	if caResp.State != privatecapb.CertificateAuthority_DISABLED {
 		return fmt.Errorf("unable to disabled Certificate Authority. Current state: %s", caResp.State.String())
 	}
 
+	fmt.Fprintf(w, "Successfully disabled Certificate Authority: %s.", caId)
 	return nil
 }
 

@@ -81,8 +81,9 @@ func createCa(
 	}
 
 	// Set certificate authority settings.
+	// Type: SELF_SIGNED denotes that this CA is a root CA.
 	ca := &privatecapb.CertificateAuthority{
-		Type:    privatecapb.CertificateAuthority_SELF_SIGNED, // SELF_SIGNED denotes that this CA is a root CA.
+		Type:    privatecapb.CertificateAuthority_SELF_SIGNED,
 		KeySpec: keySpec,
 		Config: &privatecapb.CertificateConfig{
 			SubjectConfig: subjectConfig,

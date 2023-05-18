@@ -56,12 +56,11 @@ func enableCa(w io.Writer, projectID string, location string, caPoolId string, c
 		return fmt.Errorf("EnableCertificateAuthority failed during wait: %w", err)
 	}
 
-	if caResp.State == privatecapb.CertificateAuthority_ENABLED {
-		fmt.Fprintf(w, "Successfully enabled Certificate Authority: %s.", caId)
-	} else {
+	if caResp.State != privatecapb.CertificateAuthority_ENABLED {
 		return fmt.Errorf("unable to enable Certificate Authority. Current state: %s", caResp.State.String())
 	}
 
+	fmt.Fprintf(w, "Successfully enabled Certificate Authority: %s.", caId)
 	return nil
 }
 

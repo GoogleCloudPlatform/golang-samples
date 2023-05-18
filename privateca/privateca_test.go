@@ -69,7 +69,7 @@ func setupCaPool(t *testing.T) (string, func(t *testing.T)) {
 
 // Setup and teardown functions for CaTests
 func setupCa(t *testing.T, caPoolId string) (string, func(t *testing.T)) {
-	caId := fmt.Sprintf("NEWtest-ca-%v-%v", time.Now().Format("2006-01-02"), r.Int())
+	caId := fmt.Sprintf("test-ca-%v-%v", time.Now().Format("2006-01-02"), r.Int())
 	caCommonName := fmt.Sprintf("CN - %s", caId)
 	org := "ORGANIZATION"
 	caDuration := int64(2592000) // 30 days

@@ -74,12 +74,11 @@ func deleteCa(w io.Writer, projectID string, location string, caPoolId string, c
 		return fmt.Errorf("DeleteCertificateAuthority failed during wait: %w", err)
 	}
 
-	if caResp.State == privatecapb.CertificateAuthority_DELETED {
-		fmt.Fprintf(w, "Successfully deleted Certificate Authority: %s.", caId)
-	} else {
+	if caResp.State != privatecapb.CertificateAuthority_DELETED {
 		return fmt.Errorf("unable to delete Certificate Authority. Current state: %s", caResp.State.String())
 	}
 
+	fmt.Fprintf(w, "Successfully deleted Certificate Authority: %s.", caId)
 	return nil
 }
 

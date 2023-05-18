@@ -66,12 +66,11 @@ func unDeleteCa(w io.Writer, projectID string, location string, caPoolId string,
 		return fmt.Errorf("UndeleteCertificateAuthority failed during wait: %w", err)
 	}
 
-	if caResp.State != privatecapb.CertificateAuthority_DELETED {
-		fmt.Fprintf(w, "Successfully undeleted Certificate Authority: %s.", caId)
-	} else {
+	if caResp.State == privatecapb.CertificateAuthority_DELETED {
 		return fmt.Errorf("unable to undelete Certificate Authority. Current state: %s", caResp.State.String())
 	}
 
+	fmt.Fprintf(w, "Successfully undeleted Certificate Authority: %s.", caId)
 	return nil
 }
 
