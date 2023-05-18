@@ -49,7 +49,7 @@ func seekSubscription(w io.Writer, projectID, region, zone, subID string, seekTa
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
-		return fmt.Errorf("pubsublite.NewAdminClient: %v", err)
+		return fmt.Errorf("pubsublite.NewAdminClient: %w", err)
 	}
 	defer client.Close()
 
@@ -59,18 +59,18 @@ func seekSubscription(w io.Writer, projectID, region, zone, subID string, seekTa
 	subPath := fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, zone, subID)
 	seekOp, err := client.SeekSubscription(ctx, subPath, seekTarget)
 	if err != nil {
-		return fmt.Errorf("client.SeekSubscription got err: %v", err)
+		return fmt.Errorf("client.SeekSubscription got err: %w", err)
 	}
 	fmt.Fprintf(w, "Seek operation initiated: %s\n", seekOp.Name())
 
 	if waitForOperation {
 		_, err = seekOp.Wait(ctx)
 		if err != nil {
-			return fmt.Errorf("seekOp.Wait got err: %v", err)
+			return fmt.Errorf("seekOp.Wait got err: %w", err)
 		}
 		metadata, err := seekOp.Metadata()
 		if err != nil {
-			return fmt.Errorf("seekOp.Metadata got err: %v", err)
+			return fmt.Errorf("seekOp.Metadata got err: %w", err)
 		}
 		fmt.Fprintf(w, "Seek operation completed with metadata: %v\n", metadata)
 	}

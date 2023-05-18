@@ -30,21 +30,21 @@ func addUsers(projectID, subID string) error {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 
 	sub := client.Subscription(subID)
 	policy, err := sub.IAM().Policy(ctx)
 	if err != nil {
-		return fmt.Errorf("err getting IAM Policy: %v", err)
+		return fmt.Errorf("err getting IAM Policy: %w", err)
 	}
 	// Other valid prefixes are "serviceAccount:", "user:"
 	// See the documentation for more values.
 	policy.Add(iam.AllUsers, iam.Viewer)
 	policy.Add("group:cloud-logs@google.com", iam.Editor)
 	if err := sub.IAM().SetPolicy(ctx, policy); err != nil {
-		return fmt.Errorf("SetPolicy: %v", err)
+		return fmt.Errorf("SetPolicy: %w", err)
 	}
 	// NOTE: It may be necessary to retry this operation if IAM policies are
 	// being modified concurrently. SetPolicy will return an error if the policy
