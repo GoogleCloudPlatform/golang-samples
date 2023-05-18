@@ -33,7 +33,7 @@ func getCDNKey(w io.Writer, projectID, keyID string) error {
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
-		return fmt.Errorf("stitcher.NewVideoStitcherClient: %v", err)
+		return fmt.Errorf("stitcher.NewVideoStitcherClient: %w", err)
 	}
 	defer client.Close()
 
@@ -47,7 +47,7 @@ func getCDNKey(w io.Writer, projectID, keyID string) error {
 	}
 	b, err := json.MarshalIndent(response, "", " ")
 	if err != nil {
-		return fmt.Errorf("json.MarshalIndent: %v", err)
+		return fmt.Errorf("json.MarshalIndent: %w", err)
 	}
 
 	fmt.Fprintf(w, "CDN key:\n%s", string(b))
