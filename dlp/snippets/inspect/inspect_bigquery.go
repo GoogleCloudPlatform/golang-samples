@@ -103,7 +103,7 @@ func inspectBigquery(w io.Writer, projectID string, infoTypeNames []string, cust
 	// Create the Subscription if it doesn't exist.
 	s := pubsubClient.Subscription(pubSubSub)
 	if exists, err := s.Exists(ctx); err != nil {
-		return fmt.Errorf("s.Exits: %v]w", err)
+		return fmt.Errorf("s.Exits: %w", err)
 	} else if !exists {
 		if s, err = pubsubClient.CreateSubscription(ctx, pubSubSub, pubsub.SubscriptionConfig{Topic: t}); err != nil {
 			return fmt.Errorf("CreateSubscription: %w", err)
@@ -189,7 +189,7 @@ func inspectBigquery(w io.Writer, projectID string, infoTypeNames []string, cust
 			return
 		}
 		for _, s := range r {
-			fmt.Fprintf(w, "Found %v instances of infoType %v\n", s.GetCount(), s.GetInfoType().GetName())
+			fmt.Fprintf(w, "  Found %v instances of infoType %v\n", s.GetCount(), s.GetInfoType().GetName())
 		}
 	})
 	if err != nil {

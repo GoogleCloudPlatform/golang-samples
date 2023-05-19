@@ -131,7 +131,7 @@ func riskCategorical(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub
 		cancel()
 	})
 	if err != nil {
-		return fmt.Errorf("receive: %w", err)
+		return fmt.Errorf("Receive: %w", err)
 	}
 	return nil
 }
