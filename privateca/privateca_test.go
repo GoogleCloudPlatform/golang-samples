@@ -16,6 +16,7 @@ package snippets
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -23,6 +24,8 @@ import (
 	"testing"
 	"time"
 
+	privateca "cloud.google.com/go/security/privateca/apiv1"
+	"cloud.google.com/go/security/privateca/apiv1/privatecapb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"google.golang.org/api/googleapi"
 )
@@ -64,6 +67,63 @@ func setupCaPool(t *testing.T) (string, func(t *testing.T)) {
 	}
 }
 
+// Setup and teardown functions for CaTests
+func setupCa(t *testing.T, caPoolId string) (string, func(t *testing.T)) {
+	caId := fmt.Sprintf("test-ca-%v-%v", time.Now().Format("2006-01-02"), r.Int())
+	caCommonName := fmt.Sprintf("CN - %s", caId)
+	org := "ORGANIZATION"
+	caDuration := int64(2592000) // 30 days
+
+	if err := createCa(&buf, projectId, location, caPoolId, caId, caCommonName, org, caDuration); err != nil {
+		t.Fatal("setupCa got err:", err)
+	}
+
+	// Return a function to teardown the test
+	return caId, func(t *testing.T) {
+		if err := deleteCaPerm(projectId, location, caPoolId, caId); err != nil {
+			var gerr *googleapi.Error
+			if errors.As(err, &gerr) {
+				if gerr.Code == 404 {
+					t.Log("setupCa teardown - skipped CA Pool deletion (not found)")
+				} else {
+					t.Errorf("setupCa teardown got err: %v", err)
+				}
+			}
+		}
+	}
+}
+
+// Helper function to permanently remove CAs without 30d grace period
+func deleteCaPerm(projectID string, location string, caPoolId string, caId string) error {
+	ctx := context.Background()
+	caClient, err := privateca.NewCertificateAuthorityClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer caClient.Close()
+
+	fullCaName := fmt.Sprintf("projects/%s/locations/%s/caPools/%s/certificateAuthorities/%s",
+		projectID, location, caPoolId, caId)
+
+	req := &privatecapb.DeleteCertificateAuthorityRequest{
+		Name:                     fullCaName,
+		IgnoreActiveCertificates: true,
+		IgnoreDependentResources: true,
+		SkipGracePeriod:          true,
+	}
+
+	op, err := caClient.DeleteCertificateAuthority(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	if _, err = op.Wait(ctx); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func TestCreateCaPool(t *testing.T) {
 	setupTests(t)
 
@@ -81,7 +141,7 @@ func TestCreateCaPool(t *testing.T) {
 		}
 
 		if err := deleteCaPool(&buf, projectId, location, caPoolId); err != nil {
-			t.Fatal("createCaPool teardown got err:", err)
+			t.Fatal("createCaPool teardown (deleteCaPool) got err:", err)
 		}
 	})
 
@@ -97,6 +157,83 @@ func TestCreateCaPool(t *testing.T) {
 		expectedResult := "CA Pool deleted"
 		if got := buf.String(); !strings.Contains(got, expectedResult) {
 			t.Errorf("deleteCaPool got %q, want %q", got, expectedResult)
+		}
+	})
+}
+
+func TestCreateCa(t *testing.T) {
+	setupTests(t)
+	caPoolId, teardownCaPool := setupCaPool(t)
+	defer teardownCaPool(t)
+
+	t.Run("createCa", func(t *testing.T) {
+		caId := fmt.Sprintf("test-ca-%v-%v", time.Now().Format("2006-01-02"), r.Int())
+		caCommonName := fmt.Sprintf("CN - %s", caId)
+		org := "ORGANIZATION"
+		caDuration := int64(2592000) // 30 days
+
+		buf.Reset()
+		if err := createCa(&buf, projectId, location, caPoolId, caId, caCommonName, org, caDuration); err != nil {
+			t.Fatal("createCa got err:", err)
+		}
+
+		expectedResult := fmt.Sprintf("CA %s created", caId)
+		if got := buf.String(); !strings.Contains(got, expectedResult) {
+			t.Errorf("createCa got %q, want %q", got, expectedResult)
+		}
+
+		if err := deleteCaPerm(projectId, location, caPoolId, caId); err != nil {
+			t.Fatal("createCa teardown (deleteCaPerm) got err:", err)
+		}
+	})
+
+	t.Run("deleteCa", func(t *testing.T) {
+		caId, _ := setupCa(t, caPoolId)
+
+		buf.Reset()
+		if err := deleteCa(&buf, projectId, location, caPoolId, caId); err != nil {
+			t.Fatal("deleteCa got err:", err)
+		}
+
+		expectedResult := fmt.Sprintf("Successfully deleted Certificate Authority: %s.", caId)
+		if got := buf.String(); !strings.Contains(got, expectedResult) {
+			t.Errorf("deleteCa got %q, want %q", got, expectedResult)
+		}
+
+		// Certificate Authority needs to be undeleted first, so we can delete it again permanently
+		// without 30d grace period to be able to clean up CA Pool afterwards
+		if err := unDeleteCa(&buf, projectId, location, caPoolId, caId); err != nil {
+			t.Error("createCa teardown (unDeleteCa) got err:", err)
+		}
+
+		// We need to make sure it's completely deleted (without graceperiod before we finish tests)
+		if err := deleteCaPerm(projectId, location, caPoolId, caId); err != nil {
+			t.Fatal("deleteCa teardown got err:", err)
+		}
+	})
+
+	t.Run("enableDisableCa", func(t *testing.T) {
+		caId, teardownCa := setupCa(t, caPoolId)
+		defer teardownCa(t)
+
+		buf.Reset()
+		if err := enableCa(&buf, projectId, location, caPoolId, caId); err != nil {
+			t.Fatal("enableCa got err:", err)
+		}
+
+		expectedResult := fmt.Sprintf("Successfully enabled Certificate Authority: %s.", caId)
+		if got := buf.String(); !strings.Contains(got, expectedResult) {
+			t.Errorf("enableCa got %q, want %q", got, expectedResult)
+		}
+
+		buf.Reset()
+		if err := disableCa(&buf, projectId, location, caPoolId, caId); err != nil {
+			t.Fatal("disableCa got err:", err)
+		}
+
+		expectedResult = fmt.Sprintf("Successfully disabled Certificate Authority: %s.", caId)
+		if got := buf.String(); !strings.Contains(got, expectedResult) {
+			t.Errorf("disableCa got %q, want %q", got, expectedResult)
 		}
 	})
 }

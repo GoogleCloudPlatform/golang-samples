@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/security v1.14.1
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230517211646-da4d8a7e0e9b
 	google.golang.org/api v0.122.0
+	google.golang.org/protobuf v1.30.0
 )
 
 require (
@@ -32,5 +33,4 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
 	google.golang.org/grpc v1.55.0 // indirect
-	google.golang.org/protobuf v1.30.0 // indirect
 )
