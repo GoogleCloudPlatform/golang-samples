@@ -481,6 +481,56 @@ func TestInspectWithCustomRegex(t *testing.T) {
 	}
 }
 
+func TestInspectStringWithExclusionDictionary(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	if err := inspectStringWithExclusionDictionary(buf, tc.ProjectID, "Some email addresses: gary@example.com, example@example.com", []string{"example@example.com"}); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "Infotype Name: EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringWithExclusionDictionary got %q, want %q", got, want)
+	}
+}
+
+func TestInspectImageFile(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	var buf bytes.Buffer
+
+	pathToImage := "testdata/test.png"
+
+	if err := inspectImageFile(&buf, tc.ProjectID, pathToImage); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectImageFile got %q, want %q", got, want)
+	}
+	if want := "Info type: EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectImageFile got %q, want %q", got, want)
+	}
+}
+
+func TestInspectWithCustomRegex(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	var buf bytes.Buffer
+	if err := inspectWithCustomRegex(&buf, tc.ProjectID, "Patients MRN 444-5-22222", "[1-9]{3}-[1-9]{1}-[1-9]{5}", "C_MRN"); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Infotype Name: C_MRN"; !strings.Contains(got, want) {
+		t.Errorf("inspectWithCustomRegex got %q, want %q", got, want)
+	}
+	if want := "Likelihood: POSSIBLE"; !strings.Contains(got, want) {
+		t.Errorf("inspectWithCustomRegex got %q, want %q", got, want)
+	}
+}
+
 func TestInspectImageFileAllInfoTypes(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	inputPath := "testdata/image.jpg"
