@@ -38,6 +38,7 @@ func riskKMap(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, datas
 	// tableID := "bikeshare_trips"
 	// region := "US"
 	// columnNames := "zip_code"
+
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
