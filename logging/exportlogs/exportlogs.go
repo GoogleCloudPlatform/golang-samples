@@ -16,14 +16,9 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
-
-	"google.golang.org/api/iterator"
-
-	"cloud.google.com/go/logging/logadmin"
 )
 
 func main() {
@@ -37,19 +32,10 @@ func main() {
 	projID := os.Args[1]
 	command := os.Args[2]
 
-	// [START create_logging_client]
-	ctx := context.Background()
-	client, err := logadmin.NewClient(ctx, projID)
-	if err != nil {
-		log.Fatalf("logadmin.NewClient: %v", err)
-	}
-	defer client.Close()
-	// [END create_logging_client]
-
 	switch command {
 	case "list":
 		log.Print("Listing log sinks.")
-		sinks, err := listSinks(client)
+		sinks, err := listSinks(projID)
 		if err != nil {
 			log.Fatalf("Could not list log sinks: %v", err)
 		}
@@ -57,74 +43,20 @@ func main() {
 			fmt.Printf("Sink: %v\n", sink)
 		}
 	case "create":
-		if err := createSink(client); err != nil {
+		if _, err := createSink(projID); err != nil {
 			log.Fatalf("Could not create sink: %v", err)
 		}
 	case "update":
-		if err := updateSink(client); err != nil {
+		if _, err := updateSink(projID); err != nil {
 			log.Fatalf("Could not update sink: %v", err)
 		}
 	case "delete":
-		if err := deleteSink(client); err != nil {
+		if err := deleteSink(projID); err != nil {
 			log.Fatalf("Could not delete sink: %v", err)
 		}
 	default:
 		usage("Unknown command.")
 	}
-}
-
-func listSinks(client *logadmin.Client) ([]string, error) {
-	// [START logging_list_sinks]
-	ctx := context.Background()
-
-	var sinks []string
-	it := client.Sinks(ctx)
-	for {
-		sink, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return nil, err
-		}
-		sinks = append(sinks, sink.ID)
-	}
-	// [END logging_list_sinks]
-	return sinks, nil
-}
-
-func createSink(client *logadmin.Client) error {
-	// [START logging_create_sink]
-	ctx := context.Background()
-	_, err := client.CreateSink(ctx, &logadmin.Sink{
-		ID:          "severe-errors-to-gcs",
-		Destination: "storage.googleapis.com/logsinks-bucket",
-		Filter:      "severity >= ERROR",
-	})
-	// [END logging_create_sink]
-	return err
-}
-
-func updateSink(client *logadmin.Client) error {
-	// [START logging_update_sink]
-	ctx := context.Background()
-	_, err := client.UpdateSink(ctx, &logadmin.Sink{
-		ID:          "severe-errors-to-gcs",
-		Destination: "storage.googleapis.com/logsinks-new-bucket",
-		Filter:      "severity >= INFO",
-	})
-	// [END logging_update_sink]
-	return err
-}
-
-func deleteSink(client *logadmin.Client) error {
-	// [START logging_delete_sink]
-	ctx := context.Background()
-	if err := client.DeleteSink(ctx, "severe-errors-to-gcs"); err != nil {
-		return err
-	}
-	// [END logging_delete_sink]
-	return nil
 }
 
 func usage(msg string) {
