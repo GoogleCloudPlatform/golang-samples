@@ -27,7 +27,7 @@ import (
 // inspectImageFileListedInfoTypes inspects an image for sensitive data listed infoTypes.
 func inspectImageFileListedInfoTypes(w io.Writer, projectID, filePath string) error {
 	// projectId := "my-project-id"
-	// filePath := "inspect/testdata/image.jpg"
+	// filePath := "testdata/image.jpg"
 
 	ctx := context.Background()
 
