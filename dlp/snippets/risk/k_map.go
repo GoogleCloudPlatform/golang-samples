@@ -47,7 +47,7 @@ func riskKMap(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, datas
 	// Create a PubSub Client used to listen for when the inspect job finishes.
 	pubsubClient, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("error creating PubSub client: %w", err)
+		return fmt.Errorf("Error creating PubSub client: %w", err)
 	}
 	defer pubsubClient.Close()
 
