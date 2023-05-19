@@ -31,7 +31,7 @@ func updateDocumentIncrement(projectID, city string) error {
 
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("firestore.NewClient: %v", err)
+		return fmt.Errorf("firestore.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -40,7 +40,7 @@ func updateDocumentIncrement(projectID, city string) error {
 		{Path: "population", Value: firestore.Increment(50)},
 	})
 	if err != nil {
-		return fmt.Errorf("Update: %v", err)
+		return fmt.Errorf("Update: %w", err)
 	}
 
 	return nil

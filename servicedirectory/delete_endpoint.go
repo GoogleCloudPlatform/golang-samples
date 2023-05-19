@@ -34,7 +34,7 @@ func deleteEndpoint(projectID string) error {
 	// Create a registration client.
 	client, err := servicedirectory.NewRegistrationClient(ctx)
 	if err != nil {
-		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
+		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %w", err)
 	}
 
 	defer client.Close()
@@ -43,7 +43,7 @@ func deleteEndpoint(projectID string) error {
 		Name: fmt.Sprintf("projects/%s/locations/%s/namespaces/%s/services/%s/endpoints/%s", projectID, location, namespaceID, serviceID, endpointID),
 	}
 	if err := client.DeleteEndpoint(ctx, req); err != nil {
-		return fmt.Errorf("DeleteEndpoint: %v", err)
+		return fmt.Errorf("DeleteEndpoint: %w", err)
 	}
 	return nil
 }

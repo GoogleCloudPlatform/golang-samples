@@ -32,7 +32,7 @@ func updateProductLabels(w io.Writer, projectID string, location string, product
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewProductSearchClient: %v", err)
+		return fmt.Errorf("NewProductSearchClient: %w", err)
 	}
 	defer c.Close()
 
@@ -55,7 +55,7 @@ func updateProductLabels(w io.Writer, projectID string, location string, product
 
 	resp, err := c.UpdateProduct(ctx, req)
 	if err != nil {
-		return fmt.Errorf("UpdateProduct: %v", err)
+		return fmt.Errorf("UpdateProduct: %w", err)
 	}
 
 	fmt.Fprintf(w, "Product name: %s\n", resp.Name)

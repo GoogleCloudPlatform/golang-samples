@@ -31,7 +31,7 @@ func updateDeadLetter(w io.Writer, projectID, subID string, fullyQualifiedDeadLe
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -44,7 +44,7 @@ func updateDeadLetter(w io.Writer, projectID, subID string, fullyQualifiedDeadLe
 
 	subConfig, err := client.Subscription(subID).Update(ctx, updateConfig)
 	if err != nil {
-		return fmt.Errorf("Update: %v", err)
+		return fmt.Errorf("Update: %w", err)
 	}
 	fmt.Fprintf(w, "Updated subscription config: %+v\n", subConfig)
 	return nil
