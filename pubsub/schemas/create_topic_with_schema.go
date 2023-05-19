@@ -31,7 +31,7 @@ func createTopicWithSchema(w io.Writer, projectID, topicID, schemaID string, enc
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 
 	tc := &pubsub.TopicConfig{
@@ -42,7 +42,7 @@ func createTopicWithSchema(w io.Writer, projectID, topicID, schemaID string, enc
 	}
 	t, err := client.CreateTopicWithConfig(ctx, topicID, tc)
 	if err != nil {
-		return fmt.Errorf("CreateTopicWithConfig: %v", err)
+		return fmt.Errorf("CreateTopicWithConfig: %w", err)
 	}
 	fmt.Fprintf(w, "Topic with schema created: %#v\n", t)
 	return nil

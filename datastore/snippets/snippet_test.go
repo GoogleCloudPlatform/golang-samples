@@ -680,7 +680,7 @@ func metadataNamespaces(w io.Writer, projectID string) error {
 	ctx := context.Background()
 	client, err := datastore.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("datastore.NewClient: %v", err)
+		return fmt.Errorf("datastore.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -692,7 +692,7 @@ func metadataNamespaces(w io.Writer, projectID string) error {
 		KeysOnly()
 	keys, err := client.GetAll(ctx, query, nil)
 	if err != nil {
-		return fmt.Errorf("client.GetAll: %v", err)
+		return fmt.Errorf("client.GetAll: %w", err)
 	}
 
 	fmt.Fprintln(w, "Namespaces:")

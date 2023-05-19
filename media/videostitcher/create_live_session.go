@@ -42,7 +42,7 @@ func createLiveSession(w io.Writer, projectID, sourceURI, slateID string) error 
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
-		return fmt.Errorf("stitcher.NewVideoStitcherClient: %v", err)
+		return fmt.Errorf("stitcher.NewVideoStitcherClient: %w", err)
 	}
 	defer client.Close()
 
@@ -60,7 +60,7 @@ func createLiveSession(w io.Writer, projectID, sourceURI, slateID string) error 
 	// Creates the live session.
 	response, err := client.CreateLiveSession(ctx, req)
 	if err != nil {
-		return fmt.Errorf("client.CreateLiveSession: %v", err)
+		return fmt.Errorf("client.CreateLiveSession: %w", err)
 	}
 
 	fmt.Fprintf(w, "Live session: %v\n", response.GetName())

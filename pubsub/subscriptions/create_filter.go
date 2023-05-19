@@ -32,7 +32,7 @@ func createWithFilter(w io.Writer, projectID, subID, filter string, topic *pubsu
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -41,7 +41,7 @@ func createWithFilter(w io.Writer, projectID, subID, filter string, topic *pubsu
 		Filter: filter,
 	})
 	if err != nil {
-		return fmt.Errorf("CreateSubscription: %v", err)
+		return fmt.Errorf("CreateSubscription: %w", err)
 	}
 	fmt.Fprintf(w, "Created subscription with filter: %v\n", sub)
 	return nil

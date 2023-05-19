@@ -35,7 +35,7 @@ func createEndpoint(w io.Writer, projectID string) error {
 	// Create a registration client.
 	client, err := servicedirectory.NewRegistrationClient(ctx)
 	if err != nil {
-		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
+		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %w", err)
 	}
 
 	defer client.Close()
@@ -54,7 +54,7 @@ func createEndpoint(w io.Writer, projectID string) error {
 	}
 	endpoint, err := client.CreateEndpoint(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateEndpoint: %v", err)
+		return fmt.Errorf("CreateEndpoint: %w", err)
 	}
 	fmt.Fprintf(w, "servicedirectory.CreateEndpoint result: %s", endpoint.Name)
 	return nil

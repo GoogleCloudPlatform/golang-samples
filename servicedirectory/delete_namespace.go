@@ -32,7 +32,7 @@ func deleteNamespace(projectID string) error {
 	// Create a registration client.
 	client, err := servicedirectory.NewRegistrationClient(ctx)
 	if err != nil {
-		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %v", err)
+		return fmt.Errorf("ServiceDirectory.NewRegistrationClient: %w", err)
 	}
 
 	defer client.Close()
@@ -41,7 +41,7 @@ func deleteNamespace(projectID string) error {
 		Name: fmt.Sprintf("projects/%s/locations/%s/namespaces/%s", projectID, location, namespaceID),
 	}
 	if err := client.DeleteNamespace(ctx, req); err != nil {
-		return fmt.Errorf("DeleteNamespace: %v", err)
+		return fmt.Errorf("DeleteNamespace: %w", err)
 	}
 	return nil
 }

@@ -32,7 +32,7 @@ func getLiveSession(w io.Writer, projectID, sessionID string) error {
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
-		return fmt.Errorf("stitcher.NewVideoStitcherClient: %v", err)
+		return fmt.Errorf("stitcher.NewVideoStitcherClient: %w", err)
 	}
 	defer client.Close()
 
@@ -42,7 +42,7 @@ func getLiveSession(w io.Writer, projectID, sessionID string) error {
 	// Gets the session.
 	response, err := client.GetLiveSession(ctx, req)
 	if err != nil {
-		return fmt.Errorf("client.GetLiveSession: %v", err)
+		return fmt.Errorf("client.GetLiveSession: %w", err)
 	}
 
 	fmt.Fprintf(w, "Live session: %+v", response)
