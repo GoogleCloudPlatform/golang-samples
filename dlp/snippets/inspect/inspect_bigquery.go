@@ -43,7 +43,7 @@ func inspectBigquery(w io.Writer, projectID string, infoTypeNames []string, cust
 
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return fmt.Errorf("dlp.NewClient: %w", err)
 	}
 
 	// Convert the info type strings to a list of InfoTypes.
@@ -85,7 +85,7 @@ func inspectBigquery(w io.Writer, projectID string, infoTypeNames []string, cust
 	// Create a PubSub Client used to listen for when the inspect job finishes.
 	pubsubClient, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer pubsubClient.Close()
 
@@ -193,7 +193,7 @@ func inspectBigquery(w io.Writer, projectID string, infoTypeNames []string, cust
 		}
 	})
 	if err != nil {
-		return fmt.Errorf("Receive: %v", err)
+		return fmt.Errorf("Receive: %w", err)
 	}
 	return nil
 }
