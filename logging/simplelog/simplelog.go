@@ -15,24 +15,12 @@
 // Sample simplelog writes some entries, lists them, then deletes the log.
 package main
 
-// [START logging_delete_log]
-// [START logging_list_log_entries]
-// [START logging_write_log_entry]
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
 	"time"
-
-	"cloud.google.com/go/logging"
-	"cloud.google.com/go/logging/logadmin"
-	"google.golang.org/api/iterator"
 )
-
-// [END logging_delete_log]
-// [END logging_list_log_entries]
-// [END logging_write_log_entry]
 
 func main() {
 	if len(os.Args) == 2 {
@@ -74,84 +62,6 @@ func main() {
 		usage("Unknown command.")
 	}
 }
-
-// [START logging_write_log_entry]
-func structuredWrite(projectID string) {
-	ctx := context.Background()
-	client, err := logging.NewClient(ctx, projectID)
-	if err != nil {
-		log.Fatalf("Failed to create logging client: %v", err)
-	}
-	defer client.Close()
-	const name = "log-example"
-	logger := client.Logger(name)
-	defer logger.Flush() // Ensure the entry is written.
-
-	logger.Log(logging.Entry{
-		// Log anything that can be marshaled to JSON.
-		Payload: struct{ Anything string }{
-			Anything: "The payload can be any type!",
-		},
-		Severity: logging.Debug,
-	})
-}
-
-// [END logging_write_log_entry]
-
-// [START logging_delete_log]
-
-func deleteLog(projectID string) error {
-	ctx := context.Background()
-	adminClient, err := logadmin.NewClient(ctx, projectID)
-	if err != nil {
-		log.Fatalf("Failed to create logadmin client: %v", err)
-	}
-	defer adminClient.Close()
-
-	const name = "log-example"
-	if err := adminClient.DeleteLog(ctx, name); err != nil {
-		return err
-	}
-	return nil
-}
-
-// [END logging_delete_log]
-
-// [START logging_list_log_entries]
-func getEntries(projectID string) ([]*logging.Entry, error) {
-	ctx := context.Background()
-	adminClient, err := logadmin.NewClient(ctx, projectID)
-	if err != nil {
-		log.Fatalf("Failed to create logadmin client: %v", err)
-	}
-	defer adminClient.Close()
-
-	var entries []*logging.Entry
-	const name = "log-example"
-	lastHour := time.Now().Add(-1 * time.Hour).Format(time.RFC3339)
-
-	iter := adminClient.Entries(ctx,
-		// Only get entries from the "log-example" log within the last hour.
-		logadmin.Filter(fmt.Sprintf(`logName = "projects/%s/logs/%s" AND timestamp > "%s"`, projectID, name, lastHour)),
-		// Get most recent entries first.
-		logadmin.NewestFirst(),
-	)
-
-	// Fetch the most recent 20 entries.
-	for len(entries) < 20 {
-		entry, err := iter.Next()
-		if err == iterator.Done {
-			return entries, nil
-		}
-		if err != nil {
-			return nil, err
-		}
-		entries = append(entries, entry)
-	}
-	return entries, nil
-}
-
-// [END logging_list_log_entries]
 
 func usage(msg string) {
 	if msg != "" {
