@@ -116,7 +116,6 @@ func riskNumerical(projectID, dataProject, pubSubTopic, pubSubSub, datasetID, ta
 			},
 		},
 	}
-
 	// Create the risk job.
 	j, err := client.CreateDlpJob(ctx, req)
 	if err != nil {
