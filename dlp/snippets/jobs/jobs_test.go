@@ -332,6 +332,7 @@ func TestJobsGet(t *testing.T) {
 	if err := jobsGet(&buf, tc.ProjectID, jobName); err != nil {
 		t.Fatal(err)
 	}
+	got := buf.String()
 	if want := string(jobIDRegexp.FindSubmatch([]byte(s))[1]); !strings.Contains(got, want) {
 		t.Errorf("TestJobsGet got %q, want %q", got, want)
 	}
