@@ -88,6 +88,7 @@ export GCLOUD_ORGANIZATION=1081635000895
 export SCC_PUBSUB_PROJECT="project-a-id"
 export SCC_PUBSUB_TOPIC="projects/project-a-id/topics/notifications-sample-topic"
 export SCC_PUBSUB_SUBSCRIPTION="notification-sample-subscription"
+# gcp-sec-demo-org.joonix.net
 export SCC_PROJECT_ORG_ID=688851828130
 export SCC_PROJECT_ID=sharp-quest
 
