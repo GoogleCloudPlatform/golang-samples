@@ -39,7 +39,7 @@ func cancelBackup(ctx context.Context, w io.Writer, db, backupID string) error {
 
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("cancelBackup.NewDatabaseAdminClient: %v", err)
+		return fmt.Errorf("cancelBackup.NewDatabaseAdminClient: %w", err)
 	}
 	defer adminClient.Close()
 
@@ -55,13 +55,13 @@ func cancelBackup(ctx context.Context, w io.Writer, db, backupID string) error {
 	}
 	op, err := adminClient.CreateBackup(ctx, &req)
 	if err != nil {
-		return fmt.Errorf("cancelBackup.CreateBackup: %v", err)
+		return fmt.Errorf("cancelBackup.CreateBackup: %w", err)
 	}
 
 	// Cancel backup creation.
 	err = adminClient.LROClient.CancelOperation(ctx, &longrunning.CancelOperationRequest{Name: op.Name()})
 	if err != nil {
-		return fmt.Errorf("cancelBackup.CancelOperation: %v", err)
+		return fmt.Errorf("cancelBackup.CancelOperation: %w", err)
 	}
 
 	// Cancel operations are best effort so either it will complete or be
@@ -69,14 +69,14 @@ func cancelBackup(ctx context.Context, w io.Writer, db, backupID string) error {
 	backup, err := op.Wait(ctx)
 	if err != nil {
 		if waitStatus, ok := status.FromError(err); !ok || waitStatus.Code() != codes.Canceled {
-			return fmt.Errorf("cancelBackup.Wait: %v", err)
+			return fmt.Errorf("cancelBackup.Wait: %w", err)
 		}
 	} else {
 		// Backup was completed before it could be cancelled so delete the
 		// unwanted backup.
 		err = adminClient.DeleteBackup(ctx, &adminpb.DeleteBackupRequest{Name: backup.Name})
 		if err != nil {
-			return fmt.Errorf("cancelBackup.DeleteBackup: %v", err)
+			return fmt.Errorf("cancelBackup.DeleteBackup: %w", err)
 		}
 	}
 

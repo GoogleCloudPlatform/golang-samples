@@ -34,7 +34,7 @@ func deleteJob(w io.Writer, projectID string, location string, jobID string) err
 	ctx := context.Background()
 	client, err := transcoder.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -44,7 +44,7 @@ func deleteJob(w io.Writer, projectID string, location string, jobID string) err
 
 	err = client.DeleteJob(ctx, req)
 	if err != nil {
-		return fmt.Errorf("DeleteJob: %v", err)
+		return fmt.Errorf("DeleteJob: %w", err)
 	}
 
 	fmt.Fprintf(w, "Deleted job")

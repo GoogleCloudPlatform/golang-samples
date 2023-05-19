@@ -71,13 +71,13 @@ func blurOffensiveImages(ctx context.Context, e cloudevents.Event) error {
 
 	var gcsEvent storagedata.StorageObjectData
 	if err := protojson.Unmarshal(e.Data(), &gcsEvent); err != nil {
-		return fmt.Errorf("protojson.Unmarshal: failed to decode event data: %v", err)
+		return fmt.Errorf("protojson.Unmarshal: failed to decode event data: %w", err)
 	}
 	img := vision.NewImageFromURI(fmt.Sprintf("gs://%s/%s", gcsEvent.GetBucket(), gcsEvent.GetName()))
 
 	resp, err := visionClient.DetectSafeSearch(ctx, img, nil)
 	if err != nil {
-		return fmt.Errorf("visionClient.DetectSafeSearch: %v", err)
+		return fmt.Errorf("visionClient.DetectSafeSearch: %w", err)
 	}
 
 	if resp.GetAdult() == visionpb.Likelihood_VERY_LIKELY ||
@@ -98,7 +98,7 @@ func blur(ctx context.Context, inputBucket, outputBucket, name string) error {
 	inputBlob := storageClient.Bucket(inputBucket).Object(name)
 	r, err := inputBlob.NewReader(ctx)
 	if err != nil {
-		return fmt.Errorf("inputBlob.NewReader: %v", err)
+		return fmt.Errorf("inputBlob.NewReader: %w", err)
 	}
 
 	outputBlob := storageClient.Bucket(outputBucket).Object(name)
@@ -111,11 +111,11 @@ func blur(ctx context.Context, inputBucket, outputBucket, name string) error {
 	cmd.Stdout = w
 
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("cmd.Run: %v", err)
+		return fmt.Errorf("cmd.Run: %w", err)
 	}
 
 	if err := w.Close(); err != nil {
-		return fmt.Errorf("failed to write output file: %v", err)
+		return fmt.Errorf("failed to write output file: %w", err)
 	}
 	log.Printf("Blurred image uploaded to gs://%s/%s", outputBlob.BucketName(), outputBlob.ObjectName())
 

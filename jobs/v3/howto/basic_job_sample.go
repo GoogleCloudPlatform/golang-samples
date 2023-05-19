@@ -32,12 +32,12 @@ func createJob(w io.Writer, projectID string, jobToCreate *talent.Job) (*talent.
 
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %v", err)
+		return nil, fmt.Errorf("google.DefaultClient: %w", err)
 	}
 	// Create the jobs service client.
 	service, err := talent.New(client)
 	if err != nil {
-		return nil, fmt.Errorf("talent.New: %v", err)
+		return nil, fmt.Errorf("talent.New: %w", err)
 	}
 
 	parent := "projects/" + projectID
@@ -46,7 +46,7 @@ func createJob(w io.Writer, projectID string, jobToCreate *talent.Job) (*talent.
 	}
 	job, err := service.Projects.Jobs.Create(parent, req).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Failed to create job %q, Err: %v", jobToCreate.RequisitionId, err)
+		return nil, fmt.Errorf("Failed to create job %q, Err: %w", jobToCreate.RequisitionId, err)
 	}
 	return job, err
 }
@@ -61,17 +61,17 @@ func getJob(w io.Writer, jobName string) (*talent.Job, error) {
 
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %v", err)
+		return nil, fmt.Errorf("google.DefaultClient: %w", err)
 	}
 	// Create the jobs service client.
 	service, err := talent.New(client)
 	if err != nil {
-		return nil, fmt.Errorf("talent.New: %v", err)
+		return nil, fmt.Errorf("talent.New: %w", err)
 	}
 
 	job, err := service.Projects.Jobs.Get(jobName).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Failed to get job %s: %v", jobName, err)
+		return nil, fmt.Errorf("Failed to get job %s: %w", jobName, err)
 	}
 
 	fmt.Fprintf(w, "Job: %q", job.Name)
@@ -89,12 +89,12 @@ func updateJob(w io.Writer, jobName string, jobToUpdate *talent.Job) (*talent.Jo
 
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %v", err)
+		return nil, fmt.Errorf("google.DefaultClient: %w", err)
 	}
 	// Create the jobs service client.
 	service, err := talent.New(client)
 	if err != nil {
-		return nil, fmt.Errorf("talent.New: %v", err)
+		return nil, fmt.Errorf("talent.New: %w", err)
 	}
 
 	req := &talent.UpdateJobRequest{
@@ -102,7 +102,7 @@ func updateJob(w io.Writer, jobName string, jobToUpdate *talent.Job) (*talent.Jo
 	}
 	job, err := service.Projects.Jobs.Patch(jobName, req).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Failed to update job %s: %v", jobName, err)
+		return nil, fmt.Errorf("Failed to update job %s: %w", jobName, err)
 	}
 
 	return job, err
@@ -119,12 +119,12 @@ func updateJobWithMask(w io.Writer, jobName string, mask string, jobToUpdate *ta
 
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %v", err)
+		return nil, fmt.Errorf("google.DefaultClient: %w", err)
 	}
 	// Create the jobs service client.
 	service, err := talent.New(client)
 	if err != nil {
-		return nil, fmt.Errorf("talent.New: %v", err)
+		return nil, fmt.Errorf("talent.New: %w", err)
 	}
 
 	req := &talent.UpdateJobRequest{
@@ -149,16 +149,16 @@ func deleteJob(w io.Writer, jobName string) error {
 
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		return fmt.Errorf("google.DefaultClient: %v", err)
+		return fmt.Errorf("google.DefaultClient: %w", err)
 	}
 	// Create the jobs service client.
 	service, err := talent.New(client)
 	if err != nil {
-		return fmt.Errorf("talent.New: %v", err)
+		return fmt.Errorf("talent.New: %w", err)
 	}
 
 	if _, err := service.Projects.Jobs.Delete(jobName).Do(); err != nil {
-		return fmt.Errorf("Delete(%s): %v", jobName, err)
+		return fmt.Errorf("Delete(%s): %w", jobName, err)
 	}
 
 	return err
@@ -175,18 +175,18 @@ func listJobs(w io.Writer, projectID, filter string) (*talent.ListJobsResponse, 
 
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %v", err)
+		return nil, fmt.Errorf("google.DefaultClient: %w", err)
 	}
 	// Create the jobs service client.
 	service, err := talent.New(client)
 	if err != nil {
-		return nil, fmt.Errorf("talent.New: %v", err)
+		return nil, fmt.Errorf("talent.New: %w", err)
 	}
 
 	parent := "projects/" + projectID
 	resp, err := service.Projects.Jobs.List(parent).Filter(filter).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Failed to list jobs with filter: %q: %v", filter, err)
+		return nil, fmt.Errorf("Failed to list jobs with filter: %q: %w", filter, err)
 	}
 
 	fmt.Fprintln(w, "Jobs:")

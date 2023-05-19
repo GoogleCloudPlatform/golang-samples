@@ -35,7 +35,7 @@ func deleteDiskImage(
 	ctx := context.Background()
 	imagesClient, err := compute.NewImagesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewImagesRESTClient: %v", err)
+		return fmt.Errorf("NewImagesRESTClient: %w", err)
 	}
 	defer imagesClient.Close()
 
@@ -47,7 +47,7 @@ func deleteDiskImage(
 	op, err := imagesClient.Delete(ctx, &req)
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Disk image %s deleted\n", imageName)

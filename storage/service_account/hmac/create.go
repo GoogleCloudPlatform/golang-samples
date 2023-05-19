@@ -31,7 +31,7 @@ func createHMACKey(w io.Writer, projectID string, serviceAccountEmail string) (*
 	// Initialize client.
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("storage.NewClient: %v", err)
+		return nil, fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -39,7 +39,7 @@ func createHMACKey(w io.Writer, projectID string, serviceAccountEmail string) (*
 	defer cancel()
 	key, err := client.CreateHMACKey(ctx, projectID, serviceAccountEmail)
 	if err != nil {
-		return nil, fmt.Errorf("CreateHMACKey: %v", err)
+		return nil, fmt.Errorf("CreateHMACKey: %w", err)
 	}
 
 	fmt.Fprintf(w, "%s\n", key)

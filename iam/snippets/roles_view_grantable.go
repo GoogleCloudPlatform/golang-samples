@@ -28,7 +28,7 @@ func viewGrantableRoles(w io.Writer, fullResourceName string) ([]*iam.Role, erro
 	ctx := context.Background()
 	service, err := iam.NewService(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("iam.NewService: %v", err)
+		return nil, fmt.Errorf("iam.NewService: %w", err)
 	}
 
 	request := &iam.QueryGrantableRolesRequest{
@@ -36,7 +36,7 @@ func viewGrantableRoles(w io.Writer, fullResourceName string) ([]*iam.Role, erro
 	}
 	response, err := service.Roles.QueryGrantableRoles(request).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Roles.QueryGrantableRoles: %v", err)
+		return nil, fmt.Errorf("Roles.QueryGrantableRoles: %w", err)
 	}
 	for _, role := range response.Roles {
 		fmt.Fprintf(w, "Found grantable role: %v\n", role.Name)

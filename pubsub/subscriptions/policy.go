@@ -30,13 +30,13 @@ func policy(w io.Writer, projectID, subID string) (*iam.Policy, error) {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return nil, fmt.Errorf("pubsub.NewClient: %v", err)
+		return nil, fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 
 	policy, err := client.Subscription(subID).IAM().Policy(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Subscription: %v", err)
+		return nil, fmt.Errorf("Subscription: %w", err)
 	}
 	for _, role := range policy.Roles() {
 		fmt.Fprintf(w, "%q: %q\n", role, policy.Members(role))

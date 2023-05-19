@@ -33,7 +33,7 @@ func listInputs(w io.Writer, projectID, location string) error {
 	ctx := context.Background()
 	client, err := livestream.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -50,7 +50,7 @@ func listInputs(w io.Writer, projectID, location string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("ListInputs: %v", err)
+			return fmt.Errorf("ListInputs: %w", err)
 		}
 		fmt.Fprintln(w, response.GetName())
 	}

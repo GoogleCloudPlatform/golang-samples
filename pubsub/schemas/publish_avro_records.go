@@ -32,16 +32,16 @@ func publishAvroRecords(w io.Writer, projectID, topicID, avscFile string) error 
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 
 	avroSource, err := os.ReadFile(avscFile)
 	if err != nil {
-		return fmt.Errorf("ioutil.ReadFile err: %v", err)
+		return fmt.Errorf("ioutil.ReadFile err: %w", err)
 	}
 	codec, err := goavro.NewCodec(string(avroSource))
 	if err != nil {
-		return fmt.Errorf("goavro.NewCodec err: %v", err)
+		return fmt.Errorf("goavro.NewCodec err: %w", err)
 	}
 	record := map[string]interface{}{"name": "Alaska", "post_abbr": "AK"}
 
@@ -49,7 +49,7 @@ func publishAvroRecords(w io.Writer, projectID, topicID, avscFile string) error 
 	t := client.Topic(topicID)
 	cfg, err := t.Config(ctx)
 	if err != nil {
-		return fmt.Errorf("topic.Config err: %v", err)
+		return fmt.Errorf("topic.Config err: %w", err)
 	}
 	encoding := cfg.SchemaSettings.Encoding
 
@@ -58,12 +58,12 @@ func publishAvroRecords(w io.Writer, projectID, topicID, avscFile string) error 
 	case pubsub.EncodingBinary:
 		msg, err = codec.BinaryFromNative(nil, record)
 		if err != nil {
-			return fmt.Errorf("codec.BinaryFromNative err: %v", err)
+			return fmt.Errorf("codec.BinaryFromNative err: %w", err)
 		}
 	case pubsub.EncodingJSON:
 		msg, err = codec.TextualFromNative(nil, record)
 		if err != nil {
-			return fmt.Errorf("codec.TextualFromNative err: %v", err)
+			return fmt.Errorf("codec.TextualFromNative err: %w", err)
 		}
 	default:
 		return fmt.Errorf("invalid encoding: %v", encoding)
@@ -74,7 +74,7 @@ func publishAvroRecords(w io.Writer, projectID, topicID, avscFile string) error 
 	})
 	_, err = result.Get(ctx)
 	if err != nil {
-		return fmt.Errorf("result.Get: %v", err)
+		return fmt.Errorf("result.Get: %w", err)
 	}
 	fmt.Fprintf(w, "Published avro record: %s\n", string(msg))
 	return nil

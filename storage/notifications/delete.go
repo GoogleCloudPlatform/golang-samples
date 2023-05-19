@@ -31,14 +31,14 @@ func deleteBucketNotification(w io.Writer, bucketName, notificationID string) er
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
 	bucket := client.Bucket(bucketName)
 
 	if err := bucket.DeleteNotification(ctx, notificationID); err != nil {
-		return fmt.Errorf("Bucket.DeleteNotification: %v", err)
+		return fmt.Errorf("Bucket.DeleteNotification: %w", err)
 	}
 	fmt.Fprintf(w, "Successfully deleted notification with ID %s for bucket %s.\n", notificationID, bucketName)
 	return nil

@@ -32,7 +32,7 @@ func deleteHMACKey(w io.Writer, accessID string, projectID string) error {
 	// Initialize client.
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
@@ -40,7 +40,7 @@ func deleteHMACKey(w io.Writer, accessID string, projectID string) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Minute)
 	defer cancel()
 	if err = handle.Delete(ctx); err != nil {
-		return fmt.Errorf("Delete: %v", err)
+		return fmt.Errorf("Delete: %w", err)
 	}
 
 	fmt.Fprintln(w, "The key is deleted, though it may still appear in ListHMACKeys results.")

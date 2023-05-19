@@ -31,7 +31,7 @@ func indexList(w io.Writer, projectID string) ([]*adminpb.Index, error) {
 	ctx := context.Background()
 	client, err := admin.NewDatastoreAdminClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("admin.NewDatastoreAdminClient: %v", err)
+		return nil, fmt.Errorf("admin.NewDatastoreAdminClient: %w", err)
 	}
 	defer client.Close()
 
@@ -46,7 +46,7 @@ func indexList(w io.Writer, projectID string) ([]*adminpb.Index, error) {
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("ListIndexes: %v", err)
+			return nil, fmt.Errorf("ListIndexes: %w", err)
 		}
 		indices = append(indices, index)
 		fmt.Fprintf(w, "Got index: %v\n", index.IndexId)

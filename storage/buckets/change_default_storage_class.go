@@ -30,7 +30,7 @@ func changeDefaultStorageClass(w io.Writer, bucketName string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -43,7 +43,7 @@ func changeDefaultStorageClass(w io.Writer, bucketName string) error {
 		StorageClass: newStorageClass,
 	}
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
-		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Update: %w", bucketName, err)
 	}
 	fmt.Fprintf(w, "Default storage class for bucket %v has been set to %v\n", bucketName, newStorageClass)
 	return nil

@@ -36,7 +36,7 @@ func readRow(w io.Writer, projectID, instanceID string, tableName string) error 
 	ctx := context.Background()
 	client, err := bigtable.NewClient(ctx, projectID, instanceID)
 	if err != nil {
-		return fmt.Errorf("bigtable.NewClient: %v", err)
+		return fmt.Errorf("bigtable.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -44,7 +44,7 @@ func readRow(w io.Writer, projectID, instanceID string, tableName string) error 
 	rowKey := "phone#4c410523#20190501"
 	row, err := tbl.ReadRow(ctx, rowKey)
 	if err != nil {
-		return fmt.Errorf("could not read row with key %s: %v", rowKey, err)
+		return fmt.Errorf("could not read row with key %s: %w", rowKey, err)
 	}
 
 	printRow(w, row)
@@ -62,7 +62,7 @@ func readRowPartial(w io.Writer, projectID, instanceID string, tableName string)
 	ctx := context.Background()
 	client, err := bigtable.NewClient(ctx, projectID, instanceID)
 	if err != nil {
-		return fmt.Errorf("bigtable.NewClient: %v", err)
+		return fmt.Errorf("bigtable.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -70,7 +70,7 @@ func readRowPartial(w io.Writer, projectID, instanceID string, tableName string)
 	rowKey := "phone#4c410523#20190501"
 	row, err := tbl.ReadRow(ctx, rowKey, bigtable.RowFilter(bigtable.ColumnFilter("os_build")))
 	if err != nil {
-		return fmt.Errorf("could not read row with key %s: %v", rowKey, err)
+		return fmt.Errorf("could not read row with key %s: %w", rowKey, err)
 	}
 
 	printRow(w, row)
@@ -89,7 +89,7 @@ func readRows(w io.Writer, projectID, instanceID string, tableName string) error
 	ctx := context.Background()
 	client, err := bigtable.NewClient(ctx, projectID, instanceID)
 	if err != nil {
-		return fmt.Errorf("bigtable.NewClient: %v", err)
+		return fmt.Errorf("bigtable.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -101,7 +101,7 @@ func readRows(w io.Writer, projectID, instanceID string, tableName string) error
 		},
 	)
 	if err != nil {
-		return fmt.Errorf("tbl.ReadRows: %v", err)
+		return fmt.Errorf("tbl.ReadRows: %w", err)
 	}
 
 	return nil
@@ -118,7 +118,7 @@ func readRowRange(w io.Writer, projectID, instanceID string, tableName string) e
 	ctx := context.Background()
 	client, err := bigtable.NewClient(ctx, projectID, instanceID)
 	if err != nil {
-		return fmt.Errorf("bigtable.NewClient: %v", err)
+		return fmt.Errorf("bigtable.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -131,7 +131,7 @@ func readRowRange(w io.Writer, projectID, instanceID string, tableName string) e
 	)
 
 	if err != nil {
-		return fmt.Errorf("tbl.ReadRows: %v", err)
+		return fmt.Errorf("tbl.ReadRows: %w", err)
 	}
 
 	return nil
@@ -148,7 +148,7 @@ func readRowRanges(w io.Writer, projectID, instanceID string, tableName string) 
 	ctx := context.Background()
 	client, err := bigtable.NewClient(ctx, projectID, instanceID)
 	if err != nil {
-		return fmt.Errorf("bigtable.NewClient: %v", err)
+		return fmt.Errorf("bigtable.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -163,7 +163,7 @@ func readRowRanges(w io.Writer, projectID, instanceID string, tableName string) 
 		},
 	)
 	if err != nil {
-		return fmt.Errorf("tbl.ReadRows: %v", err)
+		return fmt.Errorf("tbl.ReadRows: %w", err)
 	}
 
 	return nil
@@ -180,7 +180,7 @@ func readPrefix(w io.Writer, projectID, instanceID string, tableName string) err
 	ctx := context.Background()
 	client, err := bigtable.NewClient(ctx, projectID, instanceID)
 	if err != nil {
-		return fmt.Errorf("bigtable.NewClient: %v", err)
+		return fmt.Errorf("bigtable.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -192,7 +192,7 @@ func readPrefix(w io.Writer, projectID, instanceID string, tableName string) err
 		},
 	)
 	if err != nil {
-		return fmt.Errorf("tbl.ReadRows: %v", err)
+		return fmt.Errorf("tbl.ReadRows: %w", err)
 	}
 
 	return nil
@@ -209,7 +209,7 @@ func readFilter(w io.Writer, projectID, instanceID string, tableName string) err
 	ctx := context.Background()
 	client, err := bigtable.NewClient(ctx, projectID, instanceID)
 	if err != nil {
-		return fmt.Errorf("bigtable.NewClient: %v", err)
+		return fmt.Errorf("bigtable.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -222,7 +222,7 @@ func readFilter(w io.Writer, projectID, instanceID string, tableName string) err
 		bigtable.RowFilter(bigtable.ValueFilter("PQ2A.*$")),
 	)
 	if err != nil {
-		return fmt.Errorf("tbl.ReadRows: %v", err)
+		return fmt.Errorf("tbl.ReadRows: %w", err)
 	}
 
 	return nil

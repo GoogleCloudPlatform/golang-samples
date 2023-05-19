@@ -28,7 +28,7 @@ func createServiceAccount(w io.Writer, projectID, name, displayName string) (*ia
 	ctx := context.Background()
 	service, err := iam.NewService(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("iam.NewService: %v", err)
+		return nil, fmt.Errorf("iam.NewService: %w", err)
 	}
 
 	request := &iam.CreateServiceAccountRequest{
@@ -39,7 +39,7 @@ func createServiceAccount(w io.Writer, projectID, name, displayName string) (*ia
 	}
 	account, err := service.Projects.ServiceAccounts.Create("projects/"+projectID, request).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Projects.ServiceAccounts.Create: %v", err)
+		return nil, fmt.Errorf("Projects.ServiceAccounts.Create: %w", err)
 	}
 	fmt.Fprintf(w, "Created service account: %v", account)
 	return account, nil

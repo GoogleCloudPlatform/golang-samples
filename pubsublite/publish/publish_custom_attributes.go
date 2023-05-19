@@ -34,7 +34,7 @@ func publishWithCustomAttributes(w io.Writer, projectID, zone, topicID string) e
 	// Create the publisher client.
 	publisher, err := pscompat.NewPublisherClient(ctx, topicPath)
 	if err != nil {
-		return fmt.Errorf("pscompat.NewPublisherClient error: %v", err)
+		return fmt.Errorf("pscompat.NewPublisherClient error: %w", err)
 	}
 
 	// Ensure the publisher will be shut down.
@@ -52,7 +52,7 @@ func publishWithCustomAttributes(w io.Writer, projectID, zone, topicID string) e
 	// Get blocks until the result is ready.
 	id, err := result.Get(ctx)
 	if err != nil {
-		return fmt.Errorf("publish error: %v", err)
+		return fmt.Errorf("publish error: %w", err)
 	}
 
 	fmt.Fprintf(w, "Published a message with custom attributes: %v\n", id)
