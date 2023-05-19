@@ -79,7 +79,7 @@ func createSnapshot(
 
 		disk, err = disksClient.Get(ctx, getDiskReq)
 		if err != nil {
-			return fmt.Errorf("unable to create disk: %w", err)
+			return fmt.Errorf("unable to get disk: %w", err)
 		}
 	} else {
 		regionDisksClient, err := compute.NewRegionDisksRESTClient(ctx)
@@ -96,7 +96,7 @@ func createSnapshot(
 
 		disk, err = regionDisksClient.Get(ctx, getDiskReq)
 		if err != nil {
-			return fmt.Errorf("unable to create disk: %w", err)
+			return fmt.Errorf("unable to get disk: %w", err)
 		}
 	}
 

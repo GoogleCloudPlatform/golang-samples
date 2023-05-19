@@ -28,7 +28,7 @@ func clientCreate(w io.Writer) (*admin.DatastoreAdminClient, error) {
 	ctx := context.Background()
 	client, err := admin.NewDatastoreAdminClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("admin.NewDatastoreAdminClient: %v", err)
+		return nil, fmt.Errorf("admin.NewDatastoreAdminClient: %w", err)
 	}
 	// Close client when done using it.
 	// defer client.Close()

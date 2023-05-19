@@ -39,7 +39,7 @@ func createJobWithAnimatedOverlay(w io.Writer, projectID string, location string
 	ctx := context.Background()
 	client, err := transcoder.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -140,7 +140,7 @@ func createJobWithAnimatedOverlay(w io.Writer, projectID string, location string
 	// You can query for the job state; see getJob() in get_job.go.
 	response, err := client.CreateJob(ctx, req)
 	if err != nil {
-		return fmt.Errorf("createJobWithAnimatedOverlay: %v", err)
+		return fmt.Errorf("createJobWithAnimatedOverlay: %w", err)
 	}
 
 	fmt.Fprintf(w, "Job: %v", response.GetName())

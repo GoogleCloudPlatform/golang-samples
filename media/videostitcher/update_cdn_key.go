@@ -40,7 +40,7 @@ func updateCDNKey(w io.Writer, projectID, keyID, hostname, keyName, privateKey s
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
-		return fmt.Errorf("stitcher.NewVideoStitcherClient: %v", err)
+		return fmt.Errorf("stitcher.NewVideoStitcherClient: %w", err)
 	}
 	defer client.Close()
 
@@ -86,7 +86,7 @@ func updateCDNKey(w io.Writer, projectID, keyID, hostname, keyName, privateKey s
 	// Updates the CDN key.
 	response, err := client.UpdateCdnKey(ctx, req)
 	if err != nil {
-		return fmt.Errorf("client.UpdateCdnKey: %v", err)
+		return fmt.Errorf("client.UpdateCdnKey: %w", err)
 	}
 
 	fmt.Fprintf(w, "Updated CDN key: %+v", response)
