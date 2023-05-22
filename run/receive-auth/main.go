@@ -14,6 +14,8 @@
 
 package main
 
+// [START cloudrun_service_to_service_receive]
+
 import (
 	"fmt"
 	"log"
@@ -24,12 +26,13 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
+const port = 8080
+
 func main() {
 	http.HandleFunc("/", receiveAuthorizedGetRequest)
 	// Determine port for HTTP service.
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
 		log.Printf("Defaulting to port %s", port)
 	}
 	// Start HTTP server.
@@ -69,7 +72,7 @@ func receiveAuthorizedGetRequest(w http.ResponseWriter, r *http.Request) {
 		})
 
 		if err != nil {
-			fmt.Fprintf(w, "Unable to parse token: %w", err)
+			http.Error(w, "Unable to parse token: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -93,3 +96,5 @@ func receiveAuthorizedGetRequest(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Unhandled header format (%v).\n", authType)
 	}
 }
+
+// [END cloudrun_service_to_service_receive]
