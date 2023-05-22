@@ -58,29 +58,25 @@ func TestReceiveAuthorizedGetRequest(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+		req, err := http.NewRequest("GET", "/", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.Header.Set("Authorization", tt.header)
 
-			req, err := http.NewRequest("GET", "/", nil)
-			if err != nil {
-				t.Fatal(err)
-			}
-			req.Header.Set("Authorization", tt.header)
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(receiveAuthorizedGetRequest)
+		handler.ServeHTTP(rr, req)
 
-			rr := httptest.NewRecorder()
-			handler := http.HandlerFunc(receiveAuthorizedGetRequest)
-			handler.ServeHTTP(rr, req)
+		if status := rr.Code; status != tt.wantStatusCode {
+			t.Errorf("handler returned wrong status code: got %v want %v",
+				status, tt.wantStatusCode)
+		}
 
-			if status := rr.Code; status != tt.wantStatusCode {
-				t.Errorf("handler returned wrong status code: got %v want %v",
-					status, tt.wantStatusCode)
-			}
-
-			if rr.Body.String() != tt.wantResponse {
-				t.Errorf("handler returned unexpected body: got %v want %v",
-					rr.Body.String(), tt.wantResponse)
-			}
-
-		})
+		if rr.Body.String() != tt.wantResponse {
+			t.Errorf("handler returned unexpected body: got %v want %v",
+				rr.Body.String(), tt.wantResponse)
+		}
 	}
 }
 
@@ -89,7 +85,7 @@ func createToken(email string) string {
 		"email": email,
 	})
 	fmt.Printf("token: %+v\n", token)
-	// ReWrite <my-secret-key> for your secret key in the same way to run/service-auth/receive.go
+	// rewrite <my-secret-key> for your secret key in the same way to run/service-auth/receive.go
 	tokenString, _ := token.SignedString([]byte("my-secret-key"))
 	return tokenString
 }
