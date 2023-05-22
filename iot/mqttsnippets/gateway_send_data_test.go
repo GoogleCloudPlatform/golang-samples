@@ -213,7 +213,7 @@ func bindDeviceToGateway(w io.Writer, projectID string, region string, registryI
 	response, err := client.Projects.Locations.Registries.BindDeviceToGateway(parent, bindRequest).Do()
 
 	if err != nil {
-		return nil, fmt.Errorf("BindDeviceToGateway: %v", err)
+		return nil, fmt.Errorf("BindDeviceToGateway: %w", err)
 	}
 
 	if response.HTTPStatusCode/100 != 2 {
@@ -241,7 +241,7 @@ func unbindDeviceFromGateway(w io.Writer, projectID string, region string, regis
 	response, err := client.Projects.Locations.Registries.UnbindDeviceFromGateway(parent, unbindRequest).Do()
 
 	if err != nil {
-		return nil, fmt.Errorf("UnbindDeviceFromGateway error: %v", err)
+		return nil, fmt.Errorf("UnbindDeviceFromGateway error: %w", err)
 	}
 
 	if response.HTTPStatusCode/100 != 2 {

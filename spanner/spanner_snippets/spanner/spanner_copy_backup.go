@@ -40,7 +40,7 @@ func copyBackup(w io.Writer, instancePath string, copyBackupId string, sourceBac
 	// Instantiate database admin client.
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("database.NewDatabaseAdminClient: %v", err)
+		return fmt.Errorf("database.NewDatabaseAdminClient: %w", err)
 	}
 	defer adminClient.Close()
 
@@ -57,14 +57,14 @@ func copyBackup(w io.Writer, instancePath string, copyBackupId string, sourceBac
 	// Start copying the backup.
 	copyBackupOp, err := adminClient.CopyBackup(ctx, &copyBackupReq)
 	if err != nil {
-		return fmt.Errorf("adminClient.CopyBackup: %v", err)
+		return fmt.Errorf("adminClient.CopyBackup: %w", err)
 	}
 
 	// Wait for copy backup operation to complete.
 	fmt.Fprintf(w, "Waiting for backup copy %s/backups/%s to complete...\n", instancePath, copyBackupId)
 	copyBackup, err := copyBackupOp.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("copyBackup.Wait: %v", err)
+		return fmt.Errorf("copyBackup.Wait: %w", err)
 	}
 
 	// Check if long-running copyBackup operation is completed.

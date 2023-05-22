@@ -101,7 +101,7 @@ func executeTranslationWorkflow(ctx context.Context, client *migration.Client, p
 	// Create the workflow using the request.
 	workflow, err := client.CreateMigrationWorkflow(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("CreateMigrationWorkflow: %v", err)
+		return nil, fmt.Errorf("CreateMigrationWorkflow: %w", err)
 	}
 
 	// This is an asyncronous process, so we now poll the workflow
@@ -117,7 +117,7 @@ func executeTranslationWorkflow(ctx context.Context, client *migration.Client, p
 				Name: workflow.GetName(),
 			})
 			if err != nil {
-				return nil, fmt.Errorf("polling ended in error: %v", err)
+				return nil, fmt.Errorf("polling ended in error: %w", err)
 			}
 			if polledWorkflow.GetState() == migrationpb.MigrationWorkflow_COMPLETED {
 				// polledWorkflow contains the most recent metadata about the workflow, so we return that.

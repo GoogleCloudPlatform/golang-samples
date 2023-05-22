@@ -33,7 +33,7 @@ func destroyKeyVersion(w io.Writer, name string) error {
 	ctx := context.Background()
 	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create kms client: %v", err)
+		return fmt.Errorf("failed to create kms client: %w", err)
 	}
 	defer client.Close()
 
@@ -45,7 +45,7 @@ func destroyKeyVersion(w io.Writer, name string) error {
 	// Call the API.
 	result, err := client.DestroyCryptoKeyVersion(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to destroy key version: %v", err)
+		return fmt.Errorf("failed to destroy key version: %w", err)
 	}
 	fmt.Fprintf(w, "Destroyed key version: %s\n", result)
 	return nil

@@ -32,7 +32,7 @@ func generateV4PutObjectSignedURL(w io.Writer, bucket, object string) (string, e
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return "", fmt.Errorf("storage.NewClient: %v", err)
+		return "", fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -56,7 +56,7 @@ func generateV4PutObjectSignedURL(w io.Writer, bucket, object string) (string, e
 
 	u, err := client.Bucket(bucket).SignedURL(object, opts)
 	if err != nil {
-		return "", fmt.Errorf("Bucket(%q).SignedURL: %v", bucket, err)
+		return "", fmt.Errorf("Bucket(%q).SignedURL: %w", bucket, err)
 	}
 
 	fmt.Fprintln(w, "Generated PUT signed URL:")

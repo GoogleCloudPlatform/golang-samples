@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/logging"
-	"cloud.google.com/go/logging/logadmin"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
@@ -35,10 +34,6 @@ func TestSimplelog(t *testing.T) {
 	if err != nil {
 		t.Fatalf("logging.NewClient: %v", err)
 	}
-	adminClient, err := logadmin.NewClient(ctx, tc.ProjectID)
-	if err != nil {
-		t.Fatalf("logadmin.NewClient: %v", err)
-	}
 	defer func() {
 		if err := client.Close(); err != nil {
 			t.Errorf("Close: %v", err)
@@ -47,7 +42,7 @@ func TestSimplelog(t *testing.T) {
 
 	defer func() {
 		testutil.Retry(t, 10, 5*time.Second, func(r *testutil.R) {
-			if err := deleteLog(adminClient); err != nil {
+			if err := deleteLog(tc.ProjectID); err != nil {
 				r.Errorf("deleteLog: %v", err)
 			}
 		})
@@ -57,25 +52,23 @@ func TestSimplelog(t *testing.T) {
 		t.Errorf("OnError: %v", err)
 	}
 
-	writeEntry(client)
-	structuredWrite(client)
+	structuredWrite(tc.ProjectID)
 
 	testutil.Retry(t, 20, 10*time.Second, func(r *testutil.R) {
-		entries, err := getEntries(adminClient, tc.ProjectID)
+		entries, err := getEntries(tc.ProjectID)
 		if err != nil {
 			r.Errorf("getEntries: %v", err)
 			return
 		}
 
-		if len(entries) < 2 {
-			r.Errorf("len(entries) = %d; want at least 2 entries", len(entries))
+		if len(entries) < 1 {
+			r.Errorf("len(entries) = %d; want at least 1 entry", len(entries))
 			return
 		}
 
 		wantContain := map[string]*logging.Entry{
-			"Anything":                            entries[0],
-			"The payload can be any type!":        entries[0],
-			"infolog is a standard Go log.Logger": entries[1],
+			"Anything":                     entries[0],
+			"The payload can be any type!": entries[0],
 		}
 
 		for want, entry := range wantContain {
