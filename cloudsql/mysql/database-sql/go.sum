@@ -593,8 +593,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/GoogleCloudPlatform/functions-framework-go v1.7.3 h1:R4E96G9IKuRk40S88ygNxFgUUCpf8eatKoXg9WLoLnQ=
 github.com/GoogleCloudPlatform/functions-framework-go v1.7.3/go.mod h1:+JaLkIeUcD6GcgJSEgjgMij6cn8S+bwwmoNUhAKOYJY=
-github.com/GoogleCloudPlatform/golang-samples/cloudsql/postgres/database-sql v0.0.0-20230517211646-da4d8a7e0e9b h1:K9oI0ffKTcdnUgwiK4HJ/Y5GYF/VEzeIvOn7RSchWwc=
-github.com/GoogleCloudPlatform/golang-samples/cloudsql/postgres/database-sql v0.0.0-20230517211646-da4d8a7e0e9b/go.mod h1:34XRXBFZh0Hp6inn/QKMY8vhhJZJWIxPnzM8Oftc0Y0=
+github.com/GoogleCloudPlatform/golang-samples/cloudsql/postgres/database-sql v0.0.0-20230522201558-cba0742a460f h1:eLXOiXOgTbPbFFhBSNyDkFOfyn4Oh3H3YTG+Hp3aoPU=
+github.com/GoogleCloudPlatform/golang-samples/cloudsql/postgres/database-sql v0.0.0-20230522201558-cba0742a460f/go.mod h1:J4eG54Ckt9s/4vGl+88PDbRs57Dvi+Nx0Dc8xP60Xzg=
 github.com/JohnCGriffin/overflow v0.0.0-20211019200055-46fa312c352c/go.mod h1:X0CRv0ky0k6m906ixxpzmDRLvX58TFUKS2eePweuyxk=
 github.com/Masterminds/semver/v3 v3.1.1 h1:hLg3sBzpNErnxhQtUy/mmLR2I9foDujNK030IGemrRc=
 github.com/Masterminds/semver/v3 v3.1.1/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
