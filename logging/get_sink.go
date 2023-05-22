@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package snippets contains examples of using the Cloud Logging API.
 package snippets
 
 // [START logging_get_sink]
