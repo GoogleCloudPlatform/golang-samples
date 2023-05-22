@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_postgresql_dml_update_returning]
+// [START spanner_postgresql_update_dml_returning]
 
 import (
 	"context"
@@ -68,4 +68,4 @@ func pgUpdateUsingDMLReturning(w io.Writer, db string) error {
 	return err
 }
 
-// [END spanner_postgresql_dml_update_returning]
+// [END spanner_postgresql_update_dml_returning]

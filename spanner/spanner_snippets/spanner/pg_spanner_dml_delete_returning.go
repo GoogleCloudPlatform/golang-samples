@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_postgresql_dml_delete_returning]
+// [START spanner_postgresql_delete_dml_returning]
 
 import (
 	"context"
@@ -69,4 +69,4 @@ func pgDeleteUsingDMLReturning(w io.Writer, db string) error {
 	return err
 }
 
-// [END spanner_postgresql_dml_delete_returning]
+// [END spanner_postgresql_delete_dml_returning]
