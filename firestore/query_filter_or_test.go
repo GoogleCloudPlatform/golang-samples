@@ -19,6 +19,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"strings"
 	"testing"
 
 	"cloud.google.com/go/firestore"
@@ -50,12 +51,8 @@ func TestMain(m *testing.M) {
 	var refs []*firestore.DocumentRef
 
 	for _, d := range docs {
-		dat := struct {
-			birthYear int
-		}{birthYear: d.birthYear}
-
 		ref := client.Collection(colName).Doc(d.shortName)
-		_, err := bw.Create(ref, dat)
+		_, err := bw.Create(ref, map[string]interface{}{"birthYear": d.birthYear})
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -82,5 +79,11 @@ func TestQueryFilterOr(t *testing.T) {
 	err := queryFilterOr(&buf, projectID)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	want := "ghopper"
+	got := buf.String()
+	if !strings.Contains(got, want) {
+		t.Errorf("Wanted: %s; got: %s", want, got)
 	}
 }

@@ -21,6 +21,7 @@ import (
 	"io"
 
 	firestore "cloud.google.com/go/firestore"
+	"google.golang.org/api/iterator"
 )
 
 func queryFilterOr(w io.Writer, projectId string) error {
@@ -33,11 +34,40 @@ func queryFilterOr(w io.Writer, projectId string) error {
 	// always be sure to close the client to release resources
 	defer client.Close()
 
-	q1 := client.Collection("users").Where("birthYear", "=", 1815)
-	q2 := client.Collection("users").Where("birthYear", "=", 1906)
+	q1 := firestore.PropertyFilter{
+		Path:     "birthYear",
+		Operator: "==",
+		Value:    1906,
+	}
 
-	// TODO: Create EntityFilter
-	fmt.Fprintf(w, "Individual queries:\n%v\n%v", q1, q2)
+	q2 := firestore.PropertyFilter{
+		Path:     "birthYear",
+		Operator: "==",
+		Value:    1815,
+	}
+
+	orFilter := firestore.OrFilter{
+		Filters: []firestore.EntityFilter{q1, q2},
+	}
+
+	orQuery := client.Collection("users").WhereEntity(orFilter)
+	it := orQuery.Documents(ctx)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprint(w, "Individual documents:\n")
+	for {
+		doc, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("documents iterator: %w", err)
+		}
+		fmt.Fprintf(w, "%s: %s", doc.Ref.ID, doc.Data()["birthYear"])
+	}
+
 	return nil
 }
 
