@@ -124,7 +124,7 @@ func deleteCaPerm(projectID string, location string, caPoolId string, caId strin
 	return nil
 }
 
-func TestCreateCaPool(t *testing.T) {
+func TestCaPools(t *testing.T) {
 	setupTests(t)
 
 	t.Run("createCaPool", func(t *testing.T) {
@@ -161,7 +161,7 @@ func TestCreateCaPool(t *testing.T) {
 	})
 }
 
-func TestCreateCa(t *testing.T) {
+func TestCas(t *testing.T) {
 	setupTests(t)
 	caPoolId, teardownCaPool := setupCaPool(t)
 	defer teardownCaPool(t)
@@ -234,6 +234,22 @@ func TestCreateCa(t *testing.T) {
 		expectedResult = fmt.Sprintf("Successfully disabled Certificate Authority: %s.", caId)
 		if got := buf.String(); !strings.Contains(got, expectedResult) {
 			t.Errorf("disableCa got %q, want %q", got, expectedResult)
+		}
+	})
+
+	t.Run("listCas", func(t *testing.T) {
+		caId, teardownCa := setupCa(t, caPoolId)
+		defer teardownCa(t)
+
+		buf.Reset()
+		if err := listCas(&buf, projectId, location, caPoolId); err != nil {
+			t.Fatal("listCas got err:", err)
+		}
+
+		expectedResult := fmt.Sprintf(" - projects/%s/locations/%s/caPools/%s/certificateAuthorities/%s",
+			projectId, location, caPoolId, caId)
+		if got := buf.String(); !strings.Contains(got, expectedResult) {
+			t.Errorf("listCas got %q, want %q", got, expectedResult)
 		}
 	})
 }
