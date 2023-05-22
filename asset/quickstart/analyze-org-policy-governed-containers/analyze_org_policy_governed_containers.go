@@ -32,9 +32,10 @@ func analyzeOrgPolicyGovernedContainers(w io.Writer, scope string, constraint st
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("asset.NewClient: %v", err)
+		return err;
 	}
 	defer client.Close()
+
 	req := &assetpb.AnalyzeOrgPolicyGovernedContainersRequest{
 		Scope:      scope,
 		Constraint: constraint,
@@ -42,7 +43,7 @@ func analyzeOrgPolicyGovernedContainers(w io.Writer, scope string, constraint st
 	it := client.AnalyzeOrgPolicyGovernedContainers(ctx, req)
 
 	// Traverse and print the first 10 org policy results in response
-	for i := 0; i < 10; i++ {
+	for i := it.pos; i < 10; i++ {
 		response, err := it.Next()
 		if err == iterator.Done {
 			break
