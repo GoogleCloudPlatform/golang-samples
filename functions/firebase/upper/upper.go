@@ -101,7 +101,7 @@ func MakeUpperCase(ctx context.Context, e FirestoreEvent) error {
 	data := map[string]string{"original": newValue}
 	_, err := client.Collection(collection).Doc(doc).Set(ctx, data)
 	if err != nil {
-		return fmt.Errorf("Set: %v", err)
+		return fmt.Errorf("Set: %w", err)
 	}
 	return nil
 }

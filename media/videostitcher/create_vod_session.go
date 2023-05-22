@@ -42,7 +42,7 @@ func createVodSession(w io.Writer, projectID, sourceURI string) error {
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
-		return fmt.Errorf("stitcher.NewVideoStitcherClient: %v", err)
+		return fmt.Errorf("stitcher.NewVideoStitcherClient: %w", err)
 	}
 	defer client.Close()
 
@@ -56,7 +56,7 @@ func createVodSession(w io.Writer, projectID, sourceURI string) error {
 	// Creates the VOD session.
 	response, err := client.CreateVodSession(ctx, req)
 	if err != nil {
-		return fmt.Errorf("client.CreateVodSession: %v", err)
+		return fmt.Errorf("client.CreateVodSession: %w", err)
 	}
 
 	fmt.Fprintf(w, "VOD session: %v", response.GetName())

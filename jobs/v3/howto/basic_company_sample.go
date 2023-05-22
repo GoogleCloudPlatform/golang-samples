@@ -31,12 +31,12 @@ func createCompany(w io.Writer, projectID string, companyToCreate *talent.Compan
 
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %v", err)
+		return nil, fmt.Errorf("google.DefaultClient: %w", err)
 	}
 	// Create the jobs service client.
 	service, err := talent.New(client)
 	if err != nil {
-		return nil, fmt.Errorf("talent.New: %v", err)
+		return nil, fmt.Errorf("talent.New: %w", err)
 	}
 
 	parent := "projects/" + projectID
@@ -45,7 +45,7 @@ func createCompany(w io.Writer, projectID string, companyToCreate *talent.Compan
 	}
 	company, err := service.Projects.Companies.Create(parent, req).Do()
 	if err != nil {
-		return nil, fmt.Errorf("failed to create company %q: %v", companyToCreate.DisplayName, err)
+		return nil, fmt.Errorf("failed to create company %q: %w", companyToCreate.DisplayName, err)
 	}
 
 	return company, nil
@@ -61,17 +61,17 @@ func getCompany(w io.Writer, name string) (*talent.Company, error) {
 
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %v", err)
+		return nil, fmt.Errorf("google.DefaultClient: %w", err)
 	}
 	// Create the jobs service client.
 	service, err := talent.New(client)
 	if err != nil {
-		return nil, fmt.Errorf("talent.New: %v", err)
+		return nil, fmt.Errorf("talent.New: %w", err)
 	}
 
 	company, err := service.Projects.Companies.Get(name).Do()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get company %q: %v", name, err)
+		return nil, fmt.Errorf("failed to get company %q: %w", name, err)
 	}
 
 	fmt.Fprintf(w, "Company: %q\n", company.Name)
@@ -89,12 +89,12 @@ func updateCompany(w io.Writer, name string, companyToUpdate *talent.Company) (*
 
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %v", err)
+		return nil, fmt.Errorf("google.DefaultClient: %w", err)
 	}
 	// Create the jobs service client.
 	service, err := talent.New(client)
 	if err != nil {
-		return nil, fmt.Errorf("talent.New: %v", err)
+		return nil, fmt.Errorf("talent.New: %w", err)
 	}
 
 	updateCompanyRequest := &talent.UpdateCompanyRequest{
@@ -102,7 +102,7 @@ func updateCompany(w io.Writer, name string, companyToUpdate *talent.Company) (*
 	}
 	company, err := service.Projects.Companies.Patch(name, updateCompanyRequest).Do()
 	if err != nil {
-		return nil, fmt.Errorf("failed to update company %q: %v", name, err)
+		return nil, fmt.Errorf("failed to update company %q: %w", name, err)
 	}
 
 	return company, nil
@@ -119,12 +119,12 @@ func updateCompanyWithMask(w io.Writer, name string, mask string, companyToUpdat
 
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %v", err)
+		return nil, fmt.Errorf("google.DefaultClient: %w", err)
 	}
 	// Create the jobs service client.
 	service, err := talent.New(client)
 	if err != nil {
-		return nil, fmt.Errorf("talent.New: %v", err)
+		return nil, fmt.Errorf("talent.New: %w", err)
 	}
 
 	req := &talent.UpdateCompanyRequest{
@@ -133,7 +133,7 @@ func updateCompanyWithMask(w io.Writer, name string, mask string, companyToUpdat
 	}
 	company, err := service.Projects.Companies.Patch(name, req).Do()
 	if err != nil {
-		return nil, fmt.Errorf("failed to update company %q with mask %q: %v", name, mask, err)
+		return nil, fmt.Errorf("failed to update company %q with mask %q: %w", name, mask, err)
 	}
 
 	return company, nil
@@ -149,16 +149,16 @@ func deleteCompany(w io.Writer, name string) error {
 
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		return fmt.Errorf("google.DefaultClient: %v", err)
+		return fmt.Errorf("google.DefaultClient: %w", err)
 	}
 	// Create the jobs service client.
 	service, err := talent.New(client)
 	if err != nil {
-		return fmt.Errorf("talent.New: %v", err)
+		return fmt.Errorf("talent.New: %w", err)
 	}
 
 	if _, err := service.Projects.Companies.Delete(name).Do(); err != nil {
-		return fmt.Errorf("failed to delete company %q: %v", name, err)
+		return fmt.Errorf("failed to delete company %q: %w", name, err)
 	}
 
 	return nil
@@ -174,18 +174,18 @@ func listCompanies(w io.Writer, projectID string) (*talent.ListCompaniesResponse
 
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %v", err)
+		return nil, fmt.Errorf("google.DefaultClient: %w", err)
 	}
 	// Create the jobs service client.
 	service, err := talent.New(client)
 	if err != nil {
-		return nil, fmt.Errorf("talent.New: %v", err)
+		return nil, fmt.Errorf("talent.New: %w", err)
 	}
 
 	parent := "projects/" + projectID
 	resp, err := service.Projects.Companies.List(parent).Do()
 	if err != nil {
-		return nil, fmt.Errorf("failed to list companies: %v", err)
+		return nil, fmt.Errorf("failed to list companies: %w", err)
 	}
 
 	fmt.Fprintln(w, "Companies:")

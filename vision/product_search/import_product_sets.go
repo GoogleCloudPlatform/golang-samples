@@ -35,7 +35,7 @@ func importProductSets(w io.Writer, projectID string, location string, gcsURI st
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewProductSearchClient: %v", err)
+		return fmt.Errorf("NewProductSearchClient: %w", err)
 	}
 	defer c.Close()
 
@@ -52,14 +52,14 @@ func importProductSets(w io.Writer, projectID string, location string, gcsURI st
 
 	op, err := c.ImportProductSets(ctx, req)
 	if err != nil {
-		return fmt.Errorf("ImportProductSets: %v", err)
+		return fmt.Errorf("ImportProductSets: %w", err)
 	}
 
 	fmt.Fprintf(w, "Processing operation name: %s\n", op.Name())
 
 	resp, err := op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("Wait: %v", err)
+		return fmt.Errorf("Wait: %w", err)
 	}
 
 	fmt.Fprintf(w, "processing done.\n")

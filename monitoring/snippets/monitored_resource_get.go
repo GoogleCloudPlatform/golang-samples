@@ -33,7 +33,7 @@ func getMonitoredResource(w io.Writer, resource string) error {
 	ctx := context.Background()
 	c, err := monitoring.NewMetricClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewMetricClient: %v", err)
+		return fmt.Errorf("NewMetricClient: %w", err)
 	}
 	defer c.Close()
 	req := &monitoringpb.GetMonitoredResourceDescriptorRequest{
@@ -41,7 +41,7 @@ func getMonitoredResource(w io.Writer, resource string) error {
 	}
 	resp, err := c.GetMonitoredResourceDescriptor(ctx, req)
 	if err != nil {
-		return fmt.Errorf("could not get custom metric: %v", err)
+		return fmt.Errorf("could not get custom metric: %w", err)
 	}
 
 	fmt.Fprintf(w, "Name: %v\n", resp.GetName())

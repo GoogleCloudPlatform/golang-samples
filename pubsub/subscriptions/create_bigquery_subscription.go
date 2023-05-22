@@ -32,7 +32,7 @@ func createBigQuerySubscription(w io.Writer, projectID, subID string, topic *pub
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -44,7 +44,7 @@ func createBigQuerySubscription(w io.Writer, projectID, subID string, topic *pub
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("client.CreateSubscription: %v", err)
+		return fmt.Errorf("client.CreateSubscription: %w", err)
 	}
 	fmt.Fprintf(w, "Created BigQuery subscription: %v\n", sub)
 

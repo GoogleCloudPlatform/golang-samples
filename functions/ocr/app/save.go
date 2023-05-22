@@ -28,14 +28,14 @@ import (
 // to a file in GCS.
 func SaveResult(ctx context.Context, event PubSubMessage) error {
 	if err := setup(ctx); err != nil {
-		return fmt.Errorf("ProcessImage: %v", err)
+		return fmt.Errorf("ProcessImage: %w", err)
 	}
 	var message ocrMessage
 	if event.Data == nil {
 		return fmt.Errorf("Empty data")
 	}
 	if err := json.Unmarshal(event.Data, &message); err != nil {
-		return fmt.Errorf("json.Unmarshal: %v", err)
+		return fmt.Errorf("json.Unmarshal: %w", err)
 	}
 	log.Printf("Received request to save file %q.", message.FileName)
 

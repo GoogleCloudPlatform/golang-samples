@@ -30,7 +30,7 @@ func listSchemaRevisions(w io.Writer, projectID, schemaID string) ([]*pubsub.Sch
 	ctx := context.Background()
 	client, err := pubsub.NewSchemaClient(ctx, projectID)
 	if err != nil {
-		return nil, fmt.Errorf("pubsub.NewSchemaClient: %v", err)
+		return nil, fmt.Errorf("pubsub.NewSchemaClient: %w", err)
 	}
 	defer client.Close()
 
@@ -43,7 +43,7 @@ func listSchemaRevisions(w io.Writer, projectID, schemaID string) ([]*pubsub.Sch
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("schemaIter.Next: %v", err)
+			return nil, fmt.Errorf("schemaIter.Next: %w", err)
 		}
 		fmt.Fprintf(w, "Got schema revision: %#v\n", sc)
 		schemas = append(schemas, sc)

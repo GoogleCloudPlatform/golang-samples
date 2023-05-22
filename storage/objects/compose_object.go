@@ -34,7 +34,7 @@ func composeFile(w io.Writer, bucket, object1, object2, toObject string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -49,7 +49,7 @@ func composeFile(w io.Writer, bucket, object1, object2, toObject string) error {
 	// as you want.
 	_, err = dst.ComposerFrom(src1, src2).Run(ctx)
 	if err != nil {
-		return fmt.Errorf("ComposerFrom: %v", err)
+		return fmt.Errorf("ComposerFrom: %w", err)
 	}
 	fmt.Fprintf(w, "New composite object %v was created by combining %v and %v\n", toObject, object1, object2)
 	return nil
