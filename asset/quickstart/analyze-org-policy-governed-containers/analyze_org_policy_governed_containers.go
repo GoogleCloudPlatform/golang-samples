@@ -43,7 +43,7 @@ func analyzeOrgPolicyGovernedContainers(w io.Writer, scope string, constraint st
 	it := client.AnalyzeOrgPolicyGovernedContainers(ctx, req)
 
 	// Traverse and print the first 10 org policy results in response
-	for i := it.pos; i < 10; i++ {
+	for {
 		response, err := it.Next()
 		if err == iterator.Done {
 			break
