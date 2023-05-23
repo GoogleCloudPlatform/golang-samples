@@ -72,6 +72,7 @@ func TestMain(m *testing.M) {
 			log.Fatal(err)
 		}
 	}
+	bw.End()
 }
 
 func TestQueryFilterOr(t *testing.T) {
