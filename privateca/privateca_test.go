@@ -236,20 +236,24 @@ func TestCas(t *testing.T) {
 			t.Errorf("disableCa got %q, want %q", got, expectedResult)
 		}
 	})
+}
 
-	t.Run("listCas", func(t *testing.T) {
-		caId, teardownCa := setupCa(t, caPoolId)
-		defer teardownCa(t)
+func TestListCas(t *testing.T) {
+	setupTests(t)
+	caPoolId, teardownCaPool := setupCaPool(t)
+	defer teardownCaPool(t)
 
-		buf.Reset()
-		if err := listCas(&buf, projectId, location, caPoolId); err != nil {
-			t.Fatal("listCas got err:", err)
-		}
+	caId, teardownCa := setupCa(t, caPoolId)
+	defer teardownCa(t)
 
-		expectedResult := fmt.Sprintf(" - projects/%s/locations/%s/caPools/%s/certificateAuthorities/%s",
-			projectId, location, caPoolId, caId)
-		if got := buf.String(); !strings.Contains(got, expectedResult) {
-			t.Errorf("listCas got %q, want %q", got, expectedResult)
-		}
-	})
+	buf.Reset()
+	if err := listCas(&buf, projectId, location, caPoolId); err != nil {
+		t.Fatal("listCas got err:", err)
+	}
+
+	expectedResult := fmt.Sprintf(" - projects/%s/locations/%s/caPools/%s/certificateAuthorities/%s",
+		projectId, location, caPoolId, caId)
+	if got := buf.String(); !strings.Contains(got, expectedResult) {
+		t.Errorf("listCas got %q, want %q", got, expectedResult)
+	}
 }
