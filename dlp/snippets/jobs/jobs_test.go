@@ -30,6 +30,7 @@ import (
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/gofrs/uuid"
 )
 
 // setupPubSub creates a subscription to the given topic.
@@ -190,8 +191,10 @@ func TestCreateJob(t *testing.T) {
 
 	var buf bytes.Buffer
 	// createBucketForCreatJob will create a bucket and upload a txt file
-	createBucketForCreatJob(t, tc.ProjectID)
-
+	bucketName, err := createBucketForCreatJob(t, tc.ProjectID)
+	if err != nil {
+		t.Fatal(err)
+	}
 	gcsPath := "gs://dlp-go-lang-test/test.txt"
 	infoTypeNames := []string{"EMAIL_ADDRESS", "PERSON_NAME", "LOCATION", "PHONE_NUMBER"}
 
@@ -204,21 +207,21 @@ func TestCreateJob(t *testing.T) {
 		t.Errorf("TestInspectWithCustomRegex got %q, want %q", got, want)
 	}
 
-	defer deleteAssetsOfCreateJobTest(t, tc.ProjectID)
+	defer deleteAssetsOfCreateJobTest(t, tc.ProjectID, bucketName)
 }
 
-func createBucketForCreatJob(t *testing.T, projectID string) error {
+func createBucketForCreatJob(t *testing.T, projectID string) (string, error) {
 	t.Helper()
 
 	ctx := context.Background()
 
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer client.Close()
-
-	bucketName := "dlp-job-go-lang-test"
+	u := uuid.Must(uuid.NewV4()).String()[:8]
+	bucketName := "dlp-job-go-lang-test" + u
 
 	// Check if the bucket already exists.
 	bucketExists := false
@@ -277,13 +280,11 @@ func createBucketForCreatJob(t *testing.T, projectID string) error {
 		fmt.Printf("---File %v exists in bucket %v\n", fileName, bucketName)
 	}
 
-	return err
+	return bucketName, nil
 }
 
-func deleteAssetsOfCreateJobTest(t *testing.T, projectID string) error {
+func deleteAssetsOfCreateJobTest(t *testing.T, projectID, bucketName string) error {
 	t.Helper()
-
-	bucketName := "dlp-job-go-lang-test"
 
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
