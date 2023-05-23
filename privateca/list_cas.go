@@ -51,7 +51,7 @@ func listCas(w io.Writer, projectId string, location string, caPoolId string) er
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("unable to get the list of cerficates: %w", err)
+			return fmt.Errorf("unable to get the list of cerficate authorities: %w", err)
 		}
 
 		fmt.Fprintf(w, " - %s (state: %s)", resp.Name, resp.State.String())
