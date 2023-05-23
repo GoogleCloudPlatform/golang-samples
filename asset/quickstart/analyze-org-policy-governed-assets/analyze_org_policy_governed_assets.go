@@ -31,7 +31,7 @@ func analyzeOrgPolicyGovernedAssets(w io.Writer, scope string, constraint string
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
 	if err != nil {
-		return err;
+		return err
 	}
 	defer client.Close()
 
@@ -42,7 +42,7 @@ func analyzeOrgPolicyGovernedAssets(w io.Writer, scope string, constraint string
 	it := client.AnalyzeOrgPolicyGovernedAssets(ctx, req)
 
 	// Traverse and print the first 10 org policy results in response
-	for  {
+	for {
 		response, err := it.Next()
 		if err == iterator.Done {
 			break

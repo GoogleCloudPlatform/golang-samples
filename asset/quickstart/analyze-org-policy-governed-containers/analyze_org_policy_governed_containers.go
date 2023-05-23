@@ -31,7 +31,7 @@ func analyzeOrgPolicyGovernedContainers(w io.Writer, scope string, constraint st
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
 	if err != nil {
-		return err;
+		return err
 	}
 	defer client.Close()
 

@@ -31,7 +31,7 @@ func analyzeOrgPolicies(w io.Writer, scope string, constraint string) error {
 	ctx := context.Background()
 	client, err := asset.NewClient(ctx)
 	if err != nil {
-		return err;
+		return err
 	}
 	defer client.Close()
 
