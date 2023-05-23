@@ -14,7 +14,6 @@
 
 // [START asset_quickstart_analyze_org_policy_governed_containers]
 
-// Sample analyze-org-policy-governed-containers analyze org policy governed containers.
 package create
 
 import (
