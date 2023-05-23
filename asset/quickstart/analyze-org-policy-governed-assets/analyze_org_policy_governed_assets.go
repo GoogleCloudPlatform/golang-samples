@@ -14,7 +14,6 @@
 
 // [START asset_quickstart_analyze_org_policies]
 
-// Sample analyze-org-policies analyze org policies.
 package create
 
 import (
