@@ -78,7 +78,7 @@ func inspectImageFileListedInfoTypes(w io.Writer, projectID, filePath string) er
 	// Send the request.
 	resp, err := client.InspectContent(ctx, req)
 	if err != nil {
-		return fmt.Errorf("InspectContent: %v", err)
+		return err
 	}
 
 	// Process the results.
