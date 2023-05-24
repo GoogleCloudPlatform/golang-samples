@@ -29,7 +29,7 @@ func patchDataset(w io.Writer, projectID, location, datasetID, newTimeZone strin
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	datasetsService := healthcareService.Projects.Locations.Datasets
@@ -39,7 +39,7 @@ func patchDataset(w io.Writer, projectID, location, datasetID, newTimeZone strin
 	if _, err := datasetsService.Patch(name, &healthcare.Dataset{
 		TimeZone: newTimeZone,
 	}).UpdateMask("timeZone").Do(); err != nil {
-		return fmt.Errorf("Patch: %v", err)
+		return fmt.Errorf("Patch: %w", err)
 	}
 
 	fmt.Fprintf(w, "Patched dataset %s with timeZone %s\n", datasetID, newTimeZone)

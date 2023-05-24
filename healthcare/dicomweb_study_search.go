@@ -43,7 +43,7 @@ func dicomWebSearchStudies(w io.Writer, projectID, location, datasetID, dicomSto
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	storesService := healthcareService.Projects.Locations.Datasets.DicomStores
@@ -57,14 +57,14 @@ func dicomWebSearchStudies(w io.Writer, projectID, location, datasetID, dicomSto
 	patientName := queryParamOpt{key: "PatientName", value: "Sally Zhang"}
 	resp, err := call.Do(patientName)
 	if err != nil {
-		return fmt.Errorf("Get: %v", err)
+		return fmt.Errorf("Get: %w", err)
 	}
 
 	defer resp.Body.Close()
 
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("ioutil.ReadAll: %v", err)
+		return fmt.Errorf("ioutil.ReadAll: %w", err)
 	}
 
 	if resp.StatusCode > 299 {
