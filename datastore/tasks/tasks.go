@@ -18,7 +18,6 @@ package main
 
 import (
 	"bufio"
-	"context"
 	"fmt"
 	"io"
 	"log"
@@ -26,9 +25,6 @@ import (
 	"strconv"
 	"strings"
 	"text/tabwriter"
-	"time"
-
-	"cloud.google.com/go/datastore"
 )
 
 func main() {
@@ -36,10 +32,7 @@ func main() {
 	if projID == "" {
 		log.Fatal(`You need to set the environment variable "DATASTORE_PROJECT_ID"`)
 	}
-	// [START datastore_build_service]
-	ctx := context.Background()
-	client, err := datastore.NewClient(ctx, projID)
-	// [END datastore_build_service]
+	client, err := createClient(projID)
 	if err != nil {
 		log.Fatalf("Could not create datastore client: %v", err)
 	}
@@ -63,7 +56,7 @@ func main() {
 				usage()
 				break
 			}
-			key, err := AddTask(ctx, client, args)
+			key, err := AddTask(projID, args)
 			if err != nil {
 				log.Printf("Failed to create task: %v", err)
 				break
@@ -76,14 +69,14 @@ func main() {
 				usage()
 				break
 			}
-			if err := MarkDone(ctx, client, n); err != nil {
+			if err := MarkDone(projID, n); err != nil {
 				log.Printf("Failed to mark task done: %v", err)
 				break
 			}
 			fmt.Printf("Task %d marked done\n", n)
 
 		case "list":
-			tasks, err := ListTasks(ctx, client)
+			tasks, err := ListTasks(projID)
 			if err != nil {
 				log.Printf("Failed to fetch task list: %v", err)
 				break
@@ -96,7 +89,7 @@ func main() {
 				usage()
 				break
 			}
-			if err := DeleteTask(ctx, client, n); err != nil {
+			if err := DeleteTask(projID, n); err != nil {
 				log.Printf("Failed to delete task: %v", err)
 				break
 			}
@@ -114,79 +107,6 @@ func main() {
 		log.Fatalf("Failed reading stdin: %v", err)
 	}
 }
-
-// [START datastore_add_entity]
-// Task is the model used to store tasks in the datastore.
-type Task struct {
-	Desc    string    `datastore:"description"`
-	Created time.Time `datastore:"created"`
-	Done    bool      `datastore:"done"`
-	id      int64     // The integer ID used in the datastore.
-}
-
-// AddTask adds a task with the given description to the datastore,
-// returning the key of the newly created entity.
-func AddTask(ctx context.Context, client *datastore.Client, desc string) (*datastore.Key, error) {
-	task := &Task{
-		Desc:    desc,
-		Created: time.Now(),
-	}
-	key := datastore.IncompleteKey("Task", nil)
-	return client.Put(ctx, key, task)
-}
-
-// [END datastore_add_entity]
-
-// [START datastore_update_entity]
-// MarkDone marks the task done with the given ID.
-func MarkDone(ctx context.Context, client *datastore.Client, taskID int64) error {
-	// Create a key using the given integer ID.
-	key := datastore.IDKey("Task", taskID, nil)
-
-	// In a transaction load each task, set done to true and store.
-	_, err := client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
-		var task Task
-		if err := tx.Get(key, &task); err != nil {
-			return err
-		}
-		task.Done = true
-		_, err := tx.Put(key, &task)
-		return err
-	})
-	return err
-}
-
-// [END datastore_update_entity]
-
-// [START datastore_retrieve_entities]
-// ListTasks returns all the tasks in ascending order of creation time.
-func ListTasks(ctx context.Context, client *datastore.Client) ([]*Task, error) {
-	var tasks []*Task
-
-	// Create a query to fetch all Task entities, ordered by "created".
-	query := datastore.NewQuery("Task").Order("created")
-	keys, err := client.GetAll(ctx, query, &tasks)
-	if err != nil {
-		return nil, err
-	}
-
-	// Set the id field on each Task from the corresponding key.
-	for i, key := range keys {
-		tasks[i].id = key.ID
-	}
-
-	return tasks, nil
-}
-
-// [END datastore_retrieve_entities]
-
-// [START datastore_delete_entity]
-// DeleteTask deletes the task with the given ID.
-func DeleteTask(ctx context.Context, client *datastore.Client, taskID int64) error {
-	return client.Delete(ctx, datastore.IDKey("Task", taskID, nil))
-}
-
-// [END datastore_delete_entity]
 
 // PrintTasks prints the tasks to the given writer.
 func PrintTasks(w io.Writer, tasks []*Task) {
