@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# [START cloudrun_mc_custom_metrics_otel_config]
 receivers:
   otlp:
     protocols:
@@ -61,3 +62,4 @@ service:
       receivers: [otlp]
       processors: [batch, memory_limiter, resourcedetection, resource]
       exporters: [googlemanagedprometheus]
+# [END cloudrun_mc_custom_metrics_otel_config]

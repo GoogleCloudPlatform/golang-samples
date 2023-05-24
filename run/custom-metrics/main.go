@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START cloudrun_mc_custom_metrics]
 package main
 
 import (
@@ -59,3 +60,5 @@ func setupCounter(ctx context.Context) func(context.Context) error {
 	}
 	return provider.Shutdown
 }
+
+// [END cloudrun_mc_custom_metrics]
