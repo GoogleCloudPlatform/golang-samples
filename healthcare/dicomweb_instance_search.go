@@ -34,7 +34,7 @@ func dicomWebSearchInstances(w io.Writer, projectID, location, datasetID, dicomS
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	storesService := healthcareService.Projects.Locations.Datasets.DicomStores
@@ -43,14 +43,14 @@ func dicomWebSearchInstances(w io.Writer, projectID, location, datasetID, dicomS
 
 	resp, err := storesService.SearchForInstances(parent, "instances").Do()
 	if err != nil {
-		return fmt.Errorf("SearchForInstances: %v", err)
+		return fmt.Errorf("SearchForInstances: %w", err)
 	}
 
 	defer resp.Body.Close()
 
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("ioutil.ReadAll: %v", err)
+		return fmt.Errorf("ioutil.ReadAll: %w", err)
 	}
 
 	if resp.StatusCode > 299 {

@@ -31,21 +31,21 @@ func fhirGetPatientEverything(w io.Writer, projectID, location, datasetID, fhirS
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 	fhirService := healthcareService.Projects.Locations.Datasets.FhirStores.Fhir
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/fhirStores/%s/fhir/Patient/%s", projectID, location, datasetID, fhirStoreID, fhirResourceID)
 
 	resp, err := fhirService.PatientEverything(name).Do()
 	if err != nil {
-		return fmt.Errorf("PatientEverything: %v", err)
+		return fmt.Errorf("PatientEverything: %w", err)
 	}
 
 	defer resp.Body.Close()
 
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("could not read response: %v", err)
+		return fmt.Errorf("could not read response: %w", err)
 	}
 
 	if resp.StatusCode > 299 {

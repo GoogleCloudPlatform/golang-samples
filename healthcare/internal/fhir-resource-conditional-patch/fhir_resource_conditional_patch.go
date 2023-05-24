@@ -51,7 +51,7 @@ func ConditionalPatchFHIRResource(w io.Writer, projectID, location, datasetID, f
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	fhirService := healthcareService.Projects.Locations.Datasets.FhirStores.Fhir
@@ -67,7 +67,7 @@ func ConditionalPatchFHIRResource(w io.Writer, projectID, location, datasetID, f
 	}
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
-		return fmt.Errorf("json.Encode: %v", err)
+		return fmt.Errorf("json.Encode: %w", err)
 	}
 
 	call := fhirService.ConditionalPatch(parent, resourceType, bytes.NewReader(jsonPayload))
@@ -81,14 +81,14 @@ func ConditionalPatchFHIRResource(w io.Writer, projectID, location, datasetID, f
 
 	resp, err := call.Do(lastUpdated)
 	if err != nil {
-		return fmt.Errorf("ConditionalPatch: %v", err)
+		return fmt.Errorf("ConditionalPatch: %w", err)
 	}
 
 	defer resp.Body.Close()
 
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("could not read response: %v", err)
+		return fmt.Errorf("could not read response: %w", err)
 	}
 
 	if resp.StatusCode > 299 {
