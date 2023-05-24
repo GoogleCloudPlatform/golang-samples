@@ -26,8 +26,8 @@ import (
 
 // Delete a Certificate Authority from the specified CA pool.
 // Before deletion, the CA must be disabled or staged and must not contain any active certificates.
-func deleteCa(w io.Writer, projectID string, location string, caPoolId string, caId string) error {
-	// projectID := "your_project_id"
+func deleteCa(w io.Writer, projectId string, location string, caPoolId string, caId string) error {
+	// projectId := "your_project_id"
 	// location := "us-central1"	// For a list of locations, see: https://cloud.google.com/certificate-authority-service/docs/locations.
 	// caPoolId := "ca-pool-id"		// The id of the CA pool under which the CA is present.
 	// caId := "ca-id"				// The id of the CA to be deleted.
@@ -40,7 +40,7 @@ func deleteCa(w io.Writer, projectID string, location string, caPoolId string, c
 	defer caClient.Close()
 
 	fullCaName := fmt.Sprintf("projects/%s/locations/%s/caPools/%s/certificateAuthorities/%s",
-		projectID, location, caPoolId, caId)
+		projectId, location, caPoolId, caId)
 
 	// Check if the CA is disabled or staged.
 	// See https://pkg.go.dev/cloud.google.com/go/security/privateca/apiv1/privatecapb#GetCertificateAuthorityRequest.
