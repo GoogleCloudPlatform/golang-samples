@@ -31,12 +31,12 @@ func patchHL7V2Message(w io.Writer, projectID, location, datasetID, hl7V2StoreID
 
 	hl7v2message, err := ioutil.ReadFile(messageFile)
 	if err != nil {
-		return fmt.Errorf("ReadFile: %v", err)
+		return fmt.Errorf("ReadFile: %w", err)
 	}
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	messagesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores.Messages
@@ -51,7 +51,7 @@ func patchHL7V2Message(w io.Writer, projectID, location, datasetID, hl7V2StoreID
 	call.UpdateMask("labels")
 	resp, err := call.Do()
 	if err != nil {
-		return fmt.Errorf("Patch: %v", err)
+		return fmt.Errorf("Patch: %w", err)
 	}
 
 	fmt.Fprintf(w, "Patched HL7V2 message: %q\n", resp.Name)

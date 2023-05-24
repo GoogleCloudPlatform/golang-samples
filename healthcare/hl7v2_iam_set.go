@@ -29,7 +29,7 @@ func setHL7V2IAMPolicy(w io.Writer, projectID, location, datasetID, hl7V2StoreID
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	storesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores
@@ -38,7 +38,7 @@ func setHL7V2IAMPolicy(w io.Writer, projectID, location, datasetID, hl7V2StoreID
 
 	policy, err := storesService.GetIamPolicy(name).Do()
 	if err != nil {
-		return fmt.Errorf("GetIamPolicy: %v", err)
+		return fmt.Errorf("GetIamPolicy: %w", err)
 	}
 
 	policy.Bindings = append(policy.Bindings, &healthcare.Binding{
@@ -52,7 +52,7 @@ func setHL7V2IAMPolicy(w io.Writer, projectID, location, datasetID, hl7V2StoreID
 
 	policy, err = storesService.SetIamPolicy(name, req).Do()
 	if err != nil {
-		return fmt.Errorf("SetIamPolicy: %v", err)
+		return fmt.Errorf("SetIamPolicy: %w", err)
 	}
 
 	fmt.Fprintf(w, "Sucessfully set IAM Policy.\n")

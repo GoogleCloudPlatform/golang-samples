@@ -29,7 +29,7 @@ func deleteFHIRStore(w io.Writer, projectID, location, datasetID, fhirStoreID st
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	storesService := healthcareService.Projects.Locations.Datasets.FhirStores
@@ -37,7 +37,7 @@ func deleteFHIRStore(w io.Writer, projectID, location, datasetID, fhirStoreID st
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/fhirStores/%s", projectID, location, datasetID, fhirStoreID)
 
 	if _, err := storesService.Delete(name).Do(); err != nil {
-		return fmt.Errorf("Delete: %v", err)
+		return fmt.Errorf("Delete: %w", err)
 	}
 
 	fmt.Fprintf(w, "Deleted FHIR store: %q\n", fhirStoreID)

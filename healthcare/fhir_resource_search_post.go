@@ -56,7 +56,7 @@ func searchFHIRResourcesPost(w io.Writer, projectID, location, datasetID, fhirSt
 	// req.URL.RawQuery = q.Encode()
 
 	if err != nil {
-		return fmt.Errorf("NewRequest: %v", err)
+		return fmt.Errorf("NewRequest: %w", err)
 	}
 
 	// Sets required application/fhir+json header on the request.
@@ -64,14 +64,14 @@ func searchFHIRResourcesPost(w io.Writer, projectID, location, datasetID, fhirSt
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("Do: %v", err)
+		return fmt.Errorf("Do: %w", err)
 	}
 
 	defer resp.Body.Close()
 
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("could not read response: %v", err)
+		return fmt.Errorf("could not read response: %w", err)
 	}
 
 	if resp.StatusCode > 299 {
