@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START privateca_delete_ca_pool]
+// [START privateca_list_ca]
 import (
 	"context"
 	"fmt"
@@ -22,14 +22,14 @@ import (
 
 	privateca "cloud.google.com/go/security/privateca/apiv1"
 	"cloud.google.com/go/security/privateca/apiv1/privatecapb"
+	"google.golang.org/api/iterator"
 )
 
-// Delete the CA pool as mentioned by the ca_pool_name.
-// Before deleting the pool, all CAs in the pool MUST BE deleted.
-func deleteCaPool(w io.Writer, projectId string, location string, caPoolId string) error {
+// List all Certificate Authorities present in the given CA Pool.
+func listCas(w io.Writer, projectId string, location string, caPoolId string) error {
 	// projectId := "your_project_id"
 	// location := "us-central1"	// For a list of locations, see: https://cloud.google.com/certificate-authority-service/docs/locations.
-	// caPoolId := "ca-pool-id"		// A unique id/name for the ca pool.
+	// caPoolId := "ca-pool-id"		// The id of the CA pool under which the CAs to be listed are present.
 
 	ctx := context.Background()
 	caClient, err := privateca.NewCertificateAuthorityClient(ctx)
@@ -40,23 +40,24 @@ func deleteCaPool(w io.Writer, projectId string, location string, caPoolId strin
 
 	fullCaPoolName := fmt.Sprintf("projects/%s/locations/%s/caPools/%s", projectId, location, caPoolId)
 
-	// See https://pkg.go.dev/cloud.google.com/go/security/privateca/apiv1/privatecapb#DeleteCaPoolRequest.
-	req := &privatecapb.DeleteCaPoolRequest{
-		Name: fullCaPoolName,
-	}
+	// Create the ListCertificateAuthorities.
+	// See https://pkg.go.dev/cloud.google.com/go/security/privateca/apiv1/privatecapb#ListCertificateAuthoritiesRequest.
+	req := &privatecapb.ListCertificateAuthoritiesRequest{Parent: fullCaPoolName}
 
-	op, err := caClient.DeleteCaPool(ctx, req)
-	if err != nil {
-		return fmt.Errorf("DeleteCaPool failed: %w", err)
-	}
+	it := caClient.ListCertificateAuthorities(ctx, req)
+	for {
+		resp, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("unable to get the list of cerficate authorities: %w", err)
+		}
 
-	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("DeleteCaPool failed during wait: %w", err)
+		fmt.Fprintf(w, " - %s (state: %s)", resp.Name, resp.State.String())
 	}
-
-	fmt.Fprintf(w, "CA Pool deleted")
 
 	return nil
 }
 
-// [END privateca_delete_ca_pool]
+// [END privateca_list_ca]

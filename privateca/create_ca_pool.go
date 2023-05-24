@@ -26,8 +26,8 @@ import (
 
 // Create a Certificate Authority pool. All certificates created under this CA pool will
 // follow the same issuance policy, IAM policies, etc.
-func createCaPool(w io.Writer, projectID string, location string, caPoolId string) error {
-	// projectID := "your_project_id"
+func createCaPool(w io.Writer, projectId string, location string, caPoolId string) error {
+	// projectId := "your_project_id"
 	// location := "us-central1"	// For a list of locations, see: https://cloud.google.com/certificate-authority-service/docs/locations.
 	// caPoolId := "ca-pool-id"		// A unique id/name for the ca pool.
 
@@ -43,7 +43,7 @@ func createCaPool(w io.Writer, projectID string, location string, caPoolId strin
 		Tier: privatecapb.CaPool_ENTERPRISE,
 	}
 
-	locationPath := fmt.Sprintf("projects/%s/locations/%s", projectID, location)
+	locationPath := fmt.Sprintf("projects/%s/locations/%s", projectId, location)
 
 	// See https://pkg.go.dev/cloud.google.com/go/security/privateca/apiv1/privatecapb#CreateCaPoolRequest.
 	req := &privatecapb.CreateCaPoolRequest{
