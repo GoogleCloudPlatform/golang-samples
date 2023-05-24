@@ -23,7 +23,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/dgrijalva/jwt-go"
+	"golang.org/x/oauth2"
 )
 
 const port = 8080
@@ -52,7 +52,6 @@ func receiveAuthorizedGetRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// split the auth type and value from the header.
 	authValues := strings.SplitN(authHeader, " ", 2)
 	if len(authValues) != 2 {
 		fmt.Fprintf(w, "Unhandled header format (%v).\n", authHeader)
@@ -62,37 +61,24 @@ func receiveAuthorizedGetRequest(w http.ResponseWriter, r *http.Request) {
 	authType, creds := authValues[0], authValues[1]
 
 	if authType == "Bearer" {
-		token, err := jwt.Parse(creds, func(token *jwt.Token) (interface{}, error) {
-			// Check if signing algorithm is HMAC
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-			}
-			// TODO(developer): Set your secret key
-			return []byte("my-secret-key"), nil
-		})
+		ctx := r.Context()
+		config := &oauth2.Config{
+			ClientID:     "<your-client-id>",
+			ClientSecret: "<your-client-secret>",
+			Endpoint:     oauth2.Endpoint{
+				TokenURL: "https://oauth2.googleapis.com/token",
+			},
+		}
 
+		token, err := config.TokenSource(ctx, &oauth2.Token{AccessToken: creds}).Token()
 		if err != nil {
 			http.Error(w, "Unable to parse token: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		claims, ok := token.Claims.(jwt.MapClaims)
-
-		if !ok {
-			fmt.Fprintf(w, "Unable to extract claims from token")
-			return
-		}
-
-		email, ok := claims["email"].(string)
-
-		if !ok {
-			fmt.Fprintf(w, "Unable to extract email from token")
-			return
-		}
-
+		email := token.Extra("email").(string)
 		fmt.Fprintf(w, "Hello, %v!\n", email)
-	}
-	if authType != "Bearer" {
+	} else {
 		fmt.Fprintf(w, "Unhandled header format (%v).\n", authType)
 	}
 }
