@@ -32,7 +32,7 @@ func createDataset(w io.Writer, projectID, location, datasetID string) error {
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	datasetsService := healthcareService.Projects.Locations.Datasets
@@ -41,7 +41,7 @@ func createDataset(w io.Writer, projectID, location, datasetID string) error {
 
 	resp, err := datasetsService.Create(parent, &healthcare.Dataset{}).DatasetId(datasetID).Context(ctx).Do()
 	if err != nil {
-		return fmt.Errorf("Create: %v", err)
+		return fmt.Errorf("Create: %w", err)
 	}
 
 	// The dataset is not always ready to use immediately, instead a long-running operation is returned.

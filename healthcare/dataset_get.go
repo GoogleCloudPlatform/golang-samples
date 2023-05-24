@@ -29,7 +29,7 @@ func getDataset(w io.Writer, projectID, location, datasetID string) error {
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	datasetsService := healthcareService.Projects.Locations.Datasets
@@ -38,7 +38,7 @@ func getDataset(w io.Writer, projectID, location, datasetID string) error {
 
 	resp, err := datasetsService.Get(name).Do()
 	if err != nil {
-		return fmt.Errorf("Get: %v", err)
+		return fmt.Errorf("Get: %w", err)
 	}
 
 	fmt.Fprintf(w, "Name: %s\n", resp.Name)

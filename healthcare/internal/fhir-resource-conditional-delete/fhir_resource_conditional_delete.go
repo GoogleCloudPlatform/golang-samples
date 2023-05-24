@@ -46,7 +46,7 @@ func ConditionalDeleteFHIRResource(w io.Writer, projectID, location, datasetID, 
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	fhirService := healthcareService.Projects.Locations.Datasets.FhirStores.Fhir
@@ -61,7 +61,7 @@ func ConditionalDeleteFHIRResource(w io.Writer, projectID, location, datasetID, 
 	lastUpdated := queryParamOpt{key: "_lastUpdated", value: "gt" + twoDaysAgo}
 
 	if _, err := call.Do(lastUpdated); err != nil {
-		return fmt.Errorf("ConditionalDelete: %v", err)
+		return fmt.Errorf("ConditionalDelete: %w", err)
 	}
 
 	fmt.Fprintf(w, "Deleted %q", parent)
