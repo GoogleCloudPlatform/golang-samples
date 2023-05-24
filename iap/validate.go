@@ -34,7 +34,7 @@ func validateJWTFromAppEngine(w io.Writer, iapJWT, projectNumber, projectID stri
 
 	payload, err := idtoken.Validate(ctx, iapJWT, aud)
 	if err != nil {
-		return fmt.Errorf("idtoken.Validate: %v", err)
+		return fmt.Errorf("idtoken.Validate: %w", err)
 	}
 
 	// payload contains the JWT claims for further inspection or validation
@@ -54,7 +54,7 @@ func validateJWTFromComputeEngine(w io.Writer, iapJWT, projectNumber, backendSer
 
 	payload, err := idtoken.Validate(ctx, iapJWT, aud)
 	if err != nil {
-		return fmt.Errorf("idtoken.Validate: %v", err)
+		return fmt.Errorf("idtoken.Validate: %w", err)
 	}
 
 	// payload contains the JWT claims for further inspection or validation

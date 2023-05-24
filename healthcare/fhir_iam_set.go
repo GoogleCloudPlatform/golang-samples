@@ -29,7 +29,7 @@ func setFHIRIAMPolicy(w io.Writer, projectID, location, datasetID, fhirStoreID s
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	fhirService := healthcareService.Projects.Locations.Datasets.FhirStores
@@ -38,7 +38,7 @@ func setFHIRIAMPolicy(w io.Writer, projectID, location, datasetID, fhirStoreID s
 
 	policy, err := fhirService.GetIamPolicy(name).Do()
 	if err != nil {
-		return fmt.Errorf("GetIamPolicy: %v", err)
+		return fmt.Errorf("GetIamPolicy: %w", err)
 	}
 
 	policy.Bindings = append(policy.Bindings, &healthcare.Binding{
@@ -52,7 +52,7 @@ func setFHIRIAMPolicy(w io.Writer, projectID, location, datasetID, fhirStoreID s
 
 	policy, err = fhirService.SetIamPolicy(name, req).Do()
 	if err != nil {
-		return fmt.Errorf("SetIamPolicy: %v", err)
+		return fmt.Errorf("SetIamPolicy: %w", err)
 	}
 
 	fmt.Fprintf(w, "IAM Policy version: %v\n", policy.Version)

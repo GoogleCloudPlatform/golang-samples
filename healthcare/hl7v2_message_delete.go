@@ -29,14 +29,14 @@ func deleteHL7V2Message(w io.Writer, projectID, location, datasetID, hl7V2StoreI
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	messagesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores.Messages
 
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/hl7V2Stores/%s/messages/%s", projectID, location, datasetID, hl7V2StoreID, hl7V2MessageID)
 	if _, err := messagesService.Delete(name).Do(); err != nil {
-		return fmt.Errorf("Delete: %v", err)
+		return fmt.Errorf("Delete: %w", err)
 	}
 
 	fmt.Fprintf(w, "Deleted HL7V2 message: %q\n", name)

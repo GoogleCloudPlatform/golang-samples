@@ -29,7 +29,7 @@ func getDICOMIAMPolicy(w io.Writer, projectID, location, datasetID, dicomStoreID
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	dicomService := healthcareService.Projects.Locations.Datasets.DicomStores
@@ -38,7 +38,7 @@ func getDICOMIAMPolicy(w io.Writer, projectID, location, datasetID, dicomStoreID
 
 	policy, err := dicomService.GetIamPolicy(name).Do()
 	if err != nil {
-		return fmt.Errorf("GetIamPolicy: %v", err)
+		return fmt.Errorf("GetIamPolicy: %w", err)
 	}
 
 	fmt.Fprintf(w, "IAM Policy etag: %v\n", policy.Etag)

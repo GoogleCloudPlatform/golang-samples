@@ -29,7 +29,7 @@ func deleteHL7V2Store(w io.Writer, projectID, location, datasetID, hl7V2StoreID 
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	storesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores
@@ -37,7 +37,7 @@ func deleteHL7V2Store(w io.Writer, projectID, location, datasetID, hl7V2StoreID 
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/hl7V2Stores/%s", projectID, location, datasetID, hl7V2StoreID)
 
 	if _, err := storesService.Delete(name).Do(); err != nil {
-		return fmt.Errorf("Delete: %v", err)
+		return fmt.Errorf("Delete: %w", err)
 	}
 
 	fmt.Fprintf(w, "Deleted HL7V2 store: %q\n", name)
