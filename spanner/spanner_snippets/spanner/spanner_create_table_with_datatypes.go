@@ -52,7 +52,7 @@ func createTableWithDatatypes(ctx context.Context, w io.Writer, db string) error
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("UpdateDatabaseDdl: %v", err)
+		return fmt.Errorf("UpdateDatabaseDdl: %w", err)
 	}
 	if err := op.Wait(ctx); err != nil {
 		return err

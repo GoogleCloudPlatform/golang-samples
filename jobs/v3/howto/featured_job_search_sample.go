@@ -53,12 +53,12 @@ func searchFeaturedJobs(w io.Writer, projectID, companyName, query string) (*tal
 
 	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
 	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %v", err)
+		return nil, fmt.Errorf("google.DefaultClient: %w", err)
 	}
 	// Create the jobs service client.
 	service, err := talent.New(client)
 	if err != nil {
-		return nil, fmt.Errorf("talent.New: %v", err)
+		return nil, fmt.Errorf("talent.New: %w", err)
 	}
 
 	jobQuery := &talent.JobQuery{
@@ -88,7 +88,7 @@ func searchFeaturedJobs(w io.Writer, projectID, companyName, query string) (*tal
 	}
 	resp, err := service.Projects.Jobs.Search(parent, req).Do()
 	if err != nil {
-		return nil, fmt.Errorf("failed to search for jobs with query %q: %v", query, err)
+		return nil, fmt.Errorf("failed to search for jobs with query %q: %w", query, err)
 	}
 
 	fmt.Fprintln(w, "Jobs:")

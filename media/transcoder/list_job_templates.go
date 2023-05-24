@@ -36,7 +36,7 @@ func listJobTemplates(w io.Writer, projectID string, location string) error {
 	ctx := context.Background()
 	client, err := transcoder.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -52,7 +52,7 @@ func listJobTemplates(w io.Writer, projectID string, location string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("ListJobTemplates: %v", err)
+			return fmt.Errorf("ListJobTemplates: %w", err)
 		}
 		fmt.Fprintln(w, response.GetName())
 	}

@@ -33,7 +33,7 @@ func listDenyPolicies(w io.Writer, projectID string) error {
 	ctx := context.Background()
 	policiesClient, err := iam.NewPoliciesClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewPoliciesClient: %v", err)
+		return fmt.Errorf("NewPoliciesClient: %w", err)
 	}
 	defer policiesClient.Close()
 

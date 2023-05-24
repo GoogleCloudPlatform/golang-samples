@@ -34,7 +34,7 @@ func getVodStitchDetail(w io.Writer, projectID, sessionID, stitchDetailID string
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
-		return fmt.Errorf("stitcher.NewVideoStitcherClient: %v", err)
+		return fmt.Errorf("stitcher.NewVideoStitcherClient: %w", err)
 	}
 	defer client.Close()
 
@@ -44,11 +44,11 @@ func getVodStitchDetail(w io.Writer, projectID, sessionID, stitchDetailID string
 	// Gets the stitch detail.
 	response, err := client.GetVodStitchDetail(ctx, req)
 	if err != nil {
-		return fmt.Errorf("client.GetStitchDetail: %v", err)
+		return fmt.Errorf("client.GetStitchDetail: %w", err)
 	}
 	b, err := json.MarshalIndent(response, "", " ")
 	if err != nil {
-		return fmt.Errorf("json.MarshalIndent: %v", err)
+		return fmt.Errorf("json.MarshalIndent: %w", err)
 	}
 
 	fmt.Fprintf(w, "VOD stitch detail:\n%s", string(b))

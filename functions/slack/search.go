@@ -111,7 +111,7 @@ func KGSearch(w http.ResponseWriter, r *http.Request) {
 func makeSearchRequest(query string) (*Message, error) {
 	res, err := entitiesService.Search().Query(query).Limit(1).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Do: %v", err)
+		return nil, fmt.Errorf("Do: %w", err)
 	}
 	return formatSlackMessage(query, res)
 }
@@ -128,7 +128,7 @@ func verifyWebHook(r *http.Request, slackSigningSecret string) (bool, error) {
 
 	t, err := strconv.ParseInt(timeStamp, 10, 64)
 	if err != nil {
-		return false, fmt.Errorf("strconv.ParseInt(%s): %v", timeStamp, err)
+		return false, fmt.Errorf("strconv.ParseInt(%s): %w", timeStamp, err)
 	}
 
 	if ageOk, age := checkTimestamp(t); !ageOk {
@@ -142,7 +142,7 @@ func verifyWebHook(r *http.Request, slackSigningSecret string) (bool, error) {
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return false, fmt.Errorf("ioutil.ReadAll(%v): %v", r.Body, err)
+		return false, fmt.Errorf("ioutil.ReadAll(%v): %w", r.Body, err)
 	}
 
 	// Reset the body so other calls won't fail.
@@ -156,7 +156,7 @@ func verifyWebHook(r *http.Request, slackSigningSecret string) (bool, error) {
 	signatureInHeader, err := hex.DecodeString(trimmed)
 
 	if err != nil {
-		return false, fmt.Errorf("hex.DecodeString(%v): %v", trimmed, err)
+		return false, fmt.Errorf("hex.DecodeString(%v): %w", trimmed, err)
 	}
 
 	return hmac.Equal(signature, signatureInHeader), nil

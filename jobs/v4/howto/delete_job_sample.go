@@ -31,7 +31,7 @@ func deleteJob(w io.Writer, projectID, jobID string) error {
 	// Initialize a jobService client.
 	c, err := talent.NewJobClient(ctx)
 	if err != nil {
-		return fmt.Errorf("talent.NewJobClient: %v", err)
+		return fmt.Errorf("talent.NewJobClient: %w", err)
 	}
 	defer c.Close()
 
@@ -44,7 +44,7 @@ func deleteJob(w io.Writer, projectID, jobID string) error {
 	}
 
 	if err := c.DeleteJob(ctx, req); err != nil {
-		return fmt.Errorf("Delete(%s): %v", jobName, err)
+		return fmt.Errorf("Delete(%s): %w", jobName, err)
 	}
 
 	fmt.Fprintf(w, "Deleted job: %q\n", jobName)

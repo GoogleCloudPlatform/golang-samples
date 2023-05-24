@@ -29,7 +29,7 @@ func listSchemas(w io.Writer, projectID string) ([]*pubsub.SchemaConfig, error) 
 	ctx := context.Background()
 	client, err := pubsub.NewSchemaClient(ctx, projectID)
 	if err != nil {
-		return nil, fmt.Errorf("pubsub.NewSchemaClient: %v", err)
+		return nil, fmt.Errorf("pubsub.NewSchemaClient: %w", err)
 	}
 	defer client.Close()
 
@@ -42,7 +42,7 @@ func listSchemas(w io.Writer, projectID string) ([]*pubsub.SchemaConfig, error) 
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("schemaIter.Next: %v", err)
+			return nil, fmt.Errorf("schemaIter.Next: %w", err)
 		}
 		fmt.Fprintf(w, "Got schema: %#v\n", sc)
 		schemas = append(schemas, sc)

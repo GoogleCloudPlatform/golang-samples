@@ -36,7 +36,7 @@ func authenticateImplicitWithAdc(w io.Writer, projectId string) error {
 	// The client library finds your credentials using ADC.
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 

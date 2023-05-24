@@ -44,7 +44,7 @@ type EventDimensions struct {
 func HelloAnalytics(ctx context.Context, e AnalyticsEvent) error {
 	meta, err := metadata.FromContext(ctx)
 	if err != nil {
-		return fmt.Errorf("metadata.FromContext: %v", err)
+		return fmt.Errorf("metadata.FromContext: %w", err)
 	}
 	log.Printf("Function triggered by Google Analytics event: %v", meta.Resource)
 	log.Printf("%+v", e)

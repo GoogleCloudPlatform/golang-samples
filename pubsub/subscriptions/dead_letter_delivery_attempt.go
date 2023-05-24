@@ -30,7 +30,7 @@ func pullMsgsDeadLetterDeliveryAttempt(w io.Writer, projectID, subID string) err
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -51,7 +51,7 @@ func pullMsgsDeadLetterDeliveryAttempt(w io.Writer, projectID, subID string) err
 		msg.Ack()
 	})
 	if err != nil {
-		return fmt.Errorf("got error in Receive: %v", err)
+		return fmt.Errorf("got error in Receive: %w", err)
 	}
 	return nil
 }

@@ -37,7 +37,7 @@ func audioProfile(w io.Writer, text string, outputFile string) error {
 
 	client, err := texttospeech.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -54,7 +54,7 @@ func audioProfile(w io.Writer, text string, outputFile string) error {
 
 	resp, err := client.SynthesizeSpeech(ctx, req)
 	if err != nil {
-		return fmt.Errorf("SynthesizeSpeech: %v", err)
+		return fmt.Errorf("SynthesizeSpeech: %w", err)
 	}
 
 	if err = ioutil.WriteFile(outputFile, resp.AudioContent, 0644); err != nil {

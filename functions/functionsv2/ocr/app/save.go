@@ -36,17 +36,17 @@ func init() {
 func SaveResult(ctx context.Context, cloudevent event.Event) error {
 	var event MessagePublishedData
 	if err := setup(ctx); err != nil {
-		return fmt.Errorf("ProcessImage: %v", err)
+		return fmt.Errorf("ProcessImage: %w", err)
 	}
 	if err := cloudevent.DataAs(&event); err != nil {
-		return fmt.Errorf("Failed to parse CloudEvent data: %v", err)
+		return fmt.Errorf("Failed to parse CloudEvent data: %w", err)
 	}
 	var message ocrMessage
 	if event.Message.Data == nil {
 		return fmt.Errorf("Empty data")
 	}
 	if err := json.Unmarshal(event.Message.Data, &message); err != nil {
-		return fmt.Errorf("json.Unmarshal: %v", err)
+		return fmt.Errorf("json.Unmarshal: %w", err)
 	}
 	log.Printf("Received request to save file %q.", message.FileName)
 
