@@ -46,7 +46,7 @@ func searchFHIRResourcesGet(w io.Writer, projectID, location, datasetID, fhirSto
 	// not pass any data in its body.
 	req, err := http.NewRequest(http.MethodGet, name, nil)
 	if err != nil {
-		return fmt.Errorf("NewRequest: %v", err)
+		return fmt.Errorf("NewRequest: %w", err)
 	}
 
 	// To set additional parameters for search filtering, append the
@@ -60,14 +60,14 @@ func searchFHIRResourcesGet(w io.Writer, projectID, location, datasetID, fhirSto
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("Do: %v", err)
+		return fmt.Errorf("Do: %w", err)
 	}
 
 	defer resp.Body.Close()
 
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("could not read response: %v", err)
+		return fmt.Errorf("could not read response: %w", err)
 	}
 
 	if resp.StatusCode > 299 {
