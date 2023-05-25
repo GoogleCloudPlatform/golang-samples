@@ -43,6 +43,7 @@ var buf bytes.Buffer
 
 // Setup for all tests
 func setupTests(t *testing.T) {
+	t.Helper()
 	r = rand.New(rand.NewSource(time.Now().UnixNano()))
 	location = "us-central1"
 	tc := testutil.SystemTest(t)
@@ -51,6 +52,7 @@ func setupTests(t *testing.T) {
 
 // Setup and teardown functions for CA Pool
 func setupCaPool(t *testing.T) (string, func(t *testing.T)) {
+	t.Helper()
 	caPoolId := fmt.Sprintf("test-ca-pool-%v-%v", time.Now().Format("2006-01-02"), r.Int())
 
 	if err := createCaPool(&buf, projectId, location, caPoolId); err != nil {
@@ -74,6 +76,7 @@ func setupCaPool(t *testing.T) (string, func(t *testing.T)) {
 
 // Setup and teardown functions for Certificate Authority Tests
 func setupCa(t *testing.T, caPoolId string, autoEnable bool) (string, func(t *testing.T)) {
+	t.Helper()
 	caId := fmt.Sprintf("test-ca-%v-%v", time.Now().Format("2006-01-02"), r.Int())
 	caCommonName := fmt.Sprintf("CN - %s", caId)
 	org := "ORGANIZATION"
@@ -143,6 +146,7 @@ func deleteCaPerm(projectID string, location string, caPoolId string, caId strin
 
 // Setup and teardown functions for Certifcate tests
 func setupCertificate(t *testing.T, caPoolId string, caId string) (string, func(t *testing.T)) {
+	t.Helper()
 	certId := fmt.Sprintf("test-certificate-%v-%v", time.Now().Format("2006-01-02"), r.Int())
 	commonName := fmt.Sprintf("CN - %s", certId)
 	domainName := "cert2.example.com"
@@ -163,6 +167,7 @@ func setupCertificate(t *testing.T, caPoolId string, caId string) (string, func(
 
 // Helper function to generate RSA public key
 func genPublicKey(t *testing.T) []byte {
+	t.Helper()
 	// generate key
 	privatekey, err := rsa.GenerateKey(cryptorand.Reader, 2048)
 	if err != nil {
