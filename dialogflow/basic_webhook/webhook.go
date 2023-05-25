@@ -15,7 +15,7 @@
 // Sample implementation of a basic webhook using Cloud Functions
 package webhook
 
-// [START dialogflow_webhook]
+// [START dialogflow_es_webhook]
 import (
 	"encoding/json"
 	"fmt"
@@ -128,4 +128,4 @@ func HandleWebhookRequest(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// [END dialogflow_webhook]
+// [END dialogflow_es_webhook]
