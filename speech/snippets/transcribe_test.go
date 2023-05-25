@@ -38,7 +38,7 @@ func TestTranscribeModelSelectionGcs(t *testing.T) {
 
 	var buf bytes.Buffer
 	if err := transcribe_model_selection_gcs(&buf, gcsVideoPath, "video"); err != nil {
-		t.Errorf("error in transcribe model selection gcs %v", err)
+		t.Fatalf("error in transcribe model selection gcs %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, "Transcript:") {
 		t.Errorf("transcribe_model_selection_gcs got %q, expected %q", got, "Transcript:")
@@ -50,7 +50,7 @@ func TestTranscribeDiarizationBeta(t *testing.T) {
 
 	var buf bytes.Buffer
 	if err := transcribe_diarization(&buf, recognitionAudioFile); err != nil {
-		t.Errorf("error in transcribe diarization %v", err)
+		t.Fatalf("error in transcribe diarization %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, "Speaker") {
 		t.Errorf("transcribe_diarization got %q, expected %q", got, "Speaker")
@@ -62,7 +62,7 @@ func TestTranscribeDiarizationGcsBeta(t *testing.T) {
 
 	var buf bytes.Buffer
 	if err := transcribe_diarization_gcs_beta(&buf, gcsDiarizationAudioPath); err != nil {
-		t.Errorf("error in transcribe diarization gcs %v", err)
+		t.Fatalf("error in transcribe diarization gcs %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, "Speaker") {
 		t.Errorf("transcribe_diarization_gcs_beta got %q, expected %q", got, "Speaker")

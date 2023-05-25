@@ -75,7 +75,8 @@ func transcribe_diarization(w io.Writer, filename string) error {
 		return err
 	}
 
-	// Speaker Tags are only included in the last result object, which has only one alternative.
+	// Speaker Tags are only included in the last result object, which has only one
+	// alternative.
 	alternative := response.Results[len(response.Results)-1].Alternatives[0]
 
 	wordInfo := alternative.GetWords()[0]
@@ -93,7 +94,8 @@ func transcribe_diarization(w io.Writer, filename string) error {
 			speakerWords.WriteString(" ")
 			speakerWords.WriteString(wordInfo.GetWord())
 		} else {
-			speakerWords.WriteString(fmt.Sprintf("\nSpeaker %d: %s", wordInfo.GetSpeakerTag(), wordInfo.GetWord()))
+			speakerWords.WriteString(fmt.Sprintf("\nSpeaker %d: %s",
+				wordInfo.GetSpeakerTag(), wordInfo.GetWord()))
 			currentSpeakerTag = wordInfo.GetSpeakerTag()
 		}
 	}

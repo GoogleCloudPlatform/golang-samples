@@ -72,7 +72,8 @@ func transcribe_diarization_gcs_beta(w io.Writer, gcsUri string) error {
 		return err
 	}
 
-	// Speaker Tags are only included in the last result object, which has only one alternative.
+	// Speaker Tags are only included in the last result object, which has only one
+	// alternative.
 	alternative := response.Results[len(response.Results)-1].Alternatives[0]
 
 	wordInfo := alternative.GetWords()[0]
@@ -82,13 +83,16 @@ func transcribe_diarization_gcs_beta(w io.Writer, gcsUri string) error {
 
 	speakerWords.WriteString(fmt.Sprintf("Speaker %d: %s", wordInfo.GetSpeakerTag(), wordInfo.GetWord()))
 
+	// For each word, get all the words associated with one speaker, once the speaker changes,
+	// add a new line with the new speaker and their spoken words.
 	for i := 1; i < len(alternative.Words); i++ {
 		wordInfo := alternative.Words[i]
 		if currentSpeakerTag == wordInfo.GetSpeakerTag() {
 			speakerWords.WriteString(" ")
 			speakerWords.WriteString(wordInfo.GetWord())
 		} else {
-			speakerWords.WriteString(fmt.Sprintf("\nSpeaker %d: %s", wordInfo.GetSpeakerTag(), wordInfo.GetWord()))
+			speakerWords.WriteString(fmt.Sprintf("\nSpeaker %d: %s",
+				wordInfo.GetSpeakerTag(), wordInfo.GetWord()))
 			currentSpeakerTag = wordInfo.GetSpeakerTag()
 		}
 	}
