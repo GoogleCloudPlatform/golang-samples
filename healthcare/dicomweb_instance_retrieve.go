@@ -36,7 +36,7 @@ func dicomWebRetrieveInstance(w io.Writer, projectID, location, datasetID, dicom
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	storesService := healthcareService.Projects.Locations.Datasets.DicomStores.Studies.Series.Instances
@@ -47,7 +47,7 @@ func dicomWebRetrieveInstance(w io.Writer, projectID, location, datasetID, dicom
 	call.Header().Set("Accept", "application/dicom; transfer-syntax=*")
 	resp, err := call.Do()
 	if err != nil {
-		return fmt.Errorf("RetrieveInstance: %v", err)
+		return fmt.Errorf("RetrieveInstance: %w", err)
 	}
 
 	defer resp.Body.Close()
@@ -58,11 +58,11 @@ func dicomWebRetrieveInstance(w io.Writer, projectID, location, datasetID, dicom
 
 	file, err := os.Create(outputFile)
 	if err != nil {
-		return fmt.Errorf("os.Create: %v", err)
+		return fmt.Errorf("os.Create: %w", err)
 	}
 	defer file.Close()
 	if _, err := io.Copy(file, resp.Body); err != nil {
-		return fmt.Errorf("io.Copy: %v", err)
+		return fmt.Errorf("io.Copy: %w", err)
 	}
 
 	fmt.Fprintf(w, "DICOM instance retrieved and downloaded to file: %v\n", outputFile)

@@ -26,8 +26,8 @@ import (
 
 // Delete the CA pool as mentioned by the ca_pool_name.
 // Before deleting the pool, all CAs in the pool MUST BE deleted.
-func deleteCaPool(w io.Writer, projectID string, location string, caPoolId string) error {
-	// projectID := "your_project_id"
+func deleteCaPool(w io.Writer, projectId string, location string, caPoolId string) error {
+	// projectId := "your_project_id"
 	// location := "us-central1"	// For a list of locations, see: https://cloud.google.com/certificate-authority-service/docs/locations.
 	// caPoolId := "ca-pool-id"		// A unique id/name for the ca pool.
 
@@ -38,7 +38,7 @@ func deleteCaPool(w io.Writer, projectID string, location string, caPoolId strin
 	}
 	defer caClient.Close()
 
-	fullCaPoolName := fmt.Sprintf("projects/%s/locations/%s/caPools/%s", projectID, location, caPoolId)
+	fullCaPoolName := fmt.Sprintf("projects/%s/locations/%s/caPools/%s", projectId, location, caPoolId)
 
 	// See https://pkg.go.dev/cloud.google.com/go/security/privateca/apiv1/privatecapb#DeleteCaPoolRequest.
 	req := &privatecapb.DeleteCaPoolRequest{

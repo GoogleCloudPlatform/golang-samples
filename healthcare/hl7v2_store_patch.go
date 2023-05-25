@@ -29,7 +29,7 @@ func patchHL7V2Store(w io.Writer, projectID, location, datasetID, hl7v2StoreID, 
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	storesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores
@@ -43,7 +43,7 @@ func patchHL7V2Store(w io.Writer, projectID, location, datasetID, hl7v2StoreID, 
 			},
 		},
 	}).UpdateMask("notificationConfigs").Do(); err != nil {
-		return fmt.Errorf("Patch: %v", err)
+		return fmt.Errorf("Patch: %w", err)
 	}
 
 	fmt.Fprintf(w, "Patched HL7V2 store %s with Pub/sub topic %s\n", datasetID, topicName)

@@ -4,13 +4,13 @@ go 1.19
 
 require (
 	cloud.google.com/go/dialogflow v1.34.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230517211646-da4d8a7e0e9b
-	google.golang.org/api v0.122.0
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230522201558-cba0742a460f
+	google.golang.org/api v0.123.0
 )
 
 require (
 	cloud.google.com/go v0.110.0 // indirect
-	cloud.google.com/go/compute v1.19.0 // indirect
+	cloud.google.com/go/compute v1.19.3 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v0.13.0 // indirect
 	cloud.google.com/go/longrunning v0.4.2 // indirect
