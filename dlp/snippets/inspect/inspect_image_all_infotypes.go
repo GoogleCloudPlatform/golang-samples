@@ -25,7 +25,7 @@ import (
 )
 
 // inspectImageFileAllInfoTypes inspects a image for sensitive data with infoTypes
-func InspectImageFileAllInfoTypes(w io.Writer, projectID, inputPath string) error {
+func inspectImageFileAllInfoTypes(w io.Writer, projectID, inputPath string) error {
 	// projectId := "your-project-id"
 	// inputPath := "your-input-path"
 

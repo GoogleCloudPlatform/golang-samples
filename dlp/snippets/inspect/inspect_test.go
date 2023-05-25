@@ -519,12 +519,12 @@ func TestInspectImageFileAllInfoTypes(t *testing.T) {
 	inputPath := "testdata/image.jpg"
 
 	var buf bytes.Buffer
-	if err := InspectImageFileAllInfoTypes(&buf, tc.ProjectID, inputPath); err != nil {
-		t.Errorf("InspectBigQueryTableWithSampling: %v", err)
+	if err := inspectImageFileAllInfoTypes(&buf, tc.ProjectID, inputPath); err != nil {
+		t.Errorf("inspectImageFileAllInfoTypes: %v", err)
 	}
 	got := buf.String()
 	if want := "Info type: DATE"; !strings.Contains(got, want) {
-		t.Errorf("InspectBigQueryTableWithSampling got %q, want %q", got, want)
+		t.Errorf("inspectImageFileAllInfoTypes got %q, want %q", got, want)
 	}
 	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
 		t.Errorf("InspectBigQueryTableWithSampling got %q, want %q", got, want)
