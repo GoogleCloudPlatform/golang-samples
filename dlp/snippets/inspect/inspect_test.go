@@ -279,7 +279,6 @@ func TestInspectBigquery(t *testing.T) {
 
 func TestInspectTable(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
 	var buf bytes.Buffer
 	if err := inspectTable(&buf, tc.ProjectID); err != nil {
 		t.Fatal(err)
@@ -295,9 +294,7 @@ func TestInspectTable(t *testing.T) {
 
 func TestInspectStringWithExclusionRegex(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
 	var buf bytes.Buffer
-
 	if err := inspectStringWithExclusionRegex(&buf, tc.ProjectID, "Some email addresses: gary@example.com, bob@example.org", ".+@example.com"); err != nil {
 		t.Errorf("inspectStringWithExclusionRegex: %v", err)
 	}
@@ -338,7 +335,7 @@ func TestInspectStringMultipleRules(t *testing.T) {
 	var buf bytes.Buffer
 
 	if err := inspectStringMultipleRules(&buf, tc.ProjectID, "patient: Jane Doe"); err != nil {
-		t.Errorf("inspectStringMultipleRules: %v", err)
+		t.Fatal(err)
 	}
 	got := buf.String()
 	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
@@ -484,7 +481,6 @@ func TestInspectWithCustomRegex(t *testing.T) {
 func TestInspectStringWithExclusionDictionary(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
-
 	if err := inspectStringWithExclusionDictionary(&buf, tc.ProjectID, "Some email addresses: gary@example.com, example@example.com", []string{"example@example.com"}); err != nil {
 		t.Fatal(err)
 	}
@@ -496,20 +492,36 @@ func TestInspectStringWithExclusionDictionary(t *testing.T) {
 
 func TestInspectImageFile(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
 	var buf bytes.Buffer
-
 	pathToImage := "testdata/test.png"
-
 	if err := inspectImageFile(&buf, tc.ProjectID, pathToImage); err != nil {
 		t.Fatal(err)
 	}
-
 	got := buf.String()
 	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
 		t.Errorf("TestInspectImageFile got %q, want %q", got, want)
 	}
 	if want := "Info type: EMAIL_ADDRESS"; !strings.Contains(got, want) {
 		t.Errorf("TestInspectImageFile got %q, want %q", got, want)
+	}
+}
+
+func TestInspectImageFileListedInfoTypes(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+	pathToImage := "testdata/sensitive-data-image.jpg"
+
+	if err := inspectImageFileListedInfoTypes(&buf, tc.ProjectID, pathToImage); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
+		t.Errorf("inspectImageFileListedInfoTypes got %q, want %q", got, want)
+	}
+	if want := "Info type: EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("inspectImageFileListedInfoTypes got %q, want %q", got, want)
+	}
+	if want := "Info type: US_SOCIAL_SECURITY_NUMBER"; !strings.Contains(got, want) {
+		t.Errorf("inspectImageFileListedInfoTypes got %q, want %q", got, want)
 	}
 }
