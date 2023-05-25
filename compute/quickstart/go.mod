@@ -3,7 +3,7 @@ module exec
 go 1.19
 
 require (
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.3
 	go.mongodb.org/mongo-driver v1.11.6
 )
 
