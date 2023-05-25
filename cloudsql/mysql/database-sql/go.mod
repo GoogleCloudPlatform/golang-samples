@@ -5,7 +5,7 @@ go 1.19
 require (
 	cloud.google.com/go/cloudsqlconn v1.2.4
 	github.com/GoogleCloudPlatform/functions-framework-go v1.7.3
-	github.com/GoogleCloudPlatform/golang-samples/cloudsql/postgres/database-sql v0.0.0-20230517211646-da4d8a7e0e9b
+	github.com/GoogleCloudPlatform/golang-samples/cloudsql/postgres/database-sql v0.0.0-20230522201558-cba0742a460f
 	github.com/go-sql-driver/mysql v1.7.1
 )
 
