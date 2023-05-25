@@ -527,10 +527,10 @@ func TestInspectImageFileAllInfoTypes(t *testing.T) {
 		t.Errorf("inspectImageFileAllInfoTypes got %q, want %q", got, want)
 	}
 	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
-		t.Errorf("InspectBigQueryTableWithSampling got %q, want %q", got, want)
+		t.Errorf("inspectImageFileAllInfoTypes got %q, want %q", got, want)
 	}
 	if want := "Info type: US_SOCIAL_SECURITY_NUMBER"; !strings.Contains(got, want) {
-		t.Errorf("InspectBigQueryTableWithSampling got %q, want %q", got, want)
+		t.Errorf("inspectImageFileAllInfoTypes got %q, want %q", got, want)
 	}
 
 }
