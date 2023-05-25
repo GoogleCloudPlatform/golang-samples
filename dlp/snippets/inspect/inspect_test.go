@@ -509,7 +509,7 @@ func TestInspectImageFile(t *testing.T) {
 func TestInspectImageFileListedInfoTypes(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
-	pathToImage := "testdata/test.png"
+	pathToImage := "testdata/sensitive-data-image.jpg"
 
 	if err := inspectImageFileListedInfoTypes(&buf, tc.ProjectID, pathToImage); err != nil {
 		t.Fatal(err)
@@ -521,7 +521,7 @@ func TestInspectImageFileListedInfoTypes(t *testing.T) {
 	if want := "Info type: EMAIL_ADDRESS"; !strings.Contains(got, want) {
 		t.Errorf("inspectImageFileListedInfoTypes got %q, want %q", got, want)
 	}
-	if want := "Info type: US_SOCIAL_SECURITY_NUMBER"; strings.Contains(got, want) {
+	if want := "Info type: US_SOCIAL_SECURITY_NUMBER"; !strings.Contains(got, want) {
 		t.Errorf("inspectImageFileListedInfoTypes got %q, want %q", got, want)
 	}
 }
