@@ -483,9 +483,9 @@ func TestInspectWithCustomRegex(t *testing.T) {
 
 func TestInspectStringWithExclusionDictionary(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
-	if err := inspectStringWithExclusionDictionary(buf, tc.ProjectID, "Some email addresses: gary@example.com, example@example.com", []string{"example@example.com"}); err != nil {
+	if err := inspectStringWithExclusionDictionary(&buf, tc.ProjectID, "Some email addresses: gary@example.com, example@example.com", []string{"example@example.com"}); err != nil {
 		t.Fatal(err)
 	}
 	got := buf.String()

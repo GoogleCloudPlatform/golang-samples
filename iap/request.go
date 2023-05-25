@@ -36,16 +36,16 @@ func makeIAPRequest(w io.Writer, request *http.Request, audience string) error {
 	// to any requests made.
 	client, err := idtoken.NewClient(ctx, audience)
 	if err != nil {
-		return fmt.Errorf("idtoken.NewClient: %v", err)
+		return fmt.Errorf("idtoken.NewClient: %w", err)
 	}
 
 	response, err := client.Do(request)
 	if err != nil {
-		return fmt.Errorf("client.Do: %v", err)
+		return fmt.Errorf("client.Do: %w", err)
 	}
 	defer response.Body.Close()
 	if _, err := io.Copy(w, response.Body); err != nil {
-		return fmt.Errorf("io.Copy: %v", err)
+		return fmt.Errorf("io.Copy: %w", err)
 	}
 
 	return nil

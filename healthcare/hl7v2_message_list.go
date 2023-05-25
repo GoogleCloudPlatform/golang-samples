@@ -29,7 +29,7 @@ func listHL7V2Messages(w io.Writer, projectID, location, datasetID, hl7V2StoreID
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	messagesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores.Messages
@@ -38,7 +38,7 @@ func listHL7V2Messages(w io.Writer, projectID, location, datasetID, hl7V2StoreID
 
 	resp, err := messagesService.List(parent).Do()
 	if err != nil {
-		return fmt.Errorf("List: %v", err)
+		return fmt.Errorf("List: %w", err)
 	}
 
 	fmt.Fprintln(w, "HL7V2 messages:")

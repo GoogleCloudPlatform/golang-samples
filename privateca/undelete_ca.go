@@ -25,8 +25,8 @@ import (
 )
 
 // Undelete a Certificate Authority from the specified CA pool.
-func unDeleteCa(w io.Writer, projectID string, location string, caPoolId string, caId string) error {
-	// projectID := "your_project_id"
+func unDeleteCa(w io.Writer, projectId string, location string, caPoolId string, caId string) error {
+	// projectId := "your_project_id"
 	// location := "us-central1"	// For a list of locations, see: https://cloud.google.com/certificate-authority-service/docs/locations.
 	// caPoolId := "ca-pool-id"		// The id of the CA pool under which the CA is present.
 	// caId := "ca-id"				// The id of the CA to be undeleted.
@@ -39,7 +39,7 @@ func unDeleteCa(w io.Writer, projectID string, location string, caPoolId string,
 	defer caClient.Close()
 
 	fullCaName := fmt.Sprintf("projects/%s/locations/%s/caPools/%s/certificateAuthorities/%s",
-		projectID, location, caPoolId, caId)
+		projectId, location, caPoolId, caId)
 
 	// Check if the CA is deleted.
 	// See https://pkg.go.dev/cloud.google.com/go/security/privateca/apiv1/privatecapb#GetCertificateAuthorityRequest.
