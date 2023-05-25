@@ -191,11 +191,11 @@ func TestCreateJob(t *testing.T) {
 
 	var buf bytes.Buffer
 	// createBucketForCreatJob will create a bucket and upload a txt file
-	bucketName, err := createBucketForCreatJob(t, tc.ProjectID)
+	bucketName, fileName, err := createBucketForCreatJob(t, tc.ProjectID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	gcsPath := "gs://dlp-go-lang-test/test.txt"
+	gcsPath := "gs://" + bucketName + "/" + fileName
 	infoTypeNames := []string{"EMAIL_ADDRESS", "PERSON_NAME", "LOCATION", "PHONE_NUMBER"}
 
 	if err := createJob(&buf, tc.ProjectID, gcsPath, infoTypeNames); err != nil {
@@ -207,17 +207,17 @@ func TestCreateJob(t *testing.T) {
 		t.Errorf("TestInspectWithCustomRegex got %q, want %q", got, want)
 	}
 
-	defer deleteAssetsOfCreateJobTest(t, tc.ProjectID, bucketName)
+	defer deleteAssetsOfCreateJobTest(t, tc.ProjectID, bucketName, fileName)
 }
 
-func createBucketForCreatJob(t *testing.T, projectID string) (string, error) {
+func createBucketForCreatJob(t *testing.T, projectID string) (string, string, error) {
 	t.Helper()
 
 	ctx := context.Background()
 
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	defer client.Close()
 	u := uuid.Must(uuid.NewV4()).String()[:8]
@@ -255,7 +255,8 @@ func createBucketForCreatJob(t *testing.T, projectID string) (string, error) {
 	bucket := client.Bucket(bucketName)
 
 	// Upload the file
-	fileName := "test.txt"
+	u = uuid.Must(uuid.NewV4()).String()[:8]
+	fileName := "test" + u + ".txt"
 	object := bucket.Object(fileName)
 	writer := object.NewWriter(ctx)
 	_, err = writer.Write(file)
@@ -280,10 +281,10 @@ func createBucketForCreatJob(t *testing.T, projectID string) (string, error) {
 		fmt.Printf("---File %v exists in bucket %v\n", fileName, bucketName)
 	}
 
-	return bucketName, nil
+	return bucketName, fileName, nil
 }
 
-func deleteAssetsOfCreateJobTest(t *testing.T, projectID, bucketName string) error {
+func deleteAssetsOfCreateJobTest(t *testing.T, projectID, bucketName, objectName string) error {
 	t.Helper()
 
 	ctx := context.Background()
@@ -292,8 +293,6 @@ func deleteAssetsOfCreateJobTest(t *testing.T, projectID, bucketName string) err
 		return err
 	}
 	defer client.Close()
-
-	objectName := "test.txt"
 
 	o := client.Bucket(bucketName).Object(objectName)
 	attrs, err := o.Attrs(ctx)
