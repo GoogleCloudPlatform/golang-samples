@@ -16,7 +16,9 @@ package main
 
 import (
 	"context"
+	"log"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -47,7 +49,13 @@ func TestHandler(t *testing.T) {
 		shutdown := setupCounter(ctx)
 		defer shutdown(ctx)
 
-		req := httptest.NewRequest("GET", "http://localhost:8080", nil)
+		port := os.Getenv("PORT")
+		if port == "" {
+			port = "8080"
+			log.Printf("defaulting to port %s", port)
+		}
+
+		req := httptest.NewRequest("GET", "http://localhost:"+port, nil)
 		rr := httptest.NewRecorder()
 		handler(rr, req)
 		if rr.Body.String() != test.expected {
