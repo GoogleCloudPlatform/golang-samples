@@ -121,6 +121,9 @@ var allowList = []string{
 
 	// document ai sample pdfs
 	"documentai/**/*.pdf",
+
+	// Speech-to-Text audio/video files
+	"speech/resources/commercial_mono.wav",
 }
 
 // Check whether accidental binary files have been checked in.
