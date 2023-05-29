@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/dlp/apiv2/dlppb"
 )
 
-// RedactImageFileAllText redacts all detected text in an image
+// redactImageFileAllText redacts all detected text in an image
 func redactImageFileAllText(w io.Writer, projectID, inputPath, outputPath string) error {
 	// projectId := "my-project-id"
 	// inputPath := "testdata/image.jpg"
