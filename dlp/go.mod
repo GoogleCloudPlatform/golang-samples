@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/bigquery v1.51.2
 	cloud.google.com/go/datastore v1.11.0
 	cloud.google.com/go/dlp v1.9.1
+	cloud.google.com/go/kms v1.10.1
 	cloud.google.com/go/pubsub v1.30.1
 	cloud.google.com/go/storage v1.30.1
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230522201558-cba0742a460f

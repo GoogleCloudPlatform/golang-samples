@@ -16,6 +16,7 @@ cloud.google.com/go/dlp v1.9.1/go.mod h1:0s1WRbyeCMr6g4mhhTpUr6hDzSKVjzmclkLUpPf
 cloud.google.com/go/iam v0.13.0 h1:+CmB+K0J/33d0zSQ9SlFWUeCCEn5XJA0ZMZ3pHE9u8k=
 cloud.google.com/go/iam v0.13.0/go.mod h1:ljOg+rcNfzZ5d6f1nAUJ8ZIxOaZUVoS14bKCtaLZ/D0=
 cloud.google.com/go/kms v1.10.1 h1:7hm1bRqGCA1GBRQUrp831TwJ9TWhP+tvLuP497CQS2g=
+cloud.google.com/go/kms v1.10.1/go.mod h1:rIWk/TryCkR59GMC3YtHtXeLzd634lBbKenvyySAyYI=
 cloud.google.com/go/longrunning v0.4.1 h1:v+yFJOfKC3yZdY6ZUI933pIYdhyhV8S3NpWrXWmg7jM=
 cloud.google.com/go/pubsub v1.30.1 h1:RdzTlwhswvROjPIoTfnSJ9tEp0LY2S5ATX90anOw7E8=
 cloud.google.com/go/pubsub v1.30.1/go.mod h1:QRi3+y7wp7mPD6XM/TfHhxBxzfFhfphIdP78sUbT52A=
