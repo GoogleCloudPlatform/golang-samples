@@ -34,13 +34,13 @@ func createWithAdditionalDisk(w io.Writer, projectID, zone, instanceName string)
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstancesRESTClient: %v", err)
+		return fmt.Errorf("NewInstancesRESTClient: %w", err)
 	}
 	defer instancesClient.Close()
 
 	imagesClient, err := compute.NewImagesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewImagesRESTClient: %v", err)
+		return fmt.Errorf("NewImagesRESTClient: %w", err)
 	}
 	defer imagesClient.Close()
 
@@ -51,7 +51,7 @@ func createWithAdditionalDisk(w io.Writer, projectID, zone, instanceName string)
 	}
 	newestDebian, err := imagesClient.GetFromFamily(ctx, newestDebianReq)
 	if err != nil {
-		return fmt.Errorf("unable to get image from family: %v", err)
+		return fmt.Errorf("unable to get image from family: %w", err)
 	}
 
 	req := &computepb.InsertInstanceRequest{
@@ -91,11 +91,11 @@ func createWithAdditionalDisk(w io.Writer, projectID, zone, instanceName string)
 
 	op, err := instancesClient.Insert(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to create instance: %v", err)
+		return fmt.Errorf("unable to create instance: %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Instance created\n")

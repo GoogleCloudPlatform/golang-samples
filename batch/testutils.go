@@ -27,7 +27,7 @@ func jobSucceeded(projectID, region, jobName string) (bool, error) {
 	ctx := context.Background()
 	batchClient, err := batch.NewClient(ctx)
 	if err != nil {
-		return false, fmt.Errorf("NewClient: %v", err)
+		return false, fmt.Errorf("NewClient: %w", err)
 	}
 	defer batchClient.Close()
 
@@ -39,7 +39,7 @@ func jobSucceeded(projectID, region, jobName string) (bool, error) {
 		}
 		response, err := batchClient.GetJob(ctx, req)
 		if err != nil {
-			return false, fmt.Errorf("unable to get job: %v", err)
+			return false, fmt.Errorf("unable to get job: %w", err)
 		}
 		if response.GetStatus().State == batchpb.JobStatus_SUCCEEDED {
 			return true, nil

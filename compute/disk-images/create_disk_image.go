@@ -45,12 +45,12 @@ func createImageFromDisk(
 	ctx := context.Background()
 	disksClient, err := compute.NewDisksRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewDisksRESTClient: %v", err)
+		return fmt.Errorf("NewDisksRESTClient: %w", err)
 	}
 	defer disksClient.Close()
 	imagesClient, err := compute.NewImagesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewImagesRESTClient: %v", err)
+		return fmt.Errorf("NewImagesRESTClient: %w", err)
 	}
 	defer imagesClient.Close()
 
@@ -63,7 +63,7 @@ func createImageFromDisk(
 
 	disk, err := disksClient.Get(ctx, source_req)
 	if err != nil {
-		return fmt.Errorf("unable to get source disk: %v", err)
+		return fmt.Errorf("unable to get source disk: %w", err)
 	}
 
 	// Create the image
@@ -80,7 +80,7 @@ func createImageFromDisk(
 	op, err := imagesClient.Insert(ctx, &req)
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Disk image %s created\n", imageName)

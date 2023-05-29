@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_dml_update_returning]
+// [START spanner_update_dml_returning]
 
 import (
 	"context"
@@ -68,4 +68,4 @@ func updateUsingDMLReturning(w io.Writer, db string) error {
 	return err
 }
 
-// [END spanner_dml_update_returning]
+// [END spanner_update_dml_returning]

@@ -33,7 +33,7 @@ func listJobs(w io.Writer, projectID, region string) error {
 	ctx := context.Background()
 	batchClient, err := batch.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer batchClient.Close()
 
@@ -50,7 +50,7 @@ func listJobs(w io.Writer, projectID, region string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("unable to list jobs: %v", err)
+			return fmt.Errorf("unable to list jobs: %w", err)
 		}
 		jobs = append(jobs, job)
 	}

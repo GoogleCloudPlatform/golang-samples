@@ -30,7 +30,7 @@ func deidentifyDataset(w io.Writer, projectID, location, sourceDatasetID, destin
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	datasetsService := healthcareService.Projects.Locations.Datasets
@@ -53,7 +53,7 @@ func deidentifyDataset(w io.Writer, projectID, location, sourceDatasetID, destin
 	sourceName := fmt.Sprintf("%s/datasets/%s", parent, sourceDatasetID)
 	resp, err := datasetsService.Deidentify(sourceName, req).Do()
 	if err != nil {
-		return fmt.Errorf("Deidentify: %v", err)
+		return fmt.Errorf("Deidentify: %w", err)
 	}
 
 	// Wait for the deidentification operation to finish.
@@ -61,7 +61,7 @@ func deidentifyDataset(w io.Writer, projectID, location, sourceDatasetID, destin
 	for {
 		op, err := operationService.Get(resp.Name).Do()
 		if err != nil {
-			return fmt.Errorf("operationService.Get: %v", err)
+			return fmt.Errorf("operationService.Get: %w", err)
 		}
 		if !op.Done {
 			time.Sleep(1 * time.Second)

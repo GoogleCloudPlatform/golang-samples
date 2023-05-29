@@ -31,12 +31,12 @@ func createHL7V2Message(w io.Writer, projectID, location, datasetID, hl7V2StoreI
 
 	hl7v2message, err := ioutil.ReadFile(messageFile)
 	if err != nil {
-		return fmt.Errorf("ReadFile: %v", err)
+		return fmt.Errorf("ReadFile: %w", err)
 	}
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	messagesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores.Messages
@@ -49,7 +49,7 @@ func createHL7V2Message(w io.Writer, projectID, location, datasetID, hl7V2StoreI
 	parent := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/hl7V2Stores/%s", projectID, location, datasetID, hl7V2StoreID)
 	resp, err := messagesService.Create(parent, req).Do()
 	if err != nil {
-		return fmt.Errorf("Create: %v", err)
+		return fmt.Errorf("Create: %w", err)
 	}
 
 	fmt.Fprintf(w, "Created HL7V2 message: %q\n", resp.Name)

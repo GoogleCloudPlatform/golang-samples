@@ -33,7 +33,7 @@ func streamFileUpload(w io.Writer, bucket, object string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -48,11 +48,11 @@ func streamFileUpload(w io.Writer, bucket, object string) error {
 	wc.ChunkSize = 0 // note retries are not supported for chunk size 0.
 
 	if _, err = io.Copy(wc, buf); err != nil {
-		return fmt.Errorf("io.Copy: %v", err)
+		return fmt.Errorf("io.Copy: %w", err)
 	}
 	// Data can continue to be added to the file until the writer is closed.
 	if err := wc.Close(); err != nil {
-		return fmt.Errorf("Writer.Close: %v", err)
+		return fmt.Errorf("Writer.Close: %w", err)
 	}
 	fmt.Fprintf(w, "%v uploaded to %v.\n", object, bucket)
 

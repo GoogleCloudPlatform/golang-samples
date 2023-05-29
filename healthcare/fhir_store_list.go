@@ -29,7 +29,7 @@ func listFHIRStores(w io.Writer, projectID, location, datasetID string) error {
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	storesService := healthcareService.Projects.Locations.Datasets.FhirStores
@@ -38,7 +38,7 @@ func listFHIRStores(w io.Writer, projectID, location, datasetID string) error {
 
 	resp, err := storesService.List(parent).Do()
 	if err != nil {
-		return fmt.Errorf("List: %v", err)
+		return fmt.Errorf("List: %w", err)
 	}
 
 	fmt.Fprintln(w, "FHIR stores:")

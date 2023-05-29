@@ -126,3 +126,20 @@ Next, the following command will deploy the application to your Google Cloud pro
 ```bash
 gcloud app deploy app.flexible.yaml
 ```
+
+## Deploy to Cloud Functions
+
+To deploy the service to [Cloud Functions](https://cloud.google.com/functions/docs) run the following command:
+
+```sh
+gcloud functions deploy votes --gen2 --runtime go120 --trigger-http \
+  --allow-unauthenticated \
+  --entry-point Votes \
+  --region <INSTANCE_REGION> \
+  --set-env-vars INSTANCE_CONNECTION_NAME=<PROJECT_ID>:<INSTANCE_REGION>:<INSTANCE_NAME> \
+  --set-env-vars DB_USER=$DB_USER \
+  --set-env-vars DB_PASS=$DB_PASS \
+  --set-env-vars DB_NAME=$DB_NAME
+```
+
+Take note of the URL output at the end of the deployment process to view your function!

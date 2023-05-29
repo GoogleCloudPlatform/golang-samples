@@ -34,12 +34,12 @@ func createJobWithStaticOverlay(w io.Writer, projectID string, location string, 
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// inputURI := "gs://my-bucket/my-video-file"
-	// overlayImageURI := "gs://my-bucket/my-overlay-image-file" - Must be a JPEG
+	// overlayImageURI := "gs://my-bucket/my-overlay-image-file"
 	// outputURI := "gs://my-bucket/my-output-folder/"
 	ctx := context.Background()
 	client, err := transcoder.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -128,7 +128,7 @@ func createJobWithStaticOverlay(w io.Writer, projectID string, location string, 
 	// You can query for the job state; see getJob() in get_job.go.
 	response, err := client.CreateJob(ctx, req)
 	if err != nil {
-		return fmt.Errorf("createJobWithStaticOverlay: %v", err)
+		return fmt.Errorf("createJobWithStaticOverlay: %w", err)
 	}
 
 	fmt.Fprintf(w, "Job: %v", response.GetName())

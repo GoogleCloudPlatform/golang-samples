@@ -29,7 +29,7 @@ func importDICOMInstance(w io.Writer, projectID, location, datasetID, dicomStore
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	storesService := healthcareService.Projects.Locations.Datasets.DicomStores
@@ -43,7 +43,7 @@ func importDICOMInstance(w io.Writer, projectID, location, datasetID, dicomStore
 
 	lro, err := storesService.Import(name, req).Do()
 	if err != nil {
-		return fmt.Errorf("Import: %v", err)
+		return fmt.Errorf("Import: %w", err)
 	}
 
 	fmt.Fprintf(w, "Import to DICOM store started. Operation: %q\n", lro.Name)

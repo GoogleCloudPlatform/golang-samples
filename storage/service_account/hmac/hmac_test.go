@@ -179,7 +179,7 @@ func deleteAllKeys(projectID string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("ListHMACKeys: %v", err)
+			return fmt.Errorf("ListHMACKeys: %w", err)
 		}
 		deleteTestKey(key)
 	}
