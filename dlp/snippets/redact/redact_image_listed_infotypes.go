@@ -38,7 +38,6 @@ func redactImageFileListedInfoTypes(w io.Writer, projectID, inputPath, outputPat
 	// call the Close method to cleanup its resources.
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		fmt.Fprintf(w, "dlp.NewClient: %v", err)
 		return err
 	}
 
@@ -48,25 +47,24 @@ func redactImageFileListedInfoTypes(w io.Writer, projectID, inputPath, outputPat
 	// read the image file
 	fileBytes, err := ioutil.ReadFile(inputPath)
 	if err != nil {
-		fmt.Fprintf(w, "ioutil.ReadFile: %v", err)
 		return err
 	}
 
 	// Specify the content to be redacted.
-	var byteItem = &dlppb.ByteContentItem{
+	byteItem := &dlppb.ByteContentItem{
 		Type: dlppb.ByteContentItem_IMAGE_JPEG,
 		Data: fileBytes,
 	}
 
 	// Specify the types of info necessary to redact.
 	// See https://cloud.google.com/dlp/docs/infotypes-reference for complete list of info types
-	var infoTypes = []*dlppb.InfoType{
+	infoTypes := []*dlppb.InfoType{
 		{Name: "US_SOCIAL_SECURITY_NUMBER"},
 		{Name: "EMAIL_ADDRESS"},
 		{Name: "PHONE_NUMBER"},
 	}
 
-	var inspectConfig = &dlppb.InspectConfig{
+	inspectConfig := &dlppb.InspectConfig{
 		InfoTypes: infoTypes,
 	}
 
@@ -87,13 +85,11 @@ func redactImageFileListedInfoTypes(w io.Writer, projectID, inputPath, outputPat
 	// Send the request.
 	resp, err := client.RedactImage(ctx, req)
 	if err != nil {
-		fmt.Fprintf(w, "RedactImage: %v", err)
 		return err
 	}
 
 	// Write the output file.
 	if err := ioutil.WriteFile(outputPath, resp.GetRedactedImage(), 0644); err != nil {
-		fmt.Fprintf(w, "ioutil.WriteFile: %v", err)
 		return err
 	}
 	fmt.Fprintf(w, "Wrote output to %s\n", outputPath)
