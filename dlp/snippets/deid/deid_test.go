@@ -17,11 +17,18 @@ package deid
 
 import (
 	"bytes"
+	"context"
+	"encoding/base64"
+	"fmt"
+	"log"
 	"strings"
 
 	"testing"
 
+	kms "cloud.google.com/go/kms/apiv1"
+	"cloud.google.com/go/kms/apiv1/kmspb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/gofrs/uuid"
 )
 
 func TestMask(t *testing.T) {
