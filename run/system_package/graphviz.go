@@ -111,7 +111,7 @@ func createDiagram(w io.Writer, r io.Reader) error {
 	cmd.Stderr = stderr
 
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("exec(%s) failed (%v): %s", cmd.Path, err, stderr.String())
+		return fmt.Errorf("exec(%s) failed (%w): %s", cmd.Path, err, stderr.String())
 	}
 
 	return nil

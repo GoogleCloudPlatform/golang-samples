@@ -33,7 +33,7 @@ func downloadUsingRequesterPays(w io.Writer, bucket, object, billingProjectID st
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -43,7 +43,7 @@ func downloadUsingRequesterPays(w io.Writer, bucket, object, billingProjectID st
 	// Open local file.
 	f, err := os.OpenFile("notes.txt", os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
-		return fmt.Errorf("os.OpenFile: %v", err)
+		return fmt.Errorf("os.OpenFile: %w", err)
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
@@ -51,13 +51,13 @@ func downloadUsingRequesterPays(w io.Writer, bucket, object, billingProjectID st
 
 	rc, err := src.NewReader(ctx)
 	if err != nil {
-		return fmt.Errorf("Object(%q).NewReader: %v", object, err)
+		return fmt.Errorf("Object(%q).NewReader: %w", object, err)
 	}
 	if _, err := io.Copy(f, rc); err != nil {
-		return fmt.Errorf("io.Copy: %v", err)
+		return fmt.Errorf("io.Copy: %w", err)
 	}
 	if err := rc.Close(); err != nil {
-		return fmt.Errorf("Reader.Close: %v", err)
+		return fmt.Errorf("Reader.Close: %w", err)
 	}
 	fmt.Fprintf(w, "Downloaded using %v as billing project.\n", billingProjectID)
 	return nil

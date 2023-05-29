@@ -31,7 +31,7 @@ func writeConditionally(w io.Writer, projectID, instanceID string, tableName str
 	ctx := context.Background()
 	client, err := bigtable.NewClient(ctx, projectID, instanceID)
 	if err != nil {
-		return fmt.Errorf("bigtable.NewAdminClient: %v", err)
+		return fmt.Errorf("bigtable.NewAdminClient: %w", err)
 	}
 	defer client.Close()
 	tbl := client.Open(tableName)
@@ -49,7 +49,7 @@ func writeConditionally(w io.Writer, projectID, instanceID string, tableName str
 
 	rowKey := "phone#4c410523#20190501"
 	if err := tbl.Apply(ctx, rowKey, conditionalMutation); err != nil {
-		return fmt.Errorf("Apply: %v", err)
+		return fmt.Errorf("Apply: %w", err)
 	}
 
 	fmt.Fprintln(w, "Successfully updated row's os_name")

@@ -38,12 +38,12 @@ func pgWriteWithTransactionUsingDML(w io.Writer, db string) error {
 			key := spanner.Key{albumID, singerID}
 			row, err := txn.ReadRow(ctx, "Albums", key, []string{"MarketingBudget"})
 			if err != nil {
-				return 0, fmt.Errorf("error reading marketing budget for album_id=%v,singer_id=%v: %v",
+				return 0, fmt.Errorf("error reading marketing budget for album_id=%v,singer_id=%v: %w",
 					albumID, singerID, err)
 			}
 			var budget int64
 			if err := row.Column(0, &budget); err != nil {
-				return 0, fmt.Errorf("error decoding marketing budget for album_id=%v,singer_id=%v: %v",
+				return 0, fmt.Errorf("error decoding marketing budget for album_id=%v,singer_id=%v: %w",
 					albumID, singerID, err)
 			}
 			return budget, nil

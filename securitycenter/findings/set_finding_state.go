@@ -34,13 +34,13 @@ func setFindingState(w io.Writer, findingName string) error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %v", err)
+		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 	// Use now as the eventTime for the security finding.
 	now, err := ptypes.TimestampProto(time.Now())
 	if err != nil {
-		return fmt.Errorf("TimestampProto: %v", err)
+		return fmt.Errorf("TimestampProto: %w", err)
 	}
 
 	req := &securitycenterpb.SetFindingStateRequest{
@@ -52,7 +52,7 @@ func setFindingState(w io.Writer, findingName string) error {
 
 	finding, err := client.SetFindingState(ctx, req)
 	if err != nil {
-		return fmt.Errorf("SetFindingState: %v", err)
+		return fmt.Errorf("SetFindingState: %w", err)
 	}
 
 	fmt.Fprintf(w, "Finding updated: %s\n", finding.Name)

@@ -29,7 +29,7 @@ func exportDICOMInstance(w io.Writer, projectID, location, datasetID, dicomStore
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	storesService := healthcareService.Projects.Locations.Datasets.DicomStores
@@ -43,7 +43,7 @@ func exportDICOMInstance(w io.Writer, projectID, location, datasetID, dicomStore
 
 	lro, err := storesService.Export(name, req).Do()
 	if err != nil {
-		return fmt.Errorf("Export: %v", err)
+		return fmt.Errorf("Export: %w", err)
 	}
 
 	fmt.Fprintf(w, "Export to DICOM store started. Operation: %q\n", lro.Name)

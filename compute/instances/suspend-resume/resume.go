@@ -34,7 +34,7 @@ func resumeInstance(w io.Writer, projectID, zone, instanceName string) error {
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstancesRESTClient: %v", err)
+		return fmt.Errorf("NewInstancesRESTClient: %w", err)
 	}
 	defer instancesClient.Close()
 
@@ -46,7 +46,7 @@ func resumeInstance(w io.Writer, projectID, zone, instanceName string) error {
 
 	instance, err := instancesClient.Get(ctx, getInstanceReq)
 	if err != nil {
-		return fmt.Errorf("unable to get instance: %v", err)
+		return fmt.Errorf("unable to get instance: %w", err)
 	}
 
 	if instance.GetStatus() != "SUSPENDED" {
@@ -65,11 +65,11 @@ func resumeInstance(w io.Writer, projectID, zone, instanceName string) error {
 
 	op, err := instancesClient.Resume(ctx, resumeInstanceReq)
 	if err != nil {
-		return fmt.Errorf("unable to resume instance: %v", err)
+		return fmt.Errorf("unable to resume instance: %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Instance resumed\n")

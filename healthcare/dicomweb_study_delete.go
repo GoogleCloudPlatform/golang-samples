@@ -29,7 +29,7 @@ func dicomWebDeleteStudy(w io.Writer, projectID, location, datasetID, dicomStore
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	storesService := healthcareService.Projects.Locations.Datasets.DicomStores.Studies
@@ -37,7 +37,7 @@ func dicomWebDeleteStudy(w io.Writer, projectID, location, datasetID, dicomStore
 	parent := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/dicomStores/%s", projectID, location, datasetID, dicomStoreID)
 
 	if _, err := storesService.Delete(parent, dicomWebPath).Do(); err != nil {
-		return fmt.Errorf("Delete: %v", err)
+		return fmt.Errorf("Delete: %w", err)
 	}
 
 	fmt.Fprintf(w, "Deleted %q\n", dicomWebPath)

@@ -34,7 +34,7 @@ func getSecretVersion(w io.Writer, name string) error {
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create secretmanager client: %v", err)
+		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
 	defer client.Close()
 
@@ -46,7 +46,7 @@ func getSecretVersion(w io.Writer, name string) error {
 	// Call the API.
 	result, err := client.GetSecretVersion(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to get secret version: %v", err)
+		return fmt.Errorf("failed to get secret version: %w", err)
 	}
 
 	fmt.Fprintf(w, "Found secret version %s with state %s\n",

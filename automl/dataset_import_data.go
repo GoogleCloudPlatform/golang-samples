@@ -35,7 +35,7 @@ func importDataIntoDataset(w io.Writer, projectID string, location string, datas
 	ctx := context.Background()
 	client, err := automl.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -52,12 +52,12 @@ func importDataIntoDataset(w io.Writer, projectID string, location string, datas
 
 	op, err := client.ImportData(ctx, req)
 	if err != nil {
-		return fmt.Errorf("ImportData: %v", err)
+		return fmt.Errorf("ImportData: %w", err)
 	}
 	fmt.Fprintf(w, "Processing operation name: %q\n", op.Name())
 
 	if err := op.Wait(ctx); err != nil {
-		return fmt.Errorf("Wait: %v", err)
+		return fmt.Errorf("Wait: %w", err)
 	}
 
 	fmt.Fprintf(w, "Data imported.\n")

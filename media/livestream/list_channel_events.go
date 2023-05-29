@@ -34,7 +34,7 @@ func listChannelEvents(w io.Writer, projectID, location, channelID string) error
 	ctx := context.Background()
 	client, err := livestream.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -51,7 +51,7 @@ func listChannelEvents(w io.Writer, projectID, location, channelID string) error
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("ListEvents: %v", err)
+			return fmt.Errorf("ListEvents: %w", err)
 		}
 		fmt.Fprintln(w, response.GetName())
 	}

@@ -36,7 +36,7 @@ func listenMultiple(ctx context.Context, w io.Writer, projectID, collection stri
 
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("firestore.NewClient: %v", err)
+		return fmt.Errorf("firestore.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -48,7 +48,7 @@ func listenMultiple(ctx context.Context, w io.Writer, projectID, collection stri
 			return nil
 		}
 		if err != nil {
-			return fmt.Errorf("Snapshots.Next: %v", err)
+			return fmt.Errorf("Snapshots.Next: %w", err)
 		}
 		if snap != nil {
 			for {
@@ -57,7 +57,7 @@ func listenMultiple(ctx context.Context, w io.Writer, projectID, collection stri
 					break
 				}
 				if err != nil {
-					return fmt.Errorf("Documents.Next: %v", err)
+					return fmt.Errorf("Documents.Next: %w", err)
 				}
 				fmt.Fprintf(w, "Current cities in California: %v\n", doc.Ref.ID)
 			}

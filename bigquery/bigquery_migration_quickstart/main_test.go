@@ -71,11 +71,11 @@ func setupStorage(projectID string) (string, func(), error) {
 	bucket, err := bqtestutil.UniqueBucketName("golang-migration", "")
 	if err != nil {
 		storageClient.Close()
-		return "", nil, fmt.Errorf("couldn't construct unique bucket name: %v", err)
+		return "", nil, fmt.Errorf("couldn't construct unique bucket name: %w", err)
 	}
 	if err := storageClient.Bucket(bucket).Create(ctx, projectID, nil); err != nil {
 		storageClient.Close()
-		return "", nil, fmt.Errorf("error creating output bucket: %v", err)
+		return "", nil, fmt.Errorf("error creating output bucket: %w", err)
 	}
 	return fmt.Sprintf("gs://%s/", bucket), func() {
 		storageClient.Bucket(bucket).Delete(ctx)

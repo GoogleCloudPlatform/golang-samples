@@ -857,7 +857,7 @@ func publishMsgs(ctx context.Context, t *pubsub.Topic, numMsgs int) error {
 	// Check that all messages were published.
 	for _, r := range results {
 		if _, err := r.Get(ctx); err != nil {
-			return fmt.Errorf("Get publish result: %v", err)
+			return fmt.Errorf("Get publish result: %w", err)
 		}
 	}
 	return nil
@@ -868,12 +868,12 @@ func getOrCreateTopic(ctx context.Context, client *pubsub.Client, topicID string
 	topic := client.Topic(topicID)
 	ok, err := topic.Exists(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to check if topic exists: %v", err)
+		return nil, fmt.Errorf("failed to check if topic exists: %w", err)
 	}
 	if !ok {
 		topic, err = client.CreateTopic(ctx, topicID)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create topic (%q): %v", topicID, err)
+			return nil, fmt.Errorf("failed to create topic (%q): %w", topicID, err)
 		}
 	}
 	return topic, nil
@@ -884,12 +884,12 @@ func getOrCreateSub(ctx context.Context, client *pubsub.Client, subID string, cf
 	sub := client.Subscription(subID)
 	ok, err := sub.Exists(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to check if subscription exists: %v", err)
+		return nil, fmt.Errorf("failed to check if subscription exists: %w", err)
 	}
 	if !ok {
 		sub, err = client.CreateSubscription(ctx, subID, *cfg)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create subscription (%q): %v", topicID, err)
+			return nil, fmt.Errorf("failed to create subscription (%q): %w", topicID, err)
 		}
 	}
 	return sub, nil
@@ -900,11 +900,11 @@ func createBigQueryTable(projectID, datasetID, tableID string) error {
 
 	c, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("error instantiating bigquery client: %v", err)
+		return fmt.Errorf("error instantiating bigquery client: %w", err)
 	}
 	dataset := c.Dataset(datasetID)
 	if err = dataset.Create(ctx, &bigquery.DatasetMetadata{Location: "US"}); err != nil {
-		return fmt.Errorf("error creating dataset: %v", err)
+		return fmt.Errorf("error creating dataset: %w", err)
 	}
 
 	table := dataset.Table(tableID)
@@ -916,7 +916,7 @@ func createBigQueryTable(projectID, datasetID, tableID string) error {
 		{Name: "publish_time", Type: bigquery.TimestampFieldType, Required: true},
 	}
 	if err := table.Create(ctx, &bigquery.TableMetadata{Schema: schema}); err != nil {
-		return fmt.Errorf("error creating table: %v", err)
+		return fmt.Errorf("error creating table: %w", err)
 	}
 	return nil
 }
@@ -926,11 +926,11 @@ func deleteBigQueryDataset(projectID, datasetID string) error {
 
 	c, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("error instantiating bigquery client: %v", err)
+		return fmt.Errorf("error instantiating bigquery client: %w", err)
 	}
 	dataset := c.Dataset(datasetID)
 	if err = dataset.DeleteWithContents(ctx); err != nil {
-		return fmt.Errorf("error deleting dataset: %v", err)
+		return fmt.Errorf("error deleting dataset: %w", err)
 	}
 	return nil
 }

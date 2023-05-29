@@ -50,7 +50,7 @@ type FirestoreValue struct {
 func HelloFirestore(ctx context.Context, e FirestoreEvent) error {
 	meta, err := metadata.FromContext(ctx)
 	if err != nil {
-		return fmt.Errorf("metadata.FromContext: %v", err)
+		return fmt.Errorf("metadata.FromContext: %w", err)
 	}
 	log.Printf("Function triggered by change to: %v", meta.Resource)
 	log.Printf("Old value: %+v", e.OldValue)

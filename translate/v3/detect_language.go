@@ -33,7 +33,7 @@ func detectLanguage(w io.Writer, projectID string, text string) error {
 	ctx := context.Background()
 	client, err := translate.NewTranslationClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewTranslationClient: %v", err)
+		return fmt.Errorf("NewTranslationClient: %w", err)
 	}
 	defer client.Close()
 
@@ -47,7 +47,7 @@ func detectLanguage(w io.Writer, projectID string, text string) error {
 
 	resp, err := client.DetectLanguage(ctx, req)
 	if err != nil {
-		return fmt.Errorf("DetectLanguage: %v", err)
+		return fmt.Errorf("DetectLanguage: %w", err)
 	}
 
 	// Display list of detected languages sorted by detection confidence.

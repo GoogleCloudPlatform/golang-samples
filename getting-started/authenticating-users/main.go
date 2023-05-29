@@ -146,12 +146,12 @@ func validateAssertion(assertion string, certs map[string]string, aud string) (e
 func audience() (string, error) {
 	projectNumber, err := metadata.NumericProjectID()
 	if err != nil {
-		return "", fmt.Errorf("metadata.NumericProjectID: %v", err)
+		return "", fmt.Errorf("metadata.NumericProjectID: %w", err)
 	}
 
 	projectID, err := metadata.ProjectID()
 	if err != nil {
-		return "", fmt.Errorf("metadata.ProjectID: %v", err)
+		return "", fmt.Errorf("metadata.ProjectID: %w", err)
 	}
 
 	return "/projects/" + projectNumber + "/apps/" + projectID, nil
@@ -169,13 +169,13 @@ func certificates() (map[string]string, error) {
 	}
 	resp, err := client.Get(url)
 	if err != nil {
-		return nil, fmt.Errorf("Get: %v", err)
+		return nil, fmt.Errorf("Get: %w", err)
 	}
 
 	var certs map[string]string
 	dec := json.NewDecoder(resp.Body)
 	if err := dec.Decode(&certs); err != nil {
-		return nil, fmt.Errorf("Decode: %v", err)
+		return nil, fmt.Errorf("Decode: %w", err)
 	}
 
 	return certs, nil

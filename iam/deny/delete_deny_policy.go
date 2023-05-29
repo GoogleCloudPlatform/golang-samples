@@ -33,7 +33,7 @@ func deleteDenyPolicy(w io.Writer, projectID, policyID string) error {
 	ctx := context.Background()
 	policiesClient, err := iam.NewPoliciesClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewPoliciesClient: %v", err)
+		return fmt.Errorf("NewPoliciesClient: %w", err)
 	}
 	defer policiesClient.Close()
 
@@ -59,12 +59,12 @@ func deleteDenyPolicy(w io.Writer, projectID, policyID string) error {
 	}
 	op, err := policiesClient.DeletePolicy(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to delete policy: %v", err)
+		return fmt.Errorf("unable to delete policy: %w", err)
 	}
 
 	policy, err := op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Policy %s deleted\n", policy.GetName())
