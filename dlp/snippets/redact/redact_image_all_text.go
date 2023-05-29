@@ -36,7 +36,6 @@ func redactImageFileAllText(w io.Writer, projectID, inputPath, outputPath string
 	// call the Close method to cleanup its resources.
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		fmt.Fprintf(w, "dlp.NewClient: %v", err)
 		return err
 	}
 
@@ -46,18 +45,17 @@ func redactImageFileAllText(w io.Writer, projectID, inputPath, outputPath string
 	// read the image file
 	fileBytes, err := ioutil.ReadFile(inputPath)
 	if err != nil {
-		fmt.Fprintf(w, "ioutil.ReadFile: %v", err)
 		return err
 	}
 
 	// Specify the content to be redacted.
-	var byteItem = &dlppb.ByteContentItem{
+	byteItem := &dlppb.ByteContentItem{
 		Type: dlppb.ByteContentItem_IMAGE_JPEG,
 		Data: fileBytes,
 	}
 
 	// Enable redaction of all text.
-	var imageRedactConfig = &dlppb.RedactImageRequest_ImageRedactionConfig{
+	imageRedactConfig := &dlppb.RedactImageRequest_ImageRedactionConfig{
 		Target: &dlppb.RedactImageRequest_ImageRedactionConfig_RedactAllText{
 			RedactAllText: true,
 		},
@@ -76,13 +74,11 @@ func redactImageFileAllText(w io.Writer, projectID, inputPath, outputPath string
 	// Send the request.
 	resp, err := client.RedactImage(ctx, req)
 	if err != nil {
-		fmt.Fprintf(w, "RedactImage: %v", err)
 		return err
 	}
 
 	// Write the output file.
 	if err := ioutil.WriteFile(outputPath, resp.GetRedactedImage(), 0644); err != nil {
-		fmt.Fprintf(w, "ioutil.WriteFile: %v", err)
 		return err
 	}
 	fmt.Fprintf(w, "Wrote output to %s", outputPath)
