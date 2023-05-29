@@ -68,8 +68,8 @@ func TestRedactImageFileAllText(t *testing.T) {
 	inputPath := "testdata/image.jpg"
 	outputPath := "testdata/test-output-sensitive-data-image-redacted.jpeg"
 
-	buf := new(bytes.Buffer)
-	if err := redactImageFileAllText(buf, tc.ProjectID, inputPath, outputPath); err != nil {
+	var buf bytes.Buffer
+	if err := redactImageFileAllText(&buf, tc.ProjectID, inputPath, outputPath); err != nil {
 		t.Fatal(err)
 	}
 	got := buf.String()
