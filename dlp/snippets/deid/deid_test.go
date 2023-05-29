@@ -180,6 +180,7 @@ func TestDeidentifyExceptionList(t *testing.T) {
 	if got := buf.String(); got != want {
 		t.Errorf("deidentifyExceptionList(%q) = %q, want %q", input, got, want)
 	}
+
 }
 
 func TestDeIdentifyWithReplacement(t *testing.T) {
@@ -384,5 +385,6 @@ func destroyKey(t *testing.T, projectID, key string) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
