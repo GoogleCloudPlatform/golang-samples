@@ -365,3 +365,24 @@ func createKey(t *testing.T, projectID, keyFileName string) (string, string, str
 	wrappedKeyString := base64.StdEncoding.EncodeToString(wrappedKey)
 	return result.Name, wrappedKeyString, response.Name, nil
 }
+
+func destroyKey(t *testing.T, projectID, key string) error {
+	t.Helper()
+
+	ctx := context.Background()
+	client, err := kms.NewKeyManagementClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	req := &kmspb.DestroyCryptoKeyVersionRequest{
+		Name: key,
+	}
+
+	_, err = client.DestroyCryptoKeyVersion(ctx, req)
+	if err != nil {
+		return err
+	}
+	return nil
+}
