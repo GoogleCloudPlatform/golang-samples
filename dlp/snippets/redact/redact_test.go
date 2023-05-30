@@ -62,3 +62,25 @@ func TestRedactImage(t *testing.T) {
 		})
 	}
 }
+
+func TestRedactImageFileColoredInfoTypes(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	inputPath := "testdata/image.jpg"
+	outputPath := "testdata/test-output-image-file-colored-infoTypes-redacted.jpeg"
+
+	var buf bytes.Buffer
+	if err := redactImageFileColoredInfoTypes(&buf, tc.ProjectID, inputPath, outputPath); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+
+	if want := "Wrote output to"; !strings.Contains(got, want) {
+		t.Errorf("RedactImageFileColoredInfoTypes got %q, want %q", got, want)
+	}
+
+	if want := "ioutil.ReadFile: open testdata/image.jpg: The system cannot find the path specified."; strings.Contains(got, want) {
+		t.Errorf("RedactImageFileColoredInfoTypes got %q, want %q", got, want)
+	}
+
+}
