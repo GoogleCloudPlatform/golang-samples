@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/dlp/apiv2/dlppb"
 )
 
-// redactImageFileColoredInfoTypes redacts data from an image with color-coded infoTypes
+// redactImageFileColoredInfoTypes redacts data from an image with color-coded infoTypes.
 func redactImageFileColoredInfoTypes(w io.Writer, projectID, inputPath, outputPath string) error {
 	// projectId := "my-project-id"
 	// inputPath := "testdata/image.jpg"
@@ -56,7 +56,7 @@ func redactImageFileColoredInfoTypes(w io.Writer, projectID, inputPath, outputPa
 	}
 
 	// Define types of info to redact associate each one with a different color.
-	// See https://cloud.google.com/dlp/docs/infotypes-reference for complete list of info types
+	// See https://cloud.google.com/dlp/docs/infotypes-reference for complete list of info types.
 
 	ssnRedactionConfig := &dlppb.RedactImageRequest_ImageRedactionConfig{
 		Target: &dlppb.RedactImageRequest_ImageRedactionConfig_InfoType{
