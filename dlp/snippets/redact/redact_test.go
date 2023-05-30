@@ -68,18 +68,16 @@ func TestRedactImageFileAllInfoTypes(t *testing.T) {
 	inputPath := "testdata/image.jpg"
 	outputPath := "testdata/test-output-image-file-listed-infoTypes-redacted.jpeg"
 
-	t.Run("redactImageFileAllInfoTypes", func(t *testing.T) {
-		t.Parallel()
-		buf := new(bytes.Buffer)
-		if err := redactImageFileAllInfoTypes(buf, tc.ProjectID, inputPath, outputPath); err != nil {
-			t.Errorf("RedactImageFileAllInfoTypes: %v", err)
-		}
-		got := buf.String()
-		if want := "Wrote output to"; !strings.Contains(got, want) {
-			t.Errorf("redactImageFileAllInfoTypes got %q, want %q", got, want)
-		}
-		if want := "ioutil.ReadFile: open testdata/image.jpg: The system cannot find the path specified."; strings.Contains(got, want) {
-			t.Errorf("redactImageFileAllInfoTypes got %q, want %q", got, want)
-		}
-	})
+	var buf bytes.Buffer
+	if err := redactImageFileAllInfoTypes(buf, tc.ProjectID, inputPath, outputPath); err != nil {
+		t.Errorf("RedactImageFileAllInfoTypes: %v", err)
+	}
+	got := buf.String()
+	if want := "Wrote output to"; !strings.Contains(got, want) {
+		t.Errorf("redactImageFileAllInfoTypes got %q, want %q", got, want)
+	}
+	if want := "ioutil.ReadFile: open testdata/image.jpg: The system cannot find the path specified."; strings.Contains(got, want) {
+		t.Errorf("redactImageFileAllInfoTypes got %q, want %q", got, want)
+	}
+
 }

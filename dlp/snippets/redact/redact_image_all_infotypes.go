@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/dlp/apiv2/dlppb"
 )
 
-// redactImageFileAllInfoTypes redact sensitive data from an image using default infoTypes
+// redactImageFileAllInfoTypes redact sensitive data from an image using default infoTypes.
 func redactImageFileAllInfoTypes(w io.Writer, projectID, inputPath, outputPath string) error {
 	// projectId := "my-project-id"
 	// inputPath := "testdata/image.jpg"
@@ -37,14 +37,13 @@ func redactImageFileAllInfoTypes(w io.Writer, projectID, inputPath, outputPath s
 	// call the Close method to cleanup its resources.
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		fmt.Fprintf(w, "dlp.NewClient: %v", err)
 		return err
 	}
 
 	// Closing the client safely cleans up background resources.
 	defer client.Close()
 
-	// read the image file
+	// read the image file.
 	fileBytes, err := ioutil.ReadFile(inputPath)
 	if err != nil {
 		fmt.Fprintf(w, "ioutil.ReadFile: %v", err)
@@ -52,7 +51,7 @@ func redactImageFileAllInfoTypes(w io.Writer, projectID, inputPath, outputPath s
 	}
 
 	// Specify the content to be redacted.
-	var byteItem = &dlppb.ByteContentItem{
+	byteItem := &dlppb.ByteContentItem{
 		Type: dlppb.ByteContentItem_IMAGE_JPEG,
 		Data: fileBytes,
 	}
@@ -73,7 +72,6 @@ func redactImageFileAllInfoTypes(w io.Writer, projectID, inputPath, outputPath s
 
 	// Write the output file.
 	if err := ioutil.WriteFile(outputPath, resp.GetRedactedImage(), 0644); err != nil {
-		fmt.Fprintf(w, "ioutil.WriteFile: %v", err)
 		return err
 	}
 	fmt.Fprintf(w, "Wrote output to %s", outputPath)
