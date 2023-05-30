@@ -118,9 +118,9 @@ func redactImageFileColoredInfoTypes(w io.Writer, projectID, inputPath, outputPa
 	if err := ioutil.WriteFile(outputPath, resp.GetRedactedImage(), 0644); err != nil {
 		return err
 	}
+
 	fmt.Fprintf(w, "Wrote output to %s", outputPath)
 	return nil
-
 }
 
 // [END dlp_redact_image_colored_infotypes]
