@@ -14,7 +14,7 @@
 
 // [START functions_response_streaming]
 
-// Package responsestreaming contains a Function that streams out a large payload in chunks.
+// Package responsestreaming contains a function that streams out a large payload in chunks.
 package responsestreaming
 
 import (
@@ -31,11 +31,11 @@ import (
 )
 
 func init() {
-	functions.HTTP("StreamBigQuery", StreamBigQuery)
+	functions.HTTP("streamBigQuery", streamBigQuery)
 }
 
-// StreamBigQuery retrieves a large payload from BigQuery public dataset and streams its rows.
-func StreamBigQuery(w http.ResponseWriter, r *http.Request) {
+// streamBigQuery retrieves a large payload from BigQuery public dataset and streams its rows.
+func streamBigQuery(w http.ResponseWriter, r *http.Request) {
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	if projectID == "" {
 		fmt.Println("GOOGLE_CLOUD_PROJECT environment variable must be set.")
