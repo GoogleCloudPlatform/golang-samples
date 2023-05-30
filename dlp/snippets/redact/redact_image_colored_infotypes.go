@@ -121,7 +121,6 @@ func redactImageFileColoredInfoTypes(w io.Writer, projectID, inputPath, outputPa
 
 	fmt.Fprintf(w, "Wrote output to %s", outputPath)
 	return nil
-
 }
 
 // [END dlp_redact_image_colored_infotypes]
