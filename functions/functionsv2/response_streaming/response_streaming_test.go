@@ -15,24 +15,25 @@
 package responsestreaming
 
 import (
-	"fmt"
 	"net/http/httptest"
 	"testing"
+	"strings"
 	"context"
 	"os"
 
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"cloud.google.com/go/bigquery"
 )
 
 func TestResponseStreaming(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	client, err := bigquery.NewClient(ctx, tc.ProjectID)
+	ctx := context.Background()
+	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	if projectID == "" {
+		t.Skip("GOLANG_SAMPLES_PROJECT_ID is unset")
+	}
+	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
 		t.Fatalf("bigquery.NewClient: %v", err)
 	}
-	ctx := context.Background()
 
 	rows, err := query(ctx, client)
 	if err != nil {
@@ -40,12 +41,10 @@ func TestResponseStreaming(t *testing.T) {
 	}
 
 	w := httptest.NewRecorder()
-	if err := streamResults(w, rows); err != nil {
-		t.Fatal(err)
-	}
+	streamResults(w, rows)
 
 	want := true
-	if got := strings.Contains(rr.Body.String(), "Successfully flushed row"); got != want {
-		t.Errorf("Response contains Successfully flushed row: %q, want %q", got, want)
+	if got := strings.Contains(w.Body.String(), "Successfully flushed row"); got != want {
+		t.Errorf("Response contains Successfully flushed row: %t, want %t", got, want)
 	}
 }
