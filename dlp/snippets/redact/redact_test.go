@@ -69,8 +69,8 @@ func TestRedactImageFileAllInfoTypes(t *testing.T) {
 	outputPath := "testdata/test-output-image-file-listed-infoTypes-redacted.jpeg"
 
 	var buf bytes.Buffer
-	if err := redactImageFileAllInfoTypes(buf, tc.ProjectID, inputPath, outputPath); err != nil {
-		t.Errorf("RedactImageFileAllInfoTypes: %v", err)
+	if err := redactImageFileAllInfoTypes(&buf, tc.ProjectID, inputPath, outputPath); err != nil {
+		t.Fatal(err)
 	}
 	got := buf.String()
 	if want := "Wrote output to"; !strings.Contains(got, want) {
