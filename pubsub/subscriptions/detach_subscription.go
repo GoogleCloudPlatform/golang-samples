@@ -32,7 +32,7 @@ func detachSubscription(w io.Writer, projectID, subName string) error {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -41,7 +41,7 @@ func detachSubscription(w io.Writer, projectID, subName string) error {
 	// `pubsub.topics.detachSubscription` role on the topic.
 	_, err = client.DetachSubscription(ctx, subName)
 	if err != nil {
-		return fmt.Errorf("detach subscription failed: %v", err)
+		return fmt.Errorf("detach subscription failed: %w", err)
 	}
 
 	fmt.Fprintf(w, "Detached subscription %s", subName)

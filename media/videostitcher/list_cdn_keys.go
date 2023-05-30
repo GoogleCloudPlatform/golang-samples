@@ -33,7 +33,7 @@ func listCDNKeys(w io.Writer, projectID string) error {
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
-		return fmt.Errorf("stitcher.NewVideoStitcherClient: %v", err)
+		return fmt.Errorf("stitcher.NewVideoStitcherClient: %w", err)
 	}
 	defer client.Close()
 
@@ -49,7 +49,7 @@ func listCDNKeys(w io.Writer, projectID string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("it.Next(): %v", err)
+			return fmt.Errorf("it.Next(): %w", err)
 		}
 		fmt.Fprintln(w, response.GetName())
 	}

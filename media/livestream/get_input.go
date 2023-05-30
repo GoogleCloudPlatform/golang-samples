@@ -32,7 +32,7 @@ func getInput(w io.Writer, projectID, location, inputID string) error {
 	ctx := context.Background()
 	client, err := livestream.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -42,7 +42,7 @@ func getInput(w io.Writer, projectID, location, inputID string) error {
 
 	response, err := client.GetInput(ctx, req)
 	if err != nil {
-		return fmt.Errorf("GetInput: %v", err)
+		return fmt.Errorf("GetInput: %w", err)
 	}
 
 	fmt.Fprintf(w, "Input: %v", response.Name)

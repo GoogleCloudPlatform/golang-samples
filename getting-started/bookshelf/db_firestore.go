@@ -46,7 +46,7 @@ func newFirestoreDB(client *firestore.Client) (*firestoreDB, error) {
 		return nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("firestoredb: could not connect: %v", err)
+		return nil, fmt.Errorf("firestoredb: could not connect: %w", err)
 	}
 	return &firestoreDB{
 		client:     client,
@@ -63,7 +63,7 @@ func (db *firestoreDB) Close(context.Context) error {
 func (db *firestoreDB) GetBook(ctx context.Context, id string) (*Book, error) {
 	ds, err := db.client.Collection(db.collection).Doc(id).Get(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("firestoredb: Get: %v", err)
+		return nil, fmt.Errorf("firestoredb: Get: %w", err)
 	}
 	b := &Book{}
 	ds.DataTo(b)
@@ -77,7 +77,7 @@ func (db *firestoreDB) AddBook(ctx context.Context, b *Book) (id string, err err
 	ref := db.client.Collection(db.collection).NewDoc()
 	b.ID = ref.ID
 	if _, err := ref.Create(ctx, b); err != nil {
-		return "", fmt.Errorf("Create: %v", err)
+		return "", fmt.Errorf("Create: %w", err)
 	}
 	return ref.ID, nil
 }
@@ -85,7 +85,7 @@ func (db *firestoreDB) AddBook(ctx context.Context, b *Book) (id string, err err
 // DeleteBook removes a given book by its ID.
 func (db *firestoreDB) DeleteBook(ctx context.Context, id string) error {
 	if _, err := db.client.Collection(db.collection).Doc(id).Delete(ctx); err != nil {
-		return fmt.Errorf("firestore: Delete: %v", err)
+		return fmt.Errorf("firestore: Delete: %w", err)
 	}
 	return nil
 }
@@ -93,7 +93,7 @@ func (db *firestoreDB) DeleteBook(ctx context.Context, id string) error {
 // UpdateBook updates the entry for a given book.
 func (db *firestoreDB) UpdateBook(ctx context.Context, b *Book) error {
 	if _, err := db.client.Collection(db.collection).Doc(b.ID).Set(ctx, b); err != nil {
-		return fmt.Errorf("firestsore: Set: %v", err)
+		return fmt.Errorf("firestsore: Set: %w", err)
 	}
 	return nil
 }
@@ -109,7 +109,7 @@ func (db *firestoreDB) ListBooks(ctx context.Context) ([]*Book, error) {
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("firestoredb: could not list books: %v", err)
+			return nil, fmt.Errorf("firestoredb: could not list books: %w", err)
 		}
 		b := &Book{}
 		doc.DataTo(b)

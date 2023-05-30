@@ -32,7 +32,7 @@ func deleteInstance(w io.Writer, projectID, zone, instanceName string) error {
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstancesRESTClient: %v", err)
+		return fmt.Errorf("NewInstancesRESTClient: %w", err)
 	}
 	defer instancesClient.Close()
 
@@ -44,11 +44,11 @@ func deleteInstance(w io.Writer, projectID, zone, instanceName string) error {
 
 	op, err := instancesClient.Delete(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to delete instance: %v", err)
+		return fmt.Errorf("unable to delete instance: %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Instance deleted\n")

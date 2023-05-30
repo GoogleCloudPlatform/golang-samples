@@ -31,7 +31,7 @@ func removeBucketLabel(w io.Writer, bucketName, labelName string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -42,7 +42,7 @@ func removeBucketLabel(w io.Writer, bucketName, labelName string) error {
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{}
 	bucketAttrsToUpdate.DeleteLabel(labelName)
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
-		return fmt.Errorf("Bucket(%q).Update: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Update: %w", bucketName, err)
 	}
 	fmt.Fprintf(w, "Removed label %q from bucket %v\n", labelName, bucketName)
 	return nil

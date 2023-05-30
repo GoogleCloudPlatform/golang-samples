@@ -36,12 +36,12 @@ func verifyGoogleIdToken(w io.Writer, token, expectedAudience string) error {
 
 	validator, err := idtoken.NewValidator(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create NewValidator: %v", err)
+		return fmt.Errorf("failed to create NewValidator: %w", err)
 	}
 
 	payload, err := validator.Validate(ctx, token, expectedAudience)
 	if err != nil {
-		return fmt.Errorf("failed to validate ID token: %v", err)
+		return fmt.Errorf("failed to validate ID token: %w", err)
 	}
 
 	// Verify that the token contains subject.

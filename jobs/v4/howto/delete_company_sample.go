@@ -32,7 +32,7 @@ func deleteCompany(w io.Writer, projectID, companyID string) error {
 	// Initialize a companyService client.
 	c, err := talent.NewCompanyClient(ctx)
 	if err != nil {
-		return fmt.Errorf("talent.NewCompanyClient: %v", err)
+		return fmt.Errorf("talent.NewCompanyClient: %w", err)
 	}
 	defer c.Close()
 
@@ -45,7 +45,7 @@ func deleteCompany(w io.Writer, projectID, companyID string) error {
 	}
 
 	if err := c.DeleteCompany(ctx, req); err != nil {
-		return fmt.Errorf("DeleteCompany(%s): %v", companyName, err)
+		return fmt.Errorf("DeleteCompany(%s): %w", companyName, err)
 	}
 
 	fmt.Fprintf(w, "Deleted company: %q\n", companyName)

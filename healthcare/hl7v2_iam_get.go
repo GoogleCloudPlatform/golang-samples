@@ -29,7 +29,7 @@ func hl7V2IAMPolicy(w io.Writer, projectID, location, datasetID, hl7V2StoreID st
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	storesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores
@@ -38,7 +38,7 @@ func hl7V2IAMPolicy(w io.Writer, projectID, location, datasetID, hl7V2StoreID st
 
 	policy, err := storesService.GetIamPolicy(name).Do()
 	if err != nil {
-		return fmt.Errorf("GetIamPolicy: %v", err)
+		return fmt.Errorf("GetIamPolicy: %w", err)
 	}
 
 	fmt.Fprintf(w, "IAM policy etag: %q\n", policy.Etag)

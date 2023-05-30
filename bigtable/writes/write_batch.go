@@ -33,7 +33,7 @@ func writeBatch(w io.Writer, projectID, instanceID string, tableName string) err
 	ctx := context.Background()
 	client, err := bigtable.NewClient(ctx, projectID, instanceID)
 	if err != nil {
-		return fmt.Errorf("bigtable.NewAdminClient: %v", err)
+		return fmt.Errorf("bigtable.NewAdminClient: %w", err)
 	}
 	defer client.Close()
 	tbl := client.Open(tableName)
@@ -57,7 +57,7 @@ func writeBatch(w io.Writer, projectID, instanceID string, tableName string) err
 
 	rowKeys := []string{"tablet#a0b81f74#20190501", "tablet#a0b81f74#20190502"}
 	if _, err := tbl.ApplyBulk(ctx, rowKeys, muts); err != nil {
-		return fmt.Errorf("ApplyBulk: %v", err)
+		return fmt.Errorf("ApplyBulk: %w", err)
 	}
 
 	fmt.Fprintf(w, "Successfully wrote 2 rows: %s\n", rowKeys)

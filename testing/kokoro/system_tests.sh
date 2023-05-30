@@ -43,7 +43,7 @@ SIGNIFICANT_CHANGES=$(git --no-pager diff --name-only main..HEAD | grep -Ev '(\.
 # CHANGED_DIRS is the list of significant top-level directories that changed,
 # but weren't deleted by the current PR.
 # CHANGED_DIRS will be empty when run on main.
-CHANGED_DIRS=$(echo "$SIGNIFICANT_CHANGES" | tr ' ' '\n' | grep "/" | cut -d/ -f1 | sort -u | tr '\n' ' ' | xargs ls -d 2>/dev/null || true)
+CHANGED_DIRS=$(echo "$SIGNIFICANT_CHANGES" | tr ' ' '\n' | grep "/" | cut -d/ -f1 | sort -u | tr '\n' ' ' | xargs --no-run-if-empty ls -d 2>/dev/null || true)
 
 # List all modules in changed directories.
 # If running on main will collect all modules in the repo, including the root module.
@@ -88,6 +88,9 @@ export GCLOUD_ORGANIZATION=1081635000895
 export SCC_PUBSUB_PROJECT="project-a-id"
 export SCC_PUBSUB_TOPIC="projects/project-a-id/topics/notifications-sample-topic"
 export SCC_PUBSUB_SUBSCRIPTION="notification-sample-subscription"
+# gcp-sec-demo-org.joonix.net
+export SCC_PROJECT_ORG_ID=688851828130
+export SCC_PROJECT_ID=sharp-quest
 
 export GOLANG_SAMPLES_SPANNER=projects/golang-samples-tests/instances/golang-samples-tests
 export GOLANG_SAMPLES_SPANNER_INSTANCE_CONFIG="regional-us-west1"

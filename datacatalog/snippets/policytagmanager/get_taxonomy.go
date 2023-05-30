@@ -30,7 +30,7 @@ func getTaxonomy(w io.Writer, taxonomyID string) error {
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)
 	if err != nil {
-		return fmt.Errorf("datacatalog.NewPolicyTagManagerClient: %v", err)
+		return fmt.Errorf("datacatalog.NewPolicyTagManagerClient: %w", err)
 	}
 	defer policyClient.Close()
 
@@ -39,7 +39,7 @@ func getTaxonomy(w io.Writer, taxonomyID string) error {
 	}
 	resp, err := policyClient.GetTaxonomy(ctx, req)
 	if err != nil {
-		return fmt.Errorf("GetTaxonomy: %v", err)
+		return fmt.Errorf("GetTaxonomy: %w", err)
 	}
 	fmt.Fprintf(w, "Taxonomy %s has Display Name %s and Description: %s\n", resp.Name, resp.DisplayName, resp.Description)
 	return nil

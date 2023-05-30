@@ -34,7 +34,7 @@ func signMac(w io.Writer, name string, data string) error {
 	ctx := context.Background()
 	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create kms client: %v", err)
+		return fmt.Errorf("failed to create kms client: %w", err)
 	}
 	defer client.Close()
 
@@ -47,7 +47,7 @@ func signMac(w io.Writer, name string, data string) error {
 	// Generate HMAC of data.
 	result, err := client.MacSign(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to hmac sign: %v", err)
+		return fmt.Errorf("failed to hmac sign: %w", err)
 	}
 
 	// The data comes back as raw bytes, which may include non-printable

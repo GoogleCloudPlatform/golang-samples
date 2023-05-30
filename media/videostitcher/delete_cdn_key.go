@@ -32,7 +32,7 @@ func deleteCDNKey(w io.Writer, projectID, keyID string) error {
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
-		return fmt.Errorf("stitcher.NewVideoStitcherClient: %v", err)
+		return fmt.Errorf("stitcher.NewVideoStitcherClient: %w", err)
 	}
 	defer client.Close()
 
@@ -44,7 +44,7 @@ func deleteCDNKey(w io.Writer, projectID, keyID string) error {
 	// Deletes the CDN key.
 	err = client.DeleteCdnKey(ctx, req)
 	if err != nil {
-		return fmt.Errorf("client.DeleteCdnKey: %v", err)
+		return fmt.Errorf("client.DeleteCdnKey: %w", err)
 	}
 
 	fmt.Fprintf(w, "Deleted CDN key: %s", name)

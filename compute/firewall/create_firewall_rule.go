@@ -34,7 +34,7 @@ func createFirewallRule(w io.Writer, projectID, firewallRuleName, networkName st
 	ctx := context.Background()
 	firewallsClient, err := compute.NewFirewallsRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstancesRESTClient: %v", err)
+		return fmt.Errorf("NewInstancesRESTClient: %w", err)
 	}
 	defer firewallsClient.Close()
 
@@ -69,11 +69,11 @@ func createFirewallRule(w io.Writer, projectID, firewallRuleName, networkName st
 
 	op, err := firewallsClient.Insert(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to create firewall rule: %v", err)
+		return fmt.Errorf("unable to create firewall rule: %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Firewall rule created\n")

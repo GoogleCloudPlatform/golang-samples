@@ -33,7 +33,7 @@ func deleteFHIRResource(w io.Writer, projectID, location, datasetID, fhirStoreID
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	fhirService := healthcareService.Projects.Locations.Datasets.FhirStores.Fhir
@@ -41,7 +41,7 @@ func deleteFHIRResource(w io.Writer, projectID, location, datasetID, fhirStoreID
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/fhirStores/%s/fhir/%s/%s", projectID, location, datasetID, fhirStoreID, resourceType, fhirResourceID)
 
 	if _, err := fhirService.Delete(name).Do(); err != nil {
-		return fmt.Errorf("Delete: %v", err)
+		return fmt.Errorf("Delete: %w", err)
 	}
 
 	fmt.Fprintf(w, "Deleted %q", name)

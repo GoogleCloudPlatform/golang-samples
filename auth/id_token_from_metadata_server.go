@@ -36,12 +36,12 @@ func getIdTokenFromMetadataServer(w io.Writer, url string) error {
 	// working environment.
 	credentials, err := google.FindDefaultCredentials(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to generate default credentials: %v", err)
+		return fmt.Errorf("failed to generate default credentials: %w", err)
 	}
 
 	ts, err := idtoken.NewTokenSource(ctx, url, option.WithCredentials(credentials))
 	if err != nil {
-		return fmt.Errorf("failed to create NewTokenSource: %v", err)
+		return fmt.Errorf("failed to create NewTokenSource: %w", err)
 	}
 
 	// Get the ID token.
@@ -49,7 +49,7 @@ func getIdTokenFromMetadataServer(w io.Writer, url string) error {
 	// to the target audience.
 	_, err = ts.Token()
 	if err != nil {
-		return fmt.Errorf("failed to receive token: %v", err)
+		return fmt.Errorf("failed to receive token: %w", err)
 	}
 	fmt.Fprintf(w, "Generated ID token.\n")
 

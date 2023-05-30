@@ -29,7 +29,7 @@ func envServiceAccount() error {
 	// library will find the credentials by itself.
 	client, err := pubsub.NewClient(context.Background(), "your-project-id")
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 	// Use the authenticated client.

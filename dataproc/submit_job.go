@@ -66,12 +66,12 @@ func submitJob(w io.Writer, projectID, region, clusterName string) error {
 
 	submitJobOp, err := jobClient.SubmitJobAsOperation(ctx, submitJobReq)
 	if err != nil {
-		return fmt.Errorf("error with request to submitting job: %v", err)
+		return fmt.Errorf("error with request to submitting job: %w", err)
 	}
 
 	submitJobResp, err := submitJobOp.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("error submitting job: %v", err)
+		return fmt.Errorf("error submitting job: %w", err)
 	}
 
 	re := regexp.MustCompile("gs://(.+?)/(.+)")
@@ -84,20 +84,20 @@ func submitJob(w io.Writer, projectID, region, clusterName string) error {
 	// Dataproc job output gets saved to a GCS bucket allocated to it.
 	storageClient, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("error creating storage client: %v", err)
+		return fmt.Errorf("error creating storage client: %w", err)
 	}
 
 	obj := fmt.Sprintf("%s.000000000", matches[2])
 	reader, err := storageClient.Bucket(matches[1]).Object(obj).NewReader(ctx)
 	if err != nil {
-		return fmt.Errorf("error reading job output: %v", err)
+		return fmt.Errorf("error reading job output: %w", err)
 	}
 
 	defer reader.Close()
 
 	body, err := ioutil.ReadAll(reader)
 	if err != nil {
-		return fmt.Errorf("could not read output from Dataproc Job: %v", err)
+		return fmt.Errorf("could not read output from Dataproc Job: %w", err)
 	}
 
 	fmt.Fprintf(w, "Job finished successfully: %s", body)

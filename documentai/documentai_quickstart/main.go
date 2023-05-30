@@ -41,14 +41,14 @@ func main() {
 	endpoint := fmt.Sprintf("%s-documentai.googleapis.com:443", *location)
 	client, err := documentai.NewDocumentProcessorClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
-		fmt.Println(fmt.Errorf("error creating Document AI client: %v", err))
+		fmt.Println(fmt.Errorf("error creating Document AI client: %w", err))
 	}
 	defer client.Close()
 
 	// Open local file.
 	data, err := ioutil.ReadFile(*filePath)
 	if err != nil {
-		fmt.Println(fmt.Errorf("ioutil.ReadFile: %v", err))
+		fmt.Println(fmt.Errorf("ioutil.ReadFile: %w", err))
 	}
 
 	req := &documentaipb.ProcessRequest{
@@ -62,7 +62,7 @@ func main() {
 	}
 	resp, err := client.ProcessDocument(ctx, req)
 	if err != nil {
-		fmt.Println(fmt.Errorf("processDocument: %v", err))
+		fmt.Println(fmt.Errorf("processDocument: %w", err))
 	}
 
 	// Handle the results.
