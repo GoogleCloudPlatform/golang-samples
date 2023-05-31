@@ -29,7 +29,7 @@ func setDatasetIAMPolicy(w io.Writer, projectID, location, datasetID string) err
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	datasetsService := healthcareService.Projects.Locations.Datasets
@@ -38,7 +38,7 @@ func setDatasetIAMPolicy(w io.Writer, projectID, location, datasetID string) err
 
 	policy, err := datasetsService.GetIamPolicy(name).Do()
 	if err != nil {
-		return fmt.Errorf("GetIamPolicy: %v", err)
+		return fmt.Errorf("GetIamPolicy: %w", err)
 	}
 
 	policy.Bindings = append(policy.Bindings, &healthcare.Binding{
@@ -52,7 +52,7 @@ func setDatasetIAMPolicy(w io.Writer, projectID, location, datasetID string) err
 
 	policy, err = datasetsService.SetIamPolicy(name, req).Do()
 	if err != nil {
-		return fmt.Errorf("SetIamPolicy: %v", err)
+		return fmt.Errorf("SetIamPolicy: %w", err)
 	}
 
 	fmt.Fprintf(w, "IAM Policy etag: %v", policy.Etag)

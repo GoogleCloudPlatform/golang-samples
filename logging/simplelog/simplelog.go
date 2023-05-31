@@ -20,15 +20,6 @@ import (
 	"log"
 	"os"
 	"time"
-
-	// [START imports]
-	"context"
-
-	"cloud.google.com/go/logging"
-	"cloud.google.com/go/logging/logadmin"
-
-	"google.golang.org/api/iterator"
-	// [END imports]
 )
 
 func main() {
@@ -42,36 +33,14 @@ func main() {
 	projID := os.Args[1]
 	command := os.Args[2]
 
-	// [START setup]
-	ctx := context.Background()
-	client, err := logging.NewClient(ctx, projID)
-	if err != nil {
-		log.Fatalf("Failed to create logging client: %v", err)
-	}
-	defer client.Close()
-
-	adminClient, err := logadmin.NewClient(ctx, projID)
-	if err != nil {
-		log.Fatalf("Failed to create logadmin client: %v", err)
-	}
-	defer adminClient.Close()
-
-	client.OnError = func(err error) {
-		// Print an error to the local log.
-		// For example, if Flush() failed.
-		log.Printf("client.OnError: %v", err)
-	}
-	// [END setup]
-
 	switch command {
 	case "write":
-		log.Print("Writing some log entries.")
-		writeEntry(client)
-		structuredWrite(client)
+		log.Print("Writing log entries.")
+		structuredWrite(projID)
 
 	case "read":
 		log.Print("Fetching and printing log entries.")
-		entries, err := getEntries(adminClient, projID)
+		entries, err := getEntries(projID)
 		if err != nil {
 			log.Fatalf("Could not get entries: %v", err)
 		}
@@ -85,82 +54,13 @@ func main() {
 
 	case "delete":
 		log.Print("Deleting log.")
-		if err := deleteLog(adminClient); err != nil {
+		if err := deleteLog(projID); err != nil {
 			log.Fatalf("Could not delete log: %v", err)
 		}
 
 	default:
 		usage("Unknown command.")
 	}
-}
-
-func writeEntry(client *logging.Client) {
-	const name = "log-example"
-	logger := client.Logger(name)
-	defer logger.Flush() // Ensure the entry is written.
-
-	infolog := logger.StandardLogger(logging.Info)
-	infolog.Printf("infolog is a standard Go log.Logger with INFO severity.")
-}
-
-func structuredWrite(client *logging.Client) {
-	// [START write_structured_log_entry]
-	// [START logging_write_log_entry]
-	const name = "log-example"
-	logger := client.Logger(name)
-	defer logger.Flush() // Ensure the entry is written.
-
-	logger.Log(logging.Entry{
-		// Log anything that can be marshaled to JSON.
-		Payload: struct{ Anything string }{
-			Anything: "The payload can be any type!",
-		},
-		Severity: logging.Debug,
-	})
-	// [END logging_write_log_entry]
-	// [END write_structured_log_entry]
-}
-
-func deleteLog(adminClient *logadmin.Client) error {
-	ctx := context.Background()
-
-	// [START logging_delete_log]
-	const name = "log-example"
-	if err := adminClient.DeleteLog(ctx, name); err != nil {
-		return err
-	}
-	// [END logging_delete_log]
-	return nil
-}
-
-func getEntries(adminClient *logadmin.Client, projID string) ([]*logging.Entry, error) {
-	ctx := context.Background()
-
-	// [START logging_list_log_entries]
-	var entries []*logging.Entry
-	const name = "log-example"
-	lastHour := time.Now().Add(-1 * time.Hour).Format(time.RFC3339)
-
-	iter := adminClient.Entries(ctx,
-		// Only get entries from the "log-example" log within the last hour.
-		logadmin.Filter(fmt.Sprintf(`logName = "projects/%s/logs/%s" AND timestamp > "%s"`, projID, name, lastHour)),
-		// Get most recent entries first.
-		logadmin.NewestFirst(),
-	)
-
-	// Fetch the most recent 20 entries.
-	for len(entries) < 20 {
-		entry, err := iter.Next()
-		if err == iterator.Done {
-			return entries, nil
-		}
-		if err != nil {
-			return nil, err
-		}
-		entries = append(entries, entry)
-	}
-	return entries, nil
-	// [END logging_list_log_entries]
 }
 
 func usage(msg string) {

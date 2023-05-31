@@ -26,8 +26,8 @@ import (
 
 // Enable the Certificate Authority present in the given ca pool.
 // CA cannot be enabled if it has been already deleted.
-func enableCa(w io.Writer, projectID string, location string, caPoolId string, caId string) error {
-	// projectID := "your_project_id"
+func enableCa(w io.Writer, projectId string, location string, caPoolId string, caId string) error {
+	// projectId := "your_project_id"
 	// location := "us-central1"	// For a list of locations, see: https://cloud.google.com/certificate-authority-service/docs/locations.
 	// caPoolId := "ca-pool-id"		// The id of the CA pool under which the CA is present.
 	// caId := "ca-id"				// The id of the CA to be enabled.
@@ -40,7 +40,7 @@ func enableCa(w io.Writer, projectID string, location string, caPoolId string, c
 	defer caClient.Close()
 
 	fullCaName := fmt.Sprintf("projects/%s/locations/%s/caPools/%s/certificateAuthorities/%s",
-		projectID, location, caPoolId, caId)
+		projectId, location, caPoolId, caId)
 
 	// Create the EnableCertificateAuthorityRequest.
 	// See https://pkg.go.dev/cloud.google.com/go/security/privateca/apiv1/privatecapb#EnableCertificateAuthorityRequest.

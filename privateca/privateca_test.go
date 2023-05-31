@@ -17,6 +17,11 @@ package snippets
 import (
 	"bytes"
 	"context"
+	cryptorand "crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
+
 	"errors"
 	"fmt"
 	"math/rand"
@@ -38,14 +43,16 @@ var buf bytes.Buffer
 
 // Setup for all tests
 func setupTests(t *testing.T) {
+	t.Helper()
 	r = rand.New(rand.NewSource(time.Now().UnixNano()))
 	location = "us-central1"
 	tc := testutil.SystemTest(t)
 	projectId = tc.ProjectID
 }
 
-// Setup and teardown functions for CaPoolTests
+// Setup and teardown functions for CA Pool
 func setupCaPool(t *testing.T) (string, func(t *testing.T)) {
+	t.Helper()
 	caPoolId := fmt.Sprintf("test-ca-pool-%v-%v", time.Now().Format("2006-01-02"), r.Int())
 
 	if err := createCaPool(&buf, projectId, location, caPoolId); err != nil {
@@ -67,8 +74,9 @@ func setupCaPool(t *testing.T) (string, func(t *testing.T)) {
 	}
 }
 
-// Setup and teardown functions for CaTests
-func setupCa(t *testing.T, caPoolId string) (string, func(t *testing.T)) {
+// Setup and teardown functions for Certificate Authority Tests
+func setupCa(t *testing.T, caPoolId string, autoEnable bool) (string, func(t *testing.T)) {
+	t.Helper()
 	caId := fmt.Sprintf("test-ca-%v-%v", time.Now().Format("2006-01-02"), r.Int())
 	caCommonName := fmt.Sprintf("CN - %s", caId)
 	org := "ORGANIZATION"
@@ -78,8 +86,20 @@ func setupCa(t *testing.T, caPoolId string) (string, func(t *testing.T)) {
 		t.Fatal("setupCa got err:", err)
 	}
 
+	if autoEnable {
+		if err := enableCa(&buf, projectId, location, caPoolId, caId); err != nil {
+			t.Error("enableCa got err:", err)
+		}
+	}
+
 	// Return a function to teardown the test
 	return caId, func(t *testing.T) {
+		if autoEnable {
+			if err := disableCa(&buf, projectId, location, caPoolId, caId); err != nil {
+				t.Error("disableCa got err:", err)
+			}
+		}
+
 		if err := deleteCaPerm(projectId, location, caPoolId, caId); err != nil {
 			var gerr *googleapi.Error
 			if errors.As(err, &gerr) {
@@ -124,7 +144,52 @@ func deleteCaPerm(projectID string, location string, caPoolId string, caId strin
 	return nil
 }
 
-func TestCreateCaPool(t *testing.T) {
+// Setup and teardown functions for Certifcate tests
+func setupCertificate(t *testing.T, caPoolId string, caId string) (string, func(t *testing.T)) {
+	t.Helper()
+	certId := fmt.Sprintf("test-certificate-%v-%v", time.Now().Format("2006-01-02"), r.Int())
+	commonName := fmt.Sprintf("CN - %s", certId)
+	domainName := "cert2.example.com"
+	certDuration := int64(2592000) // 30 days
+	publicKey := genPublicKey(t)
+
+	if err := createCertificate(&buf, projectId, location, caPoolId, caId, certId, commonName,
+		domainName, certDuration, publicKey); err != nil {
+		t.Fatal("createCertificate got err:", err)
+	}
+
+	return certId, func(t *testing.T) {
+		if err := revokeCertificate(&buf, projectId, location, caPoolId, certId); err != nil {
+			t.Error("setupCertificate teardown (revokeCertificate) got err:", err)
+		}
+	}
+}
+
+// Helper function to generate RSA public key
+func genPublicKey(t *testing.T) []byte {
+	t.Helper()
+	// generate key
+	privatekey, err := rsa.GenerateKey(cryptorand.Reader, 2048)
+	if err != nil {
+		t.Fatal("Cannot generate RSA key")
+	}
+	publickey := &privatekey.PublicKey
+
+	// convert public key to PEM format
+	publicKeyBytes, err := x509.MarshalPKIXPublicKey(publickey)
+	if err != nil {
+		t.Fatal("error when dumping publickey:", err)
+	}
+
+	publicKeyBlock := &pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: publicKeyBytes,
+	}
+
+	return pem.EncodeToMemory(publicKeyBlock)
+}
+
+func TestCaPools(t *testing.T) {
 	setupTests(t)
 
 	t.Run("createCaPool", func(t *testing.T) {
@@ -161,7 +226,7 @@ func TestCreateCaPool(t *testing.T) {
 	})
 }
 
-func TestCreateCa(t *testing.T) {
+func TestCas(t *testing.T) {
 	setupTests(t)
 	caPoolId, teardownCaPool := setupCaPool(t)
 	defer teardownCaPool(t)
@@ -188,7 +253,8 @@ func TestCreateCa(t *testing.T) {
 	})
 
 	t.Run("deleteCa", func(t *testing.T) {
-		caId, _ := setupCa(t, caPoolId)
+		// Create new CA, but skip deletion because we do it during the test
+		caId, _ := setupCa(t, caPoolId, false)
 
 		buf.Reset()
 		if err := deleteCa(&buf, projectId, location, caPoolId, caId); err != nil {
@@ -213,7 +279,7 @@ func TestCreateCa(t *testing.T) {
 	})
 
 	t.Run("enableDisableCa", func(t *testing.T) {
-		caId, teardownCa := setupCa(t, caPoolId)
+		caId, teardownCa := setupCa(t, caPoolId, false)
 		defer teardownCa(t)
 
 		buf.Reset()
@@ -234,6 +300,93 @@ func TestCreateCa(t *testing.T) {
 		expectedResult = fmt.Sprintf("Successfully disabled Certificate Authority: %s.", caId)
 		if got := buf.String(); !strings.Contains(got, expectedResult) {
 			t.Errorf("disableCa got %q, want %q", got, expectedResult)
+		}
+	})
+}
+
+func TestListCas(t *testing.T) {
+	setupTests(t)
+	caPoolId, teardownCaPool := setupCaPool(t)
+	defer teardownCaPool(t)
+
+	caId, teardownCa := setupCa(t, caPoolId, false)
+	defer teardownCa(t)
+
+	buf.Reset()
+	if err := listCas(&buf, projectId, location, caPoolId); err != nil {
+		t.Fatal("listCas got err:", err)
+	}
+
+	expectedResult := fmt.Sprintf(" - projects/%s/locations/%s/caPools/%s/certificateAuthorities/%s",
+		projectId, location, caPoolId, caId)
+	if got := buf.String(); !strings.Contains(got, expectedResult) {
+		t.Errorf("listCas got %q, want %q", got, expectedResult)
+	}
+}
+
+func TestCertificate(t *testing.T) {
+	setupTests(t)
+	caPoolId, teardownCaPool := setupCaPool(t)
+	defer teardownCaPool(t)
+
+	caId, teardownCa := setupCa(t, caPoolId, true)
+	defer teardownCa(t)
+
+	t.Run("createCert", func(t *testing.T) {
+		certId := fmt.Sprintf("test-certificate-%v-%v", time.Now().Format("2006-01-02"), r.Int())
+		commonName := fmt.Sprintf("CN - %s", certId)
+		domainName := "cert.example.com"
+		certDuration := int64(2592000) // 30 days
+		publicKey := genPublicKey(t)
+
+		buf.Reset()
+		if err := createCertificate(&buf, projectId, location, caPoolId, caId, certId, commonName,
+			domainName, certDuration, publicKey); err != nil {
+			t.Fatal("createCertificate got err:", err)
+		}
+
+		expectedResult := fmt.Sprintf("Certificate %s created", certId)
+		if got := buf.String(); !strings.Contains(got, expectedResult) {
+			t.Errorf("createCertificate got %q, want %q", got, expectedResult)
+		}
+
+		if err := revokeCertificate(&buf, projectId, location, caPoolId, certId); err != nil {
+			t.Fatal("createCertificate teardown (revokeCertificate) got err:", err)
+		}
+	})
+
+	t.Run("revokeCert", func(t *testing.T) {
+		// Create new certificate, but skip revoke because we do it during the test
+		certId, _ := setupCertificate(t, caPoolId, caId)
+
+		buf.Reset()
+		if err := revokeCertificate(&buf, projectId, location, caPoolId, certId); err != nil {
+			t.Fatal("revokeCertificate got err:", err)
+		}
+
+		expectedResult := fmt.Sprintf("Certificate %s revoked", certId)
+		if got := buf.String(); !strings.Contains(got, expectedResult) {
+			t.Errorf("revokeCertificate got %q, want %q", got, expectedResult)
+		}
+	})
+
+	t.Run("listCerts", func(t *testing.T) {
+		// Create new certificate, but skip revoke because we do it during the test
+		certId, teardownCertificate := setupCertificate(t, caPoolId, caId)
+		defer teardownCertificate(t)
+
+		buf.Reset()
+		if err := listCertificates(&buf, projectId, location, caPoolId); err != nil {
+			t.Fatal("listCertificates got err:", err)
+		}
+
+		// The project will most probably be numeric, so we just check path starting at location
+		partialCertPath := fmt.Sprintf("/locations/%s/caPools/%s/certificates/%s", location,
+			caPoolId, certId)
+		commonName := fmt.Sprintf("CN - %s", certId)
+		expectedResult := fmt.Sprintf("%s (common name: %s)", partialCertPath, commonName)
+		if got := buf.String(); !strings.Contains(got, expectedResult) {
+			t.Errorf("listCertificates got %q, want %q", got, expectedResult)
 		}
 	})
 }

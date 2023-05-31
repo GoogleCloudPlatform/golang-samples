@@ -7,20 +7,20 @@ require (
 	cloud.google.com/go/bigquery v1.51.2
 	cloud.google.com/go/iam v0.13.0
 	cloud.google.com/go/storage v1.30.1
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230517211646-da4d8a7e0e9b
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230522201558-cba0742a460f
 	github.com/apache/arrow/go/v10 v10.0.1
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/google/uuid v1.3.0
-	github.com/googleapis/gax-go/v2 v2.8.0
+	github.com/googleapis/gax-go/v2 v2.9.0
 	github.com/linkedin/goavro/v2 v2.12.0
-	google.golang.org/api v0.122.0
+	google.golang.org/api v0.123.0
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1
 	google.golang.org/grpc v1.55.0
 	google.golang.org/protobuf v1.30.0
 )
 
 require (
-	cloud.google.com/go/compute v1.19.0 // indirect
+	cloud.google.com/go/compute v1.19.3 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/apache/arrow/go/v12 v12.0.0 // indirect
@@ -43,10 +43,10 @@ require (
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/crypto v0.7.0 // indirect
 	golang.org/x/mod v0.8.0 // indirect
-	golang.org/x/net v0.9.0 // indirect
-	golang.org/x/oauth2 v0.7.0 // indirect
-	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/net v0.10.0 // indirect
+	golang.org/x/oauth2 v0.8.0 // indirect
+	golang.org/x/sync v0.2.0 // indirect
+	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/tools v0.6.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect

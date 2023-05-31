@@ -29,14 +29,14 @@ func deleteDICOMStore(w io.Writer, projectID, location, datasetID, dicomStoreID 
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	storesService := healthcareService.Projects.Locations.Datasets.DicomStores
 
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/dicomStores/%s", projectID, location, datasetID, dicomStoreID)
 	if _, err := storesService.Delete(name).Do(); err != nil {
-		return fmt.Errorf("Delete: %v", err)
+		return fmt.Errorf("Delete: %w", err)
 	}
 
 	fmt.Fprintf(w, "Deleted DICOM store: %q\n", name)
