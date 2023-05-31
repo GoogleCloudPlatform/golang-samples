@@ -70,7 +70,7 @@ func TestRedactImage(t *testing.T) {
 
 func TestRedactImageFileAllInfoTypes(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	inputPath := "testdata/image.jpeg"
+	inputPath := "testdata/image.jpg"
 	outputPath := "testdata/test-output-image-file-listed-infoTypes-redacted.jpeg"
 
 	var buf bytes.Buffer
