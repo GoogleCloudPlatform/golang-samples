@@ -15,12 +15,12 @@
 package responsestreaming
 
 import (
-	"net/http/httptest"
 	"testing"
-	"strings"
-	"context"
 	"os"
-
+	"context"
+	"strings"
+	"net/http/httptest"
+	
 	"cloud.google.com/go/bigquery"
 )
 
