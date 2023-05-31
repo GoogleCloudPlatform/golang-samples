@@ -16,6 +16,11 @@ package redact
 
 import (
 	"bytes"
+	"crypto/md5"
+	"encoding/hex"
+	"errors"
+	"io"
+	"os"
 	"strings"
 	"testing"
 
@@ -72,8 +77,48 @@ func TestRedactImageFileListedInfoTypes(t *testing.T) {
 	if err := redactImageFileListedInfoTypes(&buf, tc.ProjectID, inputPath, outputPath); err != nil {
 		t.Fatal(err)
 	}
+
+	hash1, err := calculateImageHash(inputPath)
+	if err != nil {
+		t.Errorf("redactImageFileListedInfoTypes: Error calculating hash for image 1: %q", err)
+	}
+
+	if _, err := os.Stat(outputPath); errors.Is(err, os.ErrNotExist) {
+		t.Error("redactImageFileListedInfoTypes: the output file is not generated")
+	} else {
+		hash2, err := calculateImageHash(outputPath)
+		if err != nil {
+			t.Errorf("redactImageFileListedInfoTypes: Error calculating hash for image 2: %q", err)
+		}
+
+		if hash1 == hash2 {
+			t.Error("redactImageFileListedInfoTypes: image is not redacted.")
+		}
+	}
+
 	got := buf.String()
 	if want := "Wrote output to"; !strings.Contains(got, want) {
 		t.Errorf("redactImageFileListedInfoTypes got %q, want %q", got, want)
 	}
+
+	if want := "ioutil.ReadFile: open testdata/image.jpg: The system cannot find the path specified."; strings.Contains(got, want) {
+		t.Errorf("redactImageFileListedInfoTypes got %q, want %q", got, want)
+	}
+
+}
+
+func calculateImageHash(filename string) (string, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	hash := md5.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		return "", err
+	}
+
+	hashSum := hash.Sum(nil)
+	return hex.EncodeToString(hashSum), nil
 }
