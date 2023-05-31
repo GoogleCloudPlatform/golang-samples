@@ -66,7 +66,6 @@ func redactImageFileAllInfoTypes(w io.Writer, projectID, inputPath, outputPath s
 	// Send the request.
 	resp, err := client.RedactImage(ctx, req)
 	if err != nil {
-		fmt.Fprintf(w, "RedactImage: %v", err)
 		return err
 	}
 
