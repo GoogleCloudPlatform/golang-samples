@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/functions/functionsv2/response_streaming/responsestreaming
+module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/response_streaming/responsestreaming
 
 go 1.20
 
