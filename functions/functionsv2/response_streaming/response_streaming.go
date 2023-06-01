@@ -43,7 +43,7 @@ func streamBigQuery(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx := context.Background()
 	// Must include project ID in client.
-    client, err := bigquery.NewClient(ctx, projectID)
+	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
 		log.Fatalf("bigquery.NewClient: %v", err)
 	}
