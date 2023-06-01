@@ -29,6 +29,7 @@ import (
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -746,7 +747,7 @@ func TestCreateWithFilter(t *testing.T) {
 	}
 }
 
-func TestCreateBigQuerySubscription(t *testing.T) {
+func TestBigQuerySubscription(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
@@ -777,6 +778,36 @@ func TestCreateBigQuerySubscription(t *testing.T) {
 	if err := deleteBigQueryDataset(tc.ProjectID, datasetID); err != nil {
 		t.Logf("failed to delete bigquery dataset: %v", err)
 	}
+}
+
+func TestCreateCloudStorageSubscription(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+	defer client.Close()
+	storageSubID := subID + "-storage"
+
+	topic, err := getOrCreateTopic(ctx, client, topicID)
+	if err != nil {
+		t.Fatalf("CreateTopic: %v", err)
+	}
+	buf := new(bytes.Buffer)
+
+	// Use the same bucket across test instances. This
+	// is safe since we're not writing to the bucket
+	// and this makes us not have to do bucket cleanups.
+	bucketID := "pubsub-storage-sub-sink"
+	if err := createOrGetStorageBucket(tc.ProjectID, bucketID); err != nil {
+		t.Fatalf("failed to create storage bucket: %v", err)
+	}
+
+	if err := createCloudStorageSubscription(buf, tc.ProjectID, storageSubID, topic, bucketID); err != nil {
+		t.Fatalf("failed to create cloud storage subscription: %v", err)
+	}
+
+	sub := client.Subscription(storageSubID)
+	sub.Delete(ctx)
 }
 
 func TestCreateSubscriptionWithExactlyOnceDelivery(t *testing.T) {
@@ -932,5 +963,25 @@ func deleteBigQueryDataset(projectID, datasetID string) error {
 	if err = dataset.DeleteWithContents(ctx); err != nil {
 		return fmt.Errorf("error deleting dataset: %w", err)
 	}
+	return nil
+}
+
+func createOrGetStorageBucket(projectID, bucketID string) error {
+	ctx := context.Background()
+
+	c, err := storage.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("error instantiating storage client: %w", err)
+	}
+	b := c.Bucket(bucketID)
+	_, err = b.Attrs(ctx)
+	if err == storage.ErrBucketNotExist {
+		if err := b.Create(ctx, projectID, nil); err != nil {
+			return fmt.Errorf("error creating bucket: %w", err)
+		}
+	} else {
+		return fmt.Errorf("error retrieving existing bucket: %w", err)
+	}
+
 	return nil
 }
