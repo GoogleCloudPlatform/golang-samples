@@ -54,11 +54,10 @@ func streamBigQuery(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	// Stream out the payload by iterating rows and flushing out the writer.
 	streamResults(w, rows)
 }
-
 
 // query returns a row iterator suitable for reading query results.
 func query(ctx context.Context, client *bigquery.Client) (*bigquery.RowIterator, error) {
