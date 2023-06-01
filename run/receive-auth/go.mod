@@ -2,11 +2,10 @@ module github.com/GoogleCloudPlatform/golang-samples/run/service-auth
 
 go 1.19
 
-require (
-	golang.org/x/oauth2 v0.8.0
-)
+require golang.org/x/oauth2 v0.8.0
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
