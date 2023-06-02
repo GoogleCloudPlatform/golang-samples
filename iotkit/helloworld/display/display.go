@@ -78,11 +78,11 @@ type Device struct {
 func Open(o driver.Opener) (*Device, error) {
 	lcd, err := i2c.Open(o, lcdAddr)
 	if err != nil {
-		return nil, fmt.Errorf("cannot open LCD device: %v", err)
+		return nil, fmt.Errorf("cannot open LCD device: %w", err)
 	}
 	rgb, err := i2c.Open(o, rgbAddr)
 	if err != nil {
-		return nil, fmt.Errorf("cannot open RGB device: %v", err)
+		return nil, fmt.Errorf("cannot open RGB device: %w", err)
 	}
 
 	// two lines, regular 10 dots font.

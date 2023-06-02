@@ -32,7 +32,7 @@ func listReferenceImages(w io.Writer, projectID string, location string, product
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewProductSearchClient: %v", err)
+		return fmt.Errorf("NewProductSearchClient: %w", err)
 	}
 	defer c.Close()
 
@@ -47,7 +47,7 @@ func listReferenceImages(w io.Writer, projectID string, location string, product
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("Next: %v", err)
+			return fmt.Errorf("Next: %w", err)
 		}
 
 		fmt.Fprintf(w, "Reference image name: %s\n", resp.Name)

@@ -30,12 +30,12 @@ func deleteSchemaRevision(w io.Writer, projectID, schemaID, revisionID string) e
 	ctx := context.Background()
 	client, err := pubsub.NewSchemaClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewSchemaClient: %v", err)
+		return fmt.Errorf("pubsub.NewSchemaClient: %w", err)
 	}
 	defer client.Close()
 
 	if _, err := client.DeleteSchemaRevision(ctx, schemaID, revisionID); err != nil {
-		return fmt.Errorf("client.DeleteSchema revision: %v", err)
+		return fmt.Errorf("client.DeleteSchema revision: %w", err)
 	}
 	fmt.Fprintf(w, "Deleted a schema revision: %s@%s", schemaID, revisionID)
 	return nil

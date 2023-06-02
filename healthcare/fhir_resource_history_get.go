@@ -30,7 +30,7 @@ func getFHIRResourceHistory(w io.Writer, projectID, location, datasetID, fhirSto
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	fhirService := healthcareService.Projects.Locations.Datasets.FhirStores.Fhir
@@ -39,14 +39,14 @@ func getFHIRResourceHistory(w io.Writer, projectID, location, datasetID, fhirSto
 
 	resp, err := fhirService.Vread(name).Do()
 	if err != nil {
-		return fmt.Errorf("Vread: %v", err)
+		return fmt.Errorf("Vread: %w", err)
 	}
 
 	defer resp.Body.Close()
 
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("could not read response: %v", err)
+		return fmt.Errorf("could not read response: %w", err)
 	}
 
 	if resp.StatusCode > 299 {

@@ -31,7 +31,7 @@ func getSimilarProductsURI(w io.Writer, projectID string, location string, produ
 	ctx := context.Background()
 	c, err := vision.NewImageAnnotatorClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewImageAnnotatorClient: %v", err)
+		return fmt.Errorf("NewImageAnnotatorClient: %w", err)
 	}
 	defer c.Close()
 
@@ -47,7 +47,7 @@ func getSimilarProductsURI(w io.Writer, projectID string, location string, produ
 
 	response, err := c.ProductSearch(ctx, image, ictx)
 	if err != nil {
-		return fmt.Errorf("ProductSearch: %v", err)
+		return fmt.Errorf("ProductSearch: %w", err)
 	}
 
 	fmt.Fprintf(w, "Product set index time:\n")

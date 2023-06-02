@@ -30,7 +30,7 @@ func getNote(noteID, projectID string) (*grafeaspb.Note, error) {
 	ctx := context.Background()
 	client, err := containeranalysis.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("NewClient: %v", err)
+		return nil, fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -39,7 +39,7 @@ func getNote(noteID, projectID string) (*grafeaspb.Note, error) {
 	}
 	note, err := client.GetGrafeasClient().GetNote(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("client.GetNote: %v", err)
+		return nil, fmt.Errorf("client.GetNote: %w", err)
 	}
 	return note, nil
 }

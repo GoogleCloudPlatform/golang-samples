@@ -33,14 +33,14 @@ func getSubscription(w io.Writer, projectID, region, location, subID string) err
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
-		return fmt.Errorf("pubsublite.NewAdminClient: %v", err)
+		return fmt.Errorf("pubsublite.NewAdminClient: %w", err)
 	}
 	defer client.Close()
 
 	subPath := fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s", projectID, location, subID)
 	sub, err := client.Subscription(ctx, subPath)
 	if err != nil {
-		return fmt.Errorf("client.Subscription got err: %v", err)
+		return fmt.Errorf("client.Subscription got err: %w", err)
 	}
 	fmt.Fprintf(w, "Got subscription: %#v\n", sub)
 	return nil

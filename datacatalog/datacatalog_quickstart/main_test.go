@@ -132,7 +132,7 @@ func cleanupDataCatalog(ctx context.Context, stdOut string) error {
 
 	client, err := datacatalog.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("datacatalog.NewClient: %v", err)
+		return fmt.Errorf("datacatalog.NewClient: %w", err)
 	}
 
 	return client.DeleteTagTemplate(ctx, &datacatalogpb.DeleteTagTemplateRequest{

@@ -34,16 +34,16 @@ func subscribeWithAvroSchema(w io.Writer, projectID, subID, avscFile string) err
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 
 	avroSchema, err := os.ReadFile(avscFile)
 	if err != nil {
-		return fmt.Errorf("ioutil.ReadFile err: %v", err)
+		return fmt.Errorf("ioutil.ReadFile err: %w", err)
 	}
 	codec, err := goavro.NewCodec(string(avroSchema))
 	if err != nil {
-		return fmt.Errorf("goavro.NewCodec err: %v", err)
+		return fmt.Errorf("goavro.NewCodec err: %w", err)
 	}
 
 	sub := client.Subscription(subID)
