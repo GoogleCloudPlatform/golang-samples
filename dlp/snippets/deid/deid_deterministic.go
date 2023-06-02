@@ -28,7 +28,7 @@ import (
 // deIdentifyDeterministicEncryption de-identifies through deterministic encryption
 func deIdentifyDeterministicEncryption(w io.Writer, projectID, inputStr string, infoTypeNames []string, keyFileName, cryptoKeyName, surrogateInfoType string) error {
 	// projectId := "your-project-id"
-	// inputStr := "My SSN is 372819127"
+	// inputStr := "My SSN is 111111111"
 	// infoTypeNames := []string{"US_SOCIAL_SECURITY_NUMBER"}
 	/* keyFileName :=  "projects/YOUR_PROJECT/"
 	   + "locations/YOUR_KEYRING_REGION/"

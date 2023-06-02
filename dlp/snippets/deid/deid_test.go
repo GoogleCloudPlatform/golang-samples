@@ -28,7 +28,7 @@ import (
 	kms "cloud.google.com/go/kms/apiv1"
 	"cloud.google.com/go/kms/apiv1/kmspb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 )
 
 func TestMask(t *testing.T) {
@@ -275,7 +275,7 @@ func TestDeIdentifyWithWordList(t *testing.T) {
 func TestDeIdentifyDeterministic(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	input := "Jack's phone number is 2255338899"
+	input := "Jack's phone number is 5555551212"
 	infoTypeNames := []string{"PHONE_NUMBER"}
 	keyRingName, err := createKeyRing(t, tc.ProjectID)
 	if err != nil {
@@ -285,6 +285,8 @@ func TestDeIdentifyDeterministic(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer destroyKey(t, tc.ProjectID, keyVersion)
+
 	surrogateInfoType := "PHONE_TOKEN"
 	want := "output : Jack's phone number is PHONE_TOKEN(36):"
 
@@ -298,13 +300,12 @@ func TestDeIdentifyDeterministic(t *testing.T) {
 		t.Errorf("deIdentifyDeterministicEncryption(%q) = %q, want %q", input, got, want)
 	}
 
-	defer destroyKey(t, tc.ProjectID, keyVersion)
 }
 
 func createKeyRing(t *testing.T, projectID string) (string, error) {
 	t.Helper()
 
-	u := uuid.Must(uuid.NewV4()).String()[:8]
+	u := uuid.New().String()[:8]
 	parent := fmt.Sprintf("projects/%v/locations/global", projectID)
 	id := "test-dlp-go-lang-key-id-1" + u
 
@@ -326,13 +327,13 @@ func createKeyRing(t *testing.T, projectID string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Printf("Created key ring: %s\n", result.Name)
+
 	return result.Name, nil
 }
 
 func createKey(t *testing.T, projectID, keyFileName string) (string, string, string, error) {
 	t.Helper()
-	u := uuid.Must(uuid.NewV4()).String()[:8]
+	u := uuid.New().String()[:8]
 	id := "go-lang-dlp-test-wrapped-aes-256" + u
 	ctx := context.Background()
 	client, err := kms.NewKeyManagementClient(ctx)
