@@ -173,9 +173,9 @@ func TestComputeDisksSnippets(t *testing.T) {
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
-	zone := "europe-central2-b"
-	region := "europe-central2"
-	replicaZones := []string{"europe-central2-a", "europe-central2-b"}
+	zone := "europe-west2-b"
+	region := "europe-west2"
+	replicaZones := []string{"europe-west2-a", "europe-west2-b"}
 	instanceName := fmt.Sprintf("test-instance-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	diskName2 := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
@@ -184,7 +184,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 	instanceDiskName3 := fmt.Sprintf("test-instance-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	snapshotName := fmt.Sprintf("test-snapshot-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	sourceImage := "projects/debian-cloud/global/images/family/debian-11"
-	sourceDisk := fmt.Sprintf("projects/%s/zones/europe-central2-b/disks/%s", tc.ProjectID, diskName)
+	sourceDisk := fmt.Sprintf("projects/%s/zones/europe-west2-b/disks/%s", tc.ProjectID, diskName)
 	diskType := fmt.Sprintf("zones/%s/diskTypes/pd-ssd", zone)
 	diskSnapshotLink := fmt.Sprintf("projects/%s/global/snapshots/%s", tc.ProjectID, snapshotName)
 
