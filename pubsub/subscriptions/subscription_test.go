@@ -132,26 +132,26 @@ func TestCreate(t *testing.T) {
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		topic, err = client.CreateTopic(ctx, topicID)
 		if err != nil {
-			t.Fatalf("CreateTopic: %v", err)
+			r.Errorf("CreateTopic: %v", err)
 		}
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
 		if err := create(buf, tc.ProjectID, subID, topic); err != nil {
-			t.Fatalf("failed to create a subscription: %v", err)
+			r.Errorf("failed to create a subscription: %v", err)
 		}
 		got := buf.String()
 		want := "Created subscription"
 		if !strings.Contains(got, want) {
-			t.Fatalf("got: %s, want: %v", got, want)
+			r.Errorf("got: %s, want: %v", got, want)
 		}
 		ok, err := client.Subscription(subID).Exists(context.Background())
 		if err != nil {
-			t.Fatalf("failed to check if sub exists: %v", err)
+			r.Errorf("failed to check if sub exists: %v", err)
 		}
 		if !ok {
-			t.Fatalf("got none; want sub = %q", subID)
+			r.Errorf("got none; want sub = %q", subID)
 		}
 	})
 }
@@ -251,6 +251,45 @@ func TestDelete(t *testing.T) {
 	if ok {
 		t.Fatalf("sub = %q; want none", subID)
 	}
+}
+
+func TestPushSubscription(t *testing.T) {
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+
+	var topic *pubsub.Topic
+	var err error
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		topic, err = client.CreateTopic(ctx, topicID)
+		if err != nil {
+			r.Errorf("CreateTopic: %v", err)
+		}
+	})
+
+	pushSubID := subID + "-push"
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		endpoint := "https://" + tc.ProjectID + ".appspot.com/_ah/push-handlers/push"
+		if err := createWithEndpoint(buf, tc.ProjectID, pushSubID, topic, endpoint); err != nil {
+			r.Errorf("failed to create a push subscription: %v", err)
+		}
+		got := buf.String()
+		want := "Created subscription"
+		if !strings.Contains(got, want) {
+			r.Errorf("got: %s, want: %v", got, want)
+		}
+
+		buf.Reset()
+		if err := clearPushSubscription(buf, tc.ProjectID, pushSubID); err != nil {
+			r.Errorf("failed to clear push subscription: %v", err)
+		}
+		got2 := buf.String()
+		want2 := "Cleared push subscription, reverting to pull"
+		if !strings.Contains(got2, want2) {
+			r.Errorf("got: %s, want: %v", got2, want2)
+		}
+	})
 }
 
 func TestPullMsgsAsync(t *testing.T) {
@@ -755,27 +794,42 @@ func TestBigQuerySubscription(t *testing.T) {
 	defer client.Close()
 	bqSubID := subID + "-bigquery"
 
-	topic, err := getOrCreateTopic(ctx, client, topicID)
-	if err != nil {
-		t.Fatalf("CreateTopic: %v", err)
-	}
-	buf := new(bytes.Buffer)
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		topic, err := getOrCreateTopic(ctx, client, topicID)
+		if err != nil {
+			r.Errorf("CreateTopic: %v", err)
+		}
+		buf := new(bytes.Buffer)
 
-	datasetID := "go_pubsub_samples_dataset"
-	tableID := "go_pubsub_samples_table"
-	if err := ensureExistsBQTable(tc.ProjectID, datasetID, tableID); err != nil {
-		t.Fatalf("failed to create bigquery table: %v", err)
-	}
+		datasetID := "go_pubsub_samples_dataset"
+		tableID := "go_pubsub_samples_table"
+		if err := ensureExistsBQTable(tc.ProjectID, datasetID, tableID); err != nil {
+			r.Errorf("failed to ensure bigquery table exists: %v", err)
+		}
 
-	bqTable := fmt.Sprintf("%s.%s.%s", tc.ProjectID, datasetID, tableID)
+		bqTable := fmt.Sprintf("%s.%s.%s", tc.ProjectID, datasetID, tableID)
 
-	if err := createBigQuerySubscription(buf, tc.ProjectID, bqSubID, topic, bqTable); err != nil {
-		t.Fatalf("failed to create bigquery subscription: %v", err)
-	}
+		if err := createBigQuerySubscription(buf, tc.ProjectID, bqSubID, topic, bqTable); err != nil {
+			r.Errorf("failed to create bigquery subscription: %v", err)
+		}
+		got := buf.String()
+		want := "Created BigQuery subscription"
+		if !strings.Contains(got, want) {
+			r.Errorf("got: %s, want: %v", got, want)
+		}
+	})
 
-	if err := clearBigQuerySubscription(buf, tc.ProjectID, bqSubID); err != nil {
-		t.Fatalf("failed to clear bigquery subscription: %v", err)
-	}
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		if err := clearBigQuerySubscription(buf, tc.ProjectID, bqSubID); err != nil {
+			r.Errorf("failed to clear bigquery subscription: %v", err)
+		}
+		got2 := buf.String()
+		want2 := "Cleared BigQuery subscription, reverting to pull"
+		if !strings.Contains(got2, want2) {
+			r.Errorf("got: %s, want: %v", got2, want2)
+		}
+	})
 
 	sub := client.Subscription(bqSubID)
 	sub.Delete(ctx)

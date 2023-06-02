@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_clear_bigquery_subscription]
+// [START pubsub_clear_push_subscription]
 import (
 	"context"
 	"fmt"
@@ -23,8 +23,8 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-// clearBigQuerySubscription reverts a BigQuery subscription back to a pull based subscription.
-func clearBigQuerySubscription(w io.Writer, projectID, subID string) error {
+// clearPushSubscription reverts a push subscription back to a pull based subscription.
+func clearPushSubscription(w io.Writer, projectID, subID string) error {
 	// projectID := "my-project-id"
 	// subID := "my-sub"
 	ctx := context.Background()
@@ -36,14 +36,14 @@ func clearBigQuerySubscription(w io.Writer, projectID, subID string) error {
 
 	sub := client.Subscription(subID)
 	_, err = sub.Update(ctx, pubsub.SubscriptionConfigToUpdate{
-		BigQueryConfig: &pubsub.BigQueryConfig{},
+		PushConfig: &pubsub.PushConfig{},
 	})
 	if err != nil {
 		return fmt.Errorf("sub.Update: %w", err)
 	}
-	fmt.Fprintf(w, "Cleared BigQuery subscription, reverting to pull: %v\n", sub)
+	fmt.Fprintf(w, "Cleared push subscription, reverting to pull: %v\n", sub)
 
 	return nil
 }
 
-// [END pubsub_clear_bigquery_subscription]
+// [END pubsub_clear_push_subscription]
