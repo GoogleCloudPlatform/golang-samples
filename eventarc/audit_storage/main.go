@@ -22,11 +22,28 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	cloudevent "github.com/cloudevents/sdk-go/v2"
+	"github.com/googleapis/google-cloudevents-go/cloud/auditdata"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 // HelloEventsStorage receives and processes a Cloud Audit Log event with Cloud Storage data.
 func HelloEventsStorage(w http.ResponseWriter, r *http.Request) {
-	s := fmt.Sprintf("Detected change in Cloud Storage bucket: %s", string(r.Header.Get("Ce-Subject")))
+	event, err := cloudevent.NewEventFromHTTPRequest(r)
+	if err != nil {
+		log.Fatal("cloudevent.NewEventFromHTTPRequest:", err)
+	}
+	var auditlog auditdata.AuditLog
+	err = protojson.Unmarshal(event.Data(), &auditlog)
+	if err != nil {
+		log.Fatal("protojson.Unmarshal:", err)
+	}
+	if auditlog.ServiceName != "storage.googleapis.com" {
+		log.Printf("non-storage audit log received: %s", auditlog.ServiceName)
+		w.WriteHeader(http.StatusBadRequest)
+	}
+	s := fmt.Sprintf("Detected change in Cloud Storage bucket: %s", event.Subject())
 	log.Printf(s)
 	fmt.Fprintln(w, s)
 }
