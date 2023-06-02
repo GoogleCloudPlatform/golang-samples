@@ -763,7 +763,7 @@ func TestBigQuerySubscription(t *testing.T) {
 
 	datasetID := "go_pubsub_samples_dataset"
 	tableID := "go_pubsub_samples_table"
-	if err := getOrCreateBigQueryTable(tc.ProjectID, datasetID, tableID); err != nil {
+	if err := ensureExistsBQTable(tc.ProjectID, datasetID, tableID); err != nil {
 		t.Fatalf("failed to create bigquery table: %v", err)
 	}
 
@@ -897,7 +897,10 @@ func getOrCreateSub(ctx context.Context, client *pubsub.Client, subID string, cf
 	return sub, nil
 }
 
-func getOrCreateBigQueryTable(projectID, datasetID, tableID string) error {
+// ensureExistsBQTable ensures that the dataset and table exist.
+// If either does not exist, we create it. Errors returned from
+// fetching or creating will be returned still.
+func ensureExistsBQTable(projectID, datasetID, tableID string) error {
 	ctx := context.Background()
 
 	c, err := bigquery.NewClient(ctx, projectID)
