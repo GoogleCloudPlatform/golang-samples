@@ -29,6 +29,7 @@ import (
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -746,7 +747,7 @@ func TestCreateWithFilter(t *testing.T) {
 	}
 }
 
-func TestCreateBigQuerySubscription(t *testing.T) {
+func TestBigQuerySubscription(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
@@ -762,7 +763,7 @@ func TestCreateBigQuerySubscription(t *testing.T) {
 
 	datasetID := fmt.Sprintf("go_samples_dataset_%d", time.Now().UnixNano())
 	tableID := fmt.Sprintf("go_samples_table_%d", time.Now().UnixNano())
-	if err := createBigQueryTable(tc.ProjectID, datasetID, tableID); err != nil {
+	if err := getOrCreateBigQueryTable(tc.ProjectID, datasetID, tableID); err != nil {
 		t.Fatalf("failed to create bigquery table: %v", err)
 	}
 
@@ -770,6 +771,10 @@ func TestCreateBigQuerySubscription(t *testing.T) {
 
 	if err := createBigQuerySubscription(buf, tc.ProjectID, bqSubID, topic, bqTable); err != nil {
 		t.Fatalf("failed to create bigquery subscription: %v", err)
+	}
+
+	if err := clearBigQuerySubscription(buf, tc.ProjectID, bqSubID); err != nil {
+		t.Fatalf("failed to clear bigquery subscription: %v", err)
 	}
 
 	sub := client.Subscription(bqSubID)
@@ -895,7 +900,7 @@ func getOrCreateSub(ctx context.Context, client *pubsub.Client, subID string, cf
 	return sub, nil
 }
 
-func createBigQueryTable(projectID, datasetID, tableID string) error {
+func getOrCreateBigQueryTable(projectID, datasetID, tableID string) error {
 	ctx := context.Background()
 
 	c, err := bigquery.NewClient(ctx, projectID)
@@ -903,20 +908,32 @@ func createBigQueryTable(projectID, datasetID, tableID string) error {
 		return fmt.Errorf("error instantiating bigquery client: %w", err)
 	}
 	dataset := c.Dataset(datasetID)
-	if err = dataset.Create(ctx, &bigquery.DatasetMetadata{Location: "US"}); err != nil {
-		return fmt.Errorf("error creating dataset: %w", err)
+	if _, err = dataset.Metadata(ctx); err != nil {
+		if e, ok := err.(*googleapi.Error); ok && e.Code == 404 {
+			if err = dataset.Create(ctx, &bigquery.DatasetMetadata{Location: "US"}); err != nil {
+				return fmt.Errorf("error creating dataset: %w", err)
+			}
+		} else {
+			return fmt.Errorf("error accessing dataset metadata: %w", err)
+		}
 	}
 
 	table := dataset.Table(tableID)
-	schema := []*bigquery.FieldSchema{
-		{Name: "data", Type: bigquery.BytesFieldType, Required: true},
-		{Name: "message_id", Type: bigquery.StringFieldType, Required: true},
-		{Name: "attributes", Type: bigquery.StringFieldType, Required: true},
-		{Name: "subscription_name", Type: bigquery.StringFieldType, Required: true},
-		{Name: "publish_time", Type: bigquery.TimestampFieldType, Required: true},
-	}
-	if err := table.Create(ctx, &bigquery.TableMetadata{Schema: schema}); err != nil {
-		return fmt.Errorf("error creating table: %w", err)
+	if _, err := table.Metadata(ctx); err != nil {
+		if e, ok := err.(*googleapi.Error); ok && e.Code == 404 {
+			schema := []*bigquery.FieldSchema{
+				{Name: "data", Type: bigquery.BytesFieldType, Required: true},
+				{Name: "message_id", Type: bigquery.StringFieldType, Required: true},
+				{Name: "attributes", Type: bigquery.StringFieldType, Required: true},
+				{Name: "subscription_name", Type: bigquery.StringFieldType, Required: true},
+				{Name: "publish_time", Type: bigquery.TimestampFieldType, Required: true},
+			}
+			if err := table.Create(ctx, &bigquery.TableMetadata{Schema: schema}); err != nil {
+				return fmt.Errorf("error creating table: %w", err)
+			}
+		} else {
+			return fmt.Errorf("error accessing table metadata: %w", err)
+		}
 	}
 	return nil
 }
