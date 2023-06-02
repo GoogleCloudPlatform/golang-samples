@@ -761,8 +761,8 @@ func TestBigQuerySubscription(t *testing.T) {
 	}
 	buf := new(bytes.Buffer)
 
-	datasetID := fmt.Sprintf("go_samples_dataset_%d", time.Now().UnixNano())
-	tableID := fmt.Sprintf("go_samples_table_%d", time.Now().UnixNano())
+	datasetID := "go_pubsub_samples_dataset"
+	tableID := "go_pubsub_samples_table"
 	if err := getOrCreateBigQueryTable(tc.ProjectID, datasetID, tableID); err != nil {
 		t.Fatalf("failed to create bigquery table: %v", err)
 	}
@@ -779,9 +779,6 @@ func TestBigQuerySubscription(t *testing.T) {
 
 	sub := client.Subscription(bqSubID)
 	sub.Delete(ctx)
-	if err := deleteBigQueryDataset(tc.ProjectID, datasetID); err != nil {
-		t.Logf("failed to delete bigquery dataset: %v", err)
-	}
 }
 
 func TestCreateSubscriptionWithExactlyOnceDelivery(t *testing.T) {
@@ -934,20 +931,6 @@ func getOrCreateBigQueryTable(projectID, datasetID, tableID string) error {
 		} else {
 			return fmt.Errorf("error accessing table metadata: %w", err)
 		}
-	}
-	return nil
-}
-
-func deleteBigQueryDataset(projectID, datasetID string) error {
-	ctx := context.Background()
-
-	c, err := bigquery.NewClient(ctx, projectID)
-	if err != nil {
-		return fmt.Errorf("error instantiating bigquery client: %w", err)
-	}
-	dataset := c.Dataset(datasetID)
-	if err = dataset.DeleteWithContents(ctx); err != nil {
-		return fmt.Errorf("error deleting dataset: %w", err)
 	}
 	return nil
 }
