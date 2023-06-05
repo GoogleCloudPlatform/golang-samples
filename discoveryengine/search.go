@@ -12,42 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package search
 
 // [START genappbuilder_search]
 import (
 	"context"
-	"flag"
 	"fmt"
-	"log"
 
-	genappbuilder "cloud.google.com/go/discoveryengine/apiv1beta"
-	genappbuilderpb "cloud.google.com/go/discoveryengine/apiv1beta/discoveryenginepb"
+	discoveryengine "cloud.google.com/go/discoveryengine/apiv1beta"
+	discoveryenginepb "cloud.google.com/go/discoveryengine/apiv1beta/discoveryenginepb"
 	"google.golang.org/api/iterator"
 )
 
-func main() {
-	projectID := flag.String("project", "YOUR_PROJECT_ID", "Google Cloud Project ID")
-	location := flag.String("location", "global", "search engine location")
-	searchEngineID := flag.String("searchengine", "YOUR_SEARCH_ENGINE_ID", "search engine ID")
-	query := flag.String("query", "YOUR_SEARCH_QUERY", "search query")
-	flag.Parse()
+// search searches for a query in a search engine given the Google Cloud Project ID,
+// Location, and Search Engine ID.
+//
+// This example uses the default search engine.
+func search(projectID, location, searchEngineID, query string) error {
 
 	ctx := context.Background()
 
 	// Create a client
-	client, err := genappbuilder.NewSearchClient(ctx)
+	client, err := discoveryengine.NewSearchClient(ctx)
 	if err != nil {
-		log.Fatalf("unable to create a search client: %v", err)
+		return err
 	}
 	defer client.Close()
 
 	// Full resource name of search engine serving config
-	servingConfig := fmt.Sprintf("projects/%s/locations/%s/collections/default_collection/dataStores/%s/servingConfigs/default_serving_config", *projectID, *location, *searchEngineID)
+	servingConfig := fmt.Sprintf("projects/%s/locations/%s/collections/default_collection/dataStores/%s/servingConfigs/default_serving_config",
+		projectID, location, searchEngineID)
 
-	searchRequest := &genappbuilderpb.SearchRequest{
+	searchRequest := &discoveryenginepb.SearchRequest{
 		ServingConfig: servingConfig,
-		Query:         *query,
+		Query:         query,
 	}
 
 	it := client.Search(ctx, searchRequest)
@@ -57,9 +55,12 @@ func main() {
 			break
 		}
 		if err != nil {
-			log.Printf("unable to retrieve: %v", err)
+			return err
 		}
 		fmt.Printf("%+v\n", resp)
 	}
+
+	return nil
 }
+
 // [END genappbuilder_search]
