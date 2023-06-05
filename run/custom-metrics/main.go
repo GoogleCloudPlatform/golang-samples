@@ -46,7 +46,7 @@ func main() {
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	counter.Add(context.Background(), 100)
-	fmt.Fprintln(w, "Wrote sidecar_sample_counter metric!")
+	fmt.Fprintln(w, "Incremented sidecar_sample_counter metric!")
 }
 
 func setupCounter(ctx context.Context) func(context.Context) error {
