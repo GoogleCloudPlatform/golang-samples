@@ -25,7 +25,7 @@ import (
 	"google.golang.org/api/googleapi"
 )
 
-// tableExists checks wheter a table exists on a given dataset.
+// tableExists checks whether a table exists in a given dataset.
 func tableExists(projectID, datasetID, tableID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydatasetid"
