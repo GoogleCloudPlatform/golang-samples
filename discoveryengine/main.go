@@ -62,3 +62,4 @@ func main() {
 		fmt.Printf("%+v\n", resp)
 	}
 }
+// [END genappbuilder_search]
