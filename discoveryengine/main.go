@@ -14,6 +14,7 @@
 
 package main
 
+// [START genappbuilder_search]
 import (
 	"context"
 	"flag"
