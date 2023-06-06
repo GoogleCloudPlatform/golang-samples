@@ -29,14 +29,14 @@ import (
 // responsible for signing certificates within this pool.
 func createCa(
 	w io.Writer,
-	projectID string,
+	projectId string,
 	location string,
 	caPoolId string,
 	caId string,
 	caCommonName string,
 	org string,
 	caDuration int64) error {
-	// projectID := "your_project_id"
+	// projectId := "your_project_id"
 	// location := "us-central1"		// For a list of locations, see: https://cloud.google.com/certificate-authority-service/docs/locations.
 	// caPoolId := "ca-pool-id"			// The CA Pool id under which the CA should be created.
 	// caId := "ca-id"					// A unique id/name for the ca.
@@ -94,7 +94,7 @@ func createCa(
 		},
 	}
 
-	fullCaPoolName := fmt.Sprintf("projects/%s/locations/%s/caPools/%s", projectID, location, caPoolId)
+	fullCaPoolName := fmt.Sprintf("projects/%s/locations/%s/caPools/%s", projectId, location, caPoolId)
 
 	// Create the CreateCertificateAuthorityRequest.
 	// See https://pkg.go.dev/cloud.google.com/go/security/privateca/apiv1/privatecapb#CreateCertificateAuthorityRequest.

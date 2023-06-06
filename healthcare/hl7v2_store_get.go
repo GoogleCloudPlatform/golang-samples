@@ -29,7 +29,7 @@ func getHL7V2Store(w io.Writer, projectID, location, datasetID, hl7v2StoreID str
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	storesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores
@@ -38,7 +38,7 @@ func getHL7V2Store(w io.Writer, projectID, location, datasetID, hl7v2StoreID str
 
 	store, err := storesService.Get(name).Do()
 	if err != nil {
-		return fmt.Errorf("Get: %v", err)
+		return fmt.Errorf("Get: %w", err)
 	}
 
 	fmt.Fprintf(w, "Got HL7V2 store: %q\n", store.Name)

@@ -7,7 +7,7 @@ require github.com/cloudevents/sdk-go/v2 v2.14.0
 require (
 	cloud.google.com/go/compute v1.19.3
 	github.com/GoogleCloudPlatform/functions-framework-go v1.7.3
-	google.golang.org/api v0.122.0
+	google.golang.org/api v0.123.0
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1
 	google.golang.org/protobuf v1.30.0
 )

@@ -31,7 +31,7 @@ func getHL7V2Message(w io.Writer, projectID, location, datasetID, hl7V2StoreID, 
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	messagesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores.Messages
@@ -39,12 +39,12 @@ func getHL7V2Message(w io.Writer, projectID, location, datasetID, hl7V2StoreID, 
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/hl7V2Stores/%s/messages/%s", projectID, location, datasetID, hl7V2StoreID, hl7V2MessageID)
 	message, err := messagesService.Get(name).Do()
 	if err != nil {
-		return fmt.Errorf("Get: %v", err)
+		return fmt.Errorf("Get: %w", err)
 	}
 
 	rawData, err := base64.StdEncoding.DecodeString(message.Data)
 	if err != nil {
-		return fmt.Errorf("base64.DecodeString: %v", err)
+		return fmt.Errorf("base64.DecodeString: %w", err)
 	}
 
 	fmt.Fprintf(w, "Got HL7V2 message.\n")

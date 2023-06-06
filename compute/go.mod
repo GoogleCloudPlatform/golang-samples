@@ -5,8 +5,8 @@ go 1.19
 require (
 	cloud.google.com/go/compute v1.19.3
 	cloud.google.com/go/storage v1.30.1
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230517211646-da4d8a7e0e9b
-	google.golang.org/api v0.122.0
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230522201558-cba0742a460f
+	google.golang.org/api v0.123.0
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1
 	google.golang.org/protobuf v1.30.0
 )

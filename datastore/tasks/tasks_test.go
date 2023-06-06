@@ -46,21 +46,20 @@ func makeDesc() string {
 }
 
 func TestAddMarkDelete(t *testing.T) {
-	testutil.SystemTest(t)
-	ctx := context.Background()
+	tc := testutil.SystemTest(t)
 
 	desc := makeDesc()
 
-	k, err := AddTask(ctx, client, desc)
+	k, err := AddTask(tc.ProjectID, desc)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := MarkDone(ctx, client, k.ID); err != nil {
+	if err := MarkDone(tc.ProjectID, k.ID); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := DeleteTask(ctx, client, k.ID); err != nil {
+	if err := DeleteTask(tc.ProjectID, k.ID); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -68,41 +67,45 @@ func TestAddMarkDelete(t *testing.T) {
 func TestList(t *testing.T) {
 	t.Skip("Flaky. Eventual consistency. Re-enable once the datastore emulator works with gRPC.")
 
-	testutil.SystemTest(t)
-	ctx := context.Background()
+	tc := testutil.SystemTest(t)
 
 	desc := makeDesc()
 
-	k, err := AddTask(ctx, client, desc)
+	k, err := AddTask(tc.ProjectID, desc)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	foundTask := listAndGetTask(t, desc)
+	foundTask, err := listAndGetTask(tc.ProjectID, desc)
+	if err != nil {
+		t.Error(err)
+	}
 	if got, want := foundTask.id, k.ID; got != want {
 		t.Errorf("k.ID: got %d, want %d", got, want)
 	}
 
-	if err := MarkDone(ctx, client, foundTask.id); err != nil {
+	if err := MarkDone(tc.ProjectID, foundTask.id); err != nil {
 		t.Fatal(err)
 	}
 
-	foundTask = listAndGetTask(t, desc)
+	foundTask, err = listAndGetTask(tc.ProjectID, desc)
+	if err != nil {
+		t.Error(err)
+	}
 	if !foundTask.Done {
 		t.Error("foundTask.Done: got false, want true")
 	}
 
-	if err := DeleteTask(ctx, client, foundTask.id); err != nil {
+	if err := DeleteTask(tc.ProjectID, foundTask.id); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func listAndGetTask(t *testing.T, desc string) *Task {
-	ctx := context.Background()
+func listAndGetTask(projectID string, desc string) (*Task, error) {
 
-	tasks, err := ListTasks(ctx, client)
+	tasks, err := ListTasks(projectID)
 	if err != nil {
-		t.Fatal(err)
+		return nil, err
 	}
 
 	var foundTask *Task
@@ -112,8 +115,8 @@ func listAndGetTask(t *testing.T, desc string) *Task {
 		}
 	}
 	if foundTask == nil {
-		t.Fatalf("Did not find task %s in list.", desc)
+		return nil, fmt.Errorf("Did not find task %s in list.", desc)
 	}
 
-	return foundTask
+	return foundTask, nil
 }

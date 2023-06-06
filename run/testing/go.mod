@@ -3,9 +3,9 @@ module github.com/GoogleCloudPlatform/golang-samples/run/testing
 go 1.19
 
 require (
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230517211646-da4d8a7e0e9b
-	github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping v0.0.0-20230517211646-da4d8a7e0e9b
-	github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20230517211646-da4d8a7e0e9b
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230522201558-cba0742a460f
+	github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping v0.0.0-20230522201558-cba0742a460f
+	github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20230522201558-cba0742a460f
 	golang.org/x/net v0.10.0
 	google.golang.org/grpc v1.55.0
 )
@@ -32,7 +32,7 @@ require (
 	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
-	google.golang.org/api v0.122.0 // indirect
+	google.golang.org/api v0.123.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect

@@ -29,7 +29,7 @@ func createFHIRStore(w io.Writer, projectID, location, datasetID, fhirStoreID st
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	storesService := healthcareService.Projects.Locations.Datasets.FhirStores
@@ -39,7 +39,7 @@ func createFHIRStore(w io.Writer, projectID, location, datasetID, fhirStoreID st
 
 	resp, err := storesService.Create(parent, &healthcare.FhirStore{Version: version}).FhirStoreId(fhirStoreID).Do()
 	if err != nil {
-		return fmt.Errorf("Create: %v", err)
+		return fmt.Errorf("Create: %w", err)
 	}
 
 	fmt.Fprintf(w, "Created FHIR store: %q\n", resp.Name)
