@@ -13,7 +13,6 @@
 # limitations under the License.
 
 # [START cloudrun_serviceauth_dockerfile]
-# [START run_serviceauth_dockerfile]
 
 # Use the offical golang image to create a binary.
 # This is based on Debian and sets the GOPATH to /go.
@@ -50,4 +49,3 @@ COPY --from=builder /app/server /app/server
 CMD ["/app/server"]
 
 # [END cloudrun_serviceauth_dockerfile]
-# [END run_serviceauth_dockerfile]
