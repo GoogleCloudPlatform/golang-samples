@@ -79,7 +79,6 @@ func inspectGcsFileWithSampling(w io.Writer, projectID, gcsUri, topicID, subscri
 	// Create a PubSub Client used to listen for when the inspect job finishes.
 	pubsubClient, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		fmt.Fprintf(w, "pubsub.NewClient: %v", err)
 		return err
 	}
 	defer pubsubClient.Close()
@@ -88,11 +87,9 @@ func inspectGcsFileWithSampling(w io.Writer, projectID, gcsUri, topicID, subscri
 	// Create the Topic if it doesn't exist.
 	t := pubsubClient.Topic(topicID)
 	if exists, err := t.Exists(ctx); err != nil {
-		fmt.Fprintf(w, "t.Exists: %v", err)
 		return err
 	} else if !exists {
 		if t, err = pubsubClient.CreateTopic(ctx, topicID); err != nil {
-			fmt.Fprintf(w, "CreateTopic: %v", err)
 			return err
 		}
 	}
@@ -100,11 +97,9 @@ func inspectGcsFileWithSampling(w io.Writer, projectID, gcsUri, topicID, subscri
 	// Create the Subscription if it doesn't exist.
 	s := pubsubClient.Subscription(subscriptionId)
 	if exists, err := s.Exists(ctx); err != nil {
-		fmt.Fprintf(w, "s.Exits: %v", err)
 		return err
 	} else if !exists {
 		if s, err = pubsubClient.CreateSubscription(ctx, subscriptionId, pubsub.SubscriptionConfig{Topic: t}); err != nil {
-			fmt.Fprintf(w, "CreateSubscription: %v", err)
 			return err
 		}
 	}
@@ -140,7 +135,6 @@ func inspectGcsFileWithSampling(w io.Writer, projectID, gcsUri, topicID, subscri
 	// Use the client to send the request.
 	j, err := client.CreateDlpJob(ctx, req)
 	if err != nil {
-		fmt.Fprintf(w, "Receive: %v", err)
 		return err
 	}
 	fmt.Fprintf(w, "Job Created: %v", j.GetName())
@@ -178,7 +172,7 @@ func inspectGcsFileWithSampling(w io.Writer, projectID, gcsUri, topicID, subscri
 		}
 	})
 	if err != nil {
-		return fmt.Errorf("receive: %v", err)
+		return err
 	}
 	return nil
 
