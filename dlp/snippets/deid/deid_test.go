@@ -17,6 +17,8 @@ package deid
 
 import (
 	"bytes"
+	"crypto/rand"
+	"encoding/base64"
 	"strings"
 
 	"testing"
@@ -262,4 +264,39 @@ func TestDeIdentifyWithWordList(t *testing.T) {
 	if got := buf.String(); got != want {
 		t.Errorf("deidentifyWithWordList(%q) = %q, want %q", input, got, want)
 	}
+}
+
+func TestDeIdentifyFreeTextWithFPEUsingSurrogate(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	input := "My phone number is 5555551212"
+	infoType := "PHONE_NUMBER"
+	surrogateType := "PHONE_TOKEN"
+	unWrappedKey, err := getUnwrappedKey(t)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "output: My phone number is PHONE_TOKEN(10):"
+
+	buf := new(bytes.Buffer)
+	if err := deidentifyFreeTextWithFPEUsingSurrogate(buf, tc.ProjectID, input, infoType, surrogateType, unWrappedKey); err != nil {
+		t.Fatal(err)
+	}
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("deidentifyFreeTextWithFPEUsingSurrogate(%q) = %q, want %q", input, got, want)
+	}
+}
+
+func getUnwrappedKey(t *testing.T) (string, error) {
+	t.Helper()
+	key := make([]byte, 32) // 32 bytes for AES-256
+	_, err := rand.Read(key)
+	if err != nil {
+		return "", err
+	}
+
+	// Encode the key to base64
+	encodedKey := base64.StdEncoding.EncodeToString(key)
+	return string(encodedKey), nil
+
 }
