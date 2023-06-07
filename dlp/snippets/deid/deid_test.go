@@ -278,8 +278,8 @@ func TestDeIdentifyFreeTextWithFPEUsingSurrogate(t *testing.T) {
 	}
 	want := "output: My phone number is PHONE_TOKEN(10):"
 
-	buf := new(bytes.Buffer)
-	if err := deidentifyFreeTextWithFPEUsingSurrogate(buf, tc.ProjectID, input, infoType, surrogateType, unWrappedKey); err != nil {
+	var buf bytes.Buffer
+	if err := deidentifyFreeTextWithFPEUsingSurrogate(&buf, tc.ProjectID, input, infoType, surrogateType, unWrappedKey); err != nil {
 		t.Fatal(err)
 	}
 	if got := buf.String(); !strings.Contains(got, want) {
