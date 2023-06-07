@@ -35,7 +35,7 @@ func listInspectTemplates(w io.Writer, projectID string) error {
 
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return fmt.Errorf("dlp.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -52,17 +52,17 @@ func listInspectTemplates(w io.Writer, projectID string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("Next: %v", err)
+			return fmt.Errorf("Next: %w", err)
 		}
 		fmt.Fprintf(w, "Inspect template %v\n", t.GetName())
 		c, err := ptypes.Timestamp(t.GetCreateTime())
 		if err != nil {
-			return fmt.Errorf("CreateTime Timestamp: %v", err)
+			return fmt.Errorf("CreateTime Timestamp: %w", err)
 		}
 		fmt.Fprintf(w, "  Created: %v\n", c.Format(time.RFC1123))
 		u, err := ptypes.Timestamp(t.GetUpdateTime())
 		if err != nil {
-			return fmt.Errorf("UpdateTime Timestamp: %v", err)
+			return fmt.Errorf("UpdateTime Timestamp: %w", err)
 		}
 		fmt.Fprintf(w, "  Updated: %v\n", u.Format(time.RFC1123))
 		fmt.Fprintf(w, "  Display Name: %q\n", t.GetDisplayName())

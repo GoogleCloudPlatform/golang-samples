@@ -33,7 +33,7 @@ func purgeOrphanProducts(w io.Writer, projectID string, location string) error {
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewProductSearchClient: %v", err)
+		return fmt.Errorf("NewProductSearchClient: %w", err)
 	}
 	defer c.Close()
 
@@ -48,12 +48,12 @@ func purgeOrphanProducts(w io.Writer, projectID string, location string) error {
 	// The purge operation is async.
 	op, err := c.PurgeProducts(ctx, req)
 	if err != nil {
-		return fmt.Errorf("NewProductSearchClient: %v", err)
+		return fmt.Errorf("NewProductSearchClient: %w", err)
 	}
 	fmt.Fprintf(w, "Processing operation name: %q\n", op.Name())
 
 	if err := op.Wait(ctx); err != nil {
-		return fmt.Errorf("Wait: %v", err)
+		return fmt.Errorf("Wait: %w", err)
 	}
 
 	fmt.Fprintf(w, "Orphan products deleted.\n")

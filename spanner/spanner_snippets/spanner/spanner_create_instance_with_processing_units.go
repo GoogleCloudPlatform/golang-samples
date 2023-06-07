@@ -31,7 +31,7 @@ func createInstanceWithProcessingUnits(w io.Writer, projectID, instanceID string
 	ctx := context.Background()
 	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("could not create instance admin client for project %s: %v", projectID, err)
+		return fmt.Errorf("could not create instance admin client for project %s: %w", projectID, err)
 	}
 	defer instanceAdmin.Close()
 
@@ -49,13 +49,13 @@ func createInstanceWithProcessingUnits(w io.Writer, projectID, instanceID string
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("could not create instance %s: %v", fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID), err)
+		return fmt.Errorf("could not create instance %s: %w", fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID), err)
 	}
 	fmt.Fprintf(w, "Waiting for operation on %s to complete...", instanceID)
 	// Wait for the instance creation to finish.
 	i, err := op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("waiting for instance creation to finish failed: %v", err)
+		return fmt.Errorf("waiting for instance creation to finish failed: %w", err)
 	}
 	// The instance may not be ready to serve yet.
 	if i.State != instancepb.Instance_READY {
@@ -68,7 +68,7 @@ func createInstanceWithProcessingUnits(w io.Writer, projectID, instanceID string
 		FieldMask: &field_mask.FieldMask{Paths: []string{"processing_units"}},
 	})
 	if err != nil {
-		return fmt.Errorf("failed to get instance [%s]: %v", instanceName, err)
+		return fmt.Errorf("failed to get instance [%s]: %w", instanceName, err)
 	}
 	fmt.Fprintf(w, "Instance %s has %d processing units.", instanceID, instance.ProcessingUnits)
 	return nil

@@ -29,7 +29,7 @@ func pullMsgsFlowControlSettings(w io.Writer, projectID, subID string) error {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -48,7 +48,7 @@ func pullMsgsFlowControlSettings(w io.Writer, projectID, subID string) error {
 		msg.Ack()
 	})
 	if err != nil {
-		return fmt.Errorf("sub.Receive: %v", err)
+		return fmt.Errorf("sub.Receive: %w", err)
 	}
 	return nil
 }

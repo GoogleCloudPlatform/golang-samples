@@ -29,7 +29,7 @@ func createDICOMStore(w io.Writer, projectID, location, datasetID, dicomStoreID 
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	storesService := healthcareService.Projects.Locations.Datasets.DicomStores
@@ -39,7 +39,7 @@ func createDICOMStore(w io.Writer, projectID, location, datasetID, dicomStoreID 
 
 	resp, err := storesService.Create(parent, store).DicomStoreId(dicomStoreID).Do()
 	if err != nil {
-		return fmt.Errorf("Create: %v", err)
+		return fmt.Errorf("Create: %w", err)
 	}
 
 	fmt.Fprintf(w, "Created DICOM store: %q\n", resp.Name)

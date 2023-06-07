@@ -28,12 +28,12 @@ func listServiceAccounts(w io.Writer, projectID string) ([]*iam.ServiceAccount, 
 	ctx := context.Background()
 	service, err := iam.NewService(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("iam.NewService: %v", err)
+		return nil, fmt.Errorf("iam.NewService: %w", err)
 	}
 
 	response, err := service.Projects.ServiceAccounts.List("projects/" + projectID).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Projects.ServiceAccounts.List: %v", err)
+		return nil, fmt.Errorf("Projects.ServiceAccounts.List: %w", err)
 	}
 	for _, account := range response.Accounts {
 		fmt.Fprintf(w, "Listing service account: %v\n", account.Name)

@@ -29,14 +29,14 @@ func deleteDataset(w io.Writer, projectID, location, datasetID string) error {
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	datasetsService := healthcareService.Projects.Locations.Datasets
 
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s", projectID, location, datasetID)
 	if _, err := datasetsService.Delete(name).Do(); err != nil {
-		return fmt.Errorf("Delete: %v", err)
+		return fmt.Errorf("Delete: %w", err)
 	}
 
 	fmt.Fprintf(w, "Deleted dataset: %q\n", name)

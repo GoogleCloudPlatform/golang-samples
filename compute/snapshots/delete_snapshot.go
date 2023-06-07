@@ -32,7 +32,7 @@ func deleteSnapshot(w io.Writer, projectID, snapshotName string) error {
 	ctx := context.Background()
 	snapshotsClient, err := compute.NewSnapshotsRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewSnapshotsRESTClient: %v", err)
+		return fmt.Errorf("NewSnapshotsRESTClient: %w", err)
 	}
 	defer snapshotsClient.Close()
 
@@ -43,11 +43,11 @@ func deleteSnapshot(w io.Writer, projectID, snapshotName string) error {
 
 	op, err := snapshotsClient.Delete(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to delete snapshot: %v", err)
+		return fmt.Errorf("unable to delete snapshot: %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Snapshot deleted\n")

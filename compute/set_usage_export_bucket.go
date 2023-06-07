@@ -34,7 +34,7 @@ func setUsageExportBucket(w io.Writer, projectID, bucketName, reportNamePrefix s
 	ctx := context.Background()
 	projectsClient, err := compute.NewProjectsRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewProjectsRESTClient: %v", err)
+		return fmt.Errorf("NewProjectsRESTClient: %w", err)
 	}
 	defer projectsClient.Close()
 
@@ -55,11 +55,11 @@ func setUsageExportBucket(w io.Writer, projectID, bucketName, reportNamePrefix s
 
 	op, err := projectsClient.SetUsageExportBucket(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to set usage export bucket %v", err)
+		return fmt.Errorf("unable to set usage export bucket %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Usage export bucket has been set\n")

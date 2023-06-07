@@ -66,7 +66,7 @@ func inspectTextFile(w io.Writer, projectID, filePath string) error {
 	}
 	resp, err := client.InspectContent(ctx, req)
 	if err != nil {
-		return fmt.Errorf("InspectContent: %v", err)
+		return fmt.Errorf("InspectContent: %w", err)
 	}
 
 	// Process the results.

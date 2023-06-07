@@ -1,5 +1,10 @@
 assign_issues_by:
 - labels:
+  - "api: asset"
+  to:
+  - GoogleCloudPlatform/cloud-asset-analysis-team
+  - GoogleCloudPlatform/cloud-asset-platform-team
+- labels:
   - 'api: bigtable'
   - 'api: datastore'
   - 'api: firestore'
@@ -35,25 +40,37 @@ assign_issues_by:
 - labels:
   - 'api: run'
   to:
-  - grayside
+  - GoogleCloudPlatform/torus-dpe
 - labels:
   - 'api: spanner'
   to:
   - rahul2393
 - labels:
-  - 'api: cloudiot'
-  to:
-  - attilagargyan
-- labels:
   - 'api: cloudsql'
   to:
   - GoogleCloudPlatform/infra-db-dpes
+- labels:
+  - 'api: dlp'
+  to:
+  - GoogleCloudPlatform/googleapis-dlp
+- labels:
+  - "api: batch"
+  - "api: compute"
+  - "api: cloudkms"
+  - "api: iam"
+  - "api: kms"
+  - "api: privateca"
+  - "api: secretmanager"
+  - "api: securitycenter"
+  to:
+  - GoogleCloudPlatform/dee-infra
 
 assign_prs_by:
 - labels:
-  - 'api: cloudiot'
+  - "api: asset"
   to:
-  - attilagargyan
+  - GoogleCloudPlatform/cloud-asset-analysis-team
+  - GoogleCloudPlatform/cloud-asset-platform-team
 - labels:
   - 'api: bigtable'
   - 'api: datastore'
@@ -64,3 +81,18 @@ assign_prs_by:
   - 'api: cloudsql'
   to:
   - GoogleCloudPlatform/infra-db-dpes
+- labels:
+  - 'api: dlp'
+  to:
+  - GoogleCloudPlatform/googleapis-dlp
+- labels:
+  - "api: batch"
+  - "api: compute"
+  - "api: cloudkms"
+  - "api: iam"
+  - "api: kms"
+  - "api: privateca"
+  - "api: secretmanager"
+  - "api: securitycenter"
+  to:
+  - GoogleCloudPlatform/dee-infra

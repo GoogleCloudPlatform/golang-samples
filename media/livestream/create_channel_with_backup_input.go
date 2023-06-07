@@ -37,7 +37,7 @@ func createChannelWithBackupInput(w io.Writer, projectID, location, channelID, p
 	ctx := context.Background()
 	client, err := livestream.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -126,11 +126,11 @@ func createChannelWithBackupInput(w io.Writer, projectID, location, channelID, p
 	// Creates the channel.
 	op, err := client.CreateChannel(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateChannel: %v", err)
+		return fmt.Errorf("CreateChannel: %w", err)
 	}
 	response, err := op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("Wait: %v", err)
+		return fmt.Errorf("Wait: %w", err)
 	}
 
 	fmt.Fprintf(w, "Channel: %v", response.Name)
