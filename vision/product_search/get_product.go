@@ -31,7 +31,7 @@ func getProduct(w io.Writer, projectID string, location string, productID string
 	ctx := context.Background()
 	c, err := vision.NewProductSearchClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewProductSearchClient: %v", err)
+		return fmt.Errorf("NewProductSearchClient: %w", err)
 	}
 	defer c.Close()
 
@@ -41,7 +41,7 @@ func getProduct(w io.Writer, projectID string, location string, productID string
 
 	resp, err := c.GetProduct(ctx, req)
 	if err != nil {
-		return fmt.Errorf("GetProduct: %v", err)
+		return fmt.Errorf("GetProduct: %w", err)
 	}
 
 	fmt.Fprintf(w, "Product name: %s\n", resp.Name)

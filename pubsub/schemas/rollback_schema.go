@@ -31,13 +31,13 @@ func rollbackSchema(w io.Writer, projectID, schemaID, revisionID string) error {
 	ctx := context.Background()
 	client, err := pubsub.NewSchemaClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewSchemaClient: %v", err)
+		return fmt.Errorf("pubsub.NewSchemaClient: %w", err)
 	}
 	defer client.Close()
 
 	s, err := client.RollbackSchema(ctx, schemaID, revisionID)
 	if err != nil {
-		return fmt.Errorf("RollbackSchema: %v", err)
+		return fmt.Errorf("RollbackSchema: %w", err)
 	}
 	fmt.Fprintf(w, "Rolled back a schema: %#v\n", s)
 	return nil

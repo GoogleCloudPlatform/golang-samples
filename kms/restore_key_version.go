@@ -33,7 +33,7 @@ func restoreKeyVersion(w io.Writer, name string) error {
 	ctx := context.Background()
 	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create kms client: %v", err)
+		return fmt.Errorf("failed to create kms client: %w", err)
 	}
 	defer client.Close()
 
@@ -45,7 +45,7 @@ func restoreKeyVersion(w io.Writer, name string) error {
 	// Call the API.
 	result, err := client.RestoreCryptoKeyVersion(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to restore key version: %v", err)
+		return fmt.Errorf("failed to restore key version: %w", err)
 	}
 	fmt.Fprintf(w, "Restored key version: %s\n", result)
 	return nil

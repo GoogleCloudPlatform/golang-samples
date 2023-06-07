@@ -36,7 +36,7 @@ func dicomWebRetrieveRendered(w io.Writer, projectID, location, datasetID, dicom
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	storesService := healthcareService.Projects.Locations.Datasets.DicomStores.Studies.Series.Instances
@@ -47,7 +47,7 @@ func dicomWebRetrieveRendered(w io.Writer, projectID, location, datasetID, dicom
 	call.Header().Set("Accept", "image/png")
 	resp, err := call.Do()
 	if err != nil {
-		return fmt.Errorf("RetrieveRendered: %v", err)
+		return fmt.Errorf("RetrieveRendered: %w", err)
 	}
 
 	defer resp.Body.Close()
@@ -58,11 +58,11 @@ func dicomWebRetrieveRendered(w io.Writer, projectID, location, datasetID, dicom
 
 	file, err := os.Create(outputFile)
 	if err != nil {
-		return fmt.Errorf("os.Create: %v", err)
+		return fmt.Errorf("os.Create: %w", err)
 	}
 	defer file.Close()
 	if _, err := io.Copy(file, resp.Body); err != nil {
-		return fmt.Errorf("io.Copy: %v", err)
+		return fmt.Errorf("io.Copy: %w", err)
 	}
 
 	fmt.Fprintf(w, "Rendered PNG image retrieved and downloaded to file: %v\n", outputFile)

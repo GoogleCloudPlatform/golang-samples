@@ -37,7 +37,7 @@ func configureConnectionPool(w io.Writer, projectID, instanceID string) error {
 	defer client.Close()
 
 	if err != nil {
-		return fmt.Errorf("bigtable.NewClient: %v", err)
+		return fmt.Errorf("bigtable.NewClient: %w", err)
 	}
 
 	fmt.Fprintf(w, "Connected with pool size of %d", poolSize)

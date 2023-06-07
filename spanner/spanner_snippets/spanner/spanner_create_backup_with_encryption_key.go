@@ -40,7 +40,7 @@ func createBackupWithCustomerManagedEncryptionKey(ctx context.Context, w io.Writ
 
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("createBackupWithCustomerManagedEncryptionKey.NewDatabaseAdminClient: %v", err)
+		return fmt.Errorf("createBackupWithCustomerManagedEncryptionKey.NewDatabaseAdminClient: %w", err)
 	}
 	defer adminClient.Close()
 
@@ -60,12 +60,12 @@ func createBackupWithCustomerManagedEncryptionKey(ctx context.Context, w io.Writ
 	}
 	op, err := adminClient.CreateBackup(ctx, &req)
 	if err != nil {
-		return fmt.Errorf("createBackupWithCustomerManagedEncryptionKey.CreateBackup: %v", err)
+		return fmt.Errorf("createBackupWithCustomerManagedEncryptionKey.CreateBackup: %w", err)
 	}
 	// Wait for backup operation to complete.
 	backup, err := op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("createBackupWithCustomerManagedEncryptionKey.Wait: %v", err)
+		return fmt.Errorf("createBackupWithCustomerManagedEncryptionKey.Wait: %w", err)
 	}
 
 	// Get the name, create time, backup size and encryption key from the backup.

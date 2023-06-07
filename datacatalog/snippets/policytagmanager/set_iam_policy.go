@@ -33,7 +33,7 @@ func setIAMPolicy(w io.Writer, resourceID, member string) error {
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)
 	if err != nil {
-		return fmt.Errorf("datacatalog.NewPolicyTagManagerClient: %v", err)
+		return fmt.Errorf("datacatalog.NewPolicyTagManagerClient: %w", err)
 	}
 	defer policyClient.Close()
 
@@ -46,7 +46,7 @@ func setIAMPolicy(w io.Writer, resourceID, member string) error {
 	}
 	policy, err := policyClient.GetIamPolicy(ctx, req)
 	if err != nil {
-		return fmt.Errorf("GetIamPolicy: %v", err)
+		return fmt.Errorf("GetIamPolicy: %w", err)
 	}
 
 	// Alter the policy to add an additional binding.
@@ -62,7 +62,7 @@ func setIAMPolicy(w io.Writer, resourceID, member string) error {
 	}
 	updatedPolicy, err := policyClient.SetIamPolicy(ctx, sReq)
 	if err != nil {
-		return fmt.Errorf("SetIamPolicy: %v", err)
+		return fmt.Errorf("SetIamPolicy: %w", err)
 	}
 	fmt.Fprintf(w, "set policy on resource %s with Etag %x\n", resourceID, updatedPolicy.Etag)
 	return nil

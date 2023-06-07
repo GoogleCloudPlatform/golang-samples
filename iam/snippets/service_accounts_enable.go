@@ -29,13 +29,13 @@ func enableServiceAccount(w io.Writer, email string) error {
 	ctx := context.Background()
 	service, err := iam.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("iam.NewService: %v", err)
+		return fmt.Errorf("iam.NewService: %w", err)
 	}
 
 	request := &iam.EnableServiceAccountRequest{}
 	_, err = service.Projects.ServiceAccounts.Enable("projects/-/serviceAccounts/"+email, request).Do()
 	if err != nil {
-		return fmt.Errorf("Projects.ServiceAccounts.Enable: %v", err)
+		return fmt.Errorf("Projects.ServiceAccounts.Enable: %w", err)
 	}
 	fmt.Fprintf(w, "Enabled service account: %v", email)
 	return nil

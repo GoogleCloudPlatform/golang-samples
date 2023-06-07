@@ -36,7 +36,7 @@ func batchPredict(w io.Writer, projectID string, location string, modelID string
 	ctx := context.Background()
 	client, err := automl.NewPredictionClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewPredictionClient: %v", err)
+		return fmt.Errorf("NewPredictionClient: %w", err)
 	}
 	defer client.Close()
 
@@ -63,13 +63,13 @@ func batchPredict(w io.Writer, projectID string, location string, modelID string
 
 	op, err := client.BatchPredict(ctx, req)
 	if err != nil {
-		return fmt.Errorf("BatchPredict: %v", err)
+		return fmt.Errorf("BatchPredict: %w", err)
 	}
 	fmt.Fprintf(w, "Processing operation name: %q\n", op.Name())
 
 	resp, err := op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("Wait: %v", err)
+		return fmt.Errorf("Wait: %w", err)
 	}
 
 	fmt.Fprintf(w, "Batch Prediction results saved to Cloud Storage bucket.\n")

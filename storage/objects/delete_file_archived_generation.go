@@ -34,7 +34,7 @@ func deleteOldVersionOfObject(w io.Writer, bucketName, objectName string, gen in
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -43,7 +43,7 @@ func deleteOldVersionOfObject(w io.Writer, bucketName, objectName string, gen in
 
 	obj := client.Bucket(bucketName).Object(objectName)
 	if err := obj.Generation(gen).Delete(ctx); err != nil {
-		return fmt.Errorf("Bucket(%q).Object(%q).Generation(%v).Delete: %v", bucketName, objectName, gen, err)
+		return fmt.Errorf("Bucket(%q).Object(%q).Generation(%v).Delete: %w", bucketName, objectName, gen, err)
 	}
 	fmt.Fprintf(w, "Generation %v of object %v was deleted from %v\n", gen, objectName, bucketName)
 	return nil

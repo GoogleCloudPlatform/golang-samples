@@ -36,14 +36,14 @@ func autoPunctuation(w io.Writer, path string) error {
 
 	client, err := speech.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewClient: %v", err)
+		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
 	// path = "../testdata/commercial_mono.wav"
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		return fmt.Errorf("ReadFile: %v", err)
+		return fmt.Errorf("ReadFile: %w", err)
 	}
 
 	resp, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
@@ -59,7 +59,7 @@ func autoPunctuation(w io.Writer, path string) error {
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("Recognize: %v", err)
+		return fmt.Errorf("Recognize: %w", err)
 	}
 
 	for i, result := range resp.Results {

@@ -41,11 +41,11 @@ func pingRequestWithAuth(conn *grpc.ClientConn, p *pb.Request, audience string) 
 	// A given TokenSource is specific to the audience.
 	tokenSource, err := idtoken.NewTokenSource(ctx, audience)
 	if err != nil {
-		return nil, fmt.Errorf("idtoken.NewTokenSource: %v", err)
+		return nil, fmt.Errorf("idtoken.NewTokenSource: %w", err)
 	}
 	token, err := tokenSource.Token()
 	if err != nil {
-		return nil, fmt.Errorf("TokenSource.Token: %v", err)
+		return nil, fmt.Errorf("TokenSource.Token: %w", err)
 	}
 
 	// Add token to gRPC Request.

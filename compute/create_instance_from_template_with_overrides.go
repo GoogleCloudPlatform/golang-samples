@@ -37,13 +37,13 @@ func createInstanceFromTemplateWithOverrides(w io.Writer, projectID, zone, insta
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstancesRESTClient: %v", err)
+		return fmt.Errorf("NewInstancesRESTClient: %w", err)
 	}
 	defer instancesClient.Close()
 
 	intanceTemplatesClient, err := compute.NewInstanceTemplatesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewInstanceTemplatesRESTClient: %v", err)
+		return fmt.Errorf("NewInstanceTemplatesRESTClient: %w", err)
 	}
 	defer instancesClient.Close()
 
@@ -55,7 +55,7 @@ func createInstanceFromTemplateWithOverrides(w io.Writer, projectID, zone, insta
 
 	instanceTemplate, err := intanceTemplatesClient.Get(ctx, reqGetTemplate)
 	if err != nil {
-		return fmt.Errorf("unable to get intance template: %v", err)
+		return fmt.Errorf("unable to get intance template: %w", err)
 	}
 
 	fmt.Printf("%s", "asdfadf")
@@ -96,11 +96,11 @@ func createInstanceFromTemplateWithOverrides(w io.Writer, projectID, zone, insta
 
 	op, err := instancesClient.Insert(ctx, reqInsertInstance)
 	if err != nil {
-		return fmt.Errorf("unable to create instance: %v", err)
+		return fmt.Errorf("unable to create instance: %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %v", err)
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Instance created\n")

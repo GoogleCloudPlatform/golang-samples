@@ -32,7 +32,7 @@ func createProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error
 	ctx := context.Background()
 	client, err := pubsub.NewSchemaClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewSchemaClient: %v", err)
+		return fmt.Errorf("pubsub.NewSchemaClient: %w", err)
 	}
 	defer client.Close()
 
@@ -47,7 +47,7 @@ func createProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error
 	}
 	s, err := client.CreateSchema(ctx, schemaID, config)
 	if err != nil {
-		return fmt.Errorf("CreateSchema: %v", err)
+		return fmt.Errorf("CreateSchema: %w", err)
 	}
 	fmt.Fprintf(w, "Schema created: %#v\n", s)
 	return nil

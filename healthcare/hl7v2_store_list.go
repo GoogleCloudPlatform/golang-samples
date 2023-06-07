@@ -29,7 +29,7 @@ func listHL7V2Stores(w io.Writer, projectID, location, datasetID string) error {
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	storesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores
@@ -38,7 +38,7 @@ func listHL7V2Stores(w io.Writer, projectID, location, datasetID string) error {
 
 	resp, err := storesService.List(parent).Do()
 	if err != nil {
-		return fmt.Errorf("Create: %v", err)
+		return fmt.Errorf("Create: %w", err)
 	}
 
 	fmt.Fprintln(w, "HL7V2 stores:")

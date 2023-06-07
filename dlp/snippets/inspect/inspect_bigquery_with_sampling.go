@@ -26,9 +26,10 @@ import (
 )
 
 // inspectBigQueryTableWithSampling inspect bigQueries for sensitive data with sampling
-func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscriptionID, dataSetID, tableID string) error {
+func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscriptionID string) error {
 	// projectId := "your-project-id"
-	// table := "your-table-value"
+	// topicID := "your-pubsub-topic-id" or provide a topicID name to create one
+	// subscriptionID := "your-pubsub-topic-id" or provide a topicID name to create one
 
 	ctx := context.Background()
 
@@ -44,13 +45,13 @@ func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscript
 	defer client.Close()
 
 	// Specify the BigQuery table to be inspected.
-	var tableReference = &dlppb.BigQueryTable{
-		ProjectId: projectID,
-		DatasetId: dataSetID,
-		TableId:   tableID,
+	tableReference := &dlppb.BigQueryTable{
+		ProjectId: "bigquery-public-data",
+		DatasetId: "usa_names",
+		TableId:   "usa_1910_current",
 	}
 
-	var bigQueryOptions = &dlppb.BigQueryOptions{
+	bigQueryOptions := &dlppb.BigQueryOptions{
 		TableReference: tableReference,
 		RowsLimit:      int64(10000),
 		SampleMethod:   dlppb.BigQueryOptions_RANDOM_START,
@@ -59,7 +60,8 @@ func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscript
 		},
 	}
 
-	var storageConfig = &dlppb.StorageConfig{
+	// provide storage config with bigqueryOptions
+	storageConfig := &dlppb.StorageConfig{
 		Type: &dlppb.StorageConfig_BigQueryOptions{
 			BigQueryOptions: bigQueryOptions,
 		},
@@ -67,12 +69,12 @@ func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscript
 
 	// Specify the type of info the inspection will look for.
 	// See https://cloud.google.com/dlp/docs/infotypes-reference for complete list of info types
-	var infoTypes = []*dlppb.InfoType{
+	infoTypes := []*dlppb.InfoType{
 		{Name: "PERSON_NAME"},
 	}
 
 	// Specify how the content should be inspected.
-	var inspectConfig = &dlppb.InspectConfig{
+	inspectConfig := &dlppb.InspectConfig{
 		InfoTypes:    infoTypes,
 		IncludeQuote: true,
 	}
@@ -80,7 +82,6 @@ func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscript
 	// Create a PubSub Client used to listen for when the inspect job finishes.
 	pubsubClient, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		fmt.Fprintf(w, "pubsub.NewClient: %v", err)
 		return err
 	}
 	defer pubsubClient.Close()
@@ -93,7 +94,6 @@ func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscript
 		return err
 	} else if !exists {
 		if t, err = pubsubClient.CreateTopic(ctx, topicID); err != nil {
-			fmt.Fprintf(w, "CreateTopic: %v", err)
 			return err
 		}
 	}
@@ -101,11 +101,9 @@ func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscript
 	// Create the Subscription if it doesn't exist.
 	s := pubsubClient.Subscription(subscriptionID)
 	if exists, err := s.Exists(ctx); err != nil {
-		fmt.Fprintf(w, "s.Exits: %v", err)
 		return err
 	} else if !exists {
 		if s, err = pubsubClient.CreateSubscription(ctx, subscriptionID, pubsub.SubscriptionConfig{Topic: t}); err != nil {
-			fmt.Fprintf(w, "CreateSubscription: %v", err)
 			return err
 		}
 	}
@@ -113,7 +111,7 @@ func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscript
 	// topic is the PubSub topic string where messages should be sent.
 	topic := "projects/" + projectID + "/topics/" + topicID
 
-	var action = &dlppb.Action{
+	action := &dlppb.Action{
 		Action: &dlppb.Action_PubSub{
 			PubSub: &dlppb.Action_PublishToPubSub{
 				Topic: topic,
@@ -122,7 +120,7 @@ func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscript
 	}
 
 	// Configure the long running job we want the service to perform.
-	var inspectJobConfig = &dlppb.InspectJobConfig{
+	inspectJobConfig := &dlppb.InspectJobConfig{
 		StorageConfig: storageConfig,
 		InspectConfig: inspectConfig,
 		Actions: []*dlppb.Action{
@@ -141,7 +139,6 @@ func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscript
 	// Use the client to send the request.
 	j, err := client.CreateDlpJob(ctx, req)
 	if err != nil {
-		fmt.Fprintf(w, "Receive: %v", err)
 		return err
 	}
 	fmt.Fprintf(w, "Job Created: %v", j.GetName())
@@ -179,7 +176,7 @@ func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscript
 		}
 	})
 	if err != nil {
-		return fmt.Errorf("receive: %v", err)
+		return err
 	}
 	return nil
 

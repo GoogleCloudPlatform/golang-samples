@@ -33,7 +33,7 @@ func updateKeySetPrimary(w io.Writer, name, version string) error {
 	ctx := context.Background()
 	client, err := kms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create kms client: %v", err)
+		return fmt.Errorf("failed to create kms client: %w", err)
 	}
 	defer client.Close()
 
@@ -46,7 +46,7 @@ func updateKeySetPrimary(w io.Writer, name, version string) error {
 	// Call the API.
 	result, err := client.UpdateCryptoKeyPrimaryVersion(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to update key: %v", err)
+		return fmt.Errorf("failed to update key: %w", err)
 	}
 	fmt.Fprintf(w, "Updated key primary: %s\n", result.Name)
 

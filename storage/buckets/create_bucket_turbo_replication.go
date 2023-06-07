@@ -36,7 +36,7 @@ func createBucketTurboReplication(w io.Writer, projectID, bucketName, location s
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -49,7 +49,7 @@ func createBucketTurboReplication(w io.Writer, projectID, bucketName, location s
 	}
 	bucket := client.Bucket(bucketName)
 	if err := bucket.Create(ctx, projectID, storageLocationAndRPO); err != nil {
-		return fmt.Errorf("Bucket(%q).Create: %v", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Create: %w", bucketName, err)
 	}
 	fmt.Fprintf(w, "Created bucket %v with turbo replication in %v\n", bucketName, storageLocationAndRPO.Location)
 	return nil

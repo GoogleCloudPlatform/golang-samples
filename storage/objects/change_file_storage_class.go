@@ -31,7 +31,7 @@ func changeObjectStorageClass(w io.Writer, bucket, object string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -45,7 +45,7 @@ func changeObjectStorageClass(w io.Writer, bucket, object string) error {
 	// object's generation number does not match your precondition.
 	attrs, err := o.Attrs(ctx)
 	if err != nil {
-		return fmt.Errorf("object.Attrs: %v", err)
+		return fmt.Errorf("object.Attrs: %w", err)
 	}
 	o = o.If(storage.Conditions{GenerationMatch: attrs.Generation})
 
@@ -57,7 +57,7 @@ func changeObjectStorageClass(w io.Writer, bucket, object string) error {
 	copier := o.CopierFrom(o)
 	copier.StorageClass = newStorageClass
 	if _, err := copier.Run(ctx); err != nil {
-		return fmt.Errorf("copier.Run: %v", err)
+		return fmt.Errorf("copier.Run: %w", err)
 	}
 	fmt.Fprintf(w, "Object %v in bucket %v had its storage class set to %v\n", object, bucket, newStorageClass)
 	return nil

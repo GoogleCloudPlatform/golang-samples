@@ -46,7 +46,7 @@ func downloadToPosix(w io.Writer, projectID string, sinkAgentPoolName string, gc
 	ctx := context.Background()
 	client, err := storagetransfer.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("storagetransfer.NewClient: %v", err)
+		return nil, fmt.Errorf("storagetransfer.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -71,13 +71,13 @@ func downloadToPosix(w io.Writer, projectID string, sinkAgentPoolName string, gc
 
 	resp, err := client.CreateTransferJob(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create transfer job: %v", err)
+		return nil, fmt.Errorf("failed to create transfer job: %w", err)
 	}
 	if _, err = client.RunTransferJob(ctx, &storagetransferpb.RunTransferJobRequest{
 		ProjectId: projectID,
 		JobName:   resp.Name,
 	}); err != nil {
-		return nil, fmt.Errorf("failed to run transfer job: %v", err)
+		return nil, fmt.Errorf("failed to run transfer job: %w", err)
 	}
 	fmt.Fprintf(w, "Created and ran transfer job from %v to %v with name %v", gcsSourceBucket, rootDirectory, resp.Name)
 	return resp, nil
