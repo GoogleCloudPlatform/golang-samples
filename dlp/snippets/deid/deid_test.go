@@ -263,3 +263,21 @@ func TestDeIdentifyWithWordList(t *testing.T) {
 		t.Errorf("deidentifyWithWordList(%q) = %q, want %q", input, got, want)
 	}
 }
+
+func TestDeIdentifyWithInfotype(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	input := "My email is test@example.com"
+	infoType := []string{"EMAIL_ADDRESS"}
+	want := "My email is [EMAIL_ADDRESS]"
+
+	var buf bytes.Buffer
+
+	if err := deidentifyWithInfotype(&buf, tc.ProjectID, input, infoType); err != nil {
+		t.Fatal(err)
+	}
+	if got := buf.String(); got != want {
+		t.Errorf("deidentifyFreeTextWithFPEUsingSurrogate(%q) = %q, want %q", input, got, want)
+	}
+
+}
