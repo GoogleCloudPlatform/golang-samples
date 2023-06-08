@@ -299,7 +299,7 @@ func (j *Job) LogEntries(filter string, find string, maxAttempts int) (bool, err
 	ctx := context.Background()
 	client, err := logadmin.NewClient(ctx, j.ProjectID)
 	if err != nil {
-		return false, fmt.Errorf("logadmin.NewClient: %v", err)
+		return false, fmt.Errorf("logadmin.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -315,7 +315,7 @@ func (j *Job) LogEntries(filter string, find string, maxAttempts int) (bool, err
 				break
 			}
 			if err != nil {
-				return false, fmt.Errorf("it.Next: %v", err)
+				return false, fmt.Errorf("it.Next: %w", err)
 			}
 			payload := fmt.Sprintf("%v", entry.Payload)
 			if len(payload) > 0 {
