@@ -54,7 +54,7 @@ func deIdentifyDeterministicEncryption(w io.Writer, projectID, inputStr string, 
 	// Specify an encrypted AES-256 key and the name of the Cloud KMS key that encrypted it.
 	wrappedKey, err := base64.StdEncoding.DecodeString(cryptoKeyName)
 	if err != nil {
-		return fmt.Errorf("error in decoding key: %v", err)
+		return err
 	}
 
 	// Specify the type of info the inspection will look for.
@@ -122,7 +122,7 @@ func deIdentifyDeterministicEncryption(w io.Writer, projectID, inputStr string, 
 	// Send the request.
 	resp, err := client.DeidentifyContent(ctx, req)
 	if err != nil {
-		return fmt.Errorf("DeidentifyContent: %v", err)
+		return err
 	}
 
 	// Print the results.
