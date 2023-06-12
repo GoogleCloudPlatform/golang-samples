@@ -16,6 +16,11 @@ package redact
 
 import (
 	"bytes"
+	"crypto/md5"
+	"encoding/hex"
+	"errors"
+	"io"
+	"os"
 	"strings"
 	"testing"
 
@@ -61,4 +66,55 @@ func TestRedactImage(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestRedactImageFileAllText(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	inputPath := "testdata/image.jpg"
+	outputPath := "testdata/test-output-sensitive-data-image-redacted.jpeg"
+
+	var buf bytes.Buffer
+	if err := redactImageFileAllText(&buf, tc.ProjectID, inputPath, outputPath); err != nil {
+		t.Fatal(err)
+	}
+
+	hash1, err := calculateImageHash(inputPath)
+	if err != nil {
+		t.Errorf("redactImageFileAllText: Error calculating hash for image 1: %q", err)
+	}
+
+	if _, err := os.Stat(outputPath); errors.Is(err, os.ErrNotExist) {
+		t.Error("redactImageFileAllText: the output file is not generated")
+	} else {
+		hash2, err := calculateImageHash(outputPath)
+		if err != nil {
+			t.Errorf("redactImageFileAllText: Error calculating hash for image 2: %q", err)
+		}
+
+		if hash1 == hash2 {
+			t.Error("redactImageFileAllText: image is not redacted.")
+		}
+	}
+
+	got := buf.String()
+	if want := "Wrote output to"; !strings.Contains(got, want) {
+		t.Errorf("redactImageFileAllText got %q, want %q", got, want)
+	}
+
+}
+
+func calculateImageHash(filename string) (string, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	hash := md5.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		return "", err
+	}
+
+	hashSum := hash.Sum(nil)
+	return hex.EncodeToString(hashSum), nil
 }
