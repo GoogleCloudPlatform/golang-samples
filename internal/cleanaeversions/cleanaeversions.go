@@ -70,7 +70,7 @@ func main() {
 
 	filterRE, err := regexp.Compile(*filter)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Filter is not a valid regexp: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Filter is not a valid regexp: %v", err)
 		os.Exit(2)
 	}
 	_ = filterRE
@@ -78,12 +78,12 @@ func main() {
 	ctx := context.Background()
 	hc, err := google.DefaultClient(ctx, appengine.CloudPlatformScope)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Could not create DefaultClient: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Could not create DefaultClient: %v", err)
 		os.Exit(1)
 	}
 	gae, err = appengine.New(hc)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Could not create App Engine service: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Could not create App Engine service: %v", err)
 		os.Exit(1)
 	}
 
@@ -97,7 +97,7 @@ func main() {
 			}
 			return nil
 		}); err != nil {
-			fmt.Fprintf(os.Stderr, "Could not list App Engine services: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Could not list App Engine services: %v", err)
 			os.Exit(1)
 		}
 	}
