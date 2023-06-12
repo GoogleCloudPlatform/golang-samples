@@ -137,10 +137,10 @@ func (p *App) Deploy() error {
 		return err
 	}
 	if err := p.readService(); err != nil {
-		return fmt.Errorf("could not read service: %v", err)
+		return fmt.Errorf("could not read service: %w", err)
 	}
 	if err := p.initAdminService(); err != nil {
-		return fmt.Errorf("could not setup admin service: %v", err)
+		return fmt.Errorf("could not setup admin service: %w", err)
 	}
 
 	log.Printf("(%s) Deploying...", p.Name)
