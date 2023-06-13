@@ -25,6 +25,8 @@ import (
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/metric/instrument"
 	"go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/resource"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 )
 
 var counter instrument.Int64Counter
@@ -50,6 +52,21 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func setupCounter(ctx context.Context) func(context.Context) error {
+	serviceName := os.Getenv("K_SERVICE")
+	if serviceName == "" {
+		serviceName = "sample-cloud-run-app"
+	}
+	r, err := resource.Merge(
+		resource.Default(),
+		resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceName(serviceName),
+		),
+	)
+	if err != nil {
+		log.Fatalf("Error creating resource: %s", err)
+	}
+
 	exporter, err := otlpmetricgrpc.New(ctx,
 		otlpmetricgrpc.WithInsecure(),
 	)
@@ -58,6 +75,7 @@ func setupCounter(ctx context.Context) func(context.Context) error {
 	}
 	provider := metric.NewMeterProvider(
 		metric.WithReader(metric.NewPeriodicReader(exporter)),
+		metric.WithResource(r),
 	)
 
 	meter := provider.Meter("example.com/metrics")
