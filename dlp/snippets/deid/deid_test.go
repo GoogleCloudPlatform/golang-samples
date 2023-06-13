@@ -17,11 +17,18 @@ package deid
 
 import (
 	"bytes"
+	"context"
+	"encoding/base64"
+	"fmt"
+	"log"
 	"strings"
 
 	"testing"
 
+	kms "cloud.google.com/go/kms/apiv1"
+	"cloud.google.com/go/kms/apiv1/kmspb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/google/uuid"
 )
 
 func TestMask(t *testing.T) {
@@ -180,6 +187,7 @@ func TestDeidentifyExceptionList(t *testing.T) {
 	if got := buf.String(); got != want {
 		t.Errorf("deidentifyExceptionList(%q) = %q, want %q", input, got, want)
 	}
+
 }
 
 func TestDeIdentifyWithReplacement(t *testing.T) {
@@ -262,4 +270,129 @@ func TestDeIdentifyWithWordList(t *testing.T) {
 	if got := buf.String(); got != want {
 		t.Errorf("deidentifyWithWordList(%q) = %q, want %q", input, got, want)
 	}
+}
+
+func TestDeIdentifyDeterministic(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	input := "Jack's phone number is 5555551212"
+	infoTypeNames := []string{"PHONE_NUMBER"}
+	keyRingName, err := createKeyRing(t, tc.ProjectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	keyFileName, cryptoKeyName, keyVersion, err := createKey(t, tc.ProjectID, keyRingName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer destroyKey(t, tc.ProjectID, keyVersion)
+
+	surrogateInfoType := "PHONE_TOKEN"
+	want := "output : Jack's phone number is PHONE_TOKEN(36):"
+
+	var buf bytes.Buffer
+
+	if err := deIdentifyDeterministicEncryption(&buf, tc.ProjectID, input, infoTypeNames, keyFileName, cryptoKeyName, surrogateInfoType); err != nil {
+		t.Errorf("deIdentifyDeterministicEncryption(%q) = error '%q', want %q", err, input, want)
+	}
+
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("deIdentifyDeterministicEncryption(%q) = %q, want %q", input, got, want)
+	}
+
+}
+
+func createKeyRing(t *testing.T, projectID string) (string, error) {
+	t.Helper()
+
+	u := uuid.New().String()[:8]
+	parent := fmt.Sprintf("projects/%v/locations/global", projectID)
+	id := "test-dlp-go-lang-key-id-1" + u
+
+	ctx := context.Background()
+	client, err := kms.NewKeyManagementClient(ctx)
+	if err != nil {
+		return "", err
+	}
+	defer client.Close()
+
+	// Build the request.
+	req := &kmspb.CreateKeyRingRequest{
+		Parent:    parent,
+		KeyRingId: id,
+	}
+
+	// Call the API.
+	result, err := client.CreateKeyRing(ctx, req)
+	if err != nil {
+		return "", err
+	}
+
+	return result.Name, nil
+}
+
+func createKey(t *testing.T, projectID, keyFileName string) (string, string, string, error) {
+	t.Helper()
+	u := uuid.New().String()[:8]
+	id := "go-lang-dlp-test-wrapped-aes-256" + u
+	ctx := context.Background()
+	client, err := kms.NewKeyManagementClient(ctx)
+	if err != nil {
+		return "", "", "", fmt.Errorf("failed to create kms client: %w", err)
+	}
+	defer client.Close()
+
+	// Build the request.
+	req := &kmspb.CreateCryptoKeyRequest{
+		Parent:      keyFileName,
+		CryptoKeyId: id,
+		CryptoKey: &kmspb.CryptoKey{
+			Purpose: kmspb.CryptoKey_ENCRYPT_DECRYPT,
+			VersionTemplate: &kmspb.CryptoKeyVersionTemplate{
+				ProtectionLevel: kmspb.ProtectionLevel_HSM,
+				Algorithm:       kmspb.CryptoKeyVersion_GOOGLE_SYMMETRIC_ENCRYPTION,
+			},
+		},
+	}
+
+	// Call the API.
+	result, err := client.CreateCryptoKey(ctx, req)
+	if err != nil {
+		return "", "", "", fmt.Errorf("failed to create key: %w", err)
+	}
+
+	response, err := client.Encrypt(ctx, &kmspb.EncryptRequest{
+		Name:      result.Name,
+		Plaintext: []byte("5u8x/A?D(G+KbPeShVmYq3t6w9y$B&E)"),
+	})
+
+	if err != nil {
+		log.Fatalf("Failed to wrap key: %v", err)
+	}
+	wrappedKey := response.Ciphertext
+
+	wrappedKeyString := base64.StdEncoding.EncodeToString(wrappedKey)
+	return result.Name, wrappedKeyString, response.Name, nil
+}
+
+func destroyKey(t *testing.T, projectID, key string) error {
+	t.Helper()
+
+	ctx := context.Background()
+	client, err := kms.NewKeyManagementClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	req := &kmspb.DestroyCryptoKeyVersionRequest{
+		Name: key,
+	}
+
+	_, err = client.DestroyCryptoKeyVersion(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
