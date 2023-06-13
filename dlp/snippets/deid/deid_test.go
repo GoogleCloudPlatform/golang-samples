@@ -279,6 +279,7 @@ func TestDeidentifyTableFPE(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	kmsKeyName, wrappedAesKey, keyVersion, err := createKey(t, tc.ProjectID, keyRingName)
 	if err != nil {
 		t.Fatal(err)
