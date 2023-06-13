@@ -122,7 +122,7 @@ func (s *Service) NewRequest(method, path string) (*http.Request, error) {
 	}
 	url, err := s.URL(path)
 	if err != nil {
-		return nil, fmt.Errorf("service.URL: %v", err)
+		return nil, fmt.Errorf("service.URL: %w", err)
 	}
 	return s.Platform.NewRequest(method, url)
 }
@@ -132,7 +132,7 @@ func (s *Service) NewRequest(method, path string) (*http.Request, error) {
 func (s *Service) URL(p string) (string, error) {
 	u, err := s.ParsedURL()
 	if err != nil {
-		return "", fmt.Errorf("service.ParsedURL: %v", err)
+		return "", fmt.Errorf("service.ParsedURL: %w", err)
 	}
 	modified := &url.URL{}
 	*modified = *u
@@ -145,7 +145,7 @@ func (s *Service) URL(p string) (string, error) {
 func (s *Service) Host() (string, error) {
 	u, err := s.ParsedURL()
 	if err != nil {
-		return "", fmt.Errorf("service.ParsedURL: %v", err)
+		return "", fmt.Errorf("service.ParsedURL: %w", err)
 	}
 	return u.Host + ":443", nil
 }
@@ -165,7 +165,7 @@ func (s *Service) ParsedURL() (*url.URL, error) {
 		sURL := string(out)
 		u, err := url.Parse(sURL)
 		if err != nil {
-			return nil, fmt.Errorf("url.Parse: %v", err)
+			return nil, fmt.Errorf("url.Parse: %w", err)
 		}
 
 		s.url = u
@@ -394,7 +394,7 @@ func (s *Service) LogEntries(filter string, find string, maxAttempts int) (bool,
 	ctx := context.Background()
 	client, err := logadmin.NewClient(ctx, s.ProjectID)
 	if err != nil {
-		return false, fmt.Errorf("logadmin.NewClient: %v", err)
+		return false, fmt.Errorf("logadmin.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -413,7 +413,7 @@ func (s *Service) LogEntries(filter string, find string, maxAttempts int) (bool,
 				break
 			}
 			if err != nil {
-				return false, fmt.Errorf("it.Next: %v", err)
+				return false, fmt.Errorf("it.Next: %w", err)
 			}
 			payload := fmt.Sprintf("%v", entry.Payload)
 			if len(payload) > 0 {
