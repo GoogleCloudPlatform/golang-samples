@@ -277,23 +277,6 @@ func TestInspectBigquery(t *testing.T) {
 	}
 }
 
-func TestInspectBigQueryTableWithSampling(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	topicID := "go-lang-dlp-test-bigquery-with-sampling-topic"
-	subscriptionID := "go-lang-dlp-test-bigquery-with-sampling-subscription"
-
-	buf := new(bytes.Buffer)
-	if err := inspectBigQueryTableWithSampling(buf, tc.ProjectID, topicID, subscriptionID); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if want := "Job Created"; !strings.Contains(got, want) {
-		t.Errorf("InspectBigQueryTableWithSampling got %q, want %q", got, want)
-	}
-
-}
-
 func TestInspectTable(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
@@ -561,4 +544,21 @@ func TestInspectImageFileListedInfoTypes(t *testing.T) {
 	if want := "Info type: US_SOCIAL_SECURITY_NUMBER"; !strings.Contains(got, want) {
 		t.Errorf("inspectImageFileListedInfoTypes got %q, want %q", got, want)
 	}
+}
+
+func TestInspectBigQueryTableWithSampling(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	topicID := "go-lang-dlp-test-bigquery-with-sampling-topic"
+	subscriptionID := "go-lang-dlp-test-bigquery-with-sampling-subscription"
+
+	var buf bytes.Buffer
+	if err := inspectBigQueryTableWithSampling(&buf, tc.ProjectID, topicID, subscriptionID); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "Job Created"; !strings.Contains(got, want) {
+		t.Errorf("InspectBigQueryTableWithSampling got %q, want %q", got, want)
+	}
+
 }
