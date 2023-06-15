@@ -387,6 +387,7 @@ func createKey(t *testing.T, projectID, keyFileName string) (string, string, str
 	if err != nil {
 		log.Fatalf("Failed to wrap key: %v", err)
 	}
+
 	wrappedKey := response.Ciphertext
 
 	wrappedKeyString := base64.StdEncoding.EncodeToString(wrappedKey)
