@@ -46,7 +46,7 @@ func deidentifyTableFPE(w io.Writer, projectID string, kmsKeyName, wrappedAesKey
 
 	row2 := &dlppb.Table_Row{
 		Values: []*dlppb.Value{
-			{Type: &dlppb.Value_StringValue{StringValue: "11111"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "22222"}},
 			{Type: &dlppb.Value_StringValue{StringValue: "2016"}},
 			{Type: &dlppb.Value_StringValue{StringValue: "$20"}},
 		},
@@ -54,7 +54,7 @@ func deidentifyTableFPE(w io.Writer, projectID string, kmsKeyName, wrappedAesKey
 
 	row3 := &dlppb.Table_Row{
 		Values: []*dlppb.Value{
-			{Type: &dlppb.Value_StringValue{StringValue: "22222"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "33333"}},
 			{Type: &dlppb.Value_StringValue{StringValue: "2016"}},
 			{Type: &dlppb.Value_StringValue{StringValue: "$15"}},
 		},
