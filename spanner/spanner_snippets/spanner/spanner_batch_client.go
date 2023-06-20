@@ -47,7 +47,10 @@ func readBatchData(w io.Writer, db string) error {
 		SingerInfo []byte
 	}
 	stmt := spanner.Statement{SQL: "SELECT SingerId, FirstName, LastName FROM Singers;"}
-	partitions, err := txn.PartitionQuery(ctx, stmt, spanner.PartitionOptions{})
+	// A Partition object is serializable and can be used from a different process.
+	// DataBoost option is an optional parameter which can also be used for partition read
+	// and query to execute the request via spanner independent compute resources.
+	partitions, err := txn.PartitionQueryWithOptions(ctx, stmt, spanner.PartitionOptions{}, spanner.QueryOptions{DataBoostEnabled: true})
 	if err != nil {
 		return err
 	}
