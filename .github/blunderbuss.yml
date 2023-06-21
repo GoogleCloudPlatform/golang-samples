@@ -38,10 +38,6 @@ assign_issues_by:
   to:
   - hongalex
 - labels:
-  - 'api: run'
-  to:
-  - GoogleCloudPlatform/torus-dpe
-- labels:
   - 'api: spanner'
   to:
   - rahul2393
