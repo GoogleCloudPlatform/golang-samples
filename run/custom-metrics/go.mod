@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/run/custom-metrics
 
-go 1.21
+go 1.20
 
 require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230427161031-d55a50fa5eaa
