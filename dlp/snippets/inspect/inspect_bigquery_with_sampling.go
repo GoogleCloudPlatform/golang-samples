@@ -92,7 +92,6 @@ func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscript
 	// Create the Topic if it doesn't exist.
 	t := pubsubClient.Topic(topicID)
 	if exists, err := t.Exists(ctx); err != nil {
-		fmt.Errorf("t.Exists: %w", err)
 		return err
 	} else if !exists {
 		if t, err = pubsubClient.CreateTopic(ctx, topicID); err != nil {
@@ -165,7 +164,7 @@ func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscript
 			Name: j.GetName(),
 		})
 		if err != nil {
-			fmt.Errorf("Error getting completed job: %w\n", err)
+			fmt.Fprintf(w, "Error getting completed job: %v", fmt.Errorf("%w", err))
 			return
 		}
 		r := resp.GetInspectDetails().GetResult().GetInfoTypeStats()
