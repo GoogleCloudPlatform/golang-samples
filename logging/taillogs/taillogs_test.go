@@ -73,12 +73,12 @@ func TestTailLogs(t *testing.T) {
 		adminClient.DeleteLog(ctx, logID)
 	}()
 
-	// 5 minute timeout and 3 retries
-	testutil.Retry(t, 3, 5*time.Minute, func(r *testutil.R) {
+	// 3 minute timeout and 3 retries
+	testutil.Retry(t, 3, 3*time.Minute, func(r *testutil.R) {
 		// ingest a couple of logs to finish the test
 		err := tailLogs(projectID)
 		if err != nil {
-			t.Errorf("testLogs sample returned error: %v", err)
+			r.Errorf("testLogs sample returned error: %v", err)
 		}
 	})
 }
