@@ -28,8 +28,10 @@ import (
 // inspectBigQueryTableWithSampling inspect bigQueries for sensitive data with sampling
 func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscriptionID string) error {
 	// projectId := "your-project-id"
-	// topicID := "your-pubsub-topic-id" or provide a topicID name to create one
-	// subscriptionID := "your-pubsub-topic-id" or provide a topicID name to create one
+	// topicID := "your-pubsub-topic-id"
+	// or provide a topicID name to create one
+	// subscriptionID := "your-pubsub-subscription-id"
+	// or provide a subscription name to create one
 
 	ctx := context.Background()
 
@@ -60,7 +62,7 @@ func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscript
 		},
 	}
 
-	// provide storage config with bigqueryOptions
+	// Provide storage config with BigqueryOptions
 	storageConfig := &dlppb.StorageConfig{
 		Type: &dlppb.StorageConfig_BigQueryOptions{
 			BigQueryOptions: bigQueryOptions,
@@ -90,7 +92,7 @@ func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscript
 	// Create the Topic if it doesn't exist.
 	t := pubsubClient.Topic(topicID)
 	if exists, err := t.Exists(ctx); err != nil {
-		fmt.Fprintf(w, "t.Exists: %v", err)
+		fmt.Errorf("t.Exists: %w", err)
 		return err
 	} else if !exists {
 		if t, err = pubsubClient.CreateTopic(ctx, topicID); err != nil {
@@ -109,7 +111,7 @@ func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscript
 	}
 
 	// topic is the PubSub topic string where messages should be sent.
-	topic := "projects/" + projectID + "/topics/" + topicID
+	topic := fmt.Sprintf("projects/" + projectID + "/topics/" + topicID)
 
 	action := &dlppb.Action{
 		Action: &dlppb.Action_PubSub{

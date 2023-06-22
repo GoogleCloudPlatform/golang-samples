@@ -560,5 +560,8 @@ func TestInspectBigQueryTableWithSampling(t *testing.T) {
 	if want := "Job Created"; !strings.Contains(got, want) {
 		t.Errorf("InspectBigQueryTableWithSampling got %q, want %q", got, want)
 	}
+	if want := "Found"; !strings.Contains(got, want) {
+		t.Errorf("InspectBigQueryTableWithSampling got %q, want %q", got, want)
+	}
 
 }
