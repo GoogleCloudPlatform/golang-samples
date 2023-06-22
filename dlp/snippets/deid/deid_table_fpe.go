@@ -25,14 +25,14 @@ import (
 )
 
 // deidentifyTableFPE de-identifies table data with format preserving encryption.
-func deidentifyTableFPE(w io.Writer, projectID string, kmsKeyName, wrappedAesKey string) error {
+func deidentifyTableFPE(w io.Writer, projectID string, kmsKeyName, wrappedAESKey string) error {
 	// projectId := "your-project-id"
-	/* kmsKeyName := /* keyFileName :=  "projects/YOUR_PROJECT/"
+	/* keyFileName :=  "projects/YOUR_PROJECT/"
 	   + "locations/YOUR_KEYRING_REGION/"
 	   + "keyRings/YOUR_KEYRING_NAME/"
 	   + "cryptoKeys/YOUR_KEY_NAME"
 	*/
-	// wrappedAesKey := "YOUR_ENCRYPTED_AES_256_KEY"
+	// wrappedAESKey := "YOUR_ENCRYPTED_AES_256_KEY"
 	// table := "your-table"
 
 	// define your table.
@@ -73,7 +73,6 @@ func deidentifyTableFPE(w io.Writer, projectID string, kmsKeyName, wrappedAesKey
 		},
 	}
 
-	// client operations.
 	ctx := context.Background()
 
 	// Initialize a client once and reuse it to send multiple requests. Clients
@@ -81,7 +80,7 @@ func deidentifyTableFPE(w io.Writer, projectID string, kmsKeyName, wrappedAesKey
 	// call the Close method to cleanup its resources.
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("dlp.NewClient: %v", err)
+		return err
 	}
 
 	// Closing the client safely cleans up background resources.
@@ -95,7 +94,7 @@ func deidentifyTableFPE(w io.Writer, projectID string, kmsKeyName, wrappedAesKey
 	}
 
 	// Specify an encrypted AES-256 key and the name of the Cloud KMS key that encrypted it.
-	kmsKeyDecode, err := base64.StdEncoding.DecodeString(wrappedAesKey)
+	kmsKeyDecode, err := base64.StdEncoding.DecodeString(wrappedAESKey)
 	if err != nil {
 		return fmt.Errorf("error in decoding key: %v", err)
 	}
@@ -160,7 +159,7 @@ func deidentifyTableFPE(w io.Writer, projectID string, kmsKeyName, wrappedAesKey
 	// Send the request.
 	resp, err := client.DeidentifyContent(ctx, req)
 	if err != nil {
-		return fmt.Errorf("DeidentifyContent: %v", err)
+		return err
 	}
 
 	// Print the results.
