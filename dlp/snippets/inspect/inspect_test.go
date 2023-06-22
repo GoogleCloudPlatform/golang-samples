@@ -616,17 +616,6 @@ func deleteBucket(t *testing.T, projectID, bucketName string) error {
 	}
 	defer client.Close()
 
-	// o := client.Bucket(bucketName).Object(objectName)
-	// attrs, err := o.Attrs(ctx)
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	// o = o.If(storage.Conditions{GenerationMatch: attrs.Generation})
-
-	// if err := o.Delete(ctx); err != nil {
-	// 	t.Fatal(err)
-	// }
-
 	bucket := client.Bucket(bucketName)
 	if err := bucket.Delete(ctx); err != nil {
 		t.Fatal(err)
