@@ -165,7 +165,7 @@ func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscript
 			Name: j.GetName(),
 		})
 		if err != nil {
-			fmt.Fprintf(w, "Error getting completed job: %v\n", err)
+			fmt.Errorf("Error getting completed job: %w\n", err)
 			return
 		}
 		r := resp.GetInspectDetails().GetResult().GetInfoTypeStats()
