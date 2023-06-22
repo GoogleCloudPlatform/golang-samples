@@ -84,11 +84,11 @@ func deidentifyWithInfotype(w io.Writer, projectID, item string, infoTypeNames [
 	// Send the request.
 	resp, err := client.DeidentifyContent(ctx, req)
 	if err != nil {
-		return fmt.Errorf("DeidentifyContent: %v", err)
+		return err
 	}
 
 	// Print the results.
-	fmt.Fprint(w, resp.GetItem().GetValue())
+	fmt.Fprintf(w, "output : %v", resp.GetItem().GetValue())
 	return nil
 }
 
