@@ -147,9 +147,9 @@ func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscript
 	// Wait for the inspect job to finish by waiting for a PubSub message.
 	// This only waits for 10 minutes. For long jobs, consider using a truly
 	// asynchronous execution model such as Cloud Functions.
-	ctx, cancel := context.WithTimeout(ctx, 10*time.Minute)
+	c, cancel := context.WithTimeout(ctx, 10*time.Minute)
 	defer cancel()
-	err = s.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
+	err = s.Receive(c, func(ctx context.Context, msg *pubsub.Message) {
 		// If this is the wrong job, do not process the result.
 		if msg.Attributes["DlpJobName"] != j.GetName() {
 			msg.Nack()
@@ -159,25 +159,24 @@ func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscript
 
 		// Stop listening for more messages.
 		defer cancel()
-
-		resp, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
-			Name: j.GetName(),
-		})
-		if err != nil {
-			fmt.Fprintf(w, "Error getting completed job: %v", fmt.Errorf("%w", err))
-			return
-		}
-		r := resp.GetInspectDetails().GetResult().GetInfoTypeStats()
-		if len(r) == 0 {
-			fmt.Fprintf(w, "No results")
-			return
-		}
-		for _, s := range r {
-			fmt.Fprintf(w, "\nFound %v instances of infoType %v\n", s.GetCount(), s.GetInfoType().GetName())
-		}
 	})
 	if err != nil {
 		return err
+	}
+
+	resp, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
+		Name: j.GetName(),
+	})
+	if err != nil {
+		return err
+	}
+	r := resp.GetInspectDetails().GetResult().GetInfoTypeStats()
+	if len(r) == 0 {
+		fmt.Fprintf(w, "No results")
+		return err
+	}
+	for _, s := range r {
+		fmt.Fprintf(w, "\nFound %v instances of infoType %v\n", s.GetCount(), s.GetInfoType().GetName())
 	}
 	return nil
 
