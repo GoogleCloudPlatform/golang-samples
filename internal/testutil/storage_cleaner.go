@@ -55,7 +55,7 @@ func cleanBucketWithClient(ctx context.Context, t *testing.T, client *storage.Cl
 
 	// Delete the bucket if it exists.
 	if err := DeleteBucketIfExists(ctx, client, bucket); err != nil {
-		return fmt.Errorf("error deleting bucket: %v", err)
+		return fmt.Errorf("error deleting bucket: %w", err)
 	}
 	b := client.Bucket(bucket)
 

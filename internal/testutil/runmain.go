@@ -94,7 +94,7 @@ func (r *Runner) Run(env map[string]string, timeout time.Duration, args ...strin
 	cmd.Stderr = &bufErr
 
 	if err := cmd.Start(); err != nil {
-		return nil, nil, fmt.Errorf("could not execute binary: %v", err)
+		return nil, nil, fmt.Errorf("could not execute binary: %w", err)
 	}
 
 	if err := cmd.Wait(); err != nil {

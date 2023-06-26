@@ -52,6 +52,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatalf("storage.NewClient: %v", err)
 	}
+	c.SetRetry(storage.WithPolicy(storage.RetryAlways))
 	client = c
 	defer client.Close()
 
@@ -98,13 +99,16 @@ func TestNotifications(t *testing.T) {
 
 	// Test Create.
 	t.Run("create bucket notification", func(t *testing.T) {
-		if err := createBucketNotification(&buf, tc.ProjectID, bucketName, topicName); err != nil {
-			t.Fatalf("createBucketNotification: %v", err)
-		}
+		testutil.Retry(t, 5, 2*time.Second, func(r *testutil.R) {
+			if err := createBucketNotification(&buf, tc.ProjectID, bucketName, topicName); err != nil {
+				r.Errorf("createBucketNotification: %v", err)
+				return
+			}
 
-		if got, want := buf.String(), "created notification with ID"; !strings.Contains(got, want) {
-			t.Errorf("createBucketNotification: got %q; want to contain %q", got, want)
-		}
+			if got, want := buf.String(), "created notification with ID"; !strings.Contains(got, want) {
+				r.Errorf("createBucketNotification: got %q; want to contain %q", got, want)
+			}
+		})
 	})
 
 	// Add another notification so we know its ID
