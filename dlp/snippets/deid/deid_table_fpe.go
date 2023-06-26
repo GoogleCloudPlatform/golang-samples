@@ -33,7 +33,6 @@ func deidentifyTableFPE(w io.Writer, projectID string, kmsKeyName, wrappedAESKey
 	   + "cryptoKeys/YOUR_KEY_NAME"
 	*/
 	// wrappedAESKey := "YOUR_ENCRYPTED_AES_256_KEY"
-	// table := "your-table"
 
 	// define your table.
 	row1 := &dlppb.Table_Row{
@@ -163,7 +162,7 @@ func deidentifyTableFPE(w io.Writer, projectID string, kmsKeyName, wrappedAESKey
 	}
 
 	// Print the results.
-	fmt.Fprintf(w, "De-identify Table after format-preserving encryption : %v", resp.GetItem().GetTable())
+	fmt.Fprintf(w, "De-identify Table after format-preserving encryption : %+v", resp.GetItem().GetTable())
 	return nil
 }
 
