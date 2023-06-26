@@ -303,6 +303,37 @@ func TestDeIdentifyDeterministic(t *testing.T) {
 
 }
 
+func TestReidentifyFreeTextWithFPEUsingSurrogate(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+
+	inputStr := "My phone number is 1234567890"
+	infoType := "PHONE_NUMBER"
+	surrogateType := "PHONE_TOKEN"
+	unwrappedKey, err := getUnwrappedKey(t)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := deidentifyFreeTextWithFPEUsingSurrogate(&buf, tc.ProjectID, inputStr, infoType, surrogateType, unwrappedKey); err != nil {
+		t.Fatal(err)
+	}
+	deidContent := buf.String()
+
+	inputForReid := strings.TrimPrefix(deidContent, "output: ")
+
+	buf.Reset()
+	if err := reidentifyFreeTextWithFPEUsingSurrogate(&buf, tc.ProjectID, inputForReid, surrogateType, unwrappedKey); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "output: My phone number is 1234567890"; got != want {
+		t.Errorf("reidentifyFreeTextWithFPEUsingSurrogate got %q, want %q", got, want)
+	}
+
+}
+
 func createKeyRing(t *testing.T, projectID string) (string, error) {
 	t.Helper()
 
