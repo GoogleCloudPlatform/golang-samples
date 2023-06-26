@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,41 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package table
+package responsestreaming
 
-// [START bigquery_table_exists]
 import (
 	"context"
-	"errors"
-	"fmt"
-	"net/http"
+	"net/http/httptest"
+	"os"
+	"strings"
+	"testing"
 
 	"cloud.google.com/go/bigquery"
-	"google.golang.org/api/googleapi"
 )
 
-// tableExists checks whether a table exists in a given dataset.
-func tableExists(projectID, datasetID, tableID string) error {
-	// projectID := "my-project-id"
-	// datasetID := "mydatasetid"
-	// tableID := "mytableid"
+func TestResponseStreaming(t *testing.T) {
 	ctx := context.Background()
-
+	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	if projectID == "" {
+		t.Skip("GOLANG_SAMPLES_PROJECT_ID is unset")
+	}
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("bigquery.NewClient: %w", err)
+		t.Fatalf("bigquery.NewClient: %v", err)
 	}
-	defer client.Close()
 
-	tableRef := client.Dataset(datasetID).Table(tableID)
-	if _, err = tableRef.Metadata(ctx); err != nil {
-		if e, ok := err.(*googleapi.Error); ok {
-			if e.Code == http.StatusNotFound {
-				return errors.New("dataset or table not found")
-			}
-		}
+	rows, err := query(ctx, client)
+	if err != nil {
+		t.Fatal(err)
 	}
-	return nil
+
+	w := httptest.NewRecorder()
+	streamResults(w, rows)
+
+	want := true
+	if got := strings.Contains(w.Body.String(), "Successfully flushed row"); got != want {
+		t.Errorf("Response contains Successfully flushed row: %t, want %t", got, want)
+	}
 }
-
-// [END bigquery_table_exists]
