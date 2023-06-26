@@ -439,6 +439,7 @@ func TestDeIdentifyFreeTextWithFPEUsingSurrogate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	want := "output: My phone number is PHONE_TOKEN(10):"
 
 	var buf bytes.Buffer
