@@ -278,7 +278,7 @@ func TestDeIdentifyWithInfotype(t *testing.T) {
 
 	input := "My email is test@example.com"
 	infoType := []string{"EMAIL_ADDRESS"}
-	want := "My email is [EMAIL_ADDRESS]"
+	want := "output : My email is [EMAIL_ADDRESS]"
 
 	var buf bytes.Buffer
 
