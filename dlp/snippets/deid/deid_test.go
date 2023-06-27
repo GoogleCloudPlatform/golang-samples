@@ -273,6 +273,50 @@ func TestDeIdentifyWithWordList(t *testing.T) {
 	}
 }
 
+func TestDeIdentifyWithInfotype(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	input := "My email is test@example.com"
+	infoType := []string{"EMAIL_ADDRESS"}
+	want := "output : My email is [EMAIL_ADDRESS]"
+
+	var buf bytes.Buffer
+
+	if err := deidentifyWithInfotype(&buf, tc.ProjectID, input, infoType); err != nil {
+		t.Fatal(err)
+	}
+	if got := buf.String(); got != want {
+		t.Errorf("deidentifyFreeTextWithFPEUsingSurrogate(%q) = %q, want %q", input, got, want)
+	}
+
+}
+
+func TestDeidentifyTableFPE(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	keyRingName, err := createKeyRing(t, tc.ProjectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	kmsKeyName, wrappedAesKey, keyVersion, err := createKey(t, tc.ProjectID, keyRingName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer destroyKey(t, tc.ProjectID, keyVersion)
+
+	contains := "De-identify Table after format-preserving encryption"
+
+	var buf bytes.Buffer
+
+	if err := deidentifyTableFPE(&buf, tc.ProjectID, kmsKeyName, wrappedAesKey); err != nil {
+		t.Fatal(err)
+	}
+
+	if got := buf.String(); !strings.Contains(got, contains) {
+		t.Errorf("deidentifyTableFPE() = %q,%q ", got, contains)
+	}
+}
 func TestDeIdentifyDeterministic(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -443,6 +487,7 @@ func createKey(t *testing.T, projectID, keyFileName string) (string, string, str
 	if err != nil {
 		log.Fatalf("Failed to wrap key: %v", err)
 	}
+
 	wrappedKey := response.Ciphertext
 
 	wrappedKeyString := base64.StdEncoding.EncodeToString(wrappedKey)
