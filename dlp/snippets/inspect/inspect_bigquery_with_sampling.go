@@ -110,7 +110,7 @@ func inspectBigQueryTableWithSampling(w io.Writer, projectID, topicID, subscript
 	}
 
 	// topic is the PubSub topic string where messages should be sent.
-	topic := fmt.Sprintf("projects/" + projectID + "/topics/" + topicID)
+	topic := fmt.Sprintf("projects/%s/topics/%s", projectID, topicID)
 
 	action := &dlppb.Action{
 		Action: &dlppb.Action_PubSub{
