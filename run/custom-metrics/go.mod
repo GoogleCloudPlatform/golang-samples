@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples/run/custom-metrics
 go 1.21
 
 require (
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230427161031-d55a50fa5eaa
+	github.com/GoogleCloudPlatform/golang-samples 1cdc08c167bb
 	go.opentelemetry.io/otel v1.15.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v0.38.0
 	go.opentelemetry.io/otel/metric v0.38.0
