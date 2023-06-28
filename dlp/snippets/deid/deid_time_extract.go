@@ -23,8 +23,8 @@ import (
 	"cloud.google.com/go/dlp/apiv2/dlppb"
 )
 
-// deIdentifyTimeExtract De-identifies a table by extracting specific parts 
-// of the time (year in this case) from designated fields. 
+// deIdentifyTimeExtract De-identifies a table by extracting specific parts
+// of the time (year in this case) from designated fields.
 func deIdentifyTimeExtract(w io.Writer, projectID string) error {
 
 	row1 := &dlppb.Table_Row{
