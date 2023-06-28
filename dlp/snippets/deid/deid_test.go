@@ -477,3 +477,27 @@ func getUnwrappedKey(t *testing.T) (string, error) {
 	return string(encodedKey), nil
 
 }
+
+func TestReidTableDataWithFPE(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	keyRingName, err := createKeyRing(t, tc.ProjectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	keyFileName, cryptoKeyName, keyVersion, err := createKey(t, tc.ProjectID, keyRingName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer destroyKey(t, tc.ProjectID, keyVersion)
+
+	if err := reidTableDataWithFPE(buf, tc.ProjectID, keyFileName, cryptoKeyName); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "Table after re-identification "; !strings.Contains(got, want) {
+		t.Errorf("TestReidTableDataWithFPE got %q, want %q", got, want)
+	}
+
+}
