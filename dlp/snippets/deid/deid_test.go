@@ -477,3 +477,40 @@ func getUnwrappedKey(t *testing.T) (string, error) {
 	return string(encodedKey), nil
 
 }
+
+func TestReidTextDataWithFPE(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+
+	input := "My SSN is 123456789"
+	infoTypeNames := []string{"US_SOCIAL_SECURITY_NUMBER"}
+	surrogateInfoType := "AGE"
+
+	keyRingName, err := createKeyRing(t, tc.ProjectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	keyFileName, cryptoKeyName, keyVersion, err := createKey(t, tc.ProjectID, keyRingName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer destroyKey(t, tc.ProjectID, keyVersion)
+
+	if err := deidentifyFPE(&buf, tc.ProjectID, input, infoTypeNames, keyFileName, cryptoKeyName, surrogateInfoType); err != nil {
+		t.Fatal(err)
+	}
+
+	deidContent := buf.String()
+
+	inputForReid := strings.TrimPrefix(deidContent, "output: ")
+	buf.Reset()
+
+	if err := reidTextDataWithFPE(&buf, tc.ProjectID, inputForReid, keyFileName, cryptoKeyName, surrogateInfoType); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "output: My SSN is 123456789"; got != want {
+		t.Errorf("reidentifyFreeTextWithFPEUsingSurrogate got %q, want %q", got, want)
+	}
+}

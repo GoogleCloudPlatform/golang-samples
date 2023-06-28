@@ -17,9 +17,9 @@ package deid
 // [START dlp_deidentify_fpe]
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
@@ -49,11 +49,13 @@ func deidentifyFPE(w io.Writer, projectID, input string, infoTypeNames []string,
 	for _, it := range infoTypeNames {
 		infoTypes = append(infoTypes, &dlppb.InfoType{Name: it})
 	}
+
 	// Read the key file.
-	keyBytes, err := ioutil.ReadFile(keyFileName)
+	kmsWrappedCryptoKey, err := base64.StdEncoding.DecodeString(cryptoKeyName)
 	if err != nil {
-		return fmt.Errorf("ReadFile: %w", err)
+		return err
 	}
+
 	// Create a configured request.
 	req := &dlppb.DeidentifyContentRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
@@ -72,8 +74,8 @@ func deidentifyFPE(w io.Writer, projectID, input string, infoTypeNames []string,
 										CryptoKey: &dlppb.CryptoKey{
 											Source: &dlppb.CryptoKey_KmsWrapped{
 												KmsWrapped: &dlppb.KmsWrappedCryptoKey{
-													WrappedKey:    keyBytes,
-													CryptoKeyName: cryptoKeyName,
+													WrappedKey:    kmsWrappedCryptoKey,
+													CryptoKeyName: keyFileName,
 												},
 											},
 										},
