@@ -15,49 +15,31 @@
 package main
 
 import (
-	"io/ioutil"
-	"log"
-	"net/http"
+	"context"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
+
+	cloudevent "github.com/cloudevents/sdk-go/v2"
 )
 
 func TestHelloEventsStorage(t *testing.T) {
-	tests := []struct {
-		subject string
-		want    string
-	}{
-		{subject: "storage.googleapis.com/projects/_/buckets/my-bucket", want: "Detected change in Cloud Storage bucket: storage.googleapis.com/projects/_/buckets/my-bucket\n"},
+	event := cloudevent.NewEvent("1.0")
+	event.SetID("1")
+	event.SetSource("test")
+	event.SetSubject("storage.googleapis.com/projects/_/buckets/my-bucket")
+	event.SetType("test")
+
+	req, err := cloudevent.NewHTTPRequestFromEvent(context.Background(), "http://example.com", event)
+	if err != nil {
+		t.Fatal(err)
 	}
-	for _, test := range tests {
-		r, w, _ := os.Pipe()
-		log.SetOutput(w)
-		defer log.SetOutput(os.Stderr)
 
-		originalFlags := log.Flags()
-		defer log.SetFlags(originalFlags)
-		log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
+	rr := httptest.NewRecorder()
+	HelloEventsStorage(rr, req)
 
-		payload := strings.NewReader("{}")
-		req := httptest.NewRequest("POST", "/", payload)
-		req.Header.Set("ce-subject", test.subject)
-		rr := httptest.NewRecorder()
-		HelloEventsStorage(rr, req)
-
-		w.Close()
-
-		if code := rr.Result().StatusCode; code == http.StatusBadRequest {
-			t.Errorf("HelloEventsStorage(%q) invalid input, status code (%q)", test.subject, code)
-		}
-
-		out, err := ioutil.ReadAll(r)
-		if err != nil {
-			t.Fatalf("ReadAll: %v", err)
-		}
-		if got := string(out); got != test.want {
-			t.Errorf("HelloEventsStorage(%q): got %q, want %q", test.subject, got, test.want)
-		}
+	want := "buckets/my-bucket"
+	if !strings.Contains(rr.Body.String(), want) {
+		t.Errorf("want Body to contain %s, got %s", want, rr.Body)
 	}
 }
