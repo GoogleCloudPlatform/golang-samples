@@ -17,6 +17,8 @@ package inspect
 import (
 	"bytes"
 	"context"
+	"fmt"
+	"log"
 	"strings"
 	"testing"
 	"time"
@@ -506,6 +508,26 @@ func TestInspectImageFile(t *testing.T) {
 	}
 }
 
+func TestInspectImageFileAllInfoTypes(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	inputPath := "testdata/image.jpg"
+
+	var buf bytes.Buffer
+	if err := inspectImageFileAllInfoTypes(&buf, tc.ProjectID, inputPath); err != nil {
+		t.Errorf("inspectImageFileAllInfoTypes: %v", err)
+	}
+	got := buf.String()
+	if want := "Info type: DATE"; !strings.Contains(got, want) {
+		t.Errorf("inspectImageFileAllInfoTypes got %q, want %q", got, want)
+	}
+	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
+		t.Errorf("inspectImageFileAllInfoTypes got %q, want %q", got, want)
+	}
+	if want := "Info type: US_SOCIAL_SECURITY_NUMBER"; !strings.Contains(got, want) {
+		t.Errorf("inspectImageFileAllInfoTypes got %q, want %q", got, want)
+	}
+}
+
 func TestInspectImageFileListedInfoTypes(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
@@ -524,4 +546,79 @@ func TestInspectImageFileListedInfoTypes(t *testing.T) {
 	if want := "Info type: US_SOCIAL_SECURITY_NUMBER"; !strings.Contains(got, want) {
 		t.Errorf("inspectImageFileListedInfoTypes got %q, want %q", got, want)
 	}
+}
+
+func TestInspectGcsFileWithSampling(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	topicID := "go-lang-dlp-test-bigquery-with-sampling-topic"
+	subscriptionID := "go-lang-dlp-test-bigquery-with-sampling-subscription"
+	bucketName, err := createBucket(t, tc.ProjectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteBucket(t, tc.ProjectID, bucketName)
+	GCSUri := "gs://" + bucketName + "/"
+
+	var buf bytes.Buffer
+	if err := inspectGcsFileWithSampling(&buf, tc.ProjectID, GCSUri, topicID, subscriptionID); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "Job Created"; !strings.Contains(got, want) {
+		t.Errorf("inspectGcsFileWithSampling got %q, want %q", got, want)
+	}
+
+}
+
+func createBucket(t *testing.T, projectID string) (string, error) {
+	t.Helper()
+
+	ctx := context.Background()
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return "", err
+	}
+	defer client.Close()
+	u := uuid.Must(uuid.NewV4()).String()[:8]
+	bucketName := "dlp-job-go-lang-test" + u
+
+	// Check if the bucket already exists.
+	bucketExists := false
+	_, err = client.Bucket(bucketName).Attrs(ctx)
+	if err == nil {
+		bucketExists = true
+	}
+
+	// If the bucket doesn't exist, create it.
+	if !bucketExists {
+		if err := client.Bucket(bucketName).Create(ctx, projectID, &storage.BucketAttrs{
+			StorageClass: "STANDARD",
+			Location:     "us-central1",
+		}); err != nil {
+			log.Fatalf("---Failed to create bucket: %v", err)
+		}
+		fmt.Printf("---Bucket '%s' created successfully.\n", bucketName)
+	} else {
+		fmt.Printf("---Bucket '%s' already exists.\n", bucketName)
+	}
+
+	return bucketName, nil
+}
+
+func deleteBucket(t *testing.T, projectID, bucketName string) error {
+	t.Helper()
+
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	bucket := client.Bucket(bucketName)
+	if err := bucket.Delete(ctx); err != nil {
+		t.Fatal(err)
+	}
+	return nil
 }
