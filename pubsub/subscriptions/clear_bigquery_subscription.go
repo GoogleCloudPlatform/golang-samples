@@ -35,13 +35,13 @@ func clearBigQuerySubscription(w io.Writer, projectID, subID string) error {
 	defer client.Close()
 
 	sub := client.Subscription(subID)
-	_, err = sub.Update(ctx, pubsub.SubscriptionConfigToUpdate{
+	cfg, err := sub.Update(ctx, pubsub.SubscriptionConfigToUpdate{
 		BigQueryConfig: &pubsub.BigQueryConfig{},
 	})
 	if err != nil {
 		return fmt.Errorf("sub.Update: %w", err)
 	}
-	fmt.Fprintf(w, "Cleared BigQuery subscription, reverting to pull: %v\n", sub)
+	fmt.Fprintf(w, "Cleared BigQuery subscription, reverting to pull: %+v\n", cfg)
 
 	return nil
 }
