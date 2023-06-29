@@ -53,11 +53,10 @@ func reidentifyWithDeterministic(w io.Writer, projectID, inputStr, surrogateType
 	// string, so decode it here.
 	keyBytes, err := base64.StdEncoding.DecodeString(wrappedKey)
 	if err != nil {
-		fmt.Fprintf(w, "error %v", err)
 		return err
 	}
 
-	// create crypto deterministic config.
+	// Create crypto deterministic config.
 	cryptoDeterministicConfig := &dlppb.CryptoDeterministicConfig{
 		CryptoKey: &dlppb.CryptoKey{
 			Source: &dlppb.CryptoKey_KmsWrapped{
@@ -72,7 +71,7 @@ func reidentifyWithDeterministic(w io.Writer, projectID, inputStr, surrogateType
 		},
 	}
 
-	// create a config for primitive transformation.
+	// Create a config for primitive transformation.
 	primitiveTransformation := &dlppb.PrimitiveTransformation{
 		Transformation: &dlppb.PrimitiveTransformation_CryptoDeterministicConfig{
 			CryptoDeterministicConfig: cryptoDeterministicConfig,
@@ -89,12 +88,12 @@ func reidentifyWithDeterministic(w io.Writer, projectID, inputStr, surrogateType
 		},
 	}
 
-	// construct config to re-identify the config.
+	// Construct config to re-identify the config.
 	reIdentifyConfig := &dlppb.DeidentifyConfig{
 		Transformation: transformation,
 	}
 
-	// construct a config for inspection.
+	// Construct a config for inspection.
 	inspectConfig := &dlppb.InspectConfig{
 		CustomInfoTypes: []*dlppb.CustomInfoType{
 			{
@@ -108,7 +107,7 @@ func reidentifyWithDeterministic(w io.Writer, projectID, inputStr, surrogateType
 		},
 	}
 
-	// item to be analyzed.
+	// Item to be analyzed.
 	item := &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_Value{
 			Value: inputStr,
