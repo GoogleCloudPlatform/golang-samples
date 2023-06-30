@@ -622,3 +622,23 @@ func deleteBucket(t *testing.T, projectID, bucketName string) error {
 	}
 	return nil
 }
+
+func TestInspectBigQueryTableWithSampling(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	topicID := "go-lang-dlp-test-bigquery-with-sampling-topic"
+	subscriptionID := "go-lang-dlp-test-bigquery-with-sampling-subscription"
+
+	var buf bytes.Buffer
+	if err := inspectBigQueryTableWithSampling(&buf, tc.ProjectID, topicID, subscriptionID); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "Job Created"; !strings.Contains(got, want) {
+		t.Errorf("InspectBigQueryTableWithSampling got %q, want %q", got, want)
+	}
+	if want := "Found"; !strings.Contains(got, want) {
+		t.Errorf("InspectBigQueryTableWithSampling got %q, want %q", got, want)
+	}
+
+}
