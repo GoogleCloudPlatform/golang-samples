@@ -28,6 +28,7 @@ import (
 	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/gofrs/uuid"
 )
 
 func TestInfoTypes(t *testing.T) {
@@ -110,7 +111,8 @@ func bucketForStoredInfoType(t *testing.T, projectID string) (string, error) {
 	}
 	defer client.Close()
 
-	bucketName := "dlp-go-lang-test"
+	u := uuid.Must(uuid.NewV4()).String()[:8]
+	bucketName := "dlp-go-lang-test-metadata" + u
 	dirPath := "my-directory/"
 
 	// Check if the bucket already exists.
