@@ -13,8 +13,9 @@
 // limitations under the License.
 
 // [START eventarc_audit_storage_handler]
+// [START eventarc_http_quickstart_handler]
 
-// Sample audit_storage is a Cloud Run service which handles Cloud Audit Log events with Cloud Storage data.
+// Processes CloudEvents containing Cloud Audit Logs for Cloud Storage
 package main
 
 import (
@@ -22,17 +23,27 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	cloudevent "github.com/cloudevents/sdk-go/v2"
 )
 
 // HelloEventsStorage receives and processes a Cloud Audit Log event with Cloud Storage data.
 func HelloEventsStorage(w http.ResponseWriter, r *http.Request) {
-	s := fmt.Sprintf("Detected change in Cloud Storage bucket: %s", string(r.Header.Get("Ce-Subject")))
+	event, err := cloudevent.NewEventFromHTTPRequest(r)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintln(w, "Failed to create CloudEvent from request.")
+		log.Fatal("cloudevent.NewEventFromHTTPRequest:", err)
+	}
+	s := fmt.Sprintf("Detected change in Cloud Storage bucket: %s", event.Subject())
 	log.Printf(s)
 	fmt.Fprintln(w, s)
 }
 
 // [END eventarc_audit_storage_handler]
+// [END eventarc_http_quickstart_handler]
 // [START eventarc_audit_storage_server]
+// [START eventarc_http_quickstart_server]
 
 func main() {
 	http.HandleFunc("/", HelloEventsStorage)
@@ -49,3 +60,4 @@ func main() {
 }
 
 // [END eventarc_audit_storage_server]
+// [END eventarc_http_quickstart_server]
