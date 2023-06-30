@@ -499,5 +499,8 @@ func TestReidTableDataWithFPE(t *testing.T) {
 	if want := "Table after re-identification "; !strings.Contains(got, want) {
 		t.Errorf("TestReidTableDataWithFPE got %q, want %q", got, want)
 	}
+	if want := "90511"; strings.Contains(got, want) {
+		t.Errorf("TestReidTableDataWithFPE got %q, want %q", got, want)
+	}
 
 }

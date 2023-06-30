@@ -47,8 +47,8 @@ func reidTableDataWithFPE(w io.Writer, projectID, kmsKeyName, wrappedAesKey stri
 	// Closing the client safely cleans up background resources.
 	defer client.Close()
 
-	// Specify the table data.
-	table := &dlppb.Table{
+	// Specify the table data that needs to be re-identified.
+	tableToReIdentify := &dlppb.Table{
 		Headers: []*dlppb.FieldId{
 			{Name: "Employee ID"},
 		},
@@ -68,7 +68,7 @@ func reidTableDataWithFPE(w io.Writer, projectID, kmsKeyName, wrappedAesKey stri
 	// Specify the content you want to re-identify.
 	contentItem := &dlppb.ContentItem{
 		DataItem: &dlppb.ContentItem_Table{
-			Table: table,
+			Table: tableToReIdentify,
 		},
 	}
 
