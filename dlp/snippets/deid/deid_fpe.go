@@ -50,8 +50,8 @@ func deidentifyFPE(w io.Writer, projectID, input string, infoTypeNames []string,
 		infoTypes = append(infoTypes, &dlppb.InfoType{Name: it})
 	}
 
-	// Read the key file.
-	kmsWrappedCryptoKey, err := base64.StdEncoding.DecodeString(cryptoKeyName)
+	// Specify an encrypted AES-256 key and the name of the Cloud KMS key that encrypted it.
+	kmsKeyDecode, err := base64.StdEncoding.DecodeString(cryptoKeyName)
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func deidentifyFPE(w io.Writer, projectID, input string, infoTypeNames []string,
 										CryptoKey: &dlppb.CryptoKey{
 											Source: &dlppb.CryptoKey_KmsWrapped{
 												KmsWrapped: &dlppb.KmsWrappedCryptoKey{
-													WrappedKey:    kmsWrappedCryptoKey,
+													WrappedKey:    kmsKeyDecode,
 													CryptoKeyName: keyFileName,
 												},
 											},
