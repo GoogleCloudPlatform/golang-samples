@@ -111,7 +111,7 @@ func bucketForStoredInfoType(t *testing.T, projectID string) (string, error) {
 	}
 	defer client.Close()
 
-	u := uuid.Must(uuid.NewV4()).String()[:8]
+	u := uuid.New().String()[:8]
 	bucketName := "dlp-go-lang-test-metadata" + u
 	dirPath := "my-directory/"
 
