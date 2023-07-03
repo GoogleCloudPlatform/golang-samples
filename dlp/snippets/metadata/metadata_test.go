@@ -28,7 +28,7 @@ import (
 	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 )
 
 func TestInfoTypes(t *testing.T) {
