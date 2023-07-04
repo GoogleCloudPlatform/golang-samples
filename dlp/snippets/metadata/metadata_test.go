@@ -70,10 +70,14 @@ func TestInfoTypes(t *testing.T) {
 	}
 }
 
-func TestCreateStoredInfoType(t *testing.T) {
-	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") != "" {
-		t.Skip()
+func skipKOKORO(t *testing.T) {
+	if os.Getenv("GOOGLE_APPLICATION_CREDENTIALS") != "" {
+		t.Skip("Skipping testing in KOKORO environment")
 	}
+}
+
+func TestCreateStoredInfoType(t *testing.T) {
+	skipKOKORO(t)
 
 	tc := testutil.SystemTest(t)
 
