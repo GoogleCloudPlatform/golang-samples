@@ -516,6 +516,7 @@ func destroyKey(t *testing.T, projectID, key string) error {
 	return nil
 }
 
+<<<<<<< HEAD
 func TestReidTextDataWithFPE(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
@@ -523,6 +524,11 @@ func TestReidTextDataWithFPE(t *testing.T) {
 	input := "My SSN is 123456789"
 	infoTypeNames := []string{"US_SOCIAL_SECURITY_NUMBER"}
 	surrogateInfoType := "AGE"
+=======
+func TestReidTableDataWithFPE(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+>>>>>>> main
 
 	keyRingName, err := createKeyRing(t, tc.ProjectID)
 	if err != nil {
@@ -534,6 +540,7 @@ func TestReidTextDataWithFPE(t *testing.T) {
 	}
 	defer destroyKey(t, tc.ProjectID, keyVersion)
 
+<<<<<<< HEAD
 	if err := deidentifyFPE(&buf, tc.ProjectID, input, infoTypeNames, keyFileName, cryptoKeyName, surrogateInfoType); err != nil {
 		t.Fatal(err)
 	}
@@ -551,4 +558,17 @@ func TestReidTextDataWithFPE(t *testing.T) {
 	if want := "output: My SSN is 123456789"; got != want {
 		t.Errorf("reidentifyFreeTextWithFPEUsingSurrogate got %q, want %q", got, want)
 	}
+=======
+	if err := reidTableDataWithFPE(buf, tc.ProjectID, keyFileName, cryptoKeyName); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "Table after re-identification "; !strings.Contains(got, want) {
+		t.Errorf("TestReidTableDataWithFPE got %q, want %q", got, want)
+	}
+	if want := "90511"; strings.Contains(got, want) {
+		t.Errorf("TestReidTableDataWithFPE got %q, want %q", got, want)
+	}
+
+>>>>>>> main
 }
