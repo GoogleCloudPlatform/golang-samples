@@ -516,6 +516,24 @@ func destroyKey(t *testing.T, projectID, key string) error {
 	return nil
 }
 
+func TestDeIdentifyTimeExtract(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+	if err := deIdentifyTimeExtract(&buf, tc.ProjectID); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "Table after de-identification :"; !strings.Contains(got, want) {
+		t.Errorf("TestDeIdentifyTimeExtract got %q, want %q", got, want)
+	}
+	if want := "values:{string_value:\"1970\"}"; !strings.Contains(got, want) {
+		t.Errorf("TestDeIdentifyTimeExtract got %q, want %q", got, want)
+	}
+	if want := "values:{string_value:\"1996\"}}"; !strings.Contains(got, want) {
+		t.Errorf("TestDeIdentifyTimeExtract got %q, want %q", got, want)
+	}
+}
+
 func TestReidTableDataWithFPE(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
