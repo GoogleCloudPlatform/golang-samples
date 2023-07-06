@@ -32,8 +32,7 @@ func HelloStorage(w http.ResponseWriter, r *http.Request) {
 	ce, err := cloudevents.NewEventFromHTTPRequest(r)
 	if err != nil {
 		log.Printf("failed to parse CloudEvent: %v", err)
-		msg := fmt.Sprintf("%s: expected CloudEvent", http.StatusText(http.StatusBadRequest))
-		http.Error(w, msg, http.StatusBadRequest)
+		http.Error(w, "Bad Request: expected CloudEvent", http.StatusBadRequest)
 		return
 	}
 
@@ -41,8 +40,7 @@ func HelloStorage(w http.ResponseWriter, r *http.Request) {
 	err = protojson.Unmarshal(ce.Data(), &so)
 	if err != nil {
 		log.Printf("failed to unmarshal: %v", err)
-		msg := fmt.Sprintf("%s: expected Cloud Storage event", http.StatusText(http.StatusBadRequest))
-		http.Error(w, msg, http.StatusBadRequest)
+		http.Error(w, "Bad Request: expected Cloud Storage event", http.StatusBadRequest)
 		return
 	}
 
