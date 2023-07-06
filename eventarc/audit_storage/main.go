@@ -41,7 +41,6 @@ func HelloEventsStorage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s := fmt.Sprintf("Detected change in Cloud Storage bucket: %s", event.Subject())
-	log.Printf(s)
 	fmt.Fprintln(w, s)
 }
 
