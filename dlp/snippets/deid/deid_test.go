@@ -565,7 +565,7 @@ func TestDeIdentifyTableWithCryptoHash(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	var buf bytes.Buffer
-	transientKey := "abcXyz"
+	transientKey := "YOUR_TRANSIENT_CRYPTO_KEY"
 
 	if err := deIdentifyTableWithCryptoHash(&buf, tc.ProjectID, transientKey); err != nil {
 		t.Fatal(err)

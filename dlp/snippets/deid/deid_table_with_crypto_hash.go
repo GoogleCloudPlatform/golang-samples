@@ -86,7 +86,7 @@ func deIdentifyTableWithCryptoHash(w io.Writer, projectID, transientKey string) 
 
 	// Specify the transient key which will encrypt the data.
 	if transientKey == "" {
-		transientKey = "abcXyz"
+		transientKey = "YOUR_TRANSIENT_CRYPTO_KEY"
 	}
 
 	// Specify the transient key which will encrypt the data.
