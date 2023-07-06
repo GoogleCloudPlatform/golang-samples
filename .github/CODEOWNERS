@@ -26,12 +26,9 @@
 
 
 # TORuS
-/appengine/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
-/appengine_flexible/                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
 /container_registry/                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
 /endpoints/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
 /eventarc/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
-/functions/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe @GoogleCloudPlatform/functions-framework-google
 /internal/cloudrunci/                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
 /run/                                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
 /tasks/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
@@ -92,3 +89,12 @@
 # Does not have owner
 /cdn/                                  @GoogleCloudPlatform/go-samples-reviewers
 /profiler/                             @GoogleCloudPlatform/go-samples-reviewers
+
+## Assisted
+
+/functions/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe @GoogleCloudPlatform/functions-framework-google
+
+## Self-Service
+
+/appengine/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/serverless-runtimes
+/appengine_flexible/                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/serverless-runtimes
