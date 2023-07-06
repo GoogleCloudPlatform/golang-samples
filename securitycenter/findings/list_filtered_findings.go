@@ -29,10 +29,15 @@ import (
 // specific source to w. sourceName is the full resource name of the source
 // to search for findings under.
 func listFilteredFindings(w io.Writer, sourceName string) error {
-	// Specific source.
-	// sourceName := "organizations/111122222444/sources/1234"
-	// All sources.
-	// sourceName := "organizations/111122222444/sources/-"
+	// Specific source:
+	// 		sourceName := "{parent}/sources/{sourceId}"
+	// All sources:
+	// 		sourceName := "{parent}/sources/-"
+	// where,
+	// Parent must be in one of the following formats:
+	//		"organizations/{orgId}"
+	//		"projects/{projectId}"
+	//		"folders/{folderId}"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
