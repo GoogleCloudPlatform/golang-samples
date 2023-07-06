@@ -14,10 +14,11 @@
 
 package main
 
+// [START eventarc_testing_cloudevent]
+
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"path"
@@ -30,8 +31,6 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
-
-// [START eventarc_testing_cloudevent]
 
 func TestHelloStorage(t *testing.T) {
 	so := storagedata.StorageObjectData{
@@ -56,6 +55,10 @@ func TestHelloStorage(t *testing.T) {
 		t.Fatalf("cloudevents.NewHTTPRequestFromEvent: %v", err)
 	}
 	HelloStorage(w, r)
+
+	if got := w.Result().StatusCode; got != 200 {
+		t.Errorf("got %q, want contained %q", got, 200)
+	}
 
 	want := path.Join(so.Bucket, so.Name)
 	if got := w.Body.String(); !strings.Contains(got, want) {
@@ -83,19 +86,14 @@ func TestHelloStorage_NotCloudEvent(t *testing.T) {
 	}
 	HelloStorage(w, r)
 
-	{
-		want := http.StatusBadRequest
-		if got := w.Result().StatusCode; got != want {
-			t.Errorf("got %q, want %q", got, want)
-		}
+	wantStatus := http.StatusBadRequest
+	if got := w.Result().StatusCode; got != wantStatus {
+		t.Errorf("got %q, want %q", got, wantStatus)
 	}
-
-	{
-		// Ensure failure on malformed cloudevent.
-		want := fmt.Sprintf("%s: expected CloudEvent\n", http.StatusText(http.StatusBadRequest))
-		if got := w.Body.String(); got != want {
-			t.Errorf("got %q, want %q", got, want)
-		}
+	// Ensure failure on malformed cloudevent.
+	wantBody := "Bad Request: expected CloudEvent\n"
+	if got := w.Body.String(); got != wantBody {
+		t.Errorf("got %q, want %q", got, wantBody)
 	}
 }
 
@@ -115,18 +113,14 @@ func TestHelloStorage_NotStorageObjectData(t *testing.T) {
 	}
 	HelloStorage(w, r)
 
-	{
-		want := http.StatusBadRequest
-		if got := w.Result().StatusCode; got != want {
-			t.Errorf("got %q, want %q", got, want)
-		}
+	wantStatus := http.StatusBadRequest
+	if got := w.Result().StatusCode; got != wantStatus {
+		t.Errorf("got %q, want %q", got, wantStatus)
 	}
 
-	{
-		// Ensure failure on malformed storage data.
-		want := fmt.Sprintf("%s: expected Cloud Storage event\n", http.StatusText(http.StatusBadRequest))
-		if got := w.Body.String(); got != want {
-			t.Errorf("got %q, want %q", got, want)
-		}
+	// Ensure failure on malformed storage data.
+	wantBody := "Bad Request: expected Cloud Storage event\n"
+	if got := w.Body.String(); got != wantBody {
+		t.Errorf("got %q, want %q", got, wantBody)
 	}
 }
