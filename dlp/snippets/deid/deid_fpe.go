@@ -35,7 +35,7 @@ func deidentifyFPE(w io.Writer, projectID, input string, infoTypeNames []string,
 	// projectID := "my-project-id"
 	// input := "My SSN is 123456789"
 	// infoTypeNames := []string{"US_SOCIAL_SECURITY_NUMBER"}
-	// keyFileName := "projects/YOUR_GCLOUD_PROJECT/locations/YOUR_LOCATION/keyRings/YOUR_KEYRING_NAME/cryptoKeys/YOUR_KEY_NAME"
+	// kmsKeyName := "projects/YOUR_GCLOUD_PROJECT/locations/YOUR_LOCATION/keyRings/YOUR_KEYRING_NAME/cryptoKeys/YOUR_KEY_NAME"
 	// wrappedAESKey := "YOUR_ENCRYPTED_AES_256_KEY"
 	// surrogateInfoType := "AGE"
 	ctx := context.Background()
@@ -75,7 +75,7 @@ func deidentifyFPE(w io.Writer, projectID, input string, infoTypeNames []string,
 											Source: &dlppb.CryptoKey_KmsWrapped{
 												KmsWrapped: &dlppb.KmsWrappedCryptoKey{
 													WrappedKey:    kmsWrappedCryptoKey,
-													CryptoKeyName: keyFileName,
+													CryptoKeyName: kmsKeyName,
 												},
 											},
 										},
