@@ -31,7 +31,7 @@ import (
 // optional identifier needed for reidentification. surrogateInfoType can be any
 // value not found in your input.
 // Info types can be found with the infoTypes.list method or on https://cloud.google.com/dlp/docs/infotypes-reference
-func deidentifyFPE(w io.Writer, projectID, input string, infoTypeNames []string, keyFileName, wrappedAESKey, surrogateInfoType string) error {
+func deidentifyFPE(w io.Writer, projectID, input string, infoTypeNames []string, kmsKeyName, wrappedAESKey, surrogateInfoType string) error {
 	// projectID := "my-project-id"
 	// input := "My SSN is 123456789"
 	// infoTypeNames := []string{"US_SOCIAL_SECURITY_NUMBER"}
