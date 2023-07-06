@@ -38,7 +38,14 @@ func deIdentifyTableWithCryptoHash(w io.Writer, projectID, transientKey string) 
 	row2 := &dlppb.Table_Row{
 		Values: []*dlppb.Value{
 			{Type: &dlppb.Value_StringValue{StringValue: "user2@example.org"}},
-			{Type: &dlppb.Value_StringValue{StringValue: "my email is user2@example.org and phone is 858-555-0222"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "my email is user2@example.org and phone is 858-555-0232"}},
+		},
+	}
+
+	row3 := &dlppb.Table_Row{
+		Values: []*dlppb.Value{
+			{Type: &dlppb.Value_StringValue{StringValue: "user3@example.org"}},
+			{Type: &dlppb.Value_StringValue{StringValue: "my email is user3@example.org and phone is 858-555-0224"}},
 		},
 	}
 
@@ -50,6 +57,7 @@ func deIdentifyTableWithCryptoHash(w io.Writer, projectID, transientKey string) 
 		Rows: []*dlppb.Table_Row{
 			{Values: row1.Values},
 			{Values: row2.Values},
+			{Values: row3.Values},
 		},
 	}
 

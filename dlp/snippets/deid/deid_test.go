@@ -575,7 +575,10 @@ func TestDeIdentifyTableWithCryptoHash(t *testing.T) {
 	if want := "Table after de-identification :"; !strings.Contains(got, want) {
 		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
 	}
-	if want := `{string_value:\"my email is user2@example.org and phone is 858-555-0222\"}`; strings.Contains(got, want) {
+	if want := `{string_value:\"my email is user3@example.org and phone is 858-555-0224\"}`; strings.Contains(got, want) {
+		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
+	}
+	if want := `{string_value:\"my email is user2@example.org and phone is 858-555-0223\"}`; strings.Contains(got, want) {
 		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
 	}
 	if want := `{string_value:\"my email is user1@example.org and phone is 858-555-0222\"}`; strings.Contains(got, want) {
