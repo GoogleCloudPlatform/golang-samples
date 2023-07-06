@@ -560,3 +560,22 @@ func TestReidTableDataWithFPE(t *testing.T) {
 	}
 
 }
+
+func TestDeIdentifyTableWithMultipleCryptoHash(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+
+	if err := deIdentifyTableWithMultipleCryptoHash(&buf, tc.ProjectID, "your-transient-crypto-key-1", "your-transient-crypto-key-2"); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "Table after de-identification :"; !strings.Contains(got, want) {
+		t.Errorf("TestDeIdentifyTableWithMultipleCryptoHash got %q, want %q", got, want)
+	}
+	if want := `{string_value:\"my email is user1@example.org and phone is 858-555-0222\"}`; strings.Contains(got, want) {
+		t.Errorf("TestDeIdentifyTableWithMultipleCryptoHash got %q, want %q", got, want)
+	}
+	if want := "abbyabernathy1"; !strings.Contains(got, want) {
+		t.Errorf("TestDeIdentifyTableWithMultipleCryptoHash got %q, want %q", got, want)
+	}
+}
