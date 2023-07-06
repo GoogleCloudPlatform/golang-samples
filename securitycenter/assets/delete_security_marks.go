@@ -28,7 +28,10 @@ import (
 // deleteSecurityMarks deletes security marks "key_a" and  "key_b" from
 // assetName's marks. assetName is the resource path for an asset.
 func deleteSecurityMarks(w io.Writer, assetName string) error {
-	// assetName := "organizations/123123342/assets/12312321"
+	// Specify the value of 'assetName' in one of the following formats:
+	// 		assetName := "organizations/{org_id}/assets/{asset_id}"
+	//		assetName := "projects/{project_id}/assets/{asset_id}"
+	//		assetName := "folders/{folder_id}/assets/{asset_id}"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
