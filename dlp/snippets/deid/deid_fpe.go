@@ -31,12 +31,12 @@ import (
 // optional identifier needed for reidentification. surrogateInfoType can be any
 // value not found in your input.
 // Info types can be found with the infoTypes.list method or on https://cloud.google.com/dlp/docs/infotypes-reference
-func deidentifyFPE(w io.Writer, projectID, input string, infoTypeNames []string, keyFileName, cryptoKeyName, surrogateInfoType string) error {
+func deidentifyFPE(w io.Writer, projectID, input string, infoTypeNames []string, keyFileName, wrappedAESKey, surrogateInfoType string) error {
 	// projectID := "my-project-id"
 	// input := "My SSN is 123456789"
 	// infoTypeNames := []string{"US_SOCIAL_SECURITY_NUMBER"}
 	// keyFileName := "projects/YOUR_GCLOUD_PROJECT/locations/YOUR_LOCATION/keyRings/YOUR_KEYRING_NAME/cryptoKeys/YOUR_KEY_NAME"
-	// cryptoKeyName := "YOUR_ENCRYPTED_AES_256_KEY"
+	// wrappedAESKey := "YOUR_ENCRYPTED_AES_256_KEY"
 	// surrogateInfoType := "AGE"
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
@@ -51,7 +51,7 @@ func deidentifyFPE(w io.Writer, projectID, input string, infoTypeNames []string,
 	}
 
 	// Specify an encrypted AES-256 key and the name of the Cloud KMS key that encrypted it.
-	kmsKeyDecode, err := base64.StdEncoding.DecodeString(cryptoKeyName)
+	kmsWrappedCryptoKey, err := base64.StdEncoding.DecodeString(wrappedAESKey)
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func deidentifyFPE(w io.Writer, projectID, input string, infoTypeNames []string,
 										CryptoKey: &dlppb.CryptoKey{
 											Source: &dlppb.CryptoKey_KmsWrapped{
 												KmsWrapped: &dlppb.KmsWrappedCryptoKey{
-													WrappedKey:    kmsKeyDecode,
+													WrappedKey:    kmsWrappedCryptoKey,
 													CryptoKeyName: keyFileName,
 												},
 											},
