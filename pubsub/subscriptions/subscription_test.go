@@ -747,7 +747,7 @@ func TestCreateWithFilter(t *testing.T) {
 	}
 }
 
-func TestBigQuerySubscription(t *testing.T) {
+func TestCreateBigQuerySubscription(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
@@ -786,7 +786,7 @@ func TestCreateCloudStorageSubscription(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	client := setup(t)
 	defer client.Close()
-	storageSubID := subID + "-storage"
+	storageSubID := subID + "-cloud-storage"
 
 	topic, err := getOrCreateTopic(ctx, client, topicID)
 	if err != nil {
@@ -797,9 +797,9 @@ func TestCreateCloudStorageSubscription(t *testing.T) {
 	// Use the same bucket across test instances. This
 	// is safe since we're not writing to the bucket
 	// and this makes us not have to do bucket cleanups.
-	bucketID := "pubsub-storage-sub-sink"
+	bucketID := fmt.Sprintf("%s.%s", tc.ProjectID, "pubsub-storage-sub-sink")
 	if err := createOrGetStorageBucket(tc.ProjectID, bucketID); err != nil {
-		t.Fatalf("failed to create storage bucket: %v", err)
+		t.Fatalf("failed to get or create storage bucket: %v", err)
 	}
 
 	if err := createCloudStorageSubscription(buf, tc.ProjectID, storageSubID, topic, bucketID); err != nil {

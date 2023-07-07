@@ -45,7 +45,7 @@ func createCloudStorageSubscription(w io.Writer, projectID, subID string, topic 
 			FilenamePrefix: "log_events_",
 			FilenameSuffix: ".avro",
 			OutputFormat:   &pubsub.CloudStorageOutputFormatAvroConfig{WriteMetadata: true},
-			MaxDuration:    5 * time.Minute,
+			MaxDuration:    1 * time.Minute,
 			MaxBytes:       1e8,
 		},
 	})
