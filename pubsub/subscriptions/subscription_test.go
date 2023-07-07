@@ -792,7 +792,7 @@ func TestCreateCloudStorageSubscription(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateTopic: %v", err)
 	}
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
 	// Use the same bucket across test instances. This
 	// is safe since we're not writing to the bucket
@@ -802,7 +802,7 @@ func TestCreateCloudStorageSubscription(t *testing.T) {
 		t.Fatalf("failed to get or create storage bucket: %v", err)
 	}
 
-	if err := createCloudStorageSubscription(buf, tc.ProjectID, storageSubID, topic, bucketID); err != nil {
+	if err := createCloudStorageSubscription(&buf, tc.ProjectID, storageSubID, topic, bucketID); err != nil {
 		t.Fatalf("failed to create cloud storage subscription: %v", err)
 	}
 
