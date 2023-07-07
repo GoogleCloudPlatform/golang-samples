@@ -797,7 +797,7 @@ func TestCreateCloudStorageSubscription(t *testing.T) {
 	// Use the same bucket across test instances. This
 	// is safe since we're not writing to the bucket
 	// and this makes us not have to do bucket cleanups.
-	bucketID := fmt.Sprintf("%s.%s", tc.ProjectID, "pubsub-storage-sub-sink")
+	bucketID := fmt.Sprintf("%s-%s", tc.ProjectID, "pubsub-storage-sub-sink")
 	if err := createOrGetStorageBucket(tc.ProjectID, bucketID); err != nil {
 		t.Fatalf("failed to get or create storage bucket: %v", err)
 	}
