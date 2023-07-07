@@ -45,7 +45,13 @@ func listAllProjectAssetsAtTime(w io.Writer, orgID string, asOf time.Time) error
 		return fmt.Errorf("TimestampProto(%v): %w", asOf, err)
 	}
 
+	// You can also list assets in a project/ folder. To do so, modify the parent and
+	// filter condition.
 	req := &securitycenterpb.ListAssetsRequest{
+		// Parent must be in one of the following formats:
+		//		"organizations/{orgId}"
+		//		"projects/{projectId}"
+		//		"folders/{folderId}"
 		Parent:   fmt.Sprintf("organizations/%s", orgID),
 		Filter:   `security_center_properties.resource_type="google.cloud.resourcemanager.Project"`,
 		ReadTime: readTime,
