@@ -174,6 +174,17 @@ func TestPublishCustomAttributes(t *testing.T) {
 	}
 }
 
+func TestPublishWithRetrySettings(t *testing.T) {
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+	client.CreateTopic(ctx, topicID)
+	buf := new(bytes.Buffer)
+	if err := publishWithRetrySettings(buf, tc.ProjectID, topicID, "hello world"); err != nil {
+		t.Errorf("failed to publish message: %v", err)
+	}
+}
+
 func TestIAM(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
