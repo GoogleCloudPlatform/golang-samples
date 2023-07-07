@@ -15,11 +15,12 @@
 package storagetransfer
 
 import (
-	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
-	"cloud.google.com/go/storagetransfer/apiv1/storagetransferpb"
 	"context"
 	"fmt"
 	"io"
+
+	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
+	"cloud.google.com/go/storagetransfer/apiv1/storagetransferpb"
 )
 
 // [START storagetransfer_create_event_driven_gcs_transfer]
@@ -54,7 +55,7 @@ func createEventDrivenGcsTransfer(w io.Writer, projectID string, gcsSourceBucket
 					GcsDataSink: &storagetransferpb.GcsData{BucketName: gcsSinkBucket}},
 			},
 			EventStream: &storagetransferpb.EventStream{Name: pubSubId},
-			Status: storagetransferpb.TransferJob_ENABLED,
+			Status:      storagetransferpb.TransferJob_ENABLED,
 		},
 	}
 	resp, err := client.CreateTransferJob(ctx, req)
@@ -65,4 +66,5 @@ func createEventDrivenGcsTransfer(w io.Writer, projectID string, gcsSourceBucket
 	fmt.Fprintf(w, "Created an event driven transfer job from %v to %v subscribed to %v with name %v", gcsSourceBucket, gcsSinkBucket, pubSubId, resp.Name)
 	return resp, nil
 }
+
 // [END storagetransfer_create_event_driven_gcs_transfer]

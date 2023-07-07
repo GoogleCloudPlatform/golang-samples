@@ -17,13 +17,14 @@ package storagetransfer
 import (
 	"bytes"
 	"context"
-	"github.com/aws/aws-sdk-go/service/sqs"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/aws/aws-sdk-go/service/sqs"
 
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
@@ -94,8 +95,8 @@ func TestMain(m *testing.M) {
 	}
 	email := resp.AccountEmail
 
-	grantSTSPermissions(gcsSourceBucket, tc.ProjectID, email, sc)
-	grantSTSPermissions(gcsSinkBucket, tc.ProjectID, email, sc)
+	grantSTSPermissions(gcsSourceBucket, email, sc)
+	grantSTSPermissions(gcsSinkBucket, email, sc)
 
 	s3Bucket = testutil.UniqueBucketName("stss3bucket")
 	sess, err := session.NewSession(&aws.Config{
@@ -163,7 +164,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatalf("Couldn't get pubsub topic policy: " + err.Error())
 	}
-	policy.Add("serviceAccount:" + email, "roles/pubsub.subscriber")
+	policy.Add("serviceAccount:"+email, "roles/pubsub.subscriber")
 	if err := topic.IAM().SetPolicy(ctx, policy); err != nil {
 		log.Fatalf("Couldn't set pubsub topic policy: " + err.Error())
 	}
@@ -489,7 +490,7 @@ func TestCreateEventDrivenAwsTransfer(t *testing.T) {
 	}
 }
 
-func grantSTSPermissions(bucketName string, projectID string, email string, str *storage.Client) {
+func grantSTSPermissions(bucketName string, email string, str *storage.Client) {
 	ctx := context.Background()
 
 	identity := "serviceAccount:" + email
