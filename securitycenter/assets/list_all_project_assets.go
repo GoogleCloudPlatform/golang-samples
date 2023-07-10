@@ -37,6 +37,10 @@ func listAllProjectAssets(w io.Writer, orgID string) error {
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 	req := &securitycenterpb.ListAssetsRequest{
+		// Parent must be in one of the following formats:
+		//		"organizations/{orgId}"
+		//		"projects/{projectId}"
+		//		"folders/{folderId}"
 		Parent: fmt.Sprintf("organizations/%s", orgID),
 		Filter: `security_center_properties.resource_type="google.cloud.resourcemanager.Project"`,
 	}
