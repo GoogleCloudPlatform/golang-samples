@@ -25,12 +25,15 @@ import (
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-// addSecurityMarks adds/updates a the security marks for the findingName and
+// addSecurityMarks adds/updates security marks for the findingName and
 // returns the updated marks. Specifically, it sets "key_a" an "key_b" to
 // "value_a" and "value_b" respectively. findingName is the resource path for
 // the finding to add marks to.
 func addSecurityMarks(w io.Writer, findingName string) error {
-	// findingName := "organizations/11123213/sources/12342342/findings/fidningid"
+	// Specify the value of 'findingName' in one of the following formats:
+	// 		"organizations/{orgId}/sources/{sourceId}/findings/{findingId}"
+	// 		"projects/{projectId}/sources/{sourceId}/findings/{findingId}"
+	// 		"folders/{folderId}/sources/{sourceId}/findings/{findingId}"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
