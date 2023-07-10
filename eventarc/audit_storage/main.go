@@ -29,14 +29,18 @@ import (
 
 // HelloEventsStorage receives and processes a Cloud Audit Log event with Cloud Storage data.
 func HelloEventsStorage(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Expected HTTP POST request with CloudEvent payload", http.StatusMethodNotAllowed)
+		return
+	}
+
 	event, err := cloudevent.NewEventFromHTTPRequest(r)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintln(w, "Failed to create CloudEvent from request.")
-		log.Fatal("cloudevent.NewEventFromHTTPRequest:", err)
+		log.Printf("cloudevent.NewEventFromHTTPRequest: %v", err)
+		http.Error(w, "Failed to create CloudEvent from request.", http.StatusBadRequest)
+		return
 	}
 	s := fmt.Sprintf("Detected change in Cloud Storage bucket: %s", event.Subject())
-	log.Printf(s)
 	fmt.Fprintln(w, s)
 }
 
