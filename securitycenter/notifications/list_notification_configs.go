@@ -37,6 +37,10 @@ func listNotificationConfigs(w io.Writer, orgID string) error {
 	defer client.Close()
 
 	req := &securitycenterpb.ListNotificationConfigsRequest{
+		// Parent must be in one of the following formats:
+		//		"organizations/{orgId}"
+		//		"projects/{projectId}"
+		//		"folders/{folderId}"
 		Parent: fmt.Sprintf("organizations/%s", orgID),
 	}
 	it := client.ListNotificationConfigs(ctx, req)
