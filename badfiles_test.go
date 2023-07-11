@@ -74,6 +74,9 @@ var allowList = []string{
 	"webrisk/internal/webrisk_proto/*.proto",
 	"webrisk/testdata/hashes.gob",
 
+	// DLP data
+	"dlp/snippets/**/testdata/*",
+
 	// Endpoints samples.
 	"endpoints/**/*.proto",
 
