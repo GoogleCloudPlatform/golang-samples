@@ -25,7 +25,7 @@ import (
 
 // [START storagetransfer_create_event_driven_gcs_transfer]
 
-func createEventDrivenGcsTransfer(w io.Writer, projectID string, gcsSourceBucket string, gcsSinkBucket string, pubSubId string) (*storagetransferpb.TransferJob, error) {
+func createEventDrivenGCSTransfer(w io.Writer, projectID string, gcsSourceBucket string, gcsSinkBucket string, pubSubId string) (*storagetransferpb.TransferJob, error) {
 	// Your Google Cloud Project ID.
 	// projectID := "my-project-id"
 
@@ -36,7 +36,7 @@ func createEventDrivenGcsTransfer(w io.Writer, projectID string, gcsSourceBucket
 	// gcsSinkBucket := "my-sink-bucket"
 
 	// The Pub/Sub topic to subscribe the event driven transfer to.
-	// pubSubId := "projects/PROJECT_NAME/subscriptions/SUBSCRIPTION_ID"
+	// pubSubID := "projects/PROJECT_NAME/subscriptions/SUBSCRIPTION_ID"
 
 	ctx := context.Background()
 	client, err := storagetransfer.NewClient(ctx)

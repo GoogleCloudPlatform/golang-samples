@@ -26,7 +26,7 @@ import (
 
 // [START storagetransfer_create_event_driven_aws_transfer]
 
-func createEventDrivenAwsTransfer(w io.Writer, projectID string, s3SourceBucket string, gcsSinkBucket string, sqsQueueArn string) (*storagetransferpb.TransferJob, error) {
+func createEventDrivenAWSTransfer(w io.Writer, projectID string, s3SourceBucket string, gcsSinkBucket string, sqsQueueARN string) (*storagetransferpb.TransferJob, error) {
 	// Your Google Cloud Project ID.
 	// projectID := "my-project-id"
 
@@ -37,7 +37,7 @@ func createEventDrivenAwsTransfer(w io.Writer, projectID string, s3SourceBucket 
 	// gcsSinkBucket := "my-sink-bucket"
 
 	// The Amazon Resource Name (ARN) of the AWS SNS queue to subscribe the event driven transfer to.
-	// snsQueueArn := "arn:aws:sqs:us-east-1:1234567891011:s3-notification-queue"
+	// sqsQueueARN := "arn:aws:sqs:us-east-1:1234567891011:s3-notification-queue"
 
 	// The AWS access key credential, should be accessed via environment variable for security
 	awsAccessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
@@ -67,7 +67,7 @@ func createEventDrivenAwsTransfer(w io.Writer, projectID string, s3SourceBucket 
 				DataSink: &storagetransferpb.TransferSpec_GcsDataSink{
 					GcsDataSink: &storagetransferpb.GcsData{BucketName: gcsSinkBucket}},
 			},
-			EventStream: &storagetransferpb.EventStream{Name: sqsQueueArn},
+			EventStream: &storagetransferpb.EventStream{Name: sqsQueueARN},
 			Status:      storagetransferpb.TransferJob_ENABLED,
 		},
 	}
@@ -76,7 +76,7 @@ func createEventDrivenAwsTransfer(w io.Writer, projectID string, s3SourceBucket 
 		return nil, fmt.Errorf("failed to create transfer job: %w", err)
 	}
 
-	fmt.Fprintf(w, "Created an event driven transfer job from %v to %v subscribed to %v with name %v", s3SourceBucket, gcsSinkBucket, sqsQueueArn, resp.Name)
+	fmt.Fprintf(w, "Created an event driven transfer job from %v to %v subscribed to %v with name %v", s3SourceBucket, gcsSinkBucket, sqsQueueARN, resp.Name)
 	return resp, nil
 }
 

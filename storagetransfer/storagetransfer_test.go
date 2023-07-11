@@ -24,8 +24,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aws/aws-sdk-go/service/sqs"
-
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/storage"
@@ -37,25 +35,21 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go/service/sqs"
 )
 
 var sc *storage.Client
 var sts *storagetransfer.Client
+var sess *session.Session
 var s3Bucket string
 var azureContainer string
 var gcsSourceBucket string
 var gcsSinkBucket string
-var pubSubSubscriptionId string
-var sqsQueueArn string
+var stsServiceAccountEmail string
 
 func TestMain(m *testing.M) {
 	// Initialize global vars
 	tc, _ := testutil.ContextMain(m)
-	if os.Getenv("KOKORO_BUILD_ID") != "" {
-		// temporarily skip initialization in kokoro
-		// See https://github.com/GoogleCloudPlatform/golang-samples/issues/2811
-		return
-	}
 
 	ctx := context.Background()
 	c, err := storage.NewClient(ctx)
@@ -91,15 +85,15 @@ func TestMain(m *testing.M) {
 
 	resp, err := sts.GetGoogleServiceAccount(ctx, req)
 	if err != nil {
-		log.Fatalf("error getting service account")
+		log.Fatalf("error getting service account: %v", err)
 	}
-	email := resp.AccountEmail
+	stsServiceAccountEmail = resp.AccountEmail
 
-	grantSTSPermissions(gcsSourceBucket, email, sc)
-	grantSTSPermissions(gcsSinkBucket, email, sc)
+	grantSTSPermissions(gcsSourceBucket, sc)
+	grantSTSPermissions(gcsSinkBucket, sc)
 
 	s3Bucket = testutil.UniqueBucketName("stss3bucket")
-	sess, err := session.NewSession(&aws.Config{
+	sess, err = session.NewSession(&aws.Config{
 		Region: aws.String("us-west-2")},
 	)
 	s3c := s3.New(sess)
@@ -109,29 +103,6 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatalf("couldn't create S3 bucket: %v", err)
 	}
-
-	queue := testutil.UniqueBucketName("stssqsqueue")
-	sqsClient := sqs.New(sess)
-	result, err := sqsClient.CreateQueue(&sqs.CreateQueueInput{
-		QueueName: &queue,
-		Attributes: map[string]*string{
-			"DelaySeconds":           aws.String("60"),
-			"MessageRetentionPeriod": aws.String("86400"),
-		},
-	})
-	if err != nil {
-		log.Fatalf("couldn't create SQS queue: %v", err)
-	}
-
-	attributes, err := sqsClient.GetQueueAttributes(&sqs.GetQueueAttributesInput{
-		AttributeNames: []*string{aws.String("QueueArn")},
-		QueueUrl:       result.QueueUrl,
-	})
-	if err != nil {
-		log.Fatalf("couldn't get SQS queue attributes: %v", err)
-	}
-
-	sqsQueueArn = *attributes.Attributes["QueueArn"]
 
 	connectionString := os.Getenv("AZURE_CONNECTION_STRING") +
 		";" + "AccountName=" + os.Getenv("AZURE_STORAGE_ACCOUNT")
@@ -145,41 +116,6 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	pubSubTopicId := testutil.UniqueBucketName("pubsubtopic")
-
-	pubsubClient, err := pubsub.NewClient(ctx, tc.ProjectID)
-	if err != nil {
-		log.Fatalf("Coudln't create pubsub client: " + err.Error())
-	}
-	defer pubsubClient.Close()
-
-	topic, err := pubsubClient.CreateTopic(ctx, pubSubTopicId)
-	if err != nil {
-		log.Fatalf("Coudln't create pubsub topic: " + err.Error())
-	}
-	defer topic.Delete(ctx)
-
-	policy, err := topic.IAM().Policy(ctx)
-	if err != nil {
-		log.Fatalf("Couldn't get pubsub topic policy: " + err.Error())
-	}
-	policy.Add("serviceAccount:"+email, "roles/pubsub.subscriber")
-	if err := topic.IAM().SetPolicy(ctx, policy); err != nil {
-		log.Fatalf("Couldn't set pubsub topic policy: " + err.Error())
-	}
-
-	subId := testutil.UniqueBucketName("pubsubsubscription")
-
-	sub, err := pubsubClient.CreateSubscription(ctx, subId, pubsub.SubscriptionConfig{
-		Topic:       topic,
-		AckDeadline: 20 * time.Second,
-	})
-	if err != nil {
-		log.Fatalf("Couldn't create pubsub subscription: " + err.Error())
-	}
-
-	pubSubSubscriptionId = sub.String()
 
 	// Run tests
 	exit := m.Run()
@@ -206,13 +142,6 @@ func TestMain(m *testing.M) {
 	_, err = azClient.DeleteContainer(ctx, azureContainer, nil)
 	if err != nil {
 		log.Printf("couldn't delete Azure bucket: %v", err)
-	}
-
-	_, err = sqsClient.DeleteQueue(&sqs.DeleteQueueInput{
-		QueueUrl: result.QueueUrl,
-	})
-	if err != nil {
-		log.Printf("couldn't delete SQS queue: %v", err)
 	}
 
 	os.Exit(exit)
@@ -458,11 +387,47 @@ func TestTransferFromAzure(t *testing.T) {
 	}
 }
 
-func TestCreateEventDrivenGcsTransfer(t *testing.T) {
+func TestCreateEventDrivenGCSTransfer(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
+	ctx := context.Background()
 
-	resp, err := createEventDrivenGcsTransfer(buf, tc.ProjectID, gcsSourceBucket, gcsSinkBucket, pubSubSubscriptionId)
+	pubSubTopicId := testutil.UniqueBucketName("pubsubtopic")
+
+	pubsubClient, err := pubsub.NewClient(ctx, tc.ProjectID)
+	if err != nil {
+		log.Fatalf("Coudln't create pubsub client: " + err.Error())
+	}
+	defer pubsubClient.Close()
+
+	topic, err := pubsubClient.CreateTopic(ctx, pubSubTopicId)
+	if err != nil {
+		log.Fatalf("Coudln't create pubsub topic: " + err.Error())
+	}
+	defer topic.Delete(ctx)
+
+	policy, err := topic.IAM().Policy(ctx)
+	if err != nil {
+		log.Fatalf("Couldn't get pubsub topic policy: " + err.Error())
+	}
+	policy.Add("serviceAccount:" + stsServiceAccountEmail, "roles/pubsub.subscriber")
+	if err := topic.IAM().SetPolicy(ctx, policy); err != nil {
+		log.Fatalf("Couldn't set pubsub topic policy: " + err.Error())
+	}
+
+	subId := testutil.UniqueBucketName("pubsubsubscription")
+
+	sub, err := pubsubClient.CreateSubscription(ctx, subId, pubsub.SubscriptionConfig{
+		Topic:       topic,
+		AckDeadline: 20 * time.Second,
+	})
+	if err != nil {
+		log.Fatalf("Couldn't create pubsub subscription: " + err.Error())
+	}
+
+	pubSubSubscriptionID := sub.String()
+
+	resp, err := createEventDrivenGCSTransfer(buf, tc.ProjectID, gcsSourceBucket, gcsSinkBucket, pubSubSubscriptionID)
 	if err != nil {
 		t.Errorf("create_event_driven_gcs_transfer: %#v", err)
 	}
@@ -474,11 +439,37 @@ func TestCreateEventDrivenGcsTransfer(t *testing.T) {
 	}
 }
 
-func TestCreateEventDrivenAwsTransfer(t *testing.T) {
+func TestCreateEventDrivenAWSTransfer(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 
-	resp, err := createEventDrivenAwsTransfer(buf, tc.ProjectID, s3Bucket, gcsSinkBucket, sqsQueueArn)
+	queue := testutil.UniqueBucketName("stssqsqueue")
+	sqsClient := sqs.New(sess)
+	result, err := sqsClient.CreateQueue(&sqs.CreateQueueInput{
+		QueueName: &queue,
+		Attributes: map[string]*string{
+			"DelaySeconds":           aws.String("60"),
+			"MessageRetentionPeriod": aws.String("86400"),
+		},
+	})
+	if err != nil {
+		log.Fatalf("couldn't create SQS queue: %v", err)
+	}
+	defer sqsClient.DeleteQueue(&sqs.DeleteQueueInput{
+		QueueUrl: result.QueueUrl,
+	})
+
+	attributes, err := sqsClient.GetQueueAttributes(&sqs.GetQueueAttributesInput{
+		AttributeNames: []*string{aws.String("QueueArn")},
+		QueueUrl:       result.QueueUrl,
+	})
+	if err != nil {
+		log.Fatalf("couldn't get SQS queue attributes: %v", err)
+	}
+
+	sqsQueueARN := *attributes.Attributes["QueueArn"]
+
+	resp, err := createEventDrivenAWSTransfer(buf, tc.ProjectID, s3Bucket, gcsSinkBucket, sqsQueueARN)
 	if err != nil {
 		t.Errorf("create_event_driven_aws_transfer: %#v", err)
 	}
@@ -490,10 +481,10 @@ func TestCreateEventDrivenAwsTransfer(t *testing.T) {
 	}
 }
 
-func grantSTSPermissions(bucketName string, email string, str *storage.Client) {
+func grantSTSPermissions(bucketName string, str *storage.Client) {
 	ctx := context.Background()
 
-	identity := "serviceAccount:" + email
+	identity := "serviceAccount:" + stsServiceAccountEmail
 
 	bucket := str.Bucket(bucketName)
 	policy, err := bucket.IAM().Policy(ctx)
