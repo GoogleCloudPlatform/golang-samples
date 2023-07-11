@@ -547,9 +547,8 @@ func TestImportEndToEnd(t *testing.T) {
 	cryptoKeyVersionName := fmt.Sprintf("%s/cryptoKeyVersions/1", cryptoKeyName)
 
 	// Wait for the key to finish importing.
-	importInProgress := true
 	importInProgressStatus := kmspb.CryptoKeyVersion_CryptoKeyVersionState_name[int32(kmspb.CryptoKeyVersion_PENDING_IMPORT)]
-	for importInProgress {
+	for {
 		b.Reset()
 		if err := checkStateImportedKey(&b, cryptoKeyVersionName); err != nil {
 			t.Fatal(err)
@@ -561,7 +560,6 @@ func TestImportEndToEnd(t *testing.T) {
 		}
 
 		if !strings.Contains(got, importInProgressStatus) {
-			importInProgress = false
 			break
 		}
 
