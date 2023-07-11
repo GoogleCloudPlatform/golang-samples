@@ -1,12 +1,12 @@
-module github.com/GoogleCloudPlatform/golang-samples/eventarc/audit_storage
+module github.com/GoogleCloudPlatform/golang-samples/functions/typed/greeting
 
-go 1.19
+go 1.21
 
-require github.com/cloudevents/sdk-go/v2 v2.14.0
+require github.com/GoogleCloudPlatform/functions-framework-go v1.7.4
 
 require (
-	github.com/google/go-cmp v0.5.5 // indirect
-	github.com/google/uuid v1.1.1 // indirect
+	github.com/cloudevents/sdk-go/v2 v2.14.0 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
 	github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742 // indirect
