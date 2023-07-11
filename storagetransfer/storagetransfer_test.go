@@ -410,7 +410,7 @@ func TestCreateEventDrivenGCSTransfer(t *testing.T) {
 	if err != nil {
 		log.Fatalf("Couldn't get pubsub topic policy: " + err.Error())
 	}
-	policy.Add("serviceAccount:" + stsServiceAccountEmail, "roles/pubsub.subscriber")
+	policy.Add("serviceAccount:"+stsServiceAccountEmail, "roles/pubsub.subscriber")
 	if err := topic.IAM().SetPolicy(ctx, policy); err != nil {
 		log.Fatalf("Couldn't set pubsub topic policy: " + err.Error())
 	}
