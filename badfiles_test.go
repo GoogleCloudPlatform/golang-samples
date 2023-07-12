@@ -31,6 +31,7 @@ var alwaysBad = []string{
 // allowList contains glob patterns that are acceptable.
 var allowList = []string{
 	// Files that are always good!
+	"go.work",
 	"**/*.go",
 	"**/*.md",
 	"**/*.yaml",
