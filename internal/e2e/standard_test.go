@@ -17,7 +17,7 @@
 package e2e
 
 import (
-	"io/ioutil"
+	"io"
 	"log"
 	"strings"
 	"testing"
@@ -58,7 +58,7 @@ func bodyShouldContain(t *testing.T, p *aeintegrate.App, path, shouldContain str
 			r.Errorf("Get: %v", err)
 			return
 		}
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			r.Errorf("could not read body: %v", err)
 			return
