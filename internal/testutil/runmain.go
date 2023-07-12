@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -34,7 +33,7 @@ func BuildMain(t *testing.T) *Runner {
 	if err != nil {
 		t.Fatal(err)
 	}
-	tmp, err := ioutil.TempDir("", "runmain-"+filepath.Base(wd)+"-")
+	tmp, err := os.MkdirTemp("", "runmain-"+filepath.Base(wd)+"-")
 	if err != nil {
 		t.Fatal(err)
 	}
