@@ -1,4 +1,4 @@
-module warmup
+module github.com/GoogleCloudPlatform/golang-samples/appengine/go11x/warmup
 
 go 1.19
 

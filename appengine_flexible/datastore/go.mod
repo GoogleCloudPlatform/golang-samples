@@ -1,4 +1,4 @@
-module datastore
+module github.com/GoogleCloudPlatform/golang-samples/appengine_flexible/datastore
 
 go 1.19
 

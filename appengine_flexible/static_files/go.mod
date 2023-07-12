@@ -1,4 +1,4 @@
-module staticfiles
+module github.com/GoogleCloudPlatform/golang-samples/appengine_flexible/staticfiles
 
 go 1.19
 

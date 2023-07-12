@@ -1,4 +1,4 @@
-module cloudsql
+module github.com/GoogleCloudPlatform/golang-samples/appengine/go11x/cloudsql
 
 go 1.19
 

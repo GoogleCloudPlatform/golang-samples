@@ -1,4 +1,4 @@
-module redis
+module github.com/GoogleCloudPlatform/golang-samples/appengine_flexible/redis
 
 go 1.19
 
