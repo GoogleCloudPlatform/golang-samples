@@ -25,6 +25,7 @@ import (
 )
 
 func TestAuditStorageSinkService(t *testing.T) {
+	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/3188")
 	tc := testutil.EndToEndTest(t)
 
 	service := cloudrunci.NewService("audit-storage", tc.ProjectID)
