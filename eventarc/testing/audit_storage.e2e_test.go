@@ -15,13 +15,16 @@
 package cloudruntests
 
 import (
+	"context"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"testing"
 	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	cloudevent "github.com/cloudevents/sdk-go/v2"
 )
 
 func TestAuditStorageSinkService(t *testing.T) {
@@ -34,11 +37,25 @@ func TestAuditStorageSinkService(t *testing.T) {
 	}
 	defer service.Clean()
 
-	requestPath := "/"
-	req, err := service.NewRequest("POST", requestPath)
+	event := cloudevent.NewEvent("1.0")
+	event.SetID("1")
+	event.SetSource("test")
+	event.SetSubject("storage.googleapis.com/projects/_/buckets/my-bucket")
+	event.SetType("test")
+
+	service_url, err := service.URL("/")
 	if err != nil {
-		t.Fatalf("service.NewRequest: %v", err)
+		t.Fatal(err)
 	}
+	req, err := cloudevent.NewHTTPRequestFromEvent(context.Background(),
+		service_url, event)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// add a valid auth header to the cloudevent request.
+	authreq, _ := service.NewRequest("POST", "/")
+	req.Header.Set("Authorization", authreq.Header.Get("Authorization"))
 
 	client := http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
@@ -49,6 +66,8 @@ func TestAuditStorageSinkService(t *testing.T) {
 	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
 
 	if got := resp.StatusCode; got != http.StatusOK {
+		b, _ := ioutil.ReadAll(resp.Body)
+		fmt.Println(b)
 		t.Errorf("response status: got %d, want %d", got, http.StatusOK)
 	}
 }
