@@ -16,13 +16,26 @@ package main
 
 import (
 	"bytes"
+	"strings"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestConnectToDatabase(t *testing.T) {
+
+	tc := testutil.SystemTest(t)
+
 	var buf bytes.Buffer
-	err := ConnectToDatabase(&buf, "video-erschmid", "us-central1", "my-instance")
+	err := ConnectToDatabase(&buf, tc.ProjectID, "us-central1", "my-instance")
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	want := "Response"
+	got := buf.String()
+
+	if !strings.Contains(want, got) {
+		t.Errorf("wanted: %s; got: %s", want, got)
 	}
 }

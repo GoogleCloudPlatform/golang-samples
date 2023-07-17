@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"time"
 
 	memorystore "cloud.google.com/go/redis/apiv1"
@@ -79,7 +78,7 @@ func ConnectToDatabase(w io.Writer, projectId, location, instanceId string) erro
 	if err != nil {
 		return err
 	}
-	log.Print(p)
+	fmt.Fprintf(w, "Response:\n%s", p)
 
 	return nil
 }
