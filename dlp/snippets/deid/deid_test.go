@@ -575,9 +575,9 @@ func TestDeIdentifyTableWithCryptoHash(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	var buf bytes.Buffer
-	transientKey := "YOUR_TRANSIENT_CRYPTO_KEY"
+	transientKeyName := "YOUR_TRANSIENT_CRYPTO_KEY_NAME"
 
-	if err := deIdentifyTableWithCryptoHash(&buf, tc.ProjectID, transientKey); err != nil {
+	if err := deIdentifyTableWithCryptoHash(&buf, tc.ProjectID, transientKeyName); err != nil {
 		t.Fatal(err)
 	}
 	got := buf.String()
@@ -585,13 +585,22 @@ func TestDeIdentifyTableWithCryptoHash(t *testing.T) {
 	if want := "Table after de-identification :"; !strings.Contains(got, want) {
 		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
 	}
-	if want := `{string_value:\"my email is user3@example.org and phone is 858-555-0224\"}`; strings.Contains(got, want) {
+	if want := "user3@example.org"; strings.Contains(got, want) {
 		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
 	}
-	if want := `{string_value:\"my email is user2@example.org and phone is 858-555-0223\"}`; strings.Contains(got, want) {
+	if want := "858-555-0224"; strings.Contains(got, want) {
 		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
 	}
-	if want := `{string_value:\"my email is user1@example.org and phone is 858-555-0222\"}`; strings.Contains(got, want) {
+	if want := "user2@example.org"; strings.Contains(got, want) {
+		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
+	}
+	if want := "858-555-0223"; strings.Contains(got, want) {
+		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
+	}
+	if want := "user1@example.org"; strings.Contains(got, want) {
+		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
+	}
+	if want := "858-555-0222"; strings.Contains(got, want) {
 		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
 	}
 }
