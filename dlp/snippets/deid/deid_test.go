@@ -570,3 +570,37 @@ func TestReidTextDataWithFPE(t *testing.T) {
 		t.Errorf("reidentifyFreeTextWithFPEUsingSurrogate got %q, want %q", got, want)
 	}
 }
+
+func TestDeIdentifyTableWithCryptoHash(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	var buf bytes.Buffer
+	transientKeyName := "YOUR_TRANSIENT_CRYPTO_KEY_NAME"
+
+	if err := deIdentifyTableWithCryptoHash(&buf, tc.ProjectID, transientKeyName); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+
+	if want := "Table after de-identification :"; !strings.Contains(got, want) {
+		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
+	}
+	if want := "user3@example.org"; strings.Contains(got, want) {
+		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
+	}
+	if want := "858-555-0224"; strings.Contains(got, want) {
+		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
+	}
+	if want := "user2@example.org"; strings.Contains(got, want) {
+		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
+	}
+	if want := "858-555-0223"; strings.Contains(got, want) {
+		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
+	}
+	if want := "user1@example.org"; strings.Contains(got, want) {
+		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
+	}
+	if want := "858-555-0222"; strings.Contains(got, want) {
+		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
+	}
+}
