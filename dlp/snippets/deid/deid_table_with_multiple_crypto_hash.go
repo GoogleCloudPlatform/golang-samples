@@ -24,10 +24,10 @@ import (
 )
 
 // deIdentifyTableWithMultipleCryptoHash Transforms findings using two separate cryptographic hash transformations.
-func deIdentifyTableWithMultipleCryptoHash(w io.Writer, projectID, transientKey1, transientKey2 string) error {
+func deIdentifyTableWithMultipleCryptoHash(w io.Writer, projectID, transientKeyName1, transientKeyName2 string) error {
 	// projectId := "your-project-id"
-	// transientKey1 := "YOUR_TRANSIENT_CRYPTO_KEY_1"
-	// transientKey2 := "YOUR_TRANSIENT_CRYPTO_KEY_2"
+	// transientKeyName1 := "YOUR_TRANSIENT_CRYPTO_KEY_1"
+	// transientKeyName2 := "YOUR_TRANSIENT_CRYPTO_KEY_2"
 
 	// The table to de-identify.
 	row1 := &dlppb.Table_Row{
@@ -89,11 +89,11 @@ func deIdentifyTableWithMultipleCryptoHash(w io.Writer, projectID, transientKey1
 	// Specify the transient key names.
 
 	transientCryptoKey1 := &dlppb.TransientCryptoKey{
-		Name: transientKey1,
+		Name: transientKeyName1,
 	}
 
 	transientCryptoKey2 := &dlppb.TransientCryptoKey{
-		Name: transientKey2,
+		Name: transientKeyName2,
 	}
 
 	cryptoKey1 := &dlppb.CryptoKey_Transient{
