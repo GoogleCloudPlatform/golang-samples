@@ -127,7 +127,7 @@ func deIdentifyTableWithMultipleCryptoHash(w io.Writer, projectID, transientKeyN
 		},
 	}
 
-	// Specify the transformation for transientKey1
+	// Specify the transformation for transientKey2
 	primitiveTransformation2 := &dlppb.PrimitiveTransformation{
 		Transformation: &dlppb.PrimitiveTransformation_CryptoHashConfig{
 			CryptoHashConfig: cryptoHashConfig2,
