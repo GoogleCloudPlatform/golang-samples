@@ -26,7 +26,7 @@ import (
 // deIdentifyTableWithCryptoHash transforms findings using a cryptographic hash transformation.
 func deIdentifyTableWithCryptoHash(w io.Writer, projectID, transientKeyName string) error {
 	// projectId := "your-project-id"
-	// transientKey := "YOUR_TRANSIENT_CRYPTO_KEY_NAME"
+	// transientKeyName := "YOUR_TRANSIENT_CRYPTO_KEY_NAME"
 
 	row1 := &dlppb.Table_Row{
 		Values: []*dlppb.Value{
