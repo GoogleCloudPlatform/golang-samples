@@ -21,11 +21,14 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"log"
 	"strings"
 
 	"testing"
 
+	dlp "cloud.google.com/go/dlp/apiv2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 	kms "cloud.google.com/go/kms/apiv1"
 	"cloud.google.com/go/kms/apiv1/kmspb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -359,7 +362,7 @@ func TestReidentifyFreeTextWithFPEUsingSurrogate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := deidentifyFreeTextWithFPEUsingSurrogate(&buf, tc.ProjectID, inputStr, infoType, surrogateType, unwrappedKey); err != nil {
+	if err := deidentifyFreeTextWithFPEUsingSurrogateForTest(t, &buf, tc.ProjectID, inputStr, infoType, surrogateType, unwrappedKey); err != nil {
 		t.Fatal(err)
 	}
 	deidContent := buf.String()
@@ -376,6 +379,72 @@ func TestReidentifyFreeTextWithFPEUsingSurrogate(t *testing.T) {
 		t.Errorf("reidentifyFreeTextWithFPEUsingSurrogate got %q, want %q", got, want)
 	}
 
+}
+
+func deidentifyFreeTextWithFPEUsingSurrogateForTest(t *testing.T, w io.Writer, projectID, inputStr, infoType, surrogateType, unwrappedKey string) error {
+	t.Helper()
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+	keyDecode, err := base64.StdEncoding.DecodeString(unwrappedKey)
+	if err != nil {
+		return err
+	}
+	req := &dlppb.DeidentifyContentRequest{
+		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
+		DeidentifyConfig: &dlppb.DeidentifyConfig{
+			Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
+				InfoTypeTransformations: &dlppb.InfoTypeTransformations{
+					Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
+						{
+							InfoTypes: []*dlppb.InfoType{
+								{Name: infoType},
+							},
+							PrimitiveTransformation: &dlppb.PrimitiveTransformation{
+								Transformation: &dlppb.PrimitiveTransformation_CryptoReplaceFfxFpeConfig{
+									CryptoReplaceFfxFpeConfig: &dlppb.CryptoReplaceFfxFpeConfig{
+										CryptoKey: &dlppb.CryptoKey{
+											Source: &dlppb.CryptoKey_Unwrapped{
+												Unwrapped: &dlppb.UnwrappedCryptoKey{
+													Key: keyDecode,
+												},
+											},
+										},
+										Alphabet: &dlppb.CryptoReplaceFfxFpeConfig_CommonAlphabet{
+											CommonAlphabet: dlppb.CryptoReplaceFfxFpeConfig_NUMERIC,
+										},
+										SurrogateInfoType: &dlppb.InfoType{
+											Name: surrogateType,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		InspectConfig: &dlppb.InspectConfig{
+			InfoTypes: []*dlppb.InfoType{
+				{Name: infoType},
+			},
+			MinLikelihood: dlppb.Likelihood_UNLIKELY,
+		},
+		Item: &dlppb.ContentItem{
+			DataItem: &dlppb.ContentItem_Value{
+				Value: inputStr,
+			},
+		},
+	}
+	resp, err := client.DeidentifyContent(ctx, req)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "output: %v", resp.GetItem().GetValue())
+	return nil
 }
 
 func TestDeIdentifyFreeTextWithFPEUsingSurrogate(t *testing.T) {
