@@ -75,8 +75,8 @@ func inspectAugmentInfoTypes(w io.Writer, projectID, textToInspect string, wordL
 		},
 	}
 
-	// Specify the inspect config for data inspection settings in DLP API, enabling rule 
-	// specification, custom info types, and actions on sensitive data. Crucial for tailored 
+	// Specify the inspect config for data inspection settings in DLP API, enabling rule
+	// specification, custom info types, and actions on sensitive data. Crucial for tailored
 	// data protection and privacy regulation compliance.
 	inspectConfig := &dlppb.InspectConfig{
 		CustomInfoTypes: []*dlppb.CustomInfoType{
