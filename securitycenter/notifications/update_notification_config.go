@@ -40,9 +40,14 @@ func updateNotificationConfig(w io.Writer, orgID string, notificationConfigID st
 
 	updatedDescription := "Updated sample config"
 	updatedFilter := `state = "INACTIVE"`
+	// Parent must be in one of the following formats:
+	//		"organizations/{orgId}"
+	//		"projects/{projectId}"
+	//		"folders/{folderId}"
+	parent := fmt.Sprintf("organizations/%s", orgID)
 	req := &securitycenterpb.UpdateNotificationConfigRequest{
 		NotificationConfig: &securitycenterpb.NotificationConfig{
-			Name:        fmt.Sprintf("organizations/%s/notificationConfigs/%s", orgID, notificationConfigID),
+			Name:        fmt.Sprintf("%s/notificationConfigs/%s", parent, notificationConfigID),
 			Description: updatedDescription,
 			PubsubTopic: updatedPubsubTopic,
 			NotifyConfig: &securitycenterpb.NotificationConfig_StreamingConfig_{

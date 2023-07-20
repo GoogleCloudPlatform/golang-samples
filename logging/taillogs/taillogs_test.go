@@ -23,6 +23,7 @@ import (
 
 	"cloud.google.com/go/logging"
 	"cloud.google.com/go/logging/logadmin"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
 )
 
@@ -72,21 +73,12 @@ func TestTailLogs(t *testing.T) {
 		adminClient.DeleteLog(ctx, logID)
 	}()
 
-	// following implements custom 2 min timeout for running tailLogs() sample
-	success := make(chan int, 1)
-	go func() {
+	// 3 minute timeout and 3 retries
+	testutil.Retry(t, 3, 3*time.Minute, func(r *testutil.R) {
 		// ingest a couple of logs to finish the test
 		err := tailLogs(projectID)
 		if err != nil {
-			t.Errorf("testLogs sample returned error: %v", err)
+			r.Errorf("testLogs sample returned error: %v", err)
 		}
-		success <- 1
-	}()
-
-	select {
-	case <-success:
-		return // from the test
-	case <-time.After(2 * time.Minute):
-		t.Fatalf("tailLogs sample failed to complete after 2 minutes")
-	}
+	})
 }

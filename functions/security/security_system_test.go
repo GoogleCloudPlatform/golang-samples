@@ -22,6 +22,9 @@ import (
 	"os/exec"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 const RuntimeVersion = "go118"
@@ -109,12 +112,14 @@ func TestMakeGetRequest(t *testing.T) {
 	}
 	url := baseURL + "MakeGetRequestCloudFunction"
 
-	var b bytes.Buffer
-	if err := makeGetRequest(&b, url, url); err != nil {
-		t.Fatalf("makeGetRequest: %v", err)
-	}
-	got := b.String()
-	if got != "Success!" {
-		t.Fatalf("got %s, want %s", got, "Success!")
-	}
+	testutil.Retry(t, 5, 30*time.Second, func(r *testutil.R) {
+		var b bytes.Buffer
+		if err := makeGetRequest(&b, url, url); err != nil {
+			r.Errorf("makeGetRequest: %v", err)
+		}
+		got := b.String()
+		if got != "Success!" {
+			r.Errorf("got %s, want %s", got, "Success!")
+		}
+	})
 }

@@ -29,7 +29,12 @@ import (
 // key_a equal to value_a to w.  sourceName is the full resource name
 // of the source to search for findings under.
 func listFindingsWithMarks(w io.Writer, sourceName string) error {
-	// sourceName := "organizations/111122222444/sources/1234"
+	// sourceName := "{parent}/sources/{sourceId}"
+	// where,
+	// Parent must be in one of the following formats:
+	//		"organizations/{orgId}"
+	//		"projects/{projectId}"
+	//		"folders/{folderId}"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)

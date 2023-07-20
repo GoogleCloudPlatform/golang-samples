@@ -5,12 +5,14 @@ go 1.19
 require (
 	cloud.google.com/go/bigquery v1.51.2
 	cloud.google.com/go/iam v1.1.0
-	cloud.google.com/go/pubsub v1.30.1
+	cloud.google.com/go/pubsub v1.32.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230522201558-cba0742a460f
 	github.com/google/go-cmp v0.5.9
 	github.com/google/uuid v1.3.0
+	github.com/googleapis/gax-go/v2 v2.11.0
 	github.com/linkedin/goavro/v2 v2.12.0
-	google.golang.org/api v0.125.0
+	google.golang.org/api v0.126.0
+	google.golang.org/grpc v1.55.0
 	google.golang.org/protobuf v1.30.0
 )
 
