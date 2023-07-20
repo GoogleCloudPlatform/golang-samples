@@ -1,11 +1,14 @@
-module github.com/GoogleCloudPlatform/golang-samples/eventarc/audit_storage
+module github.com/GoogleCloudPlatform/golang-samples/eventarc/storage_handler
 
-go 1.19
-
-require github.com/cloudevents/sdk-go/v2 v2.14.0
+go 1.20
 
 require (
-	github.com/google/go-cmp v0.5.5 // indirect
+	github.com/cloudevents/sdk-go/v2 v2.14.0
+	github.com/googleapis/google-cloudevents-go v0.5.0
+	google.golang.org/protobuf v1.30.0
+)
+
+require (
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect

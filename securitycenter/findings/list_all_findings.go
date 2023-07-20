@@ -25,7 +25,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// listFindings prints all findings in orgID to w.  orgID is the numeric
+// listFindings prints all findings in orgID to w. orgID is the numeric
 // identifier of the organization.
 func listFindings(w io.Writer, orgID string) error {
 	// orgID := "12321311"
@@ -39,6 +39,10 @@ func listFindings(w io.Writer, orgID string) error {
 
 	req := &securitycenterpb.ListFindingsRequest{
 		// List findings across all sources.
+		// Parent must be in one of the following formats:
+		//		"organizations/{orgId}/sources/-"
+		//		"projects/{projectId}/sources/-"
+		//		"folders/{folderId}/sources/-"
 		Parent: fmt.Sprintf("organizations/%s/sources/-", orgID),
 	}
 	it := client.ListFindings(ctx, req)
