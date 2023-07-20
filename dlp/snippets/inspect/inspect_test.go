@@ -643,7 +643,6 @@ func TestInspectBigQueryTableWithSampling(t *testing.T) {
 
 }
 
-
 func TestInspectAugmentInfoTypes(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
@@ -660,7 +659,7 @@ func TestInspectAugmentInfoTypes(t *testing.T) {
 	}
 	if want := "Info type: PERSON_NAME"; !strings.Contains(got, want) {
 		t.Errorf("TestInspectAugmentInfoTypes got %q, want %q", got, want)
-  }
+        }
 }
 
 func TestInspectTableWithCustomHotword(t *testing.T) {
