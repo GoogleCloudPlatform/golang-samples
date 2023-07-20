@@ -20,10 +20,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/metric/instrument"
 	"go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/resource"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 )
 
 var counter instrument.Int64Counter
@@ -33,16 +36,37 @@ func main() {
 	shutdown := setupCounter(ctx)
 	defer shutdown(ctx)
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+		log.Printf("defaulting to port %s", port)
+	}
+
 	http.HandleFunc("/", handler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	counter.Add(context.Background(), 100)
-	fmt.Fprintln(w, "Wrote sidecar_sample_counter metric!")
+	fmt.Fprintln(w, "Incremented sidecar_sample_counter metric!")
 }
 
 func setupCounter(ctx context.Context) func(context.Context) error {
+	serviceName := os.Getenv("K_SERVICE")
+	if serviceName == "" {
+		serviceName = "sample-cloud-run-app"
+	}
+	r, err := resource.Merge(
+		resource.Default(),
+		resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceName(serviceName),
+		),
+	)
+	if err != nil {
+		log.Fatalf("Error creating resource: %s", err)
+	}
+
 	exporter, err := otlpmetricgrpc.New(ctx,
 		otlpmetricgrpc.WithInsecure(),
 	)
@@ -51,6 +75,7 @@ func setupCounter(ctx context.Context) func(context.Context) error {
 	}
 	provider := metric.NewMeterProvider(
 		metric.WithReader(metric.NewPeriodicReader(exporter)),
+		metric.WithResource(r),
 	)
 
 	meter := provider.Meter("example.com/metrics")
