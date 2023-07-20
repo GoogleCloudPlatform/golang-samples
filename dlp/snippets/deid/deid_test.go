@@ -626,3 +626,19 @@ func TestDeIdentifyTableWithMultipleCryptoHash(t *testing.T) {
 		t.Errorf("TestDeIdentifyTableWithMultipleCryptoHash got %q, want %q", got, want)
 	}
 }
+
+func TestDeidentifyDataReplaceWithDictionary(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+
+	if err := deidentifyDataReplaceWithDictionary(&buf, tc.ProjectID, "My name is Alicia Abernathy, and my email address is aabernathy@example.com."); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	want1 := "output: My name is Alicia Abernathy, and my email address is izumi@example.com."
+	want2 := "output: My name is Alicia Abernathy, and my email address is alex@example.com."
+	if !strings.Contains(got, want1) && !strings.Contains(got, want2) {
+		t.Errorf("TestDeidentifyDataReplaceWithDictionary got %q, output does not contains value from dictionary", got)
+	}
+
+}
