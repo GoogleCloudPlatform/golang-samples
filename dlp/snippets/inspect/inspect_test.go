@@ -653,12 +653,12 @@ func TestInspectTableWithCustomHotword(t *testing.T) {
 	got := buf.String()
 
 	if want := "Quote: 222-22-2222"; !strings.Contains(got, want) {
-		t.Errorf("TestInspectAugmentInfoTypes got %q, want %q", got, want)
+		t.Errorf("TestInspectTableWithCustomHotword got %q, want %q", got, want)
 	}
 	if want := "Infotype Name: US_SOCIAL_SECURITY_NUMBER"; !strings.Contains(got, want) {
-		t.Errorf("TestInspectAugmentInfoTypes got %q, want %q", got, want)
+		t.Errorf("TestInspectTableWithCustomHotword got %q, want %q", got, want)
 	}
 	if want := "Quote: 111-11-1111"; strings.Contains(got, want) {
-		t.Errorf("TestInspectAugmentInfoTypes got %q, want %q", got, want)
+		t.Errorf("TestInspectTableWithCustomHotword got %q, want %q", got, want)
 	}
 }
