@@ -642,3 +642,23 @@ func TestInspectBigQueryTableWithSampling(t *testing.T) {
 	}
 
 }
+
+func TestInspectTableWithCustomHotword(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+	hotwordRegexPattern := "(Fake Social Security Number)"
+	if err := inspectTableWithCustomHotword(&buf, tc.ProjectID, hotwordRegexPattern); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+
+	if want := "Quote: 222-22-2222"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectTableWithCustomHotword got %q, want %q", got, want)
+	}
+	if want := "Infotype Name: US_SOCIAL_SECURITY_NUMBER"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectTableWithCustomHotword got %q, want %q", got, want)
+	}
+	if want := "Quote: 111-11-1111"; strings.Contains(got, want) {
+		t.Errorf("TestInspectTableWithCustomHotword got %q, want %q", got, want)
+	}
+}
