@@ -643,6 +643,25 @@ func TestInspectBigQueryTableWithSampling(t *testing.T) {
 
 }
 
+func TestInspectAugmentInfoTypes(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+
+	textToInspect := "The patient's name is Quasimodo"
+	wordList := []string{"quasimodo"}
+
+	if err := inspectAugmentInfoTypes(&buf, tc.ProjectID, textToInspect, wordList); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "Qoute: Quasimodo"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectAugmentInfoTypes got %q, want %q", got, want)
+	}
+	if want := "Info type: PERSON_NAME"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectAugmentInfoTypes got %q, want %q", got, want)
+	}
+}
+
 func TestInspectTableWithCustomHotword(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
