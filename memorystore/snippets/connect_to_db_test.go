@@ -32,6 +32,8 @@ import (
 var instanceID string
 
 func TestMain(m *testing.M) {
+
+	// Set up
 	tc, ok := testutil.ContextMain(m)
 	if !ok {
 		log.Fatal("test project not set up properly")
@@ -78,6 +80,15 @@ func TestMain(m *testing.M) {
 	}
 
 	m.Run()
+
+	// Teardown
+	_, err = adminClient.DeleteInstance(ctx, &redispb.DeleteInstanceRequest{
+		Name: fmt.Sprintf("%s/%s", parent, instanceID),
+	})
+
+	if err != nil {
+		log.Fatalf("couldn't delete Redis instance: %s", err)
+	}
 }
 
 func TestConnectToDatabase(t *testing.T) {
