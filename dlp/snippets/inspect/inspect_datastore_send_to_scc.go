@@ -24,7 +24,7 @@ import (
 )
 
 // inspectDataStoreSendToScc inspects sensitive data in a data store and sends the results to Google Cloud Security Command Center (SCC).
-func InspectDataStoreSendToScc(w io.Writer, projectID, datastoreNamespace, datastoreKind string) error {
+func inspectDataStoreSendToScc(w io.Writer, projectID, datastoreNamespace, datastoreKind string) error {
 	// projectID := "my-project-id"
 	// datastoreNamespace := "your-datastore-namespace"
 	// datastoreKind := "your-datastore-kind"

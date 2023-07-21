@@ -669,7 +669,7 @@ func TestInspectDataStoreSendToScc(t *testing.T) {
 	datastoreNamespace := "golang-samples"
 	datastoreKind := "task"
 
-	if err := InspectDataStoreSendToScc(&buf, tc.ProjectID, datastoreNamespace, datastoreKind); err != nil {
+	if err := inspectDataStoreSendToScc(&buf, tc.ProjectID, datastoreNamespace, datastoreKind); err != nil {
 		t.Fatal(err)
 	}
 
