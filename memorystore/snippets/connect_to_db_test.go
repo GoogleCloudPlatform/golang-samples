@@ -16,18 +16,76 @@ package main
 
 import (
 	"bytes"
+	"context"
+	"fmt"
+	"log"
 	"strings"
 	"testing"
 
+	"cloud.google.com/go/longrunning/autogen/longrunningpb"
+	memorystore "cloud.google.com/go/redis/apiv1"
+	redispb "cloud.google.com/go/redis/apiv1/redispb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/google/uuid"
 )
+
+var instanceID string
+
+func TestMain(m *testing.M) {
+	tc, ok := testutil.ContextMain(m)
+	if !ok {
+		log.Fatal("test project not set up properly")
+		return
+	}
+	parent := fmt.Sprintf("projects/%s/locations/us-central1/", tc.ProjectID)
+
+	ctx := context.Background()
+	id := uuid.New()
+	instanceID = fmt.Sprintf("test-instance-%s", id.String())
+
+	adminClient, err := memorystore.NewCloudRedisClient(ctx)
+	if err != nil {
+		log.Fatal("can't instantiate MemoryStore Redis admin client")
+		return
+	}
+
+	req := &redispb.CreateInstanceRequest{
+		Parent:     parent,
+		InstanceId: instanceID,
+		Instance: &redispb.Instance{
+			Name: fmt.Sprintf("%s/%s", parent, instanceID),
+		},
+	}
+
+	op, err := adminClient.CreateInstance(ctx, req)
+	if err != nil {
+		return
+	}
+
+	for {
+		resp, err := adminClient.LROClient.GetOperation(ctx, &longrunningpb.GetOperationRequest{
+			Name: op.Name(),
+		})
+
+		if err != nil {
+			log.Fatalf("error creating Memorystore Redis instance: %s", err)
+			return
+		}
+
+		if resp.Done {
+			break
+		}
+	}
+
+	m.Run()
+}
 
 func TestConnectToDatabase(t *testing.T) {
 
 	tc := testutil.SystemTest(t)
 
 	var buf bytes.Buffer
-	err := ConnectToDatabase(&buf, tc.ProjectID, "us-central1", "my-instance")
+	err := ConnectToDatabase(&buf, tc.ProjectID, "us-central1", instanceID)
 	if err != nil {
 		t.Fatal(err)
 	}
