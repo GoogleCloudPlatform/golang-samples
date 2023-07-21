@@ -30,7 +30,7 @@ import (
 
 // ConnectToDatabase demonstrates how to use go-redis library to connect to a
 // Memorystore Redis instance.
-func ConnectToDatabase(w io.Writer, projectId, location, instanceId string) error {
+func ConnectToDatabase(w io.Writer, projectID, location, instanceID string) error {
 
 	// Instantiate a Redis administrative client
 	ctx := context.Background()
@@ -41,7 +41,7 @@ func ConnectToDatabase(w io.Writer, projectId, location, instanceId string) erro
 	defer adminClient.Close()
 
 	req := &redispb.GetInstanceRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/instances/%s", projectId, location, instanceId),
+		Name: fmt.Sprintf("projects/%s/locations/%s/instances/%s", projectID, location, instanceID),
 	}
 
 	instance, err := adminClient.GetInstance(ctx, req)
