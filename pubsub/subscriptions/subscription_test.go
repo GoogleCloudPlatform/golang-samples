@@ -29,6 +29,7 @@ import (
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -131,26 +132,26 @@ func TestCreate(t *testing.T) {
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		topic, err = client.CreateTopic(ctx, topicID)
 		if err != nil {
-			t.Fatalf("CreateTopic: %v", err)
+			r.Errorf("CreateTopic: %v", err)
 		}
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
 		if err := create(buf, tc.ProjectID, subID, topic); err != nil {
-			t.Fatalf("failed to create a subscription: %v", err)
+			r.Errorf("failed to create a subscription: %v", err)
 		}
 		got := buf.String()
 		want := "Created subscription"
 		if !strings.Contains(got, want) {
-			t.Fatalf("got: %s, want: %v", got, want)
+			r.Errorf("got: %s, want: %v", got, want)
 		}
 		ok, err := client.Subscription(subID).Exists(context.Background())
 		if err != nil {
-			t.Fatalf("failed to check if sub exists: %v", err)
+			r.Errorf("failed to check if sub exists: %v", err)
 		}
 		if !ok {
-			t.Fatalf("got none; want sub = %q", subID)
+			r.Errorf("got none; want sub = %q", subID)
 		}
 	})
 }
@@ -250,6 +251,45 @@ func TestDelete(t *testing.T) {
 	if ok {
 		t.Fatalf("sub = %q; want none", subID)
 	}
+}
+
+func TestPushSubscription(t *testing.T) {
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+
+	var topic *pubsub.Topic
+	var err error
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		topic, err = client.CreateTopic(ctx, topicID)
+		if err != nil {
+			r.Errorf("CreateTopic: %v", err)
+		}
+	})
+
+	pushSubID := subID + "-push"
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		endpoint := "https://" + tc.ProjectID + ".appspot.com/_ah/push-handlers/push"
+		if err := createWithEndpoint(buf, tc.ProjectID, pushSubID, topic, endpoint); err != nil {
+			r.Errorf("failed to create a push subscription: %v", err)
+		}
+		got := buf.String()
+		want := "Created subscription"
+		if !strings.Contains(got, want) {
+			r.Errorf("got: %s, want: %v", got, want)
+		}
+
+		buf.Reset()
+		if err := clearPushSubscription(buf, tc.ProjectID, pushSubID); err != nil {
+			r.Errorf("failed to clear push subscription: %v", err)
+		}
+		got2 := buf.String()
+		want2 := "Cleared push subscription, reverting to pull"
+		if !strings.Contains(got2, want2) {
+			r.Errorf("got: %s, want: %v", got2, want2)
+		}
+	})
 }
 
 func TestPullMsgsAsync(t *testing.T) {
@@ -746,7 +786,7 @@ func TestCreateWithFilter(t *testing.T) {
 	}
 }
 
-func TestCreateBigQuerySubscription(t *testing.T) {
+func TestBigQuerySubscription(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
@@ -754,29 +794,45 @@ func TestCreateBigQuerySubscription(t *testing.T) {
 	defer client.Close()
 	bqSubID := subID + "-bigquery"
 
-	topic, err := getOrCreateTopic(ctx, client, topicID)
-	if err != nil {
-		t.Fatalf("CreateTopic: %v", err)
-	}
-	buf := new(bytes.Buffer)
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		topic, err := getOrCreateTopic(ctx, client, topicID)
+		if err != nil {
+			r.Errorf("CreateTopic: %v", err)
+		}
+		buf := new(bytes.Buffer)
 
-	datasetID := fmt.Sprintf("go_samples_dataset_%d", time.Now().UnixNano())
-	tableID := fmt.Sprintf("go_samples_table_%d", time.Now().UnixNano())
-	if err := createBigQueryTable(tc.ProjectID, datasetID, tableID); err != nil {
-		t.Fatalf("failed to create bigquery table: %v", err)
-	}
+		datasetID := "go_pubsub_samples_dataset"
+		tableID := "go_pubsub_samples_table"
+		if err := ensureExistsBQTable(tc.ProjectID, datasetID, tableID); err != nil {
+			r.Errorf("failed to ensure bigquery table exists: %v", err)
+		}
 
-	bqTable := fmt.Sprintf("%s.%s.%s", tc.ProjectID, datasetID, tableID)
+		bqTable := fmt.Sprintf("%s.%s.%s", tc.ProjectID, datasetID, tableID)
 
-	if err := createBigQuerySubscription(buf, tc.ProjectID, bqSubID, topic, bqTable); err != nil {
-		t.Fatalf("failed to create bigquery subscription: %v", err)
-	}
+		if err := createBigQuerySubscription(buf, tc.ProjectID, bqSubID, topic, bqTable); err != nil {
+			r.Errorf("failed to create bigquery subscription: %v", err)
+		}
+		got := buf.String()
+		want := "Created BigQuery subscription"
+		if !strings.Contains(got, want) {
+			r.Errorf("got: %s, want: %v", got, want)
+		}
+	})
+
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		if err := clearBigQuerySubscription(buf, tc.ProjectID, bqSubID); err != nil {
+			r.Errorf("failed to clear bigquery subscription: %v", err)
+		}
+		got2 := buf.String()
+		want2 := "Cleared BigQuery subscription, reverting to pull"
+		if !strings.Contains(got2, want2) {
+			r.Errorf("got: %s, want: %v", got2, want2)
+		}
+	})
 
 	sub := client.Subscription(bqSubID)
 	sub.Delete(ctx)
-	if err := deleteBigQueryDataset(tc.ProjectID, datasetID); err != nil {
-		t.Logf("failed to delete bigquery dataset: %v", err)
-	}
 }
 
 func TestCreateSubscriptionWithExactlyOnceDelivery(t *testing.T) {
@@ -895,7 +951,10 @@ func getOrCreateSub(ctx context.Context, client *pubsub.Client, subID string, cf
 	return sub, nil
 }
 
-func createBigQueryTable(projectID, datasetID, tableID string) error {
+// ensureExistsBQTable ensures that the dataset and table exist.
+// If either does not exist, we create it. Errors returned from
+// fetching or creating will be returned still.
+func ensureExistsBQTable(projectID, datasetID, tableID string) error {
 	ctx := context.Background()
 
 	c, err := bigquery.NewClient(ctx, projectID)
@@ -903,34 +962,32 @@ func createBigQueryTable(projectID, datasetID, tableID string) error {
 		return fmt.Errorf("error instantiating bigquery client: %w", err)
 	}
 	dataset := c.Dataset(datasetID)
-	if err = dataset.Create(ctx, &bigquery.DatasetMetadata{Location: "US"}); err != nil {
-		return fmt.Errorf("error creating dataset: %w", err)
+	if _, err = dataset.Metadata(ctx); err != nil {
+		if e, ok := err.(*googleapi.Error); ok && e.Code == 404 {
+			if err = dataset.Create(ctx, &bigquery.DatasetMetadata{Location: "US"}); err != nil {
+				return fmt.Errorf("error creating dataset: %w", err)
+			}
+		} else {
+			return fmt.Errorf("error accessing dataset metadata: %w", err)
+		}
 	}
 
 	table := dataset.Table(tableID)
-	schema := []*bigquery.FieldSchema{
-		{Name: "data", Type: bigquery.BytesFieldType, Required: true},
-		{Name: "message_id", Type: bigquery.StringFieldType, Required: true},
-		{Name: "attributes", Type: bigquery.StringFieldType, Required: true},
-		{Name: "subscription_name", Type: bigquery.StringFieldType, Required: true},
-		{Name: "publish_time", Type: bigquery.TimestampFieldType, Required: true},
-	}
-	if err := table.Create(ctx, &bigquery.TableMetadata{Schema: schema}); err != nil {
-		return fmt.Errorf("error creating table: %w", err)
-	}
-	return nil
-}
-
-func deleteBigQueryDataset(projectID, datasetID string) error {
-	ctx := context.Background()
-
-	c, err := bigquery.NewClient(ctx, projectID)
-	if err != nil {
-		return fmt.Errorf("error instantiating bigquery client: %w", err)
-	}
-	dataset := c.Dataset(datasetID)
-	if err = dataset.DeleteWithContents(ctx); err != nil {
-		return fmt.Errorf("error deleting dataset: %w", err)
+	if _, err := table.Metadata(ctx); err != nil {
+		if e, ok := err.(*googleapi.Error); ok && e.Code == 404 {
+			schema := []*bigquery.FieldSchema{
+				{Name: "data", Type: bigquery.BytesFieldType, Required: true},
+				{Name: "message_id", Type: bigquery.StringFieldType, Required: true},
+				{Name: "attributes", Type: bigquery.StringFieldType, Required: true},
+				{Name: "subscription_name", Type: bigquery.StringFieldType, Required: true},
+				{Name: "publish_time", Type: bigquery.TimestampFieldType, Required: true},
+			}
+			if err := table.Create(ctx, &bigquery.TableMetadata{Schema: schema}); err != nil {
+				return fmt.Errorf("error creating table: %w", err)
+			}
+		} else {
+			return fmt.Errorf("error accessing table metadata: %w", err)
+		}
 	}
 	return nil
 }
