@@ -193,14 +193,15 @@ func deleteStoredInfoTypeAfterTest(t *testing.T, name string) error {
 func TestUpdateStoredInfoType(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	if err := bucketForUpdateStoredInfoType(t, tc.ProjectID); err != nil {
+	fileSetUrl, gcsUri, err := bucketForUpdateStoredInfoType(t, tc.ProjectID)
+	if err != nil {
 		t.Fatal(err)
 	}
 
 	var buf bytes.Buffer
 
-	fileSetUrl := fmt.Sprint("gs://" + "dlp-go-lang-test" + "/" + termListFileName)
-	gcsUri := fmt.Sprint("gs://" + "dlp-go-lang-test")
+	// fileSetUrl := fmt.Sprint("gs://" + "dlp-go-lang-test" + "/" + termListFileName)
+	// gcsUri := fmt.Sprint("gs://" + "dlp-go-lang-test")
 
 	outputPath, err := bucketForStoredInfoType(t, tc.ProjectID)
 	if err != nil {
@@ -212,7 +213,7 @@ func TestUpdateStoredInfoType(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	infoTypeId = strings.TrimPrefix(infoTypeId, "projects/bdp-2059-is-31084/locations/global/storedInfoTypes/")
+	infoTypeId = strings.TrimPrefix(infoTypeId, fmt.Sprint("projects/"+tc.ProjectID+"/locations/global/storedInfoTypes/"))
 
 	duration := time.Duration(30) * time.Second
 	time.Sleep(duration)
@@ -232,12 +233,12 @@ func TestUpdateStoredInfoType(t *testing.T) {
 	defer deleteStoredInfoTypeAfterTest(t, name)
 }
 
-func bucketForUpdateStoredInfoType(t *testing.T, projectID string) error {
+func bucketForUpdateStoredInfoType(t *testing.T, projectID string) (string, string, error) {
 	t.Helper()
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 	defer client.Close()
 	u := uuid.New().String()[:8]
@@ -320,7 +321,10 @@ func bucketForUpdateStoredInfoType(t *testing.T, projectID string) error {
 		fmt.Printf("File %v exists in bucket %v\n", termListFileName, bucketName)
 	}
 
-	return err
+	fileSetUrl := fmt.Sprint("gs://" + bucketName + "/" + termListFileName)
+	gcsUri := fmt.Sprint("gs://" + bucketName)
+
+	return fileSetUrl, gcsUri, err
 }
 
 func createStoredInfoTypeForTesting(t *testing.T, projectID, outputPath string) (string, error) {
