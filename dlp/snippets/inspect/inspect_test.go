@@ -689,10 +689,11 @@ func TestInspectTableWithCustomHotword(t *testing.T) {
 func TestInspectGCSFileSendToScc(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
-	if err := filePathtoGCS(t, tc.ProjectID); err != nil {
+
+	gcsPath, err := filePathtoGCS(t, tc.ProjectID)
+	if err != nil {
 		t.Fatal(err)
 	}
-	gcsPath := "gs://dlp-crest-test/test.txt"
 
 	if err := InspectGCSFileSendToScc(&buf, tc.ProjectID, gcsPath); err != nil {
 		t.Fatal(err)
@@ -704,12 +705,12 @@ func TestInspectGCSFileSendToScc(t *testing.T) {
 	}
 }
 
-func filePathtoGCS(t *testing.T, projectID string) error {
+func filePathtoGCS(t *testing.T, projectID string) (string, error) {
 	t.Helper()
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer client.Close()
 	u := uuid.New().String()[:8]
@@ -792,5 +793,7 @@ func filePathtoGCS(t *testing.T, projectID string) error {
 		fmt.Printf("File %v exists in bucket %v\n", inspectsGCSTestFileName, bucketName)
 	}
 
-	return err
+	GCSUri := fmt.Sprint("gs://" + bucketName + "/" + dirPath + "test.txt")
+
+	return GCSUri, err
 }
