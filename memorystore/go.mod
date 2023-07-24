@@ -3,7 +3,6 @@ module github.com/GoogleCloudPlatform/golang-samples/memorystore/redis
 go 1.19
 
 require (
-	cloud.google.com/go/longrunning v0.5.0
 	cloud.google.com/go/redis v1.13.1
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230714003609-029368aa73a3
 	github.com/go-redis/redis/v8 v8.11.5
@@ -16,6 +15,7 @@ require (
 	cloud.google.com/go/compute v1.19.3 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v0.13.0 // indirect
+	cloud.google.com/go/longrunning v0.5.0 // indirect
 	cloud.google.com/go/storage v1.30.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
