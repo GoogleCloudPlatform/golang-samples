@@ -22,7 +22,6 @@ import (
 	"strings"
 	"testing"
 
-	"cloud.google.com/go/longrunning/autogen/longrunningpb"
 	memorystore "cloud.google.com/go/redis/apiv1"
 	redispb "cloud.google.com/go/redis/apiv1/redispb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -63,21 +62,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		return
 	}
-
-	for {
-		resp, err := adminClient.LROClient.GetOperation(ctx, &longrunningpb.GetOperationRequest{
-			Name: op.Name(),
-		})
-
-		if err != nil {
-			log.Fatalf("error creating Memorystore Redis instance: %s", err)
-			return
-		}
-
-		if resp.Done {
-			break
-		}
-	}
+	op.Wait(ctx)
 
 	m.Run()
 

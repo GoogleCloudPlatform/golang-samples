@@ -49,7 +49,7 @@ func ConnectToDatabase(w io.Writer, projectID, location, instanceID string) erro
 		return err
 	}
 
-	fmt.Println(instance)
+	fmt.Fprintln(w, instance)
 
 	// Load CA cert
 	caCerts := instance.GetServerCaCerts()
