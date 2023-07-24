@@ -29,6 +29,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	kms "cloud.google.com/go/kms/apiv1"
 	"cloud.google.com/go/kms/apiv1/kmspb"
@@ -514,6 +515,7 @@ func TestImportEndToEnd(t *testing.T) {
 	cryptoKeyName := fmt.Sprintf("%s/cryptoKeys/%s", fixture.KeyRingName, cryptoKeyID)
 
 	// Create import job.
+	b.Reset()
 	importJobID := fixture.RandomID()
 	if err := createImportJob(&b, fixture.KeyRingName, importJobID); err != nil {
 		t.Fatal(err)
@@ -524,13 +526,17 @@ func TestImportEndToEnd(t *testing.T) {
 	importJobName := fmt.Sprintf("%s/importJobs/%s", fixture.KeyRingName, importJobID)
 
 	// Check import job state (wait for ACTIVE).
+	b.Reset()
 	for !strings.Contains(b.String(), "ACTIVE") {
 		if err := checkStateImportJob(&b, importJobName); err != nil {
 			t.Fatal(err)
 		}
+
+		time.Sleep(time.Second * 2)
 	}
 
 	// Import the key.
+	b.Reset()
 	if err := importManuallyWrappedKey(&b, importJobName, cryptoKeyName); err != nil {
 		t.Fatal(err)
 	}
@@ -540,12 +546,24 @@ func TestImportEndToEnd(t *testing.T) {
 	}
 	cryptoKeyVersionName := fmt.Sprintf("%s/cryptoKeyVersions/1", cryptoKeyName)
 
-	// Check the state of the imported key.
-	if err := checkStateImportedKey(&b, cryptoKeyVersionName); err != nil {
-		t.Fatal(err)
-	}
-	if got, want := b.String(), "Current state"; !strings.Contains(got, want) {
-		t.Errorf("checkStateImportedKey: expected %q to contain %q", got, want)
+	// Wait for the key to finish importing.
+	importInProgressStatus := kmspb.CryptoKeyVersion_CryptoKeyVersionState_name[int32(kmspb.CryptoKeyVersion_PENDING_IMPORT)]
+	for {
+		b.Reset()
+		if err := checkStateImportedKey(&b, cryptoKeyVersionName); err != nil {
+			t.Fatal(err)
+		}
+
+		got := b.String()
+		if want := "Current state"; !strings.Contains(got, want) {
+			t.Errorf("checkStateImportedKey: expected %q to contain %q", got, want)
+		}
+
+		if !strings.Contains(got, importInProgressStatus) {
+			break
+		}
+
+		time.Sleep(time.Second * 2)
 	}
 }
 
