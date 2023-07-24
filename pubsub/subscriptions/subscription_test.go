@@ -802,7 +802,6 @@ func TestCreatePushSubscription(t *testing.T) {
 			sub.Delete(ctx)
 		})
 	})
-
 }
 
 func TestCreateBigQuerySubscription(t *testing.T) {
