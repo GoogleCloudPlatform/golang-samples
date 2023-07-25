@@ -779,7 +779,7 @@ func TestCreatePushSubscription(t *testing.T) {
 		})
 	})
 
-	t.Run("no unwrapping", func(t *testing.T) {
+	t.Run("no wrapper", func(t *testing.T) {
 		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
 			topic, err := getOrCreateTopic(ctx, client, topicID)
 			if err != nil {

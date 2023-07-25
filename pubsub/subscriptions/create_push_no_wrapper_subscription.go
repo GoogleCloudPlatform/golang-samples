@@ -41,7 +41,11 @@ func createPushNoWrapperSubscription(w io.Writer, projectID, subID string, topic
 		AckDeadline: 10 * time.Second,
 		PushConfig: pubsub.PushConfig{
 			Endpoint: endpoint,
-			Wrapper:  &pubsub.NoWrapper{},
+			Wrapper: &pubsub.NoWrapper{
+				// Determines if message metadata is added to the HTTP headers of
+				// the delivered message.
+				WriteMetadata: true,
+			},
 		},
 	})
 	if err != nil {
