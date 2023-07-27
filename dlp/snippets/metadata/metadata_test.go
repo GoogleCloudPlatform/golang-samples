@@ -200,9 +200,6 @@ func TestUpdateStoredInfoType(t *testing.T) {
 
 	var buf bytes.Buffer
 
-	// fileSetUrl := fmt.Sprint("gs://" + "dlp-go-lang-test" + "/" + termListFileName)
-	// gcsUri := fmt.Sprint("gs://" + "dlp-go-lang-test")
-
 	outputPath, err := bucketForStoredInfoType(t, tc.ProjectID)
 	if err != nil {
 		t.Fatal(err)
@@ -256,7 +253,7 @@ func bucketForUpdateStoredInfoType(t *testing.T, projectID string) (string, stri
 	if !bucketExists {
 		if err := client.Bucket(bucketName).Create(ctx, projectID, &storage.BucketAttrs{
 			StorageClass: "STANDARD",
-			Location:     "us",
+			Location:     "us-central1",
 		}); err != nil {
 			log.Fatalf("Failed to create bucket: %v", err)
 		}
