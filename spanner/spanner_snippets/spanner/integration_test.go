@@ -387,6 +387,13 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "Updated data to VenueDetails column\n")
 	out = runSample(t, queryWithJsonParameter, dbName, "failed to query with json parameter")
 	assertContains(t, out, "The venue details for venue id 19")
+
+	out = runSample(t, createTableWithForeignKeyDeleteCascade, dbName, "failed to create table with foreign key delete constraint")
+	assertContains(t, out, "Created Customers and ShoppingCarts table with FKShoppingCartsCustomerId foreign key constraint")
+	out = runSample(t, alterTableWithForeignKeyDeleteCascade, dbName, "failed to alter table with foreign key delete constraint")
+	assertContains(t, out, "Altered ShoppingCarts table with FKShoppingCartsCustomerName foreign key constraint")
+	out = runSample(t, dropForeignKeyDeleteCascade, dbName, "failed to drop foreign key delete constraint")
+	assertContains(t, out, "Altered ShoppingCarts table to drop FKShoppingCartsCustomerName foreign key constraint")
 }
 
 func TestBackupSample(t *testing.T) {
