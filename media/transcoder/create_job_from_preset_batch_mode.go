@@ -28,12 +28,12 @@ import (
 // template. See
 // https://cloud.google.com/transcoder/docs/how-to/create-batch-jobs
 // for more information.
-func createJobFromPresetBatchMode(w io.Writer, projectID string, location string, inputURI string, outputURI string, preset string) error {
+func createJobFromPresetBatchMode(w io.Writer, projectID string, location string, inputURI string, outputURI string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// inputURI := "gs://my-bucket/my-video-file"
 	// outputURI := "gs://my-bucket/my-output-folder/"
-	// preset := "preset/web-hd"
+	preset := "preset/web-hd"
 	ctx := context.Background()
 	client, err := transcoder.NewClient(ctx)
 	if err != nil {

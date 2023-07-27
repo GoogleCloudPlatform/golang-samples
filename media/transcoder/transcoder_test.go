@@ -43,7 +43,6 @@ const (
 	testCaptionsFileName     = "captions.srt"
 	testSubtitlesFileName1   = "subtitles-en.srt"
 	testSubtitlesFileName2   = "subtitles-es.srt"
-	preset                   = "preset/web-hd"
 	smallSpriteSheetFileName = "small-sprite-sheet0000000000.jpeg"
 	largeSpriteSheetFileName = "large-sprite-sheet0000000000.jpeg"
 )
@@ -263,7 +262,7 @@ func testJobFromPreset(t *testing.T, projectNumber string, inputURI string, outp
 
 	// Create the job.
 	jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/", projectNumber, location)
-	if err := createJobFromPreset(buf, tc.ProjectID, location, inputURI, outputURIForPreset, preset); err != nil {
+	if err := createJobFromPreset(buf, tc.ProjectID, location, inputURI, outputURIForPreset); err != nil {
 		t.Errorf("createJobFromPreset got err: %v", err)
 	}
 	got := buf.String()
@@ -337,7 +336,7 @@ func testJobFromPresetBatchMode(t *testing.T, projectNumber string, inputURI str
 
 	// Create the job.
 	jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/", projectNumber, location)
-	if err := createJobFromPresetBatchMode(buf, tc.ProjectID, location, inputURI, outputURIForPresetBatchMode, preset); err != nil {
+	if err := createJobFromPresetBatchMode(buf, tc.ProjectID, location, inputURI, outputURIForPresetBatchMode); err != nil {
 		t.Errorf("createJobFromPresetBatchMode got err: %v", err)
 	}
 	got := buf.String()
