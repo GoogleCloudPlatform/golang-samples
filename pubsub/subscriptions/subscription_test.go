@@ -753,9 +753,20 @@ func TestCreatePushSubscription(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	client := setup(t)
 	defer client.Close()
-	subID := subID + "-push"
 
 	t.Run("default push subscription", func(t *testing.T) {
+		topicID := topicID + "-default-push"
+		subID := subID + "-default-push"
+		t.Cleanup(func() {
+			// Don't check delete errors since if it doesn't exist
+			// that's fine.
+			topic := client.Topic(topicID)
+			topic.Delete(ctx)
+
+			sub := client.Subscription(subID)
+			sub.Delete(ctx)
+		})
+
 		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
 			topic, err := getOrCreateTopic(ctx, client, topicID)
 			if err != nil {
@@ -773,21 +784,23 @@ func TestCreatePushSubscription(t *testing.T) {
 			if !strings.Contains(got, want) {
 				r.Errorf("got %s, want %s", got, want)
 			}
-
-			t.Cleanup(func() {
-				if err := topic.Delete(ctx); err != nil {
-					t.Errorf("topic.Delete: %v", err)
-				}
-
-				sub := client.Subscription(subID)
-				if err := sub.Delete(ctx); err != nil {
-					t.Errorf("sub.Delete: %v", err)
-				}
-			})
 		})
 	})
 
 	t.Run("no wrapper", func(t *testing.T) {
+		topicID := topicID + "-no-wrapper"
+		subID := subID + "-no-wrapper"
+
+		t.Cleanup(func() {
+			// Don't check delete errors since if it doesn't exist
+			// that's fine.
+			topic := client.Topic(topicID)
+			topic.Delete(ctx)
+
+			sub := client.Subscription(subID)
+			sub.Delete(ctx)
+		})
+
 		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
 			topic, err := getOrCreateTopic(ctx, client, topicID)
 			if err != nil {
@@ -805,17 +818,6 @@ func TestCreatePushSubscription(t *testing.T) {
 			if !strings.Contains(got, want) {
 				r.Errorf("got %s, want %s", got, want)
 			}
-
-			t.Cleanup(func() {
-				if err := topic.Delete(ctx); err != nil {
-					t.Errorf("topic.Delete: %v", err)
-				}
-
-				sub := client.Subscription(subID)
-				if err := sub.Delete(ctx); err != nil {
-					t.Errorf("sub.Delete: %v", err)
-				}
-			})
 		})
 	})
 }
