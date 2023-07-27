@@ -24,6 +24,7 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
+// createPushNoWrapperSubscription creates a push subscription where messages are delivered in the HTTP body.
 func createPushNoWrapperSubscription(w io.Writer, projectID, subID string, topic *pubsub.Topic, endpoint string) error {
 	// projectID := "my-project-id"
 	// subID := "my-sub"

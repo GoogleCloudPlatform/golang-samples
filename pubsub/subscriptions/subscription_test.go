@@ -774,8 +774,16 @@ func TestCreatePushSubscription(t *testing.T) {
 				r.Errorf("got %s, want %s", got, want)
 			}
 
-			sub := client.Subscription(subID)
-			sub.Delete(ctx)
+			t.Cleanup(func() {
+				if err := topic.Delete(ctx); err != nil {
+					t.Errorf("topic.Delete: %v", err)
+				}
+
+				sub := client.Subscription(subID)
+				if err := sub.Delete(ctx); err != nil {
+					t.Errorf("sub.Delete: %v", err)
+				}
+			})
 		})
 	})
 
@@ -798,8 +806,16 @@ func TestCreatePushSubscription(t *testing.T) {
 				r.Errorf("got %s, want %s", got, want)
 			}
 
-			sub := client.Subscription(subID)
-			sub.Delete(ctx)
+			t.Cleanup(func() {
+				if err := topic.Delete(ctx); err != nil {
+					t.Errorf("topic.Delete: %v", err)
+				}
+
+				sub := client.Subscription(subID)
+				if err := sub.Delete(ctx); err != nil {
+					t.Errorf("sub.Delete: %v", err)
+				}
+			})
 		})
 	})
 }
