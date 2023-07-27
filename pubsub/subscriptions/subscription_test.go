@@ -979,7 +979,7 @@ func createOrGetStorageBucket(projectID, bucketID string) error {
 		if err := b.Create(ctx, projectID, nil); err != nil {
 			return fmt.Errorf("error creating bucket: %w", err)
 		}
-	} else {
+	} else if err != nil {
 		return fmt.Errorf("error retrieving existing bucket: %w", err)
 	}
 
