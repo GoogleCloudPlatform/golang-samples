@@ -191,6 +191,7 @@ func deleteStoredInfoTypeAfterTest(t *testing.T, name string) error {
 }
 
 func TestUpdateStoredInfoType(t *testing.T) {
+	skipKOKORO(t)
 	tc := testutil.SystemTest(t)
 
 	fileSetUrl, gcsUri, err := bucketForUpdateStoredInfoType(t, tc.ProjectID)
