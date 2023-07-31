@@ -685,7 +685,8 @@ func TestInspectTableWithCustomHotword(t *testing.T) {
 func TestInspectDataStoreSendToScc(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
-	datastoreNamespace := "golang-samples"
+	u := uuid.Must(uuid.NewV4()).String()[:8]
+	datastoreNamespace := "golang-samples" + u
 	datastoreKind := "task"
 
 	if err := inspectDataStoreSendToScc(&buf, tc.ProjectID, datastoreNamespace, datastoreKind); err != nil {
