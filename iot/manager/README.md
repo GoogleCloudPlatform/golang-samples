@@ -1,5 +1,7 @@
 # Google Cloud IoT Core Device Manager Sample
 
+<h3>Google Cloud IoT Core will be <a href="https://cloud.google.com/iot/docs/release-notes#August_16_2022">retired as of August 16, 2023</a>.</h3>
+
 ## Authentication
 
 * Create a project with the [Google Cloud Console][cloud-console], and enable
