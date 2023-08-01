@@ -51,9 +51,9 @@ func pgCreateSequence(w io.Writer, db string) error {
 	}
 	// Wait for the UpdateDatabaseDdl operation to finish.
 	if err := op.Wait(ctx); err != nil {
-		return fmt.Errorf("waiting for bit reverse sequenece creation to finish failed: %w", err)
+		return fmt.Errorf("waiting for bit reverse sequence creation to finish failed: %w", err)
 	}
-	fmt.Fprintf(w, "Created Customers table with bit reverse sequence keys\n")
+	fmt.Fprintf(w, "Created Seq sequence and Customers table, where its key column CustomerId uses the sequence as a default value\n")
 
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {
@@ -84,7 +84,7 @@ func pgCreateSequence(w io.Writer, db string) error {
 			}
 			fmt.Fprintf(w, "Inserted customer record with CustomerId: %d\n", customerId)
 		}
-		fmt.Fprintf(w, "%d record(s) inserted.\n", iter.RowCount)
+		fmt.Fprintf(w, "Number of customer records inserted is: %d\n", iter.RowCount)
 		return nil
 	})
 	return err

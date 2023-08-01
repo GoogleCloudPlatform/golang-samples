@@ -40,7 +40,7 @@ func createSequence(w io.Writer, db string) error {
 	// Create a sequence, and then use the sequence as auto generated primary key in Customers table.
 	ddl := []string{
 		"CREATE SEQUENCE Seq OPTIONS (sequence_kind = 'bit_reversed_positive')",
-		"CREATE TABLE Customers (CustomerId INT64 DEFAULT (GET_NEXT_SEQUENCE_VALUE('Seq')), CustomerName STRING(1024)) PRIMARY KEY (CustomerId)",
+		"CREATE TABLE Customers (CustomerId INT64 DEFAULT (GET_NEXT_SEQUENCE_VALUE(Sequence Seq)), CustomerName STRING(1024)) PRIMARY KEY (CustomerId)",
 	}
 	op, err := adminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database:   db,
@@ -51,9 +51,9 @@ func createSequence(w io.Writer, db string) error {
 	}
 	// Wait for the UpdateDatabaseDdl operation to finish.
 	if err := op.Wait(ctx); err != nil {
-		return fmt.Errorf("waiting for bit reverse sequenece creation to finish failed: %w", err)
+		return fmt.Errorf("waiting for bit reverse sequence creation to finish failed: %w", err)
 	}
-	fmt.Fprintf(w, "Created Customers table with bit reverse sequence keys\n")
+	fmt.Fprintf(w, "Created Seq sequence and Customers table, where the key column CustomerId uses the sequence as a default value\n")
 
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {
@@ -84,7 +84,7 @@ func createSequence(w io.Writer, db string) error {
 			}
 			fmt.Fprintf(w, "Inserted customer record with CustomerId: %d\n", customerId)
 		}
-		fmt.Fprintf(w, "%d record(s) inserted.\n", iter.RowCount)
+		fmt.Fprintf(w, "Number of customer records inserted is: %d\n", iter.RowCount)
 		return nil
 	})
 	return err

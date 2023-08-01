@@ -50,7 +50,7 @@ func dropSequence(w io.Writer, db string) error {
 	}
 	// Wait for the UpdateDatabaseDdl operation to finish.
 	if err := op.Wait(ctx); err != nil {
-		return fmt.Errorf("waiting for bit reverse sequenece drop to finish failed: %w", err)
+		return fmt.Errorf("waiting for bit reverse sequence drop to finish failed: %w", err)
 	}
 	fmt.Fprintf(w, "Altered Customers table to drop DEFAULT from CustomerId column and dropped the Seq sequence\n")
 	return nil
