@@ -134,7 +134,7 @@ Administrative commands:
 	var err error
 	datastore, err = ds.NewClient(ctx, *metaProject)
 	if err != nil {
-		return fmt.Errorf("datastore.NewClient: %v", err)
+		return fmt.Errorf("datastore.NewClient: %w", err)
 	}
 
 	switch flag.Arg(0) {
@@ -164,10 +164,10 @@ func withPool(ctx context.Context, f func(pool *Pool) error) error {
 		if err := tx.Get(key, &pool); err != nil {
 			if err == ds.ErrNoSuchEntity {
 				if _, err := tx.Put(key, &pool); err != nil {
-					return fmt.Errorf("Initial Pool.Put: %v", err)
+					return fmt.Errorf("Initial Pool.Put: %w", err)
 				}
 			} else {
-				return fmt.Errorf("Pool.Get: %v", err)
+				return fmt.Errorf("Pool.Get: %w", err)
 			}
 		}
 		if err := f(&pool); err != nil {
@@ -175,12 +175,12 @@ func withPool(ctx context.Context, f func(pool *Pool) error) error {
 		}
 		_, err := tx.Put(key, &pool)
 		if err != nil {
-			return fmt.Errorf("Pool.Put: %v", err)
+			return fmt.Errorf("Pool.Put: %w", err)
 		}
 		return nil
 	})
 	if err != nil {
-		return fmt.Errorf("datastore: %v", err)
+		return fmt.Errorf("datastore: %w", err)
 	}
 	return nil
 }
@@ -191,7 +191,7 @@ func lease(ctx context.Context, duration string) error {
 	}
 	d, err := time.ParseDuration(duration)
 	if err != nil {
-		return fmt.Errorf("Could not parse duration: %v", err)
+		return fmt.Errorf("Could not parse duration: %w", err)
 	}
 
 	var proj *Project

@@ -32,7 +32,7 @@ func testIAMPermissions(w io.Writer, resourceID string, permissions []string) er
 	ctx := context.Background()
 	policyClient, err := datacatalog.NewPolicyTagManagerClient(ctx)
 	if err != nil {
-		return fmt.Errorf("datacatalog.NewPolicyTagManagerClient: %v", err)
+		return fmt.Errorf("datacatalog.NewPolicyTagManagerClient: %w", err)
 	}
 	defer policyClient.Close()
 
@@ -42,7 +42,7 @@ func testIAMPermissions(w io.Writer, resourceID string, permissions []string) er
 	}
 	resp, err := policyClient.TestIamPermissions(ctx, req)
 	if err != nil {
-		return fmt.Errorf("TestIamPermissions: %v", err)
+		return fmt.Errorf("TestIamPermissions: %w", err)
 	}
 	fmt.Fprintf(w, "Testing the permissions on %s, of the %d permissions probed, caller has %d permissions", resourceID, len(permissions), len(resp.Permissions))
 	if len(resp.Permissions) > 0 {

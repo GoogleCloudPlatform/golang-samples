@@ -88,6 +88,9 @@ export GCLOUD_ORGANIZATION=1081635000895
 export SCC_PUBSUB_PROJECT="project-a-id"
 export SCC_PUBSUB_TOPIC="projects/project-a-id/topics/notifications-sample-topic"
 export SCC_PUBSUB_SUBSCRIPTION="notification-sample-subscription"
+# gcp-sec-demo-org.joonix.net
+export SCC_PROJECT_ORG_ID=688851828130
+export SCC_PROJECT_ID=sharp-quest
 
 export GOLANG_SAMPLES_SPANNER=projects/golang-samples-tests/instances/golang-samples-tests
 export GOLANG_SAMPLES_SPANNER_INSTANCE_CONFIG="regional-us-west1"

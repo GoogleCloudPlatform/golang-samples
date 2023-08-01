@@ -29,13 +29,13 @@ func delete(w io.Writer, projectID, subID string) error {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %v", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 
 	sub := client.Subscription(subID)
 	if err := sub.Delete(ctx); err != nil {
-		return fmt.Errorf("Delete: %v", err)
+		return fmt.Errorf("Delete: %w", err)
 	}
 	fmt.Fprintf(w, "Subscription %q deleted.", subID)
 	return nil

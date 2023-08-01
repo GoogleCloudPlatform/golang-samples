@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -34,7 +33,7 @@ func BuildMain(t *testing.T) *Runner {
 	if err != nil {
 		t.Fatal(err)
 	}
-	tmp, err := ioutil.TempDir("", "runmain-"+filepath.Base(wd)+"-")
+	tmp, err := os.MkdirTemp("", "runmain-"+filepath.Base(wd)+"-")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +93,7 @@ func (r *Runner) Run(env map[string]string, timeout time.Duration, args ...strin
 	cmd.Stderr = &bufErr
 
 	if err := cmd.Start(); err != nil {
-		return nil, nil, fmt.Errorf("could not execute binary: %v", err)
+		return nil, nil, fmt.Errorf("could not execute binary: %w", err)
 	}
 
 	if err := cmd.Wait(); err != nil {

@@ -17,6 +17,8 @@ package inspect
 import (
 	"bytes"
 	"context"
+	"fmt"
+	"log"
 	"strings"
 	"testing"
 	"time"
@@ -279,7 +281,6 @@ func TestInspectBigquery(t *testing.T) {
 
 func TestInspectTable(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
 	var buf bytes.Buffer
 	if err := inspectTable(&buf, tc.ProjectID); err != nil {
 		t.Fatal(err)
@@ -295,9 +296,7 @@ func TestInspectTable(t *testing.T) {
 
 func TestInspectStringWithExclusionRegex(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
 	var buf bytes.Buffer
-
 	if err := inspectStringWithExclusionRegex(&buf, tc.ProjectID, "Some email addresses: gary@example.com, bob@example.org", ".+@example.com"); err != nil {
 		t.Errorf("inspectStringWithExclusionRegex: %v", err)
 	}
@@ -338,7 +337,7 @@ func TestInspectStringMultipleRules(t *testing.T) {
 	var buf bytes.Buffer
 
 	if err := inspectStringMultipleRules(&buf, tc.ProjectID, "patient: Jane Doe"); err != nil {
-		t.Errorf("inspectStringMultipleRules: %v", err)
+		t.Fatal(err)
 	}
 	got := buf.String()
 	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
@@ -478,5 +477,207 @@ func TestInspectWithCustomRegex(t *testing.T) {
 	}
 	if want := "Likelihood: POSSIBLE"; !strings.Contains(got, want) {
 		t.Errorf("inspectWithCustomRegex got %q, want %q", got, want)
+	}
+}
+
+func TestInspectStringWithExclusionDictionary(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+	if err := inspectStringWithExclusionDictionary(&buf, tc.ProjectID, "Some email addresses: gary@example.com, example@example.com", []string{"example@example.com"}); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "Infotype Name: EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringWithExclusionDictionary got %q, want %q", got, want)
+	}
+}
+
+func TestInspectImageFile(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+	pathToImage := "testdata/test.png"
+	if err := inspectImageFile(&buf, tc.ProjectID, pathToImage); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectImageFile got %q, want %q", got, want)
+	}
+	if want := "Info type: EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectImageFile got %q, want %q", got, want)
+	}
+}
+
+func TestInspectImageFileAllInfoTypes(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	inputPath := "testdata/image.jpg"
+
+	var buf bytes.Buffer
+	if err := inspectImageFileAllInfoTypes(&buf, tc.ProjectID, inputPath); err != nil {
+		t.Errorf("inspectImageFileAllInfoTypes: %v", err)
+	}
+	got := buf.String()
+	if want := "Info type: DATE"; !strings.Contains(got, want) {
+		t.Errorf("inspectImageFileAllInfoTypes got %q, want %q", got, want)
+	}
+	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
+		t.Errorf("inspectImageFileAllInfoTypes got %q, want %q", got, want)
+	}
+	if want := "Info type: US_SOCIAL_SECURITY_NUMBER"; !strings.Contains(got, want) {
+		t.Errorf("inspectImageFileAllInfoTypes got %q, want %q", got, want)
+	}
+}
+
+func TestInspectImageFileListedInfoTypes(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+	pathToImage := "testdata/sensitive-data-image.jpg"
+
+	if err := inspectImageFileListedInfoTypes(&buf, tc.ProjectID, pathToImage); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
+		t.Errorf("inspectImageFileListedInfoTypes got %q, want %q", got, want)
+	}
+	if want := "Info type: EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("inspectImageFileListedInfoTypes got %q, want %q", got, want)
+	}
+	if want := "Info type: US_SOCIAL_SECURITY_NUMBER"; !strings.Contains(got, want) {
+		t.Errorf("inspectImageFileListedInfoTypes got %q, want %q", got, want)
+	}
+}
+
+func TestInspectGcsFileWithSampling(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	topicID := "go-lang-dlp-test-bigquery-with-sampling-topic"
+	subscriptionID := "go-lang-dlp-test-bigquery-with-sampling-subscription"
+	bucketName, err := createBucket(t, tc.ProjectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteBucket(t, tc.ProjectID, bucketName)
+	GCSUri := "gs://" + bucketName + "/"
+
+	var buf bytes.Buffer
+	if err := inspectGcsFileWithSampling(&buf, tc.ProjectID, GCSUri, topicID, subscriptionID); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "Job Created"; !strings.Contains(got, want) {
+		t.Errorf("inspectGcsFileWithSampling got %q, want %q", got, want)
+	}
+
+}
+
+func createBucket(t *testing.T, projectID string) (string, error) {
+	t.Helper()
+
+	ctx := context.Background()
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return "", err
+	}
+	defer client.Close()
+	u := uuid.Must(uuid.NewV4()).String()[:8]
+	bucketName := "dlp-job-go-lang-test" + u
+
+	// Check if the bucket already exists.
+	bucketExists := false
+	_, err = client.Bucket(bucketName).Attrs(ctx)
+	if err == nil {
+		bucketExists = true
+	}
+
+	// If the bucket doesn't exist, create it.
+	if !bucketExists {
+		if err := client.Bucket(bucketName).Create(ctx, projectID, &storage.BucketAttrs{
+			StorageClass: "STANDARD",
+			Location:     "us-central1",
+		}); err != nil {
+			log.Fatalf("---Failed to create bucket: %v", err)
+		}
+		fmt.Printf("---Bucket '%s' created successfully.\n", bucketName)
+	} else {
+		fmt.Printf("---Bucket '%s' already exists.\n", bucketName)
+	}
+
+	return bucketName, nil
+}
+
+func deleteBucket(t *testing.T, projectID, bucketName string) error {
+	t.Helper()
+
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	bucket := client.Bucket(bucketName)
+	if err := bucket.Delete(ctx); err != nil {
+		t.Fatal(err)
+	}
+	return nil
+}
+
+func TestInspectBigQueryTableWithSampling(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	topicID := "go-lang-dlp-test-bigquery-with-sampling-topic"
+	subscriptionID := "go-lang-dlp-test-bigquery-with-sampling-subscription"
+
+	var buf bytes.Buffer
+	if err := inspectBigQueryTableWithSampling(&buf, tc.ProjectID, topicID, subscriptionID); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "Job Created"; !strings.Contains(got, want) {
+		t.Errorf("InspectBigQueryTableWithSampling got %q, want %q", got, want)
+	}
+	if want := "Found"; !strings.Contains(got, want) {
+		t.Errorf("InspectBigQueryTableWithSampling got %q, want %q", got, want)
+	}
+
+}
+
+func TestInspectAugmentInfoTypes(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+
+	textToInspect := "The patient's name is Quasimodo"
+	wordList := []string{"quasimodo"}
+
+	if err := inspectAugmentInfoTypes(&buf, tc.ProjectID, textToInspect, wordList); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "Qoute: Quasimodo"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectAugmentInfoTypes got %q, want %q", got, want)
+	}
+	if want := "Info type: PERSON_NAME"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectAugmentInfoTypes got %q, want %q", got, want)
+	}
+}
+
+func TestInspectTableWithCustomHotword(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+	hotwordRegexPattern := "(Fake Social Security Number)"
+	if err := inspectTableWithCustomHotword(&buf, tc.ProjectID, hotwordRegexPattern); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+
+	if want := "Quote: 222-22-2222"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectTableWithCustomHotword got %q, want %q", got, want)
+	}
+	if want := "Infotype Name: US_SOCIAL_SECURITY_NUMBER"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectTableWithCustomHotword got %q, want %q", got, want)
+	}
+	if want := "Quote: 111-11-1111"; strings.Contains(got, want) {
+		t.Errorf("TestInspectTableWithCustomHotword got %q, want %q", got, want)
 	}
 }

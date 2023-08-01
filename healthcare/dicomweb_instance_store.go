@@ -31,12 +31,12 @@ func dicomWebStoreInstance(w io.Writer, projectID, location, datasetID, dicomSto
 
 	dicomData, err := ioutil.ReadFile(dicomFile)
 	if err != nil {
-		return fmt.Errorf("ReadFile: %v", err)
+		return fmt.Errorf("ReadFile: %w", err)
 	}
 
 	healthcareService, err := healthcare.NewService(ctx)
 	if err != nil {
-		return fmt.Errorf("healthcare.NewService: %v", err)
+		return fmt.Errorf("healthcare.NewService: %w", err)
 	}
 
 	storesService := healthcareService.Projects.Locations.Datasets.DicomStores
@@ -47,13 +47,13 @@ func dicomWebStoreInstance(w io.Writer, projectID, location, datasetID, dicomSto
 	call.Header().Set("Content-Type", "application/dicom")
 	resp, err := call.Do()
 	if err != nil {
-		return fmt.Errorf("StoreInstances: %v", err)
+		return fmt.Errorf("StoreInstances: %w", err)
 	}
 	defer resp.Body.Close()
 
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("could not read response: %v", err)
+		return fmt.Errorf("could not read response: %w", err)
 	}
 
 	if resp.StatusCode > 299 {

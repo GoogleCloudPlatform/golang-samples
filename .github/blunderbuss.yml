@@ -38,10 +38,6 @@ assign_issues_by:
   to:
   - hongalex
 - labels:
-  - 'api: run'
-  to:
-  - GoogleCloudPlatform/torus-dpe
-- labels:
   - 'api: spanner'
   to:
   - rahul2393
@@ -53,6 +49,17 @@ assign_issues_by:
   - 'api: dlp'
   to:
   - GoogleCloudPlatform/googleapis-dlp
+- labels:
+  - "api: batch"
+  - "api: compute"
+  - "api: cloudkms"
+  - "api: iam"
+  - "api: kms"
+  - "api: privateca"
+  - "api: secretmanager"
+  - "api: securitycenter"
+  to:
+  - GoogleCloudPlatform/dee-infra
 
 assign_prs_by:
 - labels:
@@ -74,3 +81,14 @@ assign_prs_by:
   - 'api: dlp'
   to:
   - GoogleCloudPlatform/googleapis-dlp
+- labels:
+  - "api: batch"
+  - "api: compute"
+  - "api: cloudkms"
+  - "api: iam"
+  - "api: kms"
+  - "api: privateca"
+  - "api: secretmanager"
+  - "api: securitycenter"
+  to:
+  - GoogleCloudPlatform/dee-infra

@@ -31,7 +31,7 @@ func entitiesImport(w io.Writer, projectID, inputURL string) error {
 	ctx := context.Background()
 	client, err := admin.NewDatastoreAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("admin.NewDatastoreAdminClient: %v", err)
+		return fmt.Errorf("admin.NewDatastoreAdminClient: %w", err)
 	}
 	defer client.Close()
 
@@ -41,10 +41,10 @@ func entitiesImport(w io.Writer, projectID, inputURL string) error {
 	}
 	op, err := client.ImportEntities(ctx, req)
 	if err != nil {
-		return fmt.Errorf("ImportEntities: %v", err)
+		return fmt.Errorf("ImportEntities: %w", err)
 	}
 	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("Wait: %v", err)
+		return fmt.Errorf("Wait: %w", err)
 	}
 	fmt.Fprintf(w, "Entities were imported\n")
 	return nil

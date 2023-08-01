@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_postgresql_dml_insert_returning]
+// [START spanner_postgresql_insert_dml_returning]
 
 import (
 	"context"
@@ -69,4 +69,4 @@ func pgInsertUsingDMLReturning(w io.Writer, db string) error {
 	return err
 }
 
-// [END spanner_postgresql_dml_insert_returning]
+// [END spanner_postgresql_insert_dml_returning]

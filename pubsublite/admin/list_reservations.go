@@ -30,7 +30,7 @@ func listReservations(w io.Writer, projectID, region string) error {
 	ctx := context.Background()
 	client, err := pubsublite.NewAdminClient(ctx, region)
 	if err != nil {
-		return fmt.Errorf("pubsublite.NewAdminClient: %v", err)
+		return fmt.Errorf("pubsublite.NewAdminClient: %w", err)
 	}
 	defer client.Close()
 
@@ -42,7 +42,7 @@ func listReservations(w io.Writer, projectID, region string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("resIter.Next() got err: %v", err)
+			return fmt.Errorf("resIter.Next() got err: %w", err)
 		}
 		fmt.Fprintf(w, "Got reservation config: %v", res)
 	}
