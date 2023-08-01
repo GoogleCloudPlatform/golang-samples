@@ -678,6 +678,8 @@ func TestForeignKeyDeleteCascadeSample(t *testing.T) {
 	_, dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
 
+	mustRunSample(t, createDatabase, dbName, "failed to create a database")
+
 	var out string
 
 	out = runSample(t, createTableWithForeignKeyDeleteCascade, dbName, "failed to create table with foreign key delete constraint")
