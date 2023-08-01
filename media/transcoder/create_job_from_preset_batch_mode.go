@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 package transcoder
 
-// [START transcoder_create_job_from_preset]
+// [START transcoder_create_job_from_preset_batch_mode]
 import (
 	"context"
 	"fmt"
@@ -24,10 +24,11 @@ import (
 	"cloud.google.com/go/video/transcoder/apiv1/transcoderpb"
 )
 
-// createJobFromPreset creates a job based on a given preset template. See
-// https://cloud.google.com/transcoder/docs/how-to/jobs#create_jobs_presets
+// createJobFromPresetBatchMode creates a batch mode job based on a given preset
+// template. See
+// https://cloud.google.com/transcoder/docs/how-to/create-batch-jobs
 // for more information.
-func createJobFromPreset(w io.Writer, projectID string, location string, inputURI string, outputURI string) error {
+func createJobFromPresetBatchMode(w io.Writer, projectID string, location string, inputURI string, outputURI string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// inputURI := "gs://my-bucket/my-video-file"
@@ -48,17 +49,19 @@ func createJobFromPreset(w io.Writer, projectID string, location string, inputUR
 			JobConfig: &transcoderpb.Job_TemplateId{
 				TemplateId: preset,
 			},
+			Mode:              transcoderpb.Job_PROCESSING_MODE_BATCH,
+			BatchModePriority: 10,
 		},
 	}
 	// Creates the job, Jobs take a variable amount of time to run.
 	// You can query for the job state.
 	response, err := client.CreateJob(ctx, req)
 	if err != nil {
-		return fmt.Errorf("createJobFromPreset: %w", err)
+		return fmt.Errorf("createJobFromPresetBatchMode: %w", err)
 	}
 
 	fmt.Fprintf(w, "Job: %v", response.GetName())
 	return nil
 }
 
-// [END transcoder_create_job_from_preset]
+// [END transcoder_create_job_from_preset_batch_mode]

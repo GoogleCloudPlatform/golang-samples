@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_create_push_subscription]
+// [START pubsub_cloudstorage_subscription]
 import (
 	"context"
 	"fmt"
@@ -24,11 +24,13 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func createWithEndpoint(w io.Writer, projectID, subID string, topic *pubsub.Topic, endpoint string) error {
+// createCloudStorageSubscription creates a Pub/Sub subscription that exports messages to Cloud Storage.
+func createCloudStorageSubscription(w io.Writer, projectID, subID string, topic *pubsub.Topic, bucket string) error {
 	// projectID := "my-project-id"
 	// subID := "my-sub"
 	// topic of type https://godoc.org/cloud.google.com/go/pubsub#Topic
-	// endpoint := "https://my-test-project.appspot.com/push"
+	// note bucket should not have the gs:// prefix
+	// bucket := "my-bucket"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -37,15 +39,22 @@ func createWithEndpoint(w io.Writer, projectID, subID string, topic *pubsub.Topi
 	defer client.Close()
 
 	sub, err := client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
-		Topic:       topic,
-		AckDeadline: 10 * time.Second,
-		PushConfig:  pubsub.PushConfig{Endpoint: endpoint},
+		Topic: topic,
+		CloudStorageConfig: pubsub.CloudStorageConfig{
+			Bucket:         bucket,
+			FilenamePrefix: "log_events_",
+			FilenameSuffix: ".avro",
+			OutputFormat:   &pubsub.CloudStorageOutputFormatAvroConfig{WriteMetadata: true},
+			MaxDuration:    1 * time.Minute,
+			MaxBytes:       1e8,
+		},
 	})
 	if err != nil {
-		return fmt.Errorf("CreateSubscription: %w", err)
+		return fmt.Errorf("client.CreateSubscription: %w", err)
 	}
-	fmt.Fprintf(w, "Created push subscription: %v\n", sub)
+	fmt.Fprintf(w, "Created Cloud Storage subscription: %v\n", sub)
+
 	return nil
 }
 
-// [END pubsub_create_push_subscription]
+// [END pubsub_cloudstorage_subscription]
