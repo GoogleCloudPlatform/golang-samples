@@ -387,6 +387,17 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "Updated data to VenueDetails column\n")
 	out = runSample(t, queryWithJsonParameter, dbName, "failed to query with json parameter")
 	assertContains(t, out, "The venue details for venue id 19")
+
+	out = runSample(t, createSequence, dbName, "failed to create table with bit reverse sequence enabled")
+	assertContains(t, out, "Created Seq sequence and Customers table, where the key column CustomerId uses the sequence as a default value\n")
+	assertContains(t, out, "Inserted customer record with CustomerId")
+	assertContains(t, out, "Number of customer records inserted is: 3")
+	out = runSample(t, alterSequence, dbName, "failed to alter table with bit reverse sequence enabled")
+	assertContains(t, out, "Altered Seq sequence to skip an inclusive range between 1000 and 5000000\n")
+	assertContains(t, out, "Inserted customer record with CustomerId")
+	assertContains(t, out, "Number of customer records inserted is: 3")
+	out = runSample(t, dropSequence, dbName, "failed to drop bit reverse sequence column")
+	assertContains(t, out, "Altered Customers table to drop DEFAULT from CustomerId column and dropped the Seq sequence\n")
 }
 
 func TestBackupSample(t *testing.T) {
@@ -727,6 +738,17 @@ func TestPgSample(t *testing.T) {
 	assertContains(t, out, "Updated data to VenueDetails column\n")
 	out = runSample(t, queryWithJsonBParameter, dbName, "failed to query with jsonB parameter")
 	assertContains(t, out, "The venue details for venue id 19")
+
+	out = runSample(t, pgCreateSequence, dbName, "failed to create table with bit reverse sequence enabled in Spanner PG database")
+	assertContains(t, out, "Created Seq sequence and Customers table, where its key column CustomerId uses the sequence as a default value\n")
+	assertContains(t, out, "Inserted customer record with CustomerId")
+	assertContains(t, out, "Number of customer records inserted is: 3")
+	out = runSample(t, pgAlterSequence, dbName, "failed to alter table with bit reverse sequence enabled in Spanner PG database")
+	assertContains(t, out, "Altered Seq sequence to skip an inclusive range between 1000 and 5000000\n")
+	assertContains(t, out, "Inserted customer record with CustomerId")
+	assertContains(t, out, "Number of customer records inserted is: 3")
+	out = runSample(t, dropSequence, dbName, "failed to drop bit reverse sequence column in Spanner PG database")
+	assertContains(t, out, "Altered Customers table to drop DEFAULT from CustomerId column and dropped the Seq sequence\n")
 }
 
 func TestPgQueryParameter(t *testing.T) {
