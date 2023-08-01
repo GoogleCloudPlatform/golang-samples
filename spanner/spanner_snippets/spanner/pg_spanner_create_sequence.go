@@ -66,7 +66,7 @@ func pgCreateSequence(w io.Writer, db string) error {
 	// The commit timestamp is ignored in this case.
 	_, err = client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		stmt := spanner.Statement{
-			SQL: `INSERT INTO Customers (CustomerName) VALUES ('Alice'), ('David'), ('Marc') THEN RETURN CustomerId`,
+			SQL: `INSERT INTO Customers (CustomerName) VALUES ('Alice'), ('David'), ('Marc') RETURNING CustomerId`,
 		}
 		iter := txn.Query(ctx, stmt)
 		defer iter.Stop()
