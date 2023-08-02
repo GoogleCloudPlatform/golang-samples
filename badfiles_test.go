@@ -127,6 +127,9 @@ var allowList = []string{
 
 	// Speech-to-Text audio/video files
 	"speech/resources/commercial_mono.wav",
+
+	// deprecated tests (introduced for IoT samples)
+	"**/*_test.go.deprecated",
 }
 
 // Check whether accidental binary files have been checked in.
