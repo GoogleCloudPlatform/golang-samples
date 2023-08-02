@@ -29,6 +29,7 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
+	"google.golang.org/api/iterator"
 )
 
 const (
@@ -38,8 +39,10 @@ const (
 	ssnFileName = "fake_ssn.txt"
 	bucketName  = "golang-samples-dlp-test2"
 
-	inspectsGCSTestFileName = "test.txt"
-	filePathToUpload        = "./testdata/test.txt"
+	inspectsGCSTestFileName          = "test.txt"
+	filePathToUpload                 = "./testdata/test.txt"
+	bucketNameForInspectGCSSendToScc = "dlp-go-lang-test-for-inspect-gcs-send-to-scc"
+	dirPathForInspectGCSSendToScc    = "dlp-go-lang-test-for-inspect-gcs-send-to-scc/"
 )
 
 func TestInspectDatastore(t *testing.T) {
@@ -621,9 +624,28 @@ func deleteBucket(t *testing.T, projectID, bucketName string) error {
 	defer client.Close()
 
 	bucket := client.Bucket(bucketName)
-	if err := bucket.Delete(ctx); err != nil {
-		t.Fatal(err)
+
+	// List all objects in the bucket.
+	objs := bucket.Objects(ctx, nil)
+	for {
+		objAttrs, err := objs.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatalf("Failed to list objects in bucket: %v", err)
+		}
+
+		// Delete each object in the bucket.
+		if err := bucket.Object(objAttrs.Name).Delete(ctx); err != nil {
+			log.Fatalf("Failed to delete object %s: %v", objAttrs.Name, err)
+		}
+		fmt.Printf("Deleted object: %s\n", objAttrs.Name)
 	}
+	if err := bucket.Delete(ctx); err != nil {
+		log.Fatalf("Failed to delete bucket: %v", err)
+	}
+
 	return nil
 }
 
@@ -694,8 +716,9 @@ func TestInspectGCSFileSendToScc(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer deleteBucket(t, tc.ProjectID, bucketNameForInspectGCSSendToScc)
 
-	if err := InspectGCSFileSendToScc(&buf, tc.ProjectID, gcsPath); err != nil {
+	if err := inspectGCSFileSendToScc(&buf, tc.ProjectID, gcsPath); err != nil {
 		t.Fatal(err)
 	}
 
@@ -713,34 +736,31 @@ func filePathtoGCS(t *testing.T, projectID string) (string, error) {
 		return "", err
 	}
 	defer client.Close()
-	u := uuid.New().String()[:8]
-	bucketName := "dlp-go-lang-test" + u
-	dirPath := "update-stored-infoType-data/"
 
 	// Check if the bucket already exists.
 	bucketExists := false
-	_, err = client.Bucket(bucketName).Attrs(ctx)
+	_, err = client.Bucket(bucketNameForInspectGCSSendToScc).Attrs(ctx)
 	if err == nil {
 		bucketExists = true
 	}
 
 	// If the bucket doesn't exist, create it.
 	if !bucketExists {
-		if err := client.Bucket(bucketName).Create(ctx, projectID, &storage.BucketAttrs{
+		if err := client.Bucket(bucketNameForInspectGCSSendToScc).Create(ctx, projectID, &storage.BucketAttrs{
 			StorageClass: "STANDARD",
 			Location:     "us-central1",
 		}); err != nil {
 			log.Fatalf("Failed to create bucket: %v", err)
 		}
-		fmt.Printf("Bucket '%s' created successfully.\n", bucketName)
+		fmt.Printf("Bucket '%s' created successfully.\n", bucketNameForInspectGCSSendToScc)
 	} else {
-		fmt.Printf("Bucket '%s' already exists.\n", bucketName)
+		fmt.Printf("Bucket '%s' already exists.\n", bucketNameForInspectGCSSendToScc)
 	}
 
 	// Check if the directory already exists in the bucket.
 	dirExists := false
-	query := &storage.Query{Prefix: dirPath}
-	it := client.Bucket(bucketName).Objects(ctx, query)
+	query := &storage.Query{Prefix: dirPathForInspectGCSSendToScc}
+	it := client.Bucket(bucketNameForInspectGCSSendToScc).Objects(ctx, query)
 	_, err = it.Next()
 	if err == nil {
 		dirExists = true
@@ -748,13 +768,13 @@ func filePathtoGCS(t *testing.T, projectID string) (string, error) {
 
 	// If the directory doesn't exist, create it.
 	if !dirExists {
-		obj := client.Bucket(bucketName).Object(dirPath)
+		obj := client.Bucket(bucketNameForInspectGCSSendToScc).Object(dirPathForInspectGCSSendToScc)
 		if _, err := obj.NewWriter(ctx).Write([]byte("")); err != nil {
 			log.Fatalf("Failed to create directory: %v", err)
 		}
-		fmt.Printf("Directory '%s' created successfully in bucket '%s'.\n", dirPath, bucketName)
+		fmt.Printf("Directory '%s' created successfully in bucket '%s'.\n", dirPathForInspectGCSSendToScc, bucketNameForInspectGCSSendToScc)
 	} else {
-		fmt.Printf("Directory '%s' already exists in bucket '%s'.\n", dirPath, bucketName)
+		fmt.Printf("Directory '%s' already exists in bucket '%s'.\n", dirPathForInspectGCSSendToScc, bucketNameForInspectGCSSendToScc)
 	}
 
 	// file upload code
@@ -766,7 +786,7 @@ func filePathtoGCS(t *testing.T, projectID string) (string, error) {
 	}
 
 	// Get a reference to the bucket
-	bucket := client.Bucket(bucketName)
+	bucket := client.Bucket(bucketNameForInspectGCSSendToScc)
 
 	// Upload the file
 	object := bucket.Object(inspectsGCSTestFileName)
@@ -785,15 +805,15 @@ func filePathtoGCS(t *testing.T, projectID string) (string, error) {
 	_, err = bucket.Object(inspectsGCSTestFileName).Attrs(ctx)
 	if err != nil {
 		if err == storage.ErrObjectNotExist {
-			fmt.Printf("File %v does not exist in bucket %v\n", inspectsGCSTestFileName, bucketName)
+			fmt.Printf("File %v does not exist in bucket %v\n", inspectsGCSTestFileName, bucketNameForInspectGCSSendToScc)
 		} else {
 			log.Fatalf("Failed to check file existence: %v", err)
 		}
 	} else {
-		fmt.Printf("File %v exists in bucket %v\n", inspectsGCSTestFileName, bucketName)
+		fmt.Printf("File %v exists in bucket %v\n", inspectsGCSTestFileName, bucketNameForInspectGCSSendToScc)
 	}
 
-	GCSUri := fmt.Sprint("gs://" + bucketName + "/" + dirPath + "test.txt")
+	GCSUri := fmt.Sprint("gs://" + bucketNameForInspectGCSSendToScc + "/" + dirPathForInspectGCSSendToScc + "test.txt")
 
 	return GCSUri, err
 }

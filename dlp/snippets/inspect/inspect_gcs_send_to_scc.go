@@ -25,7 +25,7 @@ import (
 
 // inspectGCSFileSendToScc inspects sensitive data in a Google Cloud Storage (GCS) file
 // and sends the inspection results to Google Cloud Security Command Center (SCC) for further analysis.
-func InspectGCSFileSendToScc(w io.Writer, projectID, gcsPath string) error {
+func inspectGCSFileSendToScc(w io.Writer, projectID, gcsPath string) error {
 	// projectID := "my-project-id"
 	// gcsPath := "gs://" + "your-bucket-name" + "path/to/file.txt"
 
