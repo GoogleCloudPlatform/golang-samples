@@ -23,7 +23,7 @@ import (
 	"cloud.google.com/go/dlp/apiv2/dlppb"
 )
 
-// inspectDataStoreSendToScc inspects sensitive data in a Datastore 
+// inspectDataStoreSendToScc inspects sensitive data in a Datastore
 // and sends the results to Google Cloud Security Command Center (SCC).
 func inspectDataStoreSendToScc(w io.Writer, projectID, datastoreNamespace, datastoreKind string) error {
 	// projectID := "my-project-id"
