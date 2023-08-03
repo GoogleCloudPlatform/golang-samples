@@ -35,7 +35,7 @@ func createWndowsServerInstanceInternalIP(
 	// zone := "europe-central2-b"
 	// instanceName := "your_instance_name"
 	// machineType := "n1-standard-1"
-	// sourceImageFamily := "windows-2012-r2"
+	// sourceImageFamily := "windows-2022"
 	// networkLink := "global/networks/default"
 	// subnetworkLink := "regions/europe-central2/subnetworks/default"
 
