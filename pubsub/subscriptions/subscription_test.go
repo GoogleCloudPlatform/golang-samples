@@ -29,6 +29,7 @@ import (
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -746,6 +747,81 @@ func TestCreateWithFilter(t *testing.T) {
 	}
 }
 
+func TestCreatePushSubscription(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+	defer client.Close()
+
+	t.Run("default push subscription", func(t *testing.T) {
+		topicID := topicID + "-default-push"
+		subID := subID + "-default-push"
+		t.Cleanup(func() {
+			// Don't check delete errors since if it doesn't exist
+			// that's fine.
+			topic := client.Topic(topicID)
+			topic.Delete(ctx)
+
+			sub := client.Subscription(subID)
+			sub.Delete(ctx)
+		})
+
+		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+			topic, err := getOrCreateTopic(ctx, client, topicID)
+			if err != nil {
+				r.Errorf("CreateTopic: %v", err)
+			}
+
+			var b bytes.Buffer
+			endpoint := "https://my-test-project.appspot.com/push"
+			if err := createWithEndpoint(&b, tc.ProjectID, subID, topic, endpoint); err != nil {
+				r.Errorf("failed to create push subscription: %v", err)
+			}
+
+			got := b.String()
+			want := "Created push subscription"
+			if !strings.Contains(got, want) {
+				r.Errorf("got %s, want %s", got, want)
+			}
+		})
+	})
+
+	t.Run("no wrapper", func(t *testing.T) {
+		topicID := topicID + "-no-wrapper"
+		subID := subID + "-no-wrapper"
+
+		t.Cleanup(func() {
+			// Don't check delete errors since if it doesn't exist
+			// that's fine.
+			topic := client.Topic(topicID)
+			topic.Delete(ctx)
+
+			sub := client.Subscription(subID)
+			sub.Delete(ctx)
+		})
+
+		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+			topic, err := getOrCreateTopic(ctx, client, topicID)
+			if err != nil {
+				r.Errorf("CreateTopic: %v", err)
+			}
+
+			var b bytes.Buffer
+			endpoint := "https://my-test-project.appspot.com/push"
+			if err := createPushNoWrapperSubscription(&b, tc.ProjectID, subID, topic, endpoint); err != nil {
+				r.Errorf("failed to create push subscription: %v", err)
+			}
+
+			got := b.String()
+			want := "Created push no wrapper subscription"
+			if !strings.Contains(got, want) {
+				r.Errorf("got %s, want %s", got, want)
+			}
+		})
+	})
+}
+
 func TestCreateBigQuerySubscription(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
@@ -777,6 +853,36 @@ func TestCreateBigQuerySubscription(t *testing.T) {
 	if err := deleteBigQueryDataset(tc.ProjectID, datasetID); err != nil {
 		t.Logf("failed to delete bigquery dataset: %v", err)
 	}
+}
+
+func TestCreateCloudStorageSubscription(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+	defer client.Close()
+	storageSubID := subID + "-cloud-storage"
+
+	topic, err := getOrCreateTopic(ctx, client, topicID)
+	if err != nil {
+		t.Fatalf("CreateTopic: %v", err)
+	}
+	var buf bytes.Buffer
+
+	// Use the same bucket across test instances. This
+	// is safe since we're not writing to the bucket
+	// and this makes us not have to do bucket cleanups.
+	bucketID := fmt.Sprintf("%s-%s", tc.ProjectID, "pubsub-storage-sub-sink")
+	if err := createOrGetStorageBucket(tc.ProjectID, bucketID); err != nil {
+		t.Fatalf("failed to get or create storage bucket: %v", err)
+	}
+
+	if err := createCloudStorageSubscription(&buf, tc.ProjectID, storageSubID, topic, bucketID); err != nil {
+		t.Fatalf("failed to create cloud storage subscription: %v", err)
+	}
+
+	sub := client.Subscription(storageSubID)
+	sub.Delete(ctx)
 }
 
 func TestCreateSubscriptionWithExactlyOnceDelivery(t *testing.T) {
@@ -932,5 +1038,25 @@ func deleteBigQueryDataset(projectID, datasetID string) error {
 	if err = dataset.DeleteWithContents(ctx); err != nil {
 		return fmt.Errorf("error deleting dataset: %w", err)
 	}
+	return nil
+}
+
+func createOrGetStorageBucket(projectID, bucketID string) error {
+	ctx := context.Background()
+
+	c, err := storage.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("error instantiating storage client: %w", err)
+	}
+	b := c.Bucket(bucketID)
+	_, err = b.Attrs(ctx)
+	if err == storage.ErrBucketNotExist {
+		if err := b.Create(ctx, projectID, nil); err != nil {
+			return fmt.Errorf("error creating bucket: %w", err)
+		}
+	} else if err != nil {
+		return fmt.Errorf("error retrieving existing bucket: %w", err)
+	}
+
 	return nil
 }
