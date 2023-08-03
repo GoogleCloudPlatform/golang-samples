@@ -14,6 +14,7 @@
 
 package snippets
 
+// [START aiplatform_text_embeddings]
 import (
 	"context"
 	"encoding/json"
@@ -27,8 +28,7 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-// [START aiplatform_text_embeddings]
-
+// GenerateEmbeddings creates embeddings from text provided.
 func GenerateEmbeddings(w io.Writer, prompt, project, location, publisher, model string) error {
 	ctx := context.Background()
 
