@@ -18,12 +18,15 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestGenerateEmbeddings(t *testing.T) {
+	testutil.SystemTest(t)
 
 	prompt := "hello, say something nice."
-	projectID := "PROJECT_ID"
+	projectID := testutil.SystemTest(t).ProjectID
 	location := "us-central1"
 	publisher := "google"
 	model := "textembedding-gecko"

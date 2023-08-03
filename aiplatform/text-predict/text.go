@@ -14,12 +14,12 @@
 
 package snippets
 
+// [START aiplatform_text_predictions]
+
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 
 	aiplatform "cloud.google.com/go/aiplatform/apiv1beta1"
 	"cloud.google.com/go/aiplatform/apiv1beta1/aiplatformpb"
@@ -27,59 +27,53 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-// [START aiplatform_text_predictions]
-
 func TextPredict(w io.Writer, prompt, projectID, location, publisher, model string, parameters map[string]interface{}) error {
 	ctx := context.Background()
 
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
-	log.Printf("apiendpoint: %s", apiEndpoint)
 
-	c, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
+	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {
-		log.Printf("unable to create prediction client: %v", err)
+		fmt.Fprintf(w, "unable to create prediction client: %v", err)
 		return err
 	}
-	defer c.Close()
+	defer client.Close()
 
-	// PredictRequest requires an Endpoint, Instances, and Parameters
+	// PredictRequest requires an endpoint, instances, and parameters
 	// Endpoint
 	base := fmt.Sprintf("projects/%s/locations/%s/publishers/%s/models", projectID, location, publisher)
 	url := fmt.Sprintf("%s/%s", base, model)
 
-	// Instances: the prompt
+	// Instances: the prompt to use with the text model
 	promptValue, err := structpb.NewValue(map[string]interface{}{
 		"prompt": prompt,
 	})
 	if err != nil {
-		log.Printf("unable to convert prompt to Value: %v", err)
+		fmt.Fprintf(w, "unable to convert prompt to Value: %v", err)
+		return err
 	}
 
 	// Parameters: the model configuration parameters
 	parametersValue, err := structpb.NewValue(parameters)
 	if err != nil {
-		log.Printf("unable to convert parameters to Value: %v", err)
+		fmt.Fprintf(w, "unable to convert parameters to Value: %v", err)
+		return err
 	}
 
-	// PredictRequest
+	// PredictRequest: create the model prediction request
 	req := &aiplatformpb.PredictRequest{
 		Endpoint:   url,
 		Instances:  []*structpb.Value{promptValue},
 		Parameters: parametersValue,
 	}
-	log.Printf("PredictRequest.Endpoint:   %v", req.GetEndpoint())
-	log.Printf("PredictRequest.Instances:  %v", req.GetInstances())
-	log.Printf("PredictRequest.Parameters: %v", req.GetParameters())
 
-	// PredictResponse
-	resp, err := c.Predict(ctx, req)
+	// PredictResponse: receive the response from the model
+	resp, err := client.Predict(ctx, req)
 	if err != nil {
-		log.Printf("error in prediction: %v", err)
+		fmt.Fprintf(w, "error in prediction: %v", err)
 		return err
 	}
 
-	jsonData, err := json.MarshalIndent(resp, "", " ")
-	log.Printf("%s\n", jsonData)
 	fmt.Fprintf(w, "text-prediction response: %v", resp.Predictions[0])
 	return nil
 }

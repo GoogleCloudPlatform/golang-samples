@@ -17,10 +17,8 @@ package snippets
 // [START aiplatform_text_embeddings]
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 
 	aiplatform "cloud.google.com/go/aiplatform/apiv1beta1"
 	"cloud.google.com/go/aiplatform/apiv1beta1/aiplatformpb"
@@ -33,16 +31,15 @@ func GenerateEmbeddings(w io.Writer, prompt, project, location, publisher, model
 	ctx := context.Background()
 
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
-	log.Printf("apiendpoint: %s", apiEndpoint)
 
-	c, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
+	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {
-		log.Printf("unable to create prediction client: %v", err)
+		fmt.Fprintf(w, "unable to create prediction client: %v", err)
 		return err
 	}
-	defer c.Close()
+	defer client.Close()
 
-	// PredictRequest requires an Endpoint, Instances, and Parameters
+	// PredictRequest requires an endpoint, instances, and parameters
 	// Endpoint
 	base := fmt.Sprintf("projects/%s/locations/%s/publishers/%s/models", project, location, publisher)
 	url := fmt.Sprintf("%s/%s", base, model)
@@ -52,26 +49,23 @@ func GenerateEmbeddings(w io.Writer, prompt, project, location, publisher, model
 		"content": prompt,
 	})
 	if err != nil {
-		log.Printf("unable to convert prompt to Value: %v", err)
+		fmt.Fprintf(w, "unable to convert prompt to Value: %v", err)
+		return err
 	}
 
-	// PredictRequest
+	// PredictRequest: create the model prediction request
 	req := &aiplatformpb.PredictRequest{
 		Endpoint:  url,
 		Instances: []*structpb.Value{promptValue},
 	}
-	log.Printf("PredictRequest.Endpoint:   %v", req.GetEndpoint())
-	log.Printf("PredictRequest.Instances:  %v", req.GetInstances())
-	log.Printf("PredictRequest.Parameters: %v", req.GetParameters())
 
-	// PredictResponse
-	resp, err := c.Predict(ctx, req)
+	// PredictResponse: receive the response from the model
+	resp, err := client.Predict(ctx, req)
 	if err != nil {
-		log.Printf("error in prediction: %v", err)
+		fmt.Fprintf(w, "error in prediction: %v", err)
 		return err
 	}
-	jsonData, err := json.MarshalIndent(resp, "", " ")
-	log.Printf("%s\n", jsonData)
+
 	fmt.Fprintf(w, "embeddings generated: %v", resp.Predictions[0])
 	return nil
 }
