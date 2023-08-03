@@ -59,7 +59,7 @@ func TestComputeCreateWindowsInstancesSnippets(t *testing.T) {
 	machineType := "n1-standard-1"
 	networkLink := "global/networks/default"
 	subnetworkLink := "regions/europe-central2/subnetworks/default"
-	sourceImageFamily := "windows-2012-r2"
+	sourceImageFamily := "windows-2022"
 	want := "Instance created"
 
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
