@@ -30,12 +30,12 @@ import (
 	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/google/uuid"
 )
 
 const (
 	termListFileName = "term_list.txt"
 	filePathToUpload = "./testdata/term_list_storedInfotype.txt"
+	bucket_prefix    = "gdtfsi" //Google DLP Test For Stored Infotype
 )
 
 func TestInfoTypes(t *testing.T) {
@@ -87,12 +87,17 @@ func TestCreateStoredInfoType(t *testing.T) {
 	skipKOKORO(t)
 
 	tc := testutil.SystemTest(t)
-
-	outputPath, err := bucketForStoredInfoType(t, tc.ProjectID)
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
-
+	defer client.Close()
+	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputPath := fmt.Sprintf("gs://" + bucketName + "/")
 	var buf bytes.Buffer
 
 	if err := createStoredInfoType(&buf, tc.ProjectID, outputPath); err != nil {
@@ -111,64 +116,6 @@ func TestCreateStoredInfoType(t *testing.T) {
 	name := strings.TrimPrefix(got, "output: ")
 
 	defer deleteStoredInfoTypeAfterTest(t, name)
-}
-
-func bucketForStoredInfoType(t *testing.T, projectID string) (string, error) {
-	t.Helper()
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		return "", err
-	}
-	defer client.Close()
-
-	u := uuid.New().String()[:8]
-	bucketName := "dlp-go-lang-test-metadata" + u
-	dirPath := "my-directory/"
-
-	// Check if the bucket already exists.
-	bucketExists := false
-	_, err = client.Bucket(bucketName).Attrs(ctx)
-	if err == nil {
-		bucketExists = true
-	}
-
-	// If the bucket doesn't exist, create it.
-	if !bucketExists {
-		if err := client.Bucket(bucketName).Create(ctx, projectID, &storage.BucketAttrs{
-			StorageClass: "STANDARD",
-			Location:     "us",
-		}); err != nil {
-			log.Fatalf("Failed to create bucket: %v", err)
-		}
-		fmt.Printf("Bucket '%s' created successfully.\n", bucketName)
-	} else {
-		fmt.Printf("Bucket '%s' already exists.\n", bucketName)
-	}
-
-	// Check if the directory already exists in the bucket.
-	dirExists := false
-	query := &storage.Query{Prefix: dirPath}
-	it := client.Bucket(bucketName).Objects(ctx, query)
-	_, err = it.Next()
-	if err == nil {
-		dirExists = true
-	}
-
-	// If the directory doesn't exist, create it.
-	if !dirExists {
-		obj := client.Bucket(bucketName).Object(dirPath)
-		if _, err := obj.NewWriter(ctx).Write([]byte("")); err != nil {
-			log.Fatalf("Failed to create directory: %v", err)
-		}
-		fmt.Printf("Directory '%s' created successfully in bucket '%s'.\n", dirPath, bucketName)
-	} else {
-		fmt.Printf("Directory '%s' already exists in bucket '%s'.\n", dirPath, bucketName)
-	}
-
-	fullPath := fmt.Sprint("gs://" + bucketName + "/" + dirPath)
-
-	return fullPath, nil
 }
 
 func deleteStoredInfoTypeAfterTest(t *testing.T, name string) error {
@@ -194,14 +141,20 @@ func TestUpdateStoredInfoType(t *testing.T) {
 	skipKOKORO(t)
 	tc := testutil.SystemTest(t)
 
-	fileSetUrl, gcsUri, err := bucketForUpdateStoredInfoType(t, tc.ProjectID)
+	var buf bytes.Buffer
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer client.Close()
+	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputPath := fmt.Sprintf("gs://" + bucketName + "/")
 
-	var buf bytes.Buffer
-
-	outputPath, err := bucketForStoredInfoType(t, tc.ProjectID)
+	fileSetUrl, gcsUri, err := bucketForUpdateStoredInfoType(t, tc.ProjectID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -239,29 +192,12 @@ func bucketForUpdateStoredInfoType(t *testing.T, projectID string) (string, stri
 		return "", "", err
 	}
 	defer client.Close()
-	u := uuid.New().String()[:8]
-	bucketName := "dlp-go-lang-test" + u
+
+	bucketName, err := testutil.CreateTestBucket(ctx, t, client, projectID, "bfusit")
+	if err != nil {
+		t.Fatal(err)
+	}
 	dirPath := "update-stored-infoType-data/"
-
-	// Check if the bucket already exists.
-	bucketExists := false
-	_, err = client.Bucket(bucketName).Attrs(ctx)
-	if err == nil {
-		bucketExists = true
-	}
-
-	// If the bucket doesn't exist, create it.
-	if !bucketExists {
-		if err := client.Bucket(bucketName).Create(ctx, projectID, &storage.BucketAttrs{
-			StorageClass: "STANDARD",
-			Location:     "us-central1",
-		}); err != nil {
-			log.Fatalf("Failed to create bucket: %v", err)
-		}
-		fmt.Printf("Bucket '%s' created successfully.\n", bucketName)
-	} else {
-		fmt.Printf("Bucket '%s' already exists.\n", bucketName)
-	}
 
 	// Check if the directory already exists in the bucket.
 	dirExists := false
