@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -35,7 +34,7 @@ import (
 const (
 	termListFileName = "term_list.txt"
 	filePathToUpload = "./testdata/term_list_storedInfotype.txt"
-	bucket_prefix    = "gdtfsi" //Google DLP Test For Stored Infotype
+	bucket_prefix    = "test"
 )
 
 func TestInfoTypes(t *testing.T) {
@@ -148,13 +147,18 @@ func TestUpdateStoredInfoType(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer client.Close()
+	outputBucket, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputPath := fmt.Sprintf("gs://" + outputBucket + "/")
+
 	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
 	if err != nil {
 		t.Fatal(err)
 	}
-	outputPath := fmt.Sprintf("gs://" + bucketName + "/")
 
-	fileSetUrl, gcsUri, err := bucketForUpdateStoredInfoType(t, tc.ProjectID)
+	fileSetUrl, gcsUri, err := filesForUpdateStoredInfoType(t, tc.ProjectID, bucketName)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -184,7 +188,7 @@ func TestUpdateStoredInfoType(t *testing.T) {
 	defer deleteStoredInfoTypeAfterTest(t, name)
 }
 
-func bucketForUpdateStoredInfoType(t *testing.T, projectID string) (string, string, error) {
+func filesForUpdateStoredInfoType(t *testing.T, projectID, bucketName string) (string, string, error) {
 	t.Helper()
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -193,10 +197,6 @@ func bucketForUpdateStoredInfoType(t *testing.T, projectID string) (string, stri
 	}
 	defer client.Close()
 
-	bucketName, err := testutil.CreateTestBucket(ctx, t, client, projectID, "bfusit")
-	if err != nil {
-		t.Fatal(err)
-	}
 	dirPath := "update-stored-infoType-data/"
 
 	// Check if the directory already exists in the bucket.
@@ -222,7 +222,7 @@ func bucketForUpdateStoredInfoType(t *testing.T, projectID string) (string, stri
 	// file upload code
 
 	// Open local file.
-	file, err := ioutil.ReadFile(filePathToUpload)
+	file, err := os.ReadFile(filePathToUpload)
 	if err != nil {
 		log.Fatalf("Failed to read file: %v", err)
 	}
