@@ -35,7 +35,7 @@ func createWndowsServerInstanceExternalIP(
 	// zone := "europe-central2-b"
 	// instanceName := "your_instance_name"
 	// machineType := "n1-standard-1"
-	// sourceImageFamily := "windows-2012-r2"
+	// sourceImageFamily := "windows-2022"
 
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)

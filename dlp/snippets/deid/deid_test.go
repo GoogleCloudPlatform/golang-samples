@@ -347,6 +347,33 @@ func TestDeIdentifyDeterministic(t *testing.T) {
 
 }
 
+func TestReidentifyFreeTextWithFPEUsingSurrogate(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+
+	inputStr := "My phone number is 1234567890"
+	infoType := "PHONE_NUMBER"
+	surrogateType := "PHONE_TOKEN"
+	unwrappedKey := "hu4O2y0RsY9qrVt1d2xAWEmqVqAc1P8Vk7D6peashag="
+
+	if err := deidentifyFreeTextWithFPEUsingSurrogate(&buf, tc.ProjectID, inputStr, infoType, surrogateType, unwrappedKey); err != nil {
+		t.Fatal(err)
+	}
+
+	inputForReid := "My phone number is PHONE_TOKEN(10):4169075971"
+
+	buf.Reset()
+	if err := reidentifyFreeTextWithFPEUsingSurrogate(&buf, tc.ProjectID, inputForReid, surrogateType, unwrappedKey); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "output: My phone number is 1234567890"; got != want {
+		t.Errorf("reidentifyFreeTextWithFPEUsingSurrogate got %q, want %q", got, want)
+	}
+
+}
+
 func TestDeIdentifyFreeTextWithFPEUsingSurrogate(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -567,7 +594,7 @@ func TestReidTextDataWithFPE(t *testing.T) {
 
 	got := buf.String()
 	if want := "output: My SSN is 123456789"; got != want {
-		t.Errorf("reidentifyFreeTextWithFPEUsingSurrogate got %q, want %q", got, want)
+		t.Errorf("reidTextDataWithFPE got %q, want %q", got, want)
 	}
 }
 

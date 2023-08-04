@@ -747,6 +747,81 @@ func TestCreateWithFilter(t *testing.T) {
 	}
 }
 
+func TestCreatePushSubscription(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+	defer client.Close()
+
+	t.Run("default push subscription", func(t *testing.T) {
+		topicID := topicID + "-default-push"
+		subID := subID + "-default-push"
+		t.Cleanup(func() {
+			// Don't check delete errors since if it doesn't exist
+			// that's fine.
+			topic := client.Topic(topicID)
+			topic.Delete(ctx)
+
+			sub := client.Subscription(subID)
+			sub.Delete(ctx)
+		})
+
+		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+			topic, err := getOrCreateTopic(ctx, client, topicID)
+			if err != nil {
+				r.Errorf("CreateTopic: %v", err)
+			}
+
+			var b bytes.Buffer
+			endpoint := "https://my-test-project.appspot.com/push"
+			if err := createWithEndpoint(&b, tc.ProjectID, subID, topic, endpoint); err != nil {
+				r.Errorf("failed to create push subscription: %v", err)
+			}
+
+			got := b.String()
+			want := "Created push subscription"
+			if !strings.Contains(got, want) {
+				r.Errorf("got %s, want %s", got, want)
+			}
+		})
+	})
+
+	t.Run("no wrapper", func(t *testing.T) {
+		topicID := topicID + "-no-wrapper"
+		subID := subID + "-no-wrapper"
+
+		t.Cleanup(func() {
+			// Don't check delete errors since if it doesn't exist
+			// that's fine.
+			topic := client.Topic(topicID)
+			topic.Delete(ctx)
+
+			sub := client.Subscription(subID)
+			sub.Delete(ctx)
+		})
+
+		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+			topic, err := getOrCreateTopic(ctx, client, topicID)
+			if err != nil {
+				r.Errorf("CreateTopic: %v", err)
+			}
+
+			var b bytes.Buffer
+			endpoint := "https://my-test-project.appspot.com/push"
+			if err := createPushNoWrapperSubscription(&b, tc.ProjectID, subID, topic, endpoint); err != nil {
+				r.Errorf("failed to create push subscription: %v", err)
+			}
+
+			got := b.String()
+			want := "Created push no wrapper subscription"
+			if !strings.Contains(got, want) {
+				r.Errorf("got %s, want %s", got, want)
+			}
+		})
+	})
+}
+
 func TestCreateBigQuerySubscription(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
