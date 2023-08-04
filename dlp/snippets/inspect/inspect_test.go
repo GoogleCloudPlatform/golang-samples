@@ -637,7 +637,7 @@ func TestInspectTableWithCustomHotword(t *testing.T) {
 func TestInspectDataStoreSendToScc(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
-	u := uuid.Must(uuid.NewV4()).String()[:8]
+	u := uuid.New().String()[:8]
 	datastoreNamespace := "golang-samples" + u
 	datastoreKind := "task"
 
