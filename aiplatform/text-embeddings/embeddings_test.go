@@ -32,7 +32,7 @@ func TestGenerateEmbeddings(t *testing.T) {
 	model := "textembedding-gecko"
 
 	var buf bytes.Buffer
-	if err := GenerateEmbeddings(&buf, prompt, projectID, location, publisher, model); err != nil {
+	if err := generateEmbeddings(&buf, prompt, projectID, location, publisher, model); err != nil {
 		t.Fatal(err)
 	}
 

@@ -39,7 +39,7 @@ func TestTextPredict(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	if err := TextPredict(&buf, prompt, projectID, location, publisher, model, parameters); err != nil {
+	if err := textPredict(&buf, prompt, projectID, location, publisher, model, parameters); err != nil {
 		t.Fatal(err)
 	}
 

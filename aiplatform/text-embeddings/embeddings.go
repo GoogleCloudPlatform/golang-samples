@@ -26,8 +26,8 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-// GenerateEmbeddings creates embeddings from text provided.
-func GenerateEmbeddings(w io.Writer, prompt, project, location, publisher, model string) error {
+// generateEmbeddings creates embeddings from text provided.
+func generateEmbeddings(w io.Writer, prompt, project, location, publisher, model string) error {
 	ctx := context.Background()
 
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
