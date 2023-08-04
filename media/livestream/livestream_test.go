@@ -28,6 +28,7 @@ const (
 	deleteChannelEventResponse = "Deleted channel event"
 	deleteChannelResponse      = "Deleted channel"
 	deleteInputResponse        = "Deleted input"
+	deleteAssetResponse        = "Deleted asset"
 	startChannelResponse       = "Started channel"
 	stopChannelResponse        = "Stopped channel"
 	location                   = "us-central1"
@@ -35,6 +36,8 @@ const (
 	backupInputID              = "my-go-test-backup-input"
 	channelID                  = "my-go-test-channel"
 	eventID                    = "my-go-test-channel-event"
+	assetID                    = "my-go-test-asset"
+	poolID                     = "default" // only 1 pool supported per location
 )
 
 // To run the tests, do the following:
@@ -44,13 +47,14 @@ const (
 // Enable the following API on the test project:
 // *   Live Stream API
 
-// TestLiveStream tests major operations on inputs, channels, and channel
-// events.
+// TestLiveStream tests major operations on inputs, channels, channel
+// events, assets, and pools.
 func TestLiveStream(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	bucketName := tc.ProjectID + "-golang-samples-livestream-test"
 	outputURI := "gs://" + bucketName + "/test-output-channel/"
+	assetURI := "gs://cloud-samples-data/media/ForBiggerEscapes.mp4"
 
 	testInputs(t)
 	t.Logf("\ntestInputs() completed\n")
@@ -60,6 +64,12 @@ func TestLiveStream(t *testing.T) {
 
 	testChannelEvents(t, outputURI)
 	t.Logf("\ntestChannelEvents() completed\n")
+
+	testAssets(t, assetURI)
+	t.Logf("\ntestAssets() completed\n")
+
+	testPools(t)
+	t.Logf("\ntestPools() completed\n")
 }
 
 // testInputs tests major operations on inputs. Create, list, update,
@@ -491,4 +501,107 @@ func testChannelEvents(t *testing.T, outputURI string) {
 			r.Errorf("deleteInput got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteInputResponse)
 		}
 	})
+}
+
+// testAssets tests major operations on assets. Create, list,
+// and get operations check if the asset resource name is returned. The
+// delete operation checks for a hard-coded string response.
+func testAssets(t *testing.T, assetURI string) {
+	tc := testutil.SystemTest(t)
+	buf := &bytes.Buffer{}
+
+	// Test setup
+
+	// Delete the default asset if it exists
+	if err := getAsset(buf, tc.ProjectID, location, assetID); err == nil {
+		testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+			if err := deleteAsset(buf, tc.ProjectID, location, assetID); err != nil {
+				r.Errorf("deleteAsset got err: %v", err)
+			}
+		})
+	}
+
+	// Tests
+
+	// Create a new asset.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		assetName := fmt.Sprintf("projects/%s/locations/%s/assets/%s", tc.ProjectID, location, assetID)
+		if err := createAsset(buf, tc.ProjectID, location, assetID, assetURI); err != nil {
+			r.Errorf("createAsset got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, assetName) {
+			r.Errorf("createAsset got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, assetName)
+		}
+	})
+	buf.Reset()
+
+	// List the assets for a given location.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		assetName := fmt.Sprintf("projects/%s/locations/%s/assets/%s", tc.ProjectID, location, assetID)
+		if err := listAssets(buf, tc.ProjectID, location); err != nil {
+			r.Errorf("listAssets got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, assetName) {
+			r.Errorf("listAssets got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, assetName)
+		}
+	})
+	buf.Reset()
+
+	// Get the asset.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		assetName := fmt.Sprintf("projects/%s/locations/%s/assets/%s", tc.ProjectID, location, assetID)
+		if err := getAsset(buf, tc.ProjectID, location, assetID); err != nil {
+			r.Errorf("getAsset got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, assetName) {
+			r.Errorf("getAsset got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, assetName)
+		}
+	})
+	buf.Reset()
+
+	// Delete the asset.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		if err := deleteAsset(buf, tc.ProjectID, location, assetID); err != nil {
+			r.Errorf("deleteAsset got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, deleteAssetResponse) {
+			r.Errorf("deleteAsset got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteAssetResponse)
+		}
+	})
+	buf.Reset()
+}
+
+// testPools tests major operations on pool. Get and update
+// operations check if the pool resource name is returned.
+func testPools(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := &bytes.Buffer{}
+
+	// Tests
+
+	// Get the pool.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		poolName := fmt.Sprintf("projects/%s/locations/%s/pools/%s", tc.ProjectID, location, poolID)
+		if err := getPool(buf, tc.ProjectID, location, poolID); err != nil {
+			r.Errorf("getPool got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, poolName) {
+			r.Errorf("getPool got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, poolName)
+		}
+	})
+	buf.Reset()
+
+	// Update an existing pool. Set the updated peer network to "", which
+	// is the same as the default otherwise the test will take a long time
+	// to complete.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		poolName := fmt.Sprintf("projects/%s/locations/%s/pools/%s", tc.ProjectID, location, poolID)
+		if err := updatePool(buf, tc.ProjectID, location, poolID, ""); err != nil {
+			r.Errorf("updatePool got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, poolName) {
+			r.Errorf("updatePool got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, poolName)
+		}
+	})
+	buf.Reset()
 }
