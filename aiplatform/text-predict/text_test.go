@@ -23,10 +23,10 @@ import (
 )
 
 func TestTextPredict(t *testing.T) {
-	testutil.SystemTest(t)
+	tc := testutil.SystemTest(t)
 
 	prompt := "hello, say something nice."
-	projectID := testutil.SystemTest(t).ProjectID
+	projectID := tc.ProjectID
 	location := "us-central1"
 	publisher := "google"
 	model := "text-bison"
