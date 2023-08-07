@@ -261,7 +261,7 @@ func createStoredInfoTypeForTesting(t *testing.T, projectID, outputPath string) 
 	}
 	defer client.Close()
 
-	displayName := "Go Test - 4"
+	displayName := "dlp-stored-info-type-for-test"
 	description := "Dictionary of GitHub usernames used in commits"
 
 	cloudStoragePath := &dlppb.CloudStoragePath{
