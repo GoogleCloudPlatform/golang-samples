@@ -19,12 +19,15 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"testing"
 	"time"
 
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/datastore"
+	dlp "cloud.google.com/go/dlp/apiv2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/gofrs/uuid"
@@ -36,6 +39,10 @@ const (
 
 	ssnFileName = "fake_ssn.txt"
 	bucketName  = "golang-samples-dlp-test2"
+
+	termListFileName = "term_list.txt"
+	filePathToUpload = "./testdata/term_list_storedInfotype.txt"
+	bucket_prefix    = "test"
 )
 
 func TestInspectDatastore(t *testing.T) {
@@ -697,4 +704,190 @@ func TestInspectDataStoreSendToScc(t *testing.T) {
 	if want := "Job created successfully:"; !strings.Contains(got, want) {
 		t.Errorf("InspectBigQuerySendToScc got %q, want %q", got, want)
 	}
+}
+
+func TestInspectWithStoredInfotype(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close()
+	outputBucket, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputPath := fmt.Sprintf("gs://" + outputBucket + "/")
+
+	infoTypeId, err := createStoredInfoTypeForTesting(t, tc.ProjectID, outputPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	duration := time.Duration(30) * time.Second
+	time.Sleep(duration)
+
+	textToDeidentify := "This commit was made by kewin2010"
+	if err := inspectWithStoredInfotype(&buf, tc.ProjectID, infoTypeId, textToDeidentify); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Qoute: kewin2010"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectWithStoredInfotype got %q, want %q", got, want)
+	}
+	if want := "Info type: GITHUB_LOGINS"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectWithStoredInfotype got %q, want %q", got, want)
+	}
+
+	defer deleteStoredInfoTypeAfterTest(t, infoTypeId)
+}
+
+func createStoredInfoTypeForTesting(t *testing.T, projectID, outputPath string) (string, error) {
+	t.Helper()
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return "", err
+	}
+	defer client.Close()
+
+	displayName := "stored-info-type-for-inspect-test"
+	description := "Dictionary of GitHub usernames used in commits"
+
+	cloudStoragePath := &dlppb.CloudStoragePath{
+		Path: outputPath,
+	}
+
+	bigQueryField := &dlppb.BigQueryField{
+		Table: &dlppb.BigQueryTable{
+			ProjectId: "bigquery-public-data",
+			DatasetId: "samples",
+			TableId:   "github_nested",
+		},
+		Field: &dlppb.FieldId{
+			Name: "actor",
+		},
+	}
+
+	largeCustomDictionaryConfig := &dlppb.LargeCustomDictionaryConfig{
+		OutputPath: cloudStoragePath,
+		Source: &dlppb.LargeCustomDictionaryConfig_BigQueryField{
+			BigQueryField: bigQueryField,
+		},
+	}
+
+	storedInfoTypeConfig := &dlppb.StoredInfoTypeConfig{
+		DisplayName: displayName,
+		Description: description,
+		Type: &dlppb.StoredInfoTypeConfig_LargeCustomDictionary{
+			LargeCustomDictionary: largeCustomDictionaryConfig,
+		},
+	}
+	req := &dlppb.CreateStoredInfoTypeRequest{
+		Parent:           fmt.Sprintf("projects/%s/locations/global", projectID),
+		Config:           storedInfoTypeConfig,
+		StoredInfoTypeId: "go-sample-test-stored-infoType",
+	}
+	resp, err := client.CreateStoredInfoType(ctx, req)
+	if err != nil {
+		return "nil", err
+	}
+
+	return resp.Name, nil
+}
+
+func filesForUpdateStoredInfoType(t *testing.T, projectID, bucketName string) (string, string, error) {
+	t.Helper()
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return "", "", err
+	}
+	defer client.Close()
+
+	dirPath := "update-stored-infoType-data/"
+
+	// Check if the directory already exists in the bucket.
+	dirExists := false
+	query := &storage.Query{Prefix: dirPath}
+	it := client.Bucket(bucketName).Objects(ctx, query)
+	_, err = it.Next()
+	if err == nil {
+		dirExists = true
+	}
+
+	// If the directory doesn't exist, create it.
+	if !dirExists {
+		obj := client.Bucket(bucketName).Object(dirPath)
+		if _, err := obj.NewWriter(ctx).Write([]byte("")); err != nil {
+			log.Fatalf("Failed to create directory: %v", err)
+		}
+		fmt.Printf("Directory '%s' created successfully in bucket '%s'.\n", dirPath, bucketName)
+	} else {
+		fmt.Printf("Directory '%s' already exists in bucket '%s'.\n", dirPath, bucketName)
+	}
+
+	// file upload code
+
+	// Open local file.
+	file, err := os.ReadFile(filePathToUpload)
+	if err != nil {
+		log.Fatalf("Failed to read file: %v", err)
+	}
+
+	// Get a reference to the bucket
+	bucket := client.Bucket(bucketName)
+
+	// Upload the file
+	object := bucket.Object(termListFileName)
+	writer := object.NewWriter(ctx)
+	_, err = writer.Write(file)
+	if err != nil {
+		log.Fatalf("Failed to write file: %v", err)
+	}
+	err = writer.Close()
+	if err != nil {
+		log.Fatalf("Failed to close writer: %v", err)
+	}
+	fmt.Printf("File uploaded successfully: %v\n", termListFileName)
+
+	// Check if the file exists in the bucket
+	_, err = bucket.Object(termListFileName).Attrs(ctx)
+	if err != nil {
+		if err == storage.ErrObjectNotExist {
+			fmt.Printf("File %v does not exist in bucket %v\n", termListFileName, bucketName)
+		} else {
+			log.Fatalf("Failed to check file existence: %v", err)
+		}
+	} else {
+		fmt.Printf("File %v exists in bucket %v\n", termListFileName, bucketName)
+	}
+
+	fileSetUrl := fmt.Sprint("gs://" + bucketName + "/" + termListFileName)
+	gcsUri := fmt.Sprint("gs://" + bucketName)
+
+	return fileSetUrl, gcsUri, err
+}
+
+func deleteStoredInfoTypeAfterTest(t *testing.T, name string) error {
+	t.Helper()
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	req := &dlppb.DeleteStoredInfoTypeRequest{
+		Name: name,
+	}
+	err = client.DeleteStoredInfoType(ctx, req)
+	if err != nil {
+		return err
+	}
+	return nil
 }
