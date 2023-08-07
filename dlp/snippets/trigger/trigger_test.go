@@ -52,7 +52,7 @@ func TestTriggersSamples(t *testing.T) {
 	}
 
 	buf.Reset()
-	if err := updateTrigger(buf, tc.ProjectID, fullID); err != nil {
+	if err := updateTrigger(buf, fullID); err != nil {
 		t.Errorf("UpdateTrigger: %v", err)
 	}
 	if got, want := buf.String(), "Successfully Updated trigger"; !strings.Contains(got, want) {
