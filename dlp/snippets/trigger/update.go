@@ -29,7 +29,7 @@ import (
 // updateTrigger updates an existing job trigger in Google Cloud Data Loss Prevention (DLP).
 // It modifies the configuration of the specified job trigger with the provided updated settings.
 func updateTrigger(w io.Writer, jobTriggerName string) error {
-	// jobTriggerName := "your-job-trigger-name"
+	// jobTriggerName := "your-job-trigger-name" (projects/<projectID>/locations/global/jobTriggers/my-trigger)
 
 	ctx := context.Background()
 
