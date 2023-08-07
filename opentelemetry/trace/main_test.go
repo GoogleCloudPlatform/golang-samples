@@ -16,7 +16,6 @@ package main
 
 import (
 	"context"
-	"os"
 	"testing"
 	"time"
 
@@ -33,13 +32,10 @@ func TestWriteTraces(t *testing.T) {
 	if !m.Built() {
 		t.Fatalf("failed to build app")
 	}
-	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
-	if projectID == "" {
-		t.Skip("Skipping tail logs sample test. Set GOLANG_SAMPLES_PROJECT_ID.")
-	}
+	tc := testutil.SystemTest(t)
 	// Run the example to export to the samples project
 	testStart := time.Now()
-	_, _, err := m.Run(map[string]string{"GOOGLE_CLOUD_PROJECT": projectID}, 10*time.Second)
+	_, _, err := m.Run(map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}, 10*time.Second)
 	if err != nil {
 		t.Fatalf("Failed to run the trace example binary: %v", err)
 	}
@@ -52,29 +48,29 @@ func TestWriteTraces(t *testing.T) {
 		t.Fatalf("Failed to create trace client: %v", err)
 	}
 	defer client.Close()
-	// Wait a few seconds to ensure our trace is returned by the trace API
-	time.Sleep(5 * time.Second)
-
-	req := &tracepb.ListTracesRequest{
-		ProjectId: projectID,
-		StartTime: timestamppb.New(testStart),
-		EndTime:   timestamppb.New(testEnd),
-		Filter:    "root:foo",
-	}
-	// Count the number of traces returned, and ensure it is non-zero
-	var numMatchingTraces int
-	it := client.ListTraces(ctx, req)
-	for {
-		_, err := it.Next()
-		if err == iterator.Done {
-			break
+	testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		// Count the number of traces returned, and ensure it is non-zero
+		req := &tracepb.ListTracesRequest{
+			ProjectId: tc.ProjectID,
+			StartTime: timestamppb.New(testStart),
+			EndTime:   timestamppb.New(testEnd),
+			Filter:    "root:foo",
 		}
-		if err != nil {
-			t.Fatalf("Failed to get next item from ListTraces: %v", err)
+		var numMatchingTraces int
+		it := client.ListTraces(ctx, req)
+		for {
+			_, err := it.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				r.Errorf("Failed to get next item from ListTraces: %v", err)
+				r.Fail()
+			}
+			numMatchingTraces++
 		}
-		numMatchingTraces++
-	}
-	if numMatchingTraces == 0 {
-		t.Errorf("No traces found matching the filter")
-	}
+		if numMatchingTraces == 0 {
+			r.Errorf("No traces found matching the filter")
+		}
+	})
 }
