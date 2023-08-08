@@ -564,8 +564,7 @@ func TestAssets(t *testing.T) {
 
 	// Create a new asset.
 
-	testAssetID := assetID + "-" + strconv.FormatInt(time.Now().Unix(), 10)
-
+	testAssetID := fmt.Sprintf("%s-%s", assetID, strconv.FormatInt(time.Now().Unix(), 10))
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		testAssetName := fmt.Sprintf("projects/%s/locations/%s/assets/%s", tc.ProjectID, location, testAssetID)
 		if err := createAsset(buf, tc.ProjectID, location, testAssetID, assetURI); err != nil {
