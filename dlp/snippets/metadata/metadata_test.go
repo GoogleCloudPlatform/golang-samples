@@ -29,6 +29,7 @@ import (
 	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/google/uuid"
 )
 
 const (
@@ -260,8 +261,8 @@ func createStoredInfoTypeForTesting(t *testing.T, projectID, outputPath string) 
 		return "", err
 	}
 	defer client.Close()
-
-	displayName := "dlp-stored-info-type-for-test"
+	u := uuid.New().String()[:8]
+	displayName := "dlp-stored-info-type-for-test-" + u
 	description := "Dictionary of GitHub usernames used in commits"
 
 	cloudStoragePath := &dlppb.CloudStoragePath{
@@ -296,7 +297,7 @@ func createStoredInfoTypeForTesting(t *testing.T, projectID, outputPath string) 
 	req := &dlppb.CreateStoredInfoTypeRequest{
 		Parent:           fmt.Sprintf("projects/%s/locations/global", projectID),
 		Config:           storedInfoTypeConfig,
-		StoredInfoTypeId: "go-sample-test-stored-infoType",
+		StoredInfoTypeId: "go-sample-test-stored-infoType-" + u,
 	}
 	resp, err := client.CreateStoredInfoType(ctx, req)
 	if err != nil {
