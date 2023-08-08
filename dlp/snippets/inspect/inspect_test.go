@@ -25,6 +25,8 @@ import (
 
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/datastore"
+	dlp "cloud.google.com/go/dlp/apiv2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/gofrs/uuid"
@@ -697,4 +699,118 @@ func TestInspectDataStoreSendToScc(t *testing.T) {
 	if want := "Job created successfully:"; !strings.Contains(got, want) {
 		t.Errorf("InspectBigQuerySendToScc got %q, want %q", got, want)
 	}
+}
+
+func TestInspectDataToHybridJobTrigger(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+	trigger, err := createJobTriggerForInspectDataToHybridJobTrigger(t, tc.ProjectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := inspectDataToHybridJobTrigger(&buf, tc.ProjectID, "My email is test@example.org", trigger); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "successfully inspected data using hybrid job trigger"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectDataToHybridJobTrigger got %q, want %q", got, want)
+	}
+
+	deleteJobTriggerForInspectDataToHybridJobTrigger(t, trigger)
+}
+
+func createJobTriggerForInspectDataToHybridJobTrigger(t *testing.T, projectID string) (string, error) {
+	t.Helper()
+	log.Printf("[START] createJobTriggerForInspectDataToHybridJobTrigger: projectID %v and ", projectID)
+	// Set up the client.
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return "", err
+	}
+	defer client.Close()
+
+	// Define the job trigger.
+	jobTrigger := &dlppb.JobTrigger{
+		DisplayName: "Job-Trigger-for-test-i",
+		Description: "Job-Trigger-Description-for-test",
+		Triggers: []*dlppb.JobTrigger_Trigger{
+			{
+				Trigger: &dlppb.JobTrigger_Trigger_Manual{},
+			},
+		},
+		Job: &dlppb.JobTrigger_InspectJob{
+			InspectJob: &dlppb.InspectJobConfig{
+				InspectConfig: &dlppb.InspectConfig{
+					InfoTypes: []*dlppb.InfoType{
+						{Name: "EMAIL_ADDRESS"},
+					},
+				},
+				StorageConfig: &dlppb.StorageConfig{
+					Type: &dlppb.StorageConfig_HybridOptions{
+						HybridOptions: &dlppb.HybridOptions{
+							Labels: map[string]string{
+								"env": "prod",
+							},
+							RequiredFindingLabelKeys: []string{"appointment-bookings-comments"},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	createReq := &dlppb.CreateJobTriggerRequest{
+		Parent:     fmt.Sprintf("projects/%s/locations/global", projectID),
+		JobTrigger: jobTrigger,
+	}
+	newTrigger, err := client.CreateJobTrigger(ctx, createReq)
+	if err != nil {
+		log.Fatalf("Error creating job trigger: %v", err)
+		return "", err
+	}
+	fmt.Printf("Job trigger %q created\n", newTrigger.GetDisplayName())
+
+	trigger, err := client.GetJobTrigger(ctx, &dlppb.GetJobTriggerRequest{
+		Name: newTrigger.Name,
+	})
+	if err != nil {
+		log.Fatalf("Error getting job trigger: %v", err)
+	}
+
+	// Update the job trigger.
+	_, err = client.ActivateJobTrigger(ctx, &dlppb.ActivateJobTriggerRequest{
+		Name: trigger.Name,
+	})
+	if err != nil {
+		log.Fatalf("Error updating job trigger: %v", err)
+		return "", nil
+	}
+	log.Printf("[END] createJobTriggerForInspectDataToHybridJobTrigger: trigger.Name %v and ", trigger.Name)
+	return trigger.Name, nil
+}
+
+func deleteJobTriggerForInspectDataToHybridJobTrigger(t *testing.T, jobTrigger string) error {
+	t.Helper()
+	log.Printf("[START] deleteJobTriggerForInspectDataToHybridJobTrigger: JOBtRIGGER %v and ", jobTrigger)
+	// Set up the client.
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	req := &dlppb.DeleteJobTriggerRequest{
+		Name: jobTrigger,
+	}
+
+	err = client.DeleteJobTrigger(ctx, req)
+	if err != nil {
+		return err
+	}
+	log.Printf("[END] deleteJobTriggerForInspectDataToHybridJobTrigger: err %v", err)
+	return nil
 }
