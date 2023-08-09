@@ -67,7 +67,7 @@ func main() {
 		sdktrace.WithBatcher(exporter),
 		sdktrace.WithResource(res),
 	)
-	defer tp.ForceFlush(ctx) // flushes any pending spans
+	defer tp.Shutdown(ctx) // flushes any pending spans, and closes connections.
 	otel.SetTracerProvider(tp)
 
 	// [START opentelemetry_trace_custom_span]
