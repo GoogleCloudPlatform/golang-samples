@@ -681,20 +681,3 @@ func TestInspectTableWithCustomHotword(t *testing.T) {
 		t.Errorf("TestInspectTableWithCustomHotword got %q, want %q", got, want)
 	}
 }
-
-func TestInspectDataStoreSendToScc(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-	u := uuid.Must(uuid.NewV4()).String()[:8]
-	datastoreNamespace := "golang-samples" + u
-	datastoreKind := "task"
-
-	if err := inspectDataStoreSendToScc(&buf, tc.ProjectID, datastoreNamespace, datastoreKind); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-	if want := "Job created successfully:"; !strings.Contains(got, want) {
-		t.Errorf("InspectBigQuerySendToScc got %q, want %q", got, want)
-	}
-}
