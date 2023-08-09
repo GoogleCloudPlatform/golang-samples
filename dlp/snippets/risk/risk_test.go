@@ -152,3 +152,21 @@ func cleanupPubsub(t *testing.T, client *pubsub.Client, topicName, subName strin
 		}
 	}
 }
+
+func TestCalculateKAnonymityWithEntityId(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	client, err := pubsub.NewClient(context.Background(), tc.ProjectID)
+	if err != nil {
+		t.Fatalf("pubsub.NewClient: %v", err)
+	}
+	buf := new(bytes.Buffer)
+	u := uuid.Must(uuid.NewV4()).String()[:8]
+	err = calculateKAnonymityWithEntityId(buf, tc.ProjectID, "bigquery-public-data", "samples", "wikipedia", riskTopicName+u, riskSubscriptionName+u, "title", "contributor_ip")
+	defer cleanupPubsub(t, client, riskTopicName+u, riskSubscriptionName+u)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := buf.String(), "Created job"; !strings.Contains(got, want) {
+		t.Errorf("CalculateKAnonymityWithEntityId got %s, want substring %q", got, want)
+	}
+}
