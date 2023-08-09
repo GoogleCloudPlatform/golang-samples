@@ -33,6 +33,7 @@ func TestTriggersSamples(t *testing.T) {
 	if err := listTriggers(buf, tc.ProjectID); err != nil {
 		t.Errorf("listTriggers: %v", err)
 	}
+
 	if got := buf.String(); strings.Contains(got, fullID) {
 		buf.Reset()
 		if err := deleteTrigger(buf, fullID); err != nil {
@@ -48,6 +49,14 @@ func TestTriggersSamples(t *testing.T) {
 	}
 	if got, want := buf.String(), "Successfully created trigger"; !strings.Contains(got, want) {
 		t.Errorf("createTrigger got\n----\n%v\n----\nWant to contain:\n----\n%v\n----", got, want)
+	}
+
+	buf.Reset()
+	if err := updateTrigger(buf, fullID); err != nil {
+		t.Errorf("UpdateTrigger: %v", err)
+	}
+	if got, want := buf.String(), "Successfully Updated trigger"; !strings.Contains(got, want) {
+		t.Errorf("UpdateTrigger got\n----\n%v\n----\nWant to contain:\n----\n%v\n----", got, want)
 	}
 
 	buf.Reset()
