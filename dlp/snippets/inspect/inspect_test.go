@@ -985,3 +985,4 @@ func (i *BigQueryTableItem) Save() (map[string]bigquery.Value, string, error) {
 		"score":   i.Score,
 	}, bigquery.NoDedupeID, nil
 }
+
