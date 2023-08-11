@@ -18,6 +18,8 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
+	"time"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
@@ -52,6 +54,7 @@ func inspectDataToHybridJobTrigger(w io.Writer, projectID, textToDeIdentify, job
 	}
 
 	// Contains metadata to associate with the content.
+	// Refer to https://cloud.google.com/dlp/docs/reference/rest/v2/Container for specifying the paths in container object.
 	container := &dlppb.Container{
 		Type:         "logging_sys",
 		FullPath:     "10.0.0.2:logs1:app1",
@@ -80,8 +83,12 @@ func inspectDataToHybridJobTrigger(w io.Writer, projectID, textToDeIdentify, job
 	activateJobreq := &dlppb.ActivateJobTriggerRequest{
 		Name: jobTriggerName,
 	}
-	client.ActivateJobTrigger(ctx, activateJobreq)
 
+	dlpJob, err := client.ActivateJobTrigger(ctx, activateJobreq)
+	if err != nil {
+		log.Printf("Error from return part %v", err)
+		return err
+	}
 	// Build the hybrid inspect request.
 	req := &dlppb.HybridInspectJobTriggerRequest{
 		Name:       jobTriggerName,
@@ -89,12 +96,44 @@ func inspectDataToHybridJobTrigger(w io.Writer, projectID, textToDeIdentify, job
 	}
 
 	// Send the hybrid inspect request.
-	resp, err := client.HybridInspectJobTrigger(ctx, req)
+	_, err = client.HybridInspectJobTrigger(ctx, req)
 	if err != nil {
 		return err
 	}
 
-	fmt.Fprintf(w, "successfully inspected data using hybrid job trigger: %v", resp)
+	getDlpJobReq := &dlppb.GetDlpJobRequest{
+		Name: dlpJob.Name,
+	}
+
+	var result *dlppb.DlpJob
+	for {
+		// Get DLP job
+		result, err = client.GetDlpJob(ctx, getDlpJobReq)
+		if err != nil {
+			fmt.Printf("Error getting DLP job: %v\n", err)
+			return err
+		}
+
+		// Check if processed bytes is greater than 0
+		if result.GetInspectDetails().GetResult().GetProcessedBytes() > 0 {
+			break
+		}
+
+		// Wait for 5 seconds before checking again
+		time.Sleep(5 * time.Second)
+	}
+
+	fmt.Fprintf(w, "Job Name: %v\n", result.Name)
+	fmt.Fprintf(w, "Job State: %v\n", result.State)
+
+	inspectionResult := result.GetInspectDetails().GetResult()
+	fmt.Fprint(w, "Findings: \n")
+	for _, v := range inspectionResult.GetInfoTypeStats() {
+		fmt.Fprintf(w, "Infotype: %v\n", v.InfoType.Name)
+		fmt.Fprintf(w, "Likelihood: %v\n", v.GetCount())
+	}
+
+	fmt.Fprint(w, "successfully inspected data using hybrid job trigger ")
 	return nil
 }
 
