@@ -59,23 +59,23 @@ var assetURI string
 
 // TestMain tests major operations on inputs, channels, channel
 // events, assets, and pools.
-func TestMain(t *testing.T) {
-	tc := testutil.SystemTest(t)
+func TestMain(m *testing.M) {
+	tc, _ := testutil.ContextMain(m)
 	bucketName = tc.ProjectID + "-golang-samples-livestream-test"
 	outputURI = "gs://" + bucketName + "/test-output-channel/"
 	assetURI = "gs://cloud-samples-data/media/ForBiggerEscapes.mp4"
-	cleanStaleAssets(t)
+	m.Run()
+	cleanStaleAssets(tc)
 }
 
-func cleanStaleAssets(t *testing.T) {
-	tc := testutil.SystemTest(t)
+func cleanStaleAssets(tc testutil.Context) {
 	ctx := context.Background()
 	var threeHoursInSec int64 = 60 * 60 * 3
 	timeNowSec := time.Now().Unix()
 
 	client, err := livestream.NewClient(ctx)
 	if err != nil {
-		t.Logf("NewClient: %v", err)
+		fmt.Printf("NewClient: %v", err)
 	}
 	defer client.Close()
 
@@ -90,7 +90,7 @@ func cleanStaleAssets(t *testing.T) {
 			break
 		}
 		if err != nil {
-			t.Errorf("ListAssets: %v", err)
+			fmt.Printf("ListAssets: %v", err)
 			continue
 		}
 		req := &livestreampb.GetAssetRequest{
@@ -98,22 +98,20 @@ func cleanStaleAssets(t *testing.T) {
 		}
 		asset, err := client.GetAsset(ctx, req)
 		if err != nil {
-			t.Errorf("GetAsset: %v", err)
+			fmt.Printf("GetAsset: %v", err)
 			continue
 		}
 		if asset.GetCreateTime().GetSeconds() < timeNowSec-threeHoursInSec {
-			t.Logf("%v - delete asset", asset.GetCreateTime().GetSeconds())
+			fmt.Printf("%v - delete asset", asset.GetCreateTime().GetSeconds())
 			req := &livestreampb.DeleteAssetRequest{
 				Name: asset.GetName(),
 			}
-			op, err := client.DeleteAsset(ctx, req)
+			// No need to wait for delete ops to finish, as this is a background
+			// cleanup.
+			_, err := client.DeleteAsset(ctx, req)
 			if err != nil {
-				t.Logf("DeleteAsset: %v", err)
+				fmt.Printf("DeleteAsset: %v", err)
 				continue
-			}
-			err = op.Wait(ctx)
-			if err != nil {
-				t.Logf("Wait: %v", err)
 			}
 		}
 	}
