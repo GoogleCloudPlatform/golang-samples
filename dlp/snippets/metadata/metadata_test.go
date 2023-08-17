@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 	"testing"
 
@@ -70,15 +69,7 @@ func TestInfoTypes(t *testing.T) {
 	}
 }
 
-func skipKOKORO(t *testing.T) {
-	if os.Getenv("GOOGLE_APPLICATION_CREDENTIALS") != "" {
-		t.Skip("Skipping testing in KOKORO environment")
-	}
-}
-
 func TestCreateStoredInfoType(t *testing.T) {
-	skipKOKORO(t)
-
 	tc := testutil.SystemTest(t)
 
 	outputPath, err := bucketForStoredInfoType(t, tc.ProjectID)
