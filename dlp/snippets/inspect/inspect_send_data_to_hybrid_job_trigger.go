@@ -126,14 +126,12 @@ func inspectDataToHybridJobTrigger(w io.Writer, projectID, textToDeIdentify, job
 	fmt.Fprintf(w, "Job Name: %v\n", result.Name)
 	fmt.Fprintf(w, "Job State: %v\n", result.State)
 
-	
 	inspectionResult := result.GetInspectDetails().GetResult()
 	fmt.Fprint(w, "Findings: \n")
 	for _, v := range inspectionResult.GetInfoTypeStats() {
 		fmt.Fprintf(w, "Infotype: %v\n", v.InfoType.Name)
 		fmt.Fprintf(w, "Likelihood: %v\n", v.GetCount())
 	}
-
 
 	fmt.Fprint(w, "successfully inspected data using hybrid job trigger ")
 	return nil
