@@ -18,6 +18,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"log"
 	"testing"
 	"time"
 
@@ -29,6 +30,11 @@ import (
 
 	pb "github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping/pkg/api/v1"
 )
+
+func init() {
+	// tests should include the filename in any logs, because the log files are per-package.
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+}
 
 // TestGRPCPingService is an end-to-end test that confirms ping responses work as expected with authentication.
 // Test Cases:

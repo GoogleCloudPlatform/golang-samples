@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"testing"
 	"time"
@@ -25,6 +26,11 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
+
+func init() {
+	// tests should include the filename in any logs, because the log files are per-package.
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+}
 
 var (
 	editorService *cloudrunci.Service

@@ -16,6 +16,7 @@ package cloudruntests
 
 import (
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 	"testing"
@@ -25,6 +26,11 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"golang.org/x/net/http2"
 )
+
+func init() {
+	// tests should include the filename in any logs, because the log files are per-package.
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+}
 
 // TestGRPCServerStreamingService is an end-to-end test that confirms the image builds, deploys and runs on
 // Cloud Run and can stream messages from server.

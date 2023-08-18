@@ -19,6 +19,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"io"
+	"log"
 	"testing"
 	"time"
 
@@ -29,6 +30,11 @@ import (
 
 	pb "github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming/pkg/api/v1"
 )
+
+func init() {
+	// tests should include the filename in any logs, because the log files are per-package.
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+}
 
 // TestGRPCServerStreamingService is an end-to-end test that confirms the image builds, deploys and runs on
 // Cloud Run and can stream messages from server.
