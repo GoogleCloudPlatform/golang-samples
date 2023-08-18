@@ -27,6 +27,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"os/exec"
 	"strings"
 	"time"
@@ -304,10 +305,10 @@ func (j *Job) LogEntries(filter string, find string, maxAttempts int) (bool, err
 	defer client.Close()
 
 	preparedFilter := fmt.Sprintf(`resource.type="cloud_run_job" resource.labels.job_name="%s" %s`, j.version(), filter)
-	fmt.Printf("Using log filter: %s\n", preparedFilter)
+	log.Printf("Using log filter: %s\n", preparedFilter)
 
 	for i := 1; i < maxAttempts; i++ {
-		fmt.Printf("Attempt #%d\n", i)
+		log.Printf("Attempt #%d\n", i)
 		it := client.Entries(ctx, logadmin.Filter(preparedFilter))
 		for {
 			entry, err := it.Next()
@@ -319,10 +320,10 @@ func (j *Job) LogEntries(filter string, find string, maxAttempts int) (bool, err
 			}
 			payload := fmt.Sprintf("%v", entry.Payload)
 			if len(payload) > 0 {
-				fmt.Printf("entry.Payload: %v\n", entry.Payload)
+				log.Printf("entry.Payload: %v\n", entry.Payload)
 			}
 			if strings.Contains(payload, find) {
-				fmt.Printf("%q log entry found.\n", find)
+				log.Printf("%q log entry found.\n", find)
 				return true, nil
 			}
 		}

@@ -27,6 +27,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"os/exec"
@@ -238,7 +239,7 @@ func (s *Service) Build() error {
 	}
 
 	if out, err := gcloud(s.operationLabel(labelOperationBuild), s.buildCmd()); err != nil {
-		fmt.Printf(string(out))
+		log.Printf(string(out))
 		return fmt.Errorf("gcloud: %s: %q", s.Image, err)
 	}
 	s.built = true
@@ -399,13 +400,13 @@ func (s *Service) LogEntries(filter string, find string, maxAttempts int) (bool,
 	defer client.Close()
 
 	preparedFilter := fmt.Sprintf(`resource.type="cloud_run_revision" resource.labels.service_name="%s" %s`, s.version(), filter)
-	fmt.Printf("Using log filter: %s\n", preparedFilter)
+	log.Printf("Using log filter: %s\n", preparedFilter)
 
-	fmt.Println("Waiting for logs...")
+	log.Println("Waiting for logs...")
 	time.Sleep(3 * time.Minute)
 
 	for i := 1; i < maxAttempts; i++ {
-		fmt.Printf("Attempt #%d\n", i)
+		log.Printf("Attempt #%d\n", i)
 		it := client.Entries(ctx, logadmin.Filter(preparedFilter))
 		for {
 			entry, err := it.Next()
@@ -417,10 +418,10 @@ func (s *Service) LogEntries(filter string, find string, maxAttempts int) (bool,
 			}
 			payload := fmt.Sprintf("%v", entry.Payload)
 			if len(payload) > 0 {
-				fmt.Printf("entry.Payload: %v\n", entry.Payload)
+				log.Printf("entry.Payload: %v\n", entry.Payload)
 			}
 			if strings.Contains(payload, find) {
-				fmt.Printf("%q log entry found.\n", find)
+				log.Printf("%q log entry found.\n", find)
 				return true, nil
 			}
 		}
