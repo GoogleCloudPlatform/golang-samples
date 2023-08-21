@@ -22,14 +22,33 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
+	"os"
 	"strings"
+	"time"
 
 	"testing"
 
+	"cloud.google.com/go/bigquery"
+	dlp "cloud.google.com/go/dlp/apiv2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 	kms "cloud.google.com/go/kms/apiv1"
 	"cloud.google.com/go/kms/apiv1/kmspb"
+	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
+	"google.golang.org/api/iterator"
+)
+
+const (
+	bucketForDeidCloudStorageForInput  = "dlp-test-deid-input"
+	bucketForDeidCloudStorageForOutput = "dlp-test-deid-go-lang-output"
+	filePathToGCSForDeidTest           = "./testdata/dlp_sample.csv"
+	tableID                            = "dlp_test_deid_table"
+	dataSetID                          = "dlp_test_deid_dataset"
+
+	deidentifyTemplateID           = "deidentified-templat-test-go"
+	deidentifyStructuredTemplateID = "deidentified-structured-template-go"
+	redactImageTemplate            = "redact-image-template-go"
 )
 
 func TestMask(t *testing.T) {
@@ -686,4 +705,465 @@ func TestDeidentifyDataReplaceWithDictionary(t *testing.T) {
 	if !strings.Contains(got, want1) && !strings.Contains(got, want2) {
 		t.Errorf("TestDeidentifyDataReplaceWithDictionary got %q, output does not contains value from dictionary", got)
 	}
+}
+
+func TestDeidentifyCloudStorage(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+	// "gs://dlp-crest-test/dlp_sample.csv"
+	gcsURI := fmt.Sprint("gs://" + bucketForDeidCloudStorageForInput + "/" + filePathToGCSForDeidTest)
+	outputBucket := fmt.Sprint("gs://" + bucketForDeidCloudStorageForOutput)
+
+	fullDeidentifyTemplateID := fmt.Sprint("projects/" + tc.ProjectID + "/deidentifyTemplates/" + deidentifyTemplateID)
+	fullDeidentifyStructuredTemplateID := fmt.Sprint("projects/" + tc.ProjectID + "/deidentifyTemplates/" + deidentifyStructuredTemplateID)
+	fullRedactImageTemplate := fmt.Sprint("projects/" + tc.ProjectID + "/deidentifyTemplates/" + redactImageTemplate)
+
+	if err := deidentifyCloudStorage(&buf, tc.ProjectID, gcsURI, tableID, dataSetID, outputBucket, fullDeidentifyTemplateID, fullDeidentifyStructuredTemplateID, fullRedactImageTemplate); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Job created successfully:"; !strings.Contains(got, want) {
+		t.Errorf("TestDeidentifyCloudStorage got %q, want %q", got, want)
+	}
+}
+
+func TestMain(m *testing.M) {
+	tc := testutil.Context{}
+	tc.ProjectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	if tc.ProjectID == "" {
+		tc.ProjectID = os.Getenv("")
+	}
+	createRedactImageTemplate(tc.ProjectID, redactImageTemplate)
+	createDeidentifiedTemplate(tc.ProjectID, deidentifyTemplateID)
+	createStructuredDeidentifiedTemplate(tc.ProjectID, deidentifyStructuredTemplateID)
+	v := []string{bucketForDeidCloudStorageForInput, bucketForDeidCloudStorageForOutput}
+	for _, v := range v {
+		createBucket(tc.ProjectID, v)
+	}
+	filePathtoGCS(tc.ProjectID)
+	createBigQueryDataSetId(tc.ProjectID)
+	createTableInsideDataset(tc.ProjectID, dataSetID)
+	m.Run()
+	deleteBigQueryAssets(tc.ProjectID)
+	for _, v := range v {
+		deleteBucket(tc.ProjectID, v)
+	}
+	deleteTemplate(tc.ProjectID)
+}
+
+func createDeidentifiedTemplate(projectID, deidentifyTemplateID string) error {
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	replaceWithInfoTypeConfig := &dlppb.ReplaceWithInfoTypeConfig{}
+
+	infoTypeTransformations := &dlppb.InfoTypeTransformations{
+		Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
+			{PrimitiveTransformation: &dlppb.PrimitiveTransformation{
+				Transformation: &dlppb.PrimitiveTransformation_ReplaceWithInfoTypeConfig{
+					ReplaceWithInfoTypeConfig: replaceWithInfoTypeConfig,
+				},
+			}},
+		},
+	}
+	deidentifyConfig := &dlppb.DeidentifyConfig{
+		Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
+			InfoTypeTransformations: infoTypeTransformations,
+		},
+	}
+	template := &dlppb.DeidentifyTemplate{
+		DeidentifyConfig: deidentifyConfig,
+	}
+	req := &dlppb.CreateDeidentifyTemplateRequest{
+		Parent:             fmt.Sprintf("projects/%s/locations/global", projectID),
+		DeidentifyTemplate: template,
+		TemplateId:         deidentifyTemplateID,
+	}
+	resp, err := client.CreateDeidentifyTemplate(ctx, req)
+	if err != nil {
+		return err
+	}
+	fmt.Print("\n" + "template " + resp.Name + "is created")
+	return nil
+}
+
+func createStructuredDeidentifiedTemplate(projectID, deidentifyStructuredTemplateID string) error {
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+	value := &dlppb.Value_StringValue{
+		StringValue: "Hello",
+	}
+	replaceValueConfig := &dlppb.ReplaceValueConfig{
+		NewValue: &dlppb.Value{
+			Type: value,
+		},
+	}
+	recordTransformations := &dlppb.RecordTransformations{
+		FieldTransformations: []*dlppb.FieldTransformation{
+			{
+				Transformation: &dlppb.FieldTransformation_PrimitiveTransformation{
+					PrimitiveTransformation: &dlppb.PrimitiveTransformation{
+						Transformation: &dlppb.PrimitiveTransformation_ReplaceConfig{
+							ReplaceConfig: replaceValueConfig,
+						},
+					},
+				},
+			},
+		},
+	}
+	deidentifyConfig := &dlppb.DeidentifyConfig{
+		Transformation: &dlppb.DeidentifyConfig_RecordTransformations{
+			RecordTransformations: recordTransformations,
+		},
+	}
+	template := &dlppb.DeidentifyTemplate{
+		DeidentifyConfig: deidentifyConfig,
+	}
+	req := &dlppb.CreateDeidentifyTemplateRequest{
+		Parent:             fmt.Sprintf("projects/%s/locations/global", projectID),
+		DeidentifyTemplate: template,
+		TemplateId:         deidentifyStructuredTemplateID,
+	}
+	resp, err := client.CreateDeidentifyTemplate(ctx, req)
+	if err != nil {
+		return err
+	}
+	fmt.Print("\n" + "template " + resp.Name + "is created")
+	return nil
+}
+
+func createRedactImageTemplate(projectID, redactImageTemplate string) error {
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+	imageTransformation := &dlppb.ImageTransformations_ImageTransformation{
+		RedactionColor: &dlppb.Color{
+			Red:   1,
+			Green: 0,
+			Blue:  0,
+		},
+	}
+	imageTransformations := &dlppb.ImageTransformations{
+		Transforms: []*dlppb.ImageTransformations_ImageTransformation{
+			imageTransformation,
+		},
+	}
+	deidentifyConfig := &dlppb.DeidentifyConfig{
+		Transformation: &dlppb.DeidentifyConfig_ImageTransformations{
+			ImageTransformations: imageTransformations,
+		},
+	}
+	template := &dlppb.DeidentifyTemplate{
+		DeidentifyConfig: deidentifyConfig,
+	}
+	req := &dlppb.CreateDeidentifyTemplateRequest{
+		Parent:             fmt.Sprintf("projects/%s/locations/global", projectID),
+		DeidentifyTemplate: template,
+		TemplateId:         redactImageTemplate,
+	}
+	resp, err := client.CreateDeidentifyTemplate(ctx, req)
+	if err != nil {
+		return err
+	}
+	fmt.Print("\n" + "template " + resp.Name + "is created")
+	return nil
+}
+
+func deleteTemplate(projectID string) error {
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+	abc := []string{deidentifyTemplateID, deidentifyStructuredTemplateID, redactImageTemplate}
+	for _, v := range abc {
+		name := fmt.Sprint("projects/" + projectID + "/deidentifyTemplates/" + v)
+		req := &dlppb.DeleteDeidentifyTemplateRequest{
+			Name: name,
+		}
+		err := client.DeleteDeidentifyTemplate(ctx, req)
+		if err != nil {
+			return err
+		}
+		log.Printf("[info] deleted a template : %s", v)
+	}
+	return nil
+}
+
+func createBucket(projectID, bucketName string) error {
+
+	ctx := context.Background()
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	// Check if the bucket already exists.
+	bucketExists := false
+	_, err = client.Bucket(bucketName).Attrs(ctx)
+	if err == nil {
+		bucketExists = true
+	}
+
+	// If the bucket doesn't exist, create it.
+	if !bucketExists {
+		if err := client.Bucket(bucketName).Create(ctx, projectID, &storage.BucketAttrs{
+			StorageClass: "STANDARD",
+			Location:     "us-central1",
+		}); err != nil {
+			log.Fatalf("---Failed to create bucket: %v", err)
+			return err
+		}
+		fmt.Printf("---Bucket '%s' created successfully.\n", bucketName)
+	} else {
+		fmt.Printf("---Bucket '%s' already exists.\n", bucketName)
+	}
+	fmt.Println("createbucket function is executed-------")
+	return nil
+}
+
+func filePathtoGCS(projectID string) error {
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	// Check if the bucket already exists.
+	bucketExists := false
+	_, err = client.Bucket(bucketForDeidCloudStorageForInput).Attrs(ctx)
+	if err == nil {
+		bucketExists = true
+	}
+
+	// If the bucket doesn't exist, create it.
+	if !bucketExists {
+		if err := client.Bucket(bucketForDeidCloudStorageForInput).Create(ctx, projectID, &storage.BucketAttrs{
+			StorageClass: "STANDARD",
+			Location:     "us-central1",
+		}); err != nil {
+			return err
+		}
+		fmt.Printf("Bucket '%s' created successfully.\n", bucketForDeidCloudStorageForInput)
+	} else {
+		fmt.Printf("Bucket '%s' already exists.\n", bucketForDeidCloudStorageForInput)
+	}
+
+	// Check if the directory already exists in the bucket.
+	dirExists := false
+	query := &storage.Query{Prefix: filePathToGCSForDeidTest}
+	it := client.Bucket(bucketForDeidCloudStorageForInput).Objects(ctx, query)
+	_, err = it.Next()
+	if err == nil {
+		dirExists = true
+	}
+
+	// If the directory doesn't exist, create it.
+	if !dirExists {
+		obj := client.Bucket(bucketForDeidCloudStorageForInput).Object(filePathToGCSForDeidTest)
+		if _, err := obj.NewWriter(ctx).Write([]byte("")); err != nil {
+			log.Fatalf("Failed to create directory: %v", err)
+		}
+		fmt.Printf("Directory '%s' created successfully in bucket '%s'.\n", filePathToGCSForDeidTest, bucketForDeidCloudStorageForInput)
+	} else {
+		fmt.Printf("Directory '%s' already exists in bucket '%s'.\n", filePathToGCSForDeidTest, bucketForDeidCloudStorageForInput)
+	}
+
+	// file upload code
+
+	// Open local file.
+	file, err := os.ReadFile(filePathToGCSForDeidTest)
+	if err != nil {
+		log.Fatalf("Failed to read file: %v", err)
+		return err
+	}
+
+	// Get a reference to the bucket
+	bucket := client.Bucket(bucketForDeidCloudStorageForInput)
+
+	// Upload the file
+	object := bucket.Object(filePathToGCSForDeidTest)
+	writer := object.NewWriter(ctx)
+	_, err = writer.Write(file)
+	if err != nil {
+		log.Fatalf("Failed to write file: %v", err)
+		return err
+	}
+	err = writer.Close()
+	if err != nil {
+		log.Fatalf("Failed to close writer: %v", err)
+		return err
+	}
+	fmt.Printf("File uploaded successfully: %v\n", filePathToGCSForDeidTest)
+
+	// Check if the file exists in the bucket
+	_, err = bucket.Object(filePathToGCSForDeidTest).Attrs(ctx)
+	if err != nil {
+		if err == storage.ErrObjectNotExist {
+			fmt.Printf("File %v does not exist in bucket %v\n", filePathToGCSForDeidTest, bucketForDeidCloudStorageForInput)
+		} else {
+			log.Fatalf("Failed to check file existence: %v", err)
+		}
+	} else {
+		fmt.Printf("File %v exists in bucket %v\n", filePathToGCSForDeidTest, bucketForDeidCloudStorageForInput)
+	}
+
+	fmt.Println("filePathtoGCS function is executed-------")
+	return nil
+}
+
+func deleteBucket(projectID, bucketName string) error {
+
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	bucket := client.Bucket(bucketName)
+
+	// List all objects in the bucket.
+	objs := bucket.Objects(ctx, nil)
+	for {
+		objAttrs, err := objs.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatalf("Failed to list objects in bucket: %v", err)
+		}
+
+		// Delete each object in the bucket.
+		if err := bucket.Object(objAttrs.Name).Delete(ctx); err != nil {
+			log.Fatalf("Failed to delete object %s: %v", objAttrs.Name, err)
+		}
+		fmt.Printf("Deleted object: %s\n", objAttrs.Name)
+	}
+	if err := bucket.Delete(ctx); err != nil {
+		log.Fatalf("Failed to delete bucket: %v", err)
+	}
+
+	return nil
+}
+
+func createBigQueryDataSetId(projectID string) error {
+
+	ctx := context.Background()
+
+	client, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	meta := &bigquery.DatasetMetadata{
+		Location: "US", // See https://cloud.google.com/bigquery/docs/locations
+	}
+
+	if err := client.Dataset(dataSetID).Create(ctx, meta); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func createTableInsideDataset(projectID, dataSetID string) error {
+	ctx := context.Background()
+	client, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	sampleSchema := bigquery.Schema{
+		{Name: "user_id", Type: bigquery.StringFieldType},
+		{Name: "age", Type: bigquery.IntegerFieldType},
+		{Name: "title", Type: bigquery.StringFieldType},
+		{Name: "score", Type: bigquery.StringFieldType},
+	}
+
+	metaData := &bigquery.TableMetadata{
+		Schema:         sampleSchema,
+		ExpirationTime: time.Now().AddDate(1, 0, 0), // Table will be automatically deleted in 1 year.
+	}
+
+	tableRef := client.Dataset(dataSetID).Table(tableID)
+	if err := tableRef.Create(ctx, metaData); err != nil {
+		log.Printf("[INFO] createBigQueryDataSetId Error while table creation: %v", err)
+		return err
+	}
+
+	duration := time.Duration(90) * time.Second
+	time.Sleep(duration)
+
+	inserter := client.Dataset(dataSetID).Table(tableID).Inserter()
+	items := []*BigQueryTableItem{
+		// Item implements the ValueSaver interface.
+		{UserId: "602-61-8588", Age: 32, Title: "Biostatistician III", Score: "A"},
+		{UserId: "618-96-2322", Age: 69, Title: "Programmer I", Score: "C"},
+		{UserId: "618-96-2322", Age: 69, Title: "Executive Secretary", Score: "C"},
+	}
+	if err := inserter.Put(ctx, items); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type BigQueryTableItem struct {
+	UserId string
+	Age    int
+	Title  string
+	Score  string
+}
+
+func (i *BigQueryTableItem) Save() (map[string]bigquery.Value, string, error) {
+	return map[string]bigquery.Value{
+		"user_id": i.UserId,
+		"age":     i.Age,
+		"title":   i.Title,
+		"score":   i.Score,
+	}, bigquery.NoDedupeID, nil
+}
+
+func deleteBigQueryAssets(projectID string) error {
+
+	log.Printf("[START] deleteBigQueryAssets: projectID %v and ", projectID)
+	ctx := context.Background()
+
+	client, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	log.Printf("[INFO] deleteBigQueryAssets: delete dataset err %v", err)
+
+	if err := client.Dataset(dataSetID).DeleteWithContents(ctx); err != nil {
+		log.Printf("[INFO] deleteBigQueryAssets: delete dataset err %v", err)
+		return err
+	}
+
+	duration := time.Duration(30) * time.Second
+	time.Sleep(duration)
+
+	log.Printf("[END] deleteBigQueryAssets:")
+	return nil
 }
