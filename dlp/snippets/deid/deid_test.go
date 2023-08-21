@@ -40,8 +40,8 @@ import (
 )
 
 const (
-	bucketForDeidCloudStorageForInput  = "dlp-test-deid-input"
-	bucketForDeidCloudStorageForOutput = "dlp-test-deid-go-lang-output"
+	bucketForDeidCloudStorageForInput  = "dlp-go-test-deid-input"
+	bucketForDeidCloudStorageForOutput = "dlp-go-test-deid-go-lang-output"
 	filePathToGCSForDeidTest           = "./testdata/dlp_sample.csv"
 	tableID                            = "dlp_test_deid_table"
 	dataSetID                          = "dlp_test_deid_dataset"
