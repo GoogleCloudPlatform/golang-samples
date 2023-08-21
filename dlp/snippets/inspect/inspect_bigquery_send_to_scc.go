@@ -25,7 +25,7 @@ import (
 
 // inspectBigQuerySendToScc configures the inspection job that instructs Cloud DLP to scan data stored in BigQuery,
 // and also instructs Cloud DLP to save its scan results to Security Command Center.
-func InspectBigQuerySendToScc(w io.Writer, projectID, bigQueryDatasetId, bigQueryTableId string) error {
+func inspectBigQuerySendToScc(w io.Writer, projectID, bigQueryDatasetId, bigQueryTableId string) error {
 	// projectID := "my-project-id"
 	// bigQueryDatasetId := "your-project-bigquery-dataset"
 	// bigQueryTableId := "your-project-bigquery_table"

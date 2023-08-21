@@ -711,7 +711,7 @@ func TestInspectBigQuerySendToScc(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
 
-	if err := InspectBigQuerySendToScc(&buf, tc.ProjectID, dataSetID, tableID); err != nil {
+	if err := inspectBigQuerySendToScc(&buf, tc.ProjectID, dataSetID, tableID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -724,7 +724,6 @@ func TestInspectBigQuerySendToScc(t *testing.T) {
 	log.Printf("Job Name : %v", jobName)
 
 	deleteJob(tc.ProjectID, jobName[1])
-	// defer deleteBigQueryAssets(tc.ProjectID)
 }
 
 func TestMain(m *testing.M) {
