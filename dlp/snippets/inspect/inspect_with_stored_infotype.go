@@ -22,7 +22,6 @@ import (
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
-	"github.com/google/uuid"
 )
 
 // inspectWithStoredInfotype inspects the given text using the specified stored infoType detector.
@@ -51,10 +50,9 @@ func inspectWithStoredInfotype(w io.Writer, projectID, infoTypeId, textToDeident
 		},
 	}
 
-	u := uuid.New().String()[:8]
 	// Specify the info type the inspection will look for.
 	infoType := &dlppb.InfoType{
-		Name: "GITHUB_LOGINS" + u,
+		Name: "GITHUB_LOGINS",
 	}
 
 	// Specify the stored info type the inspection will look for.

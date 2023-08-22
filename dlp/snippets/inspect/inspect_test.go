@@ -30,7 +30,7 @@ import (
 	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 )
 
 const (
@@ -62,7 +62,7 @@ func TestInspectDatastore(t *testing.T) {
 		t.Run(test.kind, func(t *testing.T) {
 			t.Parallel()
 			testutil.Retry(t, 5, 15*time.Second, func(r *testutil.R) {
-				u := uuid.Must(uuid.NewV4()).String()[:8]
+				u := uuid.New().String()[:8]
 				buf := new(bytes.Buffer)
 				if err := inspectDatastore(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, tc.ProjectID, "", test.kind); err != nil {
 					r.Errorf("inspectDatastore(%s) got err: %v", test.kind, err)
@@ -115,7 +115,7 @@ func TestInspectGCS(t *testing.T) {
 		t.Run(test.fileName, func(t *testing.T) {
 			t.Parallel()
 			testutil.Retry(t, 5, 15*time.Second, func(r *testutil.R) {
-				u := uuid.Must(uuid.NewV4()).String()[:8]
+				u := uuid.New().String()[:8]
 				buf := new(bytes.Buffer)
 				if err := inspectGCSFile(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, bucketName, test.fileName); err != nil {
 					r.Errorf("inspectGCSFile(%s) got err: %v", test.fileName, err)
@@ -274,7 +274,7 @@ func TestInspectBigquery(t *testing.T) {
 		test := test
 		t.Run(test.table, func(t *testing.T) {
 			t.Parallel()
-			u := uuid.Must(uuid.NewV4()).String()[:8]
+			u := uuid.New().String()[:8]
 			buf := new(bytes.Buffer)
 			if err := inspectBigquery(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, tc.ProjectID, bqDatasetID, test.table); err != nil {
 				t.Errorf("inspectBigquery(%s) got err: %v", test.table, err)
@@ -587,7 +587,7 @@ func createBucket(t *testing.T, projectID string) (string, error) {
 		return "", err
 	}
 	defer client.Close()
-	u := uuid.Must(uuid.NewV4()).String()[:8]
+	u := uuid.New().String()[:8]
 	bucketName := "dlp-job-go-lang-test" + u
 
 	// Check if the bucket already exists.
@@ -692,7 +692,7 @@ func TestInspectTableWithCustomHotword(t *testing.T) {
 func TestInspectDataStoreSendToScc(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
-	u := uuid.Must(uuid.NewV4()).String()[:8]
+	u := uuid.New().String()[:8]
 	datastoreNamespace := "golang-samples" + u
 	datastoreKind := "task"
 
@@ -754,8 +754,8 @@ func createStoredInfoTypeForTesting(t *testing.T, projectID, outputPath string) 
 		return "", err
 	}
 	defer client.Close()
-
-	displayName := "stored-info-type-for-inspect-test"
+	u := uuid.New().String()[:8]
+	displayName := "stored-info-type-for-inspect-test" + u
 	description := "Dictionary of GitHub usernames used in commits"
 
 	cloudStoragePath := &dlppb.CloudStoragePath{
@@ -787,10 +787,11 @@ func createStoredInfoTypeForTesting(t *testing.T, projectID, outputPath string) 
 			LargeCustomDictionary: largeCustomDictionaryConfig,
 		},
 	}
+
 	req := &dlppb.CreateStoredInfoTypeRequest{
 		Parent:           fmt.Sprintf("projects/%s/locations/global", projectID),
 		Config:           storedInfoTypeConfig,
-		StoredInfoTypeId: "go-sample-test-stored-infoType",
+		StoredInfoTypeId: "go-sample-test-stored-infoType" + u,
 	}
 	resp, err := client.CreateStoredInfoType(ctx, req)
 	if err != nil {
