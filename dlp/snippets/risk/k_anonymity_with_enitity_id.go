@@ -25,17 +25,14 @@ import (
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
-	"cloud.google.com/go/pubsub"
 )
 
 // Uses the Data Loss Prevention API to compute the k-anonymity of a
 // column set in a Google BigQuery table.
-func calculateKAnonymityWithEntityId(w io.Writer, projectID, bigQueryProjectID, datasetId, tableId, pubSubTopic, pubSubSub string, columnNames ...string) error {
-	// projectID := "my-project-id"
+func calculateKAnonymityWithEntityId(w io.Writer, projectID, datasetId, tableId string, columnNames ...string) error {
+	// projectID := "your-project-id"
 	// datasetId := "your-bigquery-dataset-id"
 	// tableId := "your-bigquery-table-id"
-	// pubSubTopic := "dlp-risk-sample-topic"
-	// pubSubSub := "dlp-risk-sample-sub"
 	// columnNames := "age" "job_title"
 
 	ctx := context.Background()
@@ -53,9 +50,9 @@ func calculateKAnonymityWithEntityId(w io.Writer, projectID, bigQueryProjectID, 
 
 	// Specify the BigQuery table to analyze
 	bigQueryTable := &dlppb.BigQueryTable{
-		ProjectId: bigQueryProjectID,
-		DatasetId: datasetId,
-		TableId:   tableId,
+		ProjectId: "bigquery-public-data",
+		DatasetId: "samples",
+		TableId:   "wikipedia",
 	}
 
 	// Configure the privacy metric for the job
@@ -82,49 +79,29 @@ func calculateKAnonymityWithEntityId(w io.Writer, projectID, bigQueryProjectID, 
 		},
 	}
 
-	// Create action to publish job status notifications over Google Cloud Pub/Sub
-	// Create a PubSub Client used to listen for when the inspect job finishes.
-	pubsubClient, err := pubsub.NewClient(ctx, projectID)
-	if err != nil {
-		return err
-	}
-	defer pubsubClient.Close()
-
-	// Create a PubSub subscription we can use to listen for messages.
-	// Create the Topic if it doesn't exist.
-	t := pubsubClient.Topic(pubSubTopic)
-	if exists, err := t.Exists(ctx); err != nil {
-		fmt.Fprintf(w, "t.Exists: %v", err)
-		return err
-	} else if !exists {
-		if t, err = pubsubClient.CreateTopic(ctx, pubSubTopic); err != nil {
-			fmt.Fprintf(w, "CreateTopic: %v", err)
-			return err
-		}
+	// Specify the bigquery table to store the findings.
+	// The "test_results" table in the given BigQuery dataset will be created if it doesn't
+	// already exist.
+	outputbigQueryTable := &dlppb.BigQueryTable{
+		ProjectId: projectID,
+		DatasetId: datasetId,
+		TableId:   tableId,
 	}
 
-	// Create the Subscription if it doesn't exist.
-	s := pubsubClient.Subscription(pubSubSub)
-	if exists, err := s.Exists(ctx); err != nil {
-		fmt.Fprintf(w, "s.Exits: %v", err)
-		return err
-	} else if !exists {
-		if s, err = pubsubClient.CreateSubscription(ctx, pubSubSub, pubsub.SubscriptionConfig{Topic: t}); err != nil {
-			fmt.Fprintf(w, "CreateSubscription: %v", err)
-			return err
-		}
+	// Create action to publish job status notifications to BigQuery table.
+	outputStorageConfig := &dlppb.OutputStorageConfig{
+		Type: &dlppb.OutputStorageConfig_Table{
+			Table: outputbigQueryTable,
+		},
 	}
 
-	// topic is the PubSub topic string where messages should be sent.
-	topic := "projects/" + projectID + "/topics/" + pubSubTopic
-
-	publishToPubSub := &dlppb.Action_PublishToPubSub{
-		Topic: topic,
+	findings := &dlppb.Action_SaveFindings{
+		OutputConfig: outputStorageConfig,
 	}
 
 	action := &dlppb.Action{
-		Action: &dlppb.Action_PubSub{
-			PubSub: publishToPubSub,
+		Action: &dlppb.Action_SaveFindings_{
+			SaveFindings: findings,
 		},
 	}
 
@@ -146,52 +123,61 @@ func calculateKAnonymityWithEntityId(w io.Writer, projectID, bigQueryProjectID, 
 	}
 
 	// Send the request to the API using the client
-	j, err := client.CreateDlpJob(ctx, req)
+	dlpJob, err := client.CreateDlpJob(ctx, req)
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "Created job: %v\n", j.GetName())
+	fmt.Fprintf(w, "Created job: %v\n", dlpJob.GetName())
 
-	// Wait for the risk job to finish by waiting for a PubSub message.
-	// This only waits for 10 minutes. For long jobs, consider using a truly
-	// asynchronous execution model such as Cloud Functions.
-	ctx, cancel := context.WithTimeout(ctx, 10*time.Minute)
-	defer cancel()
-	err = s.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
-		// If this is the wrong job, do not process the result.
-		if msg.Attributes["DlpJobName"] != j.GetName() {
-			msg.Nack()
-			return
-		}
-		msg.Ack()
-		time.Sleep(500 * time.Millisecond)
-		j, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
-			Name: j.GetName(),
-		})
-		if err != nil {
-			fmt.Fprintf(w, "GetDlpJob: %v", err)
-			return
-		}
-		h := j.GetRiskDetails().GetKAnonymityResult().GetEquivalenceClassHistogramBuckets()
-		for i, b := range h {
-			fmt.Fprintf(w, "Histogram bucket %v\n", i)
-			fmt.Fprintf(w, "  Size range: [%v,%v]\n", b.GetEquivalenceClassSizeLowerBound(), b.GetEquivalenceClassSizeUpperBound())
-			fmt.Fprintf(w, "  %v unique values total\n", b.GetBucketSize())
-			for _, v := range b.GetBucketValues() {
-				var qvs []string
-				for _, qv := range v.GetQuasiIdsValues() {
-					qvs = append(qvs, qv.String())
-				}
-				fmt.Fprintf(w, "    QuasiID values: %s\n", strings.Join(qvs, ", "))
-				fmt.Fprintf(w, "    Class size: %v\n", v.GetEquivalenceClassSize())
-			}
-		}
-		// Stop listening for more messages.
-		cancel()
-	})
-	if err != nil {
-		return fmt.Errorf("Receive: %v", err)
+	// Build a request to get the completed job
+	getDlpJobReq := &dlppb.GetDlpJobRequest{
+		Name: dlpJob.Name,
 	}
+
+	timeout := 15 * time.Minute
+	startTime := time.Now()
+
+	var completedJob *dlppb.DlpJob
+
+	// Wait for job completion
+	for time.Since(startTime) <= timeout {
+		completedJob, err = client.GetDlpJob(ctx, getDlpJobReq)
+		if err != nil {
+			return err
+		}
+
+		if completedJob.GetState() == dlppb.DlpJob_DONE {
+			break
+		}
+
+		time.Sleep(30 * time.Second)
+
+	}
+
+	if completedJob.GetState() != dlppb.DlpJob_DONE {
+		fmt.Println("Job did not complete within 15 minutes.")
+	}
+
+	// Retrieve completed job status
+	fmt.Fprintf(w, "Job status: %v", completedJob.State)
+	fmt.Fprintf(w, "Job name: %v", dlpJob.Name)
+
+	// Get the result and parse through and process the information
+	kanonymityResult := completedJob.GetRiskDetails().GetKAnonymityResult()
+
+	for _, result := range kanonymityResult.GetEquivalenceClassHistogramBuckets() {
+		fmt.Fprintf(w, "Bucket size range: [%d, %d]\n", result.GetEquivalenceClassSizeLowerBound(), result.GetEquivalenceClassSizeLowerBound())
+
+		for _, bucket := range result.GetBucketValues() {
+			quasiIdValues := []string{}
+			for _, v := range bucket.GetQuasiIdsValues() {
+				quasiIdValues = append(quasiIdValues, v.GetStringValue())
+			}
+			fmt.Fprintf(w, "\tQuasi-ID values: %s", strings.Join(quasiIdValues, ","))
+			fmt.Fprintf(w, "\tClass size: %d", bucket.EquivalenceClassSize)
+		}
+	}
+
 	return nil
 
 }
