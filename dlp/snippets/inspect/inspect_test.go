@@ -30,7 +30,7 @@ import (
 	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 	"google.golang.org/api/iterator"
 )
 
@@ -63,7 +63,7 @@ func TestInspectDatastore(t *testing.T) {
 		t.Run(test.kind, func(t *testing.T) {
 			t.Parallel()
 			testutil.Retry(t, 5, 15*time.Second, func(r *testutil.R) {
-				u := uuid.Must(uuid.NewV4()).String()[:8]
+				u := uuid.New().String()[:8]
 				buf := new(bytes.Buffer)
 				if err := inspectDatastore(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, tc.ProjectID, "", test.kind); err != nil {
 					r.Errorf("inspectDatastore(%s) got err: %v", test.kind, err)
@@ -116,7 +116,7 @@ func TestInspectGCS(t *testing.T) {
 		t.Run(test.fileName, func(t *testing.T) {
 			t.Parallel()
 			testutil.Retry(t, 5, 15*time.Second, func(r *testutil.R) {
-				u := uuid.Must(uuid.NewV4()).String()[:8]
+				u := uuid.New().String()[:8]
 				buf := new(bytes.Buffer)
 				if err := inspectGCSFile(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, bucketName, test.fileName); err != nil {
 					r.Errorf("inspectGCSFile(%s) got err: %v", test.fileName, err)
@@ -275,7 +275,7 @@ func TestInspectBigquery(t *testing.T) {
 		test := test
 		t.Run(test.table, func(t *testing.T) {
 			t.Parallel()
-			u := uuid.Must(uuid.NewV4()).String()[:8]
+			u := uuid.New().String()[:8]
 			buf := new(bytes.Buffer)
 			if err := inspectBigquery(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, tc.ProjectID, bqDatasetID, test.table); err != nil {
 				t.Errorf("inspectBigquery(%s) got err: %v", test.table, err)
@@ -588,7 +588,7 @@ func createBucket(t *testing.T, projectID string) (string, error) {
 		return "", err
 	}
 	defer client.Close()
-	u := uuid.Must(uuid.NewV4()).String()[:8]
+	u := uuid.New().String()[:8]
 	bucketName := "dlp-job-go-lang-test" + u
 
 	// Check if the bucket already exists.
@@ -693,7 +693,7 @@ func TestInspectTableWithCustomHotword(t *testing.T) {
 func TestInspectDataStoreSendToScc(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
-	u := uuid.Must(uuid.NewV4()).String()[:8]
+	u := uuid.New().String()[:8]
 	datastoreNamespace := "golang-samples" + u
 	datastoreKind := "task"
 
@@ -735,10 +735,11 @@ func TestInspectDataToHybridJobTrigger(t *testing.T) {
 		t.Errorf("TestInspectDataToHybridJobTrigger got %q, want %q", got, want)
 	}
 
-	deleteActiveJob(t, tc.ProjectID)
+	deleteActiveJob(t, tc.ProjectID, trigger)
+	defer deleteJobTriggerForInspectDataToHybridJobTrigger(t, tc.ProjectID, trigger)
 }
 
-func deleteActiveJob(t *testing.T, project string) error {
+func deleteActiveJob(t *testing.T, project, trigger string) error {
 	t.Helper()
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
@@ -746,11 +747,9 @@ func deleteActiveJob(t *testing.T, project string) error {
 		return err
 	}
 	defer client.Close()
-	// jobTrigger := fmt.Sprint("projects/", project, "/locations/global/jobTriggers/", jobTriggerId)
 	req := &dlppb.ListDlpJobsRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/global", project),
-		Filter: "state=ACTIVE",
-		// Type:   dlppb.DlpJobType_INSPECT_JOB,
+		Filter: fmt.Sprintf("trigger_name=%s", trigger),
 	}
 
 	it := client.ListDlpJobs(ctx, req)
@@ -790,7 +789,6 @@ func TestMain(m *testing.M) {
 	createTableInsideDataset(tc.ProjectID, dataSetIDForHybridJob)
 	m.Run()
 	deleteBigQueryAssets(tc.ProjectID)
-	deleteJobTriggerForInspectDataToHybridJobTrigger(tc.ProjectID)
 }
 
 // helpers for inspect hybrid job
@@ -844,24 +842,24 @@ func createJobTriggerForInspectDataToHybridJobTrigger(t *testing.T, projectID st
 		},
 	}
 
+	u := uuid.New().String()[:8]
 	createDlpJobRequest := &dlppb.CreateJobTriggerRequest{
 		Parent:     fmt.Sprintf("projects/%s/locations/global", projectID),
 		JobTrigger: jobTrigger,
-		TriggerId:  jobTriggerId,
+		TriggerId:  jobTriggerId + u,
 	}
 
 	resp, err := client.CreateJobTrigger(ctx, createDlpJobRequest)
 	if err != nil {
 		return "", err
 	}
-	log.Printf("[END] createJobTriggerForInspectDataToHybridJobTrigger: trigger.Name %v ", resp.Name)
+	log.Printf("[END] createJobTriggerForInspectDataToHybridJobTrigger: trigger.Name %v", resp.Name)
 	return resp.Name, nil
 }
 
-func deleteJobTriggerForInspectDataToHybridJobTrigger(projectID string) error {
-	log.Printf("[START] deleteJobTriggerForInspectDataToHybridJobTrigger")
-	// Set up the client.
-	jobTrigger := fmt.Sprint("projects/", projectID, "/locations/global/jobTriggers/", jobTriggerId)
+func deleteJobTriggerForInspectDataToHybridJobTrigger(t *testing.T, projectID, jobTriggerName string) error {
+	t.Helper()
+	log.Printf("\n[START] deleteJobTriggerForInspectDataToHybridJobTrigger")
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
@@ -870,7 +868,7 @@ func deleteJobTriggerForInspectDataToHybridJobTrigger(projectID string) error {
 	defer client.Close()
 
 	req := &dlppb.DeleteJobTriggerRequest{
-		Name: jobTrigger,
+		Name: jobTriggerName,
 	}
 
 	err = client.DeleteJobTrigger(ctx, req)
