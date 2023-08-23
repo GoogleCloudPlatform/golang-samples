@@ -25,10 +25,10 @@ import (
 
 	"github.com/golang/protobuf/proto"
 
-	// [START imports]
+	// [START language_imports]
 	language "cloud.google.com/go/language/apiv2"
 	"cloud.google.com/go/language/apiv2/languagepb"
-	// [END imports]
+	// [END language_imports]
 )
 
 func main() {
@@ -36,14 +36,14 @@ func main() {
 		usage("Missing command.")
 	}
 
-	// [START init]
+	// [START language_init]
 	ctx := context.Background()
 	client, err := language.NewClient(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer client.Close()
-	// [END init]
+	// [END language_init]
 
 	text := strings.Join(os.Args[2:], " ")
 	if text == "" {
