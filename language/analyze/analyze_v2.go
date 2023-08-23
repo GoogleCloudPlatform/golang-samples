@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import (
 	"github.com/golang/protobuf/proto"
 
 	// [START imports]
-	language "cloud.google.com/go/language/apiv1"
-	"cloud.google.com/go/language/apiv1/languagepb"
+	language "cloud.google.com/go/language/apiv2"
+	"cloud.google.com/go/language/apiv2/languagepb"
 	// [END imports]
 )
 
@@ -55,10 +55,6 @@ func main() {
 		printResp(analyzeEntities(ctx, client, text))
 	case "sentiment":
 		printResp(analyzeSentiment(ctx, client, text))
-	case "syntax":
-		printResp(analyzeSyntax(ctx, client, text))
-	case "entitysentiment":
-		printResp(analyzeEntitySentiment(ctx, betaClient(), text))
 	case "classify":
 		printResp(classifyText(ctx, client, text))
 	default:
@@ -68,7 +64,7 @@ func main() {
 
 func usage(msg string) {
 	fmt.Fprintln(os.Stderr, msg)
-	fmt.Fprintln(os.Stderr, "usage: analyze [entities|sentiment|syntax|entitysentiment|classify] <text>")
+	fmt.Fprintln(os.Stderr, "usage: analyze [entities|sentiment|classify] <text>")
 	os.Exit(2)
 }
 
@@ -103,25 +99,6 @@ func analyzeSentiment(ctx context.Context, client *language.Client, text string)
 
 // [END language_sentiment_text]
 
-// [START language_syntax_text]
-
-func analyzeSyntax(ctx context.Context, client *language.Client, text string) (*languagepb.AnnotateTextResponse, error) {
-	return client.AnnotateText(ctx, &languagepb.AnnotateTextRequest{
-		Document: &languagepb.Document{
-			Source: &languagepb.Document_Content{
-				Content: text,
-			},
-			Type: languagepb.Document_PLAIN_TEXT,
-		},
-		Features: &languagepb.AnnotateTextRequest_Features{
-			ExtractSyntax: true,
-		},
-		EncodingType: languagepb.EncodingType_UTF8,
-	})
-}
-
-// [END language_syntax_text]
-
 // [START language_classify_text]
 
 func classifyText(ctx context.Context, client *language.Client, text string) (*languagepb.ClassifyTextResponse, error) {
@@ -131,13 +108,6 @@ func classifyText(ctx context.Context, client *language.Client, text string) (*l
 				Content: text,
 			},
 			Type: languagepb.Document_PLAIN_TEXT,
-		},
-		ClassificationModelOptions: &languagepb.ClassificationModelOptions{
-			ModelType: &languagepb.ClassificationModelOptions_V2Model_{
-				V2Model: &languagepb.ClassificationModelOptions_V2Model{
-					ContentCategoriesVersion: languagepb.ClassificationModelOptions_V2Model_V2,
-				},
-			},
 		},
 	})
 }
