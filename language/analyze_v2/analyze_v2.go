@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Command analyze performs sentiment, entity, entity sentiment, and syntax analysis
+// Command analyze performs sentiment, entity, and classfication
 // on a string of text via the Cloud Natural Language API.
 package main
 
