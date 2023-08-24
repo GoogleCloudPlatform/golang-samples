@@ -860,7 +860,9 @@ func deleteJob(projectID, jobName string) error {
 		Name: jobName,
 	}
 	for {
-		abc, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
+		ct, cancel := context.WithTimeout(ctx, 300000)
+		defer cancel()
+		abc, err := client.GetDlpJob(ct, &dlppb.GetDlpJobRequest{
 			Name: jobName,
 		})
 		if err != nil {
