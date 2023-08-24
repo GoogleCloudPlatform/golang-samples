@@ -270,8 +270,7 @@ func (i *BigQueryTableItem) Save() (map[string]bigquery.Value, string, error) {
 }
 
 func deleteBigQueryAssets(projectID, dataSetID string) error {
-
-	log.Printf("[START] deleteBigQueryAssets: projectID %v and ", projectID)
+	log.Printf("[START] deleteBigQueryAssets: projectID %v", projectID)
 	ctx := context.Background()
 
 	client, err := bigquery.NewClient(ctx, projectID)
