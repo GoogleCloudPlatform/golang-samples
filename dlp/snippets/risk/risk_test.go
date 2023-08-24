@@ -161,6 +161,7 @@ func TestCalculateKAnonymityWithEntityId(t *testing.T) {
 	u := uuid.New().String()[:8]
 	tableID := fmt.Sprint("dlp_test_risk_table" + u)
 	dataSetID := fmt.Sprint("dlp_test_risk_dataset" + u)
+
 	createBigQueryDataSetId(tc.ProjectID, dataSetID)
 	createTableInsideDataset(tc.ProjectID, dataSetID, tableID)
 	buf := new(bytes.Buffer)
@@ -186,6 +187,7 @@ func TestCalculateKAnonymityWithEntityId(t *testing.T) {
 	if got, want := buf.String(), "Job name:"; !strings.Contains(got, want) {
 		t.Errorf("CalculateKAnonymityWithEntityId got %s, want substring %q", got, want)
 	}
+
 	deleteBigQueryAssets(tc.ProjectID, dataSetID)
 }
 
