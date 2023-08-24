@@ -605,9 +605,9 @@ func createBucket(t *testing.T, projectID string) (string, error) {
 		}); err != nil {
 			log.Fatalf("---Failed to create bucket: %v", err)
 		}
-		fmt.Printf("---Bucket '%s' created successfully.\n", bucketName)
+		t.Logf("---Bucket '%s' created successfully.\n", bucketName)
 	} else {
-		fmt.Printf("---Bucket '%s' already exists.\n", bucketName)
+		t.Logf("---Bucket '%s' already exists.\n", bucketName)
 	}
 
 	return bucketName, nil
@@ -661,7 +661,7 @@ func TestInspectAugmentInfoTypes(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := buf.String()
-	if want := "Qoute: Quasimodo"; !strings.Contains(got, want) {
+	if want := "Quote: Quasimodo"; !strings.Contains(got, want) {
 		t.Errorf("TestInspectAugmentInfoTypes got %q, want %q", got, want)
 	}
 	if want := "Info type: PERSON_NAME"; !strings.Contains(got, want) {
@@ -693,7 +693,7 @@ func TestInspectDataStoreSendToScc(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
 	u := uuid.New().String()[:8]
-	datastoreNamespace := "golang-samples" + u
+	datastoreNamespace := fmt.Sprint("golang-samples" + u)
 	datastoreKind := "task"
 
 	if err := inspectDataStoreSendToScc(&buf, tc.ProjectID, datastoreNamespace, datastoreKind); err != nil {
@@ -827,9 +827,9 @@ func filesForUpdateStoredInfoType(t *testing.T, projectID, bucketName string) (s
 		if _, err := obj.NewWriter(ctx).Write([]byte("")); err != nil {
 			log.Fatalf("Failed to create directory: %v", err)
 		}
-		fmt.Printf("Directory '%s' created successfully in bucket '%s'.\n", dirPath, bucketName)
+		t.Logf("Directory '%s' created successfully in bucket '%s'.\n", dirPath, bucketName)
 	} else {
-		fmt.Printf("Directory '%s' already exists in bucket '%s'.\n", dirPath, bucketName)
+		t.Logf("Directory '%s' already exists in bucket '%s'.\n", dirPath, bucketName)
 	}
 
 	// file upload code
@@ -854,18 +854,18 @@ func filesForUpdateStoredInfoType(t *testing.T, projectID, bucketName string) (s
 	if err != nil {
 		log.Fatalf("Failed to close writer: %v", err)
 	}
-	fmt.Printf("File uploaded successfully: %v\n", termListFileName)
+	t.Logf("File uploaded successfully: %v\n", termListFileName)
 
 	// Check if the file exists in the bucket
 	_, err = bucket.Object(termListFileName).Attrs(ctx)
 	if err != nil {
 		if err == storage.ErrObjectNotExist {
-			fmt.Printf("File %v does not exist in bucket %v\n", termListFileName, bucketName)
+			t.Logf("File %v does not exist in bucket %v\n", termListFileName, bucketName)
 		} else {
 			log.Fatalf("Failed to check file existence: %v", err)
 		}
 	} else {
-		fmt.Printf("File %v exists in bucket %v\n", termListFileName, bucketName)
+		t.Logf("File %v exists in bucket %v\n", termListFileName, bucketName)
 	}
 
 	fileSetUrl := fmt.Sprint("gs://" + bucketName + "/" + termListFileName)
