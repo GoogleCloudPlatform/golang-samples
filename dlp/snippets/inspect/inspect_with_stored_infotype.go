@@ -91,7 +91,7 @@ func inspectWithStoredInfotype(w io.Writer, projectID, infoTypeId, textToDeident
 	// Process the results.
 	fmt.Fprintf(w, "Findings: %d\n", len(resp.Result.Findings))
 	for _, f := range resp.Result.Findings {
-		fmt.Fprintf(w, "\tQoute: %s\n", f.Quote)
+		fmt.Fprintf(w, "\tQuote: %s\n", f.Quote)
 		fmt.Fprintf(w, "\tInfo type: %s\n", f.InfoType.Name)
 		fmt.Fprintf(w, "\tLikelihood: %s\n", f.Likelihood)
 	}

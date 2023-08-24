@@ -736,7 +736,7 @@ func TestInspectWithStoredInfotype(t *testing.T) {
 	}
 
 	got := buf.String()
-	if want := "Qoute: kewin2010"; !strings.Contains(got, want) {
+	if want := "Quote: kewin2010"; !strings.Contains(got, want) {
 		t.Errorf("TestInspectWithStoredInfotype got %q, want %q", got, want)
 	}
 	if want := "Info type: GITHUB_LOGINS"; !strings.Contains(got, want) {
