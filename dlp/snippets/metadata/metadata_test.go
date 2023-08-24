@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -80,7 +81,7 @@ func TestCreateStoredInfoType(t *testing.T) {
 
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
-  
+
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		t.Fatal(err)
