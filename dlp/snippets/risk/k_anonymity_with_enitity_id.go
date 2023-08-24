@@ -15,7 +15,6 @@
 package risk
 
 // [START dlp_k_anonymity_with_entity_id]
-
 import (
 	"context"
 	"fmt"
@@ -68,14 +67,14 @@ func calculateKAnonymityWithEntityId(w io.Writer, projectID, datasetId, tableId 
 		},
 	}
 
-	kanonymityConfig := &dlppb.PrivacyMetric_KAnonymityConfig{
+	kAnonymityConfig := &dlppb.PrivacyMetric_KAnonymityConfig{
 		QuasiIds: q,
 		EntityId: entityId,
 	}
 
 	privacyMetric := &dlppb.PrivacyMetric{
 		Type: &dlppb.PrivacyMetric_KAnonymityConfig_{
-			KAnonymityConfig: kanonymityConfig,
+			KAnonymityConfig: kAnonymityConfig,
 		},
 	}
 

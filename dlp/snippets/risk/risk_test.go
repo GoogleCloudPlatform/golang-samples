@@ -18,8 +18,8 @@ package risk
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"log"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -27,15 +27,12 @@ import (
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 )
 
 const (
 	riskTopicName        = "dlp-risk-test-topic-"
 	riskSubscriptionName = "dlp-risk-test-sub-"
-
-	tableID   = "dlp_test_risk_table"
-	dataSetID = "dlp_test_risk_dataset"
 )
 
 func TestRisk(t *testing.T) {
@@ -117,7 +114,7 @@ func TestRisk(t *testing.T) {
 			name: "K Map",
 			fn: func(r *testutil.R) {
 				buf := new(bytes.Buffer)
-				u := uuid.Must(uuid.NewV4()).String()[:8]
+				u := uuid.New().String()[:8]
 				riskKMap(buf, tc.ProjectID, "bigquery-public-data", riskTopicName+u, riskSubscriptionName+u, "san_francisco", "bikeshare_trips", "US", "zip_code")
 				defer cleanupPubsub(t, client, riskTopicName+u, riskSubscriptionName+u)
 				if got, want := buf.String(), "Created job"; !strings.Contains(got, want) {
@@ -159,22 +156,13 @@ func cleanupPubsub(t *testing.T, client *pubsub.Client, topicName, subName strin
 	}
 }
 
-func TestMain(m *testing.M) {
-	tc := testutil.Context{}
-	tc.ProjectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
-	if tc.ProjectID == "" {
-		tc.ProjectID = os.Getenv("")
-	}
-
-	createBigQueryDataSetId(tc.ProjectID)
-	createTableInsideDataset(tc.ProjectID, dataSetID)
-	m.Run()
-	deleteBigQueryAssets(tc.ProjectID)
-}
-
 func TestCalculateKAnonymityWithEntityId(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
+	u := uuid.New().String()[:8]
+	tableID := fmt.Sprint("dlp_test_risk_table" + u)
+	dataSetID := fmt.Sprint("dlp_test_risk_dataset" + u)
+	createBigQueryDataSetId(tc.ProjectID, dataSetID)
+	createTableInsideDataset(tc.ProjectID, dataSetID, tableID)
 	buf := new(bytes.Buffer)
 	err := calculateKAnonymityWithEntityId(buf, tc.ProjectID, dataSetID, tableID, "title", "contributor_ip")
 	if err != nil {
@@ -198,10 +186,10 @@ func TestCalculateKAnonymityWithEntityId(t *testing.T) {
 	if got, want := buf.String(), "Job name:"; !strings.Contains(got, want) {
 		t.Errorf("CalculateKAnonymityWithEntityId got %s, want substring %q", got, want)
 	}
-
+	deleteBigQueryAssets(tc.ProjectID, dataSetID)
 }
 
-func createBigQueryDataSetId(projectID string) error {
+func createBigQueryDataSetId(projectID, dataSetID string) error {
 
 	ctx := context.Background()
 
@@ -222,7 +210,7 @@ func createBigQueryDataSetId(projectID string) error {
 	return nil
 }
 
-func createTableInsideDataset(projectID, dataSetID string) error {
+func createTableInsideDataset(projectID, dataSetID, tableID string) error {
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
@@ -281,7 +269,7 @@ func (i *BigQueryTableItem) Save() (map[string]bigquery.Value, string, error) {
 	}, bigquery.NoDedupeID, nil
 }
 
-func deleteBigQueryAssets(projectID string) error {
+func deleteBigQueryAssets(projectID, dataSetID string) error {
 
 	log.Printf("[START] deleteBigQueryAssets: projectID %v and ", projectID)
 	ctx := context.Background()
