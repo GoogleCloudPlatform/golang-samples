@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -30,7 +29,6 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
-	"google.golang.org/api/iterator"
 )
 
 const (
@@ -40,9 +38,9 @@ const (
 	ssnFileName = "fake_ssn.txt"
 	bucketName  = "golang-samples-dlp-test2"
 
-	inspectsGCSTestFileName                 = "test.txt"
-	filePathToUpload                        = "./testdata/test.txt"
-	bucketNameForInspectGCSSendToScc        = "dlp-go-lang-test-for-inspect-gcs-send-to-scc"
+	inspectsGCSTestFileName = "test.txt"
+	filePathToUpload        = "./testdata/test.txt"
+	// bucketNameForInspectGCSSendToScc        = "dlp-go-lang-test-for-inspect-gcs-send-to-scc"
 	dirPathForInspectGCSSendToScc           = "dlp-go-lang-test-for-inspect-gcs-send-to-scc/"
 	bucketnameForInspectGCSFileWithSampling = "dlp-job-go-lang-test-inspect-gcs-file-with-sampling"
 )
@@ -654,8 +652,19 @@ func TestInspectDataStoreSendToScc(t *testing.T) {
 func TestInspectGCSFileSendToScc(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
+	ctx := context.Background()
+	sc, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("storage.NewClient: %v", err)
+	}
+	defer sc.Close()
 
-	gcsPath := fmt.Sprint("gs://" + bucketNameForInspectGCSSendToScc + "/" + dirPathForInspectGCSSendToScc + "test.txt")
+	bucketNameForInspectGCSSendToScc, err := testutil.CreateTestBucket(ctx, t, sc, tc.ProjectID, "dlp-test-inspect-prefix")
+	if err != nil {
+		t.Fatal(err)
+	}
+	filePathtoGCS(t, tc.ProjectID, bucketNameForInspectGCSSendToScc, dirPathForInspectGCSSendToScc)
+	gcsPath := fmt.Sprint("gs://" + bucketNameForInspectGCSSendToScc + "/" + dirPathForInspectGCSSendToScc + "/test.txt")
 
 	if err := inspectGCSFileSendToScc(&buf, tc.ProjectID, gcsPath); err != nil {
 		t.Fatal(err)
@@ -665,65 +674,15 @@ func TestInspectGCSFileSendToScc(t *testing.T) {
 	if want := "Job created successfully:"; !strings.Contains(got, want) {
 		t.Errorf("TestInspectGCSFileSendToScc got %q, want %q", got, want)
 	}
-}
 
-func TestMain(m *testing.M) {
-	tc := testutil.Context{}
-	tc.ProjectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
-	if tc.ProjectID == "" {
-		tc.ProjectID = os.Getenv("")
-	}
-	setup(tc.ProjectID)
-
-	exitVal := m.Run()
-
-	buckets := []string{bucketNameForInspectGCSSendToScc, bucketnameForInspectGCSFileWithSampling}
-	for _, v := range buckets {
-		deleteBucket(tc.ProjectID, v)
-	}
-	os.Exit(exitVal)
-}
-
-func setup(projectID string) {
-	filePathtoGCS(projectID)
-	createBucket(projectID)
-}
-
-func createBucket(projectID string) error {
-
-	ctx := context.Background()
-
-	client, err := storage.NewClient(ctx)
+	err = testutil.DeleteBucketIfExists(ctx, sc, bucketNameForInspectGCSSendToScc)
 	if err != nil {
-		return err
+		t.Fatal(err)
 	}
-	defer client.Close()
-
-	// Check if the bucket already exists.
-	bucketExists := false
-	_, err = client.Bucket(bucketnameForInspectGCSFileWithSampling).Attrs(ctx)
-	if err == nil {
-		bucketExists = true
-	}
-
-	// If the bucket doesn't exist, create it.
-	if !bucketExists {
-		if err := client.Bucket(bucketnameForInspectGCSFileWithSampling).Create(ctx, projectID, &storage.BucketAttrs{
-			StorageClass: "STANDARD",
-			Location:     "us-central1",
-		}); err != nil {
-			log.Fatalf("---Failed to create bucket: %v", err)
-			return err
-		}
-		fmt.Printf("---Bucket '%s' created successfully.\n", bucketnameForInspectGCSFileWithSampling)
-	} else {
-		fmt.Printf("---Bucket '%s' already exists.\n", bucketnameForInspectGCSFileWithSampling)
-	}
-	fmt.Println("createbucket function is executed-------")
-	return nil
 }
 
-func filePathtoGCS(projectID string) error {
+func filePathtoGCS(t *testing.T, projectID, bucketNameForInspectGCSSendToScc, dirPathForInspectGCSSendToScc string) error {
+	t.Helper()
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -811,40 +770,5 @@ func filePathtoGCS(projectID string) error {
 	}
 
 	fmt.Println("filePathtoGCS function is executed-------")
-	return nil
-}
-
-func deleteBucket(projectID, bucketName string) error {
-
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
-
-	bucket := client.Bucket(bucketName)
-
-	// List all objects in the bucket.
-	objs := bucket.Objects(ctx, nil)
-	for {
-		objAttrs, err := objs.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			log.Fatalf("Failed to list objects in bucket: %v", err)
-		}
-
-		// Delete each object in the bucket.
-		if err := bucket.Object(objAttrs.Name).Delete(ctx); err != nil {
-			log.Fatalf("Failed to delete object %s: %v", objAttrs.Name, err)
-		}
-		fmt.Printf("Deleted object: %s\n", objAttrs.Name)
-	}
-	if err := bucket.Delete(ctx); err != nil {
-		log.Fatalf("Failed to delete bucket: %v", err)
-	}
-
 	return nil
 }
