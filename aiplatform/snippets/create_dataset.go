@@ -16,13 +16,14 @@ package snippets
 
 // Prompt: Write a code sample that creates a dataset in Vertex AI
 
+// [START aiplatform_create_dataset]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	aiplatform "cloud.google.com/go/aiplatform/apiv1"
-	aiplatformpb "google.golang.org/genproto/googleapis/cloud/aiplatform/v1"
+	aiplatformpb "cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
 )
 
 // createDataset creates a dataset in Vertex AI
@@ -50,6 +51,8 @@ func createDataset(w io.Writer, projectID, location, datasetID string) error {
 		return fmt.Errorf("CreateDataset: %v", err)
 	}
 
-	fmt.Fprintf(w, "Created dataset: %s\n", resp.GetName())
+	fmt.Fprintf(w, "Created dataset: %s\n", resp.Name())
 	return nil
 }
+
+// [END aiplatform_create_dataset]
