@@ -17,11 +17,12 @@ package language_v2
 
 // [START language_classify_text]
 import (
-	language "cloud.google.com/go/language/apiv2"
-	"cloud.google.com/go/language/apiv2/languagepb"
 	"context"
 	"fmt"
 	"io"
+
+	language "cloud.google.com/go/language/apiv2"
+	"cloud.google.com/go/language/apiv2/languagepb"
 )
 
 func ClassifyText(w io.Writer, text string) error {
