@@ -14,6 +14,8 @@
 
 package snippets
 
+// [START aiplatform_list_models]
+
 import (
 	"context"
 	"fmt"
