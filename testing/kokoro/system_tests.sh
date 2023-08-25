@@ -101,14 +101,6 @@ export GOLANG_SAMPLES_FIRESTORE_PROJECT=golang-samples-fire-0
 
 set -x
 
-export STS_AWS_SECRET=`gcloud secrets versions access latest --project cloud-devrel-kokoro-resources --secret=go-storagetransfer-aws`
-export AWS_ACCESS_KEY_ID=`S="$STS_AWS_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["AccessKeyId"]);'`
-export AWS_SECRET_ACCESS_KEY=`S="$STS_AWS_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["SecretAccessKey"]);'`
-export STS_AZURE_SECRET=`gcloud secrets versions access latest --project cloud-devrel-kokoro-resources --secret=go-storagetransfer-azure`
-export AZURE_STORAGE_ACCOUNT=`S="$STS_AZURE_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["StorageAccount"]);'`
-export AZURE_CONNECTION_STRING=`S="$STS_AZURE_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["ConnectionString"]);'`
-export AZURE_SAS_TOKEN=`S="$STS_AZURE_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["SAS"]);'`
-
 # Set application credentials before using gimmeproj so it has access.
 # This is changed to a project-specific credential after a project is leased.
 export GOOGLE_APPLICATION_CREDENTIALS=$KOKORO_KEYSTORE_DIR/71386_kokoro-golang-samples-tests
@@ -142,6 +134,14 @@ export PATH="$PATH:/tmp/google-cloud-sdk/bin";
 if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]] || [[ $CHANGED_DIRS =~ "run" ]]; then
   ./testing/kokoro/configure_gcloud.bash;
 fi
+
+export STS_AWS_SECRET=`gcloud secrets versions access latest --project cloud-devrel-kokoro-resources --secret=go-storagetransfer-aws`
+export AWS_ACCESS_KEY_ID=`S="$STS_AWS_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["AccessKeyId"]);'`
+export AWS_SECRET_ACCESS_KEY=`S="$STS_AWS_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["SecretAccessKey"]);'`
+export STS_AZURE_SECRET=`gcloud secrets versions access latest --project cloud-devrel-kokoro-resources --secret=go-storagetransfer-azure`
+export AZURE_STORAGE_ACCOUNT=`S="$STS_AZURE_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["StorageAccount"]);'`
+export AZURE_CONNECTION_STRING=`S="$STS_AZURE_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["ConnectionString"]);'`
+export AZURE_SAS_TOKEN=`S="$STS_AZURE_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["SAS"]);'`
 
 
 
