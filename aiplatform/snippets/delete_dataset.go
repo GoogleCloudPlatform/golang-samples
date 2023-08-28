@@ -15,40 +15,52 @@
 // Prompt: You are an excellent Go programmer.
 // Write a Go language program to delete a dataset.
 
-package main
+package snippets
+
+// [START aiplatform_delete_dataset_sample]
 
 import (
 	"context"
 	"fmt"
-	"log"
+	"io"
 
 	aiplatform "cloud.google.com/go/aiplatform/apiv1"
-	aiplatformpb "google.golang.org/genproto/googleapis/cloud/aiplatform/v1"
+	aiplatformpb "cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
+	"google.golang.org/api/option"
 )
 
-func main() {
+func deleteDataset(w io.Writer, projectID, location, datasetID string) error {
+	// projectID := "my-project"
+	// location := "us-central1"
+	// datasetID := "my-dataset"
+
+	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
+	clientOption := option.WithEndpoint(apiEndpoint)
+
 	ctx := context.Background()
-	aiplatformService, err := aiplatform.NewDatasetClient(ctx)
+	aiplatformService, err := aiplatform.NewDatasetClient(ctx, clientOption)
 	if err != nil {
-		log.Fatalf("Failed to create client: %v\n", err)
+		return err
 	}
 	defer aiplatformService.Close()
 
 	req := &aiplatformpb.DeleteDatasetRequest{
-		Name: "projects/123456789/locations/us-central1/datasets/123456789",
+		Name: fmt.Sprintf("projects/%s/locations/%s/datasets/%s",
+			projectID, location, datasetID),
 	}
 
 	op, err := aiplatformService.DeleteDataset(ctx, req)
 	if err != nil {
-		log.Fatalf("Failed to delete dataset: %v\n", err)
+		return err
 	}
 
-	resp, err := op.Wait(ctx)
+	err = op.Wait(ctx)
 	if err != nil {
-		log.Fatalf("Failed to wait for operation: %v\n", err)
+		return ctx.Err()
 	}
 
-	fmt.Printf("Deleted dataset: %s\n", resp.GetName())
+	fmt.Fprintf(w, "Deleted dataset: %s\n", datasetID)
+	return nil
 }
 
 // [END aiplatform_delete_dataset_sample]
