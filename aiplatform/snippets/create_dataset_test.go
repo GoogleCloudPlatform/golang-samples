@@ -17,33 +17,89 @@
 package snippets
 
 import (
+	"bytes"
 	"context"
+	"fmt"
 	"log"
+	"strings"
 	"testing"
 
-	"cloud.google.com/go/bigquery"
+	aiplatform "cloud.google.com/go/aiplatform/apiv1"
+	aiplatformpb "cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/google/uuid"
+	"google.golang.org/api/option"
 )
+
+var (
+	datasetID string
+	output    string
+	projectID string
+	region    string = "us-central1"
+)
+
+func TestMain(m *testing.M) {
+	tc, ok := testutil.ContextMain(m)
+
+	projectID = tc.ProjectID
+
+	if !ok {
+		log.Fatal("couldn't initialize test")
+		return
+	}
+
+	m.Run()
+
+	deleteDataset()
+}
 
 func TestCreateDataset(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	datasetID := uuid.New().String()
-	defer deleteDataset(tc.ProjectID, datasetID)
+	datasetID = "my-image-dataset"
+	var buf bytes.Buffer
 
-	if err := createDataset(tc.ProjectID, datasetID); err != nil {
+	if err := createDataset(&buf, tc.ProjectID, region, datasetID); err != nil {
 		t.Fatalf("createDataset: %v", err)
 	}
+
+	got := buf.String()
+	log.Println(got)
+	if !strings.Contains(got, "Created dataset: ") {
+		t.Errorf("createDataset: wanted 'Create dataset, got %s'", got)
+	}
+
+	output = got
 }
 
-func deleteDataset(projectID, datasetID string) {
-	client, err := bigquery.NewClient(context.Background(), projectID)
+func deleteDataset() {
+	// parse dataset name
+	tmp := strings.Split(output, "\n")
+	if len(tmp) < 1 {
+		log.Println("couldn't parse dataset resource name")
+		return
+	}
+
+	datasetName := tmp[1]
+	log.Println(datasetName)
+
+	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", region)
+	clientOption := option.WithEndpoint(apiEndpoint)
+
+	ctx := context.Background()
+
+	client, err := aiplatform.NewDatasetClient(ctx, clientOption)
 	if err != nil {
-		log.Fatalf("bigquery.NewClient: %v", err)
+		log.Fatalf("aiplatform.NewDatasetClient: %v", err)
 	}
 	defer client.Close()
 
-	if err := client.Dataset(datasetID).Delete(context.Background()); err != nil {
-		log.Fatalf("Dataset(%q).Delete: %v", datasetID, err)
+	log.Println(datasetName)
+
+	req := &aiplatformpb.DeleteDatasetRequest{
+		Name: datasetName,
+	}
+
+	_, err = client.DeleteDataset(ctx, req)
+	if err != nil {
+		log.Fatalf("Dataset(%s).Delete: %v", datasetID, err)
 	}
 }
