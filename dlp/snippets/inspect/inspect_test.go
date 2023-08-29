@@ -559,7 +559,17 @@ func TestInspectGcsFileWithSampling(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	topicID := "go-lang-dlp-test-bigquery-with-sampling-topic"
 	subscriptionID := "go-lang-dlp-test-bigquery-with-sampling-subscription"
+	ctx := context.Background()
+	sc, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("storage.NewClient: %v", err)
+	}
+	defer sc.Close()
 
+	bucketnameForInspectGCSFileWithSampling, err := testutil.CreateTestBucket(ctx, t, sc, tc.ProjectID, "dlp-test-inspect-prefix")
+	if err != nil {
+		t.Fatal(err)
+	}
 	GCSUri := "gs://" + bucketnameForInspectGCSFileWithSampling + "/"
 
 	var buf bytes.Buffer
@@ -569,6 +579,10 @@ func TestInspectGcsFileWithSampling(t *testing.T) {
 	got := buf.String()
 	if want := "Job Created"; !strings.Contains(got, want) {
 		t.Errorf("inspectGcsFileWithSampling got %q, want %q", got, want)
+	}
+	err = testutil.DeleteBucketIfExists(ctx, sc, bucketnameForInspectGCSFileWithSampling)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 }
