@@ -17,9 +17,9 @@ package deid
 // [START dlp_deidentify_fpe]
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
@@ -31,12 +31,12 @@ import (
 // optional identifier needed for reidentification. surrogateInfoType can be any
 // value not found in your input.
 // Info types can be found with the infoTypes.list method or on https://cloud.google.com/dlp/docs/infotypes-reference
-func deidentifyFPE(w io.Writer, projectID, input string, infoTypeNames []string, keyFileName, cryptoKeyName, surrogateInfoType string) error {
+func deidentifyFPE(w io.Writer, projectID, input string, infoTypeNames []string, kmsKeyName, wrappedAESKey, surrogateInfoType string) error {
 	// projectID := "my-project-id"
 	// input := "My SSN is 123456789"
 	// infoTypeNames := []string{"US_SOCIAL_SECURITY_NUMBER"}
-	// keyFileName := "projects/YOUR_GCLOUD_PROJECT/locations/YOUR_LOCATION/keyRings/YOUR_KEYRING_NAME/cryptoKeys/YOUR_KEY_NAME"
-	// cryptoKeyName := "YOUR_ENCRYPTED_AES_256_KEY"
+	// kmsKeyName := "projects/YOUR_GCLOUD_PROJECT/locations/YOUR_LOCATION/keyRings/YOUR_KEYRING_NAME/cryptoKeys/YOUR_KEY_NAME"
+	// wrappedAESKey := "YOUR_ENCRYPTED_AES_256_KEY"
 	// surrogateInfoType := "AGE"
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
@@ -49,11 +49,13 @@ func deidentifyFPE(w io.Writer, projectID, input string, infoTypeNames []string,
 	for _, it := range infoTypeNames {
 		infoTypes = append(infoTypes, &dlppb.InfoType{Name: it})
 	}
-	// Read the key file.
-	keyBytes, err := ioutil.ReadFile(keyFileName)
+
+	// Specify an encrypted AES-256 key and the name of the Cloud KMS key that encrypted it.
+	kmsWrappedCryptoKey, err := base64.StdEncoding.DecodeString(wrappedAESKey)
 	if err != nil {
-		return fmt.Errorf("ReadFile: %w", err)
+		return err
 	}
+
 	// Create a configured request.
 	req := &dlppb.DeidentifyContentRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
@@ -72,8 +74,8 @@ func deidentifyFPE(w io.Writer, projectID, input string, infoTypeNames []string,
 										CryptoKey: &dlppb.CryptoKey{
 											Source: &dlppb.CryptoKey_KmsWrapped{
 												KmsWrapped: &dlppb.KmsWrappedCryptoKey{
-													WrappedKey:    keyBytes,
-													CryptoKeyName: cryptoKeyName,
+													WrappedKey:    kmsWrappedCryptoKey,
+													CryptoKeyName: kmsKeyName,
 												},
 											},
 										},

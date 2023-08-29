@@ -1,5 +1,8 @@
 # Hello World
 
+> [!WARNING]
+> <h3>Google Cloud IoT Core will be <a href="https://cloud.google.com/iot/docs/release-notes#August_16_2022">retired as of August 16, 2023</a>.</h3>
+
 This document summarizes how to build, deploy and run the helloworld
 program with a GCP IoT Kit. Once you are finished, you will have a display
 blinking "Hello gopher!" with a blue backlight.
