@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"strings"
 	"time"
 
@@ -29,7 +30,7 @@ import (
 )
 
 // riskKMap runs K Map on the given data.
-func riskKMap(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, region string, columnNames ...string) error {
+func RiskKMap(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, region string, columnNames ...string) error {
 	// projectID := "my-project-id"
 	// dataProject := "bigquery-public-data"
 	// pubSubTopic := "dlp-risk-sample-topic"
@@ -52,11 +53,12 @@ func riskKMap(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, datas
 	defer pubsubClient.Close()
 
 	// Create a PubSub subscription we can use to listen for messages.
-	s, err := setupPubSub(projectID, pubSubTopic, pubSubSub)
+	s, err := setupPubSub(ctx, projectID, pubSubTopic, pubSubSub)
 	if err != nil {
 		return fmt.Errorf("setupPubSub: %w", err)
 	}
 
+	log.Println("just after setupPubSub")
 	// topic is the PubSub topic string where messages should be sent.
 	topic := "projects/" + projectID + "/topics/" + pubSubTopic
 

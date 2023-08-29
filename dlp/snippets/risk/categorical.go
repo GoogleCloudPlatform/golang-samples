@@ -27,7 +27,7 @@ import (
 )
 
 // riskCategorical computes the categorical risk of the given data.
-func riskCategorical(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, columnName string) error {
+func RiskCategorical(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, columnName string) error {
 	// projectID := "my-project-id"
 	// dataProject := "bigquery-public-data"
 	// pubSubTopic := "dlp-risk-sample-topic"
@@ -48,7 +48,7 @@ func riskCategorical(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub
 	defer pubsubClient.Close()
 
 	// Create a PubSub subscription we can use to listen for messages.
-	s, err := setupPubSub(projectID, pubSubTopic, pubSubSub)
+	s, err := setupPubSub(ctx,projectID, pubSubTopic, pubSubSub)
 	if err != nil {
 		return fmt.Errorf("setupPubSub: %w", err)
 	}
