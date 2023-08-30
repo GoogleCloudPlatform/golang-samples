@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/iam"
+	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/storage"
 	storagetransfer "cloud.google.com/go/storagetransfer/apiv1"
 	"cloud.google.com/go/storagetransfer/apiv1/storagetransferpb"
@@ -34,23 +35,21 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go/service/sqs"
 )
 
 var sc *storage.Client
 var sts *storagetransfer.Client
+var sess *session.Session
 var s3Bucket string
 var azureContainer string
 var gcsSourceBucket string
 var gcsSinkBucket string
+var stsServiceAccountEmail string
 
 func TestMain(m *testing.M) {
 	// Initialize global vars
 	tc, _ := testutil.ContextMain(m)
-	if os.Getenv("KOKORO_BUILD_ID") != "" {
-		// temporarily skip initialization in kokoro
-		// See https://github.com/GoogleCloudPlatform/golang-samples/issues/2811
-		return
-	}
 
 	ctx := context.Background()
 	c, err := storage.NewClient(ctx)
@@ -80,11 +79,21 @@ func TestMain(m *testing.M) {
 	}
 	defer sts.Close()
 
-	grantSTSPermissions(gcsSourceBucket, tc.ProjectID, sts, sc)
-	grantSTSPermissions(gcsSinkBucket, tc.ProjectID, sts, sc)
+	req := &storagetransferpb.GetGoogleServiceAccountRequest{
+		ProjectId: tc.ProjectID,
+	}
+
+	resp, err := sts.GetGoogleServiceAccount(ctx, req)
+	if err != nil {
+		log.Fatalf("error getting service account: %v", err)
+	}
+	stsServiceAccountEmail = resp.AccountEmail
+
+	grantSTSPermissions(gcsSourceBucket, sc)
+	grantSTSPermissions(gcsSinkBucket, sc)
 
 	s3Bucket = testutil.UniqueBucketName("stss3bucket")
-	sess, err := session.NewSession(&aws.Config{
+	sess, err = session.NewSession(&aws.Config{
 		Region: aws.String("us-west-2")},
 	)
 	s3c := s3.New(sess)
@@ -139,7 +148,6 @@ func TestMain(m *testing.M) {
 }
 
 func TestQuickstart(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
@@ -157,7 +165,6 @@ func TestQuickstart(t *testing.T) {
 }
 
 func TestTransferFromAws(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
@@ -176,7 +183,6 @@ func TestTransferFromAws(t *testing.T) {
 }
 
 func TestTransferToNearline(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
@@ -195,7 +201,6 @@ func TestTransferToNearline(t *testing.T) {
 }
 
 func TestGetLatestTransferOperation(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
@@ -219,7 +224,6 @@ func TestGetLatestTransferOperation(t *testing.T) {
 }
 
 func TestDownloadToPosix(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
@@ -247,7 +251,6 @@ func TestDownloadToPosix(t *testing.T) {
 }
 
 func TestTransferFromPosix(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
@@ -274,7 +277,6 @@ func TestTransferFromPosix(t *testing.T) {
 }
 
 func TestTransferBetweenPosix(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
@@ -307,7 +309,6 @@ func TestTransferBetweenPosix(t *testing.T) {
 }
 
 func TestTransferUsingManifest(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
@@ -338,7 +339,6 @@ func TestTransferUsingManifest(t *testing.T) {
 }
 
 func TestTransferFromS3CompatibleSource(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
@@ -361,7 +361,6 @@ func TestTransferFromS3CompatibleSource(t *testing.T) {
 }
 
 func TestTransferFromAzure(t *testing.T) {
-	t.Skip("https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 
@@ -378,20 +377,104 @@ func TestTransferFromAzure(t *testing.T) {
 	}
 }
 
-func grantSTSPermissions(bucketName string, projectID string, sts *storagetransfer.Client, str *storage.Client) {
+func TestCreateEventDrivenGCSTransfer(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
 	ctx := context.Background()
 
-	req := &storagetransferpb.GetGoogleServiceAccountRequest{
-		ProjectId: projectID,
-	}
+	pubSubTopicId := testutil.UniqueBucketName("pubsubtopic")
 
-	resp, err := sts.GetGoogleServiceAccount(ctx, req)
+	pubsubClient, err := pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
-		log.Fatalf("error getting service account")
+		log.Fatalf("Coudln't create pubsub client: " + err.Error())
 	}
-	email := resp.AccountEmail
+	defer pubsubClient.Close()
 
-	identity := "serviceAccount:" + email
+	topic, err := pubsubClient.CreateTopic(ctx, pubSubTopicId)
+	if err != nil {
+		log.Fatalf("Coudln't create pubsub topic: " + err.Error())
+	}
+	defer topic.Delete(ctx)
+
+	policy, err := topic.IAM().Policy(ctx)
+	if err != nil {
+		log.Fatalf("Couldn't get pubsub topic policy: " + err.Error())
+	}
+	policy.Add("serviceAccount:"+stsServiceAccountEmail, "roles/pubsub.subscriber")
+	if err := topic.IAM().SetPolicy(ctx, policy); err != nil {
+		log.Fatalf("Couldn't set pubsub topic policy: " + err.Error())
+	}
+
+	subId := testutil.UniqueBucketName("pubsubsubscription")
+
+	sub, err := pubsubClient.CreateSubscription(ctx, subId, pubsub.SubscriptionConfig{
+		Topic:       topic,
+		AckDeadline: 20 * time.Second,
+	})
+	if err != nil {
+		log.Fatalf("Couldn't create pubsub subscription: " + err.Error())
+	}
+
+	pubSubSubscriptionID := sub.String()
+
+	resp, err := createEventDrivenGCSTransfer(buf, tc.ProjectID, gcsSourceBucket, gcsSinkBucket, pubSubSubscriptionID)
+	if err != nil {
+		t.Errorf("create_event_driven_gcs_transfer: %#v", err)
+	}
+	defer cleanupSTSJob(resp, tc.ProjectID)
+
+	got := buf.String()
+	if want := "transferJobs/"; !strings.Contains(got, want) {
+		t.Errorf("create_event_driven_gcs_transfer: got %q, want %q", got, want)
+	}
+}
+
+func TestCreateEventDrivenAWSTransfer(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	queue := testutil.UniqueBucketName("stssqsqueue")
+	sqsClient := sqs.New(sess)
+	result, err := sqsClient.CreateQueue(&sqs.CreateQueueInput{
+		QueueName: &queue,
+		Attributes: map[string]*string{
+			"DelaySeconds":           aws.String("60"),
+			"MessageRetentionPeriod": aws.String("86400"),
+		},
+	})
+	if err != nil {
+		log.Fatalf("couldn't create SQS queue: %v", err)
+	}
+	defer sqsClient.DeleteQueue(&sqs.DeleteQueueInput{
+		QueueUrl: result.QueueUrl,
+	})
+
+	attributes, err := sqsClient.GetQueueAttributes(&sqs.GetQueueAttributesInput{
+		AttributeNames: []*string{aws.String("QueueArn")},
+		QueueUrl:       result.QueueUrl,
+	})
+	if err != nil {
+		log.Fatalf("couldn't get SQS queue attributes: %v", err)
+	}
+
+	sqsQueueARN := *attributes.Attributes["QueueArn"]
+
+	resp, err := createEventDrivenAWSTransfer(buf, tc.ProjectID, s3Bucket, gcsSinkBucket, sqsQueueARN)
+	if err != nil {
+		t.Errorf("create_event_driven_aws_transfer: %#v", err)
+	}
+	defer cleanupSTSJob(resp, tc.ProjectID)
+
+	got := buf.String()
+	if want := "transferJobs/"; !strings.Contains(got, want) {
+		t.Errorf("create_event_driven_aws_transfer: got %q, want %q", got, want)
+	}
+}
+
+func grantSTSPermissions(bucketName string, str *storage.Client) {
+	ctx := context.Background()
+
+	identity := "serviceAccount:" + stsServiceAccountEmail
 
 	bucket := str.Bucket(bucketName)
 	policy, err := bucket.IAM().Policy(ctx)
