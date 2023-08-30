@@ -22,7 +22,7 @@ import (
 
 	cloudevent "github.com/cloudevents/sdk-go/v2"
 	"github.com/googleapis/google-cloudevents-go/cloud/auditdata"
-	"github.com/googleapis/google-cloudevents-go/third_party/googleapis/google/api"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 func TestIamAuditlogs(t *testing.T) {
@@ -32,15 +32,13 @@ func TestIamAuditlogs(t *testing.T) {
 		AuthenticationInfo: &auditdata.AuthenticationInfo{
 			PrincipalEmail: "user@example.com",
 		},
+		Request: &structpb.Struct{
+			Fields: map[string]*structpb.Value{
+				"name": structpb.NewStringValue("projects/-/serviceAccounts/service-account@my-project.iam.gserviceaccount.com")},
+		},
 	}
 	logentry := &auditdata.LogEntryData{
-		LogName: "",
-		Resource: &api.MonitoredResource{
-			Labels: map[string]string{
-				"project_id": "my-project",
-				"email_id":   "service-account@my-project.gserviceaccount.com",
-			},
-		},
+		LogName:      "",
 		ProtoPayload: auditlog,
 	}
 
@@ -59,7 +57,7 @@ func TestIamAuditlogs(t *testing.T) {
 	rr := httptest.NewRecorder()
 	HandleCloudEvent(rr, req)
 
-	want := "New Service Account Key created for service-account@my-project.gserviceaccount.com by user@example.com"
+	want := "New Service Account Key created for projects/-/serviceAccounts/service-account@my-project.iam.gserviceaccount.com by user@example.com"
 	if !strings.Contains(rr.Body.String(), want) {
 		t.Errorf("want body to contain %s, got %s", want, rr.Body)
 	}

@@ -29,13 +29,16 @@ import (
 )
 
 func HandleCloudEvent(w http.ResponseWriter, r *http.Request) {
+	// Transform the HTTP request into a CloudEvent
 	event, err := cloudevent.NewEventFromHTTPRequest(r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(w, "Failed to create CloudEvent from request.")
 		log.Fatal("cloudevent.NewEventFromHTTPRequest:", err)
 	}
-	var logentry = auditdata.LogEntryData{}
+
+	// Extract the LogEntryData from the CloudEvent
+	var logentry auditdata.LogEntryData
 	// AuditLog objects include a `@type` annotation, which errors when using
 	// `protojson.Unmarshal`. UnmarshalOptions prevents this error.
 	umo := &protojson.UnmarshalOptions{DiscardUnknown: true}
@@ -45,10 +48,17 @@ func HandleCloudEvent(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Failed to parse Audit Log")
 		log.Fatal("protojson.Unmarshal:", err)
 	}
+
 	// Extract relevant fields from the audit log entry.
-	var auditlog = logentry.ProtoPayload
-	actor := auditlog.AuthenticationInfo.PrincipalEmail
-	principal := logentry.Resource.Labels["email_id"]
+	// Identify the user that requested key creation
+	actor := logentry.ProtoPayload.AuthenticationInfo.PrincipalEmail
+
+	// Extract the resource name from the CreateServiceAccountKey request
+	// For details of this type, see https://cloud.google.com/iam/docs/reference/rpc/google.iam.admin.v1#createserviceaccountkeyrequest
+	principal := logentry.ProtoPayload.GetRequest().AsMap()["name"]
+
+	// The response is of type google.iam.admin.v1.ServiceAccountKey,
+	// which is described at https://cloud.google.com/iam/docs/reference/rpc/google.iam.admin.v1#google.iam.admin.v1.ServiceAccountKey
 	// This key path can be used with gcloud to disable/delete the key:
 	// e.g. gcloud iam service-accounts keys disable ${keypath}
 	keypath := logentry.ProtoPayload.GetResponse().AsMap()["name"]
