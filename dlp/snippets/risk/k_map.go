@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"strings"
 	"time"
 
@@ -53,12 +52,11 @@ func RiskKMap(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, datas
 	defer pubsubClient.Close()
 
 	// Create a PubSub subscription we can use to listen for messages.
-	s, err := setupPubSub(ctx, projectID, pubSubTopic, pubSubSub)
+	s, err := setupPubSub(ctx, pubsubClient, projectID, pubSubTopic, pubSubSub)
 	if err != nil {
 		return fmt.Errorf("setupPubSub: %w", err)
 	}
 
-	log.Println("just after setupPubSub")
 	// topic is the PubSub topic string where messages should be sent.
 	topic := "projects/" + projectID + "/topics/" + pubSubTopic
 
@@ -114,7 +112,6 @@ func RiskKMap(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, datas
 		return fmt.Errorf("CreateDlpJob: %w", err)
 	}
 	fmt.Fprintf(w, "Created job: %v\n", j.GetName())
-
 	// Wait for the risk job to finish by waiting for a PubSub message.
 	// This only waits for 10 minutes. For long jobs, consider using a truly
 	// asynchronous execution model such as Cloud Functions.
@@ -122,6 +119,7 @@ func RiskKMap(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, datas
 	defer cancel()
 	err = s.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		// If this is the wrong job, do not process the result.
+
 		if msg.Attributes["DlpJobName"] != j.GetName() {
 			msg.Nack()
 			return
@@ -131,6 +129,7 @@ func RiskKMap(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, datas
 		j, err := client.GetDlpJob(ctx, &dlppb.GetDlpJobRequest{
 			Name: j.GetName(),
 		})
+
 		if err != nil {
 			fmt.Fprintf(w, "GetDlpJob: %v", err)
 			return
