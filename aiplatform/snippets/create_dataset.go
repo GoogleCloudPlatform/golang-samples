@@ -28,10 +28,9 @@ import (
 )
 
 // createDataset creates a dataset in Vertex AI
-func createDataset(w io.Writer, projectID, location, datasetID string) error {
+func createDataset(w io.Writer, projectID, location string) error {
 	// projectID := "my-project"
 	// location := "us-central1"
-	// datasetID := "my-dataset"
 
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	clientOption := option.WithEndpoint(apiEndpoint)
@@ -44,6 +43,7 @@ func createDataset(w io.Writer, projectID, location, datasetID string) error {
 	defer client.Close()
 
 	// Create a new, empty image dataset
+	// Vertex AI automatically assigns an ID for the dataset resource
 	req := &aiplatformpb.CreateDatasetRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 		Dataset: &aiplatformpb.Dataset{
@@ -63,7 +63,7 @@ func createDataset(w io.Writer, projectID, location, datasetID string) error {
 		return err
 	}
 
-	fmt.Fprintln(w, "Created dataset:")
+	fmt.Fprintln(w, "Created dataset with resource name:")
 	fmt.Fprintf(w, "%s\n", dataset.Name)
 	return nil
 }

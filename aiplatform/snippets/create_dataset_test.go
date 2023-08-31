@@ -31,7 +31,6 @@ import (
 )
 
 var (
-	datasetID string
 	output    string
 	projectID string
 	region    string = "us-central1"
@@ -54,10 +53,9 @@ func TestMain(m *testing.M) {
 
 func TestCreateDataset(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	datasetID = "my-image-dataset"
 	var buf bytes.Buffer
 
-	if err := createDataset(&buf, tc.ProjectID, region, datasetID); err != nil {
+	if err := createDataset(&buf, tc.ProjectID, region); err != nil {
 		t.Fatalf("createDataset: %v", err)
 	}
 
@@ -71,7 +69,7 @@ func TestCreateDataset(t *testing.T) {
 }
 
 func deleteDataset() {
-	// parse dataset name
+	// parse dataset name--we cannot predict the dataset ID at creation time.
 	tmp := strings.Split(output, "\n")
 	if len(tmp) < 1 {
 		log.Println("couldn't parse dataset resource name")
@@ -100,6 +98,6 @@ func deleteDataset() {
 
 	_, err = client.DeleteDataset(ctx, req)
 	if err != nil {
-		log.Fatalf("Dataset(%s).Delete: %v", datasetID, err)
+		log.Fatalf("Dataset(%s).Delete: %v", datasetName, err)
 	}
 }
