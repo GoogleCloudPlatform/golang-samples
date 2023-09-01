@@ -41,7 +41,7 @@ const (
 	ssnFileName = "fake_ssn.txt"
 	bucketName  = "golang-samples-dlp-test2"
 
-	jobTriggerId          = "dlp-job-trigger-unit-test-case-12345678"
+	jobTriggerIdPrefix    = "dlp-job-trigger-unit-test-case-12345678"
 	dataSetIDForHybridJob = "dlp_test_dataset"
 	tableIDForHybridJob   = "dlp_inspect_test_table_table_id"
 )
@@ -846,7 +846,7 @@ func createJobTriggerForInspectDataToHybridJobTrigger(t *testing.T, projectID st
 	createDlpJobRequest := &dlppb.CreateJobTriggerRequest{
 		Parent:     fmt.Sprintf("projects/%s/locations/global", projectID),
 		JobTrigger: jobTrigger,
-		TriggerId:  jobTriggerId + u,
+		TriggerId:  jobTriggerIdPrefix + u,
 	}
 
 	resp, err := client.CreateJobTrigger(ctx, createDlpJobRequest)
