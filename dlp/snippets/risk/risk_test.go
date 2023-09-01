@@ -65,7 +65,7 @@ func TestRisk(t *testing.T) {
 			fn: func(r *testutil.R) {
 				buf := new(bytes.Buffer)
 				u := uuid.Must(uuid.NewV4()).String()[:8]
-				err := RiskCategorical(buf, tc.ProjectID, "bigquery-public-data", riskTopicName+u, riskSubscriptionName+u, "nhtsa_traffic_fatalities", "accident_2015", "state_number")
+				err := riskCategorical(buf, tc.ProjectID, "bigquery-public-data", riskTopicName+u, riskSubscriptionName+u, "nhtsa_traffic_fatalities", "accident_2015", "state_number")
 				defer cleanupPubsub(t, client, riskTopicName+u, riskSubscriptionName+u)
 				if err != nil {
 					r.Errorf("riskCategorical got err: %v", err)
@@ -97,7 +97,7 @@ func TestRisk(t *testing.T) {
 			fn: func(r *testutil.R) {
 				buf := new(bytes.Buffer)
 				u := uuid.Must(uuid.NewV4()).String()[:8]
-				err := RiskLDiversity(buf, tc.ProjectID, "bigquery-public-data", riskTopicName+u, riskSubscriptionName+u, "nhtsa_traffic_fatalities", "accident_2015", "city", "state_number", "county")
+				err := riskLDiversity(buf, tc.ProjectID, "bigquery-public-data", riskTopicName+u, riskSubscriptionName+u, "nhtsa_traffic_fatalities", "accident_2015", "city", "state_number", "county")
 				defer cleanupPubsub(t, client, riskTopicName+u, riskSubscriptionName+u)
 				if err != nil {
 					r.Errorf("riskLDiversity got err: %v", err)
@@ -113,7 +113,7 @@ func TestRisk(t *testing.T) {
 			fn: func(r *testutil.R) {
 				buf := new(bytes.Buffer)
 				u := uuid.Must(uuid.NewV4()).String()[:8]
-				RiskKMap(buf, tc.ProjectID, "bigquery-public-data", riskTopicName+u, riskSubscriptionName+u, "san_francisco", "bikeshare_trips", "US", "zip_code")
+				riskKMap(buf, tc.ProjectID, "bigquery-public-data", riskTopicName+u, riskSubscriptionName+u, "san_francisco", "bikeshare_trips", "US", "zip_code")
 				defer cleanupPubsub(t, client, riskTopicName+u, riskSubscriptionName+u)
 				if got, want := buf.String(), "Created job"; !strings.Contains(got, want) {
 					r.Errorf("riskKMap got %s, want substring %q", got, want)

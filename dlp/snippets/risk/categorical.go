@@ -27,7 +27,7 @@ import (
 )
 
 // riskCategorical computes the categorical risk of the given data.
-func RiskCategorical(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, columnName string) error {
+func riskCategorical(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, columnName string) error {
 	// projectID := "my-project-id"
 	// dataProject := "bigquery-public-data"
 	// pubSubTopic := "dlp-risk-sample-topic"

@@ -28,7 +28,7 @@ import (
 )
 
 // riskLDiversity computes the L Diversity of the given columns.
-func RiskLDiversity(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, sensitiveAttribute string, columnNames ...string) error {
+func riskLDiversity(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, sensitiveAttribute string, columnNames ...string) error {
 	// projectID := "my-project-id"
 	// dataProject := "bigquery-public-data"
 	// pubSubTopic := "dlp-risk-sample-topic"

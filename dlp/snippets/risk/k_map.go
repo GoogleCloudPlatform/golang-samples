@@ -29,7 +29,7 @@ import (
 )
 
 // riskKMap runs K Map on the given data.
-func RiskKMap(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, region string, columnNames ...string) error {
+func riskKMap(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, datasetID, tableID, region string, columnNames ...string) error {
 	// projectID := "my-project-id"
 	// dataProject := "bigquery-public-data"
 	// pubSubTopic := "dlp-risk-sample-topic"
