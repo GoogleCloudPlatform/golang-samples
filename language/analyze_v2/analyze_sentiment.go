@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/language/apiv2/languagepb"
 )
 
-// analyzeSentiment sends a string of text to the Cloud Natural Language API to 
+// analyzeSentiment sends a string of text to the Cloud Natural Language API to
 // assess the sentiment of the text.
 func analyzeSentiment(w io.Writer, text string) error {
 	ctx := context.Background()

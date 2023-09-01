@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/language/apiv2/languagepb"
 )
 
-// classifyText sends a string of text to the Cloud Natural Language API to 
+// classifyText sends a string of text to the Cloud Natural Language API to
 // classify the category of the text.
 func classifyText(w io.Writer, text string) error {
 	ctx := context.Background()

@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/language/apiv2/languagepb"
 )
 
-// analyzeEntities sends a string of text to the Cloud Natural Language API to 
+// analyzeEntities sends a string of text to the Cloud Natural Language API to
 // detect the entities of the text.
 func analyzeEntities(w io.Writer, text string) error {
 	ctx := context.Background()
