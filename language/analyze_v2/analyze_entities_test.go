@@ -26,17 +26,17 @@ func TestAnalyzeEntities(t *testing.T) {
 	text := "Google is located in Mountain View."
 	err := analyzeEntities(buf, text)
 	if err != nil {
-		t.Errorf("TestAnalyzeEntities: %v", err)
+		t.Fatalf("TestAnalyzeEntities: %v", err)
 	}
 
 	got := buf.String()
 	if want := "entities:"; !strings.Contains(got, want) {
-		t.Errorf("got %q, want %q", got, want)
+		t.Fatalf("got %q, want %q", got, want)
 	}
 	if want := "language_code:"; !strings.Contains(got, want) {
-		t.Errorf("got %q, want %q", got, want)
+		t.Fatalf("got %q, want %q", got, want)
 	}
 	if want := "language_supported:"; !strings.Contains(got, want) {
-		t.Errorf("got %q, want %q", got, want)
+		t.Fatalf("got %q, want %q", got, want)
 	}
 }

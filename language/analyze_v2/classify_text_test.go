@@ -24,19 +24,19 @@ func TestClassifyText(t *testing.T) {
 	buf := new(bytes.Buffer)
 
 	text := "Google is located in Mountain View."
-	err := ClassifyText(buf, text)
+	err := classifyText(buf, text)
 	if err != nil {
-		t.Errorf("TestClassifyText: %v", err)
+		t.Fatalf("TestClassifyText: %v", err)
 	}
 
 	got := buf.String()
 	if want := "categories:"; !strings.Contains(got, want) {
-		t.Errorf("got %q, want %q", got, want)
+		t.Fatalf("got %q, want %q", got, want)
 	}
 	if want := "language_code:"; !strings.Contains(got, want) {
-		t.Errorf("got %q, want %q", got, want)
+		t.Fatalf("got %q, want %q", got, want)
 	}
 	if want := "language_supported:"; !strings.Contains(got, want) {
-		t.Errorf("got %q, want %q", got, want)
+		t.Fatalf("got %q, want %q", got, want)
 	}
 }

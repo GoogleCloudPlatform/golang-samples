@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Command classify text on a string of text via the Cloud Natural Language API.
 package language_v2
 
 // [START language_classify_text]
@@ -25,7 +24,9 @@ import (
 	"cloud.google.com/go/language/apiv2/languagepb"
 )
 
-func ClassifyText(w io.Writer, text string) error {
+// classifyText sends a string of text to the Cloud Natural Language API to 
+// classify the category of the text.
+func classifyText(w io.Writer, text string) error {
 	ctx := context.Background()
 
 	// Initialize client.
@@ -33,6 +34,7 @@ func ClassifyText(w io.Writer, text string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	resp, err := client.ClassifyText(ctx, &languagepb.ClassifyTextRequest{
 		Document: &languagepb.Document{

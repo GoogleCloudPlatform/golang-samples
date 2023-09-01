@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Command analyze sentiment on a string of text via the Cloud Natural Language API.
 package language_v2
 
 // [START language_sentiment_text]
@@ -25,6 +24,8 @@ import (
 	"cloud.google.com/go/language/apiv2/languagepb"
 )
 
+// analyzeSentiment sends a string of text to the Cloud Natural Language API to 
+// assess the sentiment of the text.
 func analyzeSentiment(w io.Writer, text string) error {
 	ctx := context.Background()
 
@@ -33,6 +34,7 @@ func analyzeSentiment(w io.Writer, text string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	resp, err := client.AnalyzeSentiment(ctx, &languagepb.AnalyzeSentimentRequest{
 		Document: &languagepb.Document{

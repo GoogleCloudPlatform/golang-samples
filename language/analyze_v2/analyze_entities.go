@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Command analyze entities on a string of text via the Cloud Natural Language API.
 package language_v2
 
 // [START language_entities_text]
@@ -25,6 +24,8 @@ import (
 	"cloud.google.com/go/language/apiv2/languagepb"
 )
 
+// analyzeEntities sends a string of text to the Cloud Natural Language API to 
+// detect the entities of the text.
 func analyzeEntities(w io.Writer, text string) error {
 	ctx := context.Background()
 
@@ -33,6 +34,7 @@ func analyzeEntities(w io.Writer, text string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	resp, err := client.AnalyzeEntities(ctx, &languagepb.AnalyzeEntitiesRequest{
 		Document: &languagepb.Document{

@@ -26,20 +26,20 @@ func TestAnalyzeSentiment(t *testing.T) {
 	text := "Google is located in Mountain View."
 	err := analyzeSentiment(buf, text)
 	if err != nil {
-		t.Errorf("TestAnalyzeSentiment: %v", err)
+		t.Fatalf("TestAnalyzeSentiment: %v", err)
 	}
 
 	got := buf.String()
 	if want := "document_sentiment:"; !strings.Contains(got, want) {
-		t.Errorf("got %q, want %q", got, want)
+		t.Fatalf("got %q, want %q", got, want)
 	}
 	if want := "sentences:"; !strings.Contains(got, want) {
-		t.Errorf("got %q, want %q", got, want)
+		t.Fatalf("got %q, want %q", got, want)
 	}
 	if want := "language_code:"; !strings.Contains(got, want) {
-		t.Errorf("got %q, want %q", got, want)
+		t.Fatalf("got %q, want %q", got, want)
 	}
 	if want := "language_supported:"; !strings.Contains(got, want) {
-		t.Errorf("got %q, want %q", got, want)
+		t.Fatalf("got %q, want %q", got, want)
 	}
 }
