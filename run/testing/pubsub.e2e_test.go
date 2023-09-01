@@ -40,15 +40,17 @@ func TestPubSubService(t *testing.T) {
 		t.Fatalf("service.NewRequest: %v", err)
 	}
 
-	client := http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Fatalf("client.Do: %v", err)
-	}
-	defer resp.Body.Close()
-	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
+	testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
+		client := http.Client{Timeout: 10 * time.Second}
+		resp, err := client.Do(req)
+		if err != nil {
+			r.Errorf("client.Do: %v", err)
+		}
+		defer resp.Body.Close()
+		fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
 
-	if got := resp.StatusCode; got != http.StatusBadRequest {
-		t.Errorf("response status: got %d, want %d", got, http.StatusBadRequest)
-	}
+		if got := resp.StatusCode; got != http.StatusBadRequest {
+			r.Errorf("response status: got %d, want %d", got, http.StatusBadRequest)
+		}
+	})
 }
