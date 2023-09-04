@@ -38,9 +38,8 @@ const (
 	ssnFileName = "fake_ssn.txt"
 	bucketName  = "golang-samples-dlp-test2"
 
-	inspectsGCSTestFileName = "test.txt"
-	filePathToUpload        = "./testdata/test.txt"
-	// bucketNameForInspectGCSSendToScc        = "dlp-go-lang-test-for-inspect-gcs-send-to-scc"
+	inspectsGCSTestFileName                 = "test.txt"
+	filePathToUpload                        = "./testdata/test.txt"
 	dirPathForInspectGCSSendToScc           = "dlp-go-lang-test-for-inspect-gcs-send-to-scc/"
 	bucketnameForInspectGCSFileWithSampling = "dlp-job-go-lang-test-inspect-gcs-file-with-sampling"
 )
@@ -673,11 +672,15 @@ func TestInspectGCSFileSendToScc(t *testing.T) {
 	}
 	defer sc.Close()
 
+	// Creates a bucket using a function available in testutil.
 	bucketNameForInspectGCSSendToScc, err := testutil.CreateTestBucket(ctx, t, sc, tc.ProjectID, "dlp-test-inspect-prefix")
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	// Uploads a file on created bucket.
 	filePathtoGCS(t, tc.ProjectID, bucketNameForInspectGCSSendToScc, dirPathForInspectGCSSendToScc)
+
 	gcsPath := fmt.Sprint("gs://" + bucketNameForInspectGCSSendToScc + "/" + dirPathForInspectGCSSendToScc + "/test.txt")
 
 	if err := inspectGCSFileSendToScc(&buf, tc.ProjectID, gcsPath); err != nil {
@@ -689,12 +692,14 @@ func TestInspectGCSFileSendToScc(t *testing.T) {
 		t.Errorf("TestInspectGCSFileSendToScc got %q, want %q", got, want)
 	}
 
+	// Delete a bucket that has just been created.
 	err = testutil.DeleteBucketIfExists(ctx, sc, bucketNameForInspectGCSSendToScc)
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
+// filePathtoGCS uploads a file test.txt in given path from the testdata directory.
 func filePathtoGCS(t *testing.T, projectID, bucketNameForInspectGCSSendToScc, dirPathForInspectGCSSendToScc string) error {
 	t.Helper()
 	ctx := context.Background()
