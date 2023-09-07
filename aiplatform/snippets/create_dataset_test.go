@@ -30,27 +30,6 @@ import (
 	"google.golang.org/api/option"
 )
 
-var (
-	output    string
-	projectID string
-	region    string = "us-central1"
-)
-
-func TestMain(m *testing.M) {
-	tc, ok := testutil.ContextMain(m)
-
-	projectID = tc.ProjectID
-
-	if !ok {
-		log.Fatal("couldn't initialize test")
-		return
-	}
-
-	m.Run()
-
-	deleteDataset()
-}
-
 func TestCreateDataset(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
@@ -65,10 +44,13 @@ func TestCreateDataset(t *testing.T) {
 		t.Errorf("createDataset: wanted 'Create dataset, got %s'", got)
 	}
 
-	output = got
+	output := got
+	teardown(output, t)
 }
 
-func deleteDataset() {
+func teardown(output string, t *testing.T) {
+	t.Helper()
+
 	// parse dataset name--we cannot predict the dataset ID at creation time.
 	tmp := strings.Split(output, "\n")
 	if len(tmp) < 1 {

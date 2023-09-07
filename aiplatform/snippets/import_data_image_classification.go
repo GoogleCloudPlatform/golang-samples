@@ -17,24 +17,29 @@
 package snippets
 
 // [START aiplatform_import_data_image_classification]
-
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 
 	aiplatform "cloud.google.com/go/aiplatform/apiv1"
 	aiplatformpb "cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
+	"google.golang.org/api/option"
 )
 
 // importDataImageClassification imports data to an existing dataset.
-func importDataImageClassification(ctx context.Context, projectID, location, datasetID, gcsSourceUri string) error {
+func importDataImageClassification(w io.Writer, projectID, location, datasetID, gcsSourceUri string) error {
 	// projectID := "my-project-id"
 	// location := "us-central1"
 	// datasetID := "YOUR_DATASET_ID"
 	// gcsSourceUri := "gs://YOUR_GCS_SOURCE_BUCKET/path_to_your_image_source/[file.csv/file.jsonl]"
 
-	aiplatformClient, err := aiplatform.NewDatasetClient(ctx)
+	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
+	clientOption := option.WithEndpoint(apiEndpoint)
+
+	ctx := context.Background()
+	aiplatformClient, err := aiplatform.NewDatasetClient(ctx, clientOption)
 	if err != nil {
 		return fmt.Errorf("aiplatform.NewDatasetClient: %v", err)
 	}
@@ -50,20 +55,21 @@ func importDataImageClassification(ctx context.Context, projectID, location, dat
 	}
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s", projectID, location, datasetID)
 	op, err := aiplatformClient.ImportData(ctx, &aiplatformpb.ImportDataRequest{
-		Name:            name,
-		ImportConfigs:   importConfigs,
-		SkipInvalidRows: true,
+		Name:          name,
+		ImportConfigs: importConfigs,
 	})
 	if err != nil {
 		return fmt.Errorf("ImportData: %v", err)
 	}
 	fmt.Fprintf(os.Stdout, "Processing operation name: %q\n", op.Name())
 
-	if err := op.Wait(ctx); err != nil {
-		return fmt.Errorf("Wait: %v", err)
+	// ImportDataReponse, the first return value from Wait(), is an empty struct
+	_, err = op.Wait(ctx)
+	if err != nil {
+		return err
 	}
 
-	fmt.Fprintf(os.Stdout, "Import Data Image Classification Response")
+	fmt.Fprint(w, "Import Data Image Classification Response successful\n")
 
 	return nil
 }
