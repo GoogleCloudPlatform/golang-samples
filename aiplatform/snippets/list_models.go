@@ -28,7 +28,7 @@ import (
 
 // listAllModels lists all of the Vertex AI models in a project for
 // a specific region.
-func listAllModels(projectID, region string) error {
+func listAllModels(projectID string, region string) error {
 
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", region)
 	clientOption := option.WithEndpoint(apiEndpoint)
