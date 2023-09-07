@@ -23,12 +23,8 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-var (
-	projectId string
-	region    string = "us-central1"
-)
-
 func TestListAllModels(t *testing.T) {
+	region := "us-central1"
 	tc := testutil.SystemTest(t)
 
 	err := listAllModels(tc.ProjectID, region)
