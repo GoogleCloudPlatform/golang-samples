@@ -48,7 +48,7 @@ func riskNumerical(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, 
 	defer pubsubClient.Close()
 
 	// Create a PubSub subscription we can use to listen for messages.
-	s, err := setupPubSub(projectID, pubSubTopic, pubSubSub)
+	s, err := setupPubSub(ctx, pubsubClient, projectID, pubSubTopic, pubSubSub)
 	if err != nil {
 		return fmt.Errorf("setupPubSub: %w", err)
 	}
