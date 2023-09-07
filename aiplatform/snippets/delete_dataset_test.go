@@ -35,13 +35,12 @@ var (
 	datasetID   string
 )
 
-func TestMain(m *testing.M) {
+func setup(t *testing.T) {
+	t.Helper()
+
 	// Create a new dataset
 	ctx := context.Background()
-	tc, ok := testutil.ContextMain(m)
-	if !ok {
-		log.Fatalf("cannot get test context")
-	}
+	tc := testutil.SystemTest(t)
 
 	projectID = tc.ProjectID
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
@@ -71,11 +70,11 @@ func TestMain(m *testing.M) {
 
 	datasetName = dataset.Name
 	datasetID = strings.Split(datasetName, "/")[5]
-
-	m.Run()
 }
 
 func TestDeleteDataset(t *testing.T) {
+	setup(t)
+
 	var buf bytes.Buffer
 	err := deleteDataset(&buf, projectID, location, datasetID)
 	if err != nil {
