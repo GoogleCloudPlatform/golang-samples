@@ -22,13 +22,8 @@ import (
 )
 
 // setupPubSub creates a subscription to the given topic.
-func setupPubSub(projectID, topic, sub string) (*pubsub.Subscription, error) {
-	ctx := context.Background()
-	client, err := pubsub.NewClient(ctx, projectID)
-	if err != nil {
-		return nil, fmt.Errorf("pubsub.NewClient: %w", err)
-	}
-	defer client.Close()
+func setupPubSub(ctx context.Context, client *pubsub.Client, projectID, topic, sub string) (*pubsub.Subscription, error) {
+
 	// Create the Topic if it doesn't exist.
 	t := client.Topic(topic)
 	if exists, err := t.Exists(ctx); err != nil {
