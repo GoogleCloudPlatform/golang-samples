@@ -64,6 +64,7 @@ var allowList = []string{
 	"**/testdata/**/*.txt",
 	"**/testdata/**/*.csv",
 	"**/testdata/**/*.mp4",
+	"**/testdata/*.jsonl",
 
 	// Healthcare data.
 	"healthcare/testdata/dicom_00000001_000.dcm",
