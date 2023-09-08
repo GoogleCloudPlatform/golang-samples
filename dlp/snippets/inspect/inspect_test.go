@@ -18,8 +18,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -40,9 +40,10 @@ const (
 	ssnFileName = "fake_ssn.txt"
 	bucketName  = "golang-samples-dlp-test2"
 
-	termListFileName = "term_list.txt"
-	filePathToUpload = "./testdata/term_list_storedInfotype.txt"
-	bucket_prefix    = "test"
+	inspectsGCSTestFileName                 = "test.txt"
+	filePathToUpload                        = "./testdata/test.txt"
+	dirPathForInspectGCSSendToScc           = "dlp-go-lang-test-for-inspect-gcs-send-to-scc/"
+	bucketnameForInspectGCSFileWithSampling = "dlp-job-go-lang-test-inspect-gcs-file-with-sampling"
 )
 
 func TestInspectDatastore(t *testing.T) {
@@ -559,12 +560,18 @@ func TestInspectGcsFileWithSampling(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	topicID := "go-lang-dlp-test-bigquery-with-sampling-topic"
 	subscriptionID := "go-lang-dlp-test-bigquery-with-sampling-subscription"
-	bucketName, err := createBucket(t, tc.ProjectID)
+	ctx := context.Background()
+	sc, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("storage.NewClient: %v", err)
+	}
+	defer sc.Close()
+
+	bucketnameForInspectGCSFileWithSampling, err := testutil.CreateTestBucket(ctx, t, sc, tc.ProjectID, "dlp-test-inspect-prefix")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer deleteBucket(t, tc.ProjectID, bucketName)
-	GCSUri := "gs://" + bucketName + "/"
+	GCSUri := "gs://" + bucketnameForInspectGCSFileWithSampling + "/"
 
 	var buf bytes.Buffer
 	if err := inspectGcsFileWithSampling(&buf, tc.ProjectID, GCSUri, topicID, subscriptionID); err != nil {
@@ -574,60 +581,11 @@ func TestInspectGcsFileWithSampling(t *testing.T) {
 	if want := "Job Created"; !strings.Contains(got, want) {
 		t.Errorf("inspectGcsFileWithSampling got %q, want %q", got, want)
 	}
-
-}
-
-func createBucket(t *testing.T, projectID string) (string, error) {
-	t.Helper()
-
-	ctx := context.Background()
-
-	client, err := storage.NewClient(ctx)
+	err = testutil.DeleteBucketIfExists(ctx, sc, bucketnameForInspectGCSFileWithSampling)
 	if err != nil {
-		return "", err
-	}
-	defer client.Close()
-	u := uuid.New().String()[:8]
-	bucketName := "dlp-job-go-lang-test" + u
-
-	// Check if the bucket already exists.
-	bucketExists := false
-	_, err = client.Bucket(bucketName).Attrs(ctx)
-	if err == nil {
-		bucketExists = true
-	}
-
-	// If the bucket doesn't exist, create it.
-	if !bucketExists {
-		if err := client.Bucket(bucketName).Create(ctx, projectID, &storage.BucketAttrs{
-			StorageClass: "STANDARD",
-			Location:     "us-central1",
-		}); err != nil {
-			log.Fatalf("---Failed to create bucket: %v", err)
-		}
-		t.Logf("---Bucket '%s' created successfully.\n", bucketName)
-	} else {
-		t.Logf("---Bucket '%s' already exists.\n", bucketName)
-	}
-
-	return bucketName, nil
-}
-
-func deleteBucket(t *testing.T, projectID, bucketName string) error {
-	t.Helper()
-
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
-
-	bucket := client.Bucket(bucketName)
-	if err := bucket.Delete(ctx); err != nil {
 		t.Fatal(err)
 	}
-	return nil
+
 }
 
 func TestInspectBigQueryTableWithSampling(t *testing.T) {
@@ -716,7 +674,7 @@ func TestInspectWithStoredInfotype(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer client.Close()
-	outputBucket, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
+	outputBucket, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, "dlp-test-inspect-prefix")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -801,21 +759,77 @@ func createStoredInfoTypeForTesting(t *testing.T, projectID, outputPath string) 
 	return resp.Name, nil
 }
 
-func filesForUpdateStoredInfoType(t *testing.T, projectID, bucketName string) (string, string, error) {
+func TestInspectGCSFileSendToScc(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+	ctx := context.Background()
+	sc, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("storage.NewClient: %v", err)
+	}
+	defer sc.Close()
+
+	// Creates a bucket using a function available in testutil.
+	bucketNameForInspectGCSSendToScc, err := testutil.CreateTestBucket(ctx, t, sc, tc.ProjectID, "dlp-test-inspect-prefix")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Uploads a file on created bucket.
+	filePathtoGCS(t, tc.ProjectID, bucketNameForInspectGCSSendToScc, dirPathForInspectGCSSendToScc)
+
+	gcsPath := fmt.Sprint("gs://" + bucketNameForInspectGCSSendToScc + "/" + dirPathForInspectGCSSendToScc + "/test.txt")
+
+	if err := inspectGCSFileSendToScc(&buf, tc.ProjectID, gcsPath); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Job created successfully:"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectGCSFileSendToScc got %q, want %q", got, want)
+	}
+
+	// Delete a bucket that has just been created.
+	err = testutil.DeleteBucketIfExists(ctx, sc, bucketNameForInspectGCSSendToScc)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// filePathtoGCS uploads a file test.txt in given path from the testdata directory.
+func filePathtoGCS(t *testing.T, projectID, bucketNameForInspectGCSSendToScc, dirPathForInspectGCSSendToScc string) error {
 	t.Helper()
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return "", "", err
+		return err
 	}
 	defer client.Close()
 
-	dirPath := "update-stored-infoType-data/"
+	// Check if the bucket already exists.
+	bucketExists := false
+	_, err = client.Bucket(bucketNameForInspectGCSSendToScc).Attrs(ctx)
+	if err == nil {
+		bucketExists = true
+	}
+
+	// If the bucket doesn't exist, create it.
+	if !bucketExists {
+		if err := client.Bucket(bucketNameForInspectGCSSendToScc).Create(ctx, projectID, &storage.BucketAttrs{
+			StorageClass: "STANDARD",
+			Location:     "us-central1",
+		}); err != nil {
+			return err
+		}
+		fmt.Printf("Bucket '%s' created successfully.\n", bucketNameForInspectGCSSendToScc)
+	} else {
+		fmt.Printf("Bucket '%s' already exists.\n", bucketNameForInspectGCSSendToScc)
+	}
 
 	// Check if the directory already exists in the bucket.
 	dirExists := false
-	query := &storage.Query{Prefix: dirPath}
-	it := client.Bucket(bucketName).Objects(ctx, query)
+	query := &storage.Query{Prefix: dirPathForInspectGCSSendToScc}
+	it := client.Bucket(bucketNameForInspectGCSSendToScc).Objects(ctx, query)
 	_, err = it.Next()
 	if err == nil {
 		dirExists = true
@@ -823,55 +837,56 @@ func filesForUpdateStoredInfoType(t *testing.T, projectID, bucketName string) (s
 
 	// If the directory doesn't exist, create it.
 	if !dirExists {
-		obj := client.Bucket(bucketName).Object(dirPath)
+		obj := client.Bucket(bucketNameForInspectGCSSendToScc).Object(dirPathForInspectGCSSendToScc)
 		if _, err := obj.NewWriter(ctx).Write([]byte("")); err != nil {
 			log.Fatalf("Failed to create directory: %v", err)
 		}
-		t.Logf("Directory '%s' created successfully in bucket '%s'.\n", dirPath, bucketName)
+		fmt.Printf("Directory '%s' created successfully in bucket '%s'.\n", dirPathForInspectGCSSendToScc, bucketNameForInspectGCSSendToScc)
 	} else {
-		t.Logf("Directory '%s' already exists in bucket '%s'.\n", dirPath, bucketName)
+		fmt.Printf("Directory '%s' already exists in bucket '%s'.\n", dirPathForInspectGCSSendToScc, bucketNameForInspectGCSSendToScc)
 	}
 
 	// file upload code
 
 	// Open local file.
-	file, err := os.ReadFile(filePathToUpload)
+	file, err := ioutil.ReadFile(filePathToUpload)
 	if err != nil {
 		log.Fatalf("Failed to read file: %v", err)
+		return err
 	}
 
 	// Get a reference to the bucket
-	bucket := client.Bucket(bucketName)
+	bucket := client.Bucket(bucketNameForInspectGCSSendToScc)
 
 	// Upload the file
-	object := bucket.Object(termListFileName)
+	object := bucket.Object(inspectsGCSTestFileName)
 	writer := object.NewWriter(ctx)
 	_, err = writer.Write(file)
 	if err != nil {
 		log.Fatalf("Failed to write file: %v", err)
+		return err
 	}
 	err = writer.Close()
 	if err != nil {
 		log.Fatalf("Failed to close writer: %v", err)
+		return err
 	}
-	t.Logf("File uploaded successfully: %v\n", termListFileName)
+	fmt.Printf("File uploaded successfully: %v\n", inspectsGCSTestFileName)
 
 	// Check if the file exists in the bucket
-	_, err = bucket.Object(termListFileName).Attrs(ctx)
+	_, err = bucket.Object(inspectsGCSTestFileName).Attrs(ctx)
 	if err != nil {
 		if err == storage.ErrObjectNotExist {
-			t.Logf("File %v does not exist in bucket %v\n", termListFileName, bucketName)
+			fmt.Printf("File %v does not exist in bucket %v\n", inspectsGCSTestFileName, bucketNameForInspectGCSSendToScc)
 		} else {
 			log.Fatalf("Failed to check file existence: %v", err)
 		}
 	} else {
-		t.Logf("File %v exists in bucket %v\n", termListFileName, bucketName)
+		fmt.Printf("File %v exists in bucket %v\n", inspectsGCSTestFileName, bucketNameForInspectGCSSendToScc)
 	}
 
-	fileSetUrl := fmt.Sprint("gs://" + bucketName + "/" + termListFileName)
-	gcsUri := fmt.Sprint("gs://" + bucketName)
-
-	return fileSetUrl, gcsUri, err
+	fmt.Println("filePathtoGCS function is executed-------")
+	return nil
 }
 
 func deleteStoredInfoTypeAfterTest(t *testing.T, name string) error {
