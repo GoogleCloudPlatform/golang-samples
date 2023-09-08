@@ -15,11 +15,9 @@
 package cloudruntests
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -36,30 +34,17 @@ func TestHelloworldService(t *testing.T) {
 	}
 	defer service.Clean()
 
-	req, err := service.NewRequest("GET", "/")
+	resp, err := service.Request("GET", "/")
+	out, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		t.Fatalf("service.NewRequest: %v", err)
+		t.Errorf("ioutil.ReadAll: %v", err)
 	}
 
-	testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
-		client := http.Client{Timeout: 10 * time.Second}
-		resp, err := client.Do(req)
-		if err != nil {
-			r.Errorf("client.Do: %v", err)
-		}
-		fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
+	if got, want := string(out), "Hello Override!\n"; got != want {
+		t.Errorf("body: got %q, want %q", got, want)
+	}
 
-		out, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			r.Errorf("ioutil.ReadAll: %v", err)
-		}
-
-		if got, want := string(out), "Hello Override!\n"; got != want {
-			r.Errorf("body: got %q, want %q", got, want)
-		}
-
-		if got := resp.StatusCode; got != http.StatusOK {
-			r.Errorf("response status: got %d, want %d", got, http.StatusOK)
-		}
-	})
+	if got := resp.StatusCode; got != http.StatusOK {
+		t.Errorf("response status: got %d, want %d", got, http.StatusOK)
+	}
 }

@@ -101,22 +101,29 @@ func (s *Service) Deployed() bool {
 	return s.deployed
 }
 
+// RetryOptions holds options for Service.Request's retry behavior
 type RetryOptions struct {
-	MaxAttempts int
-	Delay       time.Duration
-	ShouldRetry func(*http.Response) bool
+	MaxAttempts  int
+	Delay        time.Duration
+	ShouldAccept func(*http.Response) bool
 }
 
 func getDefaultRetryOptions() RetryOptions {
 	return RetryOptions{
-		MaxAttempts: 5,
-		Delay:       20 * time.Second,
-		ShouldRetry: Accept2xx,
+		MaxAttempts:  5,
+		Delay:        20 * time.Second,
+		ShouldAccept: Accept2xx,
 	}
 }
 
+// Accept2xx returns true for responses in the 200 class of http response codes
 func Accept2xx(r *http.Response) bool {
-	return !(r.StatusCode >= 200 && r.StatusCode < 300)
+	return r.StatusCode >= 200 && r.StatusCode < 300
+}
+
+// AcceptNonServerError returns true for any non-500 http response
+func AcceptNonServerError(r *http.Response) bool {
+	return r.StatusCode > 500
 }
 
 func WithAttempts(n int) func(*RetryOptions) {
@@ -129,9 +136,9 @@ func WithDelay(d time.Duration) func(*RetryOptions) {
 		r.Delay = d
 	}
 }
-func WithRetryFunc(f func(*http.Response) bool) func(*RetryOptions) {
+func WithAcceptFunc(f func(*http.Response) bool) func(*RetryOptions) {
 	return func(r *RetryOptions) {
-		r.ShouldRetry = f
+		r.ShouldAccept = f
 	}
 }
 
@@ -159,11 +166,11 @@ func (s *Service) Request(method string, path string, opts ...func(*RetryOptions
 			lastSeen = err
 			continue
 		}
-		if options.ShouldRetry(resp) {
+		if options.ShouldAccept(resp) {
+			return resp, nil
+		} else {
 			time.Sleep(options.Delay)
 			continue
-		} else {
-			return resp, nil
 		}
 	}
 	// Too many attempts, return the last result.
