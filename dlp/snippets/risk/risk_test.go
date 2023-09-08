@@ -49,7 +49,7 @@ func TestRisk(t *testing.T) {
 			name: "Numerical",
 			fn: func(r *testutil.R) {
 				buf := new(bytes.Buffer)
-				u := uuid.Must(uuid.NewV4()).String()[:8]
+				u := uuid.New().String()[:8]
 				err := riskNumerical(buf, tc.ProjectID, "bigquery-public-data", riskTopicName+u, riskSubscriptionName+u, "nhtsa_traffic_fatalities", "accident_2015", "state_number")
 				defer cleanupPubsub(t, client, riskTopicName+u, riskSubscriptionName+u)
 				if err != nil {
@@ -65,7 +65,7 @@ func TestRisk(t *testing.T) {
 			name: "Categorical",
 			fn: func(r *testutil.R) {
 				buf := new(bytes.Buffer)
-				u := uuid.Must(uuid.NewV4()).String()[:8]
+				u := uuid.New().String()[:8]
 				err := riskCategorical(buf, tc.ProjectID, "bigquery-public-data", riskTopicName+u, riskSubscriptionName+u, "nhtsa_traffic_fatalities", "accident_2015", "state_number")
 				defer cleanupPubsub(t, client, riskTopicName+u, riskSubscriptionName+u)
 				if err != nil {
@@ -81,7 +81,7 @@ func TestRisk(t *testing.T) {
 			name: "K Anonymity",
 			fn: func(r *testutil.R) {
 				buf := new(bytes.Buffer)
-				u := uuid.Must(uuid.NewV4()).String()[:8]
+				u := uuid.New().String()[:8]
 				err := riskKAnonymity(buf, tc.ProjectID, "bigquery-public-data", riskTopicName+u, riskSubscriptionName+u, "nhtsa_traffic_fatalities", "accident_2015", "state_number", "county")
 				defer cleanupPubsub(t, client, riskTopicName+u, riskSubscriptionName+u)
 				if err != nil {
@@ -97,7 +97,7 @@ func TestRisk(t *testing.T) {
 			name: "L Diversity",
 			fn: func(r *testutil.R) {
 				buf := new(bytes.Buffer)
-				u := uuid.Must(uuid.NewV4()).String()[:8]
+				u := uuid.New().String()[:8]
 				err := riskLDiversity(buf, tc.ProjectID, "bigquery-public-data", riskTopicName+u, riskSubscriptionName+u, "nhtsa_traffic_fatalities", "accident_2015", "city", "state_number", "county")
 				defer cleanupPubsub(t, client, riskTopicName+u, riskSubscriptionName+u)
 				if err != nil {
