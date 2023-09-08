@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"strings"
 	"testing"
@@ -27,7 +28,7 @@ import (
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 )
 
 const (
@@ -36,6 +37,11 @@ const (
 
 	ssnFileName = "fake_ssn.txt"
 	bucketName  = "golang-samples-dlp-test2"
+
+	inspectsGCSTestFileName                 = "test.txt"
+	filePathToUpload                        = "./testdata/test.txt"
+	dirPathForInspectGCSSendToScc           = "dlp-go-lang-test-for-inspect-gcs-send-to-scc/"
+	bucketnameForInspectGCSFileWithSampling = "dlp-job-go-lang-test-inspect-gcs-file-with-sampling"
 )
 
 func TestInspectDatastore(t *testing.T) {
@@ -55,7 +61,7 @@ func TestInspectDatastore(t *testing.T) {
 		t.Run(test.kind, func(t *testing.T) {
 			t.Parallel()
 			testutil.Retry(t, 5, 15*time.Second, func(r *testutil.R) {
-				u := uuid.Must(uuid.NewV4()).String()[:8]
+				u := uuid.New().String()[:8]
 				buf := new(bytes.Buffer)
 				if err := inspectDatastore(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, tc.ProjectID, "", test.kind); err != nil {
 					r.Errorf("inspectDatastore(%s) got err: %v", test.kind, err)
@@ -108,7 +114,7 @@ func TestInspectGCS(t *testing.T) {
 		t.Run(test.fileName, func(t *testing.T) {
 			t.Parallel()
 			testutil.Retry(t, 5, 15*time.Second, func(r *testutil.R) {
-				u := uuid.Must(uuid.NewV4()).String()[:8]
+				u := uuid.New().String()[:8]
 				buf := new(bytes.Buffer)
 				if err := inspectGCSFile(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, bucketName, test.fileName); err != nil {
 					r.Errorf("inspectGCSFile(%s) got err: %v", test.fileName, err)
@@ -267,7 +273,7 @@ func TestInspectBigquery(t *testing.T) {
 		test := test
 		t.Run(test.table, func(t *testing.T) {
 			t.Parallel()
-			u := uuid.Must(uuid.NewV4()).String()[:8]
+			u := uuid.New().String()[:8]
 			buf := new(bytes.Buffer)
 			if err := inspectBigquery(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, tc.ProjectID, bqDatasetID, test.table); err != nil {
 				t.Errorf("inspectBigquery(%s) got err: %v", test.table, err)
@@ -552,12 +558,18 @@ func TestInspectGcsFileWithSampling(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	topicID := "go-lang-dlp-test-bigquery-with-sampling-topic"
 	subscriptionID := "go-lang-dlp-test-bigquery-with-sampling-subscription"
-	bucketName, err := createBucket(t, tc.ProjectID)
+	ctx := context.Background()
+	sc, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("storage.NewClient: %v", err)
+	}
+	defer sc.Close()
+
+	bucketnameForInspectGCSFileWithSampling, err := testutil.CreateTestBucket(ctx, t, sc, tc.ProjectID, "dlp-test-inspect-prefix")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer deleteBucket(t, tc.ProjectID, bucketName)
-	GCSUri := "gs://" + bucketName + "/"
+	GCSUri := "gs://" + bucketnameForInspectGCSFileWithSampling + "/"
 
 	var buf bytes.Buffer
 	if err := inspectGcsFileWithSampling(&buf, tc.ProjectID, GCSUri, topicID, subscriptionID); err != nil {
@@ -567,60 +579,11 @@ func TestInspectGcsFileWithSampling(t *testing.T) {
 	if want := "Job Created"; !strings.Contains(got, want) {
 		t.Errorf("inspectGcsFileWithSampling got %q, want %q", got, want)
 	}
-
-}
-
-func createBucket(t *testing.T, projectID string) (string, error) {
-	t.Helper()
-
-	ctx := context.Background()
-
-	client, err := storage.NewClient(ctx)
+	err = testutil.DeleteBucketIfExists(ctx, sc, bucketnameForInspectGCSFileWithSampling)
 	if err != nil {
-		return "", err
-	}
-	defer client.Close()
-	u := uuid.Must(uuid.NewV4()).String()[:8]
-	bucketName := "dlp-job-go-lang-test" + u
-
-	// Check if the bucket already exists.
-	bucketExists := false
-	_, err = client.Bucket(bucketName).Attrs(ctx)
-	if err == nil {
-		bucketExists = true
-	}
-
-	// If the bucket doesn't exist, create it.
-	if !bucketExists {
-		if err := client.Bucket(bucketName).Create(ctx, projectID, &storage.BucketAttrs{
-			StorageClass: "STANDARD",
-			Location:     "us-central1",
-		}); err != nil {
-			log.Fatalf("---Failed to create bucket: %v", err)
-		}
-		fmt.Printf("---Bucket '%s' created successfully.\n", bucketName)
-	} else {
-		fmt.Printf("---Bucket '%s' already exists.\n", bucketName)
-	}
-
-	return bucketName, nil
-}
-
-func deleteBucket(t *testing.T, projectID, bucketName string) error {
-	t.Helper()
-
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
-
-	bucket := client.Bucket(bucketName)
-	if err := bucket.Delete(ctx); err != nil {
 		t.Fatal(err)
 	}
-	return nil
+
 }
 
 func TestInspectBigQueryTableWithSampling(t *testing.T) {
@@ -680,4 +643,151 @@ func TestInspectTableWithCustomHotword(t *testing.T) {
 	if want := "Quote: 111-11-1111"; strings.Contains(got, want) {
 		t.Errorf("TestInspectTableWithCustomHotword got %q, want %q", got, want)
 	}
+}
+
+func TestInspectDataStoreSendToScc(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+	u := uuid.New().String()[:8]
+	datastoreNamespace := "golang-samples" + u
+	datastoreKind := "task"
+
+	if err := inspectDataStoreSendToScc(&buf, tc.ProjectID, datastoreNamespace, datastoreKind); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Job created successfully:"; !strings.Contains(got, want) {
+		t.Errorf("InspectBigQuerySendToScc got %q, want %q", got, want)
+	}
+}
+
+func TestInspectGCSFileSendToScc(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+	ctx := context.Background()
+	sc, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("storage.NewClient: %v", err)
+	}
+	defer sc.Close()
+
+	// Creates a bucket using a function available in testutil.
+	bucketNameForInspectGCSSendToScc, err := testutil.CreateTestBucket(ctx, t, sc, tc.ProjectID, "dlp-test-inspect-prefix")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Uploads a file on created bucket.
+	filePathtoGCS(t, tc.ProjectID, bucketNameForInspectGCSSendToScc, dirPathForInspectGCSSendToScc)
+
+	gcsPath := fmt.Sprint("gs://" + bucketNameForInspectGCSSendToScc + "/" + dirPathForInspectGCSSendToScc + "/test.txt")
+
+	if err := inspectGCSFileSendToScc(&buf, tc.ProjectID, gcsPath); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Job created successfully:"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectGCSFileSendToScc got %q, want %q", got, want)
+	}
+
+	// Delete a bucket that has just been created.
+	err = testutil.DeleteBucketIfExists(ctx, sc, bucketNameForInspectGCSSendToScc)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// filePathtoGCS uploads a file test.txt in given path from the testdata directory.
+func filePathtoGCS(t *testing.T, projectID, bucketNameForInspectGCSSendToScc, dirPathForInspectGCSSendToScc string) error {
+	t.Helper()
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	// Check if the bucket already exists.
+	bucketExists := false
+	_, err = client.Bucket(bucketNameForInspectGCSSendToScc).Attrs(ctx)
+	if err == nil {
+		bucketExists = true
+	}
+
+	// If the bucket doesn't exist, create it.
+	if !bucketExists {
+		if err := client.Bucket(bucketNameForInspectGCSSendToScc).Create(ctx, projectID, &storage.BucketAttrs{
+			StorageClass: "STANDARD",
+			Location:     "us-central1",
+		}); err != nil {
+			return err
+		}
+		fmt.Printf("Bucket '%s' created successfully.\n", bucketNameForInspectGCSSendToScc)
+	} else {
+		fmt.Printf("Bucket '%s' already exists.\n", bucketNameForInspectGCSSendToScc)
+	}
+
+	// Check if the directory already exists in the bucket.
+	dirExists := false
+	query := &storage.Query{Prefix: dirPathForInspectGCSSendToScc}
+	it := client.Bucket(bucketNameForInspectGCSSendToScc).Objects(ctx, query)
+	_, err = it.Next()
+	if err == nil {
+		dirExists = true
+	}
+
+	// If the directory doesn't exist, create it.
+	if !dirExists {
+		obj := client.Bucket(bucketNameForInspectGCSSendToScc).Object(dirPathForInspectGCSSendToScc)
+		if _, err := obj.NewWriter(ctx).Write([]byte("")); err != nil {
+			log.Fatalf("Failed to create directory: %v", err)
+		}
+		fmt.Printf("Directory '%s' created successfully in bucket '%s'.\n", dirPathForInspectGCSSendToScc, bucketNameForInspectGCSSendToScc)
+	} else {
+		fmt.Printf("Directory '%s' already exists in bucket '%s'.\n", dirPathForInspectGCSSendToScc, bucketNameForInspectGCSSendToScc)
+	}
+
+	// file upload code
+
+	// Open local file.
+	file, err := ioutil.ReadFile(filePathToUpload)
+	if err != nil {
+		log.Fatalf("Failed to read file: %v", err)
+		return err
+	}
+
+	// Get a reference to the bucket
+	bucket := client.Bucket(bucketNameForInspectGCSSendToScc)
+
+	// Upload the file
+	object := bucket.Object(inspectsGCSTestFileName)
+	writer := object.NewWriter(ctx)
+	_, err = writer.Write(file)
+	if err != nil {
+		log.Fatalf("Failed to write file: %v", err)
+		return err
+	}
+	err = writer.Close()
+	if err != nil {
+		log.Fatalf("Failed to close writer: %v", err)
+		return err
+	}
+	fmt.Printf("File uploaded successfully: %v\n", inspectsGCSTestFileName)
+
+	// Check if the file exists in the bucket
+	_, err = bucket.Object(inspectsGCSTestFileName).Attrs(ctx)
+	if err != nil {
+		if err == storage.ErrObjectNotExist {
+			fmt.Printf("File %v does not exist in bucket %v\n", inspectsGCSTestFileName, bucketNameForInspectGCSSendToScc)
+		} else {
+			log.Fatalf("Failed to check file existence: %v", err)
+		}
+	} else {
+		fmt.Printf("File %v exists in bucket %v\n", inspectsGCSTestFileName, bucketNameForInspectGCSSendToScc)
+	}
+
+	fmt.Println("filePathtoGCS function is executed-------")
+	return nil
 }
