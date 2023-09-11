@@ -664,6 +664,33 @@ func TestInspectDataStoreSendToScc(t *testing.T) {
 	}
 }
 
+var (
+	outputBucketPathForStoredInfotype string
+	projectID                         string
+	bucketExpiryAge                   = time.Minute * 2
+	testPrefix                        = "dlp-test-inspect-prefix"
+)
+
+func TestMain(m *testing.M) {
+	tc, ok := testutil.ContextMain(m)
+	projectID = tc.ProjectID
+	if !ok {
+		log.Fatal("couldn't initialize test")
+		return
+	}
+	ctx := context.Background()
+	c, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("storage.NewClient: %v", err)
+	}
+	defer c.Close()
+	m.Run()
+	if err := testutil.DeleteExpiredBuckets(c, tc.ProjectID, testPrefix, bucketExpiryAge); err != nil {
+		// Don't fail the test if cleanup fails
+		log.Printf("Post-test cleanup failed: %v", err)
+	}
+
+}
 func TestInspectWithStoredInfotype(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
@@ -674,11 +701,11 @@ func TestInspectWithStoredInfotype(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer client.Close()
-	outputBucket, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, "dlp-test-inspect-prefix")
+	outputBucketPathForStoredInfotype, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 	if err != nil {
 		t.Fatal(err)
 	}
-	outputPath := fmt.Sprintf("gs://" + outputBucket + "/")
+	outputPath := fmt.Sprintf("gs://" + outputBucketPathForStoredInfotype + "/")
 
 	infoTypeId, err := createStoredInfoTypeForTesting(t, tc.ProjectID, outputPath)
 	if err != nil {
