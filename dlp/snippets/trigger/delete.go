@@ -26,7 +26,6 @@ import (
 
 // deleteTrigger deletes the given trigger.
 func deleteTrigger(w io.Writer, triggerID string) error {
-	// projectID := "my-project-id"
 	// triggerID := "my-trigger"
 
 	ctx := context.Background()

@@ -4,12 +4,12 @@ go 1.19
 
 require (
 	cloud.google.com/go/storage v1.30.1
-	cloud.google.com/go/video v1.17.1
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230627093437-1cdc08c167bb
+	cloud.google.com/go/video v1.19.0
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230522201558-cba0742a460f
 	github.com/golang/protobuf v1.5.3
 	github.com/google/uuid v1.3.0
-	google.golang.org/api v0.128.0
-	google.golang.org/protobuf v1.31.0
+	google.golang.org/api v0.126.0
+	google.golang.org/protobuf v1.30.0
 )
 
 require (

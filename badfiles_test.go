@@ -74,6 +74,9 @@ var allowList = []string{
 	"webrisk/internal/webrisk_proto/*.proto",
 	"webrisk/testdata/hashes.gob",
 
+	// DLP data
+	"dlp/snippets/**/testdata/*",
+
 	// Endpoints samples.
 	"endpoints/**/*.proto",
 
@@ -124,6 +127,9 @@ var allowList = []string{
 
 	// Speech-to-Text audio/video files
 	"speech/resources/commercial_mono.wav",
+
+	// deprecated tests (introduced for IoT samples)
+	"**/*_test.go.deprecated",
 }
 
 // Check whether accidental binary files have been checked in.

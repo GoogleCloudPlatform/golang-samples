@@ -387,6 +387,17 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "Updated data to VenueDetails column\n")
 	out = runSample(t, queryWithJsonParameter, dbName, "failed to query with json parameter")
 	assertContains(t, out, "The venue details for venue id 19")
+
+	out = runSample(t, createSequence, dbName, "failed to create table with bit reverse sequence enabled")
+	assertContains(t, out, "Created Seq sequence and Customers table, where the key column CustomerId uses the sequence as a default value\n")
+	assertContains(t, out, "Inserted customer record with CustomerId")
+	assertContains(t, out, "Number of customer records inserted is: 3")
+	out = runSample(t, alterSequence, dbName, "failed to alter table with bit reverse sequence enabled")
+	assertContains(t, out, "Altered Seq sequence to skip an inclusive range between 1000 and 5000000\n")
+	assertContains(t, out, "Inserted customer record with CustomerId")
+	assertContains(t, out, "Number of customer records inserted is: 3")
+	out = runSample(t, dropSequence, dbName, "failed to drop bit reverse sequence column")
+	assertContains(t, out, "Altered Customers table to drop DEFAULT from CustomerId column and dropped the Seq sequence\n")
 }
 
 func TestBackupSample(t *testing.T) {
@@ -671,6 +682,25 @@ func TestCustomInstanceConfigSample(t *testing.T) {
 	assertContains(t, out, "Deleted instance configuration")
 }
 
+func TestForeignKeyDeleteCascadeSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	_, dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	mustRunSample(t, createDatabase, dbName, "failed to create a database")
+
+	var out string
+
+	out = runSample(t, createTableWithForeignKeyDeleteCascade, dbName, "failed to create table with foreign key delete constraint")
+	assertContains(t, out, "Created Customers and ShoppingCarts table with FKShoppingCartsCustomerId foreign key constraint")
+	out = runSample(t, alterTableWithForeignKeyDeleteCascade, dbName, "failed to alter table with foreign key delete constraint")
+	assertContains(t, out, "Altered ShoppingCarts table with FKShoppingCartsCustomerName foreign key constraint")
+	out = runSample(t, dropForeignKeyDeleteCascade, dbName, "failed to drop foreign key delete constraint")
+	assertContains(t, out, "Altered ShoppingCarts table to drop FKShoppingCartsCustomerName foreign key constraint")
+}
+
 func TestPgSample(t *testing.T) {
 	_ = testutil.SystemTest(t)
 	t.Parallel()
@@ -727,6 +757,17 @@ func TestPgSample(t *testing.T) {
 	assertContains(t, out, "Updated data to VenueDetails column\n")
 	out = runSample(t, queryWithJsonBParameter, dbName, "failed to query with jsonB parameter")
 	assertContains(t, out, "The venue details for venue id 19")
+
+	out = runSample(t, pgCreateSequence, dbName, "failed to create table with bit reverse sequence enabled in Spanner PG database")
+	assertContains(t, out, "Created Seq sequence and Customers table, where its key column CustomerId uses the sequence as a default value\n")
+	assertContains(t, out, "Inserted customer record with CustomerId")
+	assertContains(t, out, "Number of customer records inserted is: 3")
+	out = runSample(t, pgAlterSequence, dbName, "failed to alter table with bit reverse sequence enabled in Spanner PG database")
+	assertContains(t, out, "Altered Seq sequence to skip an inclusive range between 1000 and 5000000\n")
+	assertContains(t, out, "Inserted customer record with CustomerId")
+	assertContains(t, out, "Number of customer records inserted is: 3")
+	out = runSample(t, dropSequence, dbName, "failed to drop bit reverse sequence column in Spanner PG database")
+	assertContains(t, out, "Altered Customers table to drop DEFAULT from CustomerId column and dropped the Seq sequence\n")
 }
 
 func TestPgQueryParameter(t *testing.T) {
