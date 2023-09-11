@@ -655,7 +655,7 @@ func TestInspectDataStoreSendToScc(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
 	u := uuid.New().String()[:8]
-	datastoreNamespace := "golang-samples" + u
+	datastoreNamespace := fmt.Sprint("golang-samples" + u)
 	datastoreKind := "task"
 
 	if err := inspectDataStoreSendToScc(&buf, tc.ProjectID, datastoreNamespace, datastoreKind); err != nil {
