@@ -106,7 +106,7 @@ func inspectDataToHybridJobTrigger(w io.Writer, projectID, textToDeIdentify, job
 	}
 
 	var result *dlppb.DlpJob
-	for {
+	for i := 0; i < 5; i++ {
 		// Get DLP job
 		result, err = client.GetDlpJob(ctx, getDlpJobReq)
 		if err != nil {
@@ -121,6 +121,7 @@ func inspectDataToHybridJobTrigger(w io.Writer, projectID, textToDeIdentify, job
 
 		// Wait for 5 seconds before checking again
 		time.Sleep(5 * time.Second)
+		i++
 	}
 
 	fmt.Fprintf(w, "Job Name: %v\n", result.Name)
