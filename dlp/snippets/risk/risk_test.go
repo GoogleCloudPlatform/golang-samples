@@ -155,14 +155,30 @@ func cleanupPubsub(t *testing.T, client *pubsub.Client, topicName, subName strin
 	}
 }
 
-func TestCalculateKAnonymityWithEntityId(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	u := uuid.New().String()[:8]
-	tableID := fmt.Sprint("dlp_test_risk_table" + u)
-	dataSetID := fmt.Sprint("dlp_test_risk_dataset" + u)
+var (
+	u         = uuid.New().String()[:8]
+	projectID string
+	tableID   = fmt.Sprint("dlp_test_risk_table" + u)
+	dataSetID = fmt.Sprint("dlp_test_risk_dataset" + u)
+)
+
+func TestMain(m *testing.M) {
+	tc, ok := testutil.ContextMain(m)
+	projectID = tc.ProjectID
+	if !ok {
+		log.Fatal("couldn't initialize test")
+		return
+	}
 
 	createBigQueryDataSetId(tc.ProjectID, dataSetID)
 	createTableInsideDataset(tc.ProjectID, dataSetID, tableID)
+	m.Run()
+	deleteBigQueryAssets(tc.ProjectID, dataSetID)
+
+}
+func TestCalculateKAnonymityWithEntityId(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
 	buf := new(bytes.Buffer)
 	err := calculateKAnonymityWithEntityId(buf, tc.ProjectID, dataSetID, tableID, "title", "contributor_ip")
 	if err != nil {
@@ -187,7 +203,6 @@ func TestCalculateKAnonymityWithEntityId(t *testing.T) {
 		t.Errorf("CalculateKAnonymityWithEntityId got %s, want substring %q", got, want)
 	}
 
-	deleteBigQueryAssets(tc.ProjectID, dataSetID)
 }
 
 func createBigQueryDataSetId(projectID, dataSetID string) error {
