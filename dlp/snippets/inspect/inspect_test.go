@@ -798,13 +798,30 @@ func filePathtoGCS(t *testing.T, projectID, bucketNameForInspectGCSSendToScc, di
 	return nil
 }
 
+var projectID, jobTriggerForInspectSample string
+
+func TestMain(m *testing.M) {
+	tc, ok := testutil.ContextMain(m)
+	projectID = tc.ProjectID
+	if !ok {
+		log.Fatal("couldn't initialize test")
+		return
+	}
+	xyz, err := createJobTriggerForInspectDataToHybridJobTrigger(tc.ProjectID)
+	jobTriggerForInspectSample = xyz
+	if err != nil {
+		log.Fatal("couldn't initialize test")
+		return
+	}
+	m.Run()
+	deleteActiveJob(tc.ProjectID, jobTriggerForInspectSample)
+	deleteJobTriggerForInspectDataToHybridJobTrigger(tc.ProjectID, jobTriggerForInspectSample)
+}
+
 func TestInspectDataToHybridJobTrigger(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
-	trigger, err := createJobTriggerForInspectDataToHybridJobTrigger(t, tc.ProjectID)
-	if err != nil {
-		t.Fatal(err)
-	}
+	trigger := jobTriggerForInspectSample
 	fmt.Print("Name:" + trigger)
 	if err := inspectDataToHybridJobTrigger(&buf, tc.ProjectID, "My email is test@example.org and my name is Gary.", trigger); err != nil {
 		t.Fatal(err)
@@ -826,12 +843,10 @@ func TestInspectDataToHybridJobTrigger(t *testing.T) {
 		t.Errorf("TestInspectDataToHybridJobTrigger got %q, want %q", got, want)
 	}
 
-	deleteActiveJob(t, tc.ProjectID, trigger)
-	defer deleteJobTriggerForInspectDataToHybridJobTrigger(t, tc.ProjectID, trigger)
 }
 
-func deleteActiveJob(t *testing.T, project, trigger string) error {
-	t.Helper()
+func deleteActiveJob(project, trigger string) error {
+
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
 	if err != nil {
@@ -871,8 +886,8 @@ func deleteActiveJob(t *testing.T, project, trigger string) error {
 }
 
 // helpers for inspect hybrid job
-func createJobTriggerForInspectDataToHybridJobTrigger(t *testing.T, projectID string) (string, error) {
-	t.Helper()
+func createJobTriggerForInspectDataToHybridJobTrigger(projectID string) (string, error) {
+
 	log.Printf("[START] createJobTriggerForInspectDataToHybridJobTrigger: projectID %v and ", projectID)
 	// Set up the client.
 	ctx := context.Background()
@@ -936,8 +951,8 @@ func createJobTriggerForInspectDataToHybridJobTrigger(t *testing.T, projectID st
 	return resp.Name, nil
 }
 
-func deleteJobTriggerForInspectDataToHybridJobTrigger(t *testing.T, projectID, jobTriggerName string) error {
-	t.Helper()
+func deleteJobTriggerForInspectDataToHybridJobTrigger(projectID, jobTriggerName string) error {
+
 	log.Printf("\n[START] deleteJobTriggerForInspectDataToHybridJobTrigger")
 	ctx := context.Background()
 	client, err := dlp.NewClient(ctx)
