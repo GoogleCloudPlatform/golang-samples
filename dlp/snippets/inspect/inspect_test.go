@@ -18,8 +18,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -41,9 +41,13 @@ const (
 	ssnFileName = "fake_ssn.txt"
 	bucketName  = "golang-samples-dlp-test2"
 
-	jobTriggerIdPrefix    = "dlp-job-trigger-unit-test-case-12345678"
-	dataSetIDForHybridJob = "dlp_test_dataset"
-	tableIDForHybridJob   = "dlp_inspect_test_table_table_id"
+	jobTriggerIdPrefix                      = "dlp-job-trigger-unit-test-case-12345678"
+	dataSetIDForHybridJob                   = "dlp_test_dataset"
+	tableIDForHybridJob                     = "dlp_inspect_test_table_table_id"
+	inspectsGCSTestFileName                 = "test.txt"
+	filePathToUpload                        = "./testdata/test.txt"
+	dirPathForInspectGCSSendToScc           = "dlp-go-lang-test-for-inspect-gcs-send-to-scc/"
+	bucketnameForInspectGCSFileWithSampling = "dlp-job-go-lang-test-inspect-gcs-file-with-sampling"
 )
 
 func TestInspectDatastore(t *testing.T) {
@@ -560,12 +564,18 @@ func TestInspectGcsFileWithSampling(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	topicID := "go-lang-dlp-test-bigquery-with-sampling-topic"
 	subscriptionID := "go-lang-dlp-test-bigquery-with-sampling-subscription"
-	bucketName, err := createBucket(t, tc.ProjectID)
+	ctx := context.Background()
+	sc, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("storage.NewClient: %v", err)
+	}
+	defer sc.Close()
+
+	bucketnameForInspectGCSFileWithSampling, err := testutil.CreateTestBucket(ctx, t, sc, tc.ProjectID, "dlp-test-inspect-prefix")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer deleteBucket(t, tc.ProjectID, bucketName)
-	GCSUri := "gs://" + bucketName + "/"
+	GCSUri := "gs://" + bucketnameForInspectGCSFileWithSampling + "/"
 
 	var buf bytes.Buffer
 	if err := inspectGcsFileWithSampling(&buf, tc.ProjectID, GCSUri, topicID, subscriptionID); err != nil {
@@ -575,60 +585,11 @@ func TestInspectGcsFileWithSampling(t *testing.T) {
 	if want := "Job Created"; !strings.Contains(got, want) {
 		t.Errorf("inspectGcsFileWithSampling got %q, want %q", got, want)
 	}
-
-}
-
-func createBucket(t *testing.T, projectID string) (string, error) {
-	t.Helper()
-
-	ctx := context.Background()
-
-	client, err := storage.NewClient(ctx)
+	err = testutil.DeleteBucketIfExists(ctx, sc, bucketnameForInspectGCSFileWithSampling)
 	if err != nil {
-		return "", err
-	}
-	defer client.Close()
-	u := uuid.New().String()[:8]
-	bucketName := "dlp-job-go-lang-test" + u
-
-	// Check if the bucket already exists.
-	bucketExists := false
-	_, err = client.Bucket(bucketName).Attrs(ctx)
-	if err == nil {
-		bucketExists = true
-	}
-
-	// If the bucket doesn't exist, create it.
-	if !bucketExists {
-		if err := client.Bucket(bucketName).Create(ctx, projectID, &storage.BucketAttrs{
-			StorageClass: "STANDARD",
-			Location:     "us-central1",
-		}); err != nil {
-			log.Fatalf("---Failed to create bucket: %v", err)
-		}
-		fmt.Printf("---Bucket '%s' created successfully.\n", bucketName)
-	} else {
-		fmt.Printf("---Bucket '%s' already exists.\n", bucketName)
-	}
-
-	return bucketName, nil
-}
-
-func deleteBucket(t *testing.T, projectID, bucketName string) error {
-	t.Helper()
-
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
-
-	bucket := client.Bucket(bucketName)
-	if err := bucket.Delete(ctx); err != nil {
 		t.Fatal(err)
 	}
-	return nil
+
 }
 
 func TestInspectBigQueryTableWithSampling(t *testing.T) {
@@ -707,6 +668,136 @@ func TestInspectDataStoreSendToScc(t *testing.T) {
 	}
 }
 
+func TestInspectGCSFileSendToScc(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+	ctx := context.Background()
+	sc, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("storage.NewClient: %v", err)
+	}
+	defer sc.Close()
+
+	// Creates a bucket using a function available in testutil.
+	bucketNameForInspectGCSSendToScc, err := testutil.CreateTestBucket(ctx, t, sc, tc.ProjectID, "dlp-test-inspect-prefix")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Uploads a file on created bucket.
+	filePathtoGCS(t, tc.ProjectID, bucketNameForInspectGCSSendToScc, dirPathForInspectGCSSendToScc)
+
+	gcsPath := fmt.Sprint("gs://" + bucketNameForInspectGCSSendToScc + "/" + dirPathForInspectGCSSendToScc + "/test.txt")
+
+	if err := inspectGCSFileSendToScc(&buf, tc.ProjectID, gcsPath); err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+	if want := "Job created successfully:"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectGCSFileSendToScc got %q, want %q", got, want)
+	}
+
+	// Delete a bucket that has just been created.
+	err = testutil.DeleteBucketIfExists(ctx, sc, bucketNameForInspectGCSSendToScc)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// filePathtoGCS uploads a file test.txt in given path from the testdata directory.
+func filePathtoGCS(t *testing.T, projectID, bucketNameForInspectGCSSendToScc, dirPathForInspectGCSSendToScc string) error {
+	t.Helper()
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	// Check if the bucket already exists.
+	bucketExists := false
+	_, err = client.Bucket(bucketNameForInspectGCSSendToScc).Attrs(ctx)
+	if err == nil {
+		bucketExists = true
+	}
+
+	// If the bucket doesn't exist, create it.
+	if !bucketExists {
+		if err := client.Bucket(bucketNameForInspectGCSSendToScc).Create(ctx, projectID, &storage.BucketAttrs{
+			StorageClass: "STANDARD",
+			Location:     "us-central1",
+		}); err != nil {
+			return err
+		}
+		fmt.Printf("Bucket '%s' created successfully.\n", bucketNameForInspectGCSSendToScc)
+	} else {
+		fmt.Printf("Bucket '%s' already exists.\n", bucketNameForInspectGCSSendToScc)
+	}
+
+	// Check if the directory already exists in the bucket.
+	dirExists := false
+	query := &storage.Query{Prefix: dirPathForInspectGCSSendToScc}
+	it := client.Bucket(bucketNameForInspectGCSSendToScc).Objects(ctx, query)
+	_, err = it.Next()
+	if err == nil {
+		dirExists = true
+	}
+
+	// If the directory doesn't exist, create it.
+	if !dirExists {
+		obj := client.Bucket(bucketNameForInspectGCSSendToScc).Object(dirPathForInspectGCSSendToScc)
+		if _, err := obj.NewWriter(ctx).Write([]byte("")); err != nil {
+			log.Fatalf("Failed to create directory: %v", err)
+		}
+		fmt.Printf("Directory '%s' created successfully in bucket '%s'.\n", dirPathForInspectGCSSendToScc, bucketNameForInspectGCSSendToScc)
+	} else {
+		fmt.Printf("Directory '%s' already exists in bucket '%s'.\n", dirPathForInspectGCSSendToScc, bucketNameForInspectGCSSendToScc)
+	}
+
+	// file upload code
+
+	// Open local file.
+	file, err := ioutil.ReadFile(filePathToUpload)
+	if err != nil {
+		log.Fatalf("Failed to read file: %v", err)
+		return err
+	}
+
+	// Get a reference to the bucket
+	bucket := client.Bucket(bucketNameForInspectGCSSendToScc)
+
+	// Upload the file
+	object := bucket.Object(inspectsGCSTestFileName)
+	writer := object.NewWriter(ctx)
+	_, err = writer.Write(file)
+	if err != nil {
+		log.Fatalf("Failed to write file: %v", err)
+		return err
+	}
+	err = writer.Close()
+	if err != nil {
+		log.Fatalf("Failed to close writer: %v", err)
+		return err
+	}
+	fmt.Printf("File uploaded successfully: %v\n", inspectsGCSTestFileName)
+
+	// Check if the file exists in the bucket
+	_, err = bucket.Object(inspectsGCSTestFileName).Attrs(ctx)
+	if err != nil {
+		if err == storage.ErrObjectNotExist {
+			fmt.Printf("File %v does not exist in bucket %v\n", inspectsGCSTestFileName, bucketNameForInspectGCSSendToScc)
+		} else {
+			log.Fatalf("Failed to check file existence: %v", err)
+		}
+	} else {
+		fmt.Printf("File %v exists in bucket %v\n", inspectsGCSTestFileName, bucketNameForInspectGCSSendToScc)
+	}
+
+	fmt.Println("filePathtoGCS function is executed-------")
+	return nil
+}
+
 func TestInspectDataToHybridJobTrigger(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
@@ -777,18 +868,6 @@ func deleteActiveJob(t *testing.T, project, trigger string) error {
 	}
 	fmt.Print("Deleted Job Successfully !!!")
 	return nil
-}
-
-func TestMain(m *testing.M) {
-	tc := testutil.Context{}
-	tc.ProjectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
-	if tc.ProjectID == "" {
-		tc.ProjectID = os.Getenv("")
-	}
-	createBigQueryDataSetId(tc.ProjectID)
-	createTableInsideDataset(tc.ProjectID, dataSetIDForHybridJob)
-	m.Run()
-	deleteBigQueryAssets(tc.ProjectID)
 }
 
 // helpers for inspect hybrid job
@@ -877,109 +956,4 @@ func deleteJobTriggerForInspectDataToHybridJobTrigger(t *testing.T, projectID, j
 	}
 	log.Print("[END] deleteJobTriggerForInspectDataToHybridJobTrigger")
 	return nil
-}
-
-func deleteBigQueryAssets(projectID string) error {
-
-	log.Printf("[START] deleteBigQueryAssets: projectID %v and ", projectID)
-	ctx := context.Background()
-
-	client, err := bigquery.NewClient(ctx, projectID)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
-
-	log.Printf("[INFO] Error deleteBigQueryAssets: delete dataset err %v", err)
-
-	if err := client.Dataset("dlp_test_dataset").DeleteWithContents(ctx); err != nil {
-		log.Printf("[INFO] deleteBigQueryAssets: delete dataset err %v", err)
-		return err
-	}
-
-	duration := time.Duration(30) * time.Second
-	time.Sleep(duration)
-
-	log.Printf("[END] deleteBigQueryAssets......")
-	return nil
-}
-
-func createBigQueryDataSetId(projectID string) error {
-
-	ctx := context.Background()
-
-	client, err := bigquery.NewClient(ctx, projectID)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
-
-	meta := &bigquery.DatasetMetadata{
-		Location: "US", // See https://cloud.google.com/bigquery/docs/locations
-	}
-
-	if err := client.Dataset(dataSetIDForHybridJob).Create(ctx, meta); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func createTableInsideDataset(projectID, dataSetID string) error {
-	ctx := context.Background()
-	client, err := bigquery.NewClient(ctx, projectID)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
-
-	sampleSchema := bigquery.Schema{
-		{Name: "user_id", Type: bigquery.StringFieldType},
-		{Name: "age", Type: bigquery.IntegerFieldType},
-		{Name: "title", Type: bigquery.StringFieldType},
-		{Name: "score", Type: bigquery.StringFieldType},
-	}
-
-	metaData := &bigquery.TableMetadata{
-		Schema:         sampleSchema,
-		ExpirationTime: time.Now().AddDate(1, 0, 0), // Table will be automatically deleted in 1 year.
-	}
-
-	tableRef := client.Dataset(dataSetID).Table(tableIDForHybridJob)
-	if err := tableRef.Create(ctx, metaData); err != nil {
-		log.Printf("[INFO] createBigQueryDataSetId Error while table creation: %v", err)
-		return err
-	}
-
-	duration := time.Duration(90) * time.Second
-	time.Sleep(duration)
-
-	inserter := client.Dataset(dataSetIDForHybridJob).Table(tableIDForHybridJob).Inserter()
-	items := []*BigQueryTableItem{
-		// Item implements the ValueSaver interface.
-		{UserId: "602-61-8588", Age: 32, Title: "Biostatistician III", Score: "A"},
-		{UserId: "618-96-2322", Age: 69, Title: "Programmer I", Score: "C"},
-		{UserId: "618-96-2322", Age: 69, Title: "Executive Secretary", Score: "C"},
-	}
-	if err := inserter.Put(ctx, items); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-type BigQueryTableItem struct {
-	UserId string
-	Age    int
-	Title  string
-	Score  string
-}
-
-func (i *BigQueryTableItem) Save() (map[string]bigquery.Value, string, error) {
-	return map[string]bigquery.Value{
-		"user_id": i.UserId,
-		"age":     i.Age,
-		"title":   i.Title,
-		"score":   i.Score,
-	}, bigquery.NoDedupeID, nil
 }

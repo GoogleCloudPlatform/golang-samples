@@ -54,7 +54,7 @@ func inspectDataToHybridJobTrigger(w io.Writer, projectID, textToDeIdentify, job
 	}
 
 	// Contains metadata to associate with the content.
-	// Refer to https://cloud.google.com/dlp/docs/reference/rest/v2/Container for specifying the paths in container object.
+	// Refer to https://cloud.google.com/dlp/docs/reference/rpc/google.privacy.dlp.v2#container for specifying the paths in container object.
 	container := &dlppb.Container{
 		Type:         "logging_sys",
 		FullPath:     "10.0.0.2:logs1:app1",
