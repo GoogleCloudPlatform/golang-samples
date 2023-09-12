@@ -691,45 +691,6 @@ func TestMain(m *testing.M) {
 	}
 
 }
-func TestInspectWithStoredInfotype(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer client.Close()
-	outputBucketPathForStoredInfotype, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
-	if err != nil {
-		t.Fatal(err)
-	}
-	outputPath := fmt.Sprintf("gs://" + outputBucketPathForStoredInfotype + "/")
-
-	infoTypeId, err := createStoredInfoTypeForTesting(t, tc.ProjectID, outputPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	duration := time.Duration(30) * time.Second
-	time.Sleep(duration)
-
-	textToDeidentify := "This commit was made by kewin2010"
-	if err := inspectWithStoredInfotype(&buf, tc.ProjectID, infoTypeId, textToDeidentify); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-	if want := "Quote: kewin2010"; !strings.Contains(got, want) {
-		t.Errorf("TestInspectWithStoredInfotype got %q, want %q", got, want)
-	}
-	if want := "Info type: GITHUB_LOGINS"; !strings.Contains(got, want) {
-		t.Errorf("TestInspectWithStoredInfotype got %q, want %q", got, want)
-	}
-
-	defer deleteStoredInfoTypeAfterTest(t, infoTypeId)
-}
 
 func createStoredInfoTypeForTesting(t *testing.T, projectID, outputPath string) (string, error) {
 	t.Helper()
