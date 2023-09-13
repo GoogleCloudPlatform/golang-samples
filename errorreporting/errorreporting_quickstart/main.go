@@ -21,8 +21,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
-	"net/http"
+	"os"
 
 	"cloud.google.com/go/errorreporting"
 )
@@ -32,14 +33,18 @@ var errorClient *errorreporting.Client
 func main() {
 	ctx := context.Background()
 
-	// Sets your Google Cloud Platform project ID.
-	projectID := "YOUR_PROJECT_ID"
+	// TODO: Sets your Google Cloud Platform project ID via environment or explicitly
+	projectID := os.Getenv("GOOGLE_PROJECT_ID")
+	if projectID == "" {
+		projectID = "YOUR_PROJECT_ID"
+	}
 
 	var err error
 	errorClient, err = errorreporting.NewClient(ctx, projectID, errorreporting.Config{
-		ServiceName: "myservice",
+		ServiceName:    "errorreporting_quickstart",
+		ServiceVersion: "0.0.0",
 		OnError: func(err error) {
-			log.Printf("Could not log error: %v", err)
+			log.Printf("Could not repport the error: %v", err)
 		},
 	})
 	if err != nil {
@@ -47,15 +52,15 @@ func main() {
 	}
 	defer errorClient.Close()
 
-	resp, err := http.Get("not-a-valid-url")
+	err = errors.New("Something went wrong")
 	if err != nil {
 		logAndPrintError(err)
 		return
 	}
-	log.Print(resp.Status)
 }
 
 func logAndPrintError(err error) {
+	// error context is autopopulated
 	errorClient.Report(errorreporting.Entry{
 		Error: err,
 	})
