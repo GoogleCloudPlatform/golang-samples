@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,23 +14,21 @@
 
 package videostitcher
 
-// [START videostitcher_update_slate]
+// [START videostitcher_list_live_configs]
 import (
 	"context"
 	"fmt"
 	"io"
 
+	"google.golang.org/api/iterator"
+
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
 	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
-	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// updateSlate updates an existing slate. This sample updates the uri for an
-// existing slate.
-func updateSlate(w io.Writer, projectID, slateID, slateURI string) error {
+// listLiveConfigs lists all live configs for a given location.
+func listLiveConfigs(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
-	// slateID := "my-slate-id"
-	// slateURI := "https://my-updated-slate-uri/test.mp4"
 	location := "us-central1"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
@@ -39,29 +37,24 @@ func updateSlate(w io.Writer, projectID, slateID, slateURI string) error {
 	}
 	defer client.Close()
 
-	req := &stitcherstreampb.UpdateSlateRequest{
-		Slate: &stitcherstreampb.Slate{
-			Name: fmt.Sprintf("projects/%s/locations/%s/slates/%s", projectID, location, slateID),
-			Uri:  slateURI,
-		},
-		UpdateMask: &fieldmaskpb.FieldMask{
-			Paths: []string{
-				"uri",
-			},
-		},
-	}
-	// Updates the slate.
-	op, err := client.UpdateSlate(ctx, req)
-	if err != nil {
-		return fmt.Errorf("client.UpdateSlate: %w", err)
-	}
-	response, err := op.Wait(ctx)
-	if err != nil {
-		return fmt.Errorf("Wait: %w", err)
+	req := &stitcherstreampb.ListLiveConfigsRequest{
+		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 	}
 
-	fmt.Fprintf(w, "Updated slate: %+v", response)
+	it := client.ListLiveConfigs(ctx, req)
+	fmt.Fprintln(w, "Live configs:")
+
+	for {
+		response, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("it.Next(): %w", err)
+		}
+		fmt.Fprintln(w, response.GetName())
+	}
 	return nil
 }
 
-// [END videostitcher_update_slate]
+// [END videostitcher_list_live_configs]

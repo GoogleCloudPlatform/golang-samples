@@ -43,6 +43,9 @@ const (
 	hostname             = "cdn.example.com"
 	updatedHostname      = "updated.example.com"
 	keyName              = "my-key"
+
+	liveConfigID             = "my-go-test-live-config"
+	deleteLiveConfigResponse = "Deleted live config"
 )
 
 var bucketName string
@@ -86,7 +89,6 @@ func TestMain(t *testing.T) {
 // and get operations check if the slate resource name is returned. The
 // delete operation checks for a hard-coded string response.
 func TestSlates(t *testing.T) {
-	t.Skip("see GoogleCloudPlatform/golang-samples#2919")
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 
@@ -100,7 +102,7 @@ func TestSlates(t *testing.T) {
 
 	// Create a new slate.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		slateName := fmt.Sprintf("projects/%s/locations/%s/slates/%s", projectNumber, location, slateID)
+		slateName := fmt.Sprintf("projects/%s/locations/%s/slates/%s", tc.ProjectID, location, slateID)
 		if err := createSlate(buf, tc.ProjectID, slateID, slateURI); err != nil {
 			t.Fatalf("createSlate got err: %v", err)
 		}
@@ -147,6 +149,7 @@ func TestSlates(t *testing.T) {
 			r.Errorf("getSlate got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, slateName)
 		}
 	})
+	buf.Reset()
 
 	// Delete the slate.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
@@ -157,13 +160,13 @@ func TestSlates(t *testing.T) {
 			r.Errorf("deleteSlate got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteSlateResponse)
 		}
 	})
+	buf.Reset()
 }
 
 // TestCDNKeys tests major operations on CDN keys. Create, list, update,
 // and get operations check if the CDN key resource name is returned. The
 // delete operation checks for a hard-coded string response.
 func TestCDNKeys(t *testing.T) {
-	t.Skip("see GoogleCloudPlatform/golang-samples#2920")
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 
@@ -205,7 +208,7 @@ func TestCDNKeys(t *testing.T) {
 
 	// Create a new Media CDN key.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectNumber, location, mediaCDNKeyID)
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, mediaCDNKeyID)
 		if err := createCDNKey(buf, tc.ProjectID, mediaCDNKeyID, hostname, keyName, mediaCDNPrivateKey, true); err != nil {
 			t.Fatalf("createCDNKey (Media CDN) got err: %v", err)
 		}
@@ -254,6 +257,7 @@ func TestCDNKeys(t *testing.T) {
 			r.Errorf("getCDNKey got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, cdnKeyName)
 		}
 	})
+	buf.Reset()
 
 	// Delete the CDN key.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
@@ -264,6 +268,7 @@ func TestCDNKeys(t *testing.T) {
 			r.Errorf("deleteCDNKey got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteCDNKeyResponse)
 		}
 	})
+	buf.Reset()
 
 	// Cloud CDN tests
 
@@ -274,7 +279,7 @@ func TestCDNKeys(t *testing.T) {
 	}
 
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectNumber, location, cloudCDNKeyID)
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, cloudCDNKeyID)
 		if err := createCDNKey(buf, tc.ProjectID, cloudCDNKeyID, hostname, keyName, cloudCDNPrivateKey, false); err != nil {
 			t.Fatalf("createCDNKey (Cloud CDN) got err: %v", err)
 		}
@@ -323,6 +328,7 @@ func TestCDNKeys(t *testing.T) {
 			r.Errorf("getCDNKey got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, cdnKeyName)
 		}
 	})
+	buf.Reset()
 
 	// Delete the CDN key.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
@@ -333,6 +339,7 @@ func TestCDNKeys(t *testing.T) {
 			r.Errorf("deleteCDNKey got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteCDNKeyResponse)
 		}
 	})
+	buf.Reset()
 
 	// Akamai tests
 
@@ -343,7 +350,7 @@ func TestCDNKeys(t *testing.T) {
 	}
 
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectNumber, location, akamaiCDNKeyID)
+		cdnKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, akamaiCDNKeyID)
 		if err := createCDNKeyAkamai(buf, tc.ProjectID, akamaiCDNKeyID, hostname, akamaiTokenKey); err != nil {
 			t.Fatalf("createCDNKeyAkamai got err: %v", err)
 		}
@@ -392,6 +399,7 @@ func TestCDNKeys(t *testing.T) {
 			r.Errorf("getCDNKey got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, cdnKeyName)
 		}
 	})
+	buf.Reset()
 
 	// Delete the CDN key.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
@@ -402,6 +410,91 @@ func TestCDNKeys(t *testing.T) {
 			r.Errorf("deleteCDNKey got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteCDNKeyResponse)
 		}
 	})
+	buf.Reset()
+}
+
+// TestLiveConfigs tests major operations on live configs. Create, list,
+// and get operations check if the live config resource name is returned. The
+// delete operation checks for a hard-coded string response.
+func TestLiveConfigs(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := &bytes.Buffer{}
+
+	// Test setup
+
+	// Delete the default slate if it exists
+	deleteSlate(buf, tc.ProjectID, slateID)
+	defer deleteSlate(buf, tc.ProjectID, slateID)
+
+	// Create a new test slate.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		slateName := fmt.Sprintf("projects/%s/locations/%s/slates/%s", tc.ProjectID, location, slateID)
+		if err := createSlate(buf, tc.ProjectID, slateID, slateURI); err != nil {
+			t.Fatalf("createSlate got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, slateName) {
+			t.Fatalf("createSlate got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, slateName)
+		}
+	})
+	buf.Reset()
+
+	// Delete the live config if it exists.
+	if err := getLiveConfig(buf, tc.ProjectID, liveConfigID); err == nil {
+		testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+			if err := deleteLiveConfig(buf, tc.ProjectID, liveConfigID); err != nil {
+				r.Errorf("deleteLiveConfig got err: %v", err)
+			}
+		})
+	}
+
+	// Tests
+
+	// Create a new live config.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		liveConfigName := fmt.Sprintf("projects/%s/locations/%s/liveConfigs/%s", tc.ProjectID, location, liveConfigID)
+		if err := createLiveConfig(buf, tc.ProjectID, liveConfigID, liveURI, slateID); err != nil {
+			t.Fatalf("createLiveConfig got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, liveConfigName) {
+			t.Fatalf("createLiveConfig got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, liveConfigName)
+		}
+	})
+	buf.Reset()
+
+	// List the live configs for a given location.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		liveConfigName := fmt.Sprintf("projects/%s/locations/%s/liveConfigs/%s", tc.ProjectID, location, liveConfigID)
+		if err := listLiveConfigs(buf, tc.ProjectID); err != nil {
+			r.Errorf("listLiveConfigs got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, liveConfigName) {
+			r.Errorf("listLiveConfigs got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, liveConfigName)
+		}
+	})
+	buf.Reset()
+
+	// Get the live config.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		liveConfigName := fmt.Sprintf("projects/%s/locations/%s/liveConfigs/%s", tc.ProjectID, location, liveConfigID)
+		if err := getLiveConfig(buf, tc.ProjectID, liveConfigID); err != nil {
+			r.Errorf("getLiveConfig got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, liveConfigName) {
+			r.Errorf("getLiveConfig got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, liveConfigName)
+		}
+	})
+	buf.Reset()
+
+	// Delete the live config.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		if err := deleteLiveConfig(buf, tc.ProjectID, liveConfigID); err != nil {
+			r.Errorf("deleteLiveConfig got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, deleteLiveConfigResponse) {
+			r.Errorf("deleteLiveConfig got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteLiveConfigResponse)
+		}
+	})
+	buf.Reset()
 }
 
 // testVodSessions tests major operations on VOD sessions. Create and get
@@ -409,7 +502,6 @@ func TestCDNKeys(t *testing.T) {
 // are not supported for VOD sessions.
 // The test lists and gets ad tag and stitch details as well.
 func TestVodSessions(t *testing.T) {
-	t.Skip("see GoogleCloudPlatform/golang-samples#2917")
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 	sessionID := ""
@@ -511,7 +603,6 @@ func TestVodSessions(t *testing.T) {
 // operations check if the session name is returned. List and delete methods
 // are not supported for live sessions. The test lists and gets ad tag details.
 func TestLiveSessions(t *testing.T) {
-	t.Skip("see GoogleCloudPlatform/golang-samples#2918")
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 	sessionID := ""
@@ -521,11 +612,8 @@ func TestLiveSessions(t *testing.T) {
 	deleteSlate(buf, tc.ProjectID, slateID)
 	defer deleteSlate(buf, tc.ProjectID, slateID)
 
-	// Tests
-
-	// Create a new slate.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		slateName := fmt.Sprintf("projects/%s/locations/%s/slates/%s", projectNumber, location, slateID)
+		slateName := fmt.Sprintf("projects/%s/locations/%s/slates/%s", tc.ProjectID, location, slateID)
 		if err := createSlate(buf, tc.ProjectID, slateID, slateURI); err != nil {
 			t.Fatalf("createSlate got err: %v", err)
 		}
@@ -535,9 +623,25 @@ func TestLiveSessions(t *testing.T) {
 	})
 	buf.Reset()
 
+	deleteLiveConfig(buf, tc.ProjectID, liveConfigID)
+	defer deleteLiveConfig(buf, tc.ProjectID, liveConfigID)
+
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		liveConfigName := fmt.Sprintf("projects/%s/locations/%s/liveConfigs/%s", tc.ProjectID, location, liveConfigID)
+		if err := createLiveConfig(buf, tc.ProjectID, liveConfigID, liveURI, slateID); err != nil {
+			t.Fatalf("createLiveConfig got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, liveConfigName) {
+			t.Fatalf("createLiveConfig got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, liveConfigName)
+		}
+	})
+	buf.Reset()
+
+	// Tests
+
 	// Create a new live session and return the play URI.
 	sessionPrefix := fmt.Sprintf("projects/%s/locations/%s/liveSessions/", projectNumber, location)
-	if err := createLiveSession(buf, tc.ProjectID, liveURI, slateID); err != nil {
+	if err := createLiveSession(buf, tc.ProjectID, liveConfigID); err != nil {
 		t.Fatalf("createLiveSession got err: %v", err)
 	}
 	got := buf.String()

@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START videostitcher_update_slate]
+// [START videostitcher_delete_live_config]
 import (
 	"context"
 	"fmt"
@@ -22,15 +22,12 @@ import (
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
 	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
-	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// updateSlate updates an existing slate. This sample updates the uri for an
-// existing slate.
-func updateSlate(w io.Writer, projectID, slateID, slateURI string) error {
+// deleteLiveConfig deletes a previously-created live config.
+func deleteLiveConfig(w io.Writer, projectID, liveConfigID string) error {
 	// projectID := "my-project-id"
-	// slateID := "my-slate-id"
-	// slateURI := "https://my-updated-slate-uri/test.mp4"
+	// liveConfigID := "my-live-config-id"
 	location := "us-central1"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
@@ -39,29 +36,23 @@ func updateSlate(w io.Writer, projectID, slateID, slateURI string) error {
 	}
 	defer client.Close()
 
-	req := &stitcherstreampb.UpdateSlateRequest{
-		Slate: &stitcherstreampb.Slate{
-			Name: fmt.Sprintf("projects/%s/locations/%s/slates/%s", projectID, location, slateID),
-			Uri:  slateURI,
-		},
-		UpdateMask: &fieldmaskpb.FieldMask{
-			Paths: []string{
-				"uri",
-			},
-		},
+	name := fmt.Sprintf("projects/%s/locations/%s/liveConfigs/%s", projectID, location, liveConfigID)
+
+	req := &stitcherstreampb.DeleteLiveConfigRequest{
+		Name: name,
 	}
-	// Updates the slate.
-	op, err := client.UpdateSlate(ctx, req)
+	// Deletes the live config.
+	op, err := client.DeleteLiveConfig(ctx, req)
 	if err != nil {
-		return fmt.Errorf("client.UpdateSlate: %w", err)
+		return fmt.Errorf("client.DeleteLiveConfig: %w", err)
 	}
-	response, err := op.Wait(ctx)
+	err = op.Wait(ctx)
 	if err != nil {
 		return fmt.Errorf("Wait: %w", err)
 	}
 
-	fmt.Fprintf(w, "Updated slate: %+v", response)
+	fmt.Fprintf(w, "Deleted live config")
 	return nil
 }
 
-// [END videostitcher_update_slate]
+// [END videostitcher_delete_live_config]
