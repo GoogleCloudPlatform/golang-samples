@@ -42,6 +42,7 @@ func riskLDiversity(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub,
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %w", err)
 	}
+	defer client.Close()
 
 	// Create a PubSub Client used to listen for when the inspect job finishes.
 	pubsubClient, err := pubsub.NewClient(ctx, projectID)
@@ -51,7 +52,7 @@ func riskLDiversity(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub,
 	defer pubsubClient.Close()
 
 	// Create a PubSub subscription we can use to listen for messages.
-	s, err := setupPubSub(projectID, pubSubTopic, pubSubSub)
+	s, err := setupPubSub(ctx, pubsubClient, projectID, pubSubTopic, pubSubSub)
 	if err != nil {
 		return fmt.Errorf("setupPubSub: %w", err)
 	}
@@ -106,7 +107,6 @@ func riskLDiversity(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub,
 		return fmt.Errorf("CreateDlpJob: %w", err)
 	}
 	fmt.Fprintf(w, "Created job: %v\n", j.GetName())
-
 	// Wait for the risk job to finish by waiting for a PubSub message.
 	// This only waits for 10 minutes. For long jobs, consider using a truly
 	// asynchronous execution model such as Cloud Functions.
