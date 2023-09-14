@@ -31,14 +31,14 @@ import (
 var errorClient *errorreporting.Client
 
 func main() {
-	ctx := context.Background()
-
-	// TODO: Sets your Google Cloud Platform project ID via environment or explicitly
-	projectID := os.Getenv("GOOGLE_PROJECT_ID")
-	if projectID == "" {
-		projectID = "YOUR_PROJECT_ID"
+	// Set your Google Cloud Platform project ID via environment or explicitly
+	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
+	args := os.Args[1:]
+	if len(args) > 0 && args[0] != "" {
+		projectID = args[0]
 	}
 
+	ctx := context.Background()
 	var err error
 	errorClient, err = errorreporting.NewClient(ctx, projectID, errorreporting.Config{
 		ServiceName:    "errorreporting_quickstart",
