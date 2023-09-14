@@ -44,7 +44,7 @@ func main() {
 		ServiceName:    "errorreporting_quickstart",
 		ServiceVersion: "0.0.0",
 		OnError: func(err error) {
-			log.Printf("Could not repport the error: %v", err)
+			log.Printf("Could not report the error: %v", err)
 		},
 	})
 	if err != nil {
@@ -52,7 +52,7 @@ func main() {
 	}
 	defer errorClient.Close()
 
-	err = errors.New("Something went wrong")
+	err = errors.New("something went wrong")
 	if err != nil {
 		logAndPrintError(err)
 		return
@@ -60,7 +60,8 @@ func main() {
 }
 
 func logAndPrintError(err error) {
-	// error context is autopopulated
+	/// Client autopopulates the error context of the error. For more details about the context see:
+	/// https://cloud.google.com/error-reporting/reference/rest/v1beta1/ErrorContext
 	errorClient.Report(errorreporting.Entry{
 		Error: err,
 	})
