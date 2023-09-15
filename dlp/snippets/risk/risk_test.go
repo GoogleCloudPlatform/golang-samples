@@ -18,6 +18,7 @@ package risk
 import (
 	"bytes"
 	"context"
+	"log"
 	"strings"
 	"testing"
 	"time"
@@ -50,6 +51,7 @@ func TestRisk(t *testing.T) {
 				err := riskNumerical(buf, tc.ProjectID, "bigquery-public-data", riskTopicName+u, riskSubscriptionName+u, "nhtsa_traffic_fatalities", "accident_2015", "state_number")
 				defer cleanupPubsub(t, client, riskTopicName+u, riskSubscriptionName+u)
 				if err != nil {
+					log.Printf("%v\n", err)
 					r.Errorf("riskNumerical got err: %v", err)
 					return
 				}
