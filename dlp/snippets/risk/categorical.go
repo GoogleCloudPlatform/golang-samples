@@ -51,9 +51,11 @@ func riskCategorical(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub
 	// Create a PubSub subscription we can use to listen for messages.
 	// Create the Topic if it doesn't exist.
 	t := pubsubClient.Topic(pubSubTopic)
-	if exists, err := t.Exists(ctx); err != nil {
+	topicExists, err := t.Exists(ctx)
+	if err != nil {
 		return err
-	} else if !exists {
+	}
+	if !topicExists {
 		if t, err = pubsubClient.CreateTopic(ctx, pubSubTopic); err != nil {
 			return err
 		}
@@ -61,9 +63,11 @@ func riskCategorical(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub
 
 	// Create the Subscription if it doesn't exist.
 	s := pubsubClient.Subscription(pubSubSub)
-	if exists, err := s.Exists(ctx); err != nil {
+	subExists, err := s.Exists(ctx)
+	if err != nil {
 		return err
-	} else if !exists {
+	}
+	if !subExists {
 		if s, err = pubsubClient.CreateSubscription(ctx, pubSubSub, pubsub.SubscriptionConfig{Topic: t}); err != nil {
 			return err
 		}
