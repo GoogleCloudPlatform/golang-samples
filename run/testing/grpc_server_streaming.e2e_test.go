@@ -59,17 +59,16 @@ func TestGRPCServerStreamingService(t *testing.T) {
 
 	var conn *grpc.ClientConn
 	testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
-		conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
+		conn, err = grpc.Dial(addr, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
 			RootCAs: certPool,
 		})))
 		if err != nil {
-			// Calls t.Fail() after the last attempt, making code dependent on
-			// a successful connection safe because it will not be called.
+			// Calls t.Fail() after the last attempt, code dependent on
+			// a successful connection is safe because it will not be called.
 			r.Errorf("grpc.Dial %s: %v", addr, err)
-			return
 		}
-		defer conn.Close()
 	})
+	defer conn.Close()
 
 	var n uint32 = 3
 	req := &pb.Request{DurationSecs: n}
