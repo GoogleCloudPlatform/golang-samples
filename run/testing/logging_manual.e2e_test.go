@@ -15,7 +15,6 @@
 package cloudruntests
 
 import (
-	"fmt"
 	"net/http"
 	"testing"
 	"time"
@@ -41,14 +40,18 @@ func TestLoggingManualService(t *testing.T) {
 	}
 
 	client := http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Fatalf("client.Do: %v", err)
-	}
-	defer resp.Body.Close()
-	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
 
-	if got := resp.StatusCode; got != http.StatusOK {
-		t.Errorf("response status: got %d, want %d", got, http.StatusOK)
-	}
+	testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
+		resp, err := client.Do(req)
+		if err != nil {
+			t.Errorf("client.Do: %v", err)
+			return
+		}
+		defer resp.Body.Close()
+		r.Logf("client.Do: %s %s", req.Method, req.URL)
+
+		if got := resp.StatusCode; got != http.StatusOK {
+			r.Errorf("response status: got %d, want %d", got, http.StatusOK)
+		}
+	})
 }

@@ -45,16 +45,19 @@ func TestSigtermHandlerService(t *testing.T) {
 	}
 
 	client := http.Client{Timeout: 30 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Fatalf("client.Do: %v", err)
-	}
-	defer resp.Body.Close()
-	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
+	testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
+		resp, err := client.Do(req)
+		if err != nil {
+			r.Errorf("client.Do: %v", err)
+			return
+		}
+		defer resp.Body.Close()
+		r.Logf("client.Do: %s %s", req.Method, req.URL)
 
-	if got := resp.StatusCode; got != http.StatusOK {
-		t.Errorf("response status: got %d, want %d", got, http.StatusOK)
-	}
+		if got := resp.StatusCode; got != http.StatusOK {
+			r.Errorf("response status: got %d, want %d", got, http.StatusOK)
+		}
+	})
 }
 
 func GetLogEntries(service *cloudrunci.Service, t *testing.T) {
@@ -69,5 +72,4 @@ func GetLogEntries(service *cloudrunci.Service, t *testing.T) {
 	if err != nil || !found {
 		t.Errorf("%q log entry not found. (%v)", find, err)
 	}
-	return
 }
