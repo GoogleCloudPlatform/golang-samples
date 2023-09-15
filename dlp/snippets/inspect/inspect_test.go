@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -652,19 +651,6 @@ func TestInspectTableWithCustomHotword(t *testing.T) {
 	}
 }
 
-func TestMain(m *testing.M) {
-	tc := testutil.Context{}
-	tc.ProjectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
-	if tc.ProjectID == "" {
-		tc.ProjectID = os.Getenv("")
-	}
-	createBigQueryDataSetId(tc.ProjectID)
-	createTableInsideDataset(tc.ProjectID, dataSetID)
-	m.Run()
-	deleteBigQueryAssets(tc.ProjectID)
-
-}
-
 func createBigQueryDataSetId(projectID string) error {
 
 	ctx := context.Background()
@@ -978,7 +964,10 @@ func TestMain(m *testing.M) {
 		log.Fatal("couldn't initialize test")
 		return
 	}
+	createBigQueryDataSetId(tc.ProjectID)
+	createTableInsideDataset(tc.ProjectID, dataSetID)
 	m.Run()
+	deleteBigQueryAssets(tc.ProjectID)
 	deleteActiveJob(tc.ProjectID, jobTriggerForInspectSample)
 	deleteJobTriggerForInspectDataToHybridJobTrigger(tc.ProjectID, jobTriggerForInspectSample)
 }
