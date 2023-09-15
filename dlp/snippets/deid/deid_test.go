@@ -40,12 +40,12 @@ import (
 )
 
 const (
-	bucketForDeidCloudStorageForInput  = "dlp-go-test-deid-input"
-	bucketForDeidCloudStorageForOutput = "dlp-go-test-deid-go-lang-output"
-	// filePathToGCSUploadForDeidTest     = "./testdata/dlp_sample.csv"
-	filePathToGCSForDeidTest = "/testdata/dlp_sample.csv"
-	tableID                  = "dlp_test_deid_table"
-	dataSetID                = "dlp_test_deid_dataset"
+	bucketForDeidCloudStorageForInput  = "dlp-test-deid-input"
+	bucketForDeidCloudStorageForOutput = "dlp-test-deid-go-lang-output"
+	filePathToGCSUploadForDeidTest     = "./testdata/dlp_sample.csv"
+	filePathToGCSForDeidTest           = "/testdata/dlp_sample.csv"
+	tableID                            = "dlp_test_deid_table"
+	dataSetID                          = "dlp_test_deid_dataset"
 
 	deidentifyTemplateID           = "deidentified-templat-test-go"
 	deidentifyStructuredTemplateID = "deidentified-structured-template-go"
@@ -989,7 +989,7 @@ func filePathtoGCS(projectID string) error {
 	// file upload code
 
 	// Open local file.
-	file, err := os.ReadFile(filePathToGCSForDeidTest)
+	file, err := os.ReadFile(filePathToGCSUploadForDeidTest)
 	if err != nil {
 		log.Fatalf("Failed to read file: %v", err)
 		return err
