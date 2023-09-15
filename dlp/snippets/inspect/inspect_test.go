@@ -669,10 +669,10 @@ func TestInspectDataStoreSendToScc(t *testing.T) {
 }
 
 var (
-	projectID                         string
-	jobTriggerForInspectSample        string
-	bucketExpiryAge                   = time.Minute * 2
-	testPrefix                        = "dlp-test-inspect-prefix"
+	projectID                  string
+	jobTriggerForInspectSample string
+	bucketExpiryAge            = time.Minute * 2
+	testPrefix                 = "dlp-test-inspect-prefix"
 )
 
 func createStoredInfoTypeForTesting(t *testing.T, projectID, outputPath string) (string, error) {
