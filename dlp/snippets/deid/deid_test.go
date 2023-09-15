@@ -42,9 +42,10 @@ import (
 const (
 	bucketForDeidCloudStorageForInput  = "dlp-go-test-deid-input"
 	bucketForDeidCloudStorageForOutput = "dlp-go-test-deid-go-lang-output"
-	filePathToGCSForDeidTest           = "./testdata/dlp_sample.csv"
-	tableID                            = "dlp_test_deid_table"
-	dataSetID                          = "dlp_test_deid_dataset"
+	// filePathToGCSUploadForDeidTest     = "./testdata/dlp_sample.csv"
+	filePathToGCSForDeidTest = "/testdata/dlp_sample.csv"
+	tableID                  = "dlp_test_deid_table"
+	dataSetID                = "dlp_test_deid_dataset"
 
 	deidentifyTemplateID           = "deidentified-templat-test-go"
 	deidentifyStructuredTemplateID = "deidentified-structured-template-go"

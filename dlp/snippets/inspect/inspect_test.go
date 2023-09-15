@@ -31,6 +31,7 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
+	"google.golang.org/api/iterator"
 )
 
 const (
@@ -40,6 +41,9 @@ const (
 	ssnFileName = "fake_ssn.txt"
 	bucketName  = "golang-samples-dlp-test2"
 
+	jobTriggerIdPrefix                      = "dlp-job-trigger-unit-test-case-12345678"
+	dataSetIDForHybridJob                   = "dlp_test_dataset"
+	tableIDForHybridJob                     = "dlp_inspect_test_table_table_id"
 	inspectsGCSTestFileName                 = "test.txt"
 	filePathToUpload                        = "./testdata/test.txt"
 	dirPathForInspectGCSSendToScc           = "dlp-go-lang-test-for-inspect-gcs-send-to-scc/"
@@ -665,32 +669,11 @@ func TestInspectDataStoreSendToScc(t *testing.T) {
 }
 
 var (
-	outputBucketPathForStoredInfotype string
 	projectID                         string
+	jobTriggerForInspectSample        string
 	bucketExpiryAge                   = time.Minute * 2
 	testPrefix                        = "dlp-test-inspect-prefix"
 )
-
-func TestMain(m *testing.M) {
-	tc, ok := testutil.ContextMain(m)
-	projectID = tc.ProjectID
-	if !ok {
-		log.Fatal("couldn't initialize test")
-		return
-	}
-	ctx := context.Background()
-	c, err := storage.NewClient(ctx)
-	if err != nil {
-		log.Fatalf("storage.NewClient: %v", err)
-	}
-	defer c.Close()
-	m.Run()
-	if err := testutil.DeleteExpiredBuckets(c, tc.ProjectID, testPrefix, bucketExpiryAge); err != nil {
-		// Don't fail the test if cleanup fails
-		log.Printf("Post-test cleanup failed: %v", err)
-	}
-
-}
 
 func createStoredInfoTypeForTesting(t *testing.T, projectID, outputPath string) (string, error) {
 	t.Helper()
@@ -893,5 +876,188 @@ func deleteStoredInfoTypeAfterTest(t *testing.T, name string) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func TestMain(m *testing.M) {
+	tc, ok := testutil.ContextMain(m)
+	projectID = tc.ProjectID
+	if !ok {
+		log.Fatal("couldn't initialize test")
+		return
+	}
+	xyz, err := createJobTriggerForInspectDataToHybridJobTrigger(tc.ProjectID)
+	jobTriggerForInspectSample = xyz
+	if err != nil {
+		log.Fatal("couldn't initialize test")
+		return
+	}
+	ctx := context.Background()
+	c, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("storage.NewClient: %v", err)
+	}
+	defer c.Close()
+	m.Run()
+	deleteActiveJob(tc.ProjectID, jobTriggerForInspectSample)
+	deleteJobTriggerForInspectDataToHybridJobTrigger(tc.ProjectID, jobTriggerForInspectSample)
+	if err := testutil.DeleteExpiredBuckets(c, tc.ProjectID, testPrefix, bucketExpiryAge); err != nil {
+		// Don't fail the test if cleanup fails
+		log.Printf("Post-test cleanup failed: %v", err)
+	}
+}
+
+func TestInspectDataToHybridJobTrigger(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+	trigger := jobTriggerForInspectSample
+	fmt.Print("Name:" + trigger)
+	if err := inspectDataToHybridJobTrigger(&buf, tc.ProjectID, "My email is test@example.org and my name is Gary.", trigger); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "successfully inspected data using hybrid job trigger"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectDataToHybridJobTrigger got %q, want %q", got, want)
+	}
+	if want := "Findings"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectDataToHybridJobTrigger got %q, want %q", got, want)
+	}
+	if want := "Job State: ACTIVE"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectDataToHybridJobTrigger got %q, want %q", got, want)
+	}
+	if want := "EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectDataToHybridJobTrigger got %q, want %q", got, want)
+	}
+	if want := "PERSON_NAME"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectDataToHybridJobTrigger got %q, want %q", got, want)
+	}
+
+}
+
+func deleteActiveJob(project, trigger string) error {
+
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+	req := &dlppb.ListDlpJobsRequest{
+		Parent: fmt.Sprintf("projects/%s/locations/global", project),
+		Filter: fmt.Sprintf("trigger_name=%s", trigger),
+	}
+
+	it := client.ListDlpJobs(ctx, req)
+	var jobIds []string
+	for {
+		j, err := it.Next()
+		jobIds = append(jobIds, j.GetName())
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			fmt.Printf("Next: %v", err)
+		}
+		fmt.Printf("Job %v status: %v\n", j.GetName(), j.GetState())
+	}
+	for _, v := range jobIds {
+		req := &dlppb.DeleteDlpJobRequest{
+			Name: v,
+		}
+		if err = client.DeleteDlpJob(ctx, req); err != nil {
+			fmt.Printf("DeleteDlpJob: %v", err)
+			return err
+		}
+		fmt.Printf("\nSuccessfully deleted job %v\n", v)
+	}
+	fmt.Print("Deleted Job Successfully !!!")
+	return nil
+}
+
+// helpers for inspect hybrid job
+func createJobTriggerForInspectDataToHybridJobTrigger(projectID string) (string, error) {
+
+	log.Printf("[START] createJobTriggerForInspectDataToHybridJobTrigger: projectID %v and ", projectID)
+	// Set up the client.
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return "", err
+	}
+	defer client.Close()
+
+	// Define the job trigger.
+	hybridOptions := &dlppb.HybridOptions{
+		Labels: map[string]string{
+			"env": "prod",
+		},
+	}
+
+	storageConfig := &dlppb.StorageConfig_HybridOptions{
+		HybridOptions: hybridOptions,
+	}
+	infoTypes := []*dlppb.InfoType{
+		{Name: "PERSON_NAME"},
+		{Name: "EMAIL_ADDRESS"},
+	}
+
+	inspectConfig := &dlppb.InspectConfig{
+		InfoTypes: infoTypes,
+	}
+
+	inspectJobConfig := &dlppb.InspectJobConfig{
+		StorageConfig: &dlppb.StorageConfig{
+			Type: storageConfig,
+		},
+		InspectConfig: inspectConfig,
+	}
+
+	trigger := &dlppb.JobTrigger_Trigger{
+		Trigger: &dlppb.JobTrigger_Trigger_Manual{},
+	}
+
+	jobTrigger := &dlppb.JobTrigger{
+		Triggers: []*dlppb.JobTrigger_Trigger{
+			trigger,
+		},
+		Job: &dlppb.JobTrigger_InspectJob{
+			InspectJob: inspectJobConfig,
+		},
+	}
+
+	u := uuid.New().String()[:8]
+	createDlpJobRequest := &dlppb.CreateJobTriggerRequest{
+		Parent:     fmt.Sprintf("projects/%s/locations/global", projectID),
+		JobTrigger: jobTrigger,
+		TriggerId:  jobTriggerIdPrefix + u,
+	}
+
+	resp, err := client.CreateJobTrigger(ctx, createDlpJobRequest)
+	if err != nil {
+		return "", err
+	}
+	log.Printf("[END] createJobTriggerForInspectDataToHybridJobTrigger: trigger.Name %v", resp.Name)
+	return resp.Name, nil
+}
+
+func deleteJobTriggerForInspectDataToHybridJobTrigger(projectID, jobTriggerName string) error {
+
+	log.Printf("\n[START] deleteJobTriggerForInspectDataToHybridJobTrigger")
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	req := &dlppb.DeleteJobTriggerRequest{
+		Name: jobTriggerName,
+	}
+
+	err = client.DeleteJobTrigger(ctx, req)
+	if err != nil {
+		return err
+	}
+	log.Print("[END] deleteJobTriggerForInspectDataToHybridJobTrigger")
 	return nil
 }
