@@ -4,14 +4,13 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     https://www.apache.org/licenses/LICENSE-2.0
+//	https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package deid
 
 import (
@@ -22,14 +21,12 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestDeidTextDataWithFPE(t *testing.T) {
+func TestReidentifyWithDeterministic(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
 
-	input := "My SSN is 123456789"
+	inputStr := "My SSN is 372819127"
 	infoTypeNames := []string{"US_SOCIAL_SECURITY_NUMBER"}
-	surrogateInfoType := "AGE"
-
 	keyRingName, err := createKeyRing(t, tc.ProjectID)
 	if err != nil {
 		t.Fatal(err)
@@ -40,12 +37,24 @@ func TestDeidTextDataWithFPE(t *testing.T) {
 	}
 	defer destroyKey(t, tc.ProjectID, keyVersion)
 
-	if err := deidentifyFPE(&buf, tc.ProjectID, input, infoTypeNames, keyFileName, cryptoKeyName, surrogateInfoType); err != nil {
+	surrogateInfoType := "SSN_TOKEN"
+
+	if err := deIdentifyDeterministicEncryption(&buf, tc.ProjectID, inputStr, infoTypeNames, keyFileName, cryptoKeyName, surrogateInfoType); err != nil {
+		t.Fatal(err)
+	}
+
+	deidContent := buf.String()
+
+	inputForReid := strings.TrimPrefix(deidContent, "output : ")
+
+	buf.Reset()
+	if err := reidentifyWithDeterministic(&buf, tc.ProjectID, inputForReid, surrogateInfoType, keyFileName, cryptoKeyName); err != nil {
 		t.Fatal(err)
 	}
 
 	got := buf.String()
-	if want := "My SSN is AGE(9): "; strings.Contains(got, want) {
-		t.Errorf("reidTextDataWithFPE got %q, want %q", got, want)
+	if want := "output: My SSN is 372819127"; got != want {
+		t.Errorf("reidentifyWithDeterministic got %q, want %q", got, want)
 	}
+
 }

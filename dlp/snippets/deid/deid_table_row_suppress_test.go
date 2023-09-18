@@ -21,25 +21,20 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestDeidentifyFreeTextWithFPEUsingSurrogate(t *testing.T) {
+// [START dlp_deidentify_table_row_suppress]
+
+func TestDeidentifyTableRowSuppress(t *testing.T) {
 	tc := testutil.SystemTest(t)
+
 	var buf bytes.Buffer
-
-	inputStr := "My phone number is 1234567890"
-	infoType := "PHONE_NUMBER"
-	surrogateType := "PHONE_TOKEN"
-	unWrappedKey, err := getUnwrappedKey(t)
-	if err != nil {
-		t.Fatal(err)
+	if err := deidentifyTableRowSuppress(&buf, tc.ProjectID); err != nil {
+		t.Errorf("deidentifyTableRowSuppress: %v", err)
 	}
-
-	if err := deidentifyFreeTextWithFPEUsingSurrogate(&buf, tc.ProjectID, inputStr, infoType, surrogateType, unWrappedKey); err != nil {
-		t.Fatal(err)
-	}
-
 	got := buf.String()
-	if want := "output: My phone number is "; !strings.Contains(got, want) {
-		t.Errorf("reidentifyFreeTextWithFPEUsingSurrogate got %q, want %q", got, want)
+	if want := "Table after de-identification"; !strings.Contains(got, want) {
+		t.Errorf("deidentifyTableRowSuppress got %q, want %q", got, want)
 	}
-
+	if want := "values:{string_value:\"Charles Dickens\"} "; strings.Contains(got, want) {
+		t.Errorf("deidentifyTableRowSuppress got %q, want %q", got, want)
+	}
 }

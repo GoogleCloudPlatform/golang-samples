@@ -16,14 +16,12 @@
 package deid
 
 import (
-	"bytes"
 	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"time"
 
 	"testing"
@@ -51,131 +49,6 @@ const (
 	redactImageTemplate            = "redact-image-template-go"
 )
 
-func TestMask(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	tests := []struct {
-		input            string
-		maskingCharacter string
-		numberToMask     int32
-		want             string
-	}{
-		{
-			input:            "My SSN is 111222333",
-			maskingCharacter: "+",
-			want:             "My SSN is +++++++++",
-		},
-		{
-			input: "My SSN is 111222333",
-			want:  "My SSN is *********",
-		},
-		{
-			input:            "My SSN is 111222333",
-			maskingCharacter: "+",
-			numberToMask:     6,
-			want:             "My SSN is ++++++333",
-		},
-	}
-	for _, test := range tests {
-		test := test
-		t.Run(test.input, func(t *testing.T) {
-			test := test
-			t.Parallel()
-			buf := new(bytes.Buffer)
-			err := mask(buf, tc.ProjectID, test.input, []string{"US_SOCIAL_SECURITY_NUMBER"}, test.maskingCharacter, test.numberToMask)
-			if err != nil {
-				t.Errorf("mask(%q, %s, %v) = error %q, want %q", test.input, test.maskingCharacter, test.numberToMask, err, test.want)
-			}
-			if got := buf.String(); got != test.want {
-				t.Errorf("mask(%q, %s, %v) = %q, want %q", test.input, test.maskingCharacter, test.numberToMask, got, test.want)
-			}
-		})
-	}
-}
-
-func TestDeidentifyTableRowSuppress(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	var buf bytes.Buffer
-	if err := deidentifyTableRowSuppress(&buf, tc.ProjectID); err != nil {
-		t.Errorf("deidentifyTableRowSuppress: %v", err)
-	}
-	got := buf.String()
-	if want := "Table after de-identification"; !strings.Contains(got, want) {
-		t.Errorf("deidentifyTableRowSuppress got %q, want %q", got, want)
-	}
-	if want := "values:{string_value:\"Charles Dickens\"} "; strings.Contains(got, want) {
-		t.Errorf("deidentifyTableRowSuppress got %q, want %q", got, want)
-	}
-}
-
-
-func TestDeIdentifyWithRedact(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	input := "My name is Alicia Abernathy, and my email address is aabernathy@example.com."
-	infoTypeNames := []string{"EMAIL_ADDRESS"}
-	want := "output: My name is Alicia Abernathy, and my email address is ."
-
-	var buf bytes.Buffer
-
-	if err := deidentifyWithRedact(&buf, tc.ProjectID, input, infoTypeNames); err != nil {
-		t.Errorf("deidentifyWithRedact(%q) = error '%q', want %q", err, input, want)
-	}
-	if got := buf.String(); got != want {
-		t.Errorf("deidentifyWithRedact(%q) = %q, want %q", got, input, want)
-	}
-}
-
-func TestDeidentifyExceptionList(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	input := "jack@example.org accessed customer record of user5@example.com"
-	want := "output : jack@example.org accessed customer record of [EMAIL_ADDRESS]"
-
-	var buf bytes.Buffer
-
-	if err := deidentifyExceptionList(&buf, tc.ProjectID, input); err != nil {
-		t.Errorf("deidentifyExceptionList(%q) = error '%q', want %q", input, err, want)
-	}
-	if got := buf.String(); got != want {
-		t.Errorf("deidentifyExceptionList(%q) = %q, want %q", input, got, want)
-	}
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-func TestDeIdentifyFreeTextWithFPEUsingSurrogate(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	input := "My phone number is 5555551212"
-	infoType := "PHONE_NUMBER"
-	surrogateType := "PHONE_TOKEN"
-	unWrappedKey, err := getUnwrappedKey(t)
-	if err != nil {
-		t.Fatal(err)
-	}
-	want := "output: My phone number is PHONE_TOKEN(10):"
-
-	var buf bytes.Buffer
-	if err := deidentifyFreeTextWithFPEUsingSurrogate(&buf, tc.ProjectID, input, infoType, surrogateType, unWrappedKey); err != nil {
-		t.Fatal(err)
-	}
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("deidentifyFreeTextWithFPEUsingSurrogate(%q) = %q, want %q", input, got, want)
-	}
-}
-
 func getUnwrappedKey(t *testing.T) (string, error) {
 	t.Helper()
 	key := make([]byte, 32) // 32 bytes for AES-256
@@ -187,44 +60,6 @@ func getUnwrappedKey(t *testing.T) (string, error) {
 	// Encode the key to base64
 	encodedKey := base64.StdEncoding.EncodeToString(key)
 	return string(encodedKey), nil
-
-}
-
-func TestReidentifyWithDeterministic(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	inputStr := "My SSN is 372819127"
-	infoTypeNames := []string{"US_SOCIAL_SECURITY_NUMBER"}
-	keyRingName, err := createKeyRing(t, tc.ProjectID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	keyFileName, cryptoKeyName, keyVersion, err := createKey(t, tc.ProjectID, keyRingName)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer destroyKey(t, tc.ProjectID, keyVersion)
-
-	surrogateInfoType := "SSN_TOKEN"
-
-	if err := deIdentifyDeterministicEncryption(&buf, tc.ProjectID, inputStr, infoTypeNames, keyFileName, cryptoKeyName, surrogateInfoType); err != nil {
-		t.Fatal(err)
-	}
-
-	deidContent := buf.String()
-
-	inputForReid := strings.TrimPrefix(deidContent, "output : ")
-
-	buf.Reset()
-	if err := reidentifyWithDeterministic(&buf, tc.ProjectID, inputForReid, surrogateInfoType, keyFileName, cryptoKeyName); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-	if want := "output: My SSN is 372819127"; got != want {
-		t.Errorf("reidentifyWithDeterministic got %q, want %q", got, want)
-	}
 
 }
 
@@ -323,82 +158,6 @@ func destroyKey(t *testing.T, projectID, key string) error {
 
 	return nil
 }
-
-func TestDeIdentifyTimeExtract(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-	if err := deIdentifyTimeExtract(&buf, tc.ProjectID); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if want := "Table after de-identification :"; !strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTimeExtract got %q, want %q", got, want)
-	}
-	if want := "values:{string_value:\"1970\"}"; !strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTimeExtract got %q, want %q", got, want)
-	}
-	if want := "values:{string_value:\"1996\"}}"; !strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTimeExtract got %q, want %q", got, want)
-	}
-}
-
-
-func TestDeIdentifyTableWithCryptoHash(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	var buf bytes.Buffer
-	transientKeyName := "YOUR_TRANSIENT_CRYPTO_KEY_NAME"
-
-	if err := deIdentifyTableWithCryptoHash(&buf, tc.ProjectID, transientKeyName); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-
-	if want := "Table after de-identification :"; !strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
-	}
-	if want := "user3@example.org"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
-	}
-	if want := "858-555-0224"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
-	}
-	if want := "user2@example.org"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
-	}
-	if want := "858-555-0223"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
-	}
-	if want := "user1@example.org"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
-	}
-	if want := "858-555-0222"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
-	}
-}
-
-func TestDeIdentifyTableWithMultipleCryptoHash(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	if err := deIdentifyTableWithMultipleCryptoHash(&buf, tc.ProjectID, "your-transient-crypto-key-name-1", "your-transient-crypto-key-name-2"); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if want := "Table after de-identification :"; !strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithMultipleCryptoHash got %q, want %q", got, want)
-	}
-	if want := "user1@example.org"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithMultipleCryptoHash got %q, want %q", got, want)
-	}
-	if want := "858-555-0222"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithMultipleCryptoHash got %q, want %q", got, want)
-	}
-	if want := "abbyabernathy1"; !strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithMultipleCryptoHash got %q, want %q", got, want)
-	}
-}
-
 
 func TestMain(m *testing.M) {
 	tc := testutil.Context{}

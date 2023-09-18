@@ -4,25 +4,23 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     https://www.apache.org/licenses/LICENSE-2.0
+//	https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package deid
 
 import (
 	"bytes"
-	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestDeidTextDataWithFPE(t *testing.T) {
+func TestReidFPE(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
 
@@ -44,8 +42,17 @@ func TestDeidTextDataWithFPE(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	deidContent := buf.String()
+
+	inputForReid := deidContent
+	buf.Reset()
+
+	if err := reidentifyFPE(&buf, tc.ProjectID, inputForReid, keyFileName, cryptoKeyName, surrogateInfoType); err != nil {
+		t.Fatal(err)
+	}
+
 	got := buf.String()
-	if want := "My SSN is AGE(9): "; strings.Contains(got, want) {
+	if want := "My SSN is 123456789"; got != want {
 		t.Errorf("reidTextDataWithFPE got %q, want %q", got, want)
 	}
 }
