@@ -78,8 +78,10 @@ func TestInfoTypes(t *testing.T) {
 }
 
 func TestCreateStoredInfoType(t *testing.T) {
+
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
+
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		t.Fatal(err)
