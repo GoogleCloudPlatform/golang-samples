@@ -29,13 +29,11 @@ import (
 )
 
 var (
-	projectID   string
-	location    string = "us-central1"
-	datasetName string
-	datasetID   string
+	projectID string
+	location  string = "us-central1"
 )
 
-func setup(t *testing.T) {
+func setup(t *testing.T) (datasetID string) {
 	t.Helper()
 
 	// Create a new dataset
@@ -68,12 +66,13 @@ func setup(t *testing.T) {
 		log.Fatalf("Wait() failed: %v", err)
 	}
 
-	datasetName = dataset.Name
+	datasetName := dataset.Name
 	datasetID = strings.Split(datasetName, "/")[5]
+	return datasetID
 }
 
 func TestDeleteDataset(t *testing.T) {
-	setup(t)
+	datasetID := setup(t)
 
 	var buf bytes.Buffer
 	err := deleteDataset(&buf, projectID, location, datasetID)
