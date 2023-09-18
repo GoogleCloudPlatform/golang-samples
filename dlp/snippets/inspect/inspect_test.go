@@ -26,9 +26,12 @@ import (
 
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/datastore"
+	dlp "cloud.google.com/go/dlp/apiv2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
+	"google.golang.org/api/iterator"
 )
 
 const (
@@ -38,6 +41,9 @@ const (
 	ssnFileName = "fake_ssn.txt"
 	bucketName  = "golang-samples-dlp-test2"
 
+	jobTriggerIdPrefix                      = "dlp-job-trigger-unit-test-case-12345678"
+	dataSetIDForHybridJob                   = "dlp_test_dataset"
+	tableIDForHybridJob                     = "dlp_inspect_test_table_table_id"
 	inspectsGCSTestFileName                 = "test.txt"
 	filePathToUpload                        = "./testdata/test.txt"
 	dirPathForInspectGCSSendToScc           = "dlp-go-lang-test-for-inspect-gcs-send-to-scc/"
@@ -617,7 +623,7 @@ func TestInspectAugmentInfoTypes(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := buf.String()
-	if want := "Qoute: Quasimodo"; !strings.Contains(got, want) {
+	if want := "Quote: Quasimodo"; !strings.Contains(got, want) {
 		t.Errorf("TestInspectAugmentInfoTypes got %q, want %q", got, want)
 	}
 	if want := "Info type: PERSON_NAME"; !strings.Contains(got, want) {
@@ -645,11 +651,162 @@ func TestInspectTableWithCustomHotword(t *testing.T) {
 	}
 }
 
+func createBigQueryDataSetId(projectID string) error {
+
+	ctx := context.Background()
+
+	client, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	meta := &bigquery.DatasetMetadata{
+		Location: "US", // See https://cloud.google.com/bigquery/docs/locations
+	}
+
+	if err := client.Dataset(dataSetID).Create(ctx, meta); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func createTableInsideDataset(projectID, dataSetID string) error {
+	ctx := context.Background()
+	client, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	sampleSchema := bigquery.Schema{
+		{Name: "user_id", Type: bigquery.StringFieldType},
+		{Name: "age", Type: bigquery.IntegerFieldType},
+		{Name: "title", Type: bigquery.StringFieldType},
+		{Name: "score", Type: bigquery.StringFieldType},
+	}
+
+	metaData := &bigquery.TableMetadata{
+		Schema:         sampleSchema,
+		ExpirationTime: time.Now().AddDate(1, 0, 0), // Table will be automatically deleted in 1 year.
+	}
+
+	tableRef := client.Dataset(dataSetID).Table(tableID)
+	if err := tableRef.Create(ctx, metaData); err != nil {
+		log.Printf("[INFO] createBigQueryDataSetId Error while table creation: %v", err)
+		return err
+	}
+
+	duration := time.Duration(90) * time.Second
+	time.Sleep(duration)
+
+	inserter := client.Dataset(dataSetID).Table(tableID).Inserter()
+	items := []*BigQueryTableItem{
+		// Item implements the ValueSaver interface.
+		{UserId: "602-61-8588", Age: 32, Title: "Biostatistician III", Score: "A"},
+		{UserId: "618-96-2322", Age: 69, Title: "Programmer I", Score: "C"},
+		{UserId: "618-96-2322", Age: 69, Title: "Executive Secretary", Score: "C"},
+	}
+	if err := inserter.Put(ctx, items); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type BigQueryTableItem struct {
+	UserId string
+	Age    int
+	Title  string
+	Score  string
+}
+
+func (i *BigQueryTableItem) Save() (map[string]bigquery.Value, string, error) {
+	return map[string]bigquery.Value{
+		"user_id": i.UserId,
+		"age":     i.Age,
+		"title":   i.Title,
+		"score":   i.Score,
+	}, bigquery.NoDedupeID, nil
+}
+
+func deleteBigQueryAssets(projectID string) error {
+
+	log.Printf("[START] deleteBigQueryAssets: projectID %v and ", projectID)
+	ctx := context.Background()
+
+	client, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	log.Printf("[INFO] deleteBigQueryAssets: delete dataset err %v", err)
+
+	if err := client.Dataset("dlp_test_dataset").DeleteWithContents(ctx); err != nil {
+		log.Printf("[INFO] deleteBigQueryAssets: delete dataset err %v", err)
+		return err
+	}
+
+	duration := time.Duration(30) * time.Second
+	time.Sleep(duration)
+
+	log.Printf("[END] deleteBigQueryAssets:")
+	return nil
+}
+
+func deleteJob(projectID, jobName string) error {
+	ctx := context.Background()
+
+	log.Printf("[START] deleteJob: projectID %v", projectID)
+	// delete job
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		log.Printf("[INFO] deleteJob:: error %v", err)
+		return err
+	}
+	log.Printf("[INFO] deleteJob:: error %v", err)
+
+	req := &dlppb.DeleteDlpJobRequest{
+		Name: jobName,
+	}
+	for {
+		ct, cancel := context.WithTimeout(ctx, 300000)
+		defer cancel()
+		abc, err := client.GetDlpJob(ct, &dlppb.GetDlpJobRequest{
+			Name: jobName,
+		})
+		if err != nil {
+			log.Printf("[INFO] deleteJob:: error %v", err)
+			return err
+		}
+		if abc.State == dlppb.DlpJob_DONE {
+			log.Printf("[INFO] deleteJob:: job done")
+			break
+		} else if abc.State == dlppb.DlpJob_FAILED {
+			log.Printf("[INFO] deleteJob:: job failed")
+			return err
+		} else {
+			log.Printf("[INFO] deleteJob:: job continue")
+			continue
+		}
+	}
+	err = client.DeleteDlpJob(ctx, req)
+	if err != nil {
+		log.Printf("[INFO] deleteJob:: error %v", err)
+		return err
+	}
+
+	log.Printf("[END] deleteJob")
+	return nil
+}
+
 func TestInspectDataStoreSendToScc(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
 	u := uuid.New().String()[:8]
-	datastoreNamespace := "golang-samples" + u
+	datastoreNamespace := fmt.Sprint("golang-samples" + u)
 	datastoreKind := "task"
 
 	if err := inspectDataStoreSendToScc(&buf, tc.ProjectID, datastoreNamespace, datastoreKind); err != nil {
@@ -660,6 +817,68 @@ func TestInspectDataStoreSendToScc(t *testing.T) {
 	if want := "Job created successfully:"; !strings.Contains(got, want) {
 		t.Errorf("InspectBigQuerySendToScc got %q, want %q", got, want)
 	}
+}
+
+var (
+	projectID                  string
+	jobTriggerForInspectSample string
+	bucketExpiryAge            = time.Minute * 2
+	testPrefix                 = "dlp-test-inspect-prefix"
+)
+
+func createStoredInfoTypeForTesting(t *testing.T, projectID, outputPath string) (string, error) {
+	t.Helper()
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return "", err
+	}
+	defer client.Close()
+	u := uuid.New().String()[:8]
+	displayName := "stored-info-type-for-inspect-test" + u
+	description := "Dictionary of GitHub usernames used in commits"
+
+	cloudStoragePath := &dlppb.CloudStoragePath{
+		Path: outputPath,
+	}
+
+	bigQueryField := &dlppb.BigQueryField{
+		Table: &dlppb.BigQueryTable{
+			ProjectId: "bigquery-public-data",
+			DatasetId: "samples",
+			TableId:   "github_nested",
+		},
+		Field: &dlppb.FieldId{
+			Name: "actor",
+		},
+	}
+
+	largeCustomDictionaryConfig := &dlppb.LargeCustomDictionaryConfig{
+		OutputPath: cloudStoragePath,
+		Source: &dlppb.LargeCustomDictionaryConfig_BigQueryField{
+			BigQueryField: bigQueryField,
+		},
+	}
+
+	storedInfoTypeConfig := &dlppb.StoredInfoTypeConfig{
+		DisplayName: displayName,
+		Description: description,
+		Type: &dlppb.StoredInfoTypeConfig_LargeCustomDictionary{
+			LargeCustomDictionary: largeCustomDictionaryConfig,
+		},
+	}
+
+	req := &dlppb.CreateStoredInfoTypeRequest{
+		Parent:           fmt.Sprintf("projects/%s/locations/global", projectID),
+		Config:           storedInfoTypeConfig,
+		StoredInfoTypeId: "go-sample-test-stored-infoType" + u,
+	}
+	resp, err := client.CreateStoredInfoType(ctx, req)
+	if err != nil {
+		return "nil", err
+	}
+
+	return resp.Name, nil
 }
 
 func TestInspectGCSFileSendToScc(t *testing.T) {
@@ -789,5 +1008,211 @@ func filePathtoGCS(t *testing.T, projectID, bucketNameForInspectGCSSendToScc, di
 	}
 
 	fmt.Println("filePathtoGCS function is executed-------")
+	return nil
+}
+
+func deleteStoredInfoTypeAfterTest(t *testing.T, name string) error {
+	t.Helper()
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	req := &dlppb.DeleteStoredInfoTypeRequest{
+		Name: name,
+	}
+	err = client.DeleteStoredInfoType(ctx, req)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func TestMain(m *testing.M) {
+	tc, ok := testutil.ContextMain(m)
+	projectID = tc.ProjectID
+	if !ok {
+		log.Fatal("couldn't initialize test")
+		return
+	}
+	xyz, err := createJobTriggerForInspectDataToHybridJobTrigger(tc.ProjectID)
+	jobTriggerForInspectSample = xyz
+	if err != nil {
+		log.Fatal("couldn't initialize test")
+		return
+	}
+	createBigQueryDataSetId(tc.ProjectID)
+	createTableInsideDataset(tc.ProjectID, dataSetID)
+
+	ctx := context.Background()
+	c, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("storage.NewClient: %v", err)
+	}
+	defer c.Close()
+	m.Run()
+	deleteBigQueryAssets(tc.ProjectID)
+	deleteActiveJob(tc.ProjectID, jobTriggerForInspectSample)
+	deleteJobTriggerForInspectDataToHybridJobTrigger(tc.ProjectID, jobTriggerForInspectSample)
+	if err := testutil.DeleteExpiredBuckets(c, tc.ProjectID, testPrefix, bucketExpiryAge); err != nil {
+		// Don't fail the test if cleanup fails
+		log.Printf("Post-test cleanup failed: %v", err)
+	}
+}
+
+func TestInspectDataToHybridJobTrigger(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
+	trigger := jobTriggerForInspectSample
+	fmt.Print("Name:" + trigger)
+	if err := inspectDataToHybridJobTrigger(&buf, tc.ProjectID, "My email is test@example.org and my name is Gary.", trigger); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+	if want := "successfully inspected data using hybrid job trigger"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectDataToHybridJobTrigger got %q, want %q", got, want)
+	}
+	if want := "Findings"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectDataToHybridJobTrigger got %q, want %q", got, want)
+	}
+	if want := "Job State: ACTIVE"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectDataToHybridJobTrigger got %q, want %q", got, want)
+	}
+	if want := "EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectDataToHybridJobTrigger got %q, want %q", got, want)
+	}
+	if want := "PERSON_NAME"; !strings.Contains(got, want) {
+		t.Errorf("TestInspectDataToHybridJobTrigger got %q, want %q", got, want)
+	}
+
+}
+
+func deleteActiveJob(project, trigger string) error {
+
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+	req := &dlppb.ListDlpJobsRequest{
+		Parent: fmt.Sprintf("projects/%s/locations/global", project),
+		Filter: fmt.Sprintf("trigger_name=%s", trigger),
+	}
+
+	it := client.ListDlpJobs(ctx, req)
+	var jobIds []string
+	for {
+		j, err := it.Next()
+		jobIds = append(jobIds, j.GetName())
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			fmt.Printf("Next: %v", err)
+		}
+		fmt.Printf("Job %v status: %v\n", j.GetName(), j.GetState())
+	}
+	for _, v := range jobIds {
+		req := &dlppb.DeleteDlpJobRequest{
+			Name: v,
+		}
+		if err = client.DeleteDlpJob(ctx, req); err != nil {
+			fmt.Printf("DeleteDlpJob: %v", err)
+			return err
+		}
+		fmt.Printf("\nSuccessfully deleted job %v\n", v)
+	}
+	fmt.Print("Deleted Job Successfully !!!")
+	return nil
+}
+
+// helpers for inspect hybrid job
+func createJobTriggerForInspectDataToHybridJobTrigger(projectID string) (string, error) {
+
+	log.Printf("[START] createJobTriggerForInspectDataToHybridJobTrigger: projectID %v and ", projectID)
+	// Set up the client.
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return "", err
+	}
+	defer client.Close()
+
+	// Define the job trigger.
+	hybridOptions := &dlppb.HybridOptions{
+		Labels: map[string]string{
+			"env": "prod",
+		},
+	}
+
+	storageConfig := &dlppb.StorageConfig_HybridOptions{
+		HybridOptions: hybridOptions,
+	}
+	infoTypes := []*dlppb.InfoType{
+		{Name: "PERSON_NAME"},
+		{Name: "EMAIL_ADDRESS"},
+	}
+
+	inspectConfig := &dlppb.InspectConfig{
+		InfoTypes: infoTypes,
+	}
+
+	inspectJobConfig := &dlppb.InspectJobConfig{
+		StorageConfig: &dlppb.StorageConfig{
+			Type: storageConfig,
+		},
+		InspectConfig: inspectConfig,
+	}
+
+	trigger := &dlppb.JobTrigger_Trigger{
+		Trigger: &dlppb.JobTrigger_Trigger_Manual{},
+	}
+
+	jobTrigger := &dlppb.JobTrigger{
+		Triggers: []*dlppb.JobTrigger_Trigger{
+			trigger,
+		},
+		Job: &dlppb.JobTrigger_InspectJob{
+			InspectJob: inspectJobConfig,
+		},
+	}
+
+	u := uuid.New().String()[:8]
+	createDlpJobRequest := &dlppb.CreateJobTriggerRequest{
+		Parent:     fmt.Sprintf("projects/%s/locations/global", projectID),
+		JobTrigger: jobTrigger,
+		TriggerId:  jobTriggerIdPrefix + u,
+	}
+
+	resp, err := client.CreateJobTrigger(ctx, createDlpJobRequest)
+	if err != nil {
+		return "", err
+	}
+	log.Printf("[END] createJobTriggerForInspectDataToHybridJobTrigger: trigger.Name %v", resp.Name)
+	return resp.Name, nil
+}
+
+func deleteJobTriggerForInspectDataToHybridJobTrigger(projectID, jobTriggerName string) error {
+
+	log.Printf("\n[START] deleteJobTriggerForInspectDataToHybridJobTrigger")
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	req := &dlppb.DeleteJobTriggerRequest{
+		Name: jobTriggerName,
+	}
+
+	err = client.DeleteJobTrigger(ctx, req)
+	if err != nil {
+		return err
+	}
+	log.Print("[END] deleteJobTriggerForInspectDataToHybridJobTrigger")
 	return nil
 }
