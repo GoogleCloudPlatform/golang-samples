@@ -623,7 +623,7 @@ func TestInspectAugmentInfoTypes(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := buf.String()
-	if want := "Qoute: Quasimodo"; !strings.Contains(got, want) {
+	if want := "Quote: Quasimodo"; !strings.Contains(got, want) {
 		t.Errorf("TestInspectAugmentInfoTypes got %q, want %q", got, want)
 	}
 	if want := "Info type: PERSON_NAME"; !strings.Contains(got, want) {
@@ -666,6 +666,68 @@ func TestInspectDataStoreSendToScc(t *testing.T) {
 	if want := "Job created successfully:"; !strings.Contains(got, want) {
 		t.Errorf("InspectBigQuerySendToScc got %q, want %q", got, want)
 	}
+}
+
+var (
+	projectID                  string
+	jobTriggerForInspectSample string
+	bucketExpiryAge            = time.Minute * 2
+	testPrefix                 = "dlp-test-inspect-prefix"
+)
+
+func createStoredInfoTypeForTesting(t *testing.T, projectID, outputPath string) (string, error) {
+	t.Helper()
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return "", err
+	}
+	defer client.Close()
+	u := uuid.New().String()[:8]
+	displayName := "stored-info-type-for-inspect-test" + u
+	description := "Dictionary of GitHub usernames used in commits"
+
+	cloudStoragePath := &dlppb.CloudStoragePath{
+		Path: outputPath,
+	}
+
+	bigQueryField := &dlppb.BigQueryField{
+		Table: &dlppb.BigQueryTable{
+			ProjectId: "bigquery-public-data",
+			DatasetId: "samples",
+			TableId:   "github_nested",
+		},
+		Field: &dlppb.FieldId{
+			Name: "actor",
+		},
+	}
+
+	largeCustomDictionaryConfig := &dlppb.LargeCustomDictionaryConfig{
+		OutputPath: cloudStoragePath,
+		Source: &dlppb.LargeCustomDictionaryConfig_BigQueryField{
+			BigQueryField: bigQueryField,
+		},
+	}
+
+	storedInfoTypeConfig := &dlppb.StoredInfoTypeConfig{
+		DisplayName: displayName,
+		Description: description,
+		Type: &dlppb.StoredInfoTypeConfig_LargeCustomDictionary{
+			LargeCustomDictionary: largeCustomDictionaryConfig,
+		},
+	}
+
+	req := &dlppb.CreateStoredInfoTypeRequest{
+		Parent:           fmt.Sprintf("projects/%s/locations/global", projectID),
+		Config:           storedInfoTypeConfig,
+		StoredInfoTypeId: "go-sample-test-stored-infoType" + u,
+	}
+	resp, err := client.CreateStoredInfoType(ctx, req)
+	if err != nil {
+		return "nil", err
+	}
+
+	return resp.Name, nil
 }
 
 func TestInspectGCSFileSendToScc(t *testing.T) {
@@ -798,7 +860,24 @@ func filePathtoGCS(t *testing.T, projectID, bucketNameForInspectGCSSendToScc, di
 	return nil
 }
 
-var projectID, jobTriggerForInspectSample string
+func deleteStoredInfoTypeAfterTest(t *testing.T, name string) error {
+	t.Helper()
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	req := &dlppb.DeleteStoredInfoTypeRequest{
+		Name: name,
+	}
+	err = client.DeleteStoredInfoType(ctx, req)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func TestMain(m *testing.M) {
 	tc, ok := testutil.ContextMain(m)
@@ -813,9 +892,19 @@ func TestMain(m *testing.M) {
 		log.Fatal("couldn't initialize test")
 		return
 	}
+	ctx := context.Background()
+	c, err := storage.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("storage.NewClient: %v", err)
+	}
+	defer c.Close()
 	m.Run()
 	deleteActiveJob(tc.ProjectID, jobTriggerForInspectSample)
 	deleteJobTriggerForInspectDataToHybridJobTrigger(tc.ProjectID, jobTriggerForInspectSample)
+	if err := testutil.DeleteExpiredBuckets(c, tc.ProjectID, testPrefix, bucketExpiryAge); err != nil {
+		// Don't fail the test if cleanup fails
+		log.Printf("Post-test cleanup failed: %v", err)
+	}
 }
 
 func TestInspectDataToHybridJobTrigger(t *testing.T) {
