@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,27 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package redact
+package inspect
 
 import (
-	"crypto/md5"
-	"encoding/hex"
-	"io"
-	"os"
+	"bytes"
+	"strings"
+	"testing"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func calculateImageHash(filename string) (string, error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
+func TestInspectStringCustomHotWord(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
 
-	hash := md5.New()
-	if _, err := io.Copy(hash, file); err != nil {
-		return "", err
+	if err := inspectStringCustomHotWord(&buf, tc.ProjectID, "patient name: John Doe", "patient", "PERSON_NAME"); err != nil {
+		t.Fatal(err)
 	}
-
-	hashSum := hash.Sum(nil)
-	return hex.EncodeToString(hashSum), nil
+	got := buf.String()
+	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
+		t.Errorf("inspectStringCustomHotWord got %q, want %q", got, want)
+	}
 }

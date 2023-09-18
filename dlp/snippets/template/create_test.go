@@ -12,27 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package redact
-
-import (
-	"crypto/md5"
-	"encoding/hex"
-	"io"
-	"os"
-)
-
-func calculateImageHash(filename string) (string, error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
-
-	hash := md5.New()
-	if _, err := io.Copy(hash, file); err != nil {
-		return "", err
-	}
-
-	hashSum := hash.Sum(nil)
-	return hex.EncodeToString(hashSum), nil
-}
+package template

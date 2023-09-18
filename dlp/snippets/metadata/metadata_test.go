@@ -16,19 +16,15 @@
 package metadata
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"testing"
-	"time"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"cloud.google.com/go/storage"
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
 )
 
@@ -37,78 +33,6 @@ const (
 	filePathToUpload = "./testdata/term_list_storedInfotype.txt"
 	bucket_prefix    = "test"
 )
-
-func TestInfoTypes(t *testing.T) {
-	testutil.SystemTest(t)
-	tests := []struct {
-		language string
-		filter   string
-		want     string
-	}{
-		{
-			want: "TIME",
-		},
-		{
-			language: "en-US",
-			want:     "TIME",
-		},
-		{
-			language: "es",
-			want:     "DATE",
-		},
-		{
-			filter: "supported_by=INSPECT",
-			want:   "GENDER",
-		},
-	}
-	for _, test := range tests {
-		test := test
-		t.Run(test.language, func(t *testing.T) {
-			t.Parallel()
-			buf := new(bytes.Buffer)
-			err := infoTypes(buf, test.language, test.filter)
-			if err != nil {
-				t.Errorf("infoTypes(%s, %s) = error %q, want substring %q", test.language, test.filter, err, test.want)
-			}
-			if got := buf.String(); !strings.Contains(got, test.want) {
-				t.Errorf("infoTypes(%s, %s) = %s, want substring %q", test.language, test.filter, got, test.want)
-			}
-		})
-	}
-}
-
-func TestCreateStoredInfoType(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer client.Close()
-	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
-	if err != nil {
-		t.Fatal(err)
-	}
-	outputPath := fmt.Sprintf("gs://" + bucketName + "/")
-	var buf bytes.Buffer
-
-	if err := createStoredInfoType(&buf, tc.ProjectID, outputPath); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-	if want := "output: "; !strings.Contains(got, want) {
-		t.Errorf("error from create stored infoType %q", got)
-	}
-
-	if want := "github-usernames"; !strings.Contains(got, want) {
-		t.Errorf("error from create stored infoType %q", got)
-	}
-
-	name := strings.TrimPrefix(got, "output: ")
-
-	defer deleteStoredInfoTypeAfterTest(t, name)
-}
 
 func deleteStoredInfoTypeAfterTest(t *testing.T, name string) error {
 	t.Helper()
@@ -127,57 +51,6 @@ func deleteStoredInfoTypeAfterTest(t *testing.T, name string) error {
 		return err
 	}
 	return nil
-}
-
-func TestUpdateStoredInfoType(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	var buf bytes.Buffer
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer client.Close()
-	outputBucket, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
-	if err != nil {
-		t.Fatal(err)
-	}
-	outputPath := fmt.Sprintf("gs://" + outputBucket + "/")
-
-	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	fileSetUrl, gcsUri, err := filesForUpdateStoredInfoType(t, tc.ProjectID, bucketName)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	infoTypeId, err := createStoredInfoTypeForTesting(t, tc.ProjectID, outputPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	infoTypeId = strings.TrimPrefix(infoTypeId, fmt.Sprint("projects/"+tc.ProjectID+"/locations/global/storedInfoTypes/"))
-
-	duration := time.Duration(30) * time.Second
-	time.Sleep(duration)
-
-	if err := updateStoredInfoType(&buf, tc.ProjectID, gcsUri, fileSetUrl, infoTypeId); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-
-	if want := "output: "; !strings.Contains(got, want) {
-		t.Errorf("error from create stored infoType %q", got)
-	}
-
-	name := strings.TrimPrefix(got, "output: ")
-
-	defer deleteStoredInfoTypeAfterTest(t, name)
 }
 
 func filesForUpdateStoredInfoType(t *testing.T, projectID, bucketName string) (string, string, error) {

@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,27 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package redact
+package inspect
 
 import (
-	"crypto/md5"
-	"encoding/hex"
-	"io"
-	"os"
+	"bytes"
+	"strings"
+	"testing"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func calculateImageHash(filename string) (string, error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
+func TestInspectPhoneNumber(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	var buf bytes.Buffer
 
-	hash := md5.New()
-	if _, err := io.Copy(hash, file); err != nil {
-		return "", err
+	if err := inspectPhoneNumber(&buf, tc.ProjectID, "I'm Gary and my phone number is (415) 555-0890"); err != nil {
+		t.Fatal(err)
 	}
 
-	hashSum := hash.Sum(nil)
-	return hex.EncodeToString(hashSum), nil
+	got := buf.String()
+	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
+		t.Errorf("inspectPhoneNumber got %q, want %q", got, want)
+	}
 }
