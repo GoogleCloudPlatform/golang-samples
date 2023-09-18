@@ -30,8 +30,6 @@ import (
 	"google.golang.org/api/option"
 )
 
-var region string = "us-central1"
-
 func TestCreateDataset(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
