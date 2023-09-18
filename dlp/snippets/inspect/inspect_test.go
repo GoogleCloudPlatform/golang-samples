@@ -651,6 +651,157 @@ func TestInspectTableWithCustomHotword(t *testing.T) {
 	}
 }
 
+func createBigQueryDataSetId(projectID string) error {
+
+	ctx := context.Background()
+
+	client, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	meta := &bigquery.DatasetMetadata{
+		Location: "US", // See https://cloud.google.com/bigquery/docs/locations
+	}
+
+	if err := client.Dataset(dataSetID).Create(ctx, meta); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func createTableInsideDataset(projectID, dataSetID string) error {
+	ctx := context.Background()
+	client, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	sampleSchema := bigquery.Schema{
+		{Name: "user_id", Type: bigquery.StringFieldType},
+		{Name: "age", Type: bigquery.IntegerFieldType},
+		{Name: "title", Type: bigquery.StringFieldType},
+		{Name: "score", Type: bigquery.StringFieldType},
+	}
+
+	metaData := &bigquery.TableMetadata{
+		Schema:         sampleSchema,
+		ExpirationTime: time.Now().AddDate(1, 0, 0), // Table will be automatically deleted in 1 year.
+	}
+
+	tableRef := client.Dataset(dataSetID).Table(tableID)
+	if err := tableRef.Create(ctx, metaData); err != nil {
+		log.Printf("[INFO] createBigQueryDataSetId Error while table creation: %v", err)
+		return err
+	}
+
+	duration := time.Duration(90) * time.Second
+	time.Sleep(duration)
+
+	inserter := client.Dataset(dataSetID).Table(tableID).Inserter()
+	items := []*BigQueryTableItem{
+		// Item implements the ValueSaver interface.
+		{UserId: "602-61-8588", Age: 32, Title: "Biostatistician III", Score: "A"},
+		{UserId: "618-96-2322", Age: 69, Title: "Programmer I", Score: "C"},
+		{UserId: "618-96-2322", Age: 69, Title: "Executive Secretary", Score: "C"},
+	}
+	if err := inserter.Put(ctx, items); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type BigQueryTableItem struct {
+	UserId string
+	Age    int
+	Title  string
+	Score  string
+}
+
+func (i *BigQueryTableItem) Save() (map[string]bigquery.Value, string, error) {
+	return map[string]bigquery.Value{
+		"user_id": i.UserId,
+		"age":     i.Age,
+		"title":   i.Title,
+		"score":   i.Score,
+	}, bigquery.NoDedupeID, nil
+}
+
+func deleteBigQueryAssets(projectID string) error {
+
+	log.Printf("[START] deleteBigQueryAssets: projectID %v and ", projectID)
+	ctx := context.Background()
+
+	client, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	log.Printf("[INFO] deleteBigQueryAssets: delete dataset err %v", err)
+
+	if err := client.Dataset("dlp_test_dataset").DeleteWithContents(ctx); err != nil {
+		log.Printf("[INFO] deleteBigQueryAssets: delete dataset err %v", err)
+		return err
+	}
+
+	duration := time.Duration(30) * time.Second
+	time.Sleep(duration)
+
+	log.Printf("[END] deleteBigQueryAssets:")
+	return nil
+}
+
+func deleteJob(projectID, jobName string) error {
+	ctx := context.Background()
+
+	log.Printf("[START] deleteJob: projectID %v", projectID)
+	// delete job
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		log.Printf("[INFO] deleteJob:: error %v", err)
+		return err
+	}
+	log.Printf("[INFO] deleteJob:: error %v", err)
+
+	req := &dlppb.DeleteDlpJobRequest{
+		Name: jobName,
+	}
+	for {
+		ct, cancel := context.WithTimeout(ctx, 300000)
+		defer cancel()
+		abc, err := client.GetDlpJob(ct, &dlppb.GetDlpJobRequest{
+			Name: jobName,
+		})
+		if err != nil {
+			log.Printf("[INFO] deleteJob:: error %v", err)
+			return err
+		}
+		if abc.State == dlppb.DlpJob_DONE {
+			log.Printf("[INFO] deleteJob:: job done")
+			break
+		} else if abc.State == dlppb.DlpJob_FAILED {
+			log.Printf("[INFO] deleteJob:: job failed")
+			return err
+		} else {
+			log.Printf("[INFO] deleteJob:: job continue")
+			continue
+		}
+	}
+	err = client.DeleteDlpJob(ctx, req)
+	if err != nil {
+		log.Printf("[INFO] deleteJob:: error %v", err)
+		return err
+	}
+
+	log.Printf("[END] deleteJob")
+	return nil
+}
+
 func TestInspectDataStoreSendToScc(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
@@ -892,6 +1043,9 @@ func TestMain(m *testing.M) {
 		log.Fatal("couldn't initialize test")
 		return
 	}
+	createBigQueryDataSetId(tc.ProjectID)
+	createTableInsideDataset(tc.ProjectID, dataSetID)
+
 	ctx := context.Background()
 	c, err := storage.NewClient(ctx)
 	if err != nil {
@@ -899,6 +1053,7 @@ func TestMain(m *testing.M) {
 	}
 	defer c.Close()
 	m.Run()
+	deleteBigQueryAssets(tc.ProjectID)
 	deleteActiveJob(tc.ProjectID, jobTriggerForInspectSample)
 	deleteJobTriggerForInspectDataToHybridJobTrigger(tc.ProjectID, jobTriggerForInspectSample)
 	if err := testutil.DeleteExpiredBuckets(c, tc.ProjectID, testPrefix, bucketExpiryAge); err != nil {
