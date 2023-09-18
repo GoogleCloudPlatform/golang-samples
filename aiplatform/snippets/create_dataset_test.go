@@ -45,10 +45,10 @@ func TestCreateDataset(t *testing.T) {
 	}
 
 	output := got
-	teardown(output, t)
+	teardownCreateDataset(output, t)
 }
 
-func teardown(output string, t *testing.T) {
+func teardownCreateDataset(output string, t *testing.T) {
 	t.Helper()
 
 	// parse dataset name--we cannot predict the dataset ID at creation time.

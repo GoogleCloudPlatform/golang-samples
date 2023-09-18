@@ -33,7 +33,7 @@ var (
 	location  string = "us-central1"
 )
 
-func setup(t *testing.T) (datasetID string) {
+func setupDeleteDataset(t *testing.T) (datasetID string) {
 	t.Helper()
 
 	// Create a new dataset
@@ -72,7 +72,7 @@ func setup(t *testing.T) (datasetID string) {
 }
 
 func TestDeleteDataset(t *testing.T) {
-	datasetID := setup(t)
+	datasetID := setupDeleteDataset(t)
 
 	var buf bytes.Buffer
 	err := deleteDataset(&buf, projectID, location, datasetID)
