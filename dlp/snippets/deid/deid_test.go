@@ -40,13 +40,10 @@ import (
 )
 
 const (
-	bucketForDeidCloudStorageForInput  = "dlp-test-deid-input"
-	bucketForDeidCloudStorageForOutput = "dlp-test-deid-go-lang-output"
-	filePathToGCSUploadForDeidTest     = "./testdata/dlp_sample.csv"
-	filePathToGCSForDeidTest           = "/testdata/dlp_sample.csv"
-	tableID                            = "dlp_test_deid_table"
-	dataSetID                          = "dlp_test_deid_dataset"
-
+	filePathToGCSUploadForDeidTest = "./testdata/dlp_sample.csv"
+	filePathToGCSForDeidTest       = "/testdata/dlp_sample.csv"
+	tableID                        = "dlp_test_deid_table"
+	dataSetID                      = "dlp_test_deid_dataset"
 	deidentifyTemplateID           = "deidentified-templat-test-go"
 	deidentifyStructuredTemplateID = "deidentified-structured-template-go"
 	redactImageTemplate            = "redact-image-template-go"
@@ -711,7 +708,7 @@ func TestDeidentifyDataReplaceWithDictionary(t *testing.T) {
 func TestDeidentifyCloudStorage(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
-	// "gs://dlp-crest-test/dlp_sample.csv"
+
 	gcsURI := fmt.Sprint("gs://" + bucketForDeidCloudStorageForInput + "/" + filePathToGCSForDeidTest)
 	outputBucket := fmt.Sprint("gs://" + bucketForDeidCloudStorageForOutput)
 
@@ -728,6 +725,12 @@ func TestDeidentifyCloudStorage(t *testing.T) {
 		t.Errorf("TestDeidentifyCloudStorage got %q, want %q", got, want)
 	}
 }
+
+var (
+	u                                  = uuid.New().String()[:8]
+	bucketForDeidCloudStorageForInput  = "dlp-test-deid-input-" + u
+	bucketForDeidCloudStorageForOutput = "dlp-test-deid-output-" + u
+)
 
 func TestMain(m *testing.M) {
 	tc := testutil.Context{}
