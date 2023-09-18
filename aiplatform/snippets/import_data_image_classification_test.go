@@ -34,7 +34,7 @@ import (
 var (
 	datasetName string
 	datasetID   string
-	gcsURI      string = ""
+	gcsURI      string
 )
 
 func setup(t *testing.T) func() {
@@ -117,7 +117,7 @@ func setup(t *testing.T) func() {
 func TestImportDataImageClassification(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	teardown := setup(t)
-	defer teardown()
+	t.Cleanup(teardown)
 
 	var buf bytes.Buffer
 	if err := importDataImageClassification(&buf, tc.ProjectID, region, datasetID, gcsURI); err != nil {
