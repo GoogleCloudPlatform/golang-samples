@@ -84,9 +84,13 @@ func updateCDNKey(w io.Writer, projectID, keyID, hostname, keyName, privateKey s
 	}
 
 	// Updates the CDN key.
-	response, err := client.UpdateCdnKey(ctx, req)
+	op, err := client.UpdateCdnKey(ctx, req)
 	if err != nil {
 		return fmt.Errorf("client.UpdateCdnKey: %w", err)
+	}
+	response, err := op.Wait(ctx)
+	if err != nil {
+		return fmt.Errorf("Wait: %w", err)
 	}
 
 	fmt.Fprintf(w, "Updated CDN key: %+v", response)

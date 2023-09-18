@@ -42,12 +42,16 @@ func deleteCDNKey(w io.Writer, projectID, keyID string) error {
 		Name: name,
 	}
 	// Deletes the CDN key.
-	err = client.DeleteCdnKey(ctx, req)
+	op, err := client.DeleteCdnKey(ctx, req)
 	if err != nil {
 		return fmt.Errorf("client.DeleteCdnKey: %w", err)
 	}
+	err = op.Wait(ctx)
+	if err != nil {
+		return fmt.Errorf("Wait: %w", err)
+	}
 
-	fmt.Fprintf(w, "Deleted CDN key: %s", name)
+	fmt.Fprintf(w, "Deleted CDN key")
 	return nil
 }
 

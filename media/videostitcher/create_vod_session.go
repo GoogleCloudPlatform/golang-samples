@@ -49,8 +49,9 @@ func createVodSession(w io.Writer, projectID, sourceURI string) error {
 	req := &stitcherpb.CreateVodSessionRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 		VodSession: &stitcherpb.VodSession{
-			SourceUri: sourceURI,
-			AdTagUri:  adTagURI,
+			SourceUri:  sourceURI,
+			AdTagUri:   adTagURI,
+			AdTracking: stitcherpb.AdTracking_SERVER,
 		},
 	}
 	// Creates the VOD session.
