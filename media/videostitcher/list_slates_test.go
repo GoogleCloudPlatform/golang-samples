@@ -18,10 +18,11 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
 	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
