@@ -75,9 +75,13 @@ func createCDNKey(w io.Writer, projectID, keyID, hostname, keyName, privateKey s
 	}
 
 	// Creates the CDN key.
-	response, err := client.CreateCdnKey(ctx, req)
+	op, err := client.CreateCdnKey(ctx, req)
 	if err != nil {
 		return fmt.Errorf("client.CreateCdnKey: %w", err)
+	}
+	response, err := op.Wait(ctx)
+	if err != nil {
+		return fmt.Errorf("Wait: %w", err)
 	}
 
 	fmt.Fprintf(w, "CDN key: %v", response.GetName())
