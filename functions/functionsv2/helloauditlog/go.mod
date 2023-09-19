@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/hello
 go 1.19
 
 require (
-	github.com/GoogleCloudPlatform/functions-framework-go v1.7.3
+	github.com/GoogleCloudPlatform/functions-framework-go v1.7.4
 	github.com/cloudevents/sdk-go/v2 v2.14.0
 )
 
