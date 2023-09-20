@@ -14,58 +14,58 @@
 
 package videostitcher
 
-// [START videostitcher_create_live_session]
-import (
-	"context"
-	"fmt"
-	"io"
+// // [START videostitcher_create_live_session]
+// import (
+// 	"context"
+// 	"fmt"
+// 	"io"
 
-	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
-)
+// 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
+// 	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
+// )
 
-// createLiveSession creates a livestream session in which to insert ads.
-// Live sessions are ephemeral resources that expire after a few minutes.
-func createLiveSession(w io.Writer, projectID, sourceURI, slateID string) error {
-	// projectID := "my-project-id"
+// // createLiveSession creates a livestream session in which to insert ads.
+// // Live sessions are ephemeral resources that expire after a few minutes.
+// func createLiveSession(w io.Writer, projectID, sourceURI, slateID string) error {
+// 	// projectID := "my-project-id"
 
-	// Uri of the media to stitch; this URI must reference either an MPEG-DASH
-	// manifest (.mpd) file or an M3U playlist manifest (.m3u8) file.
-	// sourceURI := "https://storage.googleapis.com/my-bucket/main.mpd"
-	// slateID := "my-slate"
-	// See https://cloud.google.com/video-stitcher/docs/concepts for information
-	// on ad tags and ad metadata. This sample uses an ad tag URL that displays
-	// a Single Inline Linear ad
-	// (https://developers.google.com/interactive-media-ads/docs/sdks/html5/client-side/tags).
-	adTagURI := "https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/single_ad_samples&sz=640x480&cust_params=sample_ct%3Dlinear&ciu_szs=300x250%2C728x90&gdfp_req=1&output=vast&unviewed_position_start=1&env=vp&impl=s&correlator="
-	location := "us-central1"
-	ctx := context.Background()
-	client, err := stitcher.NewVideoStitcherClient(ctx)
-	if err != nil {
-		return fmt.Errorf("stitcher.NewVideoStitcherClient: %w", err)
-	}
-	defer client.Close()
+// 	// Uri of the media to stitch; this URI must reference either an MPEG-DASH
+// 	// manifest (.mpd) file or an M3U playlist manifest (.m3u8) file.
+// 	// sourceURI := "https://storage.googleapis.com/my-bucket/main.mpd"
+// 	// slateID := "my-slate"
+// 	// See https://cloud.google.com/video-stitcher/docs/concepts for information
+// 	// on ad tags and ad metadata. This sample uses an ad tag URL that displays
+// 	// a Single Inline Linear ad
+// 	// (https://developers.google.com/interactive-media-ads/docs/sdks/html5/client-side/tags).
+// 	adTagURI := "https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/single_ad_samples&sz=640x480&cust_params=sample_ct%3Dlinear&ciu_szs=300x250%2C728x90&gdfp_req=1&output=vast&unviewed_position_start=1&env=vp&impl=s&correlator="
+// 	location := "us-central1"
+// 	ctx := context.Background()
+// 	client, err := stitcher.NewVideoStitcherClient(ctx)
+// 	if err != nil {
+// 		return fmt.Errorf("stitcher.NewVideoStitcherClient: %w", err)
+// 	}
+// 	defer client.Close()
 
-	req := &stitcherpb.CreateLiveSessionRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
-		LiveSession: &stitcherpb.LiveSession{
-			SourceUri:      sourceURI,
-			DefaultAdTagId: "default",
-			DefaultSlateId: slateID,
-			AdTagMap: map[string]*stitcherpb.AdTag{"default": {
-				Uri: adTagURI,
-			}},
-		},
-	}
-	// Creates the live session.
-	response, err := client.CreateLiveSession(ctx, req)
-	if err != nil {
-		return fmt.Errorf("client.CreateLiveSession: %w", err)
-	}
+// 	req := &stitcherpb.CreateLiveSessionRequest{
+// 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+// 		LiveSession: &stitcherpb.LiveSession{
+// 			SourceUri:      sourceURI,
+// 			DefaultAdTagId: "default",
+// 			DefaultSlateId: slateID,
+// 			AdTagMap: map[string]*stitcherpb.AdTag{"default": {
+// 				Uri: adTagURI,
+// 			}},
+// 		},
+// 	}
+// 	// Creates the live session.
+// 	response, err := client.CreateLiveSession(ctx, req)
+// 	if err != nil {
+// 		return fmt.Errorf("client.CreateLiveSession: %w", err)
+// 	}
 
-	fmt.Fprintf(w, "Live session: %v\n", response.GetName())
-	fmt.Fprintf(w, "Play URI: %v", response.GetPlayUri())
-	return nil
-}
+// 	fmt.Fprintf(w, "Live session: %v\n", response.GetName())
+// 	fmt.Fprintf(w, "Play URI: %v", response.GetPlayUri())
+// 	return nil
+// }
 
-// [END videostitcher_create_live_session]
+// // [END videostitcher_create_live_session]

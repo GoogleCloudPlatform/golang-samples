@@ -32,7 +32,11 @@ func TestCreateSlate(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 
-	slateID := "go-create-test-slate"
+	uuid, err := getUUID()
+	if err != nil {
+		t.Fatalf("getUUID err: %v", err)
+	}
+	slateID := fmt.Sprintf("%s-%s", slateID, uuid)
 	slateName := fmt.Sprintf("projects/%s/locations/%s/slates/%s", tc.ProjectID, location, slateID)
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		if err := createSlate(buf, tc.ProjectID, slateID, slateURI); err != nil {

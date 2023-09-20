@@ -73,7 +73,11 @@ func setupTestGetSlate(slateID string, t *testing.T) func() {
 func TestGetSlate(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
-	slateID := "go-get-test-slate"
+	uuid, err := getUUID()
+	if err != nil {
+		t.Fatalf("getUUID err: %v", err)
+	}
+	slateID := fmt.Sprintf("%s-%s", slateID, uuid)
 	teardown := setupTestGetSlate(slateID, t)
 	t.Cleanup(teardown)
 

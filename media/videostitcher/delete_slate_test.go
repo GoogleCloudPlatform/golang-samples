@@ -58,7 +58,11 @@ func setupTestDeleteSlate(slateID string, t *testing.T) {
 func TestDeleteSlate(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
-	slateID := "go-delete-test-slate"
+	uuid, err := getUUID()
+	if err != nil {
+		t.Fatalf("getUUID err: %v", err)
+	}
+	slateID := fmt.Sprintf("%s-%s", slateID, uuid)
 	setupTestDeleteSlate(slateID, t)
 
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {

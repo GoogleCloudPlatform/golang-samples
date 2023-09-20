@@ -14,74 +14,74 @@
 
 package videostitcher
 
-// [START videostitcher_create_cdn_key]
-import (
-	"context"
-	"fmt"
-	"io"
+// // [START videostitcher_create_cdn_key]
+// import (
+// 	"context"
+// 	"fmt"
+// 	"io"
 
-	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
-)
+// 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
+// 	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
+// )
 
-// createCDNKey creates a CDN key. A CDN key is used to retrieve protected media.
-// If isMediaCDN is true, create a Media CDN key. If false, create a Cloud
-// CDN key. To create a privateKey value for Media CDN, see
-// https://cloud.google.com/video-stitcher/docs/how-to/managing-cdn-keys#create-private-key-media-cdn.
-func createCDNKey(w io.Writer, projectID, keyID, hostname, keyName, privateKey string, isMediaCDN bool) error {
-	// projectID := "my-project-id"
-	// keyID := "my-cdn-key"
-	// hostname := "cdn.example.com"
-	// keyName := "cdn-key"
-	// privateKey := "my-private-key"
-	// isMediaCDN := true
-	location := "us-central1"
-	ctx := context.Background()
-	client, err := stitcher.NewVideoStitcherClient(ctx)
-	if err != nil {
-		return fmt.Errorf("stitcher.NewVideoStitcherClient: %w", err)
-	}
-	defer client.Close()
+// // createCDNKey creates a CDN key. A CDN key is used to retrieve protected media.
+// // If isMediaCDN is true, create a Media CDN key. If false, create a Cloud
+// // CDN key. To create a privateKey value for Media CDN, see
+// // https://cloud.google.com/video-stitcher/docs/how-to/managing-cdn-keys#create-private-key-media-cdn.
+// func createCDNKey(w io.Writer, projectID, keyID, hostname, keyName, privateKey string, isMediaCDN bool) error {
+// 	// projectID := "my-project-id"
+// 	// keyID := "my-cdn-key"
+// 	// hostname := "cdn.example.com"
+// 	// keyName := "cdn-key"
+// 	// privateKey := "my-private-key"
+// 	// isMediaCDN := true
+// 	location := "us-central1"
+// 	ctx := context.Background()
+// 	client, err := stitcher.NewVideoStitcherClient(ctx)
+// 	if err != nil {
+// 		return fmt.Errorf("stitcher.NewVideoStitcherClient: %w", err)
+// 	}
+// 	defer client.Close()
 
-	var req *stitcherpb.CreateCdnKeyRequest
-	if isMediaCDN {
-		req = &stitcherpb.CreateCdnKeyRequest{
-			Parent:   fmt.Sprintf("projects/%s/locations/%s", projectID, location),
-			CdnKeyId: keyID,
-			CdnKey: &stitcherpb.CdnKey{
-				CdnKeyConfig: &stitcherpb.CdnKey_MediaCdnKey{
-					MediaCdnKey: &stitcherpb.MediaCdnKey{
-						KeyName:    keyName,
-						PrivateKey: []byte(privateKey),
-					},
-				},
-				Hostname: hostname,
-			},
-		}
-	} else {
-		req = &stitcherpb.CreateCdnKeyRequest{
-			Parent:   fmt.Sprintf("projects/%s/locations/%s", projectID, location),
-			CdnKeyId: keyID,
-			CdnKey: &stitcherpb.CdnKey{
-				CdnKeyConfig: &stitcherpb.CdnKey_GoogleCdnKey{
-					GoogleCdnKey: &stitcherpb.GoogleCdnKey{
-						KeyName:    keyName,
-						PrivateKey: []byte(privateKey),
-					},
-				},
-				Hostname: hostname,
-			},
-		}
-	}
+// 	var req *stitcherpb.CreateCdnKeyRequest
+// 	if isMediaCDN {
+// 		req = &stitcherpb.CreateCdnKeyRequest{
+// 			Parent:   fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+// 			CdnKeyId: keyID,
+// 			CdnKey: &stitcherpb.CdnKey{
+// 				CdnKeyConfig: &stitcherpb.CdnKey_MediaCdnKey{
+// 					MediaCdnKey: &stitcherpb.MediaCdnKey{
+// 						KeyName:    keyName,
+// 						PrivateKey: []byte(privateKey),
+// 					},
+// 				},
+// 				Hostname: hostname,
+// 			},
+// 		}
+// 	} else {
+// 		req = &stitcherpb.CreateCdnKeyRequest{
+// 			Parent:   fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+// 			CdnKeyId: keyID,
+// 			CdnKey: &stitcherpb.CdnKey{
+// 				CdnKeyConfig: &stitcherpb.CdnKey_GoogleCdnKey{
+// 					GoogleCdnKey: &stitcherpb.GoogleCdnKey{
+// 						KeyName:    keyName,
+// 						PrivateKey: []byte(privateKey),
+// 					},
+// 				},
+// 				Hostname: hostname,
+// 			},
+// 		}
+// 	}
 
-	// Creates the CDN key.
-	response, err := client.CreateCdnKey(ctx, req)
-	if err != nil {
-		return fmt.Errorf("client.CreateCdnKey: %w", err)
-	}
+// 	// Creates the CDN key.
+// 	response, err := client.CreateCdnKey(ctx, req)
+// 	if err != nil {
+// 		return fmt.Errorf("client.CreateCdnKey: %w", err)
+// 	}
 
-	fmt.Fprintf(w, "CDN key: %v", response.GetName())
-	return nil
-}
+// 	fmt.Fprintf(w, "CDN key: %v", response.GetName())
+// 	return nil
+// }
 
-// [END videostitcher_create_cdn_key]
+// // [END videostitcher_create_cdn_key]

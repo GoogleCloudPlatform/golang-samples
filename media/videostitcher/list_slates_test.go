@@ -73,7 +73,11 @@ func setupTestListSlates(slateID string, t *testing.T) func() {
 func TestListSlates(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
-	slateID := "go-list-test-slates"
+	uuid, err := getUUID()
+	if err != nil {
+		t.Fatalf("getUUID err: %v", err)
+	}
+	slateID := fmt.Sprintf("%s-%s", slateID, uuid)
 	teardown := setupTestListSlates(slateID, t)
 	t.Cleanup(teardown)
 

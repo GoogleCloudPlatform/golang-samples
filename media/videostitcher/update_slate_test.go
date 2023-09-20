@@ -73,7 +73,11 @@ func setupTestUpdateSlate(slateID string, t *testing.T) func() {
 func TestUpdateSlate(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
-	slateID := "go-update-test-slate"
+	uuid, err := getUUID()
+	if err != nil {
+		t.Fatalf("getUUID err: %v", err)
+	}
+	slateID := fmt.Sprintf("%s-%s", slateID, uuid)
 	teardown := setupTestUpdateSlate(slateID, t)
 	t.Cleanup(teardown)
 

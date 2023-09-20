@@ -14,9 +14,27 @@
 
 package videostitcher
 
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"strconv"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/google/uuid"
+	"google.golang.org/api/iterator"
+
+	stitcher "cloud.google.com/go/video/stitcher/apiv1"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
+)
+
 const (
 	location            = "us-central1" // All samples use this location
-	slateID             = "my-go-test-slate"
+	slateID             = "go-test-slate"
 	slateURI            = "https://storage.googleapis.com/cloud-samples-data/media/ForBiggerEscapes.mp4"
 	updatedSlateURI     = "https://storage.googleapis.com/cloud-samples-data/media/ForBiggerJoyrides.mp4"
 	deleteSlateResponse = "Deleted slate"
@@ -42,3 +60,84 @@ const (
 // *   GOLANG_SAMPLES_PROJECT_ID
 // Enable the following API on the test project:
 // *   Video Stitcher API
+
+func TestMain(m *testing.M) {
+	tc, ok := testutil.ContextMain(m)
+	if !ok {
+		log.Fatal("couldn't initialize test")
+		return
+	}
+	cleanStaleResources(tc.ProjectID)
+	m.Run()
+}
+
+func cleanStaleResources(projectID string) {
+	ctx := context.Background()
+	client, err := stitcher.NewVideoStitcherClient(ctx)
+	if err != nil {
+		log.Fatalf("stitcher.NewVideoStitcherClient")
+		return
+	}
+	defer client.Close()
+
+	req := &stitcherstreampb.ListSlatesRequest{
+		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+	}
+
+	it := client.ListSlates(ctx, req)
+
+	for {
+		response, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Printf("Can't find next slate: %s", err)
+			continue
+		}
+		if strings.Contains(response.GetName(), slateID) {
+
+			arr := strings.Split(response.GetName(), "-")
+			t := arr[len(arr)-1]
+			if isResourceStale(t) == true {
+				req := &stitcherstreampb.DeleteSlateRequest{
+					Name: response.GetName(),
+				}
+				// Deletes the slate.
+				op, err := client.DeleteSlate(ctx, req)
+				if err != nil {
+					log.Printf("cleanStaleResources DeleteSlate: %s", err)
+				}
+				err = op.Wait(ctx)
+				if err != nil {
+					log.Printf("cleanStaleResources Wait: %s", err)
+				}
+			}
+		}
+	}
+}
+
+func isResourceStale(timestamp string) bool {
+	const threeHoursInSecs = 3 * 60 * 60
+	past, err := strconv.ParseInt(timestamp, 10, 64)
+	if err != nil {
+		log.Printf("isResourceStale timestamp: %s, err: %s", timestamp, err)
+		return false
+	}
+
+	now := time.Now().Unix()
+	if past < (now - threeHoursInSecs) {
+		return true
+	}
+	return false
+}
+
+func getUUID() (string, error) {
+	t := time.Now()
+	u, err := uuid.NewRandom()
+	if err != nil {
+		return "", fmt.Errorf("uuid err: %v", err)
+	}
+	uuid := u.String()
+	return fmt.Sprintf("%s-%d", strings.ReplaceAll(uuid, "-", ""), t.Unix()), nil
+}
