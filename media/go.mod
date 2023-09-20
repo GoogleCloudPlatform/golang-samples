@@ -7,6 +7,7 @@ require (
 	cloud.google.com/go/video v1.20.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230522201558-cba0742a460f
 	github.com/golang/protobuf v1.5.3
+	github.com/google/uuid v1.3.0
 	google.golang.org/api v0.128.0
 	google.golang.org/protobuf v1.31.0
 )
@@ -20,7 +21,6 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/s2a-go v0.1.4 // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.4 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
