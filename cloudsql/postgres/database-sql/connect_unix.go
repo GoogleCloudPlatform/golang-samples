@@ -22,9 +22,9 @@ import (
 	"os"
 
 	// Note: If connecting using the App Engine Flex Go runtime, use
-	// "github.com/jackc/pgx/stdlib" instead, since v4 requires
+	// "github.com/jackc/pgx/stdlib" instead, since v5 requires
 	// Go modules which are not supported by App Engine Flex.
-	_ "github.com/jackc/pgx/v4/stdlib"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 // connectUnixSocket initializes a Unix socket connection pool for
