@@ -19,7 +19,6 @@ import (
 	"net/http"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -58,8 +57,7 @@ func TestRendererService(t *testing.T) {
 		}
 		req.Body = ioutil.NopCloser(strings.NewReader(test.input))
 
-		client := http.Client{Timeout: 10 * time.Second}
-		resp, err := client.Do(req)
+		resp, err := service.Do(req)
 		if err != nil {
 			t.Fatalf("client.Do: %v", err)
 		}

@@ -67,7 +67,7 @@ func caseEditorServiceUI(t *testing.T) {
 		t.Fatalf("service.NewRequest: %q", err)
 	}
 
-	resp, err := client.Do(req)
+	resp, err := editorService.Do(req)
 	if err != nil {
 		t.Fatalf("client.Do: %v", err)
 	}
@@ -92,7 +92,7 @@ func caseEditorServiceRender(t *testing.T) {
 	}
 	req.Body = ioutil.NopCloser(bytes.NewReader(b))
 
-	resp, err := client.Do(req)
+	resp, err := editorService.Do(req)
 	if err != nil {
 		t.Fatalf("client.Do: %v", err)
 	}
