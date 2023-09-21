@@ -17,7 +17,6 @@ package cloudruntests
 import (
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -34,7 +33,8 @@ func TestImageProcessingService(t *testing.T) {
 	defer service.Clean()
 
 	requestPath := "/"
-	req, err := service.NewRequest("POST", requestPath)
+	resp, err := service.Request("POST", requestPath,
+		cloudrunci.WithAcceptFunc(cloudrunci.AcceptNonServerError))
 	if err != nil {
 		t.Fatalf("service.NewRequest: %v", err)
 	}
