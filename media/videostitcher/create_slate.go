@@ -51,7 +51,7 @@ func createSlate(w io.Writer, projectID, slateID, slateURI string) error {
 	}
 	response, err := op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("Wait: %w", err)
+		return err
 	}
 
 	fmt.Fprintf(w, "Slate: %v", response.GetName())

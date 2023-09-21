@@ -57,7 +57,7 @@ func setupTestDeleteSlate(slateID string, t *testing.T) {
 
 func TestDeleteSlate(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := &bytes.Buffer{}
+	var buf bytes.Buffer
 	uuid, err := getUUID()
 	if err != nil {
 		t.Fatalf("getUUID err: %v", err)
@@ -66,12 +66,11 @@ func TestDeleteSlate(t *testing.T) {
 	setupTestDeleteSlate(slateID, t)
 
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		if err := deleteSlate(buf, tc.ProjectID, slateID); err != nil {
+		if err := deleteSlate(&buf, tc.ProjectID, slateID); err != nil {
 			r.Errorf("deleteSlate got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, deleteSlateResponse) {
-			r.Errorf("deleteSlate got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteSlateResponse)
+			r.Errorf("deleteSlate got: %v Want to contain: %v", got, deleteSlateResponse)
 		}
 	})
-	buf.Reset()
 }

@@ -36,6 +36,7 @@ func setupTestListSlates(slateID string, t *testing.T) func() {
 	if err != nil {
 		t.Fatalf("stitcher.NewVideoStitcherClient: %v", err)
 	}
+	// client.Close() is called in the returned function
 
 	tc := testutil.SystemTest(t)
 	req := &stitcherstreampb.CreateSlateRequest{
@@ -72,7 +73,7 @@ func setupTestListSlates(slateID string, t *testing.T) func() {
 
 func TestListSlates(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := &bytes.Buffer{}
+	var buf bytes.Buffer
 	uuid, err := getUUID()
 	if err != nil {
 		t.Fatalf("getUUID err: %v", err)
@@ -83,12 +84,11 @@ func TestListSlates(t *testing.T) {
 
 	slateName := fmt.Sprintf("projects/%s/locations/%s/slates/%s", tc.ProjectID, location, slateID)
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		if err := listSlates(buf, tc.ProjectID); err != nil {
+		if err := listSlates(&buf, tc.ProjectID); err != nil {
 			r.Errorf("listSlates got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, slateName) {
-			r.Errorf("listSlates got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, slateName)
+			r.Errorf("listSlates got: %v Want to contain: %v", got, slateName)
 		}
 	})
-	buf.Reset()
 }

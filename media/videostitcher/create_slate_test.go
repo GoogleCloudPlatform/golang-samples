@@ -30,7 +30,7 @@ import (
 
 func TestCreateSlate(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := &bytes.Buffer{}
+	var buf bytes.Buffer
 
 	uuid, err := getUUID()
 	if err != nil {
@@ -39,14 +39,13 @@ func TestCreateSlate(t *testing.T) {
 	slateID := fmt.Sprintf("%s-%s", slateID, uuid)
 	slateName := fmt.Sprintf("projects/%s/locations/%s/slates/%s", tc.ProjectID, location, slateID)
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		if err := createSlate(buf, tc.ProjectID, slateID, slateURI); err != nil {
+		if err := createSlate(&buf, tc.ProjectID, slateID, slateURI); err != nil {
 			t.Fatalf("createSlate got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, slateName) {
-			t.Fatalf("createSlate got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, slateName)
+			t.Fatalf("createSlate got: %v Want to contain: %v", got, slateName)
 		}
 	})
-	buf.Reset()
 	teardownTestCreateSlate(slateName, t)
 }
 
@@ -68,6 +67,6 @@ func teardownTestCreateSlate(slateName string, t *testing.T) {
 	}
 	err = op.Wait(ctx)
 	if err != nil {
-		t.Errorf("op.Wait: %v", err)
+		t.Error(err)
 	}
 }

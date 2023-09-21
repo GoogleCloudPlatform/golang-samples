@@ -48,7 +48,7 @@ func deleteSlate(w io.Writer, projectID, slateID string) error {
 	}
 	err = op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("Wait: %w", err)
+		return err
 	}
 
 	fmt.Fprintf(w, "Deleted slate")
