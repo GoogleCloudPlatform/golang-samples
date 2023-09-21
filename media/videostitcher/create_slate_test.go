@@ -40,10 +40,10 @@ func TestCreateSlate(t *testing.T) {
 	slateName := fmt.Sprintf("projects/%s/locations/%s/slates/%s", tc.ProjectID, location, slateID)
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		if err := createSlate(&buf, tc.ProjectID, slateID, slateURI); err != nil {
-			t.Fatalf("createSlate got err: %v", err)
+			r.Errorf("createSlate got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, slateName) {
-			t.Fatalf("createSlate got: %v Want to contain: %v", got, slateName)
+			r.Errorf("createSlate got: %v Want to contain: %v", got, slateName)
 		}
 	})
 	teardownTestCreateSlate(slateName, t)

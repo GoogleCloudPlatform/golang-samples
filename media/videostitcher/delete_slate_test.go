@@ -36,6 +36,7 @@ func setupTestDeleteSlate(slateID string, t *testing.T) {
 	if err != nil {
 		t.Fatalf("stitcher.NewVideoStitcherClient: %v", err)
 	}
+	defer client.Close()
 
 	tc := testutil.SystemTest(t)
 	req := &stitcherstreampb.CreateSlateRequest{
