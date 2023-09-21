@@ -1,0 +1,54 @@
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: "0.0.0.0:4318"
+  filelog:
+    include:
+    - "/var/log/app.log"
+    operators:
+      - type: json_parser
+        parse_to: body
+        timestamp:
+          parse_from: attributes.time
+          layout: '%Y-%m-%d %H:%M:%S'
+
+exporters:
+  googlecloud:
+    project: "punya-hackathon-a"
+    log:
+      default_log_name: "opentelemetry.io/collector-exported-log"
+  googlemanagedprometheus:
+    project: "punya-hackathon-a"
+    retry_on_failure:
+      enabled: false
+
+processors:
+  batch:
+    send_batch_max_size: 200
+    send_batch_size: 200
+    timeout: 5s
+  resource:
+    attributes:
+      - { key: "location", value: "us-central1", action: "upsert" }
+      - { key: "cluster", value: "no-cluster", action: "upsert" }
+      - { key: "namespace", value: "no-namespace", action: "upsert" }
+      - { key: "job", value: "us-job", action: "upsert" }
+      - { key: "instance", value: "us-instance", action: "upsert" }
+  resourcedetection:
+    detectors: ["env", "gcp"]
+
+service:
+  pipelines:
+    traces:
+      receivers: ["otlp"]
+      processors: ["batch", "resourcedetection"]
+      exporters: ["googlecloud"]
+    metrics:
+      receivers: ["otlp"]
+      processors: ["resourcedetection", "resource"]
+      exporters: ["googlemanagedprometheus"]
+    logs:
+      receivers: ["filelog"]
+      processors: ["batch", "resourcedetection"]
+      exporters: ["googlecloud"]

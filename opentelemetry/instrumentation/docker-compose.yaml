@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  app:
+    build: ./app
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcol:4318
+      - OTEL_SERVICE_NAME=otel-quickstart-go
+    volumes:
+      - ./var/log:/var/log:rw
+    depends_on:
+      - "otelcol"
+  otelcol:
+    image: otel/opentelemetry-collector-contrib:0.83.0
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+      - ./var/credentials.json:/etc/otelcol-config/credentials.json:ro
+      - ./var/log:/var/log:rw
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/etc/otelcol-config/credentials.json
+  loadgen:
+    image: golang:1.21
+    command: ["go", "run", "github.com/rakyll/hey@latest", "http://app:8080/multi"]
+    depends_on:
+      - "app"
