@@ -3,16 +3,16 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/respo
 go 1.19
 
 require (
-	cloud.google.com/go/bigquery v1.51.2
-	github.com/GoogleCloudPlatform/functions-framework-go v1.7.3
-	google.golang.org/api v0.125.0
+	cloud.google.com/go/bigquery v1.52.0
+	github.com/GoogleCloudPlatform/functions-framework-go v1.7.4
+	google.golang.org/api v0.128.0
 )
 
 require (
-	cloud.google.com/go v0.110.0 // indirect
+	cloud.google.com/go v0.110.2 // indirect
 	cloud.google.com/go/compute v1.19.3 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
-	cloud.google.com/go/iam v0.13.0 // indirect
+	cloud.google.com/go/iam v1.1.0 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/apache/arrow/go/v12 v12.0.0 // indirect
 	github.com/apache/thrift v0.16.0 // indirect
@@ -25,8 +25,8 @@ require (
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/s2a-go v0.1.4 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
-	github.com/googleapis/gax-go/v2 v2.10.0 // indirect
+	github.com/googleapis/enterprise-certificate-proxy v0.2.4 // indirect
+	github.com/googleapis/gax-go/v2 v2.11.0 // indirect
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/klauspost/asmfmt v1.3.2 // indirect
 	github.com/klauspost/compress v1.15.9 // indirect
