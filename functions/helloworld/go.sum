@@ -270,8 +270,8 @@ cloud.google.com/go/functions v1.9.0/go.mod h1:Y+Dz8yGguzO3PpIjhLTbnqV1CWmgQ5Uwt
 cloud.google.com/go/functions v1.10.0/go.mod h1:0D3hEOe3DbEvCXtYOZHQZmD+SzYsi1YbI7dGvHfldXw=
 cloud.google.com/go/functions v1.12.0/go.mod h1:AXWGrF3e2C/5ehvwYo/GH6O5s09tOPksiKhz+hH8WkA=
 cloud.google.com/go/functions v1.13.0/go.mod h1:EU4O007sQm6Ef/PwRsI8N2umygGqPBS/IZQKBQBcJ3c=
-cloud.google.com/go/functions v1.14.0 h1:nhhVBBXH6RAkxROnvPZibzOu7BWkN6uh354PXqNzJrg=
-cloud.google.com/go/functions v1.14.0/go.mod h1:8Ner7FZHTwbPHoD9nDKnQqWf52Ibz9u9EESdt6jd0Ao=
+cloud.google.com/go/functions v1.15.1 h1:LtAyqvO1TFmNLcROzHZhV0agEJfBi+zfMZsF4RT/a7U=
+cloud.google.com/go/functions v1.15.1/go.mod h1:P5yNWUTkyU+LvW/S9O6V+V423VZooALQlqoXdoPz5AE=
 cloud.google.com/go/gaming v1.5.0/go.mod h1:ol7rGcxP/qHTRQE/RO4bxkXq+Fix0j6D4LFPzYTIrDM=
 cloud.google.com/go/gaming v1.6.0/go.mod h1:YMU1GEvA39Qt3zWGyAVA9bpYz/yAhTvaQ1t2sK4KPUA=
 cloud.google.com/go/gaming v1.7.0/go.mod h1:LrB8U7MHdGgFG851iHAfqUdLcKBdQ55hzXy9xBJz0+w=
@@ -586,8 +586,8 @@ gioui.org v0.0.0-20210308172011-57750fc8a0a6/go.mod h1:RSH6KIUZ0p2xy5zHDxgAM4zum
 git.sr.ht/~sbinet/gg v0.3.1/go.mod h1:KGYtlADtqsqANL9ueOFkWymvzUvLMQllU5Ixo+8v3pc=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/GoogleCloudPlatform/functions-framework-go v1.7.3 h1:R4E96G9IKuRk40S88ygNxFgUUCpf8eatKoXg9WLoLnQ=
-github.com/GoogleCloudPlatform/functions-framework-go v1.7.3/go.mod h1:+JaLkIeUcD6GcgJSEgjgMij6cn8S+bwwmoNUhAKOYJY=
+github.com/GoogleCloudPlatform/functions-framework-go v1.7.4 h1:cz5nfbp9RydcNzxpsfp+v9IrOXpDuqf6x/W7cS4UHiU=
+github.com/GoogleCloudPlatform/functions-framework-go v1.7.4/go.mod h1:+JaLkIeUcD6GcgJSEgjgMij6cn8S+bwwmoNUhAKOYJY=
 github.com/JohnCGriffin/overflow v0.0.0-20211019200055-46fa312c352c/go.mod h1:X0CRv0ky0k6m906ixxpzmDRLvX58TFUKS2eePweuyxk=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/ajstarks/deck v0.0.0-20200831202436-30c9fc6549a9/go.mod h1:JynElWSGnm/4RlzPXRlREEwqTHAN3T56Bv2ITsFT3gY=

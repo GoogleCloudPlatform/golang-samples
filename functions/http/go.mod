@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/http
 
 go 1.19
 
-require github.com/GoogleCloudPlatform/functions-framework-go v1.7.3
+require github.com/GoogleCloudPlatform/functions-framework-go v1.7.4
 
 require (
 	github.com/cloudevents/sdk-go/v2 v2.14.0 // indirect
