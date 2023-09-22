@@ -162,13 +162,11 @@ func (s *Service) Do(req *http.Request, opts ...func(*RetryOptions)) (*http.Resp
 		}
 		if options.ShouldAccept(resp) {
 			return resp, nil
-		} else {
-			time.Sleep(options.Delay)
-			continue
 		}
+		time.Sleep(options.Delay)
 	}
 	// Too many attempts, return the last result.
-	return resp, lastSeen
+	return resp, fmt.Errorf("no acceptable response after %d retries: %w", options.MaxAttempts, lastSeen)
 }
 
 // Request issues an HTTP request to the deployed service.
