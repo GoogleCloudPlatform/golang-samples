@@ -40,8 +40,7 @@ import (
 )
 
 const (
-	filePathToGCSUploadForDeidTest = "./testdata/dlp_sample.csv"
-	filePathToGCSForDeidTest       = "/testdata/dlp_sample.csv"
+	filePathToGCSForDeidTest       = "./testdata/dlp_sample.csv"
 	tableID                        = "dlp_test_deid_table"
 	dataSetID                      = "dlp_test_deid_dataset"
 	deidentifyTemplateID           = "deidentified-templat-test-go"
@@ -735,9 +734,6 @@ var (
 func TestMain(m *testing.M) {
 	tc := testutil.Context{}
 	tc.ProjectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
-	if tc.ProjectID == "" {
-		tc.ProjectID = os.Getenv("")
-	}
 	createRedactImageTemplate(tc.ProjectID, redactImageTemplate)
 	createDeidentifiedTemplate(tc.ProjectID, deidentifyTemplateID)
 	createStructuredDeidentifiedTemplate(tc.ProjectID, deidentifyStructuredTemplateID)
@@ -992,7 +988,7 @@ func filePathtoGCS(projectID string) error {
 	// file upload code
 
 	// Open local file.
-	file, err := os.ReadFile(filePathToGCSUploadForDeidTest)
+	file, err := os.ReadFile(filePathToGCSForDeidTest)
 	if err != nil {
 		log.Fatalf("Failed to read file: %v", err)
 		return err

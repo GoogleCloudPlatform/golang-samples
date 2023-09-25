@@ -5,8 +5,8 @@ go 1.19
 require (
 	cloud.google.com/go/trace v1.10.1
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230809095114-47b5f7ba1a05
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.13.1
-	go.opentelemetry.io/contrib/detectors/gcp v1.16.1
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.15.2
+	go.opentelemetry.io/contrib/detectors/gcp v1.17.0
 	go.opentelemetry.io/otel v1.16.0
 	go.opentelemetry.io/otel/sdk v1.16.0
 	google.golang.org/api v0.128.0
