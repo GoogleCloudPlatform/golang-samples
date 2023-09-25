@@ -1,0 +1,68 @@
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: "0.0.0.0:4318"
+  filelog:
+    include:
+    - "/var/log/app.log"
+    operators:
+      - type: json_parser
+        parse_to: body
+        timestamp:
+          parse_from: body.time
+          layout: '%Y-%m-%dT%H:%M:%S.%fZ'
+        severity:
+          parse_from: body.level
+      - type: trace_parser
+      - type: move
+        from: body.msg
+        to: body.message
+      - type: remove
+        field: body.time
+      - type: remove
+        field: body.level
+      - type: remove
+        field: body.trace_id
+      - type: remove
+        field: body.span_id
+      - type: remove
+        field: body.trace_flags      
+
+exporters:
+  googlecloud:
+    project: $PROJECT_ID
+    log:
+      default_log_name: "opentelemetry.io/collector-exported-log"
+  googlemanagedprometheus:
+    project: $PROJECT_ID
+
+processors:
+  batch:
+    send_batch_max_size: 500
+    send_batch_size: 500
+    timeout: 1s
+  resource:
+    attributes:
+      - { key: "location", value: "us-central1", action: "upsert" }
+      - { key: "cluster", value: "no-cluster", action: "upsert" }
+      - { key: "namespace", value: "no-namespace", action: "upsert" }
+      - { key: "job", value: "us-job", action: "upsert" }
+      - { key: "instance", value: "us-instance", action: "upsert" }
+  resourcedetection:
+    detectors: ["env", "gcp"]
+
+service:
+  pipelines:
+    traces:
+      receivers: ["otlp"]
+      processors: ["batch", "resourcedetection"]
+      exporters: ["googlecloud"]
+    metrics:
+      receivers: ["otlp"]
+      processors: ["batch", "resourcedetection", "resource"]
+      exporters: ["googlemanagedprometheus"]
+    logs:
+      receivers: ["filelog"]
+      processors: ["batch", "resourcedetection"]
+      exporters: ["googlecloud"]
