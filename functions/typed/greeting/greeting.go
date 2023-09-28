@@ -28,10 +28,10 @@ func init() {
 }
 
 // greeting is a Typed Cloud Function.
-func greeting(request *GreetingRequest) *GreetingResponse {
+func greeting(request *GreetingRequest) (*GreetingResponse, error) {
 	return &GreetingResponse{
 		Message: fmt.Sprintf("Hello %v %v!", request.FirstName, request.LastName),
-	}
+	}, nil
 }
 
 type GreetingRequest struct {
