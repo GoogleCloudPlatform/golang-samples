@@ -101,18 +101,80 @@ func (s *Service) Deployed() bool {
 	return s.deployed
 }
 
+// RetryOptions holds options for Service.Request's retry behavior
+type RetryOptions struct {
+	MaxAttempts  int
+	Delay        time.Duration
+	ShouldAccept func(*http.Response) bool
+}
+
+func getDefaultRetryOptions() RetryOptions {
+	return RetryOptions{
+		MaxAttempts:  5,
+		Delay:        20 * time.Second,
+		ShouldAccept: Accept2xx,
+	}
+}
+
+// Accept2xx returns true for responses in the 200 class of http response codes
+func Accept2xx(r *http.Response) bool {
+	return r.StatusCode >= 200 && r.StatusCode < 300
+}
+
+// AcceptNonServerError returns true for any non-500 http response
+func AcceptNonServerError(r *http.Response) bool {
+	return r.StatusCode > 500
+}
+
+func WithAttempts(n int) func(*RetryOptions) {
+	return func(r *RetryOptions) {
+		r.MaxAttempts = n
+	}
+}
+func WithDelay(d time.Duration) func(*RetryOptions) {
+	return func(r *RetryOptions) {
+		r.Delay = d
+	}
+}
+func WithAcceptFunc(f func(*http.Response) bool) func(*RetryOptions) {
+	return func(r *RetryOptions) {
+		r.ShouldAccept = f
+	}
+}
+
 // Request issues an HTTP request to the deployed service.
-func (s *Service) Request(method, path string) (*http.Response, error) {
+func (s *Service) Request(method string, path string, opts ...func(*RetryOptions)) (*http.Response, error) {
 	if !s.deployed {
 		return nil, errors.New("Request called before Deploy")
 	}
-	req, err := s.NewRequest(method, path)
-	if err != nil {
-		return nil, err
+	options := getDefaultRetryOptions()
+	for _, fn := range opts {
+		fn(&options)
 	}
-	defaultClient := &http.Client{}
+	var lastSeen error
+	resp := &http.Response{}
+	for i := 0; i < options.MaxAttempts; i++ {
+		req, err := s.NewRequest(method, path)
+		if err != nil {
+			lastSeen = err
+			continue
+		}
+		defaultClient := &http.Client{}
 
-	return defaultClient.Do(req)
+		resp, err = defaultClient.Do(req)
+		if err != nil {
+			lastSeen = err
+			continue
+		}
+		if options.ShouldAccept(resp) {
+			return resp, nil
+		} else {
+			time.Sleep(options.Delay)
+			continue
+		}
+	}
+	// Too many attempts, return the last result.
+	return resp, lastSeen
 }
 
 // NewRequest creates a new http.Request for the deployed service.

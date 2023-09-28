@@ -46,4 +46,3 @@ func TestCreateJob(t *testing.T) {
 
 	defer deleteAssetsOfCreateJobTest(t, tc.ProjectID, bucketName, fileName)
 }
-
