@@ -21,8 +21,6 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-// [START dlp_deidentify_table_row_suppress]
-
 func TestDeidentifyTableRowSuppress(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
