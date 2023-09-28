@@ -33,7 +33,7 @@ func TestInspectAugmentInfoTypes(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := buf.String()
-	if want := "Qoute: Quasimodo"; !strings.Contains(got, want) {
+	if want := "Quote: Quasimodo"; !strings.Contains(got, want) {
 		t.Errorf("TestInspectAugmentInfoTypes got %q, want %q", got, want)
 	}
 	if want := "Info type: PERSON_NAME"; !strings.Contains(got, want) {
