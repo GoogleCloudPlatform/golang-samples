@@ -3,8 +3,8 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/memorystore/redis
 go 1.19
 
 require (
-	github.com/GoogleCloudPlatform/functions-framework-go v1.7.3
-	github.com/alicebob/miniredis/v2 v2.30.2
+	github.com/GoogleCloudPlatform/functions-framework-go v1.7.4
+	github.com/alicebob/miniredis/v2 v2.30.3
 	github.com/gomodule/redigo v2.0.0+incompatible
 )
 

@@ -3,10 +3,10 @@ module github.com/GoogleCloudPlatform/functions/functionsv2/firebase/rtdb
 go 1.20
 
 require (
-	github.com/GoogleCloudPlatform/functions-framework-go v1.7.3
+	github.com/GoogleCloudPlatform/functions-framework-go v1.7.4
 	github.com/cloudevents/sdk-go/v2 v2.14.0
-	github.com/googleapis/google-cloudevents-go v0.4.0
-	google.golang.org/protobuf v1.30.0
+	github.com/googleapis/google-cloudevents-go v0.5.0
+	google.golang.org/protobuf v1.31.0
 )
 
 require (
