@@ -15,7 +15,7 @@ services:
     volumes:
       - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
       - $GOOGLE_APPLICATION_CREDENTIALS:/tmp/keys/gcp-credentials.json:ro
-      - logs:/var/log:rw
+      - logs:/var/log:ro
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/gcp-credentials.json
       - PROJECT_ID=$PROJECT_ID

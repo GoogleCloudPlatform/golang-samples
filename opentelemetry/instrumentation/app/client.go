@@ -16,21 +16,20 @@ package main
 
 import (
 	"context"
-	"fmt"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
+// callSingle makes an http request to this application's /single endpoint.
+// The provided context is used to propagate the trace context with the
+// http headers.
 func callSingle(ctx context.Context) error {
+	// otelhttp.Get makes an http GET request, just like net/http.Get.
+	// In addition, it records a span, records metrics, and propagates context.
 	res, err := otelhttp.Get(ctx, "http://localhost:8080/single")
 	if err != nil {
-		return fmt.Errorf("error invoking /single: %w", err)
+		return err
 	}
 
-	err = res.Body.Close()
-	if err != nil {
-		return fmt.Errorf("error closing response body: %w", err)
-	}
-
-	return nil
+	return res.Body.Close()
 }

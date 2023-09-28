@@ -60,7 +60,7 @@ func withTelemetry(ctx context.Context, fn func() error) error {
 
 	// Configure Log Export to write JSON logs to stdout
 	// Add trace attributes from context
-	slog.SetDefault(slog.New(handerWithTraceContext(slog.NewJSONHandler(os.Stdout, nil))))
+	slog.SetDefault(slog.New(handerWithSpanContext(slog.NewJSONHandler(os.Stdout, nil))))
 
 	return fn()
 }

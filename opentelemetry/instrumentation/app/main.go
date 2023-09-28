@@ -20,9 +20,20 @@ import (
 	"os"
 )
 
+// main runs an application which serves two http endpoints: /single and /multi.
+// The calling the /multi endpoint results in multiple calls to the /single
+// endpoint.
+//
+// The application is instrumented with OpenTelemetry and exports OTLP for
+// metrics and traces. It uses log/slog for logging, and writes logs to stdout.
+// The application does not include any GCP dependencies, and instead only uses
+// open standards for instrumentation. The OpenTelemetry collector is used to
+// route telemetry to GCP.
 func main() {
 	ctx := context.Background()
+
 	slog.InfoContext(ctx, "server starting...")
+
 	if err := withTelemetry(ctx, runServer); err != nil {
 		slog.ErrorContext(ctx, "server exited with error", slog.Any("error", err))
 		os.Exit(1)

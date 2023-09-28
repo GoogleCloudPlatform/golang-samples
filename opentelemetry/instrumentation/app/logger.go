@@ -21,24 +21,41 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// handerWithTraceContext adds attributes from the trace context
-func handerWithTraceContext(handler slog.Handler) *traceContextLogHandler {
-	return &traceContextLogHandler{Handler: handler}
+// handerWithSpanContext adds attributes from the span context
+func handerWithSpanContext(handler slog.Handler) *spanContextLogHandler {
+	return &spanContextLogHandler{Handler: handler}
 }
 
-type traceContextLogHandler struct {
+// spanContextLogHandler is an slog.Handler which adds attributes from the
+// span context.
+type spanContextLogHandler struct {
 	slog.Handler
 }
 
-func (t *traceContextLogHandler) Handle(ctx context.Context, record slog.Record) error {
+// Handle overrides slog.Handler's Handle method. This adds attributes from the
+// span context to the slog.Record.
+func (t *spanContextLogHandler) Handle(ctx context.Context, record slog.Record) error {
+	// Get the SpanContext from the golang Context.
 	if s := trace.SpanContextFromContext(ctx); s.IsValid() {
+		// Add the trace_id attribute from the SpanContext.
 		if s.HasTraceID() {
-			record.AddAttrs(slog.Any("trace_id", s.TraceID()))
+			record.AddAttrs(
+				slog.Any("trace_id", s.TraceID()),
+			)
 		}
+
+		// Add the span_id attribute from the SpanContext.
 		if s.HasSpanID() {
-			record.AddAttrs(slog.Any("span_id", s.SpanID()))
+			record.AddAttrs(
+				slog.Any("span_id", s.SpanID()),
+			)
 		}
-		record.AddAttrs(slog.Any("trace_flags", s.TraceFlags()))
+
+		// Add the trace_flags attribute from the SpanContext.
+		// This includes whether or not the trace is sampled.
+		record.AddAttrs(
+			slog.Any("trace_flags", s.TraceFlags()),
+		)
 	}
 	return t.Handler.Handle(ctx, record)
 }
