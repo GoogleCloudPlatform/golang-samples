@@ -6,6 +6,7 @@ receivers:
         endpoint: "0.0.0.0:4318"
   # Use the filelog receiver to read our log from its log file.
   filelog:
+    start_at: beginning
     include:
     - "/var/log/app.log"
     operators:
@@ -29,12 +30,6 @@ receivers:
         field: body.time
       - type: remove
         field: body.level
-      - type: remove
-        field: body.trace_id
-      - type: remove
-        field: body.span_id
-      - type: remove
-        field: body.trace_flags      
 
 exporters:
   # Export logs and traces using the standard googelcloud exporter
