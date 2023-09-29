@@ -16,6 +16,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"os"
 )
@@ -41,16 +42,10 @@ func main() {
 		slog.ErrorContext(ctx, "error setting up OpenTelemetry", slog.Any("error", err))
 		os.Exit(1)
 	}
-	defer func() {
-		if err := shutdown(ctx); err != nil {
-			slog.ErrorContext(ctx, "error shutting down OpenTelemetry", slog.Any("error", err))
-			os.Exit(1)
-		}
-	}()
 
-	// Run the http server
+	// Run the http server, and shutdown and flush telemetry after it exits.
 	slog.InfoContext(ctx, "server starting...")
-	if err = runServer(); err != nil {
+	if err = errors.Join(runServer(), shutdown(ctx)); err != nil {
 		slog.ErrorContext(ctx, "server exited with error", slog.Any("error", err))
 		os.Exit(1)
 	}

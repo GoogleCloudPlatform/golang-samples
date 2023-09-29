@@ -73,7 +73,7 @@ func setupOpenTelemetry(ctx context.Context) (shutdown func(context.Context) err
 			),
 		),
 	)
-	defer mp.Shutdown(ctx)
+	shutdownFuncs = append(shutdownFuncs, mp.Shutdown)
 	otel.SetMeterProvider(mp)
 
 	return shutdown, nil
