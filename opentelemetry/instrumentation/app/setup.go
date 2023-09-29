@@ -31,6 +31,7 @@ import (
 
 // setupOpenTelemetry sets up the OpenTelemetry SDK and exporters for metrics and
 // traces. If it does not return an error, call shutdown for proper cleanup.
+// [START opentelemetry_instrumentation_setup_opentelemetry]
 func setupOpenTelemetry(ctx context.Context) (shutdown func(context.Context) error, err error) {
 	var shutdownFuncs []func(context.Context) error
 
@@ -79,8 +80,11 @@ func setupOpenTelemetry(ctx context.Context) (shutdown func(context.Context) err
 	return shutdown, nil
 }
 
+// [END opentelemetry_instrumentation_setup_opentelemetry]
+
 // setupLogging configures logs to write JSON logs to stdout, and add span
 // context attributes.
+// [START opentelemetry_instrumentation_setup_logging]
 func setupLogging() {
 	// Use json as our base logging format.
 	jsonHandler := slog.NewJSONHandler(os.Stdout, nil)
@@ -89,3 +93,5 @@ func setupLogging() {
 	// Set this handler as the global slog handler.
 	slog.SetDefault(slog.New(instrumentedHandler))
 }
+
+// [END opentelemetry_instrumentation_setup_logging]

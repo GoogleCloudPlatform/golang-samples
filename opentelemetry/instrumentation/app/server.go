@@ -26,6 +26,7 @@ import (
 
 // handleSingle handles an http request by sleeping for 100-200 ms. It writes
 // the number of milliseconds slept as its response.
+// [START opentelemetry_instrumentation_handle_single]
 func handleSingle(w http.ResponseWriter, r *http.Request) {
 	sleepTime := time.Duration(100+rand.Intn(100)) * time.Millisecond
 
@@ -34,8 +35,11 @@ func handleSingle(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "slept %v\n", sleepTime)
 }
 
+// [END opentelemetry_instrumentation_handle_single]
+
 // handleMulti handles an http request by making 3-7 http requests to the
 // /single endpoint.
+// [START opentelemetry_instrumentation_handle_multi]
 func handleMulti(w http.ResponseWriter, r *http.Request) {
 	subRequests := 3 + rand.Intn(4)
 	// Write a structured log with the request context, which allows the log to
@@ -53,8 +57,11 @@ func handleMulti(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "ok")
 }
 
+// [END opentelemetry_instrumentation_handle_multi]
+
 // runServer runs an http server on port 8080 which handles requests to the
 // /multi and /single endpoints.
+// [START opentelemetry_instrumentation_run_server]
 func runServer() error {
 	handleHTTP("/single", handleSingle)
 	handleHTTP("/multi", handleMulti)
@@ -70,3 +77,5 @@ func handleHTTP(route string, handleFn http.HandlerFunc) {
 
 	http.Handle(route, instrumentedHandler)
 }
+
+// [END opentelemetry_instrumentation_run_server]

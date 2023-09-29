@@ -22,6 +22,7 @@ import (
 )
 
 // handerWithSpanContext adds attributes from the span context
+// [START opentelemetry_instrumentation_spancontext_logger]
 func handerWithSpanContext(handler slog.Handler) *spanContextLogHandler {
 	return &spanContextLogHandler{Handler: handler}
 }
@@ -59,3 +60,5 @@ func (t *spanContextLogHandler) Handle(ctx context.Context, record slog.Record) 
 	}
 	return t.Handler.Handle(ctx, record)
 }
+
+// [END opentelemetry_instrumentation_spancontext_logger]

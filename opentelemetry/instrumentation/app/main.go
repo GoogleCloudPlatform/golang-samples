@@ -30,6 +30,8 @@ import (
 // The application does not include any GCP dependencies, and instead only uses
 // open standards for instrumentation. The OpenTelemetry collector is used to
 // route telemetry to GCP.
+//
+// [START opentelemetry_instrumentation_main]
 func main() {
 	ctx := context.Background()
 
@@ -50,3 +52,5 @@ func main() {
 		os.Exit(1)
 	}
 }
+
+// [END opentelemetry_instrumentation_main]
