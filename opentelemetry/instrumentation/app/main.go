@@ -32,9 +32,25 @@ import (
 func main() {
 	ctx := context.Background()
 
-	slog.InfoContext(ctx, "server starting...")
+	// Setup logging
+	setupLogging()
 
-	if err := withTelemetry(ctx, runServer); err != nil {
+	// Setup metrics, tracing, and context propagation
+	shutdown, err := setupOpenTelemetry(ctx)
+	if err != nil {
+		slog.ErrorContext(ctx, "error setting up OpenTelemetry", slog.Any("error", err))
+		os.Exit(1)
+	}
+	defer func() {
+		if err := shutdown(ctx); err != nil {
+			slog.ErrorContext(ctx, "error shutting down OpenTelemetry", slog.Any("error", err))
+			os.Exit(1)
+		}
+	}()
+
+	// Run the http server
+	slog.InfoContext(ctx, "server starting...")
+	if err = runServer(); err != nil {
 		slog.ErrorContext(ctx, "server exited with error", slog.Any("error", err))
 		os.Exit(1)
 	}

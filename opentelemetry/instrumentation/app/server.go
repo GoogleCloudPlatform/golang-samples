@@ -24,16 +24,25 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
+// handleSingle handles an http request by sleeping for 100-200 ms. It writes
+// the number of milliseconds slept as its response.
 func handleSingle(w http.ResponseWriter, r *http.Request) {
 	sleepTime := time.Duration(100+rand.Intn(100)) * time.Millisecond
+
 	time.Sleep(sleepTime)
+
 	fmt.Fprintf(w, "slept %v\n", sleepTime)
 }
 
+// handleMulti handles an http request by making 3-7 http requests to the
+// /single endpoint.
 func handleMulti(w http.ResponseWriter, r *http.Request) {
 	subRequests := 3 + rand.Intn(4)
+	// Write a structured log with the request context, which allows the log to
+	// be linked with the trace for this request.
 	slog.InfoContext(r.Context(), "handle /multi request", slog.Int("subRequests", subRequests))
 
+	// Make 3-7 http requests to the /single endpoint.
 	for i := 0; i < subRequests; i++ {
 		if err := callSingle(r.Context()); err != nil {
 			http.Error(w, err.Error(), http.StatusBadGateway)
@@ -44,12 +53,20 @@ func handleMulti(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "ok")
 }
 
+// runServer runs an http server on port 8080 which handles requests to the
+// /multi and /single endpoints.
 func runServer() error {
 	handleHTTP("/single", handleSingle)
 	handleHTTP("/multi", handleMulti)
+
 	return http.ListenAndServe(":8080", nil)
 }
 
+// handleHTTP handles the http HandlerFunc on the specified route, and uses
+// otelhttp for context propagation, trace instrumentation, and metric
+// instrumentation.
 func handleHTTP(route string, handleFn http.HandlerFunc) {
-	http.Handle(route, otelhttp.NewHandler(otelhttp.WithRouteTag(route, handleFn), route))
+	instrumentedHandler := otelhttp.NewHandler(otelhttp.WithRouteTag(route, handleFn), route)
+
+	http.Handle(route, instrumentedHandler)
 }

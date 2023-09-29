@@ -16,6 +16,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"os"
 	"time"
@@ -28,24 +29,41 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
-func withTelemetry(ctx context.Context, fn func() error) error {
-	// Configure Context Propagation to use the W3C traceparent
+// setupOpenTelemetry sets up the OpenTelemetry SDK and exporters for metrics and
+// traces. If it does not return an error, call shutdown for proper cleanup.
+func setupOpenTelemetry(ctx context.Context) (shutdown func(context.Context) error, err error) {
+	var shutdownFuncs []func(context.Context) error
+
+	// shutdown combines shutdown functions from multiple OpenTelemetry
+	// components into a single function.
+	shutdown = func(ctx context.Context) error {
+		var err error
+		for _, fn := range shutdownFuncs {
+			err = errors.Join(err, fn(ctx))
+		}
+		shutdownFuncs = nil
+		return err
+	}
+
+	// Configure Context Propagation to use the default W3C traceparent format
 	otel.SetTextMapPropagator(autoprop.NewTextMapPropagator())
 
 	// Configure Trace Export to send spans as OTLP
 	texporter, err := autoexport.NewSpanExporter(ctx)
 	if err != nil {
-		return err
+		err = errors.Join(err, shutdown(ctx))
+		return
 	}
 	tp := trace.NewTracerProvider(trace.WithBatcher(texporter))
-	defer tp.Shutdown(ctx)
+	shutdownFuncs = append(shutdownFuncs, tp.Shutdown)
 	otel.SetTracerProvider(tp)
 
 	// Configure Metric Export to send metrics as OTLP
 	// TODO(https://github.com/open-telemetry/opentelemetry-go-contrib/issues/4131) - use env-based configuration instead of hardcoding
 	mexporter, err := otlpmetrichttp.New(ctx)
 	if err != nil {
-		return err
+		err = errors.Join(err, shutdown(ctx))
+		return
 	}
 	mp := metric.NewMeterProvider(
 		metric.WithReader(
@@ -58,9 +76,16 @@ func withTelemetry(ctx context.Context, fn func() error) error {
 	defer mp.Shutdown(ctx)
 	otel.SetMeterProvider(mp)
 
-	// Configure Log Export to write JSON logs to stdout
-	// Add trace attributes from context
-	slog.SetDefault(slog.New(handerWithSpanContext(slog.NewJSONHandler(os.Stdout, nil))))
+	return shutdown, nil
+}
 
-	return fn()
+// setupLogging configures logs to write JSON logs to stdout, and add span
+// context attributes.
+func setupLogging() {
+	// Use json as our base logging format.
+	jsonHandler := slog.NewJSONHandler(os.Stdout, nil)
+	// Add span context attributes when Context is passed to logging calls.
+	instrumentedHandler := handerWithSpanContext(jsonHandler)
+	// Set this handler as the global slog handler.
+	slog.SetDefault(slog.New(instrumentedHandler))
 }
