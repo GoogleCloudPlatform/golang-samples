@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/functions/typed/greeting
 
-go 1.21
+go 1.19
 
 require github.com/GoogleCloudPlatform/functions-framework-go v1.7.4
 
