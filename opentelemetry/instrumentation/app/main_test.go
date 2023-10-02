@@ -30,8 +30,6 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric/pmetricotlp"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.opentelemetry.io/collector/pdata/ptrace/ptraceotlp"
-	metricsservice "go.opentelemetry.io/proto/otlp/collector/metrics/v1"
-	traceservice "go.opentelemetry.io/proto/otlp/collector/trace/v1"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
@@ -53,6 +51,8 @@ func TestWriteTelemetry(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Handle traces from the application by comparing them against
+	// expectations
 	ts := &traceServer{
 		t:               t,
 		expectationsMet: make(chan struct{}),
@@ -62,6 +62,8 @@ func TestWriteTelemetry(t *testing.T) {
 		},
 	}
 	http.HandleFunc("/v1/traces", ts.handleTraces)
+	// Handle metrics from the application by comparing them against
+	// expectations
 	ms := &metricsServer{
 		t:               t,
 		expectationsMet: make(chan struct{}),
@@ -76,10 +78,11 @@ func TestWriteTelemetry(t *testing.T) {
 
 	var wg sync.WaitGroup
 	wg.Add(1)
-	// Test stdout logs
+	// Run the application, and verify stdout logs contain expected structured logs
 	go func() {
 		defer wg.Done()
 		stdout, stderr, _ := m.Run(map[string]string{
+			// Point the OTLP exporter at our test handler
 			"OTEL_EXPORTER_OTLP_ENDPOINT": "http://" + listener.Addr().String(),
 			"OTEL_EXPORTER_OTLP_INSECURE": "true",
 			// Export metrics and traces after 1 second
@@ -90,6 +93,7 @@ func TestWriteTelemetry(t *testing.T) {
 		t.Logf("stderr: %v", string(stderr))
 		verifyStdoutLogs(t, stdout)
 	}()
+	// Send requests to our application to generate telemetry.
 	testutil.Retry(t, 2*timeoutSeconds, 500*time.Millisecond, func(r *testutil.R) {
 		resp, err := http.Get("http://localhost:8080/multi")
 		if err != nil {
@@ -167,7 +171,6 @@ func verifyStdoutLogs(t *testing.T, stdout []byte) {
 // traceServer implements OTLP trace receiver interfaces
 type traceServer struct {
 	t *testing.T
-	traceservice.UnimplementedTraceServiceServer
 
 	lock            sync.Mutex
 	expectations    []*spanExpectation
@@ -193,6 +196,8 @@ func (t *traceServer) handleTraces(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	t.t.Logf("trace request: %+v", r.Traces())
+	// Iterate through each span sent, and update expectations with whether
+	// they have been met.
 	resourceSpans := r.Traces().ResourceSpans()
 	for i := 0; i < resourceSpans.Len(); i++ {
 		resourceSpan := resourceSpans.At(i)
@@ -207,6 +212,7 @@ func (t *traceServer) handleTraces(w http.ResponseWriter, req *http.Request) {
 						allMet = false
 					}
 				}
+				// If all expectations are met, notify the test.
 				if allMet {
 					select {
 					case <-t.expectationsMet:
@@ -247,7 +253,6 @@ func (s *spanExpectation) update(span ptrace.Span) {
 // metricsServer implements OTLP metrics receiver interfaces
 type metricsServer struct {
 	t *testing.T
-	metricsservice.UnimplementedMetricsServiceServer
 
 	lock            sync.Mutex
 	expectations    []*metricExpectation
@@ -281,6 +286,8 @@ func (t *metricsServer) handleMetrics(w http.ResponseWriter, req *http.Request) 
 	}
 	t.t.Logf("metrics request: %+v", r.Metrics())
 
+	// Iterate through each metric sent, and update expectations with whether
+	// they have been met.
 	resourceMetrics := r.Metrics().ResourceMetrics()
 	for i := 0; i < resourceMetrics.Len(); i++ {
 		resourceMetric := resourceMetrics.At(i)
@@ -295,6 +302,7 @@ func (t *metricsServer) handleMetrics(w http.ResponseWriter, req *http.Request) 
 						allMet = false
 					}
 				}
+				// If all expectations are met, notify the test.
 				if allMet {
 					select {
 					case <-t.expectationsMet:
