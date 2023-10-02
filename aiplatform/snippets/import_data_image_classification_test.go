@@ -37,7 +37,7 @@ var (
 	gcsURI      string
 )
 
-func setup(t *testing.T) func() {
+func setupImportDatasetImageClassification(t *testing.T) func() {
 	t.Helper()
 	if testing.Short() {
 		t.Skip("skipping integration test")
@@ -116,7 +116,7 @@ func setup(t *testing.T) func() {
 
 func TestImportDataImageClassification(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	teardown := setup(t)
+	teardown := setupImportDatasetImageClassification(t)
 	t.Cleanup(teardown)
 
 	var buf bytes.Buffer
