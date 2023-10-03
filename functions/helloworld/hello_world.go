@@ -13,7 +13,6 @@
 // limitations under the License.
 
 // [START functions_helloworld_get_gen1]
-// [START functions_helloworld_get]
 
 // Package helloworld provides a set of Cloud Functions samples.
 package helloworld
@@ -28,5 +27,4 @@ func HelloGet(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Hello, World!")
 }
 
-// [END functions_helloworld_get]
 // [END functions_helloworld_get_gen1]
