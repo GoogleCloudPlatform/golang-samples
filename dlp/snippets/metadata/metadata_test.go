@@ -167,6 +167,7 @@ func createStoredInfoTypeForTesting(t *testing.T, projectID, outputPath string) 
 			LargeCustomDictionary: largeCustomDictionaryConfig,
 		},
 	}
+
 	req := &dlppb.CreateStoredInfoTypeRequest{
 		Parent:           fmt.Sprintf("projects/%s/locations/global", projectID),
 		Config:           storedInfoTypeConfig,
