@@ -25,7 +25,7 @@ import (
 
 func TestRedactImageFileListedInfoTypes(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	
+
 	inputPath := "testdata/image.jpg"
 	outputPath := "testdata/test-output-image-file-listed-infoTypes-redacted.jpeg"
 
