@@ -28,7 +28,7 @@ func TestUpdateTrigger(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	u := uuid.New().String()[:8]
-	triggerID := "go-lang-template-test-" + u
+	triggerID := fmt.Sprintf("golang-update-trigger-test-%s", u)
 
 	var buf bytes.Buffer
 	if err := createTriggerForTest(t, tc.ProjectID, triggerID, "My Trigger", "Test trigger", "my-bucket", nil); err != nil {
@@ -44,5 +44,5 @@ func TestUpdateTrigger(t *testing.T) {
 		t.Errorf("UpdateTrigger got\n----\n%v\n----\nWant to contain:\n----\n%v\n----", got, want)
 	}
 
-	defer cleanUpTrigger(t, tc.ProjectID, fullID)
+	cleanUpTrigger(t, tc.ProjectID, fullID)
 }

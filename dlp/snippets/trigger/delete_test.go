@@ -28,7 +28,7 @@ func TestDeleteTrigger(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	u := uuid.New().String()[:8]
-	triggerID := "go-lang-template-test-" + u
+	triggerID := fmt.Sprintf("golang-delete-trigger-test-%s", u)
 
 	var buf bytes.Buffer
 	if err := createTriggerForTest(t, tc.ProjectID, triggerID, "My Trigger", "Test trigger", "my-bucket", nil); err != nil {

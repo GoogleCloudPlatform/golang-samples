@@ -28,7 +28,7 @@ func TestCreateTrigger(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	u := uuid.New().String()[:8]
-	triggerID := "go-lang-template-test-" + u
+	triggerID := fmt.Sprintf("golang-create-trigger-test-%s", u)
 
 	var buf bytes.Buffer
 	if err := createTrigger(&buf, tc.ProjectID, triggerID, "My Trigger", "Test trigger", "my-bucket", nil); err != nil {
@@ -39,5 +39,5 @@ func TestCreateTrigger(t *testing.T) {
 	}
 
 	fullID := fmt.Sprintf("projects/" + tc.ProjectID + "/locations/global/jobTriggers/" + triggerID)
-	defer cleanUpTrigger(t, tc.ProjectID, fullID)
+	cleanUpTrigger(t, tc.ProjectID, fullID)
 }
