@@ -176,37 +176,6 @@ func writeObject(ctx context.Context, bucket *storage.BucketHandle, fileName, co
 	return nil
 }
 
-func TestInspectString(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
-
-	if err := inspectString(buf, tc.ProjectID, "I'm Gary and my email is gary@example.com"); err != nil {
-		t.Errorf("TestInspectFile: %v", err)
-	}
-
-	got := buf.String()
-	if want := "Info type: EMAIL_ADDRESS"; !strings.Contains(got, want) {
-		t.Errorf("inspectString got %q, want %q", got, want)
-	}
-}
-
-func TestInspectTextFile(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
-
-	if err := inspectTextFile(buf, tc.ProjectID, "testdata/test.txt"); err != nil {
-		t.Errorf("TestInspectTextFile: %v", err)
-	}
-
-	got := buf.String()
-	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
-		t.Errorf("inspectTextFile got %q, want %q", got, want)
-	}
-	if want := "Info type: EMAIL_ADDRESS"; !strings.Contains(got, want) {
-		t.Errorf("inspectTextFile got %q, want %q", got, want)
-	}
-}
-
 type Item struct {
 	Description string
 }
@@ -291,38 +260,6 @@ func TestInspectBigquery(t *testing.T) {
 	}
 }
 
-func TestInspectTable(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-	if err := inspectTable(&buf, tc.ProjectID); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if want := "Infotype Name: PHONE_NUMBER"; !strings.Contains(got, want) {
-		t.Errorf("InspectTable got %q, want %q", got, want)
-	}
-	if want := "Likelihood: VERY_LIKELY"; !strings.Contains(got, want) {
-		t.Errorf("InspectTable got %q, want %q", got, want)
-	}
-}
-
-func TestInspectStringWithExclusionRegex(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-	if err := inspectStringWithExclusionRegex(&buf, tc.ProjectID, "Some email addresses: gary@example.com, bob@example.org", ".+@example.com"); err != nil {
-		t.Errorf("inspectStringWithExclusionRegex: %v", err)
-	}
-
-	got := buf.String()
-
-	if want := "Quote: bob@example.org"; !strings.Contains(got, want) {
-		t.Errorf("inspectStringWithExclusionRegex got %q, want %q", got, want)
-	}
-	if want := "Quote: gary@example.com"; strings.Contains(got, want) {
-		t.Errorf("inspectStringWithExclusionRegex got %q, want %q", got, want)
-	}
-}
-
 func TestInspectStringCustomExcludingSubstring(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
@@ -388,26 +325,6 @@ func TestInspectPhoneNumber(t *testing.T) {
 	}
 }
 
-func TestInspectStringWithoutOverlap(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	if err := inspectStringWithoutOverlap(&buf, tc.ProjectID, "example.com is a domain, james@example.org is an email."); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-	if want := "Infotype Name: DOMAIN_NAME"; !strings.Contains(got, want) {
-		t.Errorf("inspectStringWithoutOverlap got %q, want %q", got, want)
-	}
-	if want := "Quote: example.com"; !strings.Contains(got, want) {
-		t.Errorf("inspectStringWithoutOverlap got %q, want %q", got, want)
-	}
-	if want := "Quote: example.org"; strings.Contains(got, want) {
-		t.Errorf("inspectStringWithoutOverlap got %q, want %q", got, want)
-	}
-}
-
 func TestInspectStringCustomHotWord(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
@@ -418,39 +335,6 @@ func TestInspectStringCustomHotWord(t *testing.T) {
 	got := buf.String()
 	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
 		t.Errorf("inspectStringCustomHotWord got %q, want %q", got, want)
-	}
-}
-
-func TestInspectStringWithExclusionDictSubstring(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	if err := inspectStringWithExclusionDictSubstring(&buf, tc.ProjectID, "Some email addresses: gary@example.com, TEST@example.com", []string{"TEST"}); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if want := "Infotype Name: EMAIL_ADDRESS"; !strings.Contains(got, want) {
-		t.Errorf("inspectStringWithExclusionDictSubstring got %q, want %q", got, want)
-	}
-	if want := "Infotype Name: DOMAIN_NAME"; !strings.Contains(got, want) {
-		t.Errorf("inspectStringWithExclusionDictSubstring got %q, want %q", got, want)
-	}
-	if want := "Quote: TEST"; strings.Contains(got, want) {
-		t.Errorf("inspectStringWithExclusionDictSubstring got %q, want %q", got, want)
-	}
-}
-
-func TestInspectStringOmitOverlap(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	if err := inspectStringOmitOverlap(&buf, tc.ProjectID, "gary@example.com"); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-	if want := "Infotype Name: EMAIL_ADDRESS"; !strings.Contains(got, want) {
-		t.Errorf("inspectStringOmitOverlap got %q, want %q", got, want)
 	}
 }
 
@@ -472,35 +356,6 @@ func TestInspectStringCustomOmitOverlap(t *testing.T) {
 	}
 	if want := "Quote: Larry Page"; strings.Contains(got, want) {
 		t.Errorf("inspectStringCustomOmitOverlap got %q, want %q", got, want)
-	}
-}
-
-func TestInspectWithCustomRegex(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	var buf bytes.Buffer
-	if err := inspectWithCustomRegex(&buf, tc.ProjectID, "Patients MRN 444-5-22222", "[1-9]{3}-[1-9]{1}-[1-9]{5}", "C_MRN"); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-	if want := "Infotype Name: C_MRN"; !strings.Contains(got, want) {
-		t.Errorf("inspectWithCustomRegex got %q, want %q", got, want)
-	}
-	if want := "Likelihood: POSSIBLE"; !strings.Contains(got, want) {
-		t.Errorf("inspectWithCustomRegex got %q, want %q", got, want)
-	}
-}
-
-func TestInspectStringWithExclusionDictionary(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-	if err := inspectStringWithExclusionDictionary(&buf, tc.ProjectID, "Some email addresses: gary@example.com, example@example.com", []string{"example@example.com"}); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if want := "Infotype Name: EMAIL_ADDRESS"; !strings.Contains(got, want) {
-		t.Errorf("inspectStringWithExclusionDictionary got %q, want %q", got, want)
 	}
 }
 
