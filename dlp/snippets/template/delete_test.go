@@ -28,7 +28,7 @@ func TestDeleteTemplate(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	u := uuid.New().String()[:8]
-	
+
 	templateID := "go-lang-template-test-" + u
 
 	var buf bytes.Buffer
