@@ -37,6 +37,7 @@ func TestInspectBigquery(t *testing.T) {
 			want:  "Created job",
 		},
 	}
+
 	for _, test := range tests {
 		test := test
 		t.Run(test.table, func(t *testing.T) {
