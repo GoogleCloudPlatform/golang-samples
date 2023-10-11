@@ -30,6 +30,7 @@ func TestCalculateKAnonymityWithEntityId(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	if got, want := buf.String(), "Created job"; !strings.Contains(got, want) {
 		t.Errorf("CalculateKAnonymityWithEntityId got %s, want substring %q", got, want)
 	}

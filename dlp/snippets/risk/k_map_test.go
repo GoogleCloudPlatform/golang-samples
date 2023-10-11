@@ -33,6 +33,7 @@ func TestKmap(t *testing.T) {
 	}
 	buf := new(bytes.Buffer)
 	u := uuid.Must(uuid.NewV4()).String()[:8]
+
 	riskKMap(buf, tc.ProjectID, "bigquery-public-data", riskTopicName+u, riskSubscriptionName+u, "san_francisco", "bikeshare_trips", "US", "zip_code")
 	defer cleanupPubsub(t, client, riskTopicName+u, riskSubscriptionName+u)
 	if got, want := buf.String(), "Created job"; !strings.Contains(got, want) {

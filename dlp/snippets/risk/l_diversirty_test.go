@@ -33,6 +33,7 @@ func TestLDiversity(t *testing.T) {
 	}
 	buf := new(bytes.Buffer)
 	u := uuid.Must(uuid.NewV4()).String()[:8]
+
 	err = riskLDiversity(buf, tc.ProjectID, "bigquery-public-data", riskTopicName+u, riskSubscriptionName+u, "nhtsa_traffic_fatalities", "accident_2015", "city", "state_number", "county")
 	defer cleanupPubsub(t, client, riskTopicName+u, riskSubscriptionName+u)
 	if err != nil {
