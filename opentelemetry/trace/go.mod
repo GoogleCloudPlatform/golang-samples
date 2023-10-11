@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/golang-samples/opentelemetry
+module github.com/GoogleCloudPlatform/golang-samples/opentelemetry/trace
 
 go 1.19
 
