@@ -46,6 +46,6 @@ func TestDeidTextDataWithFPE(t *testing.T) {
 
 	got := buf.String()
 	if want := "My SSN is AGE(9): "; strings.Contains(got, want) {
-		t.Errorf("reidTextDataWithFPE got %q, want %q", got, want)
+		t.Errorf("deidentifyFPE got %q, want %q", got, want)
 	}
 }
