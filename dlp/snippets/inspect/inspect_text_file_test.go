@@ -33,6 +33,7 @@ func TestInspectTextFile(t *testing.T) {
 	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
 		t.Errorf("inspectTextFile got %q, want %q", got, want)
 	}
+
 	if want := "Info type: EMAIL_ADDRESS"; !strings.Contains(got, want) {
 		t.Errorf("inspectTextFile got %q, want %q", got, want)
 	}
