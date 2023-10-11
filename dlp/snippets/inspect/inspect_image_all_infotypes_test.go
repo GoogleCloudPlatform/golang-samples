@@ -30,6 +30,7 @@ func TestInspectImageFileAllInfoTypes(t *testing.T) {
 	if err := inspectImageFileAllInfoTypes(&buf, tc.ProjectID, inputPath); err != nil {
 		t.Errorf("inspectImageFileAllInfoTypes: %v", err)
 	}
+
 	got := buf.String()
 	if want := "Info type: DATE"; !strings.Contains(got, want) {
 		t.Errorf("inspectImageFileAllInfoTypes got %q, want %q", got, want)
