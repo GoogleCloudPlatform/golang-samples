@@ -1,0 +1,75 @@
+receivers:
+  # Receive OTLP from our application
+  otlp:
+    protocols:
+      http:
+        endpoint: "0.0.0.0:4318"
+  # Use the filelog receiver to read our log from its log file.
+  filelog:
+    start_at: beginning
+    include:
+    - "/var/log/app.log"
+    operators:
+      - type: json_parser
+        parse_to: body
+        # Parse the timestamp from the "time" field
+        timestamp:
+          parse_from: body.time
+          layout: '%Y-%m-%dT%H:%M:%S.%fZ'
+        # Parse the severity from the "level" field
+        severity:
+          parse_from: body.level
+      # Parse trace_id, span_id, and trace_flags into the log's span context
+      - type: trace_parser
+      # Google Cloud Logging uses "message" instead of "msg".
+      - type: move
+        from: body.msg
+        to: body.message
+      # Remove fields that we have translated above.
+      - type: remove
+        field: body.time
+      - type: remove
+        field: body.level
+
+exporters:
+  # Export logs and traces using the standard googelcloud exporter
+  googlecloud:
+    project: $PROJECT_ID
+    log:
+      default_log_name: "opentelemetry.io/collector-exported-log"
+  # Export metrics to Google Managed service for Prometheus
+  googlemanagedprometheus:
+    project: $PROJECT_ID
+
+processors:
+  # Batch telemetry together to more efficiently send to GCP
+  batch:
+    send_batch_max_size: 500
+    send_batch_size: 500
+    timeout: 1s
+  # Make sure Google Managed service for Prometheus required labels are set
+  resource:
+    attributes:
+      - { key: "location", value: "us-central1", action: "upsert" }
+      - { key: "cluster", value: "no-cluster", action: "upsert" }
+      - { key: "namespace", value: "no-namespace", action: "upsert" }
+      - { key: "job", value: "us-job", action: "upsert" }
+      - { key: "instance", value: "us-instance", action: "upsert" }
+  # If running on GCP (e.g. on GKE), detect resource attributes from the environment.
+  resourcedetection:
+    detectors: ["env", "gcp"]
+
+service:
+  pipelines:
+    traces:
+      receivers: ["otlp"]
+      processors: ["batch", "resourcedetection"]
+      exporters: ["googlecloud"]
+    metrics:
+      receivers: ["otlp"]
+      processors: ["batch", "resourcedetection", "resource"]
+      exporters: ["googlemanagedprometheus"]
+    logs:
+      receivers: ["filelog"]
+      processors: ["batch", "resourcedetection"]
+      exporters: ["googlecloud"]
