@@ -85,7 +85,6 @@ func inspectAugmentInfoTypes(w io.Writer, projectID, textToInspect string, wordL
 		IncludeQuote: true,
 	}
 
-	
 	// Construct the Inspect request to be sent by the client.
 	req := &dlppb.InspectContentRequest{
 		Parent:        fmt.Sprintf("projects/%s/locations/global", projectID),
