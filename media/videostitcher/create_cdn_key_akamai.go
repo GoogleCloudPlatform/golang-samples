@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START videostitcher_update_cdn_key_akamai]
+// [START videostitcher_create_cdn_key_akamai]
 import (
 	"context"
 	"fmt"
@@ -22,16 +22,15 @@ import (
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
 	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
-	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// updateCDNKeyAkamai updates an Akamai CDN key. A CDN key is used to retrieve
+// createCDNKeyAkamai creates an Akamai CDN key. A CDN key is used to retrieve
 // protected media.
-func updateCDNKeyAkamai(w io.Writer, projectID, keyID, hostname, akamaiTokenKey string) error {
+func createCDNKeyAkamai(w io.Writer, projectID, keyID, hostname, akamaiTokenKey string) error {
 	// projectID := "my-project-id"
 	// keyID := "my-cdn-key"
-	// hostname := "updated.cdn.example.com"
-	// akamaiTokenKey := "my-updated-token-key"
+	// hostname := "cdn.example.com"
+	// akamaiTokenKey := "my-private-token-key"
 	location := "us-central1"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
@@ -40,35 +39,31 @@ func updateCDNKeyAkamai(w io.Writer, projectID, keyID, hostname, akamaiTokenKey 
 	}
 	defer client.Close()
 
-	req := &stitcherstreampb.UpdateCdnKeyRequest{
+	req := &stitcherstreampb.CreateCdnKeyRequest{
+		Parent:   fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+		CdnKeyId: keyID,
 		CdnKey: &stitcherstreampb.CdnKey{
 			CdnKeyConfig: &stitcherstreampb.CdnKey_AkamaiCdnKey{
 				AkamaiCdnKey: &stitcherstreampb.AkamaiCdnKey{
 					TokenKey: []byte(akamaiTokenKey),
 				},
 			},
-			Name:     fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectID, location, keyID),
 			Hostname: hostname,
-		},
-		UpdateMask: &fieldmaskpb.FieldMask{
-			Paths: []string{
-				"hostname", "akamai_cdn_key",
-			},
 		},
 	}
 
-	// Updates the CDN key.
-	op, err := client.UpdateCdnKey(ctx, req)
+	// Creates the CDN key.
+	op, err := client.CreateCdnKey(ctx, req)
 	if err != nil {
-		return fmt.Errorf("client.UpdateCdnKey: %w", err)
+		return fmt.Errorf("client.CreateCdnKey: %w", err)
 	}
 	response, err := op.Wait(ctx)
 	if err != nil {
 		return err
 	}
 
-	fmt.Fprintf(w, "Updated CDN key: %+v", response)
+	fmt.Fprintf(w, "CDN key: %v", response.GetName())
 	return nil
 }
 
-// [END videostitcher_update_cdn_key_akamai]
+// [END videostitcher_create_cdn_key_akamai]
