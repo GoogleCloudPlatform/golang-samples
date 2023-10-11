@@ -32,6 +32,7 @@ func TestCreateStoredInfoType(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer client.Close()
+
 	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
 	if err != nil {
 		t.Fatal(err)
