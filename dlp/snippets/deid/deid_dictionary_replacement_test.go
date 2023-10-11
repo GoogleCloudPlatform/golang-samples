@@ -33,6 +33,6 @@ func TestDeidentifyDataReplaceWithDictionary(t *testing.T) {
 	want1 := "output: My name is Alicia Abernathy, and my email address is izumi@example.com."
 	want2 := "output: My name is Alicia Abernathy, and my email address is alex@example.com."
 	if !strings.Contains(got, want1) && !strings.Contains(got, want2) {
-		t.Errorf("TestDeidentifyDataReplaceWithDictionary got %q, output does not contains value from dictionary", got)
+		t.Errorf("deidentifyDataReplaceWithDictionary got %q, output does not contains value from dictionary", got)
 	}
 }

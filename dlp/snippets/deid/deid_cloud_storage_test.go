@@ -38,6 +38,6 @@ func TestDeidentifyCloudStorage(t *testing.T) {
 
 	got := buf.String()
 	if want := "Job created successfully:"; !strings.Contains(got, want) {
-		t.Errorf("TestDeidentifyCloudStorage got %q, want %q", got, want)
+		t.Errorf("deidentifyCloudStorage got %q, want %q", got, want)
 	}
 }
