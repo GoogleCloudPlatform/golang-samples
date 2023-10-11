@@ -41,13 +41,17 @@ func deleteSlate(w io.Writer, projectID, slateID string) error {
 	req := &stitcherstreampb.DeleteSlateRequest{
 		Name: name,
 	}
-
-	err = client.DeleteSlate(ctx, req)
+	// Deletes the slate.
+	op, err := client.DeleteSlate(ctx, req)
 	if err != nil {
 		return fmt.Errorf("client.DeleteSlate: %w", err)
 	}
+	err = op.Wait(ctx)
+	if err != nil {
+		return err
+	}
 
-	fmt.Fprintf(w, "Deleted slate: %s", name)
+	fmt.Fprintf(w, "Deleted slate")
 	return nil
 }
 
