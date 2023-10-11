@@ -32,7 +32,7 @@ func TestInspectAugmentInfoTypes(t *testing.T) {
 	if err := inspectAugmentInfoTypes(&buf, tc.ProjectID, textToInspect, wordList); err != nil {
 		t.Fatal(err)
 	}
-	
+
 	got := buf.String()
 	if want := "Quote: Quasimodo"; !strings.Contains(got, want) {
 		t.Errorf("TestInspectAugmentInfoTypes got %q, want %q", got, want)
