@@ -28,7 +28,7 @@ func TestListTrigger(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	u := uuid.New().String()[:8]
-	
+
 	triggerID := fmt.Sprintf("golang-list-trigger-test-%s", u)
 
 	var buf bytes.Buffer
