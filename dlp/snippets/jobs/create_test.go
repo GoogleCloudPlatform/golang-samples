@@ -32,6 +32,7 @@ func TestCreateJob(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	gcsPath := "gs://" + bucketName + "/" + fileName
 	infoTypeNames := []string{"EMAIL_ADDRESS", "PERSON_NAME", "LOCATION", "PHONE_NUMBER"}
 
