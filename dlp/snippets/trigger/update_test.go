@@ -28,6 +28,7 @@ func TestUpdateTrigger(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	u := uuid.New().String()[:8]
+	
 	triggerID := fmt.Sprintf("golang-update-trigger-test-%s", u)
 
 	var buf bytes.Buffer

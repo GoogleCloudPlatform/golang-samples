@@ -28,6 +28,7 @@ func TestDeleteTrigger(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	u := uuid.New().String()[:8]
+	
 	triggerID := fmt.Sprintf("golang-delete-trigger-test-%s", u)
 
 	var buf bytes.Buffer
