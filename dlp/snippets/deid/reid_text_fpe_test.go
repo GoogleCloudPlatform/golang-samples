@@ -38,6 +38,7 @@ func TestReidTextDataWithFPE(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	defer destroyKey(t, tc.ProjectID, keyVersion)
 
 	if err := deidentifyFPE(&buf, tc.ProjectID, input, infoTypeNames, keyFileName, cryptoKeyName, surrogateInfoType); err != nil {
