@@ -786,12 +786,13 @@ func TestAutoclass(t *testing.T) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 
-	// Test set Autoclass config.
-	value := false
-	if err := setAutoclass(buf, bucketName, value); err != nil {
+	// Test set Autoclass terminal storage class to "ARCHIVE".
+	value := true
+	tsc := "ARCHIVE"
+	if err := setAutoclass(buf, bucketName, value, tsc); err != nil {
 		t.Errorf("setAutoclass: %#v", err)
 	}
-	if got, want := buf.String(), "Autoclass enabled was set to false"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Autoclass terminal storage class was last updated to ARCHIVE"; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
