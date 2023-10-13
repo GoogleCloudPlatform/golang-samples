@@ -50,8 +50,8 @@ func createInstanceWithAutoscalingConfig(w io.Writer, projectID, instanceID stri
 					MaxNodes: 2,
 				},
 				AutoscalingTargets: &instancepb.AutoscalingTargets{
-					HighPriorityCpuUtilizationPercent high_priority_cpu_utilization_percent: 65%,
-					StorageUtilizationPercent: 95%,
+					HighPriorityCpuUtilizationPercent: 65,
+					StorageUtilizationPercent: 95,
 				},
 			},
 			Labels:          map[string]string{"cloud_spanner_samples": "true"},
