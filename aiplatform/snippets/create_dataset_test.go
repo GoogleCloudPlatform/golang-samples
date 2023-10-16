@@ -30,27 +30,6 @@ import (
 	"google.golang.org/api/option"
 )
 
-var (
-	output    string
-	projectID string
-	region    string = "us-central1"
-)
-
-func TestMain(m *testing.M) {
-	tc, ok := testutil.ContextMain(m)
-
-	projectID = tc.ProjectID
-
-	if !ok {
-		log.Fatal("couldn't initialize test")
-		return
-	}
-
-	m.Run()
-
-	deleteDataset()
-}
-
 func TestCreateDataset(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
@@ -65,18 +44,21 @@ func TestCreateDataset(t *testing.T) {
 		t.Errorf("createDataset: wanted 'Create dataset, got %s'", got)
 	}
 
-	output = got
+	output := got
+	teardownCreateDataset(output, t)
 }
 
-func deleteDataset() {
+func teardownCreateDataset(output string, t *testing.T) {
+	t.Helper()
+
 	// parse dataset name--we cannot predict the dataset ID at creation time.
-	tmp := strings.Split(output, "\n")
-	if len(tmp) < 1 {
+	_, tmp, ok := strings.Cut(output, "\n")
+	if !ok {
 		log.Println("couldn't parse dataset resource name")
 		return
 	}
 
-	datasetName := tmp[1]
+	datasetName := tmp
 	log.Println(datasetName)
 
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", region)
