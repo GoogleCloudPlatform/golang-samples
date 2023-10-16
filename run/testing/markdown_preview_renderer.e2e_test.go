@@ -15,7 +15,7 @@
 package cloudruntests
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -56,27 +56,31 @@ func TestRendererService(t *testing.T) {
 		if err != nil {
 			t.Fatalf("service.NewRequest: %q", err)
 		}
-		req.Body = ioutil.NopCloser(strings.NewReader(test.input))
-
+		req.Body = io.NopCloser(strings.NewReader(test.input))
 		client := http.Client{Timeout: 10 * time.Second}
-		resp, err := client.Do(req)
-		if err != nil {
-			t.Fatalf("client.Do: %v", err)
-		}
-		defer resp.Body.Close()
-		t.Logf("client.Do: %s %s\n", req.Method, req.URL)
 
-		if got := resp.StatusCode; got != http.StatusOK {
-			t.Errorf("response status: got %d, want %d", got, http.StatusOK)
-		}
+		testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
+			resp, err := client.Do(req)
+			if err != nil {
+				r.Errorf("client.Do: %v", err)
+				return
+			}
+			defer resp.Body.Close()
+			r.Logf("client.Do: %s %s\n", req.Method, req.URL)
 
-		out, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			t.Fatalf("ioutil.ReadAll: %v", err)
-		}
+			if got := resp.StatusCode; got != http.StatusOK {
+				r.Errorf("response status: got %d, want %d", got, http.StatusOK)
+			}
 
-		if got := string(out); got != test.want {
-			t.Errorf("%s: got %q, want %q", test.label, got, test.want)
-		}
+			out, err := io.ReadAll(resp.Body)
+			if err != nil {
+				r.Errorf("ioutil.ReadAll: %v", err)
+				return
+			}
+
+			if got := string(out); got != test.want {
+				r.Errorf("%s: got %q, want %q", test.label, got, test.want)
+			}
+		})
 	}
 }
