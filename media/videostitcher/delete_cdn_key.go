@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,10 +14,9 @@
 
 package videostitcher
 
-// [START videostitcher_get_cdn_key]
+// [START videostitcher_delete_cdn_key]
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -25,8 +24,8 @@ import (
 	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
-// getCDNKey gets a CDN key by ID.
-func getCDNKey(w io.Writer, projectID, keyID string) error {
+// deleteCDNKey deletes a CDN key.
+func deleteCDNKey(w io.Writer, projectID, keyID string) error {
 	// projectID := "my-project-id"
 	// keyID := "my-cdn-key"
 	location := "us-central1"
@@ -37,21 +36,23 @@ func getCDNKey(w io.Writer, projectID, keyID string) error {
 	}
 	defer client.Close()
 
-	req := &stitcherstreampb.GetCdnKeyRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectID, location, keyID),
+	name := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectID, location, keyID)
+
+	req := &stitcherstreampb.DeleteCdnKeyRequest{
+		Name: name,
 	}
-	// Gets the CDN key.
-	response, err := client.GetCdnKey(ctx, req)
+	// Deletes the CDN key.
+	op, err := client.DeleteCdnKey(ctx, req)
 	if err != nil {
-		return fmt.Errorf("client.GetCdnKey: %v", err)
+		return fmt.Errorf("client.DeleteCdnKey: %w", err)
 	}
-	b, err := json.MarshalIndent(response, "", " ")
+	err = op.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("json.MarshalIndent: %w", err)
+		return err
 	}
 
-	fmt.Fprintf(w, "CDN key:\n%s", string(b))
+	fmt.Fprintf(w, "Deleted CDN key")
 	return nil
 }
 
-// [END videostitcher_get_cdn_key]
+// [END videostitcher_delete_cdn_key]
