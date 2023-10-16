@@ -6,7 +6,7 @@ require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230928174625-702b206360e6
 	github.com/stretchr/testify v1.8.4
 	go.opentelemetry.io/collector/pdata v0.66.0
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.42.0
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.44.0
 	go.opentelemetry.io/otel/sdk v1.16.0
 	go.opentelemetry.io/otel/sdk/metric v0.39.0
 )
