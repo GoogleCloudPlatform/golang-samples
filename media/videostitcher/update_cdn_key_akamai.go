@@ -21,18 +21,18 @@ import (
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
 // updateCDNKeyAkamai updates an Akamai CDN key. A CDN key is used to retrieve
 // protected media.
-func updateCDNKeyAkamai(w io.Writer, projectID, keyID, hostname, akamaiTokenKey string) error {
+func updateCDNKeyAkamai(w io.Writer, projectID, keyID, akamaiTokenKey string) error {
 	// projectID := "my-project-id"
 	// keyID := "my-cdn-key"
-	// hostname := "updated.cdn.example.com"
 	// akamaiTokenKey := "my-updated-token-key"
 	location := "us-central1"
+	hostname := "updated.cdn.example.com"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
@@ -40,10 +40,10 @@ func updateCDNKeyAkamai(w io.Writer, projectID, keyID, hostname, akamaiTokenKey 
 	}
 	defer client.Close()
 
-	req := &stitcherpb.UpdateCdnKeyRequest{
-		CdnKey: &stitcherpb.CdnKey{
-			CdnKeyConfig: &stitcherpb.CdnKey_AkamaiCdnKey{
-				AkamaiCdnKey: &stitcherpb.AkamaiCdnKey{
+	req := &stitcherstreampb.UpdateCdnKeyRequest{
+		CdnKey: &stitcherstreampb.CdnKey{
+			CdnKeyConfig: &stitcherstreampb.CdnKey_AkamaiCdnKey{
+				AkamaiCdnKey: &stitcherstreampb.AkamaiCdnKey{
 					TokenKey: []byte(akamaiTokenKey),
 				},
 			},
@@ -58,9 +58,13 @@ func updateCDNKeyAkamai(w io.Writer, projectID, keyID, hostname, akamaiTokenKey 
 	}
 
 	// Updates the CDN key.
-	response, err := client.UpdateCdnKey(ctx, req)
+	op, err := client.UpdateCdnKey(ctx, req)
 	if err != nil {
 		return fmt.Errorf("client.UpdateCdnKey: %w", err)
+	}
+	response, err := op.Wait(ctx)
+	if err != nil {
+		return err
 	}
 
 	fmt.Fprintf(w, "Updated CDN key: %+v", response)
