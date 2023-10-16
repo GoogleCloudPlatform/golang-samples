@@ -26,12 +26,12 @@ import (
 
 // createCDNKeyAkamai creates an Akamai CDN key. A CDN key is used to retrieve
 // protected media.
-func createCDNKeyAkamai(w io.Writer, projectID, keyID, hostname, akamaiTokenKey string) error {
+func createCDNKeyAkamai(w io.Writer, projectID, keyID, akamaiTokenKey string) error {
 	// projectID := "my-project-id"
 	// keyID := "my-cdn-key"
-	// hostname := "cdn.example.com"
 	// akamaiTokenKey := "my-private-token-key"
 	location := "us-central1"
+	hostname := "cdn.example.com"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {

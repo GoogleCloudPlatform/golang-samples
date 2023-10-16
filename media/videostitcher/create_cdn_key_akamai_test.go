@@ -16,16 +16,12 @@ package videostitcher
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-
-	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 func TestCreateAkamaiCDNKey(t *testing.T) {
@@ -47,34 +43,12 @@ func TestCreateAkamaiCDNKey(t *testing.T) {
 	akamaiCDNKeyID := fmt.Sprintf("%s-%s", akamaiCDNKeyID, uuid)
 	akamaiCDNKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, akamaiCDNKeyID)
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		if err := createCDNKeyAkamai(&buf, tc.ProjectID, akamaiCDNKeyID, hostname, akamaiTokenKey); err != nil {
+		if err := createCDNKeyAkamai(&buf, tc.ProjectID, akamaiCDNKeyID, akamaiTokenKey); err != nil {
 			r.Errorf("createCDNKeyAkamai got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, akamaiCDNKeyName) {
 			r.Errorf("createCDNKeyAkamai got: %v Want to contain: %v", got, akamaiCDNKeyName)
 		}
 	})
-	teardownTestCreateAkamaiCDNKey(akamaiCDNKeyName, t)
-}
-
-func teardownTestCreateAkamaiCDNKey(testCDNKeyName string, t *testing.T) {
-	t.Helper()
-	ctx := context.Background()
-	client, err := stitcher.NewVideoStitcherClient(ctx)
-	if err != nil {
-		t.Errorf("stitcher.NewVideoStitcherClient: %v", err)
-	}
-	defer client.Close()
-
-	req := &stitcherstreampb.DeleteCdnKeyRequest{
-		Name: testCDNKeyName,
-	}
-	op, err := client.DeleteCdnKey(ctx, req)
-	if err != nil {
-		t.Errorf("client.DeleteCdnKey: %v", err)
-	}
-	err = op.Wait(ctx)
-	if err != nil {
-		t.Error(err)
-	}
+	teardownTestCreateCDNKey(akamaiCDNKeyName, t)
 }

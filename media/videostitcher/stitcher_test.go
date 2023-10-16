@@ -44,7 +44,7 @@ const (
 	cloudCDNKeyID        = "go-test-cloud-cdn"
 	akamaiCDNKeyID       = "go-test-akamai-cdn"
 	hostname             = "cdn.example.com"
-	updatedHostname      = "updated.example.com"
+	updatedHostname      = "updated.cdn.example.com"
 	keyName              = "my-key"
 
 	vodURI = "https://storage.googleapis.com/cloud-samples-data/media/hls-vod/manifest.m3u8"

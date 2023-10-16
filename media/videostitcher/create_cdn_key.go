@@ -28,14 +28,14 @@ import (
 // If isMediaCDN is true, create a Media CDN key. If false, create a Cloud
 // CDN key. To create a privateKey value for Media CDN, see
 // https://cloud.google.com/video-stitcher/docs/how-to/managing-cdn-keys#create-private-key-media-cdn.
-func createCDNKey(w io.Writer, projectID, keyID, hostname, keyName, privateKey string, isMediaCDN bool) error {
+func createCDNKey(w io.Writer, projectID, keyID, privateKey string, isMediaCDN bool) error {
 	// projectID := "my-project-id"
 	// keyID := "my-cdn-key"
-	// hostname := "cdn.example.com"
-	// keyName := "cdn-key"
 	// privateKey := "my-private-key"
 	// isMediaCDN := true
 	location := "us-central1"
+	hostname := "cdn.example.com"
+	keyName := "cdn-key"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {

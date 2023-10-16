@@ -27,12 +27,12 @@ import (
 
 // updateCDNKeyAkamai updates an Akamai CDN key. A CDN key is used to retrieve
 // protected media.
-func updateCDNKeyAkamai(w io.Writer, projectID, keyID, hostname, akamaiTokenKey string) error {
+func updateCDNKeyAkamai(w io.Writer, projectID, keyID, akamaiTokenKey string) error {
 	// projectID := "my-project-id"
 	// keyID := "my-cdn-key"
-	// hostname := "updated.cdn.example.com"
 	// akamaiTokenKey := "my-updated-token-key"
 	location := "us-central1"
+	hostname := "updated.cdn.example.com"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {

@@ -100,7 +100,7 @@ func TestUpdateCDNKeyAkamai(t *testing.T) {
 
 	akamaiCDNKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, akamaiCDNKeyID)
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		if err := updateCDNKeyAkamai(&buf, tc.ProjectID, akamaiCDNKeyID, updatedHostname, akamaiTokenKey); err != nil {
+		if err := updateCDNKeyAkamai(&buf, tc.ProjectID, akamaiCDNKeyID, akamaiTokenKey); err != nil {
 			r.Errorf("updateCDNKey got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, akamaiCDNKeyName) {

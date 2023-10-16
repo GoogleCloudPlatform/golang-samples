@@ -156,7 +156,7 @@ func TestUpdateCloudCDNKey(t *testing.T) {
 
 	cloudCDNKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, cloudCDNKeyID)
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		if err := updateCDNKey(&buf, tc.ProjectID, cloudCDNKeyID, updatedHostname, keyName, updatedCloudCDNPrivateKey, false); err != nil {
+		if err := updateCDNKey(&buf, tc.ProjectID, cloudCDNKeyID, updatedCloudCDNPrivateKey, false); err != nil {
 			r.Errorf("updateCDNKey got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, cloudCDNKeyName) {
@@ -186,7 +186,7 @@ func TestUpdateMediaCDNKey(t *testing.T) {
 
 	mediaCDNKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, mediaCDNKeyID)
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		if err := updateCDNKey(&buf, tc.ProjectID, mediaCDNKeyID, updatedHostname, keyName, updatedMediaCDNPrivateKey, true); err != nil {
+		if err := updateCDNKey(&buf, tc.ProjectID, mediaCDNKeyID, updatedMediaCDNPrivateKey, true); err != nil {
 			r.Errorf("updateCDNKey got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, mediaCDNKeyName) {

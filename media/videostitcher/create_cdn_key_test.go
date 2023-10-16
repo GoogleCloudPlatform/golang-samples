@@ -47,14 +47,16 @@ func TestCreateMediaCDNKey(t *testing.T) {
 	mediaCDNKeyID := fmt.Sprintf("%s-%s", mediaCDNKeyID, uuid)
 	mediaCDNKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, mediaCDNKeyID)
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		if err := createCDNKey(&buf, tc.ProjectID, mediaCDNKeyID, hostname, keyName, mediaCDNPrivateKey, true); err != nil {
+		if err := createCDNKey(&buf, tc.ProjectID, mediaCDNKeyID, mediaCDNPrivateKey, true); err != nil {
 			r.Errorf("createCDNKey got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, mediaCDNKeyName) {
 			r.Errorf("createCDNKey got: %v Want to contain: %v", got, mediaCDNKeyName)
 		}
 	})
-	teardownTestCreateCDNKey(mediaCDNKeyName, t)
+	t.Cleanup(func() {
+		teardownTestCreateCDNKey(mediaCDNKeyName, t)
+	})
 }
 
 func TestCreateCloudCDNKey(t *testing.T) {
@@ -68,7 +70,7 @@ func TestCreateCloudCDNKey(t *testing.T) {
 	}
 
 	// Create a random private key for the CDN key. It is not validated.
-	ckoudCDNPrivateKey, err := getUUID64()
+	cloudCDNPrivateKey, err := getUUID64()
 	if err != nil {
 		t.Fatalf("getUUID64 err: %v", err)
 	}
@@ -76,14 +78,16 @@ func TestCreateCloudCDNKey(t *testing.T) {
 	cloudCDNKeyID := fmt.Sprintf("%s-%s", cloudCDNKeyID, uuid)
 	cloudCDNKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, cloudCDNKeyID)
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		if err := createCDNKey(&buf, tc.ProjectID, cloudCDNKeyID, hostname, keyName, ckoudCDNPrivateKey, false); err != nil {
+		if err := createCDNKey(&buf, tc.ProjectID, cloudCDNKeyID, cloudCDNPrivateKey, false); err != nil {
 			r.Errorf("createCDNKey got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, cloudCDNKeyName) {
 			r.Errorf("createCDNKey got: %v Want to contain: %v", got, cloudCDNKeyName)
 		}
 	})
-	teardownTestCreateCDNKey(cloudCDNKeyName, t)
+	t.Cleanup(func() {
+		teardownTestCreateCDNKey(cloudCDNKeyName, t)
+	})
 }
 
 func teardownTestCreateCDNKey(testCDNKeyName string, t *testing.T) {
