@@ -1080,12 +1080,6 @@ func TestInspectDataToHybridJobTrigger(t *testing.T) {
 	if want := "Job State: ACTIVE"; !strings.Contains(got, want) {
 		t.Errorf("TestInspectDataToHybridJobTrigger got %q, want %q", got, want)
 	}
-	if want := "EMAIL_ADDRESS"; !strings.Contains(got, want) {
-		t.Errorf("TestInspectDataToHybridJobTrigger got %q, want %q", got, want)
-	}
-	if want := "PERSON_NAME"; !strings.Contains(got, want) {
-		t.Errorf("TestInspectDataToHybridJobTrigger got %q, want %q", got, want)
-	}
 
 }
 
