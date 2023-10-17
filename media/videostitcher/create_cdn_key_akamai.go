@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,10 +14,9 @@
 
 package videostitcher
 
-// [START videostitcher_get_cdn_key]
+// [START videostitcher_create_cdn_key_akamai]
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -25,11 +24,14 @@ import (
 	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
-// getCDNKey gets a CDN key by ID.
-func getCDNKey(w io.Writer, projectID, keyID string) error {
+// createCDNKeyAkamai creates an Akamai CDN key. A CDN key is used to retrieve
+// protected media.
+func createCDNKeyAkamai(w io.Writer, projectID, keyID, akamaiTokenKey string) error {
 	// projectID := "my-project-id"
 	// keyID := "my-cdn-key"
+	// akamaiTokenKey := "my-private-token-key"
 	location := "us-central1"
+	hostname := "cdn.example.com"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
@@ -37,21 +39,31 @@ func getCDNKey(w io.Writer, projectID, keyID string) error {
 	}
 	defer client.Close()
 
-	req := &stitcherstreampb.GetCdnKeyRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectID, location, keyID),
-	}
-	// Gets the CDN key.
-	response, err := client.GetCdnKey(ctx, req)
-	if err != nil {
-		return fmt.Errorf("client.GetCdnKey: %v", err)
-	}
-	b, err := json.MarshalIndent(response, "", " ")
-	if err != nil {
-		return fmt.Errorf("json.MarshalIndent: %w", err)
+	req := &stitcherstreampb.CreateCdnKeyRequest{
+		Parent:   fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+		CdnKeyId: keyID,
+		CdnKey: &stitcherstreampb.CdnKey{
+			CdnKeyConfig: &stitcherstreampb.CdnKey_AkamaiCdnKey{
+				AkamaiCdnKey: &stitcherstreampb.AkamaiCdnKey{
+					TokenKey: []byte(akamaiTokenKey),
+				},
+			},
+			Hostname: hostname,
+		},
 	}
 
-	fmt.Fprintf(w, "CDN key:\n%s", string(b))
+	// Creates the CDN key.
+	op, err := client.CreateCdnKey(ctx, req)
+	if err != nil {
+		return fmt.Errorf("client.CreateCdnKey: %w", err)
+	}
+	response, err := op.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintf(w, "CDN key: %v", response.GetName())
 	return nil
 }
 
-// [END videostitcher_get_cdn_key]
+// [END videostitcher_create_cdn_key_akamai]
