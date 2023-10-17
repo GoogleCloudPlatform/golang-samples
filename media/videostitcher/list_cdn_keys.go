@@ -23,7 +23,7 @@ import (
 	"google.golang.org/api/iterator"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 // listCDNKeys gets all of the CDN keys for a given location.
@@ -37,7 +37,7 @@ func listCDNKeys(w io.Writer, projectID string) error {
 	}
 	defer client.Close()
 
-	req := &stitcherpb.ListCdnKeysRequest{
+	req := &stitcherstreampb.ListCdnKeysRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 	}
 
