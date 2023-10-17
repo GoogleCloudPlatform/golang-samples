@@ -40,11 +40,11 @@ const (
 	deleteSlateResponse = "Deleted slate"
 
 	deleteCDNKeyResponse = "Deleted CDN key"
-	mediaCDNKeyID        = "my-go-test-media-cdn"
-	cloudCDNKeyID        = "my-go-test-cloud-cdn"
-	akamaiCDNKeyID       = "my-go-test-akamai-cdn"
+	mediaCDNKeyID        = "go-test-media-cdn"
+	cloudCDNKeyID        = "go-test-cloud-cdn"
+	akamaiCDNKeyID       = "go-test-akamai-cdn"
 	hostname             = "cdn.example.com"
-	updatedHostname      = "updated.example.com"
+	updatedHostname      = "updated.cdn.example.com"
 	keyName              = "my-key"
 
 	vodURI = "https://storage.googleapis.com/cloud-samples-data/media/hls-vod/manifest.m3u8"
@@ -80,6 +80,7 @@ func cleanStaleResources(projectID string) {
 	}
 	defer client.Close()
 
+	// Slates
 	req := &stitcherstreampb.ListSlatesRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 	}
@@ -115,6 +116,45 @@ func cleanStaleResources(projectID string) {
 			}
 		}
 	}
+
+	// CDN keys
+	req2 := &stitcherstreampb.ListCdnKeysRequest{
+		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+	}
+
+	it2 := client.ListCdnKeys(ctx, req2)
+
+	for {
+		response, err := it2.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Printf("Can't find next CDN key: %s", err)
+			continue
+		}
+		if strings.Contains(response.GetName(), mediaCDNKeyID) ||
+			strings.Contains(response.GetName(), cloudCDNKeyID) ||
+			strings.Contains(response.GetName(), akamaiCDNKeyID) {
+
+			arr := strings.Split(response.GetName(), "-")
+			t := arr[len(arr)-1]
+			if isResourceStale(t) == true {
+				req := &stitcherstreampb.DeleteCdnKeyRequest{
+					Name: response.GetName(),
+				}
+				// Deletes the CDN key.
+				op, err := client.DeleteCdnKey(ctx, req)
+				if err != nil {
+					log.Printf("cleanStaleResources DeleteCdnKey: %s", err)
+				}
+				err = op.Wait(ctx)
+				if err != nil {
+					log.Printf("cleanStaleResources Wait: %s", err)
+				}
+			}
+		}
+	}
 }
 
 func isResourceStale(timestamp string) bool {
@@ -140,4 +180,14 @@ func getUUID() (string, error) {
 	}
 	uuid := u.String()
 	return fmt.Sprintf("%s-%d", strings.ReplaceAll(uuid, "-", ""), t.Unix()), nil
+}
+
+func getUUID64() (string, error) {
+	u1, err1 := uuid.NewRandom()
+	u2, err2 := uuid.NewRandom()
+	if err1 != nil || err2 != nil {
+		return "", fmt.Errorf("getUUID64 err: %v, %v", err1, err2)
+	}
+	uuid := fmt.Sprintf("%s%s", u1.String(), u2.String())
+	return strings.ReplaceAll(uuid, "-", ""), nil
 }

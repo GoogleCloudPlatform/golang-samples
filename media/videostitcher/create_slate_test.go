@@ -46,7 +46,9 @@ func TestCreateSlate(t *testing.T) {
 			r.Errorf("createSlate got: %v Want to contain: %v", got, slateName)
 		}
 	})
-	teardownTestCreateSlate(slateName, t)
+	t.Cleanup(func() {
+		teardownTestCreateSlate(slateName, t)
+	})
 }
 
 func teardownTestCreateSlate(slateName string, t *testing.T) {
