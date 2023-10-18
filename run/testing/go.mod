@@ -6,7 +6,7 @@ require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230522201558-cba0742a460f
 	github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping v0.0.0-20230522201558-cba0742a460f
 	github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20230522201558-cba0742a460f
-	golang.org/x/net v0.12.0
+	golang.org/x/net v0.17.0
 	google.golang.org/grpc v1.55.0
 )
 
@@ -26,11 +26,11 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.2.4 // indirect
 	github.com/googleapis/gax-go/v2 v2.11.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/crypto v0.11.0 // indirect
+	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/oauth2 v0.9.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/sys v0.10.0 // indirect
-	golang.org/x/text v0.11.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/api v0.128.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
