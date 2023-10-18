@@ -62,7 +62,7 @@ func createInstanceWithAutoscalingConfig(w io.Writer, projectID, instanceID stri
                 },
         })
         if err != nil {
-                return fmt.Errorf("could not create instance %s: %w", fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID), err)
+                return fmt.Errorf("could not create instance %s: %w", instanceName, err)
         }
         fmt.Fprintf(w, "Waiting for operation on %s to complete...", instanceID)
         // Wait for the instance creation to finish.
