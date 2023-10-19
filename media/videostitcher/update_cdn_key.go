@@ -21,7 +21,7 @@ import (
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
@@ -29,14 +29,14 @@ import (
 // If isMediaCDN is true, update a Media CDN key. If false, update a Cloud
 // CDN key. To create an updated privateKey value for Media CDN, see
 // https://cloud.google.com/video-stitcher/docs/how-to/managing-cdn-keys#create-private-key-media-cdn.
-func updateCDNKey(w io.Writer, projectID, keyID, hostname, keyName, privateKey string, isMediaCDN bool) error {
+func updateCDNKey(w io.Writer, projectID, keyID, privateKey string, isMediaCDN bool) error {
 	// projectID := "my-project-id"
 	// keyID := "my-cdn-key"
-	// hostname := "updated.cdn.example.com"
-	// keyName := "cdn-key"
 	// privateKey := "my-updated-private-key"
 	// isMediaCDN := true
 	location := "us-central1"
+	hostname := "updated.cdn.example.com"
+	keyName := "cdn-key"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
@@ -44,12 +44,12 @@ func updateCDNKey(w io.Writer, projectID, keyID, hostname, keyName, privateKey s
 	}
 	defer client.Close()
 
-	var req *stitcherpb.UpdateCdnKeyRequest
+	var req *stitcherstreampb.UpdateCdnKeyRequest
 	if isMediaCDN {
-		req = &stitcherpb.UpdateCdnKeyRequest{
-			CdnKey: &stitcherpb.CdnKey{
-				CdnKeyConfig: &stitcherpb.CdnKey_MediaCdnKey{
-					MediaCdnKey: &stitcherpb.MediaCdnKey{
+		req = &stitcherstreampb.UpdateCdnKeyRequest{
+			CdnKey: &stitcherstreampb.CdnKey{
+				CdnKeyConfig: &stitcherstreampb.CdnKey_MediaCdnKey{
+					MediaCdnKey: &stitcherstreampb.MediaCdnKey{
 						KeyName:    keyName,
 						PrivateKey: []byte(privateKey),
 					},
@@ -64,10 +64,10 @@ func updateCDNKey(w io.Writer, projectID, keyID, hostname, keyName, privateKey s
 			},
 		}
 	} else {
-		req = &stitcherpb.UpdateCdnKeyRequest{
-			CdnKey: &stitcherpb.CdnKey{
-				CdnKeyConfig: &stitcherpb.CdnKey_GoogleCdnKey{
-					GoogleCdnKey: &stitcherpb.GoogleCdnKey{
+		req = &stitcherstreampb.UpdateCdnKeyRequest{
+			CdnKey: &stitcherstreampb.CdnKey{
+				CdnKeyConfig: &stitcherstreampb.CdnKey_GoogleCdnKey{
+					GoogleCdnKey: &stitcherstreampb.GoogleCdnKey{
 						KeyName:    keyName,
 						PrivateKey: []byte(privateKey),
 					},
@@ -84,9 +84,13 @@ func updateCDNKey(w io.Writer, projectID, keyID, hostname, keyName, privateKey s
 	}
 
 	// Updates the CDN key.
-	response, err := client.UpdateCdnKey(ctx, req)
+	op, err := client.UpdateCdnKey(ctx, req)
 	if err != nil {
 		return fmt.Errorf("client.UpdateCdnKey: %w", err)
+	}
+	response, err := op.Wait(ctx)
+	if err != nil {
+		return err
 	}
 
 	fmt.Fprintf(w, "Updated CDN key: %+v", response)
