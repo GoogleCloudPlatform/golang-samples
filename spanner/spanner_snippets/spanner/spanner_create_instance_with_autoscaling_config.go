@@ -16,75 +16,75 @@ package spanner
 
 // [START spanner_create_instance_with_autoscaling_config]
 import (
-        "context"
-        "fmt"
-        "io"
+	"context"
+	"fmt"
+	"io"
 
-        instance "cloud.google.com/go/spanner/admin/instance/apiv1"
-        "cloud.google.com/go/spanner/admin/instance/apiv1/instancepb"
-        "google.golang.org/genproto/protobuf/field_mask"
+	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
+	"cloud.google.com/go/spanner/admin/instance/apiv1/instancepb"
+	"google.golang.org/genproto/protobuf/field_mask"
 )
 
 func createInstanceWithAutoscalingConfig(w io.Writer, projectID, instanceID string) error {
-        // projectID := "my-project-id"
-        // instanceID := "my-instance"
-        ctx := context.Background()
-        instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
-        if err != nil {
-                return fmt.Errorf("could not create instance admin client for project %s: %w", projectID, err)
-        }
-        defer instanceAdmin.Close()
+	// projectID := "my-project-id"
+	// instanceID := "my-instance"
+	ctx := context.Background()
+	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
+	if err != nil {
+		return fmt.Errorf("could not create instance admin client for project %s: %w", projectID, err)
+	}
+	defer instanceAdmin.Close()
 
-        instanceName := fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
-        fmt.Fprintf(w, "Creating instance %s.", instanceName)
+	instanceName := fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
+	fmt.Fprintf(w, "Creating instance %s.", instanceName)
 
-        op, err := instanceAdmin.CreateInstance(ctx, &instancepb.CreateInstanceRequest{
-                Parent:     fmt.Sprintf("projects/%s", projectID),
-                InstanceId: instanceID,
-                Instance: &instancepb.Instance{
-                        Config:      fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, "regional-us-central1"),
-                        DisplayName: "This is a display name.",
-                        AutoscalingConfig: &instancepb.AutoscalingConfig{
-                                AutoscalingLimits: &instancepb.AutoscalingConfig_AutoscalingLimits{
-                                        MinLimit: &instancepb.AutoscalingConfig_AutoscalingLimits_MinNodes{
-                                                MinNodes: 1,
-                                        },
-                                        MaxLimit: &instancepb.AutoscalingConfig_AutoscalingLimits_MaxNodes{
-                                                MaxNodes: 2,
-                                        },
-                                },
-                                AutoscalingTargets: &instancepb.AutoscalingConfig_AutoscalingTargets{
-                                        HighPriorityCpuUtilizationPercent: 65,
-                                        StorageUtilizationPercent:         95,
-                                },
-                        },
-                        Labels: map[string]string{"cloud_spanner_samples": "true"},
-                },
-        })
-        if err != nil {
-                return fmt.Errorf("could not create instance %s: %w", instanceName, err)
-        }
-        fmt.Fprintf(w, "Waiting for operation on %s to complete...", instanceID)
-        // Wait for the instance creation to finish.
-        i, err := op.Wait(ctx)
-        if err != nil {
-                return fmt.Errorf("waiting for instance creation to finish failed: %w", err)
-        }
-        // The instance may not be ready to serve yet.
-        if i.State != instancepb.Instance_READY {
-                fmt.Fprintf(w, "instance state is not READY yet. Got state %v\n", i.State)
-        }
-        fmt.Fprintf(w, "Created instance [%s].\n", instanceID)
+	op, err := instanceAdmin.CreateInstance(ctx, &instancepb.CreateInstanceRequest{
+		Parent:     fmt.Sprintf("projects/%s", projectID),
+		InstanceId: instanceID,
+		Instance: &instancepb.Instance{
+			Config:      fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, "regional-us-central1"),
+			DisplayName: "This is a display name.",
+			AutoscalingConfig: &instancepb.AutoscalingConfig{
+				AutoscalingLimits: &instancepb.AutoscalingConfig_AutoscalingLimits{
+					MinLimit: &instancepb.AutoscalingConfig_AutoscalingLimits_MinNodes{
+						MinNodes: 1,
+					},
+					MaxLimit: &instancepb.AutoscalingConfig_AutoscalingLimits_MaxNodes{
+						MaxNodes: 2,
+					},
+				},
+				AutoscalingTargets: &instancepb.AutoscalingConfig_AutoscalingTargets{
+					HighPriorityCpuUtilizationPercent: 65,
+					StorageUtilizationPercent:         95,
+				},
+			},
+			Labels: map[string]string{"cloud_spanner_samples": "true"},
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("could not create instance %s: %w", instanceName, err)
+	}
+	fmt.Fprintf(w, "Waiting for operation on %s to complete...", instanceID)
+	// Wait for the instance creation to finish.
+	i, err := op.Wait(ctx)
+	if err != nil {
+		return fmt.Errorf("waiting for instance creation to finish failed: %w", err)
+	}
+	// The instance may not be ready to serve yet.
+	if i.State != instancepb.Instance_READY {
+		fmt.Fprintf(w, "instance state is not READY yet. Got state %v\n", i.State)
+	}
+	fmt.Fprintf(w, "Created instance [%s].\n", instanceID)
 
-        instance, err := instanceAdmin.GetInstance(ctx, &instancepb.GetInstanceRequest{
-                Name:      instanceName,
-                FieldMask: &field_mask.FieldMask{Paths: []string{"autoscaling_config"}},
-        })
-        if err != nil {
-                return fmt.Errorf("failed to get instance [%s]: %w", instanceName, err)
-        }
-        fmt.Fprintf(w, "Instance %s has autoscaling_config: %s.", instanceID, instance.AutoscalingConfig)
-        return nil
+	instance, err := instanceAdmin.GetInstance(ctx, &instancepb.GetInstanceRequest{
+		Name:      instanceName,
+		FieldMask: &field_mask.FieldMask{Paths: []string{"autoscaling_config"}},
+	})
+	if err != nil {
+		return fmt.Errorf("failed to get instance [%s]: %w", instanceName, err)
+	}
+	fmt.Fprintf(w, "Instance %s has autoscaling_config: %s.", instanceID, instance.AutoscalingConfig)
+	return nil
 }
 
 // [END spanner_create_instance_with_autoscaling_config]
