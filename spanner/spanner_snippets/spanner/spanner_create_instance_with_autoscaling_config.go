@@ -25,6 +25,9 @@ import (
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
+// Example of creating an autoscaling instance with Go.
+// projectID is the ID of the project that the new instance will be in.
+// instanceID is the ID of the new instance to be created.
 func createInstanceWithAutoscalingConfig(w io.Writer, projectID, instanceID string) error {
 	// projectID := "my-project-id"
 	// instanceID := "my-instance"
@@ -77,7 +80,8 @@ func createInstanceWithAutoscalingConfig(w io.Writer, projectID, instanceID stri
 	fmt.Fprintf(w, "Created instance [%s].\n", instanceID)
 
 	instance, err := instanceAdmin.GetInstance(ctx, &instancepb.GetInstanceRequest{
-		Name:      instanceName,
+		Name: instanceName,
+		// Get the autoscaling_config field from the newly created instance.
 		FieldMask: &field_mask.FieldMask{Paths: []string{"autoscaling_config"}},
 	})
 	if err != nil {
