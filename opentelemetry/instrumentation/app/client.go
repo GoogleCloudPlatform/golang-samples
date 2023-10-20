@@ -23,6 +23,7 @@ import (
 // callSingle makes an http request to this application's /single endpoint.
 // The provided context is used to propagate the trace context with the
 // http headers.
+// [START opentelemetry_instrumentation_client]
 func callSingle(ctx context.Context) error {
 	// otelhttp.Get makes an http GET request, just like net/http.Get.
 	// In addition, it records a span, records metrics, and propagates context.
@@ -33,3 +34,5 @@ func callSingle(ctx context.Context) error {
 
 	return res.Body.Close()
 }
+
+// [END opentelemetry_instrumentation_client]
