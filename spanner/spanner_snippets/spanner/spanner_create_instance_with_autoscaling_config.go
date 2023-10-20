@@ -46,7 +46,7 @@ func createInstanceWithAutoscalingConfig(w io.Writer, projectID, instanceID stri
 		InstanceId: instanceID,
 		Instance: &instancepb.Instance{
 			Config:      fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, "regional-us-central1"),
-			DisplayName: "This is a display name.",
+			DisplayName: "Example of creating an instance programmatically.",
 			AutoscalingConfig: &instancepb.AutoscalingConfig{
 				AutoscalingLimits: &instancepb.AutoscalingConfig_AutoscalingLimits{
 					MinLimit: &instancepb.AutoscalingConfig_AutoscalingLimits_MinNodes{
