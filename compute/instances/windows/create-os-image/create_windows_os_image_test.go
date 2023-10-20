@@ -66,7 +66,7 @@ func TestCreateWindowsOSImageSnippets(t *testing.T) {
 						DiskName:   proto.String(diskName),
 						DiskSizeGb: proto.Int64(64),
 						SourceImage: proto.String(
-							"projects/windows-cloud/global/images/windows-server-2012-r2-dc-core-v20220314",
+							"projects/windows-cloud/global/images/windows-server-2022-dc-core-v20231011",
 						),
 					},
 					DeviceName: proto.String(diskName),
