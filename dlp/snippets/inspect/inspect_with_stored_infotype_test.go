@@ -47,7 +47,7 @@ func TestInspectWithStoredInfotype(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	duration := time.Duration(30) * time.Second
+	duration := time.Duration(45) * time.Second
 	time.Sleep(duration)
 
 	textToDeidentify := "This commit was made by kewin2010"
