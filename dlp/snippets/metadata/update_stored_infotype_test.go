@@ -11,8 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-package inspect
+package metadata
 
 import (
 	"bytes"
@@ -26,42 +25,53 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestInspectWithStoredInfotype(t *testing.T) {
+func TestUpdateStoredInfoType(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
 
+	var buf bytes.Buffer
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer client.Close()
-	outputBucketPathForStoredInfotype, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	outputBucket, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
 	if err != nil {
 		t.Fatal(err)
 	}
-	outputPath := fmt.Sprintf("gs://" + outputBucketPathForStoredInfotype + "/")
+	outputPath := fmt.Sprintf("gs://" + outputBucket + "/")
+
+	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fileSetUrl, gcsUri, err := filesForUpdateStoredInfoType(t, tc.ProjectID, bucketName)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	infoTypeId, err := createStoredInfoTypeForTesting(t, tc.ProjectID, outputPath)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	duration := time.Duration(45) * time.Second
+	infoTypeId = strings.TrimPrefix(infoTypeId, fmt.Sprint("projects/"+tc.ProjectID+"/locations/global/storedInfoTypes/"))
+
+	duration := time.Duration(30) * time.Second
 	time.Sleep(duration)
 
-	textToDeidentify := "This commit was made by kewin2010"
-	if err := inspectWithStoredInfotype(&buf, tc.ProjectID, infoTypeId, textToDeidentify); err != nil {
+	if err := updateStoredInfoType(&buf, tc.ProjectID, gcsUri, fileSetUrl, infoTypeId); err != nil {
 		t.Fatal(err)
 	}
 
 	got := buf.String()
-	if want := "Quote: kewin2010"; !strings.Contains(got, want) {
-		t.Errorf("TestInspectWithStoredInfotype got %q, want %q", got, want)
-	}
-	if want := "Info type: GITHUB_LOGINS"; !strings.Contains(got, want) {
-		t.Errorf("TestInspectWithStoredInfotype got %q, want %q", got, want)
+
+	if want := "output: "; !strings.Contains(got, want) {
+		t.Errorf("error from create stored infoType %q", got)
 	}
 
-	defer deleteStoredInfoTypeAfterTest(t, infoTypeId)
+	name := strings.TrimPrefix(got, "output: ")
+
+	defer deleteStoredInfoTypeAfterTest(t, name)
 }
