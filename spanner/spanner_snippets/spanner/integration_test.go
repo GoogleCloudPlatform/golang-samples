@@ -115,6 +115,7 @@ func TestCreateInstances(t *testing.T) {
 
 	runCreateInstanceSample(t, createInstance)
 	runCreateInstanceSample(t, createInstanceWithProcessingUnits)
+	runCreateInstanceSample(t, createInstanceWithAutoscalingConfig)
 }
 
 func runCreateInstanceSample(t *testing.T, f instanceSampleFunc) {
