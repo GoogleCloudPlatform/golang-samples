@@ -6,12 +6,12 @@ require (
 	cloud.google.com/go v0.110.3
 	cloud.google.com/go/kms v1.12.1
 	cloud.google.com/go/longrunning v0.5.1
-	cloud.google.com/go/spanner v1.47.0
+	cloud.google.com/go/spanner v1.51.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.14
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230627093437-1cdc08c167bb
 	github.com/golang/protobuf v1.5.3
 	github.com/google/uuid v1.3.0
-	github.com/googleapis/gax-go/v2 v2.11.0
+	github.com/googleapis/gax-go/v2 v2.12.0
 	go.opencensus.io v0.24.0
 	google.golang.org/api v0.128.0
 	google.golang.org/genproto v0.0.0-20230626202813-9b080da550b3
