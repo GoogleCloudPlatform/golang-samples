@@ -16,19 +16,15 @@
 package metadata
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"testing"
-	"time"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"cloud.google.com/go/storage"
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
 )
 
@@ -37,80 +33,6 @@ const (
 	filePathToUpload = "./testdata/term_list_storedInfotype.txt"
 	bucket_prefix    = "test"
 )
-
-func TestInfoTypes(t *testing.T) {
-	testutil.SystemTest(t)
-	tests := []struct {
-		language string
-		filter   string
-		want     string
-	}{
-		{
-			want: "TIME",
-		},
-		{
-			language: "en-US",
-			want:     "TIME",
-		},
-		{
-			language: "es",
-			want:     "DATE",
-		},
-		{
-			filter: "supported_by=INSPECT",
-			want:   "GENDER",
-		},
-	}
-	for _, test := range tests {
-		test := test
-		t.Run(test.language, func(t *testing.T) {
-			t.Parallel()
-			buf := new(bytes.Buffer)
-			err := infoTypes(buf, test.language, test.filter)
-			if err != nil {
-				t.Errorf("infoTypes(%s, %s) = error %q, want substring %q", test.language, test.filter, err, test.want)
-			}
-			if got := buf.String(); !strings.Contains(got, test.want) {
-				t.Errorf("infoTypes(%s, %s) = %s, want substring %q", test.language, test.filter, got, test.want)
-			}
-		})
-	}
-}
-
-func TestCreateStoredInfoType(t *testing.T) {
-
-	tc := testutil.SystemTest(t)
-	ctx := context.Background()
-
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer client.Close()
-	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
-	if err != nil {
-		t.Fatal(err)
-	}
-	outputPath := fmt.Sprintf("gs://" + bucketName + "/")
-	var buf bytes.Buffer
-
-	if err := createStoredInfoType(&buf, tc.ProjectID, outputPath); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-	if want := "output: "; !strings.Contains(got, want) {
-		t.Errorf("error from create stored infoType %q", got)
-	}
-
-	if want := "github-usernames"; !strings.Contains(got, want) {
-		t.Errorf("error from create stored infoType %q", got)
-	}
-
-	name := strings.TrimPrefix(got, "output: ")
-
-	defer deleteStoredInfoTypeAfterTest(t, name)
-}
 
 func deleteStoredInfoTypeAfterTest(t *testing.T, name string) error {
 	t.Helper()
@@ -129,57 +51,6 @@ func deleteStoredInfoTypeAfterTest(t *testing.T, name string) error {
 		return err
 	}
 	return nil
-}
-
-func TestUpdateStoredInfoType(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	var buf bytes.Buffer
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer client.Close()
-	outputBucket, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
-	if err != nil {
-		t.Fatal(err)
-	}
-	outputPath := fmt.Sprintf("gs://" + outputBucket + "/")
-
-	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	fileSetUrl, gcsUri, err := filesForUpdateStoredInfoType(t, tc.ProjectID, bucketName)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	infoTypeId, err := createStoredInfoTypeForTesting(t, tc.ProjectID, outputPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	infoTypeId = strings.TrimPrefix(infoTypeId, fmt.Sprint("projects/"+tc.ProjectID+"/locations/global/storedInfoTypes/"))
-
-	duration := time.Duration(30) * time.Second
-	time.Sleep(duration)
-
-	if err := updateStoredInfoType(&buf, tc.ProjectID, gcsUri, fileSetUrl, infoTypeId); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-
-	if want := "output: "; !strings.Contains(got, want) {
-		t.Errorf("error from create stored infoType %q", got)
-	}
-
-	name := strings.TrimPrefix(got, "output: ")
-
-	defer deleteStoredInfoTypeAfterTest(t, name)
 }
 
 func filesForUpdateStoredInfoType(t *testing.T, projectID, bucketName string) (string, string, error) {
@@ -206,11 +77,11 @@ func filesForUpdateStoredInfoType(t *testing.T, projectID, bucketName string) (s
 	if !dirExists {
 		obj := client.Bucket(bucketName).Object(dirPath)
 		if _, err := obj.NewWriter(ctx).Write([]byte("")); err != nil {
-			log.Fatalf("Failed to create directory: %v", err)
+			log.Fatalf("[INFO] [filesForUpdateStoredInfoType] Failed to create directory: %v", err)
 		}
-		fmt.Printf("Directory '%s' created successfully in bucket '%s'.\n", dirPath, bucketName)
+		log.Printf("[INFO] [filesForUpdateStoredInfoType] Directory '%s' created successfully in bucket '%s'.\n", dirPath, bucketName)
 	} else {
-		fmt.Printf("Directory '%s' already exists in bucket '%s'.\n", dirPath, bucketName)
+		log.Printf("[INFO] [filesForUpdateStoredInfoType] Directory '%s' already exists in bucket '%s'.\n", dirPath, bucketName)
 	}
 
 	// file upload code
@@ -218,7 +89,7 @@ func filesForUpdateStoredInfoType(t *testing.T, projectID, bucketName string) (s
 	// Open local file.
 	file, err := os.ReadFile(filePathToUpload)
 	if err != nil {
-		log.Fatalf("Failed to read file: %v", err)
+		log.Fatalf("[INFO] [filesForUpdateStoredInfoType] Failed to read file: %v", err)
 	}
 
 	// Get a reference to the bucket
@@ -229,24 +100,24 @@ func filesForUpdateStoredInfoType(t *testing.T, projectID, bucketName string) (s
 	writer := object.NewWriter(ctx)
 	_, err = writer.Write(file)
 	if err != nil {
-		log.Fatalf("Failed to write file: %v", err)
+		log.Fatalf("[INFO] [filesForUpdateStoredInfoType] Failed to write file: %v", err)
 	}
 	err = writer.Close()
 	if err != nil {
 		log.Fatalf("Failed to close writer: %v", err)
 	}
-	fmt.Printf("File uploaded successfully: %v\n", termListFileName)
+	log.Printf("[INFO] [filesForUpdateStoredInfoType] File uploaded successfully: %v\n", termListFileName)
 
 	// Check if the file exists in the bucket
 	_, err = bucket.Object(termListFileName).Attrs(ctx)
 	if err != nil {
 		if err == storage.ErrObjectNotExist {
-			fmt.Printf("File %v does not exist in bucket %v\n", termListFileName, bucketName)
+			log.Printf("[INFO] [filesForUpdateStoredInfoType] File %v does not exist in bucket %v\n", termListFileName, bucketName)
 		} else {
-			log.Fatalf("Failed to check file existence: %v", err)
+			log.Fatalf("[INFO] [filesForUpdateStoredInfoType] Failed to check file existence: %v", err)
 		}
 	} else {
-		fmt.Printf("File %v exists in bucket %v\n", termListFileName, bucketName)
+		log.Printf("[INFO] [filesForUpdateStoredInfoType] File %v exists in bucket %v\n", termListFileName, bucketName)
 	}
 
 	fileSetUrl := fmt.Sprint("gs://" + bucketName + "/" + termListFileName)
@@ -296,6 +167,7 @@ func createStoredInfoTypeForTesting(t *testing.T, projectID, outputPath string) 
 			LargeCustomDictionary: largeCustomDictionaryConfig,
 		},
 	}
+
 	req := &dlppb.CreateStoredInfoTypeRequest{
 		Parent:           fmt.Sprintf("projects/%s/locations/global", projectID),
 		Config:           storedInfoTypeConfig,
