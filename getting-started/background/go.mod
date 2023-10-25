@@ -7,7 +7,7 @@ require (
 	cloud.google.com/go/pubsub v1.31.0
 	cloud.google.com/go/translate v1.8.1
 	golang.org/x/text v0.13.0
-	google.golang.org/grpc v1.56.1
+	google.golang.org/grpc v1.56.3
 )
 
 require (
