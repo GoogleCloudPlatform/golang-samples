@@ -7,7 +7,7 @@ require (
 	github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping v0.0.0-20230522201558-cba0742a460f
 	github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20230522201558-cba0742a460f
 	golang.org/x/net v0.17.0
-	google.golang.org/grpc v1.55.0
+	google.golang.org/grpc v1.56.3
 )
 
 require (
