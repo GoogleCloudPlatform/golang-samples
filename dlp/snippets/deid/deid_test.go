@@ -86,52 +86,6 @@ func TestDeidentifyDateShift(t *testing.T) {
 	}
 }
 
-func TestDeidentifyTableRowSuppress(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	var buf bytes.Buffer
-	if err := deidentifyTableRowSuppress(&buf, tc.ProjectID); err != nil {
-		t.Errorf("deidentifyTableRowSuppress: %v", err)
-	}
-	got := buf.String()
-	if want := "Table after de-identification"; !strings.Contains(got, want) {
-		t.Errorf("deidentifyTableRowSuppress got %q, want %q", got, want)
-	}
-	if want := "values:{string_value:\"Charles Dickens\"} "; strings.Contains(got, want) {
-		t.Errorf("deidentifyTableRowSuppress got %q, want %q", got, want)
-	}
-}
-
-func TestDeidentifyTableInfoTypes(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	var buf bytes.Buffer
-
-	if err := deidentifyTableInfotypes(&buf, tc.ProjectID); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-	if want := "Table after de-identification"; !strings.Contains(got, want) {
-		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
-	}
-
-	if want := "[PERSON_NAME]"; !strings.Contains(got, want) {
-		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
-	}
-
-	if want := "Charles Dickens"; strings.Contains(got, want) {
-		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
-	}
-	if want := "Mark Twain"; strings.Contains(got, want) {
-		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
-	}
-	if want := "Jane Austen"; strings.Contains(got, want) {
-		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
-	}
-
-}
-
 func TestDeIdentifyWithReplacement(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	input := "My name is Alicia Abernathy, and my email address is aabernathy@example.com."
@@ -146,55 +100,6 @@ func TestDeIdentifyWithReplacement(t *testing.T) {
 	}
 	if got := buf.String(); got != want {
 		t.Errorf("deidentifyWithReplacement(%q) = %q, want %q", input, got, want)
-	}
-}
-
-func TestDeidentifyTableBucketing(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	if err := deIdentifyTableBucketing(&buf, tc.ProjectID); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if want := "values:{string_value:\"70:80\"}}"; !strings.Contains(got, want) {
-		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
-	}
-	if want := "values:{string_value:\"75\"}}"; strings.Contains(got, want) {
-		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
-	}
-
-}
-
-func TestDeidentifyTableMaskingCondition(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-	if err := deidentifyTableMaskingCondition(&buf, tc.ProjectID); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if want := "Table after de-identification :"; !strings.Contains(got, want) {
-		t.Errorf("deidentifyTableMaskingCondition got (%q) =%q ", got, want)
-	}
-	if want := "values:{string_value:\"**\"}"; !strings.Contains(got, want) {
-		t.Errorf("deidentifyTableMaskingCondition got (%q) =%q ", got, want)
-	}
-}
-
-func TestDeidentifyTableConditionInfoTypes(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	if err := deidentifyTableConditionInfoTypes(&buf, tc.ProjectID, []string{"PATIENT", "FACTOID"}); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-	if want := "Table after de-identification"; !strings.Contains(got, want) {
-		t.Errorf("deidentifyTableConditionInfoTypes got %q, want %q", got, want)
-	}
-	if want := "values:{string_value:\"[PERSON_NAME] name was a curse invented by [PERSON_NAME].\"}}"; !strings.Contains(got, want) {
-		t.Errorf("deidentifyTableConditionInfoTypes got %q, want %q", got, want)
 	}
 }
 
@@ -232,32 +137,6 @@ func TestDeIdentifyWithInfotype(t *testing.T) {
 
 }
 
-func TestDeidentifyTableFPE(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	keyRingName, err := createKeyRing(t, tc.ProjectID)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	kmsKeyName, wrappedAesKey, keyVersion, err := createKey(t, tc.ProjectID, keyRingName)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer destroyKey(t, tc.ProjectID, keyVersion)
-
-	contains := "De-identify Table after format-preserving encryption"
-
-	var buf bytes.Buffer
-
-	if err := deidentifyTableFPE(&buf, tc.ProjectID, kmsKeyName, wrappedAesKey); err != nil {
-		t.Fatal(err)
-	}
-
-	if got := buf.String(); !strings.Contains(got, contains) {
-		t.Errorf("deidentifyTableFPE() = %q,%q ", got, contains)
-	}
-}
 func TestDeIdentifyDeterministic(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -417,81 +296,6 @@ func destroyKey(t *testing.T, projectID, key string) error {
 	}
 
 	return nil
-}
-
-func TestDeIdentifyTableWithCryptoHash(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	var buf bytes.Buffer
-	transientKeyName := "YOUR_TRANSIENT_CRYPTO_KEY_NAME"
-
-	if err := deIdentifyTableWithCryptoHash(&buf, tc.ProjectID, transientKeyName); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-
-	if want := "Table after de-identification :"; !strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
-	}
-	if want := "user3@example.org"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
-	}
-	if want := "858-555-0224"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
-	}
-	if want := "user2@example.org"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
-	}
-	if want := "858-555-0223"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
-	}
-	if want := "user1@example.org"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
-	}
-	if want := "858-555-0222"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
-	}
-}
-
-func TestDeIdentifyTableWithMultipleCryptoHash(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	if err := deIdentifyTableWithMultipleCryptoHash(&buf, tc.ProjectID, "your-transient-crypto-key-name-1", "your-transient-crypto-key-name-2"); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if want := "Table after de-identification :"; !strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithMultipleCryptoHash got %q, want %q", got, want)
-	}
-	if want := "user1@example.org"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithMultipleCryptoHash got %q, want %q", got, want)
-	}
-	if want := "858-555-0222"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithMultipleCryptoHash got %q, want %q", got, want)
-	}
-	if want := "abbyabernathy1"; !strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithMultipleCryptoHash got %q, want %q", got, want)
-	}
-}
-
-func TestDeIdentifyTablePrimitiveBucketing(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-	if err := deIdentifyTablePrimitiveBucketing(&buf, tc.ProjectID); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if want := "Table after de-identification :"; !strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTablePrimitiveBucketing got %q, want %q", got, want)
-	}
-
-	if want := `values:{string_value:"High"}`; !strings.Contains(got, want) {
-		t.Errorf("TestDeidentifyDataReplaceWithDictionary got %q, want %q", got, want)
-	}
-	if want := `values:{string_value:"75"}`; strings.Contains(got, want) {
-		t.Errorf("TestDeidentifyDataReplaceWithDictionary got %q, want %q", got, want)
-	}
 }
 
 func TestDeidentifyDataReplaceWithDictionary(t *testing.T) {
