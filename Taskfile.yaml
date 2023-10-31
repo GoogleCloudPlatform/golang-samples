@@ -1,0 +1,30 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  # Allow overriding with envvar.
+  TEST_PROJECT_ID:
+    sh: "echo ${GOOGLE_PROJECT_ID:-}"
+
+env:
+  GOLANG_SAMPLES_E2E_TEST: true
+  GOLANG_SAMPLES_PROJECT_ID: "{{.TEST_PROJECT_ID}}"
+
+tasks:
+  build:
+    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - go build .
+
+  test:
+    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - go test .
+
+  lint:
+    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - go mod tidy
+      - go fmt .
+      - go vet .
