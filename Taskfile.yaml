@@ -13,16 +13,19 @@ env:
 
 tasks:
   build:
+    desc:"Compile go code in the current directory"
     dir: "{{.USER_WORKING_DIR}}"
     cmds:
       - go build .
 
   test:
+    desc:"Run all go tests in the current directory"
     dir: "{{.USER_WORKING_DIR}}"
     cmds:
       - go test .
 
   lint:
+    desc: "Run linters and tidy the current module"
     dir: "{{.USER_WORKING_DIR}}"
     cmds:
       - go mod tidy
