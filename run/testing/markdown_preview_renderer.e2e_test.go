@@ -15,11 +15,10 @@
 package cloudruntests
 
 import (
-	"io"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -56,31 +55,27 @@ func TestRendererService(t *testing.T) {
 		if err != nil {
 			t.Fatalf("service.NewRequest: %q", err)
 		}
-		req.Body = io.NopCloser(strings.NewReader(test.input))
-		client := http.Client{Timeout: 10 * time.Second}
+		req.Body = ioutil.NopCloser(strings.NewReader(test.input))
 
-		testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
-			resp, err := client.Do(req)
-			if err != nil {
-				r.Errorf("client.Do: %v", err)
-				return
-			}
-			defer resp.Body.Close()
-			r.Logf("client.Do: %s %s\n", req.Method, req.URL)
+		resp, err := service.Do(req)
+		if err != nil {
+			t.Fatalf("client.Do: %v", err)
+		}
+		defer resp.Body.Close()
+		t.Logf("client.Do: %s %s\n", req.Method, req.URL)
 
-			if got := resp.StatusCode; got != http.StatusOK {
-				r.Errorf("response status: got %d, want %d", got, http.StatusOK)
-			}
+		if got := resp.StatusCode; got != http.StatusOK {
+			t.Errorf("response status: got %d, want %d", got, http.StatusOK)
+		}
 
-			out, err := io.ReadAll(resp.Body)
-			if err != nil {
-				r.Errorf("ioutil.ReadAll: %v", err)
-				return
-			}
+		out, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			t.Errorf("ioutil.ReadAll: %v", err)
+			return
+		}
 
-			if got := string(out); got != test.want {
-				r.Errorf("%s: got %q, want %q", test.label, got, test.want)
-			}
-		})
+		if got := string(out); got != test.want {
+			t.Errorf("%s: got %q, want %q", test.label, got, test.want)
+		}
 	}
 }
