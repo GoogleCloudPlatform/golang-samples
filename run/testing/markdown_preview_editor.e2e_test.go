@@ -17,7 +17,7 @@ package cloudruntests
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 	"time"
@@ -113,4 +113,5 @@ func caseEditorServiceRender(t *testing.T) {
 	if got := string(out); got != want {
 		t.Errorf("markdown: got %q, want %q", got, want)
 	}
+
 }

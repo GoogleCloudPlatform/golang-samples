@@ -15,7 +15,7 @@
 package cloudruntests
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -64,17 +64,19 @@ func TestRendererService(t *testing.T) {
 		defer resp.Body.Close()
 		t.Logf("client.Do: %s %s\n", req.Method, req.URL)
 
-		if got := resp.StatusCode; got != http.StatusOK {
-			t.Errorf("response status: got %d, want %d", got, http.StatusOK)
+
+	  if got := resp.StatusCode; got != http.StatusOK {
+			r.Errorf("response status: got %d, want %d", got, http.StatusOK)
 		}
 
-		out, err := ioutil.ReadAll(resp.Body)
+		out, err := io.ReadAll(resp.Body)
 		if err != nil {
-			t.Fatalf("ioutil.ReadAll: %v", err)
+			r.Errorf("ioutil.ReadAll: %v", err)
+	  		return
 		}
 
 		if got := string(out); got != test.want {
-			t.Errorf("%s: got %q, want %q", test.label, got, test.want)
-		}
+			r.Errorf("%s: got %q, want %q", test.label, got, test.want)
+    }
 	}
 }

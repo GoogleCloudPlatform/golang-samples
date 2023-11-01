@@ -29,10 +29,6 @@
       ],
       "enabled": false
     }
-  ],
-  "force": {
-    "constraints": {
-      "go": "1.19"
-    }
+  ]
   }
 }
