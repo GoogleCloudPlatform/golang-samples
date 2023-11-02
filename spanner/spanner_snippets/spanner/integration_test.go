@@ -143,7 +143,7 @@ func TestSample(t *testing.T) {
 	runSample(t, createClients, dbName, "failed to create clients")
 	runSample(t, write, dbName, "failed to insert data")
 	out = runSample(t, batchWrite, dbName, "failed to write data using BatchWrite")
-	assertContains(t, out, "BatchWrite successful")
+	assertNotContains(t, out, "could not be applied with error")
 	runSampleWithContext(ctx, t, addNewColumn, dbName, "failed to add new column")
 	runSample(t, delete, dbName, "failed to delete data")
 	runSample(t, write, dbName, "failed to insert data")

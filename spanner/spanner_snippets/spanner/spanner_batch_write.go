@@ -55,15 +55,12 @@ func batchWrite(w io.Writer, db string) error {
 	doFunc := func(response *sppb.BatchWriteResponse) error {
 		if err = status.ErrorProto(response.GetStatus()); err == nil {
 			fmt.Fprintf(w, "Mutation group indexes %v have been applied with commit timestamp %v", response.GetIndexes(), response.GetCommitTimestamp())
-			return nil
+		} else {
+			fmt.Fprintf(w, "Mutation group indexes %v could not be applied with error %v", response.GetIndexes(), err)
 		}
-		return fmt.Errorf("mutation group indexes %v could not be applied with error %v", response.GetIndexes(), err)
+		return nil
 	}
-	if err = iter.Do(doFunc); err != nil {
-		return err
-	}
-	fmt.Fprint(w, "BatchWrite successful")
-	return nil
+	return iter.Do(doFunc)
 }
 
 // [END spanner_batch_write_at_least_once]
