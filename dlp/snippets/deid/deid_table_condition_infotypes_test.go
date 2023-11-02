@@ -11,38 +11,29 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package inspect
+package deid
 
 import (
 	"bytes"
-	"log"
 	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-const (
-	dataSetID = "dlp_test_dataset"
-	tableID   = "dlp_inspect_test_table_table_id"
-)
-
-func TestInspectBigQuerySendToScc(t *testing.T) {
+func TestDeidentifyTableConditionInfoTypes(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
 
-	if err := inspectBigQuerySendToScc(&buf, tc.ProjectID, dataSetID, tableID); err != nil {
+	if err := deidentifyTableConditionInfoTypes(&buf, tc.ProjectID, []string{"PATIENT", "FACTOID"}); err != nil {
 		t.Fatal(err)
 	}
 
 	got := buf.String()
-	if want := "Job created successfully:"; !strings.Contains(got, want) {
-		t.Errorf("InspectBigQuerySendToScc got %q, want %q", got, want)
+	if want := "Table after de-identification"; !strings.Contains(got, want) {
+		t.Errorf("deidentifyTableConditionInfoTypes got %q, want %q", got, want)
 	}
-
-	jobName := strings.SplitAfter(got, "Job created successfully: ")
-
-	log.Printf("Job Name : %v", jobName)
-
-	deleteJob(tc.ProjectID, jobName[1])
+	if want := "values:{string_value:\"[PERSON_NAME] name was a curse invented by [PERSON_NAME].\"}}"; !strings.Contains(got, want) {
+		t.Errorf("deidentifyTableConditionInfoTypes got %q, want %q", got, want)
+	}
 }
