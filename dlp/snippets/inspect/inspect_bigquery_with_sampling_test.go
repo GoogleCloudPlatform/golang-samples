@@ -15,34 +15,28 @@ package inspect
 
 import (
 	"bytes"
-	"log"
 	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-const (
-	dataSetID = "dlp_test_dataset"
-	tableID   = "dlp_inspect_test_table_table_id"
-)
-
-func TestInspectBigQuerySendToScc(t *testing.T) {
+func TestInspectBigQueryTableWithSampling(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
 
-	if err := inspectBigQuerySendToScc(&buf, tc.ProjectID, dataSetID, tableID); err != nil {
+	topicID := "go-lang-dlp-test-bigquery-with-sampling-topic"
+	subscriptionID := "go-lang-dlp-test-bigquery-with-sampling-subscription"
+
+	var buf bytes.Buffer
+	if err := inspectBigQueryTableWithSampling(&buf, tc.ProjectID, topicID, subscriptionID); err != nil {
 		t.Fatal(err)
 	}
-
 	got := buf.String()
-	if want := "Job created successfully:"; !strings.Contains(got, want) {
-		t.Errorf("InspectBigQuerySendToScc got %q, want %q", got, want)
+	if want := "Job Created"; !strings.Contains(got, want) {
+		t.Errorf("InspectBigQueryTableWithSampling got %q, want %q", got, want)
+	}
+	if want := "Found"; !strings.Contains(got, want) {
+		t.Errorf("InspectBigQueryTableWithSampling got %q, want %q", got, want)
 	}
 
-	jobName := strings.SplitAfter(got, "Job created successfully: ")
-
-	log.Printf("Job Name : %v", jobName)
-
-	deleteJob(tc.ProjectID, jobName[1])
 }

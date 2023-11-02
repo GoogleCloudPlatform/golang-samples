@@ -17,7 +17,7 @@ package cloudruntests
 import (
 	"bytes"
 	"encoding/json"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"testing"
 	"time"
@@ -67,19 +67,17 @@ func caseEditorServiceUI(t *testing.T) {
 		t.Fatalf("service.NewRequest: %q", err)
 	}
 
-	testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
-		resp, err := client.Do(req)
-		if err != nil {
-			r.Errorf("client.Do: %v", err)
-		}
-		defer resp.Body.Close()
-		r.Logf("client.Do: %s %s\n", req.Method, req.URL)
+	resp, err := editorService.Do(req)
+	if err != nil {
+		t.Fatalf("client.Do: %v", err)
+	}
+	defer resp.Body.Close()
+	t.Logf("client.Do: %s %s\n", req.Method, req.URL)
 
-		wantStatus := http.StatusOK
-		if got := resp.StatusCode; got != wantStatus {
-			r.Errorf("response status: got %d, want %d", got, wantStatus)
-		}
-	})
+	wantStatus := http.StatusOK
+	if got := resp.StatusCode; got != wantStatus {
+		t.Errorf("response status: got %d, want %d", got, wantStatus)
+	}
 }
 
 func caseEditorServiceRender(t *testing.T) {
@@ -92,31 +90,28 @@ func caseEditorServiceRender(t *testing.T) {
 	if err != nil {
 		t.Fatalf("json.Marshall: %v", err)
 	}
-	req.Body = io.NopCloser(bytes.NewReader(b))
+	req.Body = ioutil.NopCloser(bytes.NewReader(b))
 
-	testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
-		resp, err := client.Do(req)
-		if err != nil {
-			r.Errorf("client.Do: %v", err)
-			return
-		}
-		defer resp.Body.Close()
-		r.Logf("client.Do: %s %s\n", req.Method, req.URL)
+	resp, err := editorService.Do(req)
+	if err != nil {
+		t.Fatalf("client.Do: %v", err)
+	}
+	defer resp.Body.Close()
+	t.Logf("client.Do: %s %s\n", req.Method, req.URL)
 
-		wantStatus := http.StatusOK
-		if got := resp.StatusCode; got != wantStatus {
-			r.Errorf("response status: got %d, want %d", got, wantStatus)
-		}
+	wantStatus := http.StatusOK
+	if got := resp.StatusCode; got != wantStatus {
+		t.Errorf("response status: got %d, want %d", got, wantStatus)
+	}
 
-		out, err := io.ReadAll(resp.Body)
-		if err != nil {
-			r.Errorf("io.ReadAll: %v", err)
-			return
-		}
+	out, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("ioutil.ReadAll: %v", err)
+	}
 
-		want := "<p><strong>strong text</strong></p>\n"
-		if got := string(out); got != want {
-			r.Errorf("markdown: got %q, want %q", got, want)
-		}
-	})
+	want := "<p><strong>strong text</strong></p>\n"
+	if got := string(out); got != want {
+		t.Errorf("markdown: got %q, want %q", got, want)
+	}
+
 }
