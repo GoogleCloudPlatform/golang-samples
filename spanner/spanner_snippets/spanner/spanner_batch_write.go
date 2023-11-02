@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_batch_write]
+// [START spanner_batch_write_at_least_once]
 
 import (
 	"context"
@@ -23,6 +23,7 @@ import (
 
 	"cloud.google.com/go/spanner"
 	sppb "cloud.google.com/go/spanner/apiv1/spannerpb"
+	"google.golang.org/grpc/status"
 )
 
 func batchWrite(w io.Writer, db string) error {
@@ -37,31 +38,32 @@ func batchWrite(w io.Writer, db string) error {
 	albumColumns := []string{"SingerId", "AlbumId", "AlbumTitle"}
 	mutationGroups := make([]*spanner.MutationGroup, 2)
 
-	group1 := []*spanner.Mutation{
+	mutationGroup1 := []*spanner.Mutation{
 		spanner.InsertOrUpdate("Singers", singerColumns, []interface{}{16, "Scarlet", "Terry"}),
 	}
-	mutationGroups[0] = &spanner.MutationGroup{Mutations: group1}
+	mutationGroups[0] = &spanner.MutationGroup{Mutations: mutationGroup1}
 
-	group2 := []*spanner.Mutation{
+	mutationGroup2 := []*spanner.Mutation{
 		spanner.InsertOrUpdate("Singers", singerColumns, []interface{}{17, "Marc", ""}),
 		spanner.InsertOrUpdate("Singers", singerColumns, []interface{}{18, "Catalina", "Smith"}),
 		spanner.InsertOrUpdate("Albums", albumColumns, []interface{}{17, 1, "Total Junk"}),
-		spanner.InsertOrUpdate("Singers", singerColumns, []interface{}{18, 2, "Go, Go, Go"}),
+		spanner.InsertOrUpdate("Albums", albumColumns, []interface{}{18, 2, "Go, Go, Go"}),
 	}
-	mutationGroups[1] = &spanner.MutationGroup{Mutations: group2}
+	mutationGroups[1] = &spanner.MutationGroup{Mutations: mutationGroup2}
 
 	iter := client.BatchWrite(ctx, mutationGroups)
 	doFunc := func(response *sppb.BatchWriteResponse) error {
-		if ts := response.GetCommitTimestamp(); ts == nil {
-			return fmt.Errorf("invalid commit timesamp")
+		if err = status.ErrorProto(response.GetStatus()); err == nil {
+			fmt.Fprintf(w, "Mutation group indexes %v have been applied with commit timestamp %v", response.GetIndexes(), response.GetCommitTimestamp())
+			return nil
 		}
-		return nil
+		return fmt.Errorf("mutation group indexes %v could not be applied with error %v", response.GetIndexes(), err)
 	}
 	if err = iter.Do(doFunc); err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "BatchWrite successful")
+	fmt.Fprint(w, "BatchWrite successful")
 	return nil
 }
 
-// [END spanner_batch_write]
+// [END spanner_batch_write_at_least_once]
