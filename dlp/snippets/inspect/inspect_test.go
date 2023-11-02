@@ -50,37 +50,6 @@ const (
 	bucketnameForInspectGCSFileWithSampling = "dlp-job-go-lang-test-inspect-gcs-file-with-sampling"
 )
 
-func TestInspectDatastore(t *testing.T) {
-	tc := testutil.EndToEndTest(t)
-	writeTestDatastoreFiles(t, tc.ProjectID)
-	tests := []struct {
-		kind string
-		want string
-	}{
-		{
-			kind: "SSNTask",
-			want: "Created job",
-		},
-	}
-	for _, test := range tests {
-		test := test
-		t.Run(test.kind, func(t *testing.T) {
-			t.Parallel()
-			testutil.Retry(t, 5, 15*time.Second, func(r *testutil.R) {
-				u := uuid.New().String()[:8]
-				buf := new(bytes.Buffer)
-				if err := inspectDatastore(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, tc.ProjectID, "", test.kind); err != nil {
-					r.Errorf("inspectDatastore(%s) got err: %v", test.kind, err)
-					return
-				}
-				if got := buf.String(); !strings.Contains(got, test.want) {
-					r.Errorf("inspectDatastore(%s) = %q, want %q substring", test.kind, got, test.want)
-				}
-			})
-		})
-	}
-}
-
 type SSNTask struct {
 	Description string
 }
@@ -100,37 +69,6 @@ func writeTestDatastoreFiles(t *testing.T, projectID string) {
 	}
 	if _, err := client.Put(ctx, ssnKey, &task); err != nil {
 		t.Fatalf("Failed to save task: %v", err)
-	}
-}
-
-func TestInspectGCS(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	writeTestGCSFiles(t, tc.ProjectID)
-	tests := []struct {
-		fileName string
-		want     string
-	}{
-		{
-			fileName: ssnFileName,
-			want:     "Created job",
-		},
-	}
-	for _, test := range tests {
-		test := test
-		t.Run(test.fileName, func(t *testing.T) {
-			t.Parallel()
-			testutil.Retry(t, 5, 15*time.Second, func(r *testutil.R) {
-				u := uuid.New().String()[:8]
-				buf := new(bytes.Buffer)
-				if err := inspectGCSFile(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, bucketName, test.fileName); err != nil {
-					r.Errorf("inspectGCSFile(%s) got err: %v", test.fileName, err)
-					return
-				}
-				if got := buf.String(); !strings.Contains(got, test.want) {
-					r.Errorf("inspectGCSFile(%s) = %q, want %q substring", test.fileName, got, test.want)
-				}
-			})
-		})
 	}
 }
 
@@ -228,36 +166,6 @@ func uploadBigQuery(ctx context.Context, d *bigquery.Dataset, schema bigquery.Sc
 		return err
 	}
 	return status.Err()
-}
-
-func TestInspectBigquery(t *testing.T) {
-	tc := testutil.EndToEndTest(t)
-
-	mustCreateBigqueryTestFiles(t, tc.ProjectID, bqDatasetID)
-
-	tests := []struct {
-		table string
-		want  string
-	}{
-		{
-			table: harmfulTable,
-			want:  "Created job",
-		},
-	}
-	for _, test := range tests {
-		test := test
-		t.Run(test.table, func(t *testing.T) {
-			t.Parallel()
-			u := uuid.New().String()[:8]
-			buf := new(bytes.Buffer)
-			if err := inspectBigquery(buf, tc.ProjectID, []string{"US_SOCIAL_SECURITY_NUMBER"}, []string{}, []string{}, topicName+u, subscriptionName+u, tc.ProjectID, bqDatasetID, test.table); err != nil {
-				t.Errorf("inspectBigquery(%s) got err: %v", test.table, err)
-			}
-			if got := buf.String(); !strings.Contains(got, test.want) {
-				t.Errorf("inspectBigquery(%s) = %q, want %q substring", test.table, got, test.want)
-			}
-		})
-	}
 }
 
 func TestInspectStringCustomExcludingSubstring(t *testing.T) {
@@ -415,97 +323,6 @@ func TestInspectImageFileListedInfoTypes(t *testing.T) {
 	}
 }
 
-func TestInspectGcsFileWithSampling(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	topicID := "go-lang-dlp-test-bigquery-with-sampling-topic"
-	subscriptionID := "go-lang-dlp-test-bigquery-with-sampling-subscription"
-	ctx := context.Background()
-	sc, err := storage.NewClient(ctx)
-	if err != nil {
-		log.Fatalf("storage.NewClient: %v", err)
-	}
-	defer sc.Close()
-
-	bucketnameForInspectGCSFileWithSampling, err := testutil.CreateTestBucket(ctx, t, sc, tc.ProjectID, "dlp-test-inspect-prefix")
-	if err != nil {
-		t.Fatal(err)
-	}
-	GCSUri := "gs://" + bucketnameForInspectGCSFileWithSampling + "/"
-
-	var buf bytes.Buffer
-	if err := inspectGcsFileWithSampling(&buf, tc.ProjectID, GCSUri, topicID, subscriptionID); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if want := "Job Created"; !strings.Contains(got, want) {
-		t.Errorf("inspectGcsFileWithSampling got %q, want %q", got, want)
-	}
-	err = testutil.DeleteBucketIfExists(ctx, sc, bucketnameForInspectGCSFileWithSampling)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-}
-
-func TestInspectBigQueryTableWithSampling(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	topicID := "go-lang-dlp-test-bigquery-with-sampling-topic"
-	subscriptionID := "go-lang-dlp-test-bigquery-with-sampling-subscription"
-
-	var buf bytes.Buffer
-	if err := inspectBigQueryTableWithSampling(&buf, tc.ProjectID, topicID, subscriptionID); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if want := "Job Created"; !strings.Contains(got, want) {
-		t.Errorf("InspectBigQueryTableWithSampling got %q, want %q", got, want)
-	}
-	if want := "Found"; !strings.Contains(got, want) {
-		t.Errorf("InspectBigQueryTableWithSampling got %q, want %q", got, want)
-	}
-
-}
-
-func TestInspectAugmentInfoTypes(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	textToInspect := "The patient's name is Quasimodo"
-	wordList := []string{"quasimodo"}
-
-	if err := inspectAugmentInfoTypes(&buf, tc.ProjectID, textToInspect, wordList); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if want := "Quote: Quasimodo"; !strings.Contains(got, want) {
-		t.Errorf("TestInspectAugmentInfoTypes got %q, want %q", got, want)
-	}
-	if want := "Info type: PERSON_NAME"; !strings.Contains(got, want) {
-		t.Errorf("TestInspectAugmentInfoTypes got %q, want %q", got, want)
-	}
-}
-
-func TestInspectTableWithCustomHotword(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-	hotwordRegexPattern := "(Fake Social Security Number)"
-	if err := inspectTableWithCustomHotword(&buf, tc.ProjectID, hotwordRegexPattern); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-
-	if want := "Quote: 222-22-2222"; !strings.Contains(got, want) {
-		t.Errorf("TestInspectTableWithCustomHotword got %q, want %q", got, want)
-	}
-	if want := "Infotype Name: US_SOCIAL_SECURITY_NUMBER"; !strings.Contains(got, want) {
-		t.Errorf("TestInspectTableWithCustomHotword got %q, want %q", got, want)
-	}
-	if want := "Quote: 111-11-1111"; strings.Contains(got, want) {
-		t.Errorf("TestInspectTableWithCustomHotword got %q, want %q", got, want)
-	}
-}
-
 func createBigQueryDataSetId(projectID string) error {
 
 	ctx := context.Background()
@@ -657,23 +474,6 @@ func deleteJob(projectID, jobName string) error {
 	return nil
 }
 
-func TestInspectDataStoreSendToScc(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-	u := uuid.New().String()[:8]
-	datastoreNamespace := fmt.Sprint("golang-samples" + u)
-	datastoreKind := "task"
-
-	if err := inspectDataStoreSendToScc(&buf, tc.ProjectID, datastoreNamespace, datastoreKind); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-	if want := "Job created successfully:"; !strings.Contains(got, want) {
-		t.Errorf("InspectBigQuerySendToScc got %q, want %q", got, want)
-	}
-}
-
 var (
 	projectID                  string
 	jobTriggerForInspectSample string
@@ -734,43 +534,6 @@ func createStoredInfoTypeForTesting(t *testing.T, projectID, outputPath string) 
 	}
 
 	return resp.Name, nil
-}
-
-func TestInspectGCSFileSendToScc(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-	ctx := context.Background()
-	sc, err := storage.NewClient(ctx)
-	if err != nil {
-		log.Fatalf("storage.NewClient: %v", err)
-	}
-	defer sc.Close()
-
-	// Creates a bucket using a function available in testutil.
-	bucketNameForInspectGCSSendToScc, err := testutil.CreateTestBucket(ctx, t, sc, tc.ProjectID, "dlp-test-inspect-prefix")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Uploads a file on created bucket.
-	filePathtoGCS(t, tc.ProjectID, bucketNameForInspectGCSSendToScc, dirPathForInspectGCSSendToScc)
-
-	gcsPath := fmt.Sprint("gs://" + bucketNameForInspectGCSSendToScc + "/" + dirPathForInspectGCSSendToScc + "/test.txt")
-
-	if err := inspectGCSFileSendToScc(&buf, tc.ProjectID, gcsPath); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-	if want := "Job created successfully:"; !strings.Contains(got, want) {
-		t.Errorf("TestInspectGCSFileSendToScc got %q, want %q", got, want)
-	}
-
-	// Delete a bucket that has just been created.
-	err = testutil.DeleteBucketIfExists(ctx, sc, bucketNameForInspectGCSSendToScc)
-	if err != nil {
-		t.Fatal(err)
-	}
 }
 
 // filePathtoGCS uploads a file test.txt in given path from the testdata directory.

@@ -11,27 +11,26 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package inspect
 
 import (
 	"bytes"
-	"log"
 	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/google/uuid"
 )
 
-const (
-	dataSetID = "dlp_test_dataset"
-	tableID   = "dlp_inspect_test_table_table_id"
-)
-
-func TestInspectBigQuerySendToScc(t *testing.T) {
+func TestInspectDataStoreSendToScc(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
+	u := uuid.New().String()[:8]
+	datastoreNamespace := "golang-samples" + u
+	datastoreKind := "task"
 
-	if err := inspectBigQuerySendToScc(&buf, tc.ProjectID, dataSetID, tableID); err != nil {
+	if err := inspectDataStoreSendToScc(&buf, tc.ProjectID, datastoreNamespace, datastoreKind); err != nil {
 		t.Fatal(err)
 	}
 
@@ -39,10 +38,4 @@ func TestInspectBigQuerySendToScc(t *testing.T) {
 	if want := "Job created successfully:"; !strings.Contains(got, want) {
 		t.Errorf("InspectBigQuerySendToScc got %q, want %q", got, want)
 	}
-
-	jobName := strings.SplitAfter(got, "Job created successfully: ")
-
-	log.Printf("Job Name : %v", jobName)
-
-	deleteJob(tc.ProjectID, jobName[1])
 }
