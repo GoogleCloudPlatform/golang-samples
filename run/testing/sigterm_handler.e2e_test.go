@@ -44,8 +44,7 @@ func TestSigtermHandlerService(t *testing.T) {
 		t.Fatalf("service.NewRequest: %v", err)
 	}
 
-	client := http.Client{Timeout: 30 * time.Second}
-	resp, err := client.Do(req)
+	resp, err := service.Do(req)
 	if err != nil {
 		t.Fatalf("client.Do: %v", err)
 	}
