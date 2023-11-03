@@ -11,38 +11,27 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package inspect
+package deid
 
 import (
 	"bytes"
-	"log"
-	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-const (
-	dataSetID = "dlp_test_dataset"
-	tableID   = "dlp_inspect_test_table_table_id"
-)
-
-func TestInspectBigQuerySendToScc(t *testing.T) {
+func TestDeIdentifyWithWordList(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
+	input := "Patient was seen in RM-YELLOW then transferred to rm green."
+	infoType := "CUSTOM_ROOM_ID"
+	wordList := []string{"RM-GREEN", "RM-YELLOW", "RM-ORANGE"}
+	want := "output : Patient was seen in [CUSTOM_ROOM_ID] then transferred to [CUSTOM_ROOM_ID]."
 
-	if err := inspectBigQuerySendToScc(&buf, tc.ProjectID, dataSetID, tableID); err != nil {
-		t.Fatal(err)
+	if err := deidentifyWithWordList(&buf, tc.ProjectID, input, infoType, wordList); err != nil {
+		t.Errorf("deidentifyWithWordList(%q) = error '%q', want %q", input, err, want)
 	}
-
-	got := buf.String()
-	if want := "Job created successfully:"; !strings.Contains(got, want) {
-		t.Errorf("InspectBigQuerySendToScc got %q, want %q", got, want)
+	if got := buf.String(); got != want {
+		t.Errorf("deidentifyWithWordList(%q) = %q, want %q", input, got, want)
 	}
-
-	jobName := strings.SplitAfter(got, "Job created successfully: ")
-
-	log.Printf("Job Name : %v", jobName)
-
-	deleteJob(tc.ProjectID, jobName[1])
 }
