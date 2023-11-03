@@ -4,4 +4,4 @@ go 1.19
 
 require cloud.google.com/go/compute/metadata v0.2.3
 
-require cloud.google.com/go/compute v1.14.0 // indirect
+require cloud.google.com/go/compute v1.19.1 // indirect
