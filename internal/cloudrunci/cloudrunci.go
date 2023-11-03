@@ -123,7 +123,7 @@ func Accept2xx(r *http.Response) bool {
 
 // AcceptNonServerError returns true for any non-500 http response
 func AcceptNonServerError(r *http.Response) bool {
-	return r.StatusCode > 500
+	return r.StatusCode < 500
 }
 
 func WithAttempts(n int) func(*RetryOptions) {
@@ -142,8 +142,8 @@ func WithAcceptFunc(f func(*http.Response) bool) func(*RetryOptions) {
 	}
 }
 
-// Request issues an HTTP request to the deployed service.
-func (s *Service) Request(method string, path string, opts ...func(*RetryOptions)) (*http.Response, error) {
+// Do executes the provided http.Request using the default http client
+func (s *Service) Do(req *http.Request, opts ...func(*RetryOptions)) (*http.Response, error) {
 	if !s.deployed {
 		return nil, errors.New("Request called before Deploy")
 	}
@@ -154,27 +154,28 @@ func (s *Service) Request(method string, path string, opts ...func(*RetryOptions
 	var lastSeen error
 	resp := &http.Response{}
 	for i := 0; i < options.MaxAttempts; i++ {
-		req, err := s.NewRequest(method, path)
-		if err != nil {
-			lastSeen = err
-			continue
-		}
 		defaultClient := &http.Client{}
 
-		resp, err = defaultClient.Do(req)
-		if err != nil {
-			lastSeen = err
+		resp, lastSeen = defaultClient.Do(req)
+		if lastSeen != nil {
 			continue
 		}
 		if options.ShouldAccept(resp) {
 			return resp, nil
-		} else {
-			time.Sleep(options.Delay)
-			continue
 		}
+		time.Sleep(options.Delay)
 	}
 	// Too many attempts, return the last result.
-	return resp, lastSeen
+	return resp, fmt.Errorf("no acceptable response after %d retries: %w", options.MaxAttempts, lastSeen)
+}
+
+// Request issues an HTTP request to the deployed service.
+func (s *Service) Request(method string, path string, opts ...func(*RetryOptions)) (*http.Response, error) {
+	req, err := s.NewRequest(method, path)
+	if err != nil {
+		return &http.Response{}, err
+	}
+	return s.Do(req, opts...)
 }
 
 // NewRequest creates a new http.Request for the deployed service.
