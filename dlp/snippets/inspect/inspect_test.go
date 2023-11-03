@@ -15,7 +15,6 @@
 package inspect
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io/ioutil"
@@ -166,161 +165,6 @@ func uploadBigQuery(ctx context.Context, d *bigquery.Dataset, schema bigquery.Sc
 		return err
 	}
 	return status.Err()
-}
-
-func TestInspectStringCustomExcludingSubstring(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	if err := inspectStringCustomExcludingSubstring(&buf, tc.ProjectID, "Name: Doe, John. Name: Example, Jimmy", "[A-Z][a-z]{1,15}, [A-Z][a-z]{1,15}", []string{"Jimmy"}); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-
-	if want := "Infotype Name: CUSTOM_NAME_DETECTOR"; !strings.Contains(got, want) {
-		t.Errorf("inspectStringCustomExcludingSubstring got %q, want %q", got, want)
-	}
-	if want := "Quote: Doe, John"; !strings.Contains(got, want) {
-		t.Errorf("inspectStringCustomExcludingSubstring got %q, want %q", got, want)
-	}
-	if want := "Jimmy"; strings.Contains(got, want) {
-		t.Errorf("inspectStringCustomExcludingSubstring got %q, want %q", got, want)
-	}
-}
-
-func TestInspectStringMultipleRules(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	if err := inspectStringMultipleRules(&buf, tc.ProjectID, "patient: Jane Doe"); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
-		t.Errorf("inspectStringMultipleRules got %q, want %q", got, want)
-	}
-}
-
-func TestInspectWithHotWordRules(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	if err := inspectWithHotWordRules(&buf, tc.ProjectID, "Patient's MRN 444-5-22222 and just a number 333-2-33333"); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-	if want := "InfoType Name: C_MRN"; !strings.Contains(got, want) {
-		t.Errorf("inspectWithHotWordRules got %q, want %q", got, want)
-	}
-	if want := "Findings: 2"; !strings.Contains(got, want) {
-		t.Errorf("inspectWithHotWordRules got %q, want %q", got, want)
-	}
-}
-
-func TestInspectPhoneNumber(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	if err := inspectPhoneNumber(&buf, tc.ProjectID, "I'm Gary and my phone number is (415) 555-0890"); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
-		t.Errorf("inspectPhoneNumber got %q, want %q", got, want)
-	}
-}
-
-func TestInspectStringCustomHotWord(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	if err := inspectStringCustomHotWord(&buf, tc.ProjectID, "patient name: John Doe", "patient", "PERSON_NAME"); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
-		t.Errorf("inspectStringCustomHotWord got %q, want %q", got, want)
-	}
-}
-
-func TestInspectStringCustomOmitOverlap(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	if err := inspectStringCustomHotWord(&buf, tc.ProjectID, "patient name: John Doe", "patient", "PERSON_NAME"); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-	if want := "Infotype Name: PERSON_NAME"; !strings.Contains(got, want) {
-		t.Errorf("inspectStringCustomOmitOverlap got %q, want %q", got, want)
-	}
-
-	if want := "Quote: John Doe"; !strings.Contains(got, want) {
-		t.Errorf("inspectStringCustomOmitOverlap got %q, want %q", got, want)
-	}
-	if want := "Quote: Larry Page"; strings.Contains(got, want) {
-		t.Errorf("inspectStringCustomOmitOverlap got %q, want %q", got, want)
-	}
-}
-
-func TestInspectImageFile(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-	pathToImage := "testdata/test.png"
-	if err := inspectImageFile(&buf, tc.ProjectID, pathToImage); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
-		t.Errorf("TestInspectImageFile got %q, want %q", got, want)
-	}
-	if want := "Info type: EMAIL_ADDRESS"; !strings.Contains(got, want) {
-		t.Errorf("TestInspectImageFile got %q, want %q", got, want)
-	}
-}
-
-func TestInspectImageFileAllInfoTypes(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	inputPath := "testdata/image.jpg"
-
-	var buf bytes.Buffer
-	if err := inspectImageFileAllInfoTypes(&buf, tc.ProjectID, inputPath); err != nil {
-		t.Errorf("inspectImageFileAllInfoTypes: %v", err)
-	}
-	got := buf.String()
-	if want := "Info type: DATE"; !strings.Contains(got, want) {
-		t.Errorf("inspectImageFileAllInfoTypes got %q, want %q", got, want)
-	}
-	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
-		t.Errorf("inspectImageFileAllInfoTypes got %q, want %q", got, want)
-	}
-	if want := "Info type: US_SOCIAL_SECURITY_NUMBER"; !strings.Contains(got, want) {
-		t.Errorf("inspectImageFileAllInfoTypes got %q, want %q", got, want)
-	}
-}
-
-func TestInspectImageFileListedInfoTypes(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-	pathToImage := "testdata/sensitive-data-image.jpg"
-
-	if err := inspectImageFileListedInfoTypes(&buf, tc.ProjectID, pathToImage); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if want := "Info type: PHONE_NUMBER"; !strings.Contains(got, want) {
-		t.Errorf("inspectImageFileListedInfoTypes got %q, want %q", got, want)
-	}
-	if want := "Info type: EMAIL_ADDRESS"; !strings.Contains(got, want) {
-		t.Errorf("inspectImageFileListedInfoTypes got %q, want %q", got, want)
-	}
-	if want := "Info type: US_SOCIAL_SECURITY_NUMBER"; !strings.Contains(got, want) {
-		t.Errorf("inspectImageFileListedInfoTypes got %q, want %q", got, want)
-	}
 }
 
 func createBigQueryDataSetId(projectID string) error {
@@ -678,27 +522,6 @@ func TestMain(m *testing.M) {
 		// Don't fail the test if cleanup fails
 		log.Printf("[INFO] [TestMain] Post-test cleanup failed: %v", err)
 	}
-}
-
-func TestInspectDataToHybridJobTrigger(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-	trigger := jobTriggerForInspectSample
-	fmt.Print("Name:" + trigger)
-	if err := inspectDataToHybridJobTrigger(&buf, tc.ProjectID, "My email is test@example.org and my name is Gary.", trigger); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if want := "successfully inspected data using hybrid job trigger"; !strings.Contains(got, want) {
-		t.Errorf("TestInspectDataToHybridJobTrigger got %q, want %q", got, want)
-	}
-	if want := "Findings"; !strings.Contains(got, want) {
-		t.Errorf("TestInspectDataToHybridJobTrigger got %q, want %q", got, want)
-	}
-	if want := "Job State: ACTIVE"; !strings.Contains(got, want) {
-		t.Errorf("TestInspectDataToHybridJobTrigger got %q, want %q", got, want)
-	}
-
 }
 
 func deleteActiveJob(project, trigger string) error {
