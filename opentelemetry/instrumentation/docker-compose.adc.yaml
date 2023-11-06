@@ -1,0 +1,19 @@
+# Use this compose file along with docker-compose.yaml to pass Application Default
+# Credentials from the host into the collector container:
+#
+# ```
+# export GOOGLE_APPLICATION_CREDENTIALS=$HOME/.config/gcloud/application_default_credentials.json
+# docker compose -f docker-compose.yaml -f docker-compose.adc.yaml up
+# ```
+
+version: '3'
+
+services:
+  otelcol:
+    # If the collector does not have permission to read the mounted volumes, set
+    # USERID=$(id -u) to run the container as the current user
+    user: ${USERID?}
+    volumes:
+      - ${GOOGLE_APPLICATION_CREDENTIALS:-/dev/null}:/tmp/keys/gcp-credentials.json:ro
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/gcp-credentials.json

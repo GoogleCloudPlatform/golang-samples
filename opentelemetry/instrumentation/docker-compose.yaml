@@ -14,11 +14,9 @@ services:
     image: otel/opentelemetry-collector-contrib:0.85.0
     volumes:
       - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
-      - ${GOOGLE_APPLICATION_CREDENTIALS?}:/tmp/keys/gcp-credentials.json:ro
       - logs:/var/log:ro
     environment:
-      - GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/gcp-credentials.json
-      - PROJECT_ID=${PROJECT_ID?}
+      - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT?}
   loadgen:
     image: golang:1.21
     command: ["go", "run", "github.com/rakyll/hey@latest", "-c=2", "-q=1", "http://app:8080/multi"]
@@ -26,4 +24,3 @@ services:
       - "app"
 volumes:
   logs:
-    name: "logs"
