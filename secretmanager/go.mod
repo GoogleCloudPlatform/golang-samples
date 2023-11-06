@@ -8,7 +8,7 @@ require (
 	github.com/gofrs/uuid v3.4.0+incompatible
 	google.golang.org/api v0.128.0
 	google.golang.org/genproto v0.0.0-20230626202813-9b080da550b3
-	google.golang.org/grpc v1.56.1
+	google.golang.org/grpc v1.56.3
 )
 
 require (
