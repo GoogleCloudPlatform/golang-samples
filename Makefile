@@ -2,15 +2,17 @@
 # To run actions in a subdirectory of the repo:
 #   make lint build dir=translate/snippets
 
-.-PHONY: build test lint check-env
+INTERFACE_ACTIONS="build test lint"
+
+.-PHONY: build test lint check-env list-actions
 
 #TODO: name this variable something more meaningful
 DIR=${dir:-.}
 
 GOLANG_SAMPLES_E2E_TEST=true
-GOLANG_SAMPLES_PROJECT_ID="${GOOGLE_PROJECT_ID}"
+GOLANG_SAMPLES_PROJECT_ID="${GOOGLE_SAMPLE_PROJECT}"
 
-build: check-env
+build:
 	go -C ${DIR} build .
 
 test: check-env
@@ -23,6 +25,10 @@ lint:
 	go vet .
 
 check-env:
-ifndef GOOGLE_PROJECT_ID
-	$(error GOOGLE_PROJECT_ID environment variable is required to perform this action)
+ifndef GOOGLE_SAMPLE_PROJECT
+	$(error GOOGLE_SAMPLE_PROJECT environment variable is required to perform this action)
 endif
+
+list-actions:
+	@ echo ${INTERFACE_ACTIONS}
+
