@@ -15,10 +15,8 @@
 package cloudruntests
 
 import (
-	"fmt"
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -41,25 +39,21 @@ func TestDiagramService(t *testing.T) {
 	q := req.URL.Query()
 	q.Add("dot", "digraph G { A -> {B, C, D} -> {F} }")
 	req.URL.RawQuery = q.Encode()
-	testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
-		client := http.Client{Timeout: 10 * time.Second}
-		resp, err := client.Do(req)
-		if err != nil {
-			r.Errorf("client.Do: %v", err)
-		}
-		defer resp.Body.Close()
-		fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
 
-		if got := resp.StatusCode; got != 200 {
-			r.Errorf("response status: got %d, want %d", got, 200)
-		}
+	resp, err := service.Do(req)
+	if err != nil {
+		t.Fatalf("request: %v", err)
+	}
 
-		if got, want := resp.Header.Get("Content-Type"), "image/png"; got != want {
-			r.Errorf("response Content-Type: got %q, want %s", got, want)
-		}
+	if got := resp.StatusCode; got != http.StatusOK {
+		t.Errorf("response status: got %d, want %d", got, http.StatusOK)
+	}
 
-		if got, want := resp.Header.Get("Cache-Control"), "public, max-age=86400"; got != want {
-			r.Errorf("response Cache-Control: got %q, want %q", got, want)
-		}
-	})
+	if got, want := resp.Header.Get("Content-Type"), "image/png"; got != want {
+		t.Errorf("response Content-Type: got %q, want %s", got, want)
+	}
+
+	if got, want := resp.Header.Get("Cache-Control"), "public, max-age=86400"; got != want {
+		t.Errorf("response Cache-Control: got %q, want %q", got, want)
+	}
 }
