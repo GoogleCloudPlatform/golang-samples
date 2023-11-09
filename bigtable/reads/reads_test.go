@@ -94,6 +94,20 @@ Column Family stats_summary
 	os_build: PQ2A.190405.004 @%[1]d`, timestamp),
 		},
 		{
+			name: "readRowsReversed", filter: readRowsReversed, want: fmt.Sprintf(
+				`Reading data for phone#4c410523#20190502:
+Column Family stats_summary
+	connected_cell: 1 @%[1]d
+	connected_wifi: 1 @%[1]d
+	os_build: PQ2A.190405.004 @%[1]d
+
+Reading data for phone#4c410523#20190501:
+Column Family stats_summary
+	connected_cell: 1 @%[1]d
+	connected_wifi: 1 @%[1]d
+	os_build: PQ2A.190405.003 @%[1]d`, timestamp),
+		},
+		{
 			name: "readRowRange", filter: readRowRange, want: fmt.Sprintf(
 				`Reading data for phone#4c410523#20190501:
 Column Family stats_summary
