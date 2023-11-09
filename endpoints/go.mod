@@ -7,7 +7,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	golang.org/x/net v0.17.0
 	golang.org/x/oauth2 v0.9.0
-	google.golang.org/grpc v1.56.1
+	google.golang.org/grpc v1.56.3
 	google.golang.org/grpc/examples v0.0.0-20220105183818-2fb1ac854b20
 )
 
