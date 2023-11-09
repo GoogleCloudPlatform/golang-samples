@@ -32,7 +32,12 @@ func TestPubSubService(t *testing.T) {
 	}
 	defer service.Clean()
 
-	resp, err := service.Request("GET", "/")
+	resp, err := service.Request("GET", "/",
+		cloudrunci.WithAcceptFunc(func(resp *http.Response) bool {
+			return resp.StatusCode != http.StatusBadRequest
+		}),
+	)
+
 	if err != nil {
 		t.Fatalf("request: %v", err)
 	}
