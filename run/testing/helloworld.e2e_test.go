@@ -35,9 +35,13 @@ func TestHelloworldService(t *testing.T) {
 	defer service.Clean()
 
 	resp, err := service.Request("GET", "/")
+	if err != nil {
+		t.Fatalf("request: %v", err)
+	}
+
 	out, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		t.Errorf("ioutil.ReadAll: %v", err)
+		t.Fatalf("ioutil.ReadAll: %v", err)
 	}
 
 	if got, want := string(out), "Hello Override!\n"; got != want {
