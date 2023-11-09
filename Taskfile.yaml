@@ -5,7 +5,7 @@ version: '3'
 vars:
   # Allow overriding with envvar.
   TEST_PROJECT_ID:
-    sh: "echo ${GOOGLE_PROJECT_ID:-}"
+    sh: "echo ${GOOGLE_SAMPLES_PROJECT:-}"
 
 env:
   GOLANG_SAMPLES_E2E_TEST: true
