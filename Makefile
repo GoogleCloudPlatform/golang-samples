@@ -2,24 +2,24 @@
 # To run actions in a subdirectory of the repo:
 #   make lint build dir=translate/snippets
 
-INTERFACE_ACTIONS="build test lint"
+# Default values for make variables
+dir ?= $(shell pwd)
 
+INTERFACE_ACTIONS="build test lint"
+.ONESHELL:  # run make recipies in the same shell, to ease subdirectory usage.
 .-PHONY: build test lint check-env list-actions
 
-#TODO: name this variable something more meaningful
-DIR=${dir:-.}
-
-GOLANG_SAMPLES_E2E_TEST=true
-GOLANG_SAMPLES_PROJECT_ID="${GOOGLE_SAMPLE_PROJECT}"
+export GOLANG_SAMPLES_E2E_TEST ?= true
+export GOLANG_SAMPLES_PROJECT_ID ?=${GOOGLE_SAMPLE_PROJECT}
 
 build:
-	go -C ${DIR} build .
+	go -C ${dir} build .
 
 test: check-env
-	go -C ${DIR} test .
+	go -C ${dir} test .
 
 lint:
-	cd ${DIR}
+	cd ${dir}
 	go mod tidy
 	go fmt .
 	go vet .
