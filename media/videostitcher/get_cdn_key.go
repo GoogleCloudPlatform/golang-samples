@@ -22,7 +22,7 @@ import (
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 // getCDNKey gets a CDN key by ID.
@@ -37,7 +37,7 @@ func getCDNKey(w io.Writer, projectID, keyID string) error {
 	}
 	defer client.Close()
 
-	req := &stitcherpb.GetCdnKeyRequest{
+	req := &stitcherstreampb.GetCdnKeyRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectID, location, keyID),
 	}
 	// Gets the CDN key.
