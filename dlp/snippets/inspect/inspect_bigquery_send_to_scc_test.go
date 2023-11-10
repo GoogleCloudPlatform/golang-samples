@@ -41,6 +41,7 @@ func TestInspectBigQuerySendToScc(t *testing.T) {
 	}
 
 	jobName := strings.SplitAfter(got, "Job created successfully: ")
+
 	log.Printf("Job Name : %v", jobName)
 
 	deleteJob(tc.ProjectID, jobName[1])
