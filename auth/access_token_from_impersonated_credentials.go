@@ -39,6 +39,7 @@ func getAccessTokenFromImpersonatedCredentials(w io.Writer, impersonatedServiceA
 	// working environment.
 	credentials, err := google.FindDefaultCredentials(ctx, scope)
 	if err != nil {
+		fmt.Fprintf(w, "failed to generate default credentials: %v", err)
 		return fmt.Errorf("failed to generate default credentials: %w", err)
 	}
 
@@ -53,6 +54,7 @@ func getAccessTokenFromImpersonatedCredentials(w io.Writer, impersonatedServiceA
 		Delegates: []string{},
 	}, option.WithCredentials(credentials))
 	if err != nil {
+		fmt.Fprintf(w, "CredentialsTokenSource error: %v", err)
 		return fmt.Errorf("CredentialsTokenSource error: %w", err)
 	}
 
@@ -60,6 +62,7 @@ func getAccessTokenFromImpersonatedCredentials(w io.Writer, impersonatedServiceA
 	// Once you've obtained the OAuth2 token, you can use it to make an authenticated call.
 	t, err := ts.Token()
 	if err != nil {
+		fmt.Fprintf(w, "failed to receive token: %v", err)
 		return fmt.Errorf("failed to receive token: %w", err)
 	}
 	fmt.Fprintf(w, "Generated OAuth2 token with length %d.\n", len(t.AccessToken))
