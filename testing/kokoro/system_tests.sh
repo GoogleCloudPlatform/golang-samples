@@ -41,6 +41,8 @@ TIMEOUT=60m
 # significant changes.
 set +x
 SIGNIFICANT_CHANGES=$(git --no-pager diff --name-only main..HEAD | grep -Ev '(\.md$|^\.github)')
+echo "DEBUG: git diff:"
+git --no-pager diff --name-only main..HEAD
 if [ $? != 0 ]; then
   echo "ERROR: diff detection failed"
   git status
