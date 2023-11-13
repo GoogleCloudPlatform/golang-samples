@@ -19,12 +19,10 @@ import (
 	"errors"
 	"log/slog"
 	"os"
-	"time"
 
 	"go.opentelemetry.io/contrib/exporters/autoexport"
 	"go.opentelemetry.io/contrib/propagators/autoprop"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/trace"
 )
@@ -60,19 +58,13 @@ func setupOpenTelemetry(ctx context.Context) (shutdown func(context.Context) err
 	otel.SetTracerProvider(tp)
 
 	// Configure Metric Export to send metrics as OTLP
-	// TODO(https://github.com/open-telemetry/opentelemetry-go-contrib/issues/4131) - use env-based configuration instead of hardcoding
-	mexporter, err := otlpmetrichttp.New(ctx)
+	mreader, err := autoexport.NewMetricReader(ctx)
 	if err != nil {
 		err = errors.Join(err, shutdown(ctx))
 		return
 	}
 	mp := metric.NewMeterProvider(
-		metric.WithReader(
-			metric.NewPeriodicReader(
-				mexporter,
-				metric.WithInterval(5*time.Second),
-			),
-		),
+		metric.WithReader(mreader),
 	)
 	shutdownFuncs = append(shutdownFuncs, mp.Shutdown)
 	otel.SetMeterProvider(mp)

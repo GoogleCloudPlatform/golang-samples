@@ -29,9 +29,12 @@ import (
 
 // Note: Only update requests that disable Autoclass are currently supported.
 // To enable Autoclass, you must set it at bucket creation time.
-func setAutoclass(w io.Writer, bucketName string, value bool) error {
+func setAutoclass(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
-	// value := false
+	// Enable Autoclass for a bucket. Set enabled to false to disable Autoclass.
+	// Set Autoclass.TerminalStorageClass, valid values are NEARLINE and ARCHIVE.
+	enabled := true
+	terminalStorageClass := "ARCHIVE"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -45,13 +48,15 @@ func setAutoclass(w io.Writer, bucketName string, value bool) error {
 	bucket := client.Bucket(bucketName)
 	bucketAttrsToUpdate := storage.BucketAttrsToUpdate{
 		Autoclass: &storage.Autoclass{
-			Enabled: value,
+			Enabled:              enabled,
+			TerminalStorageClass: terminalStorageClass,
 		},
 	}
 	if _, err := bucket.Update(ctx, bucketAttrsToUpdate); err != nil {
 		return fmt.Errorf("Bucket(%q).Update: %w", bucketName, err)
 	}
 	fmt.Fprintf(w, "Autoclass enabled was set to %v on bucket %q \n", bucketAttrsToUpdate.Autoclass.Enabled, bucketName)
+	fmt.Fprintf(w, "Autoclass terminal storage class was last updated to %v at %v", bucketAttrsToUpdate.Autoclass.TerminalStorageClass, bucketAttrsToUpdate.Autoclass.TerminalStorageClassUpdateTime)
 	return nil
 }
 
