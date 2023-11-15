@@ -37,19 +37,7 @@ func batchWrite(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
-	// Schema assumed -
-	// CREATE TABLE Singers (
-	// 	SingerId   INT64 NOT NULL,
-	// 	FirstName  STRING(1024),
-	// 	LastName   STRING(1024),
-	// 	SingerInfo BYTES(MAX)
-	// ) PRIMARY KEY (SingerId)
-	// CREATE TABLE Albums (
-	// 	SingerId     INT64 NOT NULL,
-	// 	AlbumId      INT64 NOT NULL,
-	// 	AlbumTitle   STRING(MAX)
-	// ) PRIMARY KEY (SingerId, AlbumId),
-	// INTERLEAVE IN PARENT Singers ON DELETE CASCADE
+	// Database is assumed to exist - https://cloud.google.com/spanner/docs/getting-started/go#create_a_database
 	singerColumns := []string{"SingerId", "FirstName", "LastName"}
 	albumColumns := []string{"SingerId", "AlbumId", "AlbumTitle"}
 	mutationGroups := make([]*spanner.MutationGroup, 2)
