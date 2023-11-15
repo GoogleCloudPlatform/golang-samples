@@ -26,7 +26,10 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// batchWrite demonstrates writing mutations to a Spanner database through
+// BatchWrite API - https://pkg.go.dev/cloud.google.com/go/spanner#Client.BatchWrite
 func batchWrite(w io.Writer, db string) error {
+	// db := "projects/my-project/instances/my-instance/databases/my-database"
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {
@@ -34,6 +37,19 @@ func batchWrite(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
+	// Schema assumed -
+	// CREATE TABLE Singers (
+	// 	SingerId   INT64 NOT NULL,
+	// 	FirstName  STRING(1024),
+	// 	LastName   STRING(1024),
+	// 	SingerInfo BYTES(MAX)
+	// ) PRIMARY KEY (SingerId)
+	// CREATE TABLE Albums (
+	// 	SingerId     INT64 NOT NULL,
+	// 	AlbumId      INT64 NOT NULL,
+	// 	AlbumTitle   STRING(MAX)
+	// ) PRIMARY KEY (SingerId, AlbumId),
+	// INTERLEAVE IN PARENT Singers ON DELETE CASCADE
 	singerColumns := []string{"SingerId", "FirstName", "LastName"}
 	albumColumns := []string{"SingerId", "AlbumId", "AlbumTitle"}
 	mutationGroups := make([]*spanner.MutationGroup, 2)
@@ -50,14 +66,17 @@ func batchWrite(w io.Writer, db string) error {
 		spanner.InsertOrUpdate("Albums", albumColumns, []interface{}{18, 2, "Go, Go, Go"}),
 	}
 	mutationGroups[1] = &spanner.MutationGroup{Mutations: mutationGroup2}
-
 	iter := client.BatchWrite(ctx, mutationGroups)
+	// See https://pkg.go.dev/cloud.google.com/go/spanner#BatchWriteResponseIterator.Do
 	doFunc := func(response *sppb.BatchWriteResponse) error {
 		if err = status.ErrorProto(response.GetStatus()); err == nil {
-			fmt.Fprintf(w, "Mutation group indexes %v have been applied with commit timestamp %v", response.GetIndexes(), response.GetCommitTimestamp())
+			fmt.Fprintf(w, "Mutation group indexes %v have been applied with commit timestamp %v",
+				response.GetIndexes(), response.GetCommitTimestamp())
 		} else {
-			fmt.Fprintf(w, "Mutation group indexes %v could not be applied with error %v", response.GetIndexes(), err)
+			fmt.Fprintf(w, "Mutation group indexes %v could not be applied with error %v",
+				response.GetIndexes(), err)
 		}
+		// Return an actual error as needed.
 		return nil
 	}
 	return iter.Do(doFunc)
