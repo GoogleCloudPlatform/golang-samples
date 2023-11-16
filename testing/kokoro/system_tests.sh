@@ -39,7 +39,15 @@ TIMEOUT=60m
 
 # Also see trampoline.sh - system_tests.sh is only run for PRs when there are
 # significant changes.
-SIGNIFICANT_CHANGES=$(git --no-pager diff --name-only main..HEAD | grep -Ev '(\.md$|^\.github)' || true)
+# allow files to be owned by a different user than our current uid.
+# Kokoro runs a double-nested container, and UIDs may not match.
+git config --global --add safe.directory $(pwd)
+GIT_CHANGES=$(git --no-pager diff --name-only main..HEAD)
+if [ -z $GIT_CHANGES ]; then
+  echo "No diffs detected. This is unexpected - check above for additional error messages."
+  exit 2
+fi
+SIGNIFICANT_CHANGES=$(git --no-pager diff --name-only main..HEAD | grep -Ev '(\.md$|^\.github)' || true )
 # CHANGED_DIRS is the list of significant top-level directories that changed,
 # but weren't deleted by the current PR.
 # CHANGED_DIRS will be empty when run on main.
