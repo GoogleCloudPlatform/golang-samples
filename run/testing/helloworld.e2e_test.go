@@ -15,7 +15,7 @@
 package cloudruntests
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
@@ -35,9 +35,9 @@ func TestHelloworldService(t *testing.T) {
 	defer service.Clean()
 
 	resp, err := service.Request("GET", "/")
-	out, err := ioutil.ReadAll(resp.Body)
+	out, err := io.ReadAll(resp.Body)
 	if err != nil {
-		t.Errorf("ioutil.ReadAll: %v", err)
+		t.Errorf("io.ReadAll: %v", err)
 	}
 
 	if got, want := string(out), "Hello Override!\n"; got != want {
