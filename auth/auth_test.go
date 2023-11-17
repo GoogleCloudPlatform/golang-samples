@@ -73,7 +73,7 @@ func TestAuthSnippets(t *testing.T) {
 
 	buf.Reset()
 	want = "Generated OAuth2 token"
-	impersonatedServiceAccount := "name@project.service.gserviceaccount.com"
+	impersonatedServiceAccount := fmt.Sprintf("auth-samples-testing@%s.iam.gserviceaccount.com", tc.ProjectID)
 	scope := "https://www.googleapis.com/auth/cloud-platform"
 
 	if err := getAccessTokenFromImpersonatedCredentials(buf, impersonatedServiceAccount, scope); err != nil {
