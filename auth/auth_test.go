@@ -17,6 +17,7 @@ package snippets
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
