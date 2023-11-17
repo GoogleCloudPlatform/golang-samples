@@ -16,7 +16,10 @@ build:
 	go -C ${dir} build .
 
 test: check-env
-	go -C ${dir} test .
+	# TODO: remove when we've re-built our testing containers to include this
+	go install gotest.tools/gotestsum@latest
+	cd ${dir}
+	gotestsum --junitfile sponge_log.xml -f standard-verbose
 
 lint:
 	cd ${dir}
