@@ -32,6 +32,7 @@ go version
 date
 
 cd "${1:-github/golang-samples}"
+PROJECT_ROOT=$(pwd)
 
 export GO111MODULE=on # Always use modules.
 export GOPROXY=https://proxy.golang.org
@@ -199,11 +200,13 @@ runTests() {
   fi
 
   set +x
-  echo "Running 'go test' in '$(pwd)'..."
+  test_dir=$(realpath --relative-to $PROJECT_ROOT $(pwd))
+  echo "Running 'go test' in '${test_dir}'..."
   set -x
-  2>&1 go test -timeout $TIMEOUT -v "${1:-./...}" | tee sponge_log.log
-  cat sponge_log.log | /go/bin/go-junit-report -set-exit-code > sponge_log.xml
+  pushd $PROJECT_ROOT
+  make test dir=${test_dir}
   exit_code=$((exit_code + $?))
+  popd
   set +x
 }
 
