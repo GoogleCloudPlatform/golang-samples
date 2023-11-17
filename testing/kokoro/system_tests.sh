@@ -204,7 +204,7 @@ runTests() {
   echo "Running 'go test' in '${test_dir}'..."
   set -x
   pushd $PROJECT_ROOT
-  make test dir=${test_dir}
+  GOOGLE_SAMPLES_PROJECT=${GOLANG_SAMPLES_PROJECT_ID} make test dir=${test_dir}
   exit_code=$((exit_code + $?))
   popd
   set +x
