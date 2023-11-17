@@ -17,7 +17,7 @@ package cloudruntests
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 	"time"
@@ -90,7 +90,7 @@ func caseEditorServiceRender(t *testing.T) {
 	if err != nil {
 		t.Fatalf("json.Marshall: %v", err)
 	}
-	req.Body = ioutil.NopCloser(bytes.NewReader(b))
+	req.Body = io.NopCloser(bytes.NewReader(b))
 
 	resp, err := editorService.Do(req)
 	if err != nil {
@@ -104,9 +104,9 @@ func caseEditorServiceRender(t *testing.T) {
 		t.Errorf("response status: got %d, want %d", got, wantStatus)
 	}
 
-	out, err := ioutil.ReadAll(resp.Body)
+	out, err := io.ReadAll(resp.Body)
 	if err != nil {
-		t.Fatalf("ioutil.ReadAll: %v", err)
+		t.Fatalf("io.ReadAll: %v", err)
 	}
 
 	want := "<p><strong>strong text</strong></p>\n"

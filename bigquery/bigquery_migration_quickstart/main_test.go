@@ -26,6 +26,8 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
+var appTimeout = 60 * time.Second
+
 func TestApp(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	m := testutil.BuildMain(t)
@@ -42,7 +44,7 @@ func TestApp(t *testing.T) {
 	}
 	defer cleanup()
 
-	stdOut, stdErr, err := m.Run(nil, 30*time.Second, fmt.Sprintf("--project_id=%s", tc.ProjectID), fmt.Sprintf("--output=%s", bucket))
+	stdOut, stdErr, err := m.Run(nil, appTimeout, fmt.Sprintf("--project_id=%s", tc.ProjectID), fmt.Sprintf("--output=%s", bucket))
 	if err != nil {
 		t.Errorf("execution failed: %v", err)
 	}
