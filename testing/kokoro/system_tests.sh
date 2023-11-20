@@ -140,9 +140,7 @@ pwd
 date
 
 export PATH="$PATH:/tmp/google-cloud-sdk/bin";
-if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]] || [[ $CHANGED_DIRS =~ "run" ]]; then
-  ./testing/kokoro/configure_gcloud.bash;
-fi
+./testing/kokoro/configure_gcloud.bash;
 
 export STS_AWS_SECRET=`gcloud secrets versions access latest --project cloud-devrel-kokoro-resources --secret=go-storagetransfer-aws`
 export AWS_ACCESS_KEY_ID=`S="$STS_AWS_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["AccessKeyId"]);'`
