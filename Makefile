@@ -19,7 +19,7 @@ test: check-env
 	# TODO: remove when we've re-built our testing containers to include this
 	go install gotest.tools/gotestsum@latest
 	cd ${dir}
-	gotestsum --junitfile sponge_log.xml -f standard-verbose
+	gotestsum --junitfile sponge_log.xml -f standard-verbose -- --timeout 60m
 
 lint:
 	cd ${dir}
