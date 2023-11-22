@@ -37,6 +37,7 @@ PROJECT_ROOT=$(pwd)
 export GO111MODULE=on # Always use modules.
 export GOPROXY=https://proxy.golang.org
 TIMEOUT=60m
+export GOLANG_SAMPLES_E2E_TEST=
 
 # Also see trampoline.sh - system_tests.sh is only run for PRs when there are
 # significant changes.
