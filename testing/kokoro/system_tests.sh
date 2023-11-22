@@ -143,7 +143,7 @@ date
 export PATH="$PATH:/tmp/google-cloud-sdk/bin";
 ./testing/kokoro/configure_gcloud.bash;
 
-# explicitly use the kokoro-$PROJECT_ID account to fetch these secrets.
+# fetch secrets used by storagetransfer tests
 export STS_AWS_SECRET=`gcloud secrets versions access latest --project cloud-devrel-kokoro-resources --secret=go-storagetransfer-aws`
 export AWS_ACCESS_KEY_ID=`S="$STS_AWS_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["AccessKeyId"]);'`
 export AWS_SECRET_ACCESS_KEY=`S="$STS_AWS_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["SecretAccessKey"]);'`
