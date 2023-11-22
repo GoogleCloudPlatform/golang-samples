@@ -43,7 +43,7 @@ TIMEOUT=60m
 # Kokoro runs a double-nested container, and UIDs may not match.
 git config --global --add safe.directory $(pwd)
 GIT_CHANGES=$(git --no-pager diff --name-only main..HEAD)
-if [ -z $GIT_CHANGES ]; then
+if [[ -z $GIT_CHANGES && $KOKORO_JOB_NAME != *"system-tests"* ]]; then
   echo "No diffs detected. This is unexpected - check above for additional error messages."
   exit 2
 fi
