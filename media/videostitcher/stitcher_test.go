@@ -49,9 +49,10 @@ const (
 
 	vodURI = "https://storage.googleapis.com/cloud-samples-data/media/hls-vod/manifest.m3u8"
 
-	liveConfigID             = "my-go-test-live-config"
+	liveConfigID             = "go-test-live-config"
 	deleteLiveConfigResponse = "Deleted live config"
 	liveURI                  = "https://storage.googleapis.com/cloud-samples-data/media/hls-live/manifest.m3u8"
+	liveAdTagURI             = "https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/single_ad_samples&sz=640x480&cust_params=sample_ct%3Dlinear&ciu_szs=300x250%2C728x90&gdfp_req=1&output=vast&unviewed_position_start=1&env=vp&impl=s&correlator="
 )
 
 // To run the tests, do the following:
@@ -80,15 +81,52 @@ func cleanStaleResources(projectID string) {
 	}
 	defer client.Close()
 
-	// Slates
-	req := &stitcherstreampb.ListSlatesRequest{
+	// Live configs
+	req := &stitcherstreampb.ListLiveConfigsRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 	}
 
-	it := client.ListSlates(ctx, req)
+	it := client.ListLiveConfigs(ctx, req)
 
 	for {
 		response, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Printf("Can't find next live config: %s", err)
+			continue
+		}
+		if strings.Contains(response.GetName(), liveConfigID) {
+
+			arr := strings.Split(response.GetName(), "-")
+			t := arr[len(arr)-1]
+			if isResourceStale(t) == true {
+				req := &stitcherstreampb.DeleteLiveConfigRequest{
+					Name: response.GetName(),
+				}
+				// Deletes the live config.
+				op, err := client.DeleteLiveConfig(ctx, req)
+				if err != nil {
+					log.Printf("cleanStaleResources DeleteLiveConfig: %s", err)
+				}
+				err = op.Wait(ctx)
+				if err != nil {
+					log.Printf("cleanStaleResources Wait: %s", err)
+				}
+			}
+		}
+	}
+
+	// Slates
+	req2 := &stitcherstreampb.ListSlatesRequest{
+		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+	}
+
+	it2 := client.ListSlates(ctx, req2)
+
+	for {
+		response, err := it2.Next()
 		if err == iterator.Done {
 			break
 		}
@@ -118,14 +156,14 @@ func cleanStaleResources(projectID string) {
 	}
 
 	// CDN keys
-	req2 := &stitcherstreampb.ListCdnKeysRequest{
+	req3 := &stitcherstreampb.ListCdnKeysRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 	}
 
-	it2 := client.ListCdnKeys(ctx, req2)
+	it3 := client.ListCdnKeys(ctx, req3)
 
 	for {
-		response, err := it2.Next()
+		response, err := it3.Next()
 		if err == iterator.Done {
 			break
 		}
