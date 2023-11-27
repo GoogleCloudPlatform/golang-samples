@@ -27,7 +27,7 @@ import (
 	"time"
 
 	migration "cloud.google.com/go/bigquery/migration/apiv2"
-	migrationpb "google.golang.org/genproto/googleapis/cloud/bigquery/migration/v2"
+	"cloud.google.com/go/bigquery/migration/apiv2/migrationpb"
 )
 
 func main() {
@@ -103,6 +103,7 @@ func executeTranslationWorkflow(ctx context.Context, client *migration.Client, p
 	if err != nil {
 		return nil, fmt.Errorf("CreateMigrationWorkflow: %w", err)
 	}
+	fmt.Printf("workflow created: %s", workflow.GetName())
 
 	// This is an asyncronous process, so we now poll the workflow
 	// until completion or a suitable timeout has elapsed.
@@ -124,6 +125,7 @@ func executeTranslationWorkflow(ctx context.Context, client *migration.Client, p
 				return polledWorkflow, nil
 			}
 			// workflow still isn't complete, so sleep briefly before polling again.
+			fmt.Printf("sleeping, workflow in state %q", polledWorkflow.GetState().String())
 			time.Sleep(5 * time.Second)
 		}
 	}
