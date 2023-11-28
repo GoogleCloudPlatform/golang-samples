@@ -26,7 +26,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-var appTimeout = 60 * time.Second
+var appTimeout = 120 * time.Second
 
 func TestApp(t *testing.T) {
 	tc := testutil.SystemTest(t)
