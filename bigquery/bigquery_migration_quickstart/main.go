@@ -56,7 +56,7 @@ func main() {
 
 	workflow, err := executeTranslationWorkflow(ctx, migClient, *projectID, *location, *outputPath)
 	if err != nil {
-		log.Fatalf("workflow execution failed: %v", err)
+		log.Fatalf("workflow execution failed: %v\n", err)
 	}
 
 	reportWorkflowStatus(workflow)
@@ -125,7 +125,6 @@ func executeTranslationWorkflow(ctx context.Context, client *migration.Client, p
 				return polledWorkflow, nil
 			}
 			// workflow still isn't complete, so sleep briefly before polling again.
-			fmt.Printf("sleeping, workflow in state %q", polledWorkflow.GetState().String())
 			time.Sleep(5 * time.Second)
 		}
 	}
