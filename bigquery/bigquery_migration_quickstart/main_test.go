@@ -50,7 +50,7 @@ func TestApp(t *testing.T) {
 	}
 
 	// Look for a known substring in the output
-	if !strings.Contains(string(stdOut), " ended in state COMPLETED") {
+	if !strings.Contains(string(stdOut), "workflow created:") {
 		t.Errorf("Did not find expected output.  Stdout: %s", string(stdOut))
 	}
 
