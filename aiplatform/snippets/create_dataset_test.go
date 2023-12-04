@@ -40,8 +40,8 @@ func TestCreateDataset(t *testing.T) {
 
 	got := buf.String()
 	log.Println(got)
-	if !strings.Contains(got, "Created dataset: ") {
-		t.Errorf("createDataset: wanted 'Create dataset, got %s'", got)
+	if !strings.Contains(got, "Created dataset ") {
+		t.Errorf("createDataset: wanted 'Created dataset ', got '%s'", got)
 	}
 
 	output := got
