@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples/bigtable
 go 1.19
 
 require (
-	cloud.google.com/go/bigtable v1.18.1
+	cloud.google.com/go/bigtable v1.21.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20230627093437-1cdc08c167bb
 	github.com/google/go-cmp v0.5.9
 	github.com/google/uuid v1.3.0
