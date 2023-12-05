@@ -1,6 +1,6 @@
 module warmup
 
-go 1.19
+go 1.21
 
 require cloud.google.com/go/storage v1.30.1
 
