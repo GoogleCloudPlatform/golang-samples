@@ -115,7 +115,7 @@ func setupImportDatasetImageClassification(t *testing.T) func() {
 }
 
 func TestImportDataImageClassification(t *testing.T) {
-  t.Skip("skipped, see context at https://github.com/GoogleCloudPlatform/golang-samples/issues/3579")
+	t.Skip("skipped, see context at https://github.com/GoogleCloudPlatform/golang-samples/issues/3579")
 	tc := testutil.SystemTest(t)
 	teardown := setupImportDatasetImageClassification(t)
 	t.Cleanup(teardown)
