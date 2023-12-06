@@ -16,10 +16,14 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
+	"os"
 
 	"go.opentelemetry.io/otel/trace"
 )
+
+var projectId = os.Getenv("GOOGLE_CLOUD_PROJECT")
 
 // handerWithSpanContext adds attributes from the span context
 // [START opentelemetry_instrumentation_spancontext_logger]
@@ -38,27 +42,32 @@ type spanContextLogHandler struct {
 func (t *spanContextLogHandler) Handle(ctx context.Context, record slog.Record) error {
 	// Get the SpanContext from the golang Context.
 	if s := trace.SpanContextFromContext(ctx); s.IsValid() {
-		// Add the trace_id attribute from the SpanContext.
-		if s.HasTraceID() {
-			record.AddAttrs(
-				slog.Any("trace_id", s.TraceID()),
-			)
-		}
-
-		// Add the span_id attribute from the SpanContext.
-		if s.HasSpanID() {
-			record.AddAttrs(
-				slog.Any("span_id", s.SpanID()),
-			)
-		}
-
-		// Add the trace_flags attribute from the SpanContext.
-		// This includes whether or not the trace is sampled.
+		// Add trace context attributes following Cloud Logging structured log format described
+		// in https://cloud.google.com/logging/docs/structured-logging#special-payload-fields
 		record.AddAttrs(
-			slog.Any("trace_flags", s.TraceFlags()),
+			slog.Any("logging.googleapis.com/trace", fmt.Sprintf("projects/%s/traces/%s", projectId, s.TraceID())),
+		)
+		record.AddAttrs(
+			slog.Any("logging.googleapis.com/spanId", s.SpanID()),
+		)
+		record.AddAttrs(
+			slog.Bool("logging.googleapis.com/trace_sampled", s.TraceFlags().IsSampled()),
 		)
 	}
 	return t.Handler.Handle(ctx, record)
+}
+
+func replacer(groups []string, a slog.Attr) slog.Attr {
+	// Rename attribute keys to match Cloud Logging structured log format
+	switch a.Key {
+	case slog.LevelKey:
+		return slog.Any("severity", a.Value)
+	case slog.TimeKey:
+		return slog.Any("timestamp", a.Value)
+	case slog.MessageKey:
+		return slog.Any("message", a.Value)
+	}
+	return a
 }
 
 // [END opentelemetry_instrumentation_spancontext_logger]

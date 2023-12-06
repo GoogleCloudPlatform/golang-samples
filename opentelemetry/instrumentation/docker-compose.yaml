@@ -6,6 +6,7 @@ services:
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcol:4318
       - OTEL_SERVICE_NAME=otel-quickstart-go
+      - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT?}
     volumes:
       - logs:/var/log:rw
     depends_on:
