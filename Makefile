@@ -10,13 +10,16 @@ INTERFACE_ACTIONS="build test lint"
 .-PHONY: build test lint check-env list-actions
 
 export GOLANG_SAMPLES_E2E_TEST ?= true
-export GOLANG_SAMPLES_PROJECT_ID ?=${GOOGLE_SAMPLE_PROJECT}
+export GOLANG_SAMPLES_PROJECT_ID ?=${GOOGLE_SAMPLES_PROJECT}
 
 build:
 	go -C ${dir} build .
 
 test: check-env
-	go -C ${dir} test .
+	# TODO: remove when we've re-built our testing containers to include this
+	go install gotest.tools/gotestsum@latest
+	cd ${dir}
+	gotestsum --rerun-fails=3 --packages="./..." --junitfile sponge_log.xml -f standard-verbose -- --timeout 60m
 
 lint:
 	cd ${dir}
@@ -25,8 +28,8 @@ lint:
 	go vet .
 
 check-env:
-ifndef GOOGLE_SAMPLE_PROJECT
-	$(error GOOGLE_SAMPLE_PROJECT environment variable is required to perform this action)
+ifndef GOOGLE_SAMPLES_PROJECT
+	$(error GOOGLE_SAMPLES_PROJECT environment variable is required to perform this action)
 endif
 
 list-actions:

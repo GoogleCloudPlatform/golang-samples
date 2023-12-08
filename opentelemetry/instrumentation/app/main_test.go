@@ -132,13 +132,13 @@ func TestWriteTelemetry(t *testing.T) {
 }
 
 type expectedLogFormat struct {
-	Time        string `json:"time"`
-	Level       string `json:"level"`
-	Msg         string `json:"msg"`
-	SubRequests int    `json:"subRequests"`
-	TraceID     string `json:"trace_id"`
-	SpanID      string `json:"span_id"`
-	TraceFlags  string `json:"trace_flags"`
+	Timestamp    string `json:"timestamp"`
+	Severity     string `json:"severity"`
+	Message      string `json:"message"`
+	SubRequests  int    `json:"subRequests"`
+	TraceID      string `json:"logging.googleapis.com/trace"`
+	SpanID       string `json:"logging.googleapis.com/spanId"`
+	TraceSampled bool   `json:"logging.googleapis.com/trace_sampled"`
 }
 
 const expectedLogMessage = "handle /multi request"
@@ -153,16 +153,16 @@ func verifyStdoutLogs(t *testing.T, stdout []byte) {
 			continue
 		}
 		t.Logf("stdout line: %v; parsed: %+v", line, contents)
-		if contents.Msg != expectedLogMessage {
+		if contents.Message != expectedLogMessage {
 			continue
 		}
-		assert.NotEmpty(t, contents.Time)
-		assert.NotEmpty(t, contents.Level)
-		assert.NotEmpty(t, contents.Msg)
+		assert.NotEmpty(t, contents.Timestamp)
+		assert.NotEmpty(t, contents.Severity)
+		assert.NotEmpty(t, contents.Message)
 		assert.NotEmpty(t, contents.SubRequests)
 		assert.NotEmpty(t, contents.TraceID)
 		assert.NotEmpty(t, contents.SpanID)
-		assert.NotEmpty(t, contents.TraceFlags)
+		assert.NotEmpty(t, contents.TraceSampled)
 		return
 	}
 	t.Errorf("Did not find log message: %v", expectedLogMessage)
