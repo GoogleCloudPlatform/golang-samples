@@ -22,16 +22,16 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestTranscribeFileV2(t *testing.T) {
+func TestTranscribeGcsV2(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	var buf bytes.Buffer
-	err := transcribeFileV2(&buf, tc.ProjectID, "../testdata/Google_Gnome.wav")
+	err := transcribeGcsV2(&buf, tc.ProjectID, "gs://cloud-samples-tests//speech/Google_Gnome.wav")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	if got := buf.String(); !strings.Contains(got, "the weather outside is sunny") {
-		t.Fatalf(`transcribeFileV2(../testdata/Google_Gnome.wav) = %q; want "the weather outside is sunny"`, got)
+		t.Fatalf(`transcribeGcsV2(gs://cloud-samples-tests//speech/Google_Gnome.wav) = %q; want "the weather outside is sunny"`, got)
 	}
 }

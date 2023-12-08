@@ -18,14 +18,13 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 
 	speech "cloud.google.com/go/speech/apiv2"
 	"cloud.google.com/go/speech/apiv2/speechpb"
 )
 
-func transcribeFileV2(w io.Writer, projectId, path string) error {
+func transcribeGcsV2(w io.Writer, projectId, gcsUri string) error {
 	ctx := context.Background()
 	client, err := speech.NewClient(ctx)
 
@@ -34,33 +33,24 @@ func transcribeFileV2(w io.Writer, projectId, path string) error {
 	}
 	defer client.Close()
 
-	// path = "../testdata/commercial_mono.wav"
-	content, err := os.ReadFile(path)
-
-	if err != nil {
-		return fmt.Errorf("file: %s, ReadFile Error: %w", path, err)
-	}
-
 	languageCodes := []string{"en-US"}
 	config := &speechpb.RecognitionConfig{
 		DecodingConfig: &speechpb.RecognitionConfig_AutoDecodingConfig{},
 		Model:          "short",
 		LanguageCodes:  languageCodes,
 	}
-	request := &speechpb.RecognizeRequest{
-		Recognizer: fmt.Sprintf("projects/%s/locations/global/recognizers/_", projectId),
-		Config:     config,
-		AudioSource: &speechpb.RecognizeRequest_Content{
-			Content: content,
-		},
-	}
 
+	request := &speechpb.RecognizeRequest{
+		Recognizer:  fmt.Sprintf("projects/%s/locations/global/recognizers/_", projectId),
+		Config:      config,
+		AudioSource: &speechpb.RecognizeRequest_Uri{Uri: gcsUri},
+	}
 	response, err := client.Recognize(
 		ctx, request,
 	)
 
 	if err != nil {
-		return fmt.Errorf("file: %s, Recognize: %w", path, err)
+		return fmt.Errorf("file: %s, Recognize: %w", gcsUri, err)
 	}
 
 	for i, result := range response.Results {
@@ -70,6 +60,5 @@ func transcribeFileV2(w io.Writer, projectId, path string) error {
 			fmt.Fprintf(w, "Alternative %d: %s\n", j+1, alternative.Transcript)
 		}
 	}
-
 	return nil
 }
