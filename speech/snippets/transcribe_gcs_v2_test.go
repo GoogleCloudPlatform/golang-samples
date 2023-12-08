@@ -26,7 +26,7 @@ func TestTranscribeGcsV2(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	var buf bytes.Buffer
-	err := transcribeGcsV2(&buf, tc.ProjectID, "gs://cloud-samples-tests//speech/Google_Gnome.wav")
+	err := transcribeGcsV2(&buf, tc.ProjectID, "gs://cloud-samples-tests/speech/Google_Gnome.wav")
 	if err != nil {
 		t.Fatal(err)
 	}

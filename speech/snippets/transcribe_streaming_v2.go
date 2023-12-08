@@ -43,7 +43,7 @@ func transcribeStreamingV2(w io.Writer, projectId, path string) error {
 	}
 
 	//chunk the audio data to simulate streaming
-	chunkLength := len(content) / 5
+	chunkLength := len(content) / 500
 	audioRequests := make([]speechpb.StreamingRecognizeRequest_Audio, 0, len(content)/chunkLength)
 	for i := 0; i < len(content); i += chunkLength {
 		end := i + chunkLength
@@ -59,12 +59,12 @@ func transcribeStreamingV2(w io.Writer, projectId, path string) error {
 		Model:          "short",
 		LanguageCodes:  languageCodes,
 	}
-	
+
 	streamingConfig := &speechpb.StreamingRecognizeRequest_StreamingConfig{
 		StreamingConfig: &speechpb.StreamingRecognitionConfig{Config: recognitionConfig},
 	}
 	configRequest := &speechpb.StreamingRecognizeRequest{
-		Recognizer: recognizer,
+		Recognizer:       recognizer,
 		StreamingRequest: streamingConfig,
 	}
 
@@ -74,13 +74,13 @@ func transcribeStreamingV2(w io.Writer, projectId, path string) error {
 		stream.Send(configRequest) // First message sent should be the recognition config
 		for _, request := range audioRequests {
 			stream.Send(&speechpb.StreamingRecognizeRequest{
-				Recognizer: recognizer,
+				Recognizer:       recognizer,
 				StreamingRequest: &request,
 			})
 		}
 		stream.CloseSend()
 	}()
-	
+
 	for {
 		response, err := stream.Recv()
 
