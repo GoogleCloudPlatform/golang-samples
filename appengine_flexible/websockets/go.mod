@@ -1,4 +1,4 @@
-module main
+module github.com/GoogleCloudPlatform/golang-samples/appengine_flexible/websockets
 
 go 1.19
 

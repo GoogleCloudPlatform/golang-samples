@@ -64,12 +64,12 @@ func setupImportDatasetImageClassification(t *testing.T) func() {
 
 	op, err := client.CreateDataset(ctx, req)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("CreateDataset: %v", err)
 	}
 
 	resp, err := op.Wait(ctx)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Wait: %v", err)
 	}
 
 	datasetName = resp.GetName()
@@ -106,15 +106,16 @@ func setupImportDatasetImageClassification(t *testing.T) func() {
 		}
 		op, err := client.DeleteDataset(ctx, dr)
 		if err != nil {
-			t.Error(err)
+			t.Errorf("DeleteDataset: %v", err)
 		}
 		if err := op.Wait(ctx); err != nil {
-			t.Error(err)
+			t.Errorf("op.Wait: %v", err)
 		}
 	}
 }
 
 func TestImportDataImageClassification(t *testing.T) {
+	t.Skip("skipped, see context at https://github.com/GoogleCloudPlatform/golang-samples/issues/3579")
 	tc := testutil.SystemTest(t)
 	teardown := setupImportDatasetImageClassification(t)
 	t.Cleanup(teardown)
