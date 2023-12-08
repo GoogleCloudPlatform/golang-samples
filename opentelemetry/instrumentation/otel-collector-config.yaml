@@ -12,24 +12,42 @@ receivers:
     operators:
       - type: json_parser
         parse_to: body
-        # Parse the timestamp from the "time" field
         timestamp:
-          parse_from: body.time
+          parse_from: body.timestamp
           layout: '%Y-%m-%dT%H:%M:%S.%fZ'
-        # Parse the severity from the "level" field
         severity:
-          parse_from: body.level
-      # Parse trace_id, span_id, and trace_flags into the log's span context
-      - type: trace_parser
-      # Google Cloud Logging uses "message" instead of "msg".
-      - type: move
-        from: body.msg
-        to: body.message
-      # Remove fields that we have translated above.
+          parse_from: body.severity
+
+      # set trace_flags to SAMPLED if GCP attribute is set to true
+      - type: add
+        field: body.trace_flags
+        value: "01"
+        if: body["logging.googleapis.com/trace_sampled"] == true
+
+      # parse the trace context fields from GCP attributes
+      - type: regex_parser
+        parse_from: body["logging.googleapis.com/trace"]
+        parse_to: body
+        regex: projects/.+/traces/(?P<trace_id>.*)
+        trace:
+          span_id:
+            parse_from: body["logging.googleapis.com/spanId"]
+
+      # Remove fields that are redundant from translation above
       - type: remove
-        field: body.time
+        field: body.timestamp
       - type: remove
-        field: body.level
+        field: body.trace_id
+      - type: remove
+        field: body.trace_flags
+      - type: remove
+        field: body.severity
+      - type: remove
+        field: body["logging.googleapis.com/trace"]
+      - type: remove
+        field: body["logging.googleapis.com/spanId"]
+      - type: remove
+        field: body["logging.googleapis.com/trace_sampled"]
 
 exporters:
   # Export logs and traces using the standard googelcloud exporter
