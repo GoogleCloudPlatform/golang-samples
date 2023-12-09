@@ -31,7 +31,7 @@ func TestTranscribeFileV2(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got := buf.String(); !strings.Contains(got, "the weather outside is sunny") {
-		t.Fatalf(`transcribeFileV2(../testdata/Google_Gnome.wav) = %q; want "the weather outside is sunny"`, got)
+	if got := buf.String(); !strings.Contains(got, "stream stranger things from Netflix to my TV") {
+		t.Fatalf(`transcribeFileV2(../testdata/Google_Gnome.wav) = %q; want "stream stranger things from Netflix to my TV"`, got)
 	}
 }
