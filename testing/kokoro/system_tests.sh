@@ -32,10 +32,12 @@ go version
 date
 
 cd "${1:-github/golang-samples}"
+PROJECT_ROOT=$(pwd)
 
 export GO111MODULE=on # Always use modules.
 export GOPROXY=https://proxy.golang.org
 TIMEOUT=60m
+export GOLANG_SAMPLES_E2E_TEST=""
 
 # Also see trampoline.sh - system_tests.sh is only run for PRs when there are
 # significant changes.
@@ -139,10 +141,9 @@ pwd
 date
 
 export PATH="$PATH:/tmp/google-cloud-sdk/bin";
-if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]] || [[ $CHANGED_DIRS =~ "run" ]]; then
-  ./testing/kokoro/configure_gcloud.bash;
-fi
+./testing/kokoro/configure_gcloud.bash;
 
+# fetch secrets used by storagetransfer tests
 export STS_AWS_SECRET=`gcloud secrets versions access latest --project cloud-devrel-kokoro-resources --secret=go-storagetransfer-aws`
 export AWS_ACCESS_KEY_ID=`S="$STS_AWS_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["AccessKeyId"]);'`
 export AWS_SECRET_ACCESS_KEY=`S="$STS_AWS_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["SecretAccessKey"]);'`
@@ -199,11 +200,13 @@ runTests() {
   fi
 
   set +x
-  echo "Running 'go test' in '$(pwd)'..."
+  test_dir=$(realpath --relative-to $PROJECT_ROOT $(pwd))
+  echo "Running 'go test' in '${test_dir}'..."
   set -x
-  2>&1 go test -timeout $TIMEOUT -v "${1:-./...}" | tee sponge_log.log
-  cat sponge_log.log | /go/bin/go-junit-report -set-exit-code > sponge_log.xml
+  pushd $PROJECT_ROOT
+  GOOGLE_SAMPLES_PROJECT=${GOLANG_SAMPLES_PROJECT_ID} make test dir=${test_dir}
   exit_code=$((exit_code + $?))
+  popd
   set +x
 }
 
