@@ -109,6 +109,35 @@ func readRows(w io.Writer, projectID, instanceID string, tableName string) error
 
 // [END bigtable_reads_rows]
 
+// [START bigtable_reverse_scan]
+func readRowsReversed(w io.Writer, projectID, instanceID string, tableName string) error {
+	// projectID := "my-project-id"
+	// instanceID := "my-instance-id"
+	// tableName := "mobile-time-series"
+
+	ctx := context.Background()
+	client, err := bigtable.NewClient(ctx, projectID, instanceID)
+	if err != nil {
+		return fmt.Errorf("bigtable.NewClient: %w", err)
+	}
+	defer client.Close()
+
+	tbl := client.Open(tableName)
+	err = tbl.ReadRows(ctx, bigtable.NewRange("phone#5c10102", "phone#5c10103"),
+		func(row bigtable.Row) bool {
+			printRow(w, row)
+			return true
+		},
+		bigtable.ReverseScan())
+	if err != nil {
+		return fmt.Errorf("tbl.ReadRows: %w", err)
+	}
+
+	return nil
+}
+
+// [END bigtable_reverse_scan]
+
 // [START bigtable_reads_row_range]
 func readRowRange(w io.Writer, projectID, instanceID string, tableName string) error {
 	// projectID := "my-project-id"
