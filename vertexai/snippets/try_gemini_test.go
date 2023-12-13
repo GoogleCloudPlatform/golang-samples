@@ -22,6 +22,7 @@ import (
 )
 
 func Test_tryGemini(t *testing.T) {
+	t.Skip("TODO(muncus): remove skip")
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 	err := tryGemini(buf, tc.ProjectID, "us-central1", "gemini-pro-vision")

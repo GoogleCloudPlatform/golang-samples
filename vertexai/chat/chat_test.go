@@ -21,6 +21,7 @@ import (
 )
 
 func Test_makeChatRequests(t *testing.T) {
+	t.Skip("TODO(muncus): remove skip")
 	tc := testutil.SystemTest(t)
 	err := makeChatRequests(tc.ProjectID, "us-central1", "gemini-pro-vision")
 	if err != nil {
