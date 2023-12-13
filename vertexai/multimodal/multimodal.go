@@ -20,7 +20,9 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"mime"
 	"os"
+	"path/filepath"
 
 	"cloud.google.com/go/vertexai/genai"
 )
@@ -59,7 +61,7 @@ func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, 
 
 	// Given an image file URL, prepare image file as genai.Part
 	img := genai.FileData{
-		MIMEType: "image/jpeg",
+		MIMEType: mime.TypeByExtension(filepath.Ext(image)),
 		FileURI:  image,
 	}
 
