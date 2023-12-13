@@ -33,7 +33,7 @@ func TestGenerateContent(t *testing.T) {
 	model := "gemini-pro-vision"
 	temp := 0.8
 
-	cat, _ := partFromImagePath("https://storage.googleapis.com/cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg")
+	cat, _ := partFromImageURL("https://storage.googleapis.com/cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg")
 
 	// create a multipart (multimodal) prompt
 	prompt := []genai.Part{

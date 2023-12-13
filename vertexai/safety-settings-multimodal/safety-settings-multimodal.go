@@ -23,7 +23,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"cloud.google.com/go/vertexai/genai"
@@ -39,7 +38,7 @@ func main() {
 		log.Fatal("require environment variable GOOGLE_CLOUD_PROJECT")
 	}
 
-	cat, _ := partFromImagePath("https://storage.googleapis.com/cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg")
+	cat, _ := partFromImageURL("https://storage.googleapis.com/cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg")
 
 	// create a multipart (multimodal) prompt
 	prompt := []genai.Part{
@@ -92,40 +91,29 @@ func generateContent(w io.Writer, prompt []genai.Part, projectID, location, mode
 	return nil
 }
 
-// partFromImagePath create a multimodal prompt part from an image file path or URL
-func partFromImagePath(imagePath string) (genai.Part, error) {
+// partFromImageURL create a multimodal prompt part from an image URL
+func partFromImageURL(image string) (genai.Part, error) {
 	var img genai.Blob
-	var data []byte
-	var ext string
 
-	if strings.HasPrefix(imagePath, "https://") {
-		imageURL, err := url.Parse(imagePath)
-		if err != nil {
-			return img, err
-		}
-		res, err := http.Get(imagePath)
-		if err != nil || res.StatusCode != 200 {
-			return img, err
-		}
-		defer res.Body.Close()
-		data, err = io.ReadAll(res.Body)
-		if err != nil {
-			return img, fmt.Errorf("unable to read from http: %v", err)
-		}
-
-		position := strings.LastIndex(imageURL.Path, ".")
-		if position == -1 {
-			return img, fmt.Errorf("couldn't find a period to indicate a file extension")
-		}
-		ext = imageURL.Path[position+1:]
-	} else {
-		var err error
-		data, err = os.ReadFile(imagePath)
-		if err != nil {
-			return img, fmt.Errorf("cannot open file: %v", err)
-		}
-		ext = filepath.Ext(imagePath)
+	imageURL, err := url.Parse(image)
+	if err != nil {
+		return img, err
 	}
+	res, err := http.Get(image)
+	if err != nil || res.StatusCode != 200 {
+		return img, err
+	}
+	defer res.Body.Close()
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		return img, fmt.Errorf("unable to read from http: %v", err)
+	}
+
+	position := strings.LastIndex(imageURL.Path, ".")
+	if position == -1 {
+		return img, fmt.Errorf("couldn't find a period to indicate a file extension")
+	}
+	ext := imageURL.Path[position+1:]
 
 	img = genai.ImageData(ext, data)
 	return img, nil
