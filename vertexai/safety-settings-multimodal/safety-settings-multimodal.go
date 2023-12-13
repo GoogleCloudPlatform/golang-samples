@@ -14,6 +14,7 @@
 
 package main
 
+// [START aiplatform_gemini_safety_settings]
 import (
 	"context"
 	"fmt"
@@ -129,3 +130,5 @@ func partFromImagePath(imagePath string) (genai.Part, error) {
 	img = genai.ImageData(ext, data)
 	return img, nil
 }
+
+// [END aiplatform_gemini_safety_settings]
