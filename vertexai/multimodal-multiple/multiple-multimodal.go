@@ -94,7 +94,7 @@ func generateMultimodalContent(w io.Writer, parts []genai.Part, projectID, locat
 		return fmt.Errorf("unable to generate contents: %v", err)
 	}
 
-	fmt.Printf("generated response: %s\n", res.Candidates[0].Content.Parts[0])
+	fmt.Fprintf(w, "generated response: %s\n", res.Candidates[0].Content.Parts[0])
 
 	return nil
 }
