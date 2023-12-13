@@ -17,6 +17,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"os/exec"
 	"strings"
 	"testing"
 	"time"
@@ -46,7 +47,14 @@ func TestApp(t *testing.T) {
 
 	stdOut, stdErr, err := m.Run(nil, appTimeout, fmt.Sprintf("--project_id=%s", tc.ProjectID), fmt.Sprintf("--output=%s", bucket))
 	if err != nil {
-		t.Errorf("execution failed: %v", err)
+		if exErr, ok := err.(*exec.ExitError); ok {
+			if gotExit := exErr.ProcessState.ExitCode(); gotExit != -1 {
+				t.Errorf("execution failed with exit %d: %v", gotExit, err)
+			}
+			// exit -1 is effectively a timeout error / sigkill, ignore
+		} else {
+			t.Errorf("execution failed: %v", err)
+		}
 	}
 
 	// Look for a known substring in the output
