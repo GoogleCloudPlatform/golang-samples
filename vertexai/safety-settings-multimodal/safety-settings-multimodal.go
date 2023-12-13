@@ -78,7 +78,7 @@ func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, 
 
 	res, err := model.GenerateContent(ctx, img, genai.Text(prompt))
 	if err != nil {
-		return fmt.Errorf("unable to generate contents: %v", err)
+		return fmt.Errorf("unable to generate contents: %w", err)
 	}
 
 	fmt.Fprintf(w, "generated response: %s\n", res.Candidates[0].Content.Parts[0])
