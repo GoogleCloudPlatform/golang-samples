@@ -20,10 +20,9 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
-	"net/url"
+	"mime"
 	"os"
-	"strings"
+	"path/filepath"
 
 	"cloud.google.com/go/vertexai/genai"
 )
@@ -32,23 +31,23 @@ func main() {
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	location := "us-central1"
 	modelName := "gemini-pro-vision"
-	temperature := 0.4
 
 	prompt := "describe what is in this picture"
-	image := "https://storage.googleapis.com/cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg"
+	image := "gs://generativeai-downloads/images/scones.jpg"
 
 	if projectID == "" {
 		log.Fatal("require environment variable GOOGLE_CLOUD_PROJECT")
 	}
 
-	err := generateMultimodalContent(os.Stdout, prompt, image, projectID, location, modelName, float32(temperature))
+	err := generateMultimodalContent(os.Stdout, prompt, image, projectID, location, modelName)
 	if err != nil {
 		log.Fatalf("unable to generate: %v", err)
 	}
 }
 
-// generateMultimodalContent returns generated responses based upon the prompt and configurations provided
-func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, modelName string, temperature float32) error {
+// generateMultimodalContent generates a response into w, based upon the prompt
+// and image provided.
+func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, modelName string) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
@@ -58,12 +57,12 @@ func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, 
 	defer client.Close()
 
 	model := client.GenerativeModel(modelName)
-	model.Temperature = temperature
+	model.Temperature = 0.4
 
 	// Given an image file URL, prepare image file as genai.Part
-	img, err := partFromImageURL(image)
-	if err != nil {
-		return fmt.Errorf("unable to open image: %v", err)
+	img := genai.FileData{
+		MIMEType: mime.TypeByExtension(filepath.Ext(image)),
+		FileURI:  image,
 	}
 
 	res, err := model.GenerateContent(ctx, img, genai.Text(prompt))
@@ -72,31 +71,5 @@ func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, 
 	}
 
 	fmt.Fprintf(w, "generated response: %s\n", res.Candidates[0].Content.Parts[0])
-
 	return nil
-}
-
-// partFromImageURL create a multimodal prompt part from an image URL
-func partFromImageURL(image string) (genai.Part, error) {
-	imageURL, err := url.Parse(image)
-	if err != nil {
-		return nil, err
-	}
-	res, err := http.Get(image)
-	if err != nil || res.StatusCode != 200 {
-		return nil, err
-	}
-	defer res.Body.Close()
-	data, err := io.ReadAll(res.Body)
-	if err != nil {
-		return nil, fmt.Errorf("unable to read from http: %v", err)
-	}
-
-	position := strings.LastIndex(imageURL.Path, ".")
-	if position == -1 {
-		return nil, fmt.Errorf("couldn't find a period to indicate a file extension")
-	}
-	ext := imageURL.Path[position+1:]
-
-	return genai.ImageData(ext, data), nil
 }
