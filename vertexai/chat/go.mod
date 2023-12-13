@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/vertexai/chat
 
-go 1.22
+go 1.21
 
 require (
 	cloud.google.com/go/vertexai v0.3.0
