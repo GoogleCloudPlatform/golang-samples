@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,21 +14,20 @@
 
 package videostitcher
 
-// [START videostitcher_list_vod_ad_tag_details]
+// [START videostitcher_list_live_configs]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 	"google.golang.org/api/iterator"
 )
 
-// listVodAdTagDetails lists the ad tag details for a video on demand (VOD) session.
-func listVodAdTagDetails(w io.Writer, projectID, sessionID string) error {
+// listLiveConfigs lists all live configs for a given location.
+func listLiveConfigs(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
-	// sessionID := "123-456-789"
 	location := "us-central1"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
@@ -37,12 +36,13 @@ func listVodAdTagDetails(w io.Writer, projectID, sessionID string) error {
 	}
 	defer client.Close()
 
-	req := &stitcherpb.ListVodAdTagDetailsRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s/vodSessions/%s", projectID, location, sessionID),
+	req := &stitcherstreampb.ListLiveConfigsRequest{
+		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 	}
 
-	it := client.ListVodAdTagDetails(ctx, req)
-	fmt.Fprintln(w, "VOD ad tag details:")
+	it := client.ListLiveConfigs(ctx, req)
+	fmt.Fprintln(w, "Live configs:")
+
 	for {
 		response, err := it.Next()
 		if err == iterator.Done {
@@ -53,8 +53,7 @@ func listVodAdTagDetails(w io.Writer, projectID, sessionID string) error {
 		}
 		fmt.Fprintln(w, response.GetName())
 	}
-
 	return nil
 }
 
-// [END videostitcher_list_vod_ad_tag_details]
+// [END videostitcher_list_live_configs]

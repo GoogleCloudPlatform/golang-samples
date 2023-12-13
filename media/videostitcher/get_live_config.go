@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,21 +14,21 @@
 
 package videostitcher
 
-// [START videostitcher_list_vod_ad_tag_details]
+// [START videostitcher_get_live_config]
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
-	"google.golang.org/api/iterator"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
-// listVodAdTagDetails lists the ad tag details for a video on demand (VOD) session.
-func listVodAdTagDetails(w io.Writer, projectID, sessionID string) error {
+// getLiveConfig gets a previously-created live config.
+func getLiveConfig(w io.Writer, projectID, liveConfigID string) error {
 	// projectID := "my-project-id"
-	// sessionID := "123-456-789"
+	// liveConfigID := "my-live-config-id"
 	location := "us-central1"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
@@ -37,24 +37,21 @@ func listVodAdTagDetails(w io.Writer, projectID, sessionID string) error {
 	}
 	defer client.Close()
 
-	req := &stitcherpb.ListVodAdTagDetailsRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s/vodSessions/%s", projectID, location, sessionID),
+	req := &stitcherstreampb.GetLiveConfigRequest{
+		Name: fmt.Sprintf("projects/%s/locations/%s/liveConfigs/%s", projectID, location, liveConfigID),
 	}
 
-	it := client.ListVodAdTagDetails(ctx, req)
-	fmt.Fprintln(w, "VOD ad tag details:")
-	for {
-		response, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return fmt.Errorf("it.Next(): %w", err)
-		}
-		fmt.Fprintln(w, response.GetName())
+	response, err := client.GetLiveConfig(ctx, req)
+	if err != nil {
+		return fmt.Errorf("client.GetLiveConfig: %w", err)
+	}
+	b, err := json.MarshalIndent(response, "", " ")
+	if err != nil {
+		return fmt.Errorf("json.MarshalIndent: %w", err)
 	}
 
+	fmt.Fprintf(w, "Live config:\n%s", string(b))
 	return nil
 }
 
-// [END videostitcher_list_vod_ad_tag_details]
+// [END videostitcher_get_live_config]

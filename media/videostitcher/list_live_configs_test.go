@@ -24,27 +24,31 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestGetCDNKey(t *testing.T) {
+func TestListLiveConfigs(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
 	uuid, err := getUUID()
 	if err != nil {
 		t.Fatalf("getUUID err: %v", err)
 	}
-	mediaCDNKeyID := fmt.Sprintf("%s-%s", mediaCDNKeyIDPrefix, uuid)
-	createTestMediaCDNKey(mediaCDNKeyID, t)
+	slateID := fmt.Sprintf("%s-%s", slateIDPrefix, uuid)
+	slateName := fmt.Sprintf("projects/%s/locations/%s/slates/%s", tc.ProjectID, location, slateID)
+	liveConfigID := fmt.Sprintf("%s-%s", liveConfigIDPrefix, uuid)
+	createTestSlate(slateID, t)
+	createTestLiveConfig(slateID, liveConfigID, t)
 
-	mediaCDNKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, mediaCDNKeyID)
+	liveConfigName := fmt.Sprintf("projects/%s/locations/%s/liveConfigs/%s", tc.ProjectID, location, liveConfigID)
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		if err := getCDNKey(&buf, tc.ProjectID, mediaCDNKeyID); err != nil {
-			r.Errorf("getCDNKey got err: %v", err)
+		if err := listLiveConfigs(&buf, tc.ProjectID); err != nil {
+			r.Errorf("listLiveConfigs got err: %v", err)
 		}
-		if got := buf.String(); !strings.Contains(got, mediaCDNKeyName) {
-			r.Errorf("getCDNKey got: %v Want to contain: %v", got, mediaCDNKeyName)
+		if got := buf.String(); !strings.Contains(got, liveConfigName) {
+			r.Errorf("listLiveConfigs got: %v Want to contain: %v", got, liveConfigName)
 		}
 	})
 
 	t.Cleanup(func() {
-		deleteTestCDNKey(mediaCDNKeyName, t)
+		deleteTestLiveConfig(liveConfigName, t)
+		deleteTestSlate(slateName, t)
 	})
 }

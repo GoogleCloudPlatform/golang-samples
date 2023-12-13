@@ -20,10 +20,9 @@ import (
 	"fmt"
 	"io"
 
-	"google.golang.org/api/iterator"
-
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
 	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
+	"google.golang.org/api/iterator"
 )
 
 // listVodStitchDetails lists the stitch details for a video on demand (VOD) session.

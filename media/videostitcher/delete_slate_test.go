@@ -16,45 +16,13 @@ package videostitcher
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-
-	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
-
-func setupTestDeleteSlate(slateID string, t *testing.T) {
-	t.Helper()
-	ctx := context.Background()
-
-	client, err := stitcher.NewVideoStitcherClient(ctx)
-	if err != nil {
-		t.Fatalf("stitcher.NewVideoStitcherClient: %v", err)
-	}
-	defer client.Close()
-
-	tc := testutil.SystemTest(t)
-	req := &stitcherstreampb.CreateSlateRequest{
-		Parent:  fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, location),
-		SlateId: slateID,
-		Slate: &stitcherstreampb.Slate{
-			Uri: slateURI,
-		},
-	}
-	op, err := client.CreateSlate(ctx, req)
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, err = op.Wait(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-}
 
 func TestDeleteSlate(t *testing.T) {
 	tc := testutil.SystemTest(t)
@@ -63,8 +31,8 @@ func TestDeleteSlate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("getUUID err: %v", err)
 	}
-	slateID := fmt.Sprintf("%s-%s", slateID, uuid)
-	setupTestDeleteSlate(slateID, t)
+	slateID := fmt.Sprintf("%s-%s", slateIDPrefix, uuid)
+	createTestSlate(slateID, t)
 
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		if err := deleteSlate(&buf, tc.ProjectID, slateID); err != nil {

@@ -16,57 +16,13 @@ package videostitcher
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-
-	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
-
-func setupTestDeleteCDNKey(keyID string, t *testing.T) {
-	t.Helper()
-	ctx := context.Background()
-
-	client, err := stitcher.NewVideoStitcherClient(ctx)
-	if err != nil {
-		t.Fatalf("stitcher.NewVideoStitcherClient: %v", err)
-	}
-	defer client.Close()
-
-	// Create a random private key for the CDN key. It is not validated.
-	mediaCDNPrivateKey, err := getUUID64()
-	if err != nil {
-		t.Fatalf("getUUID64 err: %v", err)
-	}
-
-	tc := testutil.SystemTest(t)
-	req := &stitcherstreampb.CreateCdnKeyRequest{
-		Parent:   fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, location),
-		CdnKeyId: keyID,
-		CdnKey: &stitcherstreampb.CdnKey{
-			CdnKeyConfig: &stitcherstreampb.CdnKey_MediaCdnKey{
-				MediaCdnKey: &stitcherstreampb.MediaCdnKey{
-					KeyName:    keyName,
-					PrivateKey: []byte(mediaCDNPrivateKey),
-				},
-			},
-			Hostname: hostname,
-		},
-	}
-	op, err := client.CreateCdnKey(ctx, req)
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, err = op.Wait(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-}
 
 func TestDeleteCDNKey(t *testing.T) {
 	tc := testutil.SystemTest(t)
@@ -75,8 +31,8 @@ func TestDeleteCDNKey(t *testing.T) {
 	if err != nil {
 		t.Fatalf("getUUID err: %v", err)
 	}
-	mediaCDNKeyID := fmt.Sprintf("%s-%s", mediaCDNKeyID, uuid)
-	setupTestDeleteCDNKey(mediaCDNKeyID, t)
+	mediaCDNKeyID := fmt.Sprintf("%s-%s", mediaCDNKeyIDPrefix, uuid)
+	createTestMediaCDNKey(mediaCDNKeyID, t)
 
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		if err := deleteCDNKey(&buf, tc.ProjectID, mediaCDNKeyID); err != nil {

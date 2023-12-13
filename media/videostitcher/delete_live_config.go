@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,21 +14,20 @@
 
 package videostitcher
 
-// [START videostitcher_list_vod_ad_tag_details]
+// [START videostitcher_delete_live_config]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
-	"google.golang.org/api/iterator"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
-// listVodAdTagDetails lists the ad tag details for a video on demand (VOD) session.
-func listVodAdTagDetails(w io.Writer, projectID, sessionID string) error {
+// deleteLiveConfig deletes a previously-created live config.
+func deleteLiveConfig(w io.Writer, projectID, liveConfigID string) error {
 	// projectID := "my-project-id"
-	// sessionID := "123-456-789"
+	// liveConfigID := "my-live-config-id"
 	location := "us-central1"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
@@ -37,24 +36,21 @@ func listVodAdTagDetails(w io.Writer, projectID, sessionID string) error {
 	}
 	defer client.Close()
 
-	req := &stitcherpb.ListVodAdTagDetailsRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s/vodSessions/%s", projectID, location, sessionID),
+	req := &stitcherstreampb.DeleteLiveConfigRequest{
+		Name: fmt.Sprintf("projects/%s/locations/%s/liveConfigs/%s", projectID, location, liveConfigID),
+	}
+	// Deletes the live config.
+	op, err := client.DeleteLiveConfig(ctx, req)
+	if err != nil {
+		return fmt.Errorf("client.DeleteLiveConfig: %w", err)
+	}
+	err = op.Wait(ctx)
+	if err != nil {
+		return err
 	}
 
-	it := client.ListVodAdTagDetails(ctx, req)
-	fmt.Fprintln(w, "VOD ad tag details:")
-	for {
-		response, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return fmt.Errorf("it.Next(): %w", err)
-		}
-		fmt.Fprintln(w, response.GetName())
-	}
-
+	fmt.Fprintf(w, "Deleted live config")
 	return nil
 }
 
-// [END videostitcher_list_vod_ad_tag_details]
+// [END videostitcher_delete_live_config]
