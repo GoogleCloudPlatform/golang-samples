@@ -30,7 +30,6 @@ func TestGenerateMultimodalContent(t *testing.T) {
 	location := "us-central1"
 
 	model := "gemini-pro-vision"
-	temp := 0.8
 
 	image := "https://storage.googleapis.com/cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg"
 
@@ -39,7 +38,7 @@ func TestGenerateMultimodalContent(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	if err := generateMultimodalContent(&buf, prompt, image, projectID, location, model, float32(temp)); err != nil {
+	if err := generateMultimodalContent(&buf, prompt, image, projectID, location, model); err != nil {
 		t.Fatal(err)
 	}
 
