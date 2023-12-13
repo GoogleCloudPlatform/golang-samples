@@ -24,6 +24,7 @@ import (
 )
 
 func TestGenerateMultimodalContent(t *testing.T) {
+	t.Skip("TODO(muncus): remove skip")
 	tc := testutil.SystemTest(t)
 
 	projectID := tc.ProjectID

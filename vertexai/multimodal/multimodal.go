@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// multimodal shows an example of understanding multimodal input
 package main
 
 import (
@@ -22,7 +23,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"cloud.google.com/go/vertexai/genai"
@@ -60,8 +60,8 @@ func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, 
 	model := client.GenerativeModel(modelName)
 	model.Temperature = temperature
 
-	// Given an image file path, prepare image file as genai.Part
-	img, err := partFromImagePath(image)
+	// Given an image file URL, prepare image file as genai.Part
+	img, err := partFromImageURL(image)
 	if err != nil {
 		return fmt.Errorf("unable to open image: %v", err)
 	}
@@ -76,40 +76,31 @@ func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, 
 	return nil
 }
 
-// partFromImagePath create a multimodal prompt part from an image file path or URL
-func partFromImagePath(imagePath string) (genai.Part, error) {
+// partFromImageURL create a multimodal prompt part from an image file path or URL
+func partFromImageURL(image string) (genai.Part, error) {
 	var img genai.Blob
 	var data []byte
 	var ext string
 
-	if strings.HasPrefix(imagePath, "https://") {
-		imageURL, err := url.Parse(imagePath)
-		if err != nil {
-			return img, err
-		}
-		res, err := http.Get(imagePath)
-		if err != nil || res.StatusCode != 200 {
-			return img, err
-		}
-		defer res.Body.Close()
-		data, err = io.ReadAll(res.Body)
-		if err != nil {
-			return img, fmt.Errorf("unable to read from http: %v", err)
-		}
-
-		position := strings.LastIndex(imageURL.Path, ".")
-		if position == -1 {
-			return img, fmt.Errorf("couldn't find a period to indicate a file extension")
-		}
-		ext = imageURL.Path[position+1:]
-	} else {
-		var err error
-		data, err = os.ReadFile(imagePath)
-		if err != nil {
-			return img, fmt.Errorf("cannot open file: %v", err)
-		}
-		ext = filepath.Ext(imagePath)
+	imageURL, err := url.Parse(image)
+	if err != nil {
+		return img, err
 	}
+	res, err := http.Get(image)
+	if err != nil || res.StatusCode != 200 {
+		return img, err
+	}
+	defer res.Body.Close()
+	data, err = io.ReadAll(res.Body)
+	if err != nil {
+		return img, fmt.Errorf("unable to read from http: %v", err)
+	}
+
+	position := strings.LastIndex(imageURL.Path, ".")
+	if position == -1 {
+		return img, fmt.Errorf("couldn't find a period to indicate a file extension")
+	}
+	ext = imageURL.Path[position+1:]
 
 	img = genai.ImageData(ext, data)
 	return img, nil

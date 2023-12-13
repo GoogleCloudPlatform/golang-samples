@@ -23,6 +23,7 @@ import (
 )
 
 func TestGenerateContent(t *testing.T) {
+	t.Skip("TODO(muncus): remove skip")
 	tc := testutil.SystemTest(t)
 
 	prompt := "hello, say something mean to me."

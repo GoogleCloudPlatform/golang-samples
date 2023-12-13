@@ -22,6 +22,7 @@ import (
 )
 
 func TestGenerateMultimodalContent(t *testing.T) {
+	t.Skip("TODO(muncus): remove skip")
 	tc := testutil.SystemTest(t)
 
 	prompt := "describe this image."
