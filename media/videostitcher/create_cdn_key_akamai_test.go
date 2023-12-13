@@ -40,7 +40,7 @@ func TestCreateAkamaiCDNKey(t *testing.T) {
 		t.Fatalf("getUUID64 err: %v", err)
 	}
 
-	akamaiCDNKeyID := fmt.Sprintf("%s-%s", akamaiCDNKeyID, uuid)
+	akamaiCDNKeyID := fmt.Sprintf("%s-%s", akamaiCDNKeyIDPrefix, uuid)
 	akamaiCDNKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, akamaiCDNKeyID)
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		if err := createCDNKeyAkamai(&buf, tc.ProjectID, akamaiCDNKeyID, akamaiTokenKey); err != nil {
@@ -50,5 +50,8 @@ func TestCreateAkamaiCDNKey(t *testing.T) {
 			r.Errorf("createCDNKeyAkamai got: %v Want to contain: %v", got, akamaiCDNKeyName)
 		}
 	})
-	teardownTestCreateCDNKey(akamaiCDNKeyName, t)
+
+	t.Cleanup(func() {
+		deleteTestCDNKey(akamaiCDNKeyName, t)
+	})
 }

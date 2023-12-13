@@ -22,13 +22,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
 	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func setupTestUpdateCDNKeyAkamai(keyID string, t *testing.T) func() {
+func setupTestUpdateCDNKeyAkamai(keyID string, t *testing.T) {
 	t.Helper()
 	ctx := context.Background()
 
@@ -36,7 +35,7 @@ func setupTestUpdateCDNKeyAkamai(keyID string, t *testing.T) func() {
 	if err != nil {
 		t.Fatalf("stitcher.NewVideoStitcherClient: %v", err)
 	}
-	// client.Close() is called in the returned function
+	defer client.Close()
 
 	// Create a random token key for the CDN key. It is not validated.
 	akamaiTokenKey, err := getUUID64()
@@ -65,21 +64,6 @@ func setupTestUpdateCDNKeyAkamai(keyID string, t *testing.T) func() {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	return func() {
-		req := &stitcherstreampb.DeleteCdnKeyRequest{
-			Name: fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, keyID),
-		}
-		_, err := client.DeleteCdnKey(ctx, req)
-		if err != nil {
-			t.Error(err)
-		}
-		_, err = op.Wait(ctx)
-		if err != nil {
-			t.Error(err)
-		}
-		client.Close()
-	}
 }
 
 func TestUpdateCDNKeyAkamai(t *testing.T) {
@@ -94,9 +78,8 @@ func TestUpdateCDNKeyAkamai(t *testing.T) {
 		t.Fatalf("getUUID64 err: %v", err)
 	}
 
-	akamaiCDNKeyID := fmt.Sprintf("%s-%s", akamaiCDNKeyID, uuid)
-	teardown := setupTestUpdateCDNKeyAkamai(akamaiCDNKeyID, t)
-	t.Cleanup(teardown)
+	akamaiCDNKeyID := fmt.Sprintf("%s-%s", akamaiCDNKeyIDPrefix, uuid)
+	setupTestUpdateCDNKeyAkamai(akamaiCDNKeyID, t)
 
 	akamaiCDNKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, akamaiCDNKeyID)
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
@@ -109,5 +92,9 @@ func TestUpdateCDNKeyAkamai(t *testing.T) {
 		if got := buf.String(); !strings.Contains(got, updatedHostname) {
 			r.Errorf("updateCDNKey got: %v Want to contain: %v", got, updatedHostname)
 		}
+	})
+
+	t.Cleanup(func() {
+		deleteTestCDNKey(akamaiCDNKeyName, t)
 	})
 }
