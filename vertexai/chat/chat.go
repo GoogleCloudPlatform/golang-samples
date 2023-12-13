@@ -23,10 +23,6 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-var projectId = "PROJECT_ID"
-var region = "us-central1"
-var modelName = "gemini-pro-vision"
-
 func makeChatRequests(ctx context.Context, projectID, region, modelName string) error {
 	client, err := genai.NewClient(ctx, projectID, region)
 	if err != nil {

@@ -16,12 +16,16 @@ package chat
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func Test_makeChatRequests(t *testing.T) {
+	if os.Getenv("GOLANG_SAMPLES_PROJECT_ID") == "" {
+		t.Skip("need GOLANG_SAMPLES_PROJECT_ID")
+	}
 	tc := testutil.SystemTest(t)
 	err := makeChatRequests(context.Background(), tc.ProjectID, "us-central1", "gemini-pro-vision")
 	if err != nil {
