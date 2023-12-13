@@ -84,3 +84,5 @@ func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, 
 	fmt.Fprintf(w, "generated response: %s\n", res.Candidates[0].Content.Parts[0])
 	return nil
 }
+
+// [END aiplatform_gemini_safety_settings]
