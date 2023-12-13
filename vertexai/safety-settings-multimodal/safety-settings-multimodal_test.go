@@ -19,7 +19,6 @@ import (
 	"strings"
 	"testing"
 
-	"cloud.google.com/go/vertexai/genai"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
@@ -27,30 +26,24 @@ func TestGenerateContent(t *testing.T) {
 	t.Skip("TODO(muncus): remove skip")
 	tc := testutil.SystemTest(t)
 
+	prompt := "describe this image."
 	projectID := tc.ProjectID
 	location := "us-central1"
 
 	model := "gemini-pro-vision"
-	temp := 0.8
 
-	cat, _ := partFromImageURL("https://storage.googleapis.com/cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg")
-
-	// create a multipart (multimodal) prompt
-	prompt := []genai.Part{
-		genai.Text("say something nice about this "),
-		cat,
-	}
+	image := "gs://cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg"
 
 	if projectID == "" {
 		t.Fatal("require environment variable GOOGLE_CLOUD_PROJECT")
 	}
 
 	var buf bytes.Buffer
-	if err := generateContent(&buf, prompt, projectID, location, model, float32(temp)); err != nil {
+	if err := generateMultimodalContent(&buf, prompt, image, projectID, location, model); err != nil {
 		t.Fatal(err)
 	}
 
-	if got := buf.String(); !strings.Contains(got, "generate-content response") {
+	if got := buf.String(); !strings.Contains(got, "generated response: ") {
 		t.Error("generated text content not found in response")
 	}
 }

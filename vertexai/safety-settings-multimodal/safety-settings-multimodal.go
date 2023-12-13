@@ -20,10 +20,9 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
-	"net/url"
+	"mime"
 	"os"
-	"strings"
+	"path/filepath"
 
 	"cloud.google.com/go/vertexai/genai"
 )
@@ -32,39 +31,33 @@ func main() {
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	location := "us-central1"
 	modelName := "gemini-pro-vision"
-	temperature := 0.4
+
+	prompt := "describe what is in this picture"
+	image := "gs://generativeai-downloads/images/scones.jpg"
 
 	if projectID == "" {
 		log.Fatal("require environment variable GOOGLE_CLOUD_PROJECT")
 	}
 
-	cat, _ := partFromImageURL("https://storage.googleapis.com/cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg")
-
-	// create a multipart (multimodal) prompt
-	prompt := []genai.Part{
-		genai.Text("say something nice about this "),
-		cat,
-	}
-
-	err := generateContent(os.Stdout, prompt, projectID, location, modelName, float32(temperature))
+	err := generateMultimodalContent(os.Stdout, prompt, image, projectID, location, modelName)
 	if err != nil {
-		fmt.Printf("unable to generate: %v\n", err)
+		log.Fatalf("unable to generate: %v", err)
 	}
 }
 
-// generateContent generates text from prompt and configurations provided.
-func generateContent(w io.Writer, prompt []genai.Part, projectID, location, modelName string, temperature float32) error {
+// generateMultimodalContent generates a response into w, based upon the prompt
+// and image provided.
+func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, modelName string) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to create client: %v", err)
 	}
 	defer client.Close()
 
 	model := client.GenerativeModel(modelName)
-	model.Temperature = temperature
-
+	model.Temperature = 0.4
 	// configure the safety settings thresholds
 	model.SafetySettings = []*genai.SafetySetting{
 		{
@@ -77,43 +70,19 @@ func generateContent(w io.Writer, prompt []genai.Part, projectID, location, mode
 		},
 	}
 
-	res, err := model.GenerateContent(ctx, prompt...)
+	// Given an image file URL, prepare image file as genai.Part
+	img := genai.FileData{
+		MIMEType: mime.TypeByExtension(filepath.Ext(image)),
+		FileURI:  image,
+	}
+
+	res, err := model.GenerateContent(ctx, img, genai.Text(prompt))
 	if err != nil {
-		return fmt.Errorf("unable to generate content: %v", err)
-	}
-	fmt.Fprintf(w, "generate-content response: %v\n", res.Candidates[0].Content.Parts[0])
-
-	fmt.Fprintf(w, "safety ratings:\n")
-	for _, r := range res.Candidates[0].SafetyRatings {
-		fmt.Fprintf(w, "\t%+v\n", r)
+		return fmt.Errorf("unable to generate contents: %w", err)
 	}
 
+	fmt.Fprintf(w, "generated response: %s\n", res.Candidates[0].Content.Parts[0])
 	return nil
-}
-
-// partFromImageURL create a multimodal prompt part from an image URL
-func partFromImageURL(image string) (genai.Part, error) {
-	imageURL, err := url.Parse(image)
-	if err != nil {
-		return nil, err
-	}
-	res, err := http.Get(image)
-	if err != nil || res.StatusCode != 200 {
-		return nil, err
-	}
-	defer res.Body.Close()
-	data, err := io.ReadAll(res.Body)
-	if err != nil {
-		return nil, fmt.Errorf("unable to read from http: %v", err)
-	}
-
-	position := strings.LastIndex(imageURL.Path, ".")
-	if position == -1 {
-		return nil, fmt.Errorf("couldn't find a period to indicate a file extension")
-	}
-	ext := imageURL.Path[position+1:]
-
-	return genai.ImageData(ext, data), nil
 }
 
 // [END aiplatform_gemini_safety_settings]
