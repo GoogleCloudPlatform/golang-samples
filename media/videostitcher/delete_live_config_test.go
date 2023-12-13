@@ -16,67 +16,13 @@ package videostitcher
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-
-	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
-
-func setupTestDeleteLiveConfig(slateID, liveConfigID string, t *testing.T) {
-	t.Helper()
-	ctx := context.Background()
-
-	client, err := stitcher.NewVideoStitcherClient(ctx)
-	if err != nil {
-		t.Fatalf("stitcher.NewVideoStitcherClient: %v", err)
-	}
-	defer client.Close()
-
-	// Create a slate.
-	tc := testutil.SystemTest(t)
-	req := &stitcherstreampb.CreateSlateRequest{
-		Parent:  fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, location),
-		SlateId: slateID,
-		Slate: &stitcherstreampb.Slate{
-			Uri: slateURI,
-		},
-	}
-	op, err := client.CreateSlate(ctx, req)
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, err = op.Wait(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Create a live config to delete.
-	req2 := &stitcherstreampb.CreateLiveConfigRequest{
-		Parent:       fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, location),
-		LiveConfigId: liveConfigID,
-		LiveConfig: &stitcherstreampb.LiveConfig{
-			SourceUri:       liveURI,
-			AdTagUri:        liveAdTagURI,
-			AdTracking:      stitcherstreampb.AdTracking_SERVER,
-			StitchingPolicy: stitcherstreampb.LiveConfig_CUT_CURRENT,
-			DefaultSlate:    fmt.Sprintf("projects/%s/locations/%s/slates/%s", tc.ProjectID, location, slateID),
-		},
-	}
-	op2, err2 := client.CreateLiveConfig(ctx, req2)
-	if err2 != nil {
-		t.Fatal(err2)
-	}
-	_, err2 = op2.Wait(ctx)
-	if err2 != nil {
-		t.Fatal(err2)
-	}
-}
 
 func TestDeleteLiveConfig(t *testing.T) {
 	tc := testutil.SystemTest(t)
@@ -85,10 +31,11 @@ func TestDeleteLiveConfig(t *testing.T) {
 	if err != nil {
 		t.Fatalf("getUUID err: %v", err)
 	}
-	slateID := fmt.Sprintf("%s-%s", slateID, uuid)
+	slateID := fmt.Sprintf("%s-%s", slateIDPrefix, uuid)
 	slateName := fmt.Sprintf("projects/%s/locations/%s/slates/%s", tc.ProjectID, location, slateID)
-	liveConfigID := fmt.Sprintf("%s-%s", liveConfigID, uuid)
-	setupTestDeleteLiveConfig(slateID, liveConfigID, t)
+	liveConfigID := fmt.Sprintf("%s-%s", liveConfigIDPrefix, uuid)
+	createTestSlate(slateID, t)
+	createTestLiveConfig(slateID, liveConfigID, t)
 
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		if err := deleteLiveConfig(&buf, tc.ProjectID, liveConfigID); err != nil {
@@ -99,30 +46,5 @@ func TestDeleteLiveConfig(t *testing.T) {
 		}
 	})
 
-	t.Cleanup(func() {
-		teardownTestDeleteLiveConfig(slateName, t)
-	})
-}
-
-func teardownTestDeleteLiveConfig(slateName string, t *testing.T) {
-	t.Helper()
-	ctx := context.Background()
-	client, err := stitcher.NewVideoStitcherClient(ctx)
-	if err != nil {
-		t.Errorf("stitcher.NewVideoStitcherClient: %v", err)
-	}
-	defer client.Close()
-
-	// Delete the slate.
-	req := &stitcherstreampb.DeleteSlateRequest{
-		Name: slateName,
-	}
-	op, err := client.DeleteSlate(ctx, req)
-	if err != nil {
-		t.Errorf("client.DeleteSlate: %v", err)
-	}
-	err = op.Wait(ctx)
-	if err != nil {
-		t.Error(err)
-	}
+	deleteTestSlate(slateName, t)
 }
