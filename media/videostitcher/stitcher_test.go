@@ -261,7 +261,7 @@ func deleteTestSlate(slateName string, t *testing.T) {
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
-		t.Errorf("stitcher.NewVideoStitcherClient: %v", err)
+		t.Fatalf("stitcher.NewVideoStitcherClient: %v", err)
 	}
 	defer client.Close()
 
@@ -315,7 +315,7 @@ func deleteTestLiveConfig(liveConfigName string, t *testing.T) {
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
-		t.Errorf("stitcher.NewVideoStitcherClient: %v", err)
+		t.Fatalf("stitcher.NewVideoStitcherClient: %v", err)
 	}
 	defer client.Close()
 
@@ -378,7 +378,7 @@ func deleteTestCDNKey(CDNKeyName string, t *testing.T) {
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
-		t.Errorf("stitcher.NewVideoStitcherClient: %v", err)
+		t.Fatalf("stitcher.NewVideoStitcherClient: %v", err)
 	}
 	defer client.Close()
 

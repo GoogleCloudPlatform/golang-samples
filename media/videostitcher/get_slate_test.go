@@ -43,5 +43,8 @@ func TestGetSlate(t *testing.T) {
 			r.Errorf("getSlate got: %v Want to contain: %v", got, slateName)
 		}
 	})
-	deleteTestSlate(slateName, t)
+
+	t.Cleanup(func() {
+		deleteTestSlate(slateName, t)
+	})
 }

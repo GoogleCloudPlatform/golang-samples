@@ -43,5 +43,8 @@ func TestGetCDNKey(t *testing.T) {
 			r.Errorf("getCDNKey got: %v Want to contain: %v", got, mediaCDNKeyName)
 		}
 	})
-	deleteTestCDNKey(mediaCDNKeyName, t)
+
+	t.Cleanup(func() {
+		deleteTestCDNKey(mediaCDNKeyName, t)
+	})
 }

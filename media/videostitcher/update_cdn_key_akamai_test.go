@@ -94,5 +94,7 @@ func TestUpdateCDNKeyAkamai(t *testing.T) {
 		}
 	})
 
-	deleteTestCDNKey(akamaiCDNKeyName, t)
+	t.Cleanup(func() {
+		deleteTestCDNKey(akamaiCDNKeyName, t)
+	})
 }

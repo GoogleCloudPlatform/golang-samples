@@ -43,5 +43,7 @@ func TestCreateSlate(t *testing.T) {
 		}
 	})
 
-	deleteTestSlate(slateName, t)
+	t.Cleanup(func() {
+		deleteTestSlate(slateName, t)
+	})
 }

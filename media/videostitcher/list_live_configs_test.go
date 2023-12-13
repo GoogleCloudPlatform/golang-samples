@@ -47,6 +47,8 @@ func TestListLiveConfigs(t *testing.T) {
 		}
 	})
 
-	deleteTestLiveConfig(liveConfigName, t)
-	deleteTestSlate(slateName, t)
+	t.Cleanup(func() {
+		deleteTestLiveConfig(liveConfigName, t)
+		deleteTestSlate(slateName, t)
+	})
 }

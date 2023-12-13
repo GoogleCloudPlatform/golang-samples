@@ -94,7 +94,10 @@ func TestUpdateCloudCDNKey(t *testing.T) {
 			r.Errorf("updateCDNKey got: %v Want to contain: %v", got, updatedHostname)
 		}
 	})
-	deleteTestCDNKey(cloudCDNKeyName, t)
+
+	t.Cleanup(func() {
+		deleteTestCDNKey(cloudCDNKeyName, t)
+	})
 }
 
 func TestUpdateMediaCDNKey(t *testing.T) {
@@ -125,5 +128,7 @@ func TestUpdateMediaCDNKey(t *testing.T) {
 		}
 	})
 
-	deleteTestCDNKey(mediaCDNKeyName, t)
+	t.Cleanup(func() {
+		deleteTestCDNKey(mediaCDNKeyName, t)
+	})
 }

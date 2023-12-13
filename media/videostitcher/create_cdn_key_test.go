@@ -51,7 +51,9 @@ func TestCreateMediaCDNKey(t *testing.T) {
 		}
 	})
 
-	deleteTestCDNKey(mediaCDNKeyName, t)
+	t.Cleanup(func() {
+		deleteTestCDNKey(mediaCDNKeyName, t)
+	})
 }
 
 func TestCreateCloudCDNKey(t *testing.T) {
@@ -81,5 +83,7 @@ func TestCreateCloudCDNKey(t *testing.T) {
 		}
 	})
 
-	deleteTestCDNKey(cloudCDNKeyName, t)
+	t.Cleanup(func() {
+		deleteTestCDNKey(cloudCDNKeyName, t)
+	})
 }

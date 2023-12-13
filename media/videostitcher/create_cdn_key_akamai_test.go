@@ -50,5 +50,8 @@ func TestCreateAkamaiCDNKey(t *testing.T) {
 			r.Errorf("createCDNKeyAkamai got: %v Want to contain: %v", got, akamaiCDNKeyName)
 		}
 	})
-	deleteTestCDNKey(akamaiCDNKeyName, t)
+
+	t.Cleanup(func() {
+		deleteTestCDNKey(akamaiCDNKeyName, t)
+	})
 }
