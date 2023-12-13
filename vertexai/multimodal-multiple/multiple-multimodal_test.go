@@ -32,17 +32,17 @@ func TestGenerateMultimodalContent(t *testing.T) {
 	modelName := "gemini-pro-vision"
 	temperature := 0.8
 
-	colosseum, err := partFromImagePath("https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark1.png")
+	colosseum, err := partFromImageURL("https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark1.png")
 	if err != nil {
 		t.Fatal(err)
 	}
 	// forbidden city
-	forbiddenCity, err := partFromImagePath("https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark2.png")
+	forbiddenCity, err := partFromImageURL("https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark2.png")
 	if err != nil {
 		t.Fatal(err)
 	}
 	// new image
-	newImage, err := partFromImagePath("https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark3.png")
+	newImage, err := partFromImageURL("https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark3.png")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,7 +65,7 @@ func TestGenerateMultimodalContent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got := buf.String(); !strings.Contains(got, "generate-content response") {
+	if got := buf.String(); !strings.Contains(got, "generated response") {
 		t.Error("generated text content not found in response")
 	}
 }

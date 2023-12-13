@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/vertexai/multimodal-multiple
 
-go 1.21.5
+go 1.21
 
 require (
 	cloud.google.com/go/vertexai v0.3.0

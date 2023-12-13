@@ -4,14 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+// multiple-multimodal shows how to generate content from mixed image and text content
 package main
 
 // [START aiplatform_gemini_single_turn_multi_image]
@@ -23,7 +23,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"cloud.google.com/go/vertexai/genai"
@@ -46,17 +45,17 @@ func main() {
 
 	// create prompt image parts
 	// colosseum
-	colosseum, err := partFromImagePath("https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark1.png")
+	colosseum, err := partFromImageURL("https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark1.png")
 	if err != nil {
 		log.Fatalf("unable to read image: %v", err)
 	}
 	// forbidden city
-	forbiddenCity, err := partFromImagePath("https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark2.png")
+	forbiddenCity, err := partFromImageURL("https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark2.png")
 	if err != nil {
 		log.Fatalf("unable to read image: %v", err)
 	}
 	// new image
-	newImage, err := partFromImagePath("https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark3.png")
+	newImage, err := partFromImageURL("https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark3.png")
 	if err != nil {
 		log.Fatalf("unable to read image: %v", err)
 	}
@@ -100,40 +99,31 @@ func generateMultimodalContent(w io.Writer, parts []genai.Part, projectID, locat
 	return nil
 }
 
-// partFromImagePath create a multimodal prompt part from an image file path or URL
-func partFromImagePath(imagePath string) (genai.Part, error) {
+// partFromImageURL create a multimodal prompt part from an image file path or URL
+func partFromImageURL(image string) (genai.Part, error) {
 	var img genai.Blob
 	var data []byte
 	var ext string
 
-	if strings.HasPrefix(imagePath, "https://") {
-		imageURL, err := url.Parse(imagePath)
-		if err != nil {
-			return img, err
-		}
-		res, err := http.Get(imagePath)
-		if err != nil || res.StatusCode != 200 {
-			return img, err
-		}
-		defer res.Body.Close()
-		data, err = io.ReadAll(res.Body)
-		if err != nil {
-			return img, fmt.Errorf("unable to read from http: %v", err)
-		}
-
-		position := strings.LastIndex(imageURL.Path, ".")
-		if position == -1 {
-			return img, fmt.Errorf("couldn't find a period to indicate a file extension")
-		}
-		ext = imageURL.Path[position+1:]
-	} else {
-		var err error
-		data, err = os.ReadFile(imagePath)
-		if err != nil {
-			return img, fmt.Errorf("cannot open file: %v", err)
-		}
-		ext = filepath.Ext(imagePath)
+	imageURL, err := url.Parse(image)
+	if err != nil {
+		return img, err
 	}
+	res, err := http.Get(image)
+	if err != nil || res.StatusCode != 200 {
+		return img, err
+	}
+	defer res.Body.Close()
+	data, err = io.ReadAll(res.Body)
+	if err != nil {
+		return img, fmt.Errorf("unable to read from http: %v", err)
+	}
+
+	position := strings.LastIndex(imageURL.Path, ".")
+	if position == -1 {
+		return img, fmt.Errorf("couldn't find a period to indicate a file extension")
+	}
+	ext = imageURL.Path[position+1:]
 
 	img = genai.ImageData(ext, data)
 	return img, nil
