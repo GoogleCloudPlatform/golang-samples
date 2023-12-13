@@ -42,7 +42,7 @@ func TestGenerateMultimodalContent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got := buf.String(); !strings.Contains(got, "generate-content response") {
+	if got := buf.String(); !strings.Contains(got, "generated response: ") {
 		t.Error("generated text content not found in response")
 	}
 }
