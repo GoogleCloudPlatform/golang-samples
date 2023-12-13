@@ -22,6 +22,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path"
 	"strings"
 	"time"
 
@@ -39,8 +40,10 @@ func main() {
 		log.Fatal("require environment variable GOOGLE_CLOUD_PROJECT")
 	}
 
+	ctx := context.Background()
+
 	// create video part
-	video, err := partFromGCSURI("gs://cloud-samples-data/video/animals.mp4")
+	video, err := partFromGCSURI(ctx, "gs://cloud-samples-data/video/animals.mp4")
 	if err != nil {
 		log.Fatalf("unable to process media: %v", err)
 	}
@@ -52,16 +55,14 @@ func main() {
 	}
 
 	// generate the response
-	err = generateMultimodalContent(os.Stdout, prompt, projectID, location, modelName, float32(temperature))
+	err = generateMultimodalContent(ctx, os.Stdout, prompt, projectID, location, modelName, float32(temperature))
 	if err != nil {
 		log.Fatalf("unable to generate: %v", err)
 	}
 }
 
 // generateMultimodalContent provide a generated response using multimodal input
-func generateMultimodalContent(w io.Writer, parts []genai.Part, projectID, location, modelName string, temperature float32) error {
-	ctx := context.Background()
-
+func generateMultimodalContent(ctx context.Context, w io.Writer, parts []genai.Part, projectID, location, modelName string, temperature float32) error {
 	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {
 		return fmt.Errorf("unable to create client: %v", err)
@@ -76,18 +77,16 @@ func generateMultimodalContent(w io.Writer, parts []genai.Part, projectID, locat
 		return fmt.Errorf("unable to generate contents: %v", err)
 	}
 
-	fmt.Fprintf(w, "generated response: %s\n", res.Candidates[0].Content.Parts[0])
+	_, err = fmt.Fprintf(w, "generated response: %s\n", res.Candidates[0].Content.Parts[0])
 
-	return nil
+	return err
 }
 
 // partFromGCSURI create a multimodal prompt part from a Google Cloud Storage object URI
-func partFromGCSURI(gcsPath string) (genai.Part, error) {
+func partFromGCSURI(ctx context.Context, gcsPath string) (genai.Part, error) {
 	gcsPath = strings.Replace(gcsPath, "gs://", "", -1)
 	bucket := strings.SplitN(gcsPath, "/", 3)[0]
 	object := strings.Join(strings.SplitN(gcsPath, "/", 3)[1:], "/")
-
-	ctx := context.Background()
 
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -109,12 +108,7 @@ func partFromGCSURI(gcsPath string) (genai.Part, error) {
 		return nil, fmt.Errorf("ioutil.ReadAll: %w", err)
 	}
 
-	position := strings.LastIndex(object, ".")
-	if position == -1 {
-		return nil, fmt.Errorf("couldn't find a period to indicate a file extension")
-	}
-
-	ext := object[position+1:]
+	ext := path.Ext(object)
 
 	return genai.Blob{MIMEType: "video/" + ext, Data: data}, nil
 }

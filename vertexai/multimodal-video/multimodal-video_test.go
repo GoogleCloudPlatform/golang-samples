@@ -15,6 +15,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"os"
 	"strings"
 	"testing"
@@ -33,8 +34,10 @@ func TestGenerateMultimodalContent(t *testing.T) {
 	modelName := "gemini-pro-vision"
 	temperature := 0.8
 
+	ctx := context.Background()
+
 	// create video part
-	video, err := partFromGCSURI("gs://cloud-samples-data/video/animals.mp4")
+	video, err := partFromGCSURI(ctx, "gs://cloud-samples-data/video/animals.mp4")
 	if err != nil {
 		t.Fatalf("unable to process media: %v", err)
 	}
@@ -48,7 +51,7 @@ func TestGenerateMultimodalContent(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	if err := generateMultimodalContent(os.Stdout, prompt, projectID, location, modelName, float32(temperature)); err != nil {
+	if err := generateMultimodalContent(ctx, os.Stdout, prompt, projectID, location, modelName, float32(temperature)); err != nil {
 		t.Fatal(err)
 	}
 
