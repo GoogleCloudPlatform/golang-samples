@@ -27,8 +27,8 @@ var projectId = "PROJECT_ID"
 var region = "us-central1"
 var modelName = "gemini-pro-vision"
 
-func makeChatRequests(projectId string, region string, modelName string) error {
-	client, err := genai.NewClient(context.TODO(), projectId, region)
+func makeChatRequests(ctx context.Context, projectID, region, modelName string) error {
+	client, err := genai.NewClient(ctx, projectID, region)
 	if err != nil {
 		return fmt.Errorf("error creating client: %v", err)
 	}
@@ -37,34 +37,26 @@ func makeChatRequests(projectId string, region string, modelName string) error {
 	gemini := client.GenerativeModel(modelName)
 	chat := gemini.StartChat()
 
-	r, err := chat.SendMessage(
-		context.TODO(),
-		genai.Text("Hello"))
-	if err != nil {
+	send := func(message string) error {
+		r, err := chat.SendMessage(ctx, genai.Text(message))
+		if err != nil {
+			return err
+		}
+		rb, err := json.MarshalIndent(r, "", "  ")
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(rb))
+		return nil
+	}
+
+	if err := send("Hello"); err != nil {
 		return err
 	}
-	rb, _ := json.MarshalIndent(r, "", "  ")
-	fmt.Println(string(rb))
-
-	r, err = chat.SendMessage(
-		context.TODO(),
-		genai.Text("What are all the colors in a rainbow?"))
-	if err != nil {
+	if err := send("What are all the colors in a rainbow?"); err != nil {
 		return err
 	}
-	rb, _ = json.MarshalIndent(r, "", "  ")
-	fmt.Println(string(rb))
-
-	r, err = chat.SendMessage(
-		context.TODO(),
-		genai.Text("Why does it appear when it rains?"))
-	if err != nil {
-		return err
-	}
-	rb, _ = json.MarshalIndent(r, "", "  ")
-	fmt.Println(string(rb))
-
-	return nil
+	return send("Why does it appear when it rains?")
 }
 
 // [END aiplatform_gemini_multiturn_chat]
