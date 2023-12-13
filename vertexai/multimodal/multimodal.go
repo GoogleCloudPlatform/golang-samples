@@ -78,28 +78,25 @@ func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, 
 
 // partFromImageURL create a multimodal prompt part from an image URL
 func partFromImageURL(image string) (genai.Part, error) {
-	var img genai.Blob
-
 	imageURL, err := url.Parse(image)
 	if err != nil {
-		return img, err
+		return nil, err
 	}
 	res, err := http.Get(image)
 	if err != nil || res.StatusCode != 200 {
-		return img, err
+		return nil, err
 	}
 	defer res.Body.Close()
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
-		return img, fmt.Errorf("unable to read from http: %v", err)
+		return nil, fmt.Errorf("unable to read from http: %v", err)
 	}
 
 	position := strings.LastIndex(imageURL.Path, ".")
 	if position == -1 {
-		return img, fmt.Errorf("couldn't find a period to indicate a file extension")
+		return nil, fmt.Errorf("couldn't find a period to indicate a file extension")
 	}
 	ext := imageURL.Path[position+1:]
 
-	img = genai.ImageData(ext, data)
-	return img, nil
+	return genai.ImageData(ext, data), nil
 }
