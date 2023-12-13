@@ -33,7 +33,7 @@ func tryGemini(w io.Writer, projectId string, region string, modelName string) e
 
 	img := genai.FileData{
 		MIMEType: "image/jpeg",
-		FileURI:  "https://storage.googleapis.com/generativeai-downloads/images/scones.jpg",
+		FileURI:  "gs://generativeai-downloads/images/scones.jpg",
 	}
 	prompt := genai.Text("What is in this image?")
 	resp, err := gemini.GenerateContent(context.Background(), img, prompt)
