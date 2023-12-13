@@ -32,7 +32,7 @@ func TestGenerateContent(t *testing.T) {
 
 	model := "gemini-pro-vision"
 
-	image := "https://storage.googleapis.com/cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg"
+	image := "gs://cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg"
 
 	if projectID == "" {
 		t.Fatal("require environment variable GOOGLE_CLOUD_PROJECT")
