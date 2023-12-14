@@ -32,7 +32,6 @@ func TestGenerateMultimodalContent(t *testing.T) {
 	location := "us-central1"
 
 	modelName := "gemini-pro-vision"
-	temperature := 0.8
 
 	ctx := context.Background()
 
@@ -51,7 +50,7 @@ func TestGenerateMultimodalContent(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	if err := generateMultimodalContent(ctx, os.Stdout, prompt, projectID, location, modelName, float32(temperature)); err != nil {
+	if err := generateMultimodalContent(ctx, os.Stdout, prompt, projectID, location, modelName); err != nil {
 		t.Fatal(err)
 	}
 

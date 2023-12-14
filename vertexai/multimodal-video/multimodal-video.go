@@ -34,7 +34,6 @@ func main() {
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	location := "us-central1"
 	modelName := "gemini-pro-vision"
-	temperature := 0.4
 
 	if projectID == "" {
 		log.Fatal("require environment variable GOOGLE_CLOUD_PROJECT")
@@ -55,14 +54,14 @@ func main() {
 	}
 
 	// generate the response
-	err = generateMultimodalContent(ctx, os.Stdout, prompt, projectID, location, modelName, float32(temperature))
+	err = generateMultimodalContent(ctx, os.Stdout, prompt, projectID, location, modelName)
 	if err != nil {
 		log.Fatalf("unable to generate: %v", err)
 	}
 }
 
 // generateMultimodalContent provide a generated response using multimodal input
-func generateMultimodalContent(ctx context.Context, w io.Writer, parts []genai.Part, projectID, location, modelName string, temperature float32) error {
+func generateMultimodalContent(ctx context.Context, w io.Writer, parts []genai.Part, projectID, location, modelName string) error {
 	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {
 		return fmt.Errorf("unable to create client: %v", err)
@@ -70,7 +69,7 @@ func generateMultimodalContent(ctx context.Context, w io.Writer, parts []genai.P
 	defer client.Close()
 
 	model := client.GenerativeModel(modelName)
-	model.Temperature = temperature
+	model.Temperature = 0.6
 
 	res, err := model.GenerateContent(ctx, parts...)
 	if err != nil {
