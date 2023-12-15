@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START export_profiles]
+// [START profiler_export_profiles]
 
 // Sample export_profiles shows how ListProfiles API can be used to download
 // existing pprof profiles for a given project from GCP.
@@ -126,4 +126,4 @@ func main() {
 	log.Println("Finished reading all profiles")
 }
 
-// [END export_profiles]
+// [END profiler_export_profiles]
