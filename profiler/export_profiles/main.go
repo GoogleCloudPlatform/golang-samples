@@ -26,6 +26,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	cloudprofiler "cloud.google.com/go/cloudprofiler/apiv2"
 	pb "cloud.google.com/go/cloudprofiler/apiv2/cloudprofilerpb"
@@ -56,11 +57,12 @@ func run(ctx context.Context) error {
 	}
 
 	// create a folder for storing profiles & metadata
-	if err := os.Mkdir("profiles", os.ModePerm); err != nil {
+	profilesDirName := fmt.Sprintf("profiles_%v", time.Now())
+	if err := os.Mkdir(profilesDirName, 0750); err != nil {
 		log.Fatal(err)
 	}
 	// create a file for storing profile metadata
-	metadata, err := os.Create("profiles/metadata.csv")
+	metadata, err := os.Create(fmt.Sprintf("%s/metadata.csv", profilesDirName))
 	if err != nil {
 		return err
 	}
@@ -87,8 +89,8 @@ func run(ctx context.Context) error {
 		}
 		profileCount++
 
-		filename := fmt.Sprintf("profiles/profile%06d.pprof", profileCount)
-		err = os.WriteFile(filename, profile.ProfileBytes, 0)
+		filename := fmt.Sprintf("%s/profile%06d.pprof", profilesDirName, profileCount)
+		err = os.WriteFile(filename, profile.ProfileBytes, 0640)
 
 		if err != nil {
 			return fmt.Errorf("unable to write file %s: %v", filename, err)
