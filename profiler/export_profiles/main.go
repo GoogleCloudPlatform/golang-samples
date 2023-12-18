@@ -119,6 +119,10 @@ func run(ctx context.Context) error {
 
 func main() {
 	flag.Parse()
+	// validate project ID
+	if *project == "" {
+		log.Fatalf("No project ID provided, please provide the GCP project ID via '-project' flag")
+	}
 	if err := run(context.Background()); err != nil {
 		log.Fatal(err)
 	}
