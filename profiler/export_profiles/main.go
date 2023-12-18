@@ -57,7 +57,7 @@ func run(ctx context.Context) error {
 	}
 
 	// create a folder for storing profiles & metadata
-	profilesDirName := fmt.Sprintf("profiles_%v", time.Now())
+	profilesDirName := fmt.Sprintf("profiles_%v", time.Now().Unix())
 	if err := os.Mkdir(profilesDirName, 0750); err != nil {
 		log.Fatal(err)
 	}
