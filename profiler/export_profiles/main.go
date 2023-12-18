@@ -46,7 +46,7 @@ func run(ctx context.Context) error {
 		return err
 	}
 	defer client.Close()
-	fmt.Printf("Attempting to fetch %v profiles with a pageSize of %v for %v\n", *maxProfiles, *pageSize, *project)
+	log.Printf("Attempting to fetch %v profiles with a pageSize of %v for %v\n", *maxProfiles, *pageSize, *project)
 
 	// Initial request for the ListProfiles API
 	request := &pb.ListProfilesRequest{
@@ -91,8 +91,7 @@ func run(ctx context.Context) error {
 		err = os.WriteFile(filename, profile.ProfileBytes, 0)
 
 		if err != nil {
-			fmt.Printf("Error writing %s, skipping: %v\n", filename, err)
-			continue
+			return fmt.Errorf("unable to write file %s: %v", filename, err)
 		}
 
 		labelBytes, err := json.Marshal(profile.Labels)
@@ -112,7 +111,7 @@ func run(ctx context.Context) error {
 
 		if profilesIterator.PageInfo().Remaining() == 0 {
 			// This signifies that the client will make a new API call internally
-			fmt.Printf("next page token: %v\n", profilesIterator.PageInfo().Token)
+			log.Printf("next page token: %v\n", profilesIterator.PageInfo().Token)
 		}
 	}
 	return nil
