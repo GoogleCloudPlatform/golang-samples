@@ -19,11 +19,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/csv"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"time"
@@ -38,22 +40,24 @@ var pageSize = flag.Int("page_size", 100, "Number of profiles fetched per page. 
 var pageToken = flag.String("page_token", "", "PageToken from a previous ListProfiles call. If empty, the listing will start from the begnning. Invalid page tokens result in error.")
 var maxProfiles = flag.Int("max_profiles", 1000, "Maximum number of profiles to fetch across all pages. If this is <= 0, will fetch all available profiles")
 
+const ProfilesDownloadedSuccessfully = "Read max allowed profiles"
+
 // This function reads profiles for a given project and stores them into locally created files.
 // The profile metadata gets stored into a 'metdata.csv' file, while the individual pprof files
 // are created per profile.
-func run(ctx context.Context) error {
+func downloadProfiles(ctx context.Context, w io.Writer, project, pageToken string, pageSize, maxProfiles int) error {
 	client, err := cloudprofiler.NewExportClient(ctx)
 	if err != nil {
 		return err
 	}
 	defer client.Close()
-	log.Printf("Attempting to fetch %v profiles with a pageSize of %v for %v\n", *maxProfiles, *pageSize, *project)
+	log.Printf("Attempting to fetch %v profiles with a pageSize of %v for %v\n", maxProfiles, pageSize, project)
 
 	// Initial request for the ListProfiles API
 	request := &pb.ListProfilesRequest{
-		Parent:    fmt.Sprintf("projects/%s", *project),
-		PageSize:  int32(*pageSize),
-		PageToken: *pageToken,
+		Parent:    fmt.Sprintf("projects/%s", project),
+		PageSize:  int32(pageSize),
+		PageToken: pageToken,
 	}
 
 	// create a folder for storing profiles & metadata
@@ -95,6 +99,7 @@ func run(ctx context.Context) error {
 		if err != nil {
 			return fmt.Errorf("unable to write file %s: %v", filename, err)
 		}
+		fmt.Fprintf(w, "deployment target: %v\n", profile.Deployment.Labels)
 
 		labelBytes, err := json.Marshal(profile.Labels)
 		if err != nil {
@@ -106,8 +111,8 @@ func run(ctx context.Context) error {
 			return err
 		}
 
-		if *maxProfiles > 0 && profileCount >= *maxProfiles {
-			log.Println("Read max allowed profiles")
+		if maxProfiles > 0 && profileCount >= maxProfiles {
+			fmt.Fprintf(w, "result: %v", ProfilesDownloadedSuccessfully)
 			break
 		}
 
@@ -125,7 +130,8 @@ func main() {
 	if *project == "" {
 		log.Fatalf("No project ID provided, please provide the GCP project ID via '-project' flag")
 	}
-	if err := run(context.Background()); err != nil {
+	var writer bytes.Buffer
+	if err := downloadProfiles(context.Background(), &writer, *project, *pageToken, *pageSize, *maxProfiles); err != nil {
 		log.Fatal(err)
 	}
 	log.Println("Finished reading all profiles")
