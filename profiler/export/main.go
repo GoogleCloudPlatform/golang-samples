@@ -14,7 +14,7 @@
 
 // [START profiler_export_profiles]
 
-// Sample export_profiles shows how ListProfiles API can be used to download
+// Sample export shows how ListProfiles API can be used to download
 // existing pprof profiles for a given project from GCP.
 package main
 
@@ -89,7 +89,7 @@ func run(ctx context.Context) error {
 		}
 		profileCount++
 
-		filename := fmt.Sprintf("%s/profile%06d.pprof", profilesDirName, profileCount)
+		filename := fmt.Sprintf("%s/profile%06d.pb.gz", profilesDirName, profileCount)
 		err = os.WriteFile(filename, profile.ProfileBytes, 0640)
 
 		if err != nil {
