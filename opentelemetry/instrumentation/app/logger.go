@@ -25,9 +25,9 @@ import (
 
 var projectId = os.Getenv("GOOGLE_CLOUD_PROJECT")
 
-// handerWithSpanContext adds attributes from the span context
+// handlerWithSpanContext adds attributes from the span context
 // [START opentelemetry_instrumentation_spancontext_logger]
-func handerWithSpanContext(handler slog.Handler) *spanContextLogHandler {
+func handlerWithSpanContext(handler slog.Handler) *spanContextLogHandler {
 	return &spanContextLogHandler{Handler: handler}
 }
 

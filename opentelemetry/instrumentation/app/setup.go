@@ -81,7 +81,7 @@ func setupLogging() {
 	// Use json as our base logging format.
 	jsonHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{ReplaceAttr: replacer})
 	// Add span context attributes when Context is passed to logging calls.
-	instrumentedHandler := handerWithSpanContext(jsonHandler)
+	instrumentedHandler := handlerWithSpanContext(jsonHandler)
 	// Set this handler as the global slog handler.
 	slog.SetDefault(slog.New(instrumentedHandler))
 }
