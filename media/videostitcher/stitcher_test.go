@@ -232,9 +232,9 @@ func getUUID64() (string, error) {
 	return strings.ReplaceAll(uuid, "-", ""), nil
 }
 
-// Curl the playURI first. The last line of the response will contain a
+// Get the playURI first. The last line of the response will contain a
 // renditions location. Return the renditions.
-func curlPlayURI(playURI string) ([]string, error) {
+func getPlayURI(playURI string) ([]string, error) {
 	resp, err := http.Get(playURI)
 	if err != nil {
 		return nil, errors.New("\nError getting the play URI\n")

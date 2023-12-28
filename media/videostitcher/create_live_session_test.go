@@ -37,6 +37,10 @@ func TestCreateLiveSession(t *testing.T) {
 	liveConfigName := fmt.Sprintf("projects/%s/locations/%s/liveConfigs/%s", tc.ProjectID, location, liveConfigID)
 	createTestSlate(slateID, t)
 	createTestLiveConfig(slateID, liveConfigID, t)
+	t.Cleanup(func() {
+		deleteTestLiveConfig(liveConfigName, t)
+		deleteTestSlate(slateName, t)
+	})
 
 	// Create a new live session and return the play URI.
 	sessionPrefix := fmt.Sprintf("locations/%s/liveSessions/", location)
@@ -47,10 +51,5 @@ func TestCreateLiveSession(t *testing.T) {
 		if got := buf.String(); !strings.Contains(got, sessionPrefix) {
 			r.Errorf("createLiveSession got: %v Want to contain: %v", got, sessionPrefix)
 		}
-	})
-
-	t.Cleanup(func() {
-		deleteTestLiveConfig(liveConfigName, t)
-		deleteTestSlate(slateName, t)
 	})
 }

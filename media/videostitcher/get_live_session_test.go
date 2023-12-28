@@ -38,6 +38,12 @@ func TestGetLiveSession(t *testing.T) {
 
 	createTestSlate(slateID, t)
 	createTestLiveConfig(slateID, liveConfigID, t)
+	t.Cleanup(func() {
+		// Can't delete live sessions
+		deleteTestLiveConfig(liveConfigName, t)
+		deleteTestSlate(slateName, t)
+	})
+
 	sessionID, _ := createTestLiveSession(liveConfigID, t)
 	liveSession := fmt.Sprintf("/locations/%s/liveSessions/%s", location, sessionID)
 
@@ -48,11 +54,5 @@ func TestGetLiveSession(t *testing.T) {
 		if got := buf.String(); !strings.Contains(got, liveSession) {
 			r.Errorf("getLiveSession got: %v Want to contain: %v", got, liveSession)
 		}
-	})
-
-	t.Cleanup(func() {
-		// Can't delete live sessions
-		deleteTestLiveConfig(liveConfigName, t)
-		deleteTestSlate(slateName, t)
 	})
 }

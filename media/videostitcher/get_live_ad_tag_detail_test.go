@@ -38,6 +38,12 @@ func TestGetLiveAdTagDetail(t *testing.T) {
 
 	createTestSlate(slateID, t)
 	createTestLiveConfig(slateID, liveConfigID, t)
+	t.Cleanup(func() {
+		// Can't delete live sessions
+		deleteTestLiveConfig(liveConfigName, t)
+		deleteTestSlate(slateName, t)
+	})
+
 	sessionID, playURI := createTestLiveSession(liveConfigID, t)
 
 	// No list or delete methods for live sessions
@@ -47,13 +53,13 @@ func TestGetLiveAdTagDetail(t *testing.T) {
 	// To get ad tag details, you need to curl the main manifest and
 	// a rendition first. This supplies media player information to the API.
 	//
-	// Curl the playURI first. The last line of the response will contain a
+	// Get the playURI first. The last line of the response will contain a
 	// renditions location. Curl the live session name with the rendition
 	// location appended.
 
-	renditions, err := curlPlayURI(playURI)
+	renditions, err := getPlayURI(playURI)
 	if err != nil {
-		t.Fatalf("curlPlayURI err: %v", err)
+		t.Fatalf("getPlayURI err: %v", err)
 	}
 
 	// playURI will be in the following format:
@@ -95,10 +101,4 @@ func TestGetLiveAdTagDetail(t *testing.T) {
 		}
 	})
 	buf.Reset()
-
-	t.Cleanup(func() {
-		// Can't delete live sessions
-		deleteTestLiveConfig(liveConfigName, t)
-		deleteTestSlate(slateName, t)
-	})
 }
