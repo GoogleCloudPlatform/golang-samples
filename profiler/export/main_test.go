@@ -17,7 +17,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"os"
 	"runtime"
 	"strings"
 	"testing"
@@ -28,11 +27,8 @@ import (
 )
 
 func TestDownloadProfiles(t *testing.T) {
-	testutil.EndToEndTest(t)
-	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
-	if projectID == "" {
-		t.Skip("Skipping download profiles test. Set GOLANG_SAMPLES_PROJECT_ID.")
-	}
+	tc := testutil.EndToEndTest(t)
+	projectID := tc.ProjectID
 	ctx := context.Background()
 	serviceVersion := fmt.Sprintf("v%v", time.Now().Unix())
 
