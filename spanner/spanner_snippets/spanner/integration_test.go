@@ -1315,10 +1315,10 @@ func createTestPgDatabase(db string, extraStatements ...string) (func(), error) 
 }
 
 func deleteInstanceAndBackups(
-		t *testing.T,
-		instanceName string,
-		instanceAdmin *instance.InstanceAdminClient,
-		databaseAdmin *database.DatabaseAdminClient) {
+	t *testing.T,
+	instanceName string,
+	instanceAdmin *instance.InstanceAdminClient,
+	databaseAdmin *database.DatabaseAdminClient) {
 	ctx := context.Background()
 	// Delete all backups before deleting the instance.
 	iter := databaseAdmin.ListBackups(ctx, &adminpb.ListBackupsRequest{
