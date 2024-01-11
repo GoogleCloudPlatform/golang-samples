@@ -401,6 +401,9 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "Number of customer records inserted is: 3")
 	out = runSample(t, dropSequence, dbName, "failed to drop bit reverse sequence column")
 	assertContains(t, out, "Altered Customers table to drop DEFAULT from CustomerId column and dropped the Seq sequence\n")
+
+	out = runSample(t, directedReadOptions, dbName, "failed to read using directed read options")
+	assertContains(t, out, "1 1 Total Junk")
 }
 
 func TestBackupSample(t *testing.T) {

@@ -108,6 +108,9 @@ export GOLANG_SAMPLES_BIGTABLE_PROJECT=golang-samples-tests
 export GOLANG_SAMPLES_BIGTABLE_INSTANCE=testing-instance
 
 export GOLANG_SAMPLES_FIRESTORE_PROJECT=golang-samples-fire-0
+# This flag is added to avoid protobuf conflicts while running tests for profiler.
+# TODO: Remove this after https://github.com/googleapis/google-cloud-go/issues/9207 is resolved.
+export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn
 
 set -x
 
