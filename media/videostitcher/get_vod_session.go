@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import (
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 // getVodSession gets a VOD session by ID.
@@ -37,7 +37,7 @@ func getVodSession(w io.Writer, projectID, sessionID string) error {
 	}
 	defer client.Close()
 
-	req := &stitcherpb.GetVodSessionRequest{
+	req := &stitcherstreampb.GetVodSessionRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/vodSessions/%s", projectID, location, sessionID),
 	}
 	// Gets the session.
