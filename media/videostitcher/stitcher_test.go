@@ -447,7 +447,8 @@ func createTestLiveSession(liveConfigID string, t *testing.T) (string, string) {
 			LiveConfig: fmt.Sprintf("projects/%s/locations/%s/liveConfigs/%s", tc.ProjectID, location, liveConfigID),
 		},
 	}
-	// Creates the live session.
+	// Creates the live session. Live sessions are
+	// ephemeral resources that expire after a few minutes.
 	response, err := client.CreateLiveSession(ctx, req)
 	if err != nil {
 		t.Fatal(err)
@@ -486,7 +487,8 @@ func createTestVodSession(t *testing.T) string {
 			AdTracking: stitcherstreampb.AdTracking_SERVER,
 		},
 	}
-	// Creates the VOD session.
+	// Creates the VOD session. VOD sessions are
+	// ephemeral resources that expire after a few hours.
 	response, err := client.CreateVodSession(ctx, req)
 	if err != nil {
 		t.Fatal(err)
