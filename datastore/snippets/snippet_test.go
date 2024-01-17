@@ -772,12 +772,12 @@ func Snippet_metadataPropertiesForKind() {
 	_ = keys // Use keys to find property names, and props for their representations.
 }
 
-func SnippetQuery_RunQueryWithExplainMode() {
-	// [START datastore_run_query_with_explain_mode]
+func SnippetQuery_RunQueryWithExplainMode(w io.Writer) {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	defer client.Close()
 
+	// [START datastore_run_query_with_explain_mode]
 	// Build the query
 	query := datastore.NewQuery("Task")
 
@@ -787,17 +787,18 @@ func SnippetQuery_RunQueryWithExplainMode() {
 
 	// Get the query plan
 	queryPlan := it.Stats.QueryPlan
-	fmt.Printf("----- Plan Info -----\n%+v\n", queryPlan.PlanInfo)
+	fmt.Fprintln(w, "----- Plan Info -----")
+	fmt.Fprintf(w, "%+v\n", queryPlan.PlanInfo)
 	// [END datastore_run_query_with_explain_mode]
-	_ = err // Check error.
+	_ = err // Check non-nil errors other than Iterator.Done
 }
 
-func SnippetQuery_RunQueryWithExplainAnalyzeMode() {
-	// [START datastore_run_query_with_explain_analyze_mode]
+func SnippetQuery_RunQueryWithExplainAnalyzeMode(w io.Writer) {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	defer client.Close()
 
+	// [START datastore_run_query_with_explain_analyze_mode]
 	// Build the query
 	query := datastore.NewQuery("Task")
 
@@ -806,7 +807,7 @@ func SnippetQuery_RunQueryWithExplainAnalyzeMode() {
 	it := client.Run(ctx, query, []datastore.RunOption{datastore.QueryModeExplainAnalyze}...)
 
 	// Get the query results
-	fmt.Println("----- Query Results -----")
+	fmt.Fprintln(w, "----- Query Results -----")
 	for {
 		var task Task
 		_, err := it.Next(&task)
@@ -816,15 +817,17 @@ func SnippetQuery_RunQueryWithExplainAnalyzeMode() {
 		if err != nil {
 			log.Fatalf("Error fetching next task: %v", err)
 		}
-		fmt.Printf("Task %q, Priority %d\n", task.Description, task.Priority)
+		fmt.Fprintf(w, "Task %q, Priority %d\n", task.Description, task.Priority)
 	}
 
 	// Get the query plan
 	queryPlan := it.Stats.QueryPlan
-	fmt.Printf("----- Plan Info -----\n%+v\n", queryPlan.PlanInfo)
+	fmt.Fprintln(w, "----- Plan Info -----")
+	fmt.Fprintf(w, "%+v\n", queryPlan.PlanInfo)
 
 	// Get the query stats
 	queryStats := it.Stats.QueryStats
-	fmt.Printf("----- Query Stats -----\n%+v\n", queryStats)
+	fmt.Fprintln(w, "----- Query Stats -----")
+	fmt.Fprintf(w, "%+v\n", queryStats)
 	// [END datastore_run_query_with_explain_analyze_mode]
 }
