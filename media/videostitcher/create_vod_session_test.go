@@ -28,7 +28,8 @@ func TestCreateVodSession(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
 
-	// Create a new VOD session and return the play URI.
+	// Create a new VOD session and return the play URI. VOD sessions are
+	// ephemeral resources that expire after a few hours.
 	sessionPrefix := fmt.Sprintf("locations/%s/vodSessions/", location)
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		if err := createVodSession(&buf, tc.ProjectID, vodURI); err != nil {
