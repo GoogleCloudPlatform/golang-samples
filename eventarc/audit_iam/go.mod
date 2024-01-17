@@ -4,8 +4,8 @@ go 1.19
 
 require (
 	github.com/cloudevents/sdk-go/v2 v2.14.0
-	github.com/googleapis/google-cloudevents-go v0.7.0
-	google.golang.org/protobuf v1.31.0
+	github.com/googleapis/google-cloudevents-go v0.7.1
+	google.golang.org/protobuf v1.32.0
 )
 
 require (
@@ -16,5 +16,5 @@ require (
 	go.uber.org/atomic v1.4.0 // indirect
 	go.uber.org/multierr v1.1.0 // indirect
 	go.uber.org/zap v1.10.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230629202037-9506855d4529 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20231030173426-d783a09b4405 // indirect
 )

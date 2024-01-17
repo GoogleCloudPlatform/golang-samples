@@ -87,7 +87,7 @@ func generateMultimodalContent(w io.Writer, parts []genai.Part, projectID, locat
 	defer client.Close()
 
 	model := client.GenerativeModel(modelName)
-	model.Temperature = temperature
+	model.SetTemperature(temperature)
 
 	res, err := model.GenerateContent(ctx, parts...)
 	if err != nil {
