@@ -771,3 +771,60 @@ func Snippet_metadataPropertiesForKind() {
 	_ = err  // Check error.
 	_ = keys // Use keys to find property names, and props for their representations.
 }
+
+func SnippetQuery_RunQueryWithExplainMode() {
+	// [START datastore_run_query_with_explain_mode]
+	ctx := context.Background()
+	client, _ := datastore.NewClient(ctx, "my-proj")
+	defer client.Close()
+
+	// Build the query
+	query := datastore.NewQuery("Task")
+
+	// Set the query mode to EXPLAIN to get back *only* the plan info
+	it := client.Run(ctx, query, []datastore.RunOption{datastore.QueryModeExplain}...)
+	_, err := it.Next(nil)
+
+	// Get the query plan
+	queryPlan := it.Stats.QueryPlan
+	fmt.Printf("----- Plan Info -----\n%+v\n", queryPlan.PlanInfo)
+	// [END datastore_run_query_with_explain_mode]
+	_ = err // Check error.
+}
+
+func SnippetQuery_RunQueryWithExplainAnalyzeMode() {
+	// [START datastore_run_query_with_explain_analyze_mode]
+	ctx := context.Background()
+	client, _ := datastore.NewClient(ctx, "my-proj")
+	defer client.Close()
+
+	// Build the query
+	query := datastore.NewQuery("Task")
+
+	// Set the query mode to EXPLAIN_ANALYZE to get back the query stats, plan info, and query
+	// results
+	it := client.Run(ctx, query, []datastore.RunOption{datastore.QueryModeExplainAnalyze}...)
+
+	// Get the query results
+	fmt.Println("----- Query Results -----")
+	for {
+		var task Task
+		_, err := it.Next(&task)
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatalf("Error fetching next task: %v", err)
+		}
+		fmt.Printf("Task %q, Priority %d\n", task.Description, task.Priority)
+	}
+
+	// Get the query plan
+	queryPlan := it.Stats.QueryPlan
+	fmt.Printf("----- Plan Info -----\n%+v\n", queryPlan.PlanInfo)
+
+	// Get the query stats
+	queryStats := it.Stats.QueryStats
+	fmt.Printf("----- Query Stats -----\n%+v\n", queryStats)
+	// [END datastore_run_query_with_explain_analyze_mode]
+}
