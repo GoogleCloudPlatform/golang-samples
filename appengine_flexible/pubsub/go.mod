@@ -1,4 +1,4 @@
-module pubsub
+module github.com/GoogleCloudPlatform/appengine_flexible/pubsub
 
 go 1.19
 

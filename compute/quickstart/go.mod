@@ -1,4 +1,4 @@
-module exec
+module github.com/GoogleCloudPlatform/compute/quickstart/exec
 
 go 1.19
 

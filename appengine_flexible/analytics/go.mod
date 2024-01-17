@@ -1,4 +1,4 @@
-module analytics
+module github.com/GoogleCloudPlatform/appengine_flexible/analytics
 
 go 1.19
 

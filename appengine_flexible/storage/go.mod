@@ -1,4 +1,4 @@
-module storage
+module github.com/GoogleCloudPlatform/appengine_flexible/storage
 
 go 1.19
 
