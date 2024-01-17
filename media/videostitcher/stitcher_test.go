@@ -49,7 +49,8 @@ const (
 	updatedHostname      = "updated.cdn.example.com"
 	keyName              = "my-key"
 
-	vodURI = "https://storage.googleapis.com/cloud-samples-data/media/hls-vod/manifest.m3u8"
+	vodURI      = "https://storage.googleapis.com/cloud-samples-data/media/hls-vod/manifest.m3u8"
+	vodAdTagURI = "https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpreonly&ciu_szs=300x250%2C728x90&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&correlator="
 
 	liveConfigIDPrefix       = "go-test-live-config"
 	deleteLiveConfigResponse = "Deleted live config"
@@ -446,7 +447,8 @@ func createTestLiveSession(liveConfigID string, t *testing.T) (string, string) {
 			LiveConfig: fmt.Sprintf("projects/%s/locations/%s/liveConfigs/%s", tc.ProjectID, location, liveConfigID),
 		},
 	}
-	// Creates the live session.
+	// Creates the live session. Live sessions are
+	// ephemeral resources that expire after a few minutes.
 	response, err := client.CreateLiveSession(ctx, req)
 	if err != nil {
 		t.Fatal(err)
@@ -465,4 +467,97 @@ func createTestLiveSession(liveConfigID string, t *testing.T) (string, string) {
 	}
 
 	return sessionID, playURI
+}
+
+func createTestVodSession(t *testing.T) string {
+	t.Helper()
+	ctx := context.Background()
+	client, err := stitcher.NewVideoStitcherClient(ctx)
+	if err != nil {
+		t.Fatalf("stitcher.NewVideoStitcherClient: %v", err)
+	}
+	defer client.Close()
+
+	tc := testutil.SystemTest(t)
+	req := &stitcherstreampb.CreateVodSessionRequest{
+		Parent: fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, location),
+		VodSession: &stitcherstreampb.VodSession{
+			SourceUri:  vodURI,
+			AdTagUri:   vodAdTagURI,
+			AdTracking: stitcherstreampb.AdTracking_SERVER,
+		},
+	}
+	// Creates the VOD session. VOD sessions are
+	// ephemeral resources that expire after a few hours.
+	response, err := client.CreateVodSession(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Get the ID of the session
+	strSlice := strings.Split(response.GetName(), "/")
+	return strSlice[len(strSlice)-1]
+}
+
+func listTestVodAdTagDetails(vodSessionID string, t *testing.T) string {
+	t.Helper()
+	ctx := context.Background()
+	client, err := stitcher.NewVideoStitcherClient(ctx)
+	if err != nil {
+		t.Fatalf("stitcher.NewVideoStitcherClient: %v", err)
+	}
+	defer client.Close()
+
+	tc := testutil.SystemTest(t)
+	req := &stitcherstreampb.ListVodAdTagDetailsRequest{
+		Parent: fmt.Sprintf("projects/%s/locations/%s/vodSessions/%s", tc.ProjectID, location, vodSessionID),
+	}
+
+	vodAdTagDetailID := ""
+	it := client.ListVodAdTagDetails(ctx, req)
+	for {
+		response, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			t.Fatalf("it.Next(): %v", err)
+		}
+
+		// Get the ID of the session
+		strSlice := strings.Split(response.GetName(), "/")
+		vodAdTagDetailID += strSlice[len(strSlice)-1]
+	}
+	return vodAdTagDetailID
+}
+
+func listTestVodStitchDetails(vodSessionID string, t *testing.T) string {
+	t.Helper()
+	ctx := context.Background()
+	client, err := stitcher.NewVideoStitcherClient(ctx)
+	if err != nil {
+		t.Fatalf("stitcher.NewVideoStitcherClient: %v", err)
+	}
+	defer client.Close()
+
+	tc := testutil.SystemTest(t)
+	req := &stitcherstreampb.ListVodStitchDetailsRequest{
+		Parent: fmt.Sprintf("projects/%s/locations/%s/vodSessions/%s", tc.ProjectID, location, vodSessionID),
+	}
+
+	vodStitchDetailID := ""
+	it := client.ListVodStitchDetails(ctx, req)
+	for {
+		response, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			t.Fatalf("it.Next(): %v", err)
+		}
+
+		// Get the ID of the session
+		strSlice := strings.Split(response.GetName(), "/")
+		vodStitchDetailID += strSlice[len(strSlice)-1]
+	}
+	return vodStitchDetailID
 }
