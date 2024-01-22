@@ -28,5 +28,5 @@ To run the example with one of a sample audio file:
 
 ```bash
 go build
-livecaption_from_file ../testdata/audio.raw
+livecaption_from_file <project_id> ../testdata/audio.raw
 ```

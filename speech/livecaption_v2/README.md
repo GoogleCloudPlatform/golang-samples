@@ -28,7 +28,7 @@ To run the example with a local file:
 
 ```bash
 go build
-cat ../testdata/audio.raw | livecaption
+cat ../testdata/audio.raw | livecaption <project_id>
 ```
 
 ## Capturing audio from the mic
@@ -36,7 +36,7 @@ cat ../testdata/audio.raw | livecaption
 Alternatively, `gst-launch` can be used to capture audio from the mic. For example:
 
 ```bash
-gst-launch-1.0 -v pulsesrc ! audioconvert ! audioresample ! audio/x-raw,channels=1,rate=16000 ! filesink location=/dev/stdout | livecaption
+gst-launch-1.0 -v pulsesrc ! audioconvert ! audioresample ! audio/x-raw,channels=1,rate=16000 ! filesink location=/dev/stdout | livecaption <project_id>
 ```
 
 In order to discover your recording device you may use the `gst-device-monitor-1.0` command line tool. For example:
@@ -69,7 +69,7 @@ Device found:
 In the above example the recording device (`Built-In Microphone`) is `osxaudiosrc device=39`, so in order to run the example you would need to adapt the command-line accordingly:
 
 ```bash
-gst-launch-1.0 -v osxaudiosrc device=39 ! audioconvert ! audioresample ! audio/x-raw,channels=1,rate=16000 ! filesink location=/dev/stdout | livecaption
+gst-launch-1.0 -v osxaudiosrc device=39 ! audioconvert ! audioresample ! audio/x-raw,channels=1,rate=16000 ! filesink location=/dev/stdout | livecaption <project_id>
 ```
 
 ## Content Limits
