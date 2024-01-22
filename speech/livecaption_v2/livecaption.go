@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,17 +23,18 @@ package main
 
 // [START speech_transcribe_streaming_mic]
 import (
-	speech "cloud.google.com/go/speech/apiv2"
-	"cloud.google.com/go/speech/apiv2/speechpb"
 	"context"
 	"flag"
 	"fmt"
 	"io"
 	"log"
 	"os"
+
+	speech "cloud.google.com/go/speech/apiv2"
+	"cloud.google.com/go/speech/apiv2/speechpb"
 )
 
-var project = ""
+var projectID string
 
 const location = "global"
 
@@ -42,17 +43,17 @@ func main() {
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s <Project_id>\n", os.Args[0])
-		fmt.Fprintf(os.Stderr, "<project> must be a project_id to a valid gcp project with speech api enabled.\n")
+		fmt.Fprintf(os.Stderr, "<projectID> must be a project_id to a valid gcp projectID with speech api enabled.\n")
 
 	}
 	flag.Parse()
 	if len(flag.Args()) != 1 {
 		log.Fatal("Please pass the project_id as a command line argument. Should be a valid project_id with stt api enabled.")
 	}
-	project = flag.Arg(0)
+	projectID = flag.Arg(0)
 
-	if project == "" {
-		log.Fatalf("Project is is required parameter: %s", project)
+	if projectID == "" {
+		log.Fatalf("Project is is required parameter: %s", projectID)
 	}
 
 	client, err := speech.NewClient(ctx)
@@ -65,7 +66,7 @@ func main() {
 	}
 
 	if err := stream.Send(&speechpb.StreamingRecognizeRequest{
-		Recognizer: fmt.Sprintf("projects/%s/locations/%s/recognizers/_", project, location),
+		Recognizer: fmt.Sprintf("projects/%s/locations/%s/recognizers/_", projectID, location),
 		StreamingRequest: &speechpb.StreamingRecognizeRequest_StreamingConfig{
 			StreamingConfig: &speechpb.StreamingRecognitionConfig{
 				Config: &speechpb.RecognitionConfig{
@@ -101,7 +102,7 @@ func main() {
 
 			if n > 0 {
 				if err := stream.Send(&speechpb.StreamingRecognizeRequest{
-					Recognizer: fmt.Sprintf("projects/%s/locations/%s/recognizers/_", project, location),
+					Recognizer: fmt.Sprintf("projects/%s/locations/%s/recognizers/_", projectID, location),
 					StreamingRequest: &speechpb.StreamingRecognizeRequest_Audio{
 						Audio: buf[:n],
 					},

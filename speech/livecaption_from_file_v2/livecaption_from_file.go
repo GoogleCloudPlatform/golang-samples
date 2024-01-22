@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package main
 
 // [START speech_transcribe_streaming]
 import (
-	speech "cloud.google.com/go/speech/apiv2"
-	"cloud.google.com/go/speech/apiv2/speechpb"
 	"context"
 	"flag"
 	"fmt"
@@ -28,9 +26,12 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+
+	speech "cloud.google.com/go/speech/apiv2"
+	"cloud.google.com/go/speech/apiv2/speechpb"
 )
 
-var project = ""
+var projectID string
 
 const location = "global"
 
@@ -45,7 +46,7 @@ func main() {
 		log.Fatal("Please pass path to your project_id and local audio file as a command line argument")
 	}
 	audioFile := flag.Arg(1)
-	project = flag.Arg(0)
+	projectID = flag.Arg(0)
 
 	ctx := context.Background()
 
@@ -59,7 +60,7 @@ func main() {
 	}
 	// Send the initial configuration message.
 	if err := stream.Send(&speechpb.StreamingRecognizeRequest{
-		Recognizer: fmt.Sprintf("projects/%s/locations/%s/recognizers/_", project, location),
+		Recognizer: fmt.Sprintf("projects/%s/locations/%s/recognizers/_", projectID, location),
 		StreamingRequest: &speechpb.StreamingRecognizeRequest_StreamingConfig{
 			StreamingConfig: &speechpb.StreamingRecognitionConfig{
 				Config: &speechpb.RecognitionConfig{
@@ -97,7 +98,7 @@ func main() {
 			n, err := f.Read(buf)
 			if n > 0 {
 				if err := stream.Send(&speechpb.StreamingRecognizeRequest{
-					Recognizer: fmt.Sprintf("projects/%s/locations/%s/recognizers/_", project, location),
+					Recognizer: fmt.Sprintf("projects/%s/locations/%s/recognizers/_", projectID, location),
 					StreamingRequest: &speechpb.StreamingRecognizeRequest_Audio{
 						Audio: buf[:n],
 					},
