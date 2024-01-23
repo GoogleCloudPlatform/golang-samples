@@ -15,17 +15,17 @@
 // Command livecaption_from_file streams a local audio file to
 // Google Speech API and outputs the transcript.
 
-package main
+package snippets
 
 // [START speech_transcribe_streaming]
 import (
 	"context"
-	"flag"
 	"fmt"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	speech "cloud.google.com/go/speech/apiv2"
 	"cloud.google.com/go/speech/apiv2/speechpb"
@@ -35,28 +35,25 @@ var projectID string
 
 const location = "global"
 
-func main() {
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s %s <AUDIOFILE>\n", os.Args[0], filepath.Base(os.Args[1]))
-		fmt.Fprintf(os.Stderr, "<AUDIOFILE> must be a path to a local audio file. Audio file must be a 16-bit signed little-endian encoded with a sample rate of 16000.\n")
+func transcribe_streaming_v2(w io.Writer, path string, projectID string) error {
 
+	audioFile, err := filepath.Abs(path)
+	if err != nil {
+		log.Println("Failed to load file: ", path)
+		return err
 	}
-	flag.Parse()
-	if len(flag.Args()) != 2 {
-		log.Fatal("Please pass path to your project_id and local audio file as a command line argument")
-	}
-	audioFile := flag.Arg(1)
-	projectID = flag.Arg(0)
 
 	ctx := context.Background()
 
 	client, err := speech.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return err
 	}
 	stream, err := client.StreamingRecognize(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return err
 	}
 	// Send the initial configuration message.
 	if err := stream.Send(&speechpb.StreamingRecognizeRequest{
@@ -65,16 +62,9 @@ func main() {
 			StreamingConfig: &speechpb.StreamingRecognitionConfig{
 				Config: &speechpb.RecognitionConfig{
 					// In case of specific file encoding , so specify the decoding config.
-					//DecodingConfig: &speechpb.RecognitionConfig_AutoDecodingConfig{},
-					DecodingConfig: &speechpb.RecognitionConfig_ExplicitDecodingConfig{
-						ExplicitDecodingConfig: &speechpb.ExplicitDecodingConfig{
-							Encoding:          speechpb.ExplicitDecodingConfig_LINEAR16,
-							SampleRateHertz:   16000,
-							AudioChannelCount: 1,
-						},
-					},
-					Model:         "long",
-					LanguageCodes: []string{"en-US"},
+					DecodingConfig: &speechpb.RecognitionConfig_AutoDecodingConfig{},
+					Model:          "long",
+					LanguageCodes:  []string{"en-US"},
 					Features: &speechpb.RecognitionFeatures{
 						MaxAlternatives: 2,
 					},
@@ -83,16 +73,18 @@ func main() {
 			},
 		},
 	}); err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return err
 	}
 
 	f, err := os.Open(audioFile)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return err
 	}
 	defer f.Close()
 
-	go func() {
+	go func() error {
 		buf := make([]byte, 1024)
 		for {
 			n, err := f.Read(buf)
@@ -103,15 +95,15 @@ func main() {
 						Audio: buf[:n],
 					},
 				}); err != nil {
-					log.Printf("Could not send audio: %v", err)
+					return fmt.Errorf("could not send audio: %v", err)
 				}
 			}
 			if err == io.EOF {
 				// Nothing else to pipe, close the stream.
 				if err := stream.CloseSend(); err != nil {
-					log.Fatalf("Could not close stream: %v", err)
+					return fmt.Errorf("could not close stream: %w", err)
 				}
-				return
+				return nil
 			}
 			if err != nil {
 				log.Printf("Could not read from %s: %v", audioFile, err)
@@ -123,21 +115,20 @@ func main() {
 	for {
 		resp, err := stream.Recv()
 		if err == io.EOF {
-			print("Recv break")
 			break
 		}
 		if err != nil {
-			log.Fatalf("Cannot stream results: %v", err)
+			return fmt.Errorf("cannot stream results: %v", err)
 		}
-		for _, result := range resp.Results {
-			if len(result.Alternatives) > 0 {
-				if result.IsFinal == true {
-					log.Println("result alternatives", result.Alternatives[0].Transcript, result.IsFinal)
-				}
-
+		for i, result := range resp.Results {
+			fmt.Fprintf(w, "%s\n", strings.Repeat("-", 20))
+			fmt.Fprintf(w, "Result %d\n", i+1)
+			for j, alternative := range result.Alternatives {
+				fmt.Fprintf(w, "Alternative %d is_final: %t : %s\n", j+1, result.IsFinal, alternative.Transcript)
 			}
 		}
 	}
+	return nil
 }
 
 // [END speech_transcribe_streaming]

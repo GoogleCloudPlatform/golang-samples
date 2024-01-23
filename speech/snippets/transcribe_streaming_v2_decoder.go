@@ -12,59 +12,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Command livecaption pipes the stdin audio data to
+// Command livecaption_from_file streams a local audio file to
 // Google Speech API and outputs the transcript.
-//
-// As an example, gst-launch can be used to capture the mic input:
-//
-//	$ gst-launch-1.0 -v pulsesrc ! audioconvert ! audioresample ! audio/x-raw,channels=1,rate=16000 ! filesink location=/dev/stdout | livecaption <project_id>
 
-package main
+package snippets
 
-// [START speech_transcribe_streaming_mic]
+// [START speech_transcribe_streaming]
 import (
 	"context"
-	"flag"
 	"fmt"
 	"io"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 
 	speech "cloud.google.com/go/speech/apiv2"
 	"cloud.google.com/go/speech/apiv2/speechpb"
 )
 
-var projectID string
+func transcribe_streaming_specific_decoding_v2(w io.Writer, path string, projectID string) error {
+	audioFile, err := filepath.Abs(path)
+	if err != nil {
+		log.Println("Failed to load file: ", path)
+		return err
+	}
 
-const location = "global"
-
-func main() {
 	ctx := context.Background()
-
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s <Project_id>\n", os.Args[0])
-		fmt.Fprintf(os.Stderr, "<projectID> must be a project_id to a valid gcp projectID with speech api enabled.\n")
-
-	}
-	flag.Parse()
-	if len(flag.Args()) != 1 {
-		log.Fatal("Please pass the project_id as a command line argument. Should be a valid project_id with stt api enabled.")
-	}
-	projectID = flag.Arg(0)
-
-	if projectID == "" {
-		log.Fatalf("Project is is required parameter: %s", projectID)
-	}
 
 	client, err := speech.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return err
 	}
 	stream, err := client.StreamingRecognize(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return err
 	}
-
+	// Send the initial configuration message.
 	if err := stream.Send(&speechpb.StreamingRecognizeRequest{
 		Recognizer: fmt.Sprintf("projects/%s/locations/%s/recognizers/_", projectID, location),
 		StreamingRequest: &speechpb.StreamingRecognizeRequest_StreamingConfig{
@@ -89,17 +75,21 @@ func main() {
 			},
 		},
 	}); err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return err
 	}
 
-	go func() {
-		// Pipe stdin to the API.
+	f, err := os.Open(audioFile)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	defer f.Close()
+
+	go func() error {
 		buf := make([]byte, 1024)
-
 		for {
-
-			n, err := os.Stdin.Read(buf)
-
+			n, err := f.Read(buf)
 			if n > 0 {
 				if err := stream.Send(&speechpb.StreamingRecognizeRequest{
 					Recognizer: fmt.Sprintf("projects/%s/locations/%s/recognizers/_", projectID, location),
@@ -107,18 +97,18 @@ func main() {
 						Audio: buf[:n],
 					},
 				}); err != nil {
-					log.Printf("Could not send audio: %v", err)
+					return fmt.Errorf("could not send audio: %v", err)
 				}
 			}
 			if err == io.EOF {
 				// Nothing else to pipe, close the stream.
 				if err := stream.CloseSend(); err != nil {
-					log.Fatalf("Could not close stream: %v", err)
+					return fmt.Errorf("could not close stream: %w", err)
 				}
-				return
+				return nil
 			}
 			if err != nil {
-				log.Printf("Could not read from stdin: %v", err)
+				log.Printf("Could not read from %s: %v", audioFile, err)
 				continue
 			}
 		}
@@ -127,25 +117,22 @@ func main() {
 	for {
 		resp, err := stream.Recv()
 		if err == io.EOF {
-			log.Printf("EOF break")
 			break
 		}
 		if err != nil {
-			log.Fatalf("Could not recognize: %v", err)
-		} else {
-			// It seems like the new response api does not have a field called Error
-			for _, result := range resp.Results {
-				//fmt.Printf("Result: %+v\n", result)
-				if len(result.Alternatives) > 0 {
-					if result.IsFinal == true {
-						log.Println("result", result.Alternatives[0].Transcript, result.IsFinal)
-					}
-
-				}
-			}
+			return fmt.Errorf("cannot stream results: %v", err)
 		}
+		for i, result := range resp.Results {
+			fmt.Fprintf(w, "%s\n", strings.Repeat("-", 20))
+			fmt.Fprintf(w, "Result %d\n", i+1)
+			for j, alternative := range result.Alternatives {
+				log.Printf("Alternative %d is_final: %t : %s\n", j+1, result.IsFinal, alternative.Transcript)
+				fmt.Fprintf(w, "Alternative %d is_final: %t : %s\n", j+1, result.IsFinal, alternative.Transcript)
+			}
 
+		}
 	}
+	return nil
 }
 
-// [END speech_transcribe_streaming_mic]
+// [END speech_transcribe_streaming]
