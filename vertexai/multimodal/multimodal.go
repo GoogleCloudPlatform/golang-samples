@@ -57,7 +57,7 @@ func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, 
 	defer client.Close()
 
 	model := client.GenerativeModel(modelName)
-	model.Temperature = 0.4
+	model.SetTemperature(0.4)
 
 	// Given an image file URL, prepare image file as genai.Part
 	img := genai.FileData{

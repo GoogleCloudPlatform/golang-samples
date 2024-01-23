@@ -54,7 +54,7 @@ func generateContent(w io.Writer, prompt, projectID, location, modelName string,
 	defer client.Close()
 
 	model := client.GenerativeModel(modelName)
-	model.Temperature = temperature
+	model.SetTemperature(temperature)
 
 	// configure the safety settings thresholds
 	model.SafetySettings = []*genai.SafetySetting{
