@@ -432,22 +432,22 @@ func TestV4SignedURL(t *testing.T) {
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		_, err = httpClient.Do(request)
 		if err != nil {
-			t.Errorf("httpClient.Do: %v", err)
+			r.Errorf("httpClient.Do: %v", err)
 		}
 
 		response, err := http.Get(getURL)
 		if err != nil {
-			t.Errorf("http.Get: %v", err)
+			r.Errorf("http.Get: %v", err)
 		}
 		defer response.Body.Close()
 
 		body, err := io.ReadAll(response.Body)
 		if err != nil {
-			t.Errorf("io.ReadAll: %v", err)
+			r.Errorf("io.ReadAll: %v", err)
 		}
 
 		if got, want := string(body), "hello world"; got != want {
-			t.Errorf("object content = %q; want %q", got, want)
+			r.Errorf("object content = %q; want %q", got, want)
 		}
 	})
 }
