@@ -167,11 +167,11 @@ func TestDeleteKey(t *testing.T) {
 	testutil.Retry(t, 18, 10*time.Second, func(r *testutil.R) {
 		err = deleteHMACKey(io.Discard, key.AccessID, key.ProjectID)
 		if err != nil {
-			t.Errorf("Error in deleteHMACKey: %s", err)
+			r.Errorf("Error in deleteHMACKey: %s", err)
 		}
 		key, _ = handle.Get(ctx)
 		if key != nil && key.State != "DELETED" {
-			t.Errorf("State of key is %s, should be DELETED", key.State)
+			r.Errorf("State of key is %s, should be DELETED", key.State)
 		}
 
 	})
