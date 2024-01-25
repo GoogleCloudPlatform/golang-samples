@@ -377,6 +377,13 @@ func TestSample(t *testing.T) {
 	out = runSample(t, queryWithQueryStats, dbName, "failed to query with query stats")
 	assertContains(t, out, "1 1 Total Junk")
 
+	out = runSample(t, enableOpenTelemetryMetricsAndTraces, dbName, "failed to enable opentelemetry")
+	assertContains(t, out, "1 1 Total Junk")
+	out = runSample(t, queryWithGFELatencyMetric, dbName, "failed to query with GFE latency using OpenTelemetry")
+	assertContains(t, out, "1 1 Total Junk")
+	out = runSample(t, queryWithQueryStatsMetric, dbName, "failed to query with query stats using OpenTelemetry")
+	assertContains(t, out, "1 1 Total Junk")
+
 	runSample(t, dropColumn, dbName, "failed to drop column")
 	runSampleWithContext(ctx, t, addNumericColumn, dbName, "failed to add numeric column")
 	runSample(t, updateDataWithNumericColumn, dbName, "failed to update data with numeric")
@@ -1315,10 +1322,10 @@ func createTestPgDatabase(db string, extraStatements ...string) (func(), error) 
 }
 
 func deleteInstanceAndBackups(
-	t *testing.T,
-	instanceName string,
-	instanceAdmin *instance.InstanceAdminClient,
-	databaseAdmin *database.DatabaseAdminClient) {
+		t *testing.T,
+		instanceName string,
+		instanceAdmin *instance.InstanceAdminClient,
+		databaseAdmin *database.DatabaseAdminClient) {
 	ctx := context.Background()
 	// Delete all backups before deleting the instance.
 	iter := databaseAdmin.ListBackups(ctx, &adminpb.ListBackupsRequest{
