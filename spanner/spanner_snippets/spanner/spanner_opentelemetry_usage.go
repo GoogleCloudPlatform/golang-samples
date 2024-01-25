@@ -15,7 +15,7 @@
 package spanner
 
 // [START spanner_opentelemetry_usage]
-
+// TODO: This cworks only from Go 1.20 due to OpenTelemetry incompatibility
 import (
 	"context"
 	"fmt"
