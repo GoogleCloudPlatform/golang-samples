@@ -14,7 +14,7 @@ services:
   otelcol:
     # If the collector does not have permission to read the mounted volumes, set
     # USERID=$(id -u) to run the container as the current user
-    user: ${USERID?set with USERID=$(id -u)}
+    user: $USERID
     volumes:
       - ${GOOGLE_APPLICATION_CREDENTIALS?}:${GOOGLE_APPLICATION_CREDENTIALS}:ro
     environment:
