@@ -17,7 +17,7 @@
 
 package snippets
 
-// [START transcribe_streaming_v2_explicit_decoding]
+// [START speech_transcribe_streaming_v2_explicit_decoding]
 import (
 	"context"
 	"fmt"
@@ -135,4 +135,4 @@ func transcribeStreamingSpecificDecodingV2(w io.Writer, path string, projectID s
 	return nil
 }
 
-// [END transcribe_streaming_v2_explicit_decoding]
+// [END speech_transcribe_streaming_v2_explicit_decoding]

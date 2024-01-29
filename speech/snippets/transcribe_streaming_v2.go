@@ -17,7 +17,7 @@
 
 package snippets
 
-// [START transcribe_streaming_v2]
+// [START speech_transcribe_streaming_v2]
 import (
 	"context"
 	"fmt"
@@ -131,4 +131,4 @@ func transcribeStreamingV2(w io.Writer, path string, projectID string) error {
 	return nil
 }
 
-// [END transcribe_streaming_v2]
+// [END speech_transcribe_streaming_v2]
