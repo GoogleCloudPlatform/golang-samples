@@ -23,14 +23,14 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestTrascribeStreamingV2(t *testing.T) {
+func TestTranscribeStreamingV2(t *testing.T) {
 	testutil.SystemTest(t)
 	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 	var buf bytes.Buffer
-	if err := transcribe_streaming_v2(&buf, recognitionAudioFile, projectID); err != nil {
-		t.Fatalf("error in transcribe diarization gcs %v", err)
+	if err := transcribeStreamingV2(&buf, recognitionAudioFile, projectID); err != nil {
+		t.Fatalf("error in transcribe %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, "Chromecast") {
-		t.Errorf("transcribe_diarization_gcs_beta got %q, expected %q", got, "Speaker")
+		t.Errorf("transcribe_streaming_v2 got %q, expected %q", got, "Speaker")
 	}
 }

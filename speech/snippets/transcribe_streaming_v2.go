@@ -17,7 +17,7 @@
 
 package snippets
 
-// [START speech_transcribe_streaming]
+// [START transcribe_streaming_v2]
 import (
 	"context"
 	"fmt"
@@ -35,7 +35,7 @@ var projectID string
 
 const location = "global"
 
-func transcribe_streaming_v2(w io.Writer, path string, projectID string) error {
+func transcribeStreamingV2(w io.Writer, path string, projectID string) error {
 
 	audioFile, err := filepath.Abs(path)
 	if err != nil {
@@ -131,4 +131,4 @@ func transcribe_streaming_v2(w io.Writer, path string, projectID string) error {
 	return nil
 }
 
-// [END speech_transcribe_streaming]
+// [END transcribe_streaming_v2]

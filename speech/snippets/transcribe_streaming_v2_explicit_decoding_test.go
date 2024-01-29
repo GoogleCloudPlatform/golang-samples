@@ -25,14 +25,14 @@ import (
 
 var recognitionAudioFileRawLINEAR16 = "../testdata/audio.raw"
 
-func TestTrascribeStreamingV2SpecificDecoding(t *testing.T) {
+func TestTranscribeStreamingV2SpecificDecoding(t *testing.T) {
 	testutil.SystemTest(t)
 	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 	var buf bytes.Buffer
-	if err := transcribe_streaming_specific_decoding_v2(&buf, recognitionAudioFileRawLINEAR16, projectID); err != nil {
-		t.Fatalf("error in transcribe diarization gcs %v", err)
+	if err := transcribeStreamingSpecificDecodingV2(&buf, recognitionAudioFileRawLINEAR16, projectID); err != nil {
+		t.Fatalf("error in transcribe rawfile %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, "Brooklyn Bridge") {
-		t.Errorf("transcribe_diarization_gcs_beta got %q, expected %q", got, "Speaker")
+		t.Errorf("transcribe_streaming_v2_explicit_decoding got %q, expected %q", got, "Speaker")
 	}
 }

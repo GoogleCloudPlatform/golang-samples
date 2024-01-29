@@ -17,7 +17,7 @@
 
 package snippets
 
-// [START speech_transcribe_streaming]
+// [START transcribe_streaming_v2_explicit_decoding]
 import (
 	"context"
 	"fmt"
@@ -31,7 +31,7 @@ import (
 	"cloud.google.com/go/speech/apiv2/speechpb"
 )
 
-func transcribe_streaming_specific_decoding_v2(w io.Writer, path string, projectID string) error {
+func transcribeStreamingSpecificDecodingV2(w io.Writer, path string, projectID string) error {
 	audioFile, err := filepath.Abs(path)
 	if err != nil {
 		log.Println("Failed to load file: ", path)
@@ -135,4 +135,4 @@ func transcribe_streaming_specific_decoding_v2(w io.Writer, path string, project
 	return nil
 }
 
-// [END speech_transcribe_streaming]
+// [END transcribe_streaming_v2_explicit_decoding]
