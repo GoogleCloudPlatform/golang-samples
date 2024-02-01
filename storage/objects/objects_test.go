@@ -391,16 +391,13 @@ func TestKMSObjects(t *testing.T) {
 func TestV4SignedURL(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatalf("storage.NewClient: %v", err)
-	}
-	defer client.Close()
 
 	bucketName := tc.ProjectID + "-signed-url-bucket-name"
 	objectName := "foo.txt"
 
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
+
+	// Generate PUT URL.
 	putBuf := new(bytes.Buffer)
 	putURL, err := generateV4PutObjectSignedURL(putBuf, bucketName, objectName)
 	if err != nil {
@@ -411,17 +408,7 @@ func TestV4SignedURL(t *testing.T) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 
-	httpClient := &http.Client{}
-	request, err := http.NewRequest("PUT", putURL, strings.NewReader("hello world"))
-	if err != nil {
-		t.Fatalf("failed to compose HTTP request: %v", err)
-	}
-	request.ContentLength = 11
-	request.Header.Set("Content-Type", "application/octet-stream")
-	_, err = httpClient.Do(request)
-	if err != nil {
-		t.Errorf("httpClient.Do: %v", err)
-	}
+	// Generate GET URL.
 	getBuf := new(bytes.Buffer)
 	getURL, err := generateV4GetObjectSignedURL(getBuf, bucketName, objectName)
 	if err != nil {
@@ -432,20 +419,37 @@ func TestV4SignedURL(t *testing.T) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 
-	response, err := http.Get(getURL)
+	// Create PUT request.
+	httpClient := &http.Client{}
+	request, err := http.NewRequest("PUT", putURL, strings.NewReader("hello world"))
 	if err != nil {
-		t.Errorf("http.Get: %v", err)
+		t.Fatalf("failed to compose HTTP request: %v", err)
 	}
-	defer response.Body.Close()
+	request.ContentLength = 11
+	request.Header.Set("Content-Type", "application/octet-stream")
 
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		t.Errorf("ioutil.ReadAll: %v", err)
-	}
+	// Test PUT and GET requests.
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		_, err = httpClient.Do(request)
+		if err != nil {
+			r.Errorf("httpClient.Do: %v", err)
+		}
 
-	if got, want := string(body), "hello world"; got != want {
-		t.Errorf("object content = %q; want %q", got, want)
-	}
+		response, err := http.Get(getURL)
+		if err != nil {
+			r.Errorf("http.Get: %v", err)
+		}
+		defer response.Body.Close()
+
+		body, err := io.ReadAll(response.Body)
+		if err != nil {
+			r.Errorf("io.ReadAll: %v", err)
+		}
+
+		if got, want := string(body), "hello world"; got != want {
+			r.Errorf("object content = %q; want %q", got, want)
+		}
+	})
 }
 
 func TestPostPolicyV4(t *testing.T) {
