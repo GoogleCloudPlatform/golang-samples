@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -157,17 +158,23 @@ func TestDeleteKey(t *testing.T) {
 	// Keys must be in INACTIVE state before deletion.
 	ctx := context.Background()
 	handle := storageClient.HMACKeyHandle(key.ProjectID, key.AccessID)
-	handle.Update(ctx, storage.HMACKeyAttrsToUpdate{State: "INACTIVE"})
-
-	err = deleteHMACKey(ioutil.Discard, key.AccessID, key.ProjectID)
+	_, err = handle.Update(ctx, storage.HMACKeyAttrsToUpdate{State: "INACTIVE"})
 	if err != nil {
-		t.Errorf("Error in deleteHMACKey: %s", err)
-	}
-	key, _ = handle.Get(ctx)
-	if key != nil && key.State != "DELETED" {
-		t.Errorf("State of key is %s, should be DELETED", key.State)
+		t.Errorf("Error updating HMAC key: %s", err)
 	}
 
+	// Retry as HMAC key updates can take up to 3 minutes to propagate.
+	testutil.Retry(t, 18, 10*time.Second, func(r *testutil.R) {
+		err = deleteHMACKey(io.Discard, key.AccessID, key.ProjectID)
+		if err != nil {
+			r.Errorf("Error in deleteHMACKey: %s", err)
+		}
+		key, _ = handle.Get(ctx)
+		if key != nil && key.State != "DELETED" {
+			r.Errorf("State of key is %s, should be DELETED", key.State)
+		}
+
+	})
 }
 
 // Delete all HMAC keys in the project.
