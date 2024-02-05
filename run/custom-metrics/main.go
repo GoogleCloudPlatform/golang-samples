@@ -26,7 +26,7 @@ import (
 	"go.opentelemetry.io/otel/metric"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
-	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 )
 
 var counter metric.Int64Counter
@@ -64,7 +64,7 @@ func setupCounter(ctx context.Context) func(context.Context) error {
 		),
 	)
 	if err != nil {
-		log.Fatalf("Error creating resource: %s", err)
+		log.Fatalf("Error creating resource: %v", err)
 	}
 
 	exporter, err := otlpmetricgrpc.New(ctx,
