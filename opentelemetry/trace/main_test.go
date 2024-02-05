@@ -48,7 +48,7 @@ func TestWriteTraces(t *testing.T) {
 		t.Fatalf("Failed to create trace client: %v", err)
 	}
 	defer client.Close()
-	testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
 		// Count the number of traces returned, and ensure it is non-zero
 		req := &tracepb.ListTracesRequest{
 			ProjectId: tc.ProjectID,
