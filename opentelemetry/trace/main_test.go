@@ -35,9 +35,12 @@ func TestWriteTraces(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	// Run the example to export to the samples project
 	testStart := time.Now()
-	_, _, err := m.Run(map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}, 10*time.Second)
+	sout, serr, err := m.Run(map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}, 10*time.Second)
 	if err != nil {
+		t.Log(sout)
+		t.Log(serr)
 		t.Fatalf("Failed to run the trace example binary: %v", err)
+
 	}
 	testEnd := time.Now()
 
