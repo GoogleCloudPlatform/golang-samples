@@ -37,9 +37,7 @@ func TestWriteTraces(t *testing.T) {
 	testStart := time.Now()
 	sout, serr, err := m.Run(map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}, 10*time.Second)
 	if err != nil {
-		t.Log(sout)
-		t.Log(serr)
-		t.Fatalf("Failed to run the trace example binary: %v", err)
+		t.Fatalf("Failed to run the trace example binary: %v - \n%s\n%s\n", err, sout, serr)
 
 	}
 	testEnd := time.Now()
