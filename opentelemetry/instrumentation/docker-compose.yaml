@@ -17,6 +17,7 @@ services:
       - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
       - logs:/var/log:ro
     environment:
+      - GOOGLE_CLOUD_QUOTA_PROJECT
       - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT?}
   loadgen:
     image: golang:1.21
