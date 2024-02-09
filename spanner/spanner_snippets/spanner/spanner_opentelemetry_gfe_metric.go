@@ -44,6 +44,7 @@ func queryWithGFELatencyMetric(w io.Writer, db string) error {
 
 	// Create a new meter provider
 	meterProvider := getOtlpMeterProvider(ctx, res)
+	defer meterProvider.ForceFlush(ctx)
 
 	// Inject meter provider locally via ClientConfig when creating a spanner client.
 	client, err := spanner.NewClientWithConfig(ctx, db, spanner.ClientConfig{OpenTelemetryMeterProvider: meterProvider})
@@ -70,10 +71,6 @@ func queryWithGFELatencyMetric(w io.Writer, db string) error {
 		}
 		fmt.Fprintf(w, "%d %d %s\n", singerID, albumID, albumTitle)
 	}
-
-	meterProvider.ForceFlush(ctx)
-
-	return nil
 }
 
 // [END spanner_opentelemetry_gfe_metric]

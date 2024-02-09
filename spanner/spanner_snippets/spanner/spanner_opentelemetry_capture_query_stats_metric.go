@@ -47,6 +47,7 @@ func queryWithQueryStatsMetric(w io.Writer, db string) error {
 
 	// Create a new meter provider
 	meterProvider := getOtlpMeterProvider(ctx, res)
+	defer meterProvider.ForceFlush(ctx)
 
 	queryStats := registerQueryStatsMetric(meterProvider)
 
@@ -82,9 +83,6 @@ func queryWithQueryStatsMetric(w io.Writer, db string) error {
 		}
 		fmt.Fprintf(w, "%d %d %s\n", singerID, albumID, albumTitle)
 	}
-
-	meterProvider.ForceFlush(ctx)
-	return nil
 }
 
 func registerQueryStatsMetric(mp metric.MeterProvider) metric.Float64Histogram {

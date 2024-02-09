@@ -52,6 +52,7 @@ func enableOpenTelemetryMetricsAndTraces(w io.Writer, db string) error {
 
 	// Create a new tracer provider
 	tracerProvider, err := getOtlpTracerProvider(ctx, res)
+	defer tracerProvider.ForceFlush(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,6 +61,7 @@ func enableOpenTelemetryMetricsAndTraces(w io.Writer, db string) error {
 
 	// Create a new meter provider
 	meterProvider := getOtlpMeterProvider(ctx, res)
+	defer meterProvider.ForceFlush(ctx)
 
 	// Inject meter provider locally via ClientConfig when creating a spanner client.
 	client, err := spanner.NewClientWithConfig(ctx, db, spanner.ClientConfig{OpenTelemetryMeterProvider: meterProvider})
@@ -86,11 +88,6 @@ func enableOpenTelemetryMetricsAndTraces(w io.Writer, db string) error {
 		}
 		fmt.Fprintf(w, "%d %d %s\n", singerID, albumID, albumTitle)
 	}
-
-	meterProvider.ForceFlush(ctx)
-	tracerProvider.ForceFlush(ctx)
-
-	return nil
 }
 
 func getOtlpMeterProvider(ctx context.Context, res *resource.Resource) *metric.MeterProvider {
