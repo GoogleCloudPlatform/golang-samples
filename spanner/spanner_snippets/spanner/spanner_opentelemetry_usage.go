@@ -1,3 +1,6 @@
+//go:build go1.20
+// +build go1.20
+
 // Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +18,7 @@
 package spanner
 
 // [START spanner_opentelemetry_usage]
-// TODO: This cworks only from Go 1.20 due to OpenTelemetry incompatibility
+// TODO: This works only from Go 1.20 due to OpenTelemetry incompatibility
 import (
 	"context"
 	"fmt"
@@ -34,28 +37,31 @@ import (
 )
 
 func enableOpenTelemetryMetricsAndTraces(w io.Writer, db string) error {
+	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
 	ctx := context.Background()
 
-	// Enable OpenTelemetry metrics for Spanner GFE metrics.
-	spanner.EnableOpenTelemetryMetrics()
-
-	// Create a new resource to uniquely identifies the application
+	// Create a new resource to uniquely identify the application
 	res, err := newResource()
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Enable OpenTelemetry traces by setting environment variable GOOGLE_API_GO_EXPERIMENTAL_TELEMETRY_PLATFORM_TRACING=opentelemetry at the start of the application
+	// Enable OpenTelemetry metrics before injecting meter provider.
+	spanner.EnableOpenTelemetryMetrics()
+
 	// Create a new tracer provider
-	// Set environment variable GOOGLE_API_GO_EXPERIMENTAL_TELEMETRY_PLATFORM_TRACING=opentelemetry at the start of the application
 	tracerProvider, err := getOtlpTracerProvider(ctx, res)
 	if err != nil {
 		log.Fatal(err)
 	}
+	// Register tracer provider as global
 	otel.SetTracerProvider(tracerProvider)
 
 	// Create a new meter provider
 	meterProvider := getOtlpMeterProvider(ctx, res)
 
+	// Inject meter provider locally via ClientConfig when creating a spanner client.
 	client, err := spanner.NewClientWithConfig(ctx, db, spanner.ClientConfig{OpenTelemetryMeterProvider: meterProvider})
 	if err != nil {
 		return err

@@ -1,3 +1,6 @@
+//go:build go1.20
+// +build go1.20
+
 // Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,22 +33,24 @@ import (
 )
 
 func queryWithQueryStatsMetric(w io.Writer, db string) error {
+	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
 	ctx := context.Background()
 
-	// Enable OpenTelemetry metrics for Spanner GFE metrics.
-	spanner.EnableOpenTelemetryMetrics()
-
-	// Create a new resource to uniquely identifies the application
+	// Create a new resource to uniquely identify the application
 	res, err := newResource()
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Enable OpenTelemetry metrics before injecting meter provider.
+	spanner.EnableOpenTelemetryMetrics()
 
 	// Create a new meter provider
 	meterProvider := getOtlpMeterProvider(ctx, res)
 
 	queryStats := registerQueryStatsMetric(meterProvider)
 
+	// Inject meter provider locally via ClientConfig when creating a spanner client.
 	client, err := spanner.NewClientWithConfig(ctx, db, spanner.ClientConfig{OpenTelemetryMeterProvider: meterProvider})
 	if err != nil {
 		return err
@@ -58,7 +63,7 @@ func queryWithQueryStatsMetric(w io.Writer, db string) error {
 	for {
 		row, err := iter.Next()
 		if err == iterator.Done {
-			// Record query execution time with OpenCensus.
+			// Record query execution time with OpenTelemetry.
 			elapasedTime := iter.QueryStats["elapsed_time"].(string)
 			elapasedTimeMs, err := strconv.ParseFloat(strings.TrimSuffix(elapasedTime, " msecs"), 64)
 			if err != nil {
