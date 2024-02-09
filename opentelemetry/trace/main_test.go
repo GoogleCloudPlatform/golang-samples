@@ -35,9 +35,10 @@ func TestWriteTraces(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	// Run the example to export to the samples project
 	testStart := time.Now()
-	_, _, err := m.Run(map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}, 10*time.Second)
+	sout, serr, err := m.Run(map[string]string{"GOOGLE_CLOUD_PROJECT": tc.ProjectID}, 10*time.Second)
 	if err != nil {
-		t.Fatalf("Failed to run the trace example binary: %v", err)
+		t.Fatalf("Failed to run the trace example binary: %v - \n%s\n%s\n", err, sout, serr)
+
 	}
 	testEnd := time.Now()
 
@@ -48,7 +49,7 @@ func TestWriteTraces(t *testing.T) {
 		t.Fatalf("Failed to create trace client: %v", err)
 	}
 	defer client.Close()
-	testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
 		// Count the number of traces returned, and ensure it is non-zero
 		req := &tracepb.ListTracesRequest{
 			ProjectId: tc.ProjectID,
