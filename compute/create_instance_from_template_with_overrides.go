@@ -45,7 +45,7 @@ func createInstanceFromTemplateWithOverrides(w io.Writer, projectID, zone, insta
 	if err != nil {
 		return fmt.Errorf("NewInstanceTemplatesRESTClient: %w", err)
 	}
-	defer instancesClient.Close()
+	defer intanceTemplatesClient.Close()
 
 	// Retrieve an instance template by name.
 	reqGetTemplate := &computepb.GetInstanceTemplateRequest{

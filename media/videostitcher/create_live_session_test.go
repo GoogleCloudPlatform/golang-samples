@@ -42,7 +42,8 @@ func TestCreateLiveSession(t *testing.T) {
 		deleteTestSlate(slateName, t)
 	})
 
-	// Create a new live session and return the play URI.
+	// Create a new live session and return the play URI. Live sessions are
+	// ephemeral resources that expire after a few minutes.
 	sessionPrefix := fmt.Sprintf("locations/%s/liveSessions/", location)
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		if err := createLiveSession(&buf, tc.ProjectID, liveConfigID); err != nil {
