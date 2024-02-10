@@ -18,7 +18,9 @@
 package spanner
 
 // [START spanner_opentelemetry_usage]
-// TODO: This works only from Go 1.20 due to OpenTelemetry incompatibility
+// Ensure that your Go runtime version is supported by the OpenTelemetry-Go compatibility policy before enabling OpenTelemetry instrumentation.
+// Refer to compatibility here https://github.com/googleapis/google-cloud-go/blob/main/debug.md#opentelemetry
+
 import (
 	"context"
 	"fmt"
@@ -91,7 +93,7 @@ func enableOpenTelemetryMetricsAndTraces(w io.Writer, db string) error {
 }
 
 func getOtlpMeterProvider(ctx context.Context, res *resource.Resource) *metric.MeterProvider {
-	otlpExporter, err := otlpmetricgrpc.New(ctx)
+	otlpExporter, err := otlpmetricgrpc.New(ctx, otlpmetricgrpc.WithInsecure())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -103,7 +105,7 @@ func getOtlpMeterProvider(ctx context.Context, res *resource.Resource) *metric.M
 }
 
 func getOtlpTracerProvider(ctx context.Context, res *resource.Resource) (*sdktrace.TracerProvider, error) {
-	traceExporter, err := otlptracegrpc.New(ctx)
+	traceExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithInsecure())
 	if err != nil {
 		return nil, err
 	}

@@ -18,6 +18,8 @@
 package spanner
 
 // [START spanner_opentelemetry_gfe_metric]
+// Ensure that your Go runtime version is supported by the OpenTelemetry-Go compatibility policy before enabling OpenTelemetry instrumentation.
+// Refer to compatibility here https://github.com/googleapis/google-cloud-go/blob/main/debug.md#opentelemetry
 
 import (
 	"context"
