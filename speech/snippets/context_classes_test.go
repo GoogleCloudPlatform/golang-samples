@@ -22,7 +22,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestContextClasses(t *testing.T) {
+func TestContextClasses_v2(t *testing.T) {
 	testutil.SystemTest(t)
 
 	var buf bytes.Buffer

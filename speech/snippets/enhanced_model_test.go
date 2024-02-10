@@ -22,7 +22,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestEnhancedModel(t *testing.T) {
+func TestEnhancedModel_v2(t *testing.T) {
 	testutil.SystemTest(t)
 
 	var buf bytes.Buffer

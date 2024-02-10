@@ -23,17 +23,17 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-var bucket = "cloud-samples-tests"
-var gcsVideoPath = "gs://" + bucket + "/speech/Google_Gnome.wav"
-var recognitionAudioFile = "../resources/commercial_mono.wav"
-var gcsDiarizationAudioPath = "gs://" + bucket + "/speech/commercial_mono.wav"
+var bucket_v2 = "cloud-samples-tests"
+var gcsVideoPath_v2 = "gs://" + bucket + "/speech/Google_Gnome.wav"
+var recognitionAudioFile_v2 = "../resources/commercial_mono.wav"
+var gcsDiarizationAudioPath_v2 = "gs://" + bucket + "/speech/commercial_mono.wav"
 
-func TestMain(m *testing.M) {
-	exitCode := m.Run()
+func TestMain_v2(t *testing.T) {
+	exitCode := t.Run()
 	os.Exit(exitCode)
 }
 
-func TestTranscribeModelSelectionGcs(t *testing.T) {
+func TestTranscribeModelSelectionGcs_v2(t *testing.T) {
 	testutil.SystemTest(t)
 
 	var buf bytes.Buffer
@@ -45,7 +45,7 @@ func TestTranscribeModelSelectionGcs(t *testing.T) {
 	}
 }
 
-func TestTranscribeDiarizationBeta(t *testing.T) {
+func TestTranscribeDiarizationBeta_v2(t *testing.T) {
 	testutil.SystemTest(t)
 
 	var buf bytes.Buffer
@@ -57,7 +57,7 @@ func TestTranscribeDiarizationBeta(t *testing.T) {
 	}
 }
 
-func TestTranscribeDiarizationGcsBeta(t *testing.T) {
+func TestTranscribeDiarizationGcsBeta_v2(t *testing.T) {
 	testutil.SystemTest(t)
 
 	var buf bytes.Buffer
