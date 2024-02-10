@@ -14,6 +14,8 @@
 
 package main
 
+// [START speech_transcribe_streaming_v2]
+
 import (
 	"bufio"
 	"context"
@@ -104,3 +106,4 @@ func main() {
 	}
 }
 
+// [END speech_transcribe_streaming_v2]
