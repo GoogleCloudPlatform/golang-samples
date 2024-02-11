@@ -29,7 +29,7 @@ import (
 	// [END imports]
 )
 
-// [START speech_transcribe_enhanced_model_v2]
+// [START speech_transcribe_enhanced_model]
 
 func enhancedModel(w io.Writer, path string) error {
 	ctx := context.Background()
@@ -73,4 +73,4 @@ func enhancedModel(w io.Writer, path string) error {
 	return nil
 }
 
-// [END speech_transcribe_enhanced_model_v2]
+// [END speech_transcribe_enhanced_model]

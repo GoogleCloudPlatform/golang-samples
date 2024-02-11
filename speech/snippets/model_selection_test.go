@@ -22,7 +22,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestModelSelection_v2(t *testing.T) {
+func TestModelSelection(t *testing.T) {
 	testutil.SystemTest(t)
 
 	var buf bytes.Buffer
