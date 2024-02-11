@@ -38,7 +38,7 @@ func main() {
         audioFile := "gs://cloud-samples-data/speech/brooklyn_bridge.raw"
 	
         // Check if required arguments are provided
-        if *projectID == "" || *audioFile == "" {
+        if *projectID == "" || audioFile == "" {
 		flag.Usage()
 		return
 	}
@@ -56,12 +56,11 @@ func main() {
         // Detects speech in the audio file provided via command-line argument
 	resp, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
 		Config: &speechpb.RecognitionConfig{
-			Encoding:        speechpb.RecognitionConfig_LINEAR16,
-			SampleRateHertz: 16000,
-			LanguageCode:    "en-US",
-		},
-		Audio: &speechpb.RecognitionAudio{
-			AudioSource: &speechpb.RecognitionAudio_Uri{Uri: *audioFile},
+                        DecodingConfig:  &speechpb.RecognitionConfig_AutoDecodingConfig{},
+		        LanguageCodes:  []string{"en-US"}, 
+                 },
+		AudioSource: &speechpb.RecognizeRequest_Content{
+			Content: &speechpb.RecognizeRequest_Uri{Uri: audioFile},
 		},
 	})
 	if err != nil {
