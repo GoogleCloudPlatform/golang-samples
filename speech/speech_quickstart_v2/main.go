@@ -60,7 +60,6 @@ func main() {
 		        LanguageCodes:  []string{"en-US"}, 
                  },
 		AudioSource: &speechpb.RecognizeRequest_Content{
-			Content: &speechpb.RecognizeRequest_Uri{Uri: audioFile},
 		},
 	})
 	if err != nil {
