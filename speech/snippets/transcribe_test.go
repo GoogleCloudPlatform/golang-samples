@@ -28,8 +28,8 @@ var gcsVideoPath = "gs://" + bucket + "/speech/Google_Gnome.wav"
 var recognitionAudioFile = "../resources/commercial_mono.wav"
 var gcsDiarizationAudioPath = "gs://" + bucket + "/speech/commercial_mono.wav"
 
-func TestMain(t *testing.T) {
-	exitCode := t.Run()
+func TestMain(m *testing.M) {
+	exitCode := m.Run()
 	os.Exit(exitCode)
 }
 
