@@ -17,61 +17,53 @@
 
 // Sample speech-quickstart_v2 uses the Google Cloud Speech API to transcribe audio.
 
-package main
+package main 
+
 import (
 	"context"
-        "flag"
-	"fmt"
 	"log"
-	
+	"fmt"
+
         speech "cloud.google.com/go/speech/apiv2"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v2"
 )
 
 func main() {
-	
-        // Parse command-line arguments
-	projectID := flag.String("project_id", "", "GCP Project ID")
-	flag.Parse()
-        
-        // The path to the remote audio file to transcribe.
-        audioFile := "gs://cloud-samples-data/speech/brooklyn_bridge.raw"
-	
-        // Check if required arguments are provided
-        if *projectID == "" || audioFile == "" {
-		flag.Usage()
-		return
-	}
-	
-        // Create a new context
-	ctx := context.Background()
-	
-        // Create a client
-	client, err := speech.NewClient(ctx)
-	if err != nil {
+       
+        //Creates a context
+        ctx := context.Background()
+       
+        //Create a new client
+        client, err := speech.NewClient(ctx)
+ 
+        //Check for error if any 
+        if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
-	}
+	} 
         defer client.Close()
-	
-        // Detects speech in the audio file provided via command-line argument
-	resp, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
-		Config: &speechpb.RecognitionConfig{
-                        DecodingConfig:  &speechpb.RecognitionConfig_AutoDecodingConfig{},
-		        LanguageCodes:  []string{"en-US"}, 
-                 },
-		AudioSource: &speechpb.RecognizeRequest_Content{
-		},
+
+        // The path to the remote audio file to transcribe.
+	fileURI := "gs://cloud-samples-data/speech/brooklyn_bridge.raw"
+
+        // Detects speech in the audio file. 
+       resp, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
+               Config: &speechpb.RecognitionConfig{
+                       DecodingConfig: &speechpb.RecognitionConfig_AutoDecodingConfig{},
+                       LanguageCodes:  []string{"en-US"},
+               },
+               AudioSource: &speechpb.RecognizeRequest_Uri{Uri: fileURI},
 	})
-	if err != nil {
+        if err != nil {
 		log.Fatalf("failed to recognize: %v", err)
 	}
-	
-        // Prints the results
+
+        // Prints the results.
 	for _, result := range resp.Results {
 		for _, alt := range result.Alternatives {
-			fmt.Printf("\"%v\" (confidence=%f)\n", alt.Transcript, alt.Confidence)
+			fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
 		}
 	}
+
 }
 
 // [END speech_quickstart_v2]
