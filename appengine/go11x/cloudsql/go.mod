@@ -1,4 +1,4 @@
-module cloudsql
+module github.com/GoogleCloudPlatform/appengine/go11x/cloudsql
 
 go 1.21
 
