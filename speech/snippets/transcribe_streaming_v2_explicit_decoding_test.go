@@ -16,6 +16,7 @@ package snippets
 
 import (
 	"bytes"
+	"os"
 	"strings"
 	"testing"
 
@@ -25,8 +26,8 @@ import (
 var recognitionAudioFileRawLINEAR16 = "../testdata/audio.raw"
 
 func TestTranscribeStreamingV2SpecificDecoding(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	projectID := tc.ProjectID
+	testutil.SystemTest(t)
+	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 	var buf bytes.Buffer
 	if err := transcribeStreamingSpecificDecodingV2(&buf, projectID, recognitionAudioFileRawLINEAR16); err != nil {
 		t.Fatalf("error in transcribe rawfile %v", err)

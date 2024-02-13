@@ -16,6 +16,7 @@ package snippets
 
 import (
 	"bytes"
+	"os"
 	"strings"
 	"testing"
 
@@ -23,8 +24,8 @@ import (
 )
 
 func TestTranscribeStreamingV2(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	projectID := tc.ProjectID
+	testutil.SystemTest(t)
+	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 	var buf bytes.Buffer
 	if err := transcribeStreamingV2(&buf, projectID, recognitionAudioFile); err != nil {
 		t.Fatalf("error in transcribe %v", err)
