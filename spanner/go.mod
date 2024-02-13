@@ -71,5 +71,3 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20240205150955-31a09d347014 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240205150955-31a09d347014 // indirect
 )
-
-replace cloud.google.com/go/spanner => github.com/googleapis/google-cloud-go/spanner v1.56.1-0.20240208225617-f7170e29c1c7

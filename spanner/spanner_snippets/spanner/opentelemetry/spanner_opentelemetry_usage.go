@@ -1,6 +1,3 @@
-//go:build go1.20
-// +build go1.20
-
 // Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package spanner
+package opentelemetry
 
 // [START spanner_opentelemetry_usage]
 // Ensure that your Go runtime version is supported by the OpenTelemetry-Go compatibility policy before enabling OpenTelemetry instrumentation.
@@ -26,12 +23,15 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strconv"
+	"strings"
 
 	"cloud.google.com/go/spanner"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-	"go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/metric"
+	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
@@ -48,7 +48,7 @@ func enableOpenTelemetryMetricsAndTraces(w io.Writer, db string) error {
 		log.Fatal(err)
 	}
 
-	// Enable OpenTelemetry traces by setting environment variable GOOGLE_API_GO_EXPERIMENTAL_TELEMETRY_PLATFORM_TRACING=opentelemetry at the start of the application
+	// Enable OpenTelemetry traces by setting environment variable GOOGLE_API_GO_EXPERIMENTAL_TELEMETRY_PLATFORM_TRACING to the case-insensitive value "opentelemetry" before loading the client library.
 	// Enable OpenTelemetry metrics before injecting meter provider.
 	spanner.EnableOpenTelemetryMetrics()
 
@@ -65,41 +65,23 @@ func enableOpenTelemetryMetricsAndTraces(w io.Writer, db string) error {
 	meterProvider := getOtlpMeterProvider(ctx, res)
 	defer meterProvider.ForceFlush(ctx)
 
-	// Inject meter provider locally via ClientConfig when creating a spanner client.
+	// Inject meter provider locally via ClientConfig when creating a spanner client or set globally via setMeterProvider.
 	client, err := spanner.NewClientWithConfig(ctx, db, spanner.ClientConfig{OpenTelemetryMeterProvider: meterProvider})
 	if err != nil {
 		return err
 	}
 	defer client.Close()
-
-	stmt := spanner.Statement{SQL: `SELECT SingerId, AlbumId, AlbumTitle FROM Albums`}
-	iter := client.Single().Query(ctx, stmt)
-	defer iter.Stop()
-	for {
-		row, err := iter.Next()
-		if err == iterator.Done {
-			return nil
-		}
-		if err != nil {
-			return err
-		}
-		var singerID, albumID int64
-		var albumTitle string
-		if err := row.Columns(&singerID, &albumID, &albumTitle); err != nil {
-			return err
-		}
-		fmt.Fprintf(w, "%d %d %s\n", singerID, albumID, albumTitle)
-	}
+	return nil
 }
 
-func getOtlpMeterProvider(ctx context.Context, res *resource.Resource) *metric.MeterProvider {
+func getOtlpMeterProvider(ctx context.Context, res *resource.Resource) *sdkmetric.MeterProvider {
 	otlpExporter, err := otlpmetricgrpc.New(ctx, otlpmetricgrpc.WithInsecure())
 	if err != nil {
 		log.Fatal(err)
 	}
-	meterProvider := metric.NewMeterProvider(
-		metric.WithResource(res),
-		metric.WithReader(metric.NewPeriodicReader(otlpExporter)),
+	meterProvider := sdkmetric.NewMeterProvider(
+		sdkmetric.WithResource(res),
+		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(otlpExporter)),
 	)
 	return meterProvider
 }
@@ -128,3 +110,73 @@ func newResource() (*resource.Resource, error) {
 }
 
 // [END spanner_opentelemetry_usage]
+
+// [START spanner_opentelemetry_gfe_metric]
+// GFE_Latency and other Spanner metrics are automatically collected
+// when OpenTelemetry metrics are enabled.
+func captureGFELatencyMetric(ctx context.Context, client spanner.Client) error {
+	stmt := spanner.Statement{SQL: `SELECT SingerId, AlbumId, AlbumTitle FROM Albums`}
+	iter := client.Single().Query(ctx, stmt)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var singerID, albumID int64
+		var albumTitle string
+		if err := row.Columns(&singerID, &albumID, &albumTitle); err != nil {
+			return err
+		}
+	}
+}
+
+// [END spanner_opentelemetry_gfe_metric]
+
+// [START spanner_opentelemetry_capture_query_stats_metric]
+func captureQueryStatsMetric(ctx context.Context, mp metric.MeterProvider, client spanner.Client) error {
+	meter := mp.Meter(spanner.OtInstrumentationScope)
+	// Register query stats metric with OpenTelemetry to record the data.
+	queryStats, err := meter.Float64Histogram(
+		"spanner/query_stats_elapsed",
+		metric.WithDescription("The execution of the query"),
+		metric.WithUnit("ms"),
+		metric.WithExplicitBucketBoundaries(0.0, 0.01, 0.05, 0.1, 0.3, 0.6, 0.8, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 13.0,
+			16.0, 20.0, 25.0, 30.0, 40.0, 50.0, 65.0, 80.0, 100.0, 130.0, 160.0, 200.0, 250.0,
+			300.0, 400.0, 500.0, 650.0, 800.0, 1000.0, 2000.0, 5000.0, 10000.0, 20000.0, 50000.0,
+			100000.0),
+	)
+	if err != nil {
+		fmt.Print(err)
+	}
+
+	stmt := spanner.Statement{SQL: `SELECT SingerId, AlbumId, AlbumTitle FROM Albums`}
+	iter := client.Single().QueryWithStats(ctx, stmt)
+	defer iter.Stop()
+	for {
+		row, err := iter.Next()
+		if err == iterator.Done {
+			// Record query execution time with OpenTelemetry.
+			elapasedTime := iter.QueryStats["elapsed_time"].(string)
+			elapasedTimeMs, err := strconv.ParseFloat(strings.TrimSuffix(elapasedTime, " msecs"), 64)
+			if err != nil {
+				return err
+			}
+			queryStats.Record(ctx, elapasedTimeMs)
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		var singerID, albumID int64
+		var albumTitle string
+		if err := row.Columns(&singerID, &albumID, &albumTitle); err != nil {
+			return err
+		}
+	}
+}
+
+// [END spanner_opentelemetry_capture_query_stats_metric]
