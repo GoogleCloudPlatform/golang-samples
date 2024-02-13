@@ -1,0 +1,21 @@
+# Use this compose file along with docker-compose.yaml to pass a credentials file from the host
+# into the collector container:
+#
+# ```
+# GOOGLE_CLOUD_PROJECT="otel-quickstart-demos" \
+# GOOGLE_APPLICATION_CREDENTIALS="$HOME/.config/gcloud/application_default_credentials.json" \
+# USERID="$(id -u)" \
+# docker compose -f docker-compose.yaml -f docker-compose.creds.yaml up --abort-on-container-exit
+# ```
+
+version: "3"
+
+services:
+  otelcol:
+    # If the collector does not have permission to read the mounted volumes, set
+    # USERID=$(id -u) to run the container as the current user
+    user: $USERID
+    volumes:
+      - ${GOOGLE_APPLICATION_CREDENTIALS?}:${GOOGLE_APPLICATION_CREDENTIALS}:ro
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS
