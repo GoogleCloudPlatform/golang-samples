@@ -33,7 +33,6 @@ func main() {
 	modelName := "gemini-pro-vision"
 
 	prompt := "What is in this video?"
-
 	video := "gs://cloud-samples-data/video/animals.mp4"
 
 	if projectID == "" {

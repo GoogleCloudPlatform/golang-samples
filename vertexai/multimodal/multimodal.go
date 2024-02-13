@@ -47,6 +47,7 @@ func main() {
 
 // generateMultimodalContent generates a response into w, based upon the prompt
 // and image provided.
+// image is a Google Cloud Storage path starting with "gs://"
 func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, modelName string) error {
 	ctx := context.Background()
 
@@ -68,6 +69,10 @@ func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, 
 	res, err := model.GenerateContent(ctx, img, genai.Text(prompt))
 	if err != nil {
 		return fmt.Errorf("unable to generate contents: %v", err)
+	}
+
+	if len(res.Candidates) == 0 || len(res.Candidates[0].Content.Parts) == 0 {
+		return fmt.Errorf("empty response from model")
 	}
 
 	fmt.Fprintf(w, "generated response: %s\n", res.Candidates[0].Content.Parts[0])
