@@ -4,12 +4,14 @@ go 1.20
 
 require (
 	cloud.google.com/go/spanner v1.56.0
+	// [START spanner_opentelemetry_dependencies]
 	go.opentelemetry.io/otel v1.23.1
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.23.1
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.23.1
 	go.opentelemetry.io/otel/metric v1.23.1
 	go.opentelemetry.io/otel/sdk v1.23.1
 	go.opentelemetry.io/otel/sdk/metric v1.23.1
+	// [END spanner_opentelemetry_dependencies]
 	google.golang.org/api v0.164.0
 )
 
