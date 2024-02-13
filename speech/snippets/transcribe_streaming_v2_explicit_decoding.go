@@ -32,6 +32,7 @@ import (
 )
 
 func transcribeStreamingSpecificDecodingV2(w io.Writer, projectID string, path string) error {
+	const location = "global"
 	audioFile, err := filepath.Abs(path)
 	if err != nil {
 		log.Println("Failed to load file: ", path)
