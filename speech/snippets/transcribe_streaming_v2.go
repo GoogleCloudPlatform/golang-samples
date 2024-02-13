@@ -31,17 +31,18 @@ import (
 	"cloud.google.com/go/speech/apiv2/speechpb"
 )
 
-var projectID string
-
-const location = "global"
-
-func transcribeStreamingV2(w io.Writer, path string, projectID string) error {
-
+func transcribeStreamingV2(w io.Writer, projectID string, path string) error {
+	const location = "global"
 	audioFile, err := filepath.Abs(path)
 	if err != nil {
 		log.Println("Failed to load file: ", path)
 		return err
 	}
+	f, err := os.Open(audioFile)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
 
 	ctx := context.Background()
 
@@ -56,7 +57,7 @@ func transcribeStreamingV2(w io.Writer, path string, projectID string) error {
 		return err
 	}
 	// Send the initial configuration message.
-	if err := stream.Send(&speechpb.StreamingRecognizeRequest{
+	err = stream.Send(&speechpb.StreamingRecognizeRequest{
 		Recognizer: fmt.Sprintf("projects/%s/locations/%s/recognizers/_", projectID, location),
 		StreamingRequest: &speechpb.StreamingRecognizeRequest_StreamingConfig{
 			StreamingConfig: &speechpb.StreamingRecognitionConfig{
@@ -72,17 +73,10 @@ func transcribeStreamingV2(w io.Writer, path string, projectID string) error {
 				StreamingFeatures: &speechpb.StreamingRecognitionFeatures{InterimResults: true},
 			},
 		},
-	}); err != nil {
-		log.Println(err)
-		return err
-	}
-
-	f, err := os.Open(audioFile)
+	})
 	if err != nil {
-		log.Println(err)
 		return err
 	}
-	defer f.Close()
 
 	go func() error {
 		buf := make([]byte, 1024)
