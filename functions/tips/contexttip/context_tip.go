@@ -27,18 +27,20 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 
 	"cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
 
-// GOOGLE_CLOUD_PROJECT is a user-set environment variable.
-var projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
-
 // client is a global Pub/Sub client, initialized once per instance.
 var client *pubsub.Client
+var once sync.Once
 
-func init() {
+// createClient creates the global pubsub Client
+func createClient() {
+	// GOOGLE_CLOUD_PROJECT is a user-set environment variable.
+	var projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
 	// err is pre-declared to avoid shadowing client.
 	var err error
 
@@ -48,7 +50,9 @@ func init() {
 	if err != nil {
 		log.Fatalf("pubsub.NewClient: %v", err)
 	}
+}
 
+func init() {
 	// register http function
 	functions.HTTP("PublishMessage", PublishMessage)
 }
@@ -61,6 +65,8 @@ type publishRequest struct {
 // PublishMessage publishes a message to Pub/Sub. PublishMessage only works
 // with topics that already exist.
 func PublishMessage(w http.ResponseWriter, r *http.Request) {
+	// use of sync.Once ensures client is only created once.
+	once.Do(createClient)
 	// Parse the request body to get the topic name and message.
 	p := publishRequest{}
 
