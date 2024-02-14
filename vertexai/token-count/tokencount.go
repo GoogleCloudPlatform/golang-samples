@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// token-count shows an example of determining how many tokens correspond to a given prompt string
+// token-count shows an example of determining how many tokens correspond to
+// a given prompt string
 package main
 
 // [START aiplatform_gemini_token_count]
@@ -31,7 +32,7 @@ func main() {
 	location := "us-central1"
 	modelName := "gemini-pro"
 
-	prompt := "How many tokens are there in this prompt?"
+	prompt := "why is sky blue?"
 
 	if projectID == "" {
 		log.Fatal("require environment variable GOOGLE_CLOUD_PROJECT")
