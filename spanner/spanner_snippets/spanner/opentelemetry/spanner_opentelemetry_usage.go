@@ -75,7 +75,7 @@ func enableOpenTelemetryMetricsAndTraces(w io.Writer, db string) error {
 }
 
 func getOtlpMeterProvider(ctx context.Context, res *resource.Resource) *sdkmetric.MeterProvider {
-	otlpExporter, err := otlpmetricgrpc.New(ctx, otlpmetricgrpc.WithInsecure())
+	otlpExporter, err := otlpmetricgrpc.New(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -87,7 +87,7 @@ func getOtlpMeterProvider(ctx context.Context, res *resource.Resource) *sdkmetri
 }
 
 func getOtlpTracerProvider(ctx context.Context, res *resource.Resource) (*sdktrace.TracerProvider, error) {
-	traceExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithInsecure())
+	traceExporter, err := otlptracegrpc.New(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -140,6 +140,7 @@ func captureGFELatencyMetric(ctx context.Context, client spanner.Client) error {
 func captureQueryStatsMetric(ctx context.Context, mp metric.MeterProvider, client spanner.Client) error {
 	meter := mp.Meter(spanner.OtInstrumentationScope)
 	// Register query stats metric with OpenTelemetry to record the data.
+	// This should be done once before start recording the data.
 	queryStats, err := meter.Float64Histogram(
 		"spanner/query_stats_elapsed",
 		metric.WithDescription("The execution of the query"),
