@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// token-count shows an example of determining how many tokens correspond to a give prompt string
+// token-count shows an example of determining how many tokens correspond to a given prompt string
 package main
 
 // [START aiplatform_gemini_token_count]
