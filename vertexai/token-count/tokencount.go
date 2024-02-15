@@ -14,55 +14,34 @@
 
 // token-count shows an example of determining how many tokens correspond to
 // a given prompt string
-package main
+package tokencount
 
 // [START aiplatform_gemini_token_count]
 import (
 	"context"
 	"fmt"
-	"io"
-	"log"
-	"os"
 
 	"cloud.google.com/go/vertexai/genai"
 )
 
-func main() {
-	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	location := "us-central1"
-	modelName := "gemini-pro"
-
-	prompt := "why is sky blue?"
-
-	if projectID == "" {
-		log.Fatal("require environment variable GOOGLE_CLOUD_PROJECT")
-	}
-
-	err := countTokens(os.Stdout, prompt, projectID, location, modelName)
-	if err != nil {
-		log.Fatalf("unable to count tokens: %v", err)
-	}
-}
-
-// countTokens prints into w the number of tokens for this prompt.
-func countTokens(w io.Writer, prompt, projectID, location, modelName string) error {
+// countTokens returns the number of tokens for this prompt.
+func countTokens(prompt, projectID, location, modelName string) (int, error) {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {
-		return fmt.Errorf("unable to create client: %v", err)
+		return 0, fmt.Errorf("unable to create client: %v", err)
 	}
 	defer client.Close()
 
 	model := client.GenerativeModel(modelName)
 
 	resp, err := model.CountTokens(ctx, genai.Text(prompt))
-
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
-	fmt.Fprintf(w, "There are %d tokens in the prompt.\n", resp.TotalTokens)
-	return nil
+
+	return int(resp.TotalTokens), nil
 }
 
 // [END aiplatform_gemini_token_count]
