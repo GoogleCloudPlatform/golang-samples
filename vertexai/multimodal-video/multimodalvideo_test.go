@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package multimodal
+package multimodalvideo
 
 import (
-	"bytes"
+	"os"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -24,14 +24,14 @@ import (
 func Test_generateMultimodalContent(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	buf := new(bytes.Buffer)
-	prompt := "describe what is in this picture"
-	image := "gs://generativeai-downloads/images/scones.jpg"
+	buf := os.Stdout
+	prompt := "What is in this video?"
+	video := "gs://cloud-samples-data/video/animals.mp4"
 	location := "us-central1"
 	modelName := "gemini-pro-vision"
 	temperature := float32(0.4)
 
-	err := generateMultimodalContent(buf, prompt, image, tc.ProjectID, location, modelName, temperature)
+	err := generateMultimodalContent(buf, prompt, video, tc.ProjectID, location, modelName, temperature)
 	if err != nil {
 		t.Errorf("Test_generateMultimodalContent: %v", err.Error())
 	}

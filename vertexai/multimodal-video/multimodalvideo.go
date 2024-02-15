@@ -12,43 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// multimodal-video shows an example of understanding multimodal input involving video files
-package main
+// multimodalvideo shows an example of understanding multimodal input including video
+package multimodalvideo
 
+// [START aiplatform_gemini_single_turn_video]
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
-	"log"
 	"mime"
-	"os"
 	"path/filepath"
 
 	"cloud.google.com/go/vertexai/genai"
 )
 
-func main() {
-	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	location := "us-central1"
-	modelName := "gemini-pro-vision"
-
-	prompt := "What is in this video?"
-	video := "gs://cloud-samples-data/video/animals.mp4"
-
-	if projectID == "" {
-		log.Fatal("require environment variable GOOGLE_CLOUD_PROJECT")
-	}
-
-	err := generateMultimodalContent(os.Stdout, prompt, video, projectID, location, modelName)
-	if err != nil {
-		log.Fatalf("unable to generate: %v", err)
-	}
-}
-
 // generateMultimodalContent generates a response into w, based upon the prompt
 // and video provided.
 // video is a Google Cloud Storage path starting with "gs://"
-func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, modelName string) error {
+func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, modelName string, temperature float32) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
@@ -58,7 +40,7 @@ func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, 
 	defer client.Close()
 
 	model := client.GenerativeModel(modelName)
-	model.SetTemperature(0.4)
+	model.SetTemperature(temperature)
 
 	// Given a video file URL, prepare video file as genai.Part
 	img := genai.FileData{
@@ -71,10 +53,13 @@ func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, 
 		return fmt.Errorf("unable to generate contents: %v", err)
 	}
 
-	if len(res.Candidates) == 0 || len(res.Candidates[0].Content.Parts) == 0 {
-		return fmt.Errorf("empty response from model")
+	if len(res.Candidates) == 0 ||
+		len(res.Candidates[0].Content.Parts) == 0 {
+		return errors.New("empty response from model")
 	}
 
 	fmt.Fprintf(w, "generated response: %s\n", res.Candidates[0].Content.Parts[0])
 	return nil
 }
+
+// [END aiplatform_gemini_single_turn_video]
