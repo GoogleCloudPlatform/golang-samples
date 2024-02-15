@@ -31,6 +31,6 @@ func Test_functionCalls(t *testing.T) {
 
 	err := functionCalls(w, prompt, tc.ProjectID, location, modelName)
 	if err != nil {
-		t.Errorf("Test_weather: %v", err.Error())
+		t.Errorf("Test_functionCalls: %v", err.Error())
 	}
 }
