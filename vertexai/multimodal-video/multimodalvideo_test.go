@@ -15,7 +15,7 @@
 package multimodalvideo
 
 import (
-	"os"
+	"bytes"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -24,7 +24,7 @@ import (
 func Test_generateMultimodalContent(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	buf := os.Stdout
+	buf := new(bytes.Buffer)
 	prompt := "What is in this video?"
 	video := "gs://cloud-samples-data/video/animals.mp4"
 	location := "us-central1"
