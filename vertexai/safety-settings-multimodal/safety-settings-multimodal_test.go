@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package safetysettingsmultimodal
 
 import (
 	"bytes"
@@ -23,7 +23,6 @@ import (
 )
 
 func TestGenerateContent(t *testing.T) {
-	t.Skip("TODO(muncus): remove skip")
 	tc := testutil.SystemTest(t)
 
 	prompt := "describe this image."
