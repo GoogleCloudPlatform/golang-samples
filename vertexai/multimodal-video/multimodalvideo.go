@@ -31,6 +31,11 @@ import (
 // and video provided.
 // video is a Google Cloud Storage path starting with "gs://"
 func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, modelName string, temperature float32) error {
+	// prompt := "What is in this video?"
+	// video := "gs://cloud-samples-data/video/animals.mp4"
+	// location := "us-central1"
+	// modelName := "gemini-1.0-pro-vision"
+	// temperature := float32(0.4)
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)

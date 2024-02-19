@@ -30,6 +30,11 @@ import (
 // and image provided.
 // image is a Google Cloud Storage path starting with "gs://"
 func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, modelName string, temperature float32) error {
+	// prompt := "describe what is in this picture"
+	// image := "gs://generativeai-downloads/images/scones.jpg"
+	// location := "us-central1"
+	// modelName := "gemini-1.0-pro-vision"
+	// temperature := float32(0.4)
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
