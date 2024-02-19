@@ -26,6 +26,10 @@ import (
 
 // countTokens returns the number of tokens for this prompt.
 func countTokens(prompt, projectID, location, modelName string) (int, error) {
+	// prompt := "why is sky blue?"
+	// location := "us-central1"
+	// modelName := "gemini-1.0-pro"
+
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
