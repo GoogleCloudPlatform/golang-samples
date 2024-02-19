@@ -29,7 +29,7 @@ func TestGenerateContent(t *testing.T) {
 	projectID := tc.ProjectID
 	location := "us-central1"
 
-	model := "gemini-pro-vision"
+	model := "gemini-1.0-pro-vision"
 
 	image := "gs://cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg"
 
