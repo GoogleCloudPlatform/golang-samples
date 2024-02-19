@@ -25,6 +25,10 @@ import (
 
 // generateContent generates text from prompt and configurations provided.
 func generateContent(w io.Writer, prompt, projectID, location, modelName string, temperature float32) error {
+	// prompt := "hello, say something mean to me."
+	// location := "us-central1"
+	// model := "gemini-1.0-pro"
+	// temp := float32(0.8)
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
