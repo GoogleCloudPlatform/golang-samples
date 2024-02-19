@@ -25,11 +25,11 @@ func Test_countTokens(t *testing.T) {
 
 	prompt := "why is sky blue?"
 	location := "us-central1"
-	modelName := "gemini-pro"
+	modelName := "gemini-1.0-pro"
 
 	n, err := countTokens(prompt, tc.ProjectID, location, modelName)
 	if err != nil {
-		t.Errorf("Test_countTokens: %v", err.Error())
+		t.Fatalf("Test_countTokens: %v", err.Error())
 	}
 
 	// "why is sky blue?" is expected to account for (more or less) 5 tokens
