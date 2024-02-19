@@ -28,7 +28,7 @@ import (
 func main() {
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	location := "us-central1"
-	modelName := "gemini-pro"
+	modelName := "gemini-1.0-pro"
 	temperature := 0.4
 
 	prompt := "say something nice to me, but be angry"
