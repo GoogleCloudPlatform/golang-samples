@@ -30,7 +30,7 @@ import (
 func main() {
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	location := "us-central1"
-	modelName := "gemini-pro-vision"
+	modelName := "gemini-1.0-pro-vision"
 
 	prompt := "describe what is in this picture"
 	image := "gs://generativeai-downloads/images/scones.jpg"

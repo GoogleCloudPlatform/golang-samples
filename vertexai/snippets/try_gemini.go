@@ -29,7 +29,7 @@ var region = "us-central1"
 func tryGemini(w io.Writer, projectId string, region string, modelName string) error {
 
 	client, err := genai.NewClient(context.TODO(), projectId, region)
-	gemini := client.GenerativeModel("gemini-pro-vision")
+	gemini := client.GenerativeModel(modelName)
 
 	img := genai.FileData{
 		MIMEType: "image/jpeg",
