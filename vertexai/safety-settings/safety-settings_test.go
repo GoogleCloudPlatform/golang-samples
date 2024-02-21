@@ -30,7 +30,7 @@ func TestGenerateContent(t *testing.T) {
 	projectID := tc.ProjectID
 	location := "us-central1"
 
-	model := "gemini-pro"
+	model := "gemini-1.0-pro"
 	temp := 0.8
 
 	if projectID == "" {
