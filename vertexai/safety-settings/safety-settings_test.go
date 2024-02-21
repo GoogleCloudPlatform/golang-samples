@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package safetysettings
 
 import (
 	"bytes"
@@ -27,18 +27,12 @@ func TestGenerateContent(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	prompt := "hello, say something mean to me."
-	projectID := tc.ProjectID
 	location := "us-central1"
-
 	model := "gemini-1.0-pro"
 	temp := 0.8
 
-	if projectID == "" {
-		t.Fatal("require environment variable GOOGLE_CLOUD_PROJECT")
-	}
-
 	var buf bytes.Buffer
-	if err := generateContent(&buf, prompt, projectID, location, model, float32(temp)); err != nil {
+	if err := generateContent(&buf, prompt, tc.ProjectID, location, model, float32(temp)); err != nil {
 		t.Fatal(err)
 	}
 
