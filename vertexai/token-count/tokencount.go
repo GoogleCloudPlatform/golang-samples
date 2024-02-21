@@ -20,12 +20,13 @@ package tokencount
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"cloud.google.com/go/vertexai/genai"
 )
 
 // countTokens returns the number of tokens for this prompt.
-func countTokens(prompt, projectID, location, modelName string) (int, error) {
+func countTokens(w io.Writer, prompt, projectID, location, modelName string) error {
 	// prompt := "why is sky blue?"
 	// location := "us-central1"
 	// modelName := "gemini-1.0-pro"
@@ -34,7 +35,7 @@ func countTokens(prompt, projectID, location, modelName string) (int, error) {
 
 	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {
-		return 0, fmt.Errorf("unable to create client: %v", err)
+		return fmt.Errorf("unable to create client: %v", err)
 	}
 	defer client.Close()
 
@@ -42,10 +43,12 @@ func countTokens(prompt, projectID, location, modelName string) (int, error) {
 
 	resp, err := model.CountTokens(ctx, genai.Text(prompt))
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	return int(resp.TotalTokens), nil
+	fmt.Fprintf(w, "Number of tokens for the prompt: %d\n", resp.TotalTokens)
+
+	return nil
 }
 
 // [END aiplatform_gemini_token_count]

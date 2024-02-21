@@ -15,6 +15,9 @@
 package tokencount
 
 import (
+	"bytes"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -27,7 +30,16 @@ func Test_countTokens(t *testing.T) {
 	location := "us-central1"
 	modelName := "gemini-1.0-pro"
 
-	n, err := countTokens(prompt, tc.ProjectID, location, modelName)
+	var buf bytes.Buffer
+	err := countTokens(&buf, prompt, tc.ProjectID, location, modelName)
+	if err != nil {
+		t.Fatalf("Test_countTokens: %v", err.Error())
+	}
+
+	answer := buf.String()
+	s := strings.TrimPrefix(answer, "Number of tokens for the prompt: ")
+	s = strings.TrimSpace(s)
+	n, err := strconv.Atoi(s)
 	if err != nil {
 		t.Fatalf("Test_countTokens: %v", err.Error())
 	}
