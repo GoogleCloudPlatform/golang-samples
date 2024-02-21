@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// multimodal shows an example of understanding multimodal input
-package multimodal
+// multimodalvideo shows an example of understanding multimodal input including video
+package multimodalvideo
 
+// [START aiplatform_gemini_single_turn_video]
 import (
 	"context"
 	"errors"
@@ -27,11 +28,11 @@ import (
 )
 
 // generateMultimodalContent generates a response into w, based upon the prompt
-// and image provided.
-// image is a Google Cloud Storage path starting with "gs://"
-func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, modelName string) error {
-	// prompt := "describe what is in this picture"
-	// image := "gs://generativeai-downloads/images/scones.jpg"
+// and video provided.
+// video is a Google Cloud Storage path starting with "gs://"
+func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, modelName string) error {
+	// prompt := "What is in this video?"
+	// video := "gs://cloud-samples-data/video/animals.mp4"
 	// location := "us-central1"
 	// modelName := "gemini-1.0-pro-vision"
 	ctx := context.Background()
@@ -45,10 +46,10 @@ func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, 
 	model := client.GenerativeModel(modelName)
 	model.SetTemperature(0.4)
 
-	// Given an image file URL, prepare image file as genai.Part
+	// Given a video file URL, prepare video file as genai.Part
 	img := genai.FileData{
-		MIMEType: mime.TypeByExtension(filepath.Ext(image)),
-		FileURI:  image,
+		MIMEType: mime.TypeByExtension(filepath.Ext(video)),
+		FileURI:  video,
 	}
 
 	res, err := model.GenerateContent(ctx, img, genai.Text(prompt))
@@ -64,3 +65,5 @@ func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, 
 	fmt.Fprintf(w, "generated response: %s\n", res.Candidates[0].Content.Parts[0])
 	return nil
 }
+
+// [END aiplatform_gemini_single_turn_video]
