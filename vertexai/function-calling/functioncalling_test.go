@@ -27,7 +27,7 @@ func Test_functionCalls(t *testing.T) {
 	w := io.Discard
 	prompt := "What's the weather like in Paris?"
 	location := "us-central1"
-	modelName := "gemini-pro"
+	modelName := "gemini-1.0-pro"
 
 	err := functionCalls(w, prompt, tc.ProjectID, location, modelName)
 	if err != nil {

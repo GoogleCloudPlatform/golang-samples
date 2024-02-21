@@ -25,7 +25,7 @@ import (
 
 var projectId = "PROJECT_ID"
 var region = "us-central1"
-var modelName = "gemini-pro-vision"
+var modelName = "gemini-1.0-pro-vision"
 
 func makeChatRequests(projectId string, region string, modelName string) error {
 	client, err := genai.NewClient(context.TODO(), projectId, region)
