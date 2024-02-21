@@ -29,9 +29,8 @@ func Test_generateMultimodalContent(t *testing.T) {
 	video := "gs://cloud-samples-data/video/animals.mp4"
 	location := "us-central1"
 	modelName := "gemini-1.0-pro-vision"
-	temperature := float32(0.4)
 
-	err := generateMultimodalContent(buf, prompt, video, tc.ProjectID, location, modelName, temperature)
+	err := generateMultimodalContent(buf, prompt, video, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Errorf("Test_generateMultimodalContent: %v", err.Error())
 	}

@@ -30,12 +30,11 @@ import (
 // generateMultimodalContent generates a response into w, based upon the prompt
 // and video provided.
 // video is a Google Cloud Storage path starting with "gs://"
-func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, modelName string, temperature float32) error {
+func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, modelName string) error {
 	// prompt := "What is in this video?"
 	// video := "gs://cloud-samples-data/video/animals.mp4"
 	// location := "us-central1"
 	// modelName := "gemini-1.0-pro-vision"
-	// temperature := float32(0.4)
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
@@ -45,7 +44,7 @@ func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, 
 	defer client.Close()
 
 	model := client.GenerativeModel(modelName)
-	model.SetTemperature(temperature)
+	model.SetTemperature(0.4)
 
 	// Given a video file URL, prepare video file as genai.Part
 	img := genai.FileData{

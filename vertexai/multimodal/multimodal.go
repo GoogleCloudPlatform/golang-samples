@@ -29,12 +29,11 @@ import (
 // generateMultimodalContent generates a response into w, based upon the prompt
 // and image provided.
 // image is a Google Cloud Storage path starting with "gs://"
-func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, modelName string, temperature float32) error {
+func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, modelName string) error {
 	// prompt := "describe what is in this picture"
 	// image := "gs://generativeai-downloads/images/scones.jpg"
 	// location := "us-central1"
 	// modelName := "gemini-1.0-pro-vision"
-	// temperature := float32(0.4)
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
@@ -44,7 +43,7 @@ func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, 
 	defer client.Close()
 
 	model := client.GenerativeModel(modelName)
-	model.SetTemperature(temperature)
+	model.SetTemperature(0.4)
 
 	// Given an image file URL, prepare image file as genai.Part
 	img := genai.FileData{

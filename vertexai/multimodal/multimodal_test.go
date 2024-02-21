@@ -29,9 +29,8 @@ func Test_generateMultimodalContent(t *testing.T) {
 	image := "gs://generativeai-downloads/images/scones.jpg"
 	location := "us-central1"
 	modelName := "gemini-1.0-pro-vision"
-	temperature := float32(0.4)
 
-	err := generateMultimodalContent(buf, prompt, image, tc.ProjectID, location, modelName, temperature)
+	err := generateMultimodalContent(buf, prompt, image, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Errorf("Test_generateMultimodalContent: %v", err.Error())
 	}
