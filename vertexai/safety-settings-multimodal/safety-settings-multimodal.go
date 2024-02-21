@@ -12,42 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // safety-settings-multimodal shows how to adjust safety settings for mixed text and image input
-package main
+package safetysettingsmultimodal
 
 // [START aiplatform_gemini_safety_settings]
 import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"mime"
-	"os"
 	"path/filepath"
 
 	"cloud.google.com/go/vertexai/genai"
 )
 
-func main() {
-	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	location := "us-central1"
-	modelName := "gemini-1.0-pro-vision"
-
-	prompt := "describe what is in this picture"
-	image := "gs://generativeai-downloads/images/scones.jpg"
-
-	if projectID == "" {
-		log.Fatal("require environment variable GOOGLE_CLOUD_PROJECT")
-	}
-
-	err := generateMultimodalContent(os.Stdout, prompt, image, projectID, location, modelName)
-	if err != nil {
-		log.Fatalf("unable to generate: %v", err)
-	}
-}
-
 // generateMultimodalContent generates a response into w, based upon the prompt
 // and image provided.
 func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, modelName string) error {
+	// prompt := "describe this image."
+	// location := "us-central1"
+	// model := "gemini-1.0-pro-vision"
+	// image := "gs://cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
