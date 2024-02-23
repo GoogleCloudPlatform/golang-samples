@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -29,6 +30,7 @@ import (
 
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/pstest"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"google.golang.org/api/iterator"
 )
@@ -291,5 +293,28 @@ func TestDelete(t *testing.T) {
 	}
 	if ok {
 		t.Fatalf("got topic = %q; want none", topicID)
+	}
+}
+
+func TestTopicKinesis(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	// Use the pstest fake with emulator settings since Pub/Sub service expects real AWS Kinesis
+	// resources, which we cannot provide in a samples test.
+	srv := pstest.NewServer()
+	os.Setenv("PUBSUB_EMULATOR_HOST", srv.Addr)
+
+	stream := "stream-arn"
+	consumer := "consumer-arn"
+	awsRole := "aws-role-arn"
+	sa := "gcp-service-account"
+	if err := createTopicWithKinesisIngestion(buf, tc.ProjectID, topicID, stream, consumer, awsRole, sa); err != nil {
+		t.Fatalf("failed to create a topic with kinesis ingestion: %v", err)
+	}
+
+	// test updateTopicType
+	if err := updateTopicType(buf, tc.ProjectID, topicID, stream, consumer, awsRole, sa); err != nil {
+		t.Fatalf("failed to update a topic type to kinesis ingestion: %v", err)
 	}
 }
