@@ -12,31 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package safetysettings
+package functioncalling
 
 import (
-	"bytes"
-	"strings"
+	"io"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestGenerateContent(t *testing.T) {
-	t.Skip("TODO(muncus): remove skip")
+func Test_functionCalls(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	prompt := "hello, say something mean to me."
+	w := io.Discard
+	prompt := "What's the weather like in Paris?"
 	location := "us-central1"
-	model := "gemini-1.0-pro"
-	temp := 0.8
+	modelName := "gemini-1.0-pro"
 
-	var buf bytes.Buffer
-	if err := generateContent(&buf, prompt, tc.ProjectID, location, model, float32(temp)); err != nil {
-		t.Fatal(err)
-	}
-
-	if got := buf.String(); !strings.Contains(got, "generate-content response") {
-		t.Error("generated text content not found in response")
+	err := functionCalls(w, prompt, tc.ProjectID, location, modelName)
+	if err != nil {
+		t.Errorf("Test_functionCalls: %v", err.Error())
 	}
 }
