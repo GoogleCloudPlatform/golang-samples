@@ -12,31 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package safetysettings
+package tokencount
 
 import (
 	"bytes"
+	"strconv"
 	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestGenerateContent(t *testing.T) {
-	t.Skip("TODO(muncus): remove skip")
+func Test_countTokens(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	prompt := "hello, say something mean to me."
+	prompt := "why is sky blue?"
 	location := "us-central1"
-	model := "gemini-1.0-pro"
-	temp := 0.8
+	modelName := "gemini-1.0-pro"
 
 	var buf bytes.Buffer
-	if err := generateContent(&buf, prompt, tc.ProjectID, location, model, float32(temp)); err != nil {
-		t.Fatal(err)
+	err := countTokens(&buf, prompt, tc.ProjectID, location, modelName)
+	if err != nil {
+		t.Fatalf("Test_countTokens: %v", err.Error())
 	}
 
-	if got := buf.String(); !strings.Contains(got, "generate-content response") {
-		t.Error("generated text content not found in response")
+	answer := buf.String()
+	s := strings.TrimPrefix(answer, "Number of tokens for the prompt: ")
+	s = strings.TrimSpace(s)
+	n, err := strconv.Atoi(s)
+	if err != nil {
+		t.Fatalf("Test_countTokens: %v", err.Error())
+	}
+
+	// "why is sky blue?" is expected to account for (more or less) 5 tokens
+	// Extremely low or high values would not be correct
+	if n <= 1 {
+		t.Errorf("Expected more than 1 token, got %d", n)
+	}
+	if n >= 20 {
+		t.Errorf("Expected less than 20 tokens, got %d", n)
 	}
 }
