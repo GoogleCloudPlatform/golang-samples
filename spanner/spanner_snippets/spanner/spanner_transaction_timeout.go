@@ -20,12 +20,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"google.golang.org/api/iterator"
-	"google.golang.org/grpc/codes"
 	"io"
 	"time"
 
 	"cloud.google.com/go/spanner"
+	"google.golang.org/api/iterator"
+	"google.golang.org/grpc/codes"
 )
 
 func transactionTimeout(w io.Writer, db string) error {
