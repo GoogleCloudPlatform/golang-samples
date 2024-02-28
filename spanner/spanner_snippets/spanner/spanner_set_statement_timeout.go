@@ -39,7 +39,7 @@ func setStatementTimeout(w io.Writer, db string) error {
 		defer cancel()
 		stmt := spanner.Statement{
 			SQL: `INSERT Singers (SingerId, FirstName, LastName)
-					VALUES (20, 'George', 'Washington')`,
+					VALUES (39, 'George', 'Washington')`,
 		}
 		rowCount, err := txn.Update(ctxWithTimeout, stmt)
 		// Get the error code from the error. This function returns codes.OK if err == nil.
