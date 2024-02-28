@@ -65,7 +65,7 @@ func transactionTimeout(w io.Writer, db string) error {
 		}
 		stmt := spanner.Statement{
 			SQL: `INSERT INTO Singers (SingerId, FirstName, LastName)
-					VALUES (20, 'George', 'Washington')`,
+					VALUES (38, 'George', 'Washington')`,
 		}
 		rowCount, err := txn.Update(ctx, stmt)
 		if err != nil {
