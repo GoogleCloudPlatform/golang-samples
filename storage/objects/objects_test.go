@@ -351,7 +351,7 @@ func TestKMSObjects(t *testing.T) {
 		t.Skip("GOLANG_SAMPLES_KMS_KEYRING and GOLANG_SAMPLES_KMS_CRYPTOKEY must be set")
 	}
 
-	bucket := tc.ProjectID + "-samples-object-bucket-1"
+	bucket := tc.ProjectID + "-samples-object-bucket-kms"
 	object := "foo.txt"
 
 	testutil.CleanBucket(ctx, t, tc.ProjectID, bucket)
