@@ -26,7 +26,7 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/googleapis/gax-go/v2/apierror"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 )
 
@@ -170,9 +170,9 @@ func TestDeleteKey(t *testing.T) {
 			// 400 error with reason "invalid" means the key was already deleted;
 			// this can happen if there was a previous call that returned an error
 			// but succeeded on the server side.
-			var ae *apierror.APIError
-			if errors.As(err, &ae) {
-				if ae.HTTPCode() == 400 && ae.Reason() == "invalid" {
+			var ge *googleapi.Error
+			if errors.As(err, &ge) {
+				if ge.Code == 400 && len(ge.Errors) > 0 && ge.Errors[0].Reason == "invalid" {
 					return
 				}
 			}
