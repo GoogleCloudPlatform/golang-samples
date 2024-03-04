@@ -28,7 +28,8 @@ var region = "us-central1"
 
 func tryGemini(w io.Writer, projectId string, region string, modelName string) error {
 
-	client, err := genai.NewClient(context.TODO(), projectId, region)
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, projectId, region)
 	gemini := client.GenerativeModel(modelName)
 
 	img := genai.FileData{
@@ -36,7 +37,7 @@ func tryGemini(w io.Writer, projectId string, region string, modelName string) e
 		FileURI:  "gs://generativeai-downloads/images/scones.jpg",
 	}
 	prompt := genai.Text("What is in this image?")
-	resp, err := gemini.GenerateContent(context.Background(), img, prompt)
+	resp, err := gemini.GenerateContent(ctx, img, prompt)
 	if err != nil {
 		return fmt.Errorf("error generating content: %w", err)
 	}

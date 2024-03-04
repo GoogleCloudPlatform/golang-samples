@@ -28,7 +28,7 @@ receivers:
       - type: regex_parser
         parse_from: body["logging.googleapis.com/trace"]
         parse_to: body
-        regex: projects/.+/traces/(?P<trace_id>.*)
+        regex: (?P<trace_id>.*)
         trace:
           span_id:
             parse_from: body["logging.googleapis.com/spanId"]

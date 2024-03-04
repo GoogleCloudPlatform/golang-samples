@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,41 +13,27 @@
 // limitations under the License.
 
 // multimodal shows an example of understanding multimodal input
-package main
+package multimodal
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
-	"log"
 	"mime"
-	"os"
 	"path/filepath"
 
 	"cloud.google.com/go/vertexai/genai"
 )
 
-func main() {
-	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	location := "us-central1"
-	modelName := "gemini-1.0-pro-vision"
-
-	prompt := "describe what is in this picture"
-	image := "gs://generativeai-downloads/images/scones.jpg"
-
-	if projectID == "" {
-		log.Fatal("require environment variable GOOGLE_CLOUD_PROJECT")
-	}
-
-	err := generateMultimodalContent(os.Stdout, prompt, image, projectID, location, modelName)
-	if err != nil {
-		log.Fatalf("unable to generate: %v", err)
-	}
-}
-
 // generateMultimodalContent generates a response into w, based upon the prompt
 // and image provided.
+// image is a Google Cloud Storage path starting with "gs://"
 func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, modelName string) error {
+	// prompt := "describe what is in this picture"
+	// image := "gs://generativeai-downloads/images/scones.jpg"
+	// location := "us-central1"
+	// modelName := "gemini-1.0-pro-vision"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
@@ -68,6 +54,11 @@ func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, 
 	res, err := model.GenerateContent(ctx, img, genai.Text(prompt))
 	if err != nil {
 		return fmt.Errorf("unable to generate contents: %v", err)
+	}
+
+	if len(res.Candidates) == 0 ||
+		len(res.Candidates[0].Content.Parts) == 0 {
+		return errors.New("empty response from model")
 	}
 
 	fmt.Fprintf(w, "generated response: %s\n", res.Candidates[0].Content.Parts[0])

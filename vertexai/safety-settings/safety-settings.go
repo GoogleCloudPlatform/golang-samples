@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,38 +13,22 @@
 // limitations under the License.
 // safety-settings shows how to adjust safety settings for a generative model
 
-package main
+package safetysettings
 
 import (
 	"context"
 	"fmt"
 	"io"
-	"log"
-	"os"
 
 	"cloud.google.com/go/vertexai/genai"
 )
 
-func main() {
-	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	location := "us-central1"
-	modelName := "gemini-1.0-pro"
-	temperature := 0.4
-
-	prompt := "say something nice to me, but be angry"
-
-	if projectID == "" {
-		log.Fatal("require environment variable GOOGLE_CLOUD_PROJECT")
-	}
-
-	err := generateContent(os.Stdout, prompt, projectID, location, modelName, float32(temperature))
-	if err != nil {
-		fmt.Printf("unable to generate: %v\n", err)
-	}
-}
-
 // generateContent generates text from prompt and configurations provided.
 func generateContent(w io.Writer, prompt, projectID, location, modelName string, temperature float32) error {
+	// prompt := "hello, say something mean to me."
+	// location := "us-central1"
+	// model := "gemini-1.0-pro"
+	// temp := float32(0.8)
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)

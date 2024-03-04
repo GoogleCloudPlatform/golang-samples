@@ -16,14 +16,10 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
-	"os"
 
 	"go.opentelemetry.io/otel/trace"
 )
-
-var projectId = os.Getenv("GOOGLE_CLOUD_PROJECT")
 
 // handlerWithSpanContext adds attributes from the span context
 // [START opentelemetry_instrumentation_spancontext_logger]
@@ -45,7 +41,7 @@ func (t *spanContextLogHandler) Handle(ctx context.Context, record slog.Record) 
 		// Add trace context attributes following Cloud Logging structured log format described
 		// in https://cloud.google.com/logging/docs/structured-logging#special-payload-fields
 		record.AddAttrs(
-			slog.Any("logging.googleapis.com/trace", fmt.Sprintf("projects/%s/traces/%s", projectId, s.TraceID())),
+			slog.Any("logging.googleapis.com/trace", s.TraceID()),
 		)
 		record.AddAttrs(
 			slog.Any("logging.googleapis.com/spanId", s.SpanID()),
