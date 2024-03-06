@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/golang-samples/eventarc/audit_storage
 
 go 1.19
 
-require github.com/cloudevents/sdk-go/v2 v2.14.0
+require github.com/cloudevents/sdk-go/v2 v2.15.2
 
 require (
 	github.com/google/go-cmp v0.5.9 // indirect
