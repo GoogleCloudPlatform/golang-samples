@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/functions/v2/tips/infinite_retries
 
-require github.com/cloudevents/sdk-go/v2 v2.14.0
+require github.com/cloudevents/sdk-go/v2 v2.15.2
 
 require (
 	github.com/google/uuid v1.3.0 // indirect
