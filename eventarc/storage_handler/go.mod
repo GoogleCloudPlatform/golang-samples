@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples/eventarc/storage_handler
 go 1.20
 
 require (
-	github.com/cloudevents/sdk-go/v2 v2.14.0
+	github.com/cloudevents/sdk-go/v2 v2.15.2
 	github.com/googleapis/google-cloudevents-go v0.7.1
 	google.golang.org/protobuf v1.32.0
 )
