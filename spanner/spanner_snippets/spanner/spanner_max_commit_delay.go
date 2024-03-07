@@ -29,7 +29,7 @@ func maxCommitDelay(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {
-		return fmt.Errorf("commitStats.NewClient: %w", err)
+		return fmt.Errorf("maxCommitDelay.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -46,9 +46,8 @@ func maxCommitDelay(w io.Writer, db string) error {
 		return nil
 	}, spanner.TransactionOptions{CommitOptions: spanner.CommitOptions{MaxCommitDelay: time.ParseDuration("100ms"}})
 	if err != nil {
-		return fmt.Errorf("commitStats.ReadWriteTransactionWithOptions: %w", err)
+		return fmt.Errorf("maxCommitDelay.ReadWriteTransactionWithOptions: %w", err)
 	}
-	fmt.Fprintf(w, "%d mutations in transaction\n", resp.CommitStats.MutationCount)
 	return nil
 }
 
