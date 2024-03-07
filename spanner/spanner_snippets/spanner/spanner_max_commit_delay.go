@@ -44,10 +44,11 @@ func maxCommitDelay(w io.Writer, db string) error {
 		}
 		fmt.Fprintf(w, "%d record(s) inserted.\n", rowCount)
 		return nil
-	}, spanner.TransactionOptions{CommitOptions: spanner.CommitOptions{MaxCommitDelay: time.ParseDuration("100ms"}})
+	}, spanner.TransactionOptions{CommitOptions: spanner.CommitOptions{MaxCommitDelay: time.ParseDuration("100ms"), ReturnCommitStats: true}})
 	if err != nil {
 		return fmt.Errorf("maxCommitDelay.ReadWriteTransactionWithOptions: %w", err)
 	}
+	fmt.Fprintf(w, "%d mutations in transaction\n", resp.CommitStats.MutationCount)
 	return nil
 }
 
