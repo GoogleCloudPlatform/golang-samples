@@ -32,12 +32,12 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// functionCalls opens a chat session and sends 4 messages to the model:
+// functionCallsChat opens a chat session and sends 4 messages to the model:
 // - convert a first text question into a structured function call request
 // - convert the first structured function call response into natural language
 // - convert a second text question into a structured function call request
 // - convert the second structured function call response into natural language
-func functionCalls(w io.Writer, projectID, location, modelName string) error {
+func functionCallsChat(w io.Writer, projectID, location, modelName string) error {
 	// location := "us-central1"
 	// modelName := "gemini-1.0-pro"
 	ctx := context.Background()
