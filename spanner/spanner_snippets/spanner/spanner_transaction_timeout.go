@@ -38,7 +38,8 @@ func transactionTimeout(w io.Writer, db string) error {
 
 	// Create a context with a 60-second timeout and use this context to run a read/write transaction.
 	// This context timeout will be applied to the entire transaction, and the transaction will fail
-	// if it cannot finish within the specified timeout value.
+	// if it cannot finish within the specified timeout value. The Spanner client library applies the
+	// (remainder of the) timeout to each statement that is executed in the transaction.
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
@@ -46,6 +47,8 @@ func transactionTimeout(w io.Writer, db string) error {
 		selectStmt := spanner.Statement{
 			SQL: `SELECT SingerId, FirstName, LastName FROM Singers ORDER BY LastName, FirstName`,
 		}
+		// The context that is passed in to the transaction function should be used for each statement
+		// is executed.
 		iter := txn.Query(ctx, selectStmt)
 		defer iter.Stop()
 		for {
