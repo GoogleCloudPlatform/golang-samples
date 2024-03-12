@@ -36,7 +36,10 @@ func maxCommitDelay(w io.Writer, db string) error {
 	defer client.Close()
 
 	// Set the maximum commit delay to 100ms.
-	// This will cause the transaction to commit after 100ms even if the commit delay is not reached.
+	// This is the amount of latency this request is willing to incur in order
+	// to improve throughput. If this field is not set, Spanner assumes requests
+	// are relatively latency sensitive and automatically determines an
+	// appropriate delay time. You can specify a batching delay value between 0 and 500 ms.
 	// The transaction will also return the commit statistics.
 	commitDelay := 100 * time.Millisecond
 	resp, err := client.ReadWriteTransactionWithOptions(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
