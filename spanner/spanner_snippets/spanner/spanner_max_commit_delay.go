@@ -25,7 +25,9 @@ import (
 	"cloud.google.com/go/spanner"
 )
 
+// maxCommitDelay sets the maximum commit delay for a transaction.
 func maxCommitDelay(w io.Writer, db string) error {
+	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {
@@ -33,6 +35,10 @@ func maxCommitDelay(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
+	// Set the maximum commit delay to 100ms.
+	// This will cause the transaction to commit after 100ms even if the commit delay is not reached.
+	// The transaction will also return the commit statistics.
+	commitDelay := 100 * time.Millisecond
 	resp, err := client.ReadWriteTransactionWithOptions(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		stmt := spanner.Statement{
 			SQL: `INSERT Singers (SingerId, FirstName, LastName)
@@ -44,7 +50,7 @@ func maxCommitDelay(w io.Writer, db string) error {
 		}
 		fmt.Fprintf(w, "%d record(s) inserted.\n", rowCount)
 		return nil
-	}, spanner.TransactionOptions{CommitOptions: spanner.CommitOptions{MaxCommitDelay: time.ParseDuration("100ms"), ReturnCommitStats: true}})
+	}, spanner.TransactionOptions{CommitOptions: spanner.CommitOptions{MaxCommitDelay: &commitDelay, ReturnCommitStats: true}})
 	if err != nil {
 		return fmt.Errorf("maxCommitDelay.ReadWriteTransactionWithOptions: %w", err)
 	}
