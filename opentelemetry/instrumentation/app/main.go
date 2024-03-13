@@ -22,7 +22,7 @@ import (
 )
 
 // main runs an application which serves two http endpoints: /single and /multi.
-// The calling the /multi endpoint results in multiple calls to the /single
+// Calling the /multi endpoint results in multiple calls to the /single
 // endpoint.
 //
 // The application is instrumented with OpenTelemetry and exports OTLP for
