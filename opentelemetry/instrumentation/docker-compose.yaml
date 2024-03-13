@@ -6,7 +6,7 @@ services:
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcol:4318
       - OTEL_SERVICE_NAME=otel-quickstart-go
-      - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT?}
+      - OTEL_GO_X_EXEMPLAR=true
     volumes:
       - logs:/var/log:rw
     depends_on:
@@ -17,6 +17,7 @@ services:
       - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
       - logs:/var/log:ro
     environment:
+      - GOOGLE_CLOUD_QUOTA_PROJECT
       - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT?}
   loadgen:
     image: golang:1.21
