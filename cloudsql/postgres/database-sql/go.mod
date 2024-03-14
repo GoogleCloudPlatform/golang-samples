@@ -5,7 +5,7 @@ go 1.19
 require (
 	cloud.google.com/go/cloudsqlconn v1.5.2
 	github.com/GoogleCloudPlatform/functions-framework-go v1.8.0
-	github.com/jackc/pgx/v5 v5.5.1
+	github.com/jackc/pgx/v5 v5.5.4
 )
 
 require (
