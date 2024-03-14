@@ -276,6 +276,9 @@ func TestSample(t *testing.T) {
 	out = runSample(t, setStatementTimeout, dbName, "failed to execute statement with a timeout")
 	assertContains(t, out, "record(s) inserted")
 
+	out = runSample(t, transactionTimeout, dbName, "failed to run transaction with a timeout")
+	assertContains(t, out, "Transaction with timeout was executed successfully")
+
 	out = runSample(t, updateUsingDML, dbName, "failed to update using DML")
 	assertContains(t, out, "record(s) updated")
 
@@ -301,6 +304,9 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "record(s) inserted")
 
 	out = runSample(t, commitStats, dbName, "failed to request commit stats")
+	assertContains(t, out, "4 mutations in transaction")
+
+	out = runSample(t, maxCommitDelay, dbName, "failed to set max commit delay")
 	assertContains(t, out, "4 mutations in transaction")
 
 	out = runSample(t, queryWithParameter, dbName, "failed to query with parameter")
