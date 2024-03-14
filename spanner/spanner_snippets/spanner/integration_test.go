@@ -273,6 +273,9 @@ func TestSample(t *testing.T) {
 	out = runSample(t, setCustomTimeoutAndRetry, dbName, "failed to insert using DML with custom timeout and retry")
 	assertContains(t, out, "record(s) inserted")
 
+	out = runSample(t, setStatementTimeout, dbName, "failed to execute statement with a timeout")
+	assertContains(t, out, "record(s) inserted")
+
 	out = runSample(t, transactionTimeout, dbName, "failed to run transaction with a timeout")
 	assertContains(t, out, "Transaction with timeout was executed successfully")
 
