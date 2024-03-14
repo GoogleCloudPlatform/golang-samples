@@ -33,27 +33,31 @@ func setStatementTimeout(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
-	_, err = client.ReadWriteTransaction(context.Background(), func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-		// Create a context with a 60-second timeout and apply this timeout to the insert statement.
-		ctxWithTimeout, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-		defer cancel()
-		stmt := spanner.Statement{
-			SQL: `INSERT Singers (SingerId, FirstName, LastName)
+	_, err = client.ReadWriteTransaction(context.Background(),
+		func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+			// Create a context with a 60-second timeout and apply this timeout to the insert statement.
+			ctxWithTimeout, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+			defer cancel()
+			stmt := spanner.Statement{
+				SQL: `INSERT Singers (SingerId, FirstName, LastName)
 					VALUES (39, 'George', 'Washington')`,
-		}
-		rowCount, err := txn.Update(ctxWithTimeout, stmt)
-		// Get the error code from the error. This function returns codes.OK if err == nil.
-		code := spanner.ErrCode(err)
-		if code == codes.DeadlineExceeded {
-			fmt.Fprintf(w, "Insert statement timed out.\n")
-		} else if code == codes.OK {
-			fmt.Fprintf(w, "%d record(s) inserted.\n", rowCount)
-		} else {
-			fmt.Fprintf(w, "Insert statement failed with error %v\n", err)
-		}
+			}
+			rowCount, err := txn.Update(ctxWithTimeout, stmt)
+			// Get the error code from the error. This function returns codes.OK if err == nil.
+			code := spanner.ErrCode(err)
+			if code == codes.DeadlineExceeded {
+				fmt.Fprintf(w, "Insert statement timed out.\n")
+			} else if code == codes.OK {
+				fmt.Fprintf(w, "%d record(s) inserted.\n", rowCount)
+			} else {
+				fmt.Fprintf(w, "Insert statement failed with error %v\n", err)
+			}
+			return err
+		})
+	if err != nil {
 		return err
-	})
-	return err
+	}
+	return nil
 }
 
 // [END spanner_set_statement_timeout]
