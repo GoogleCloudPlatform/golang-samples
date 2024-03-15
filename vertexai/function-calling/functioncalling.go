@@ -21,6 +21,7 @@
 // - ask the model to interpret the function call response
 package functioncalling
 
+// [START aiplatform_gemini_function_calling]
 // [START aiplatform_gemini_function_calling_chat]
 import (
 	"context"
@@ -197,3 +198,4 @@ func functionCallsChat(w io.Writer, projectID, location, modelName string) error
 }
 
 // [END aiplatform_gemini_function_calling_chat]
+// [END aiplatform_gemini_function_calling]
