@@ -36,6 +36,9 @@ import (
 // - first, to convert a text into a structured function call request
 // - second, to convert a structured function call response into natural language
 func functionCalls(w io.Writer, prompt, projectID, location, modelName string) error {
+	// prompt := "What's the weather like in Paris?"
+	// location := "us-central1"
+	// modelName := "gemini-1.0-pro"
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {
