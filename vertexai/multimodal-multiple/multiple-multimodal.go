@@ -31,7 +31,7 @@ import (
 func main() {
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	location := "us-central1"
-	modelName := "gemini-pro-vision"
+	modelName := "gemini-1.0-pro-vision"
 	temperature := 0.4
 
 	if projectID == "" {
@@ -87,7 +87,7 @@ func generateMultimodalContent(w io.Writer, parts []genai.Part, projectID, locat
 	defer client.Close()
 
 	model := client.GenerativeModel(modelName)
-	model.Temperature = temperature
+	model.SetTemperature(temperature)
 
 	res, err := model.GenerateContent(ctx, parts...)
 	if err != nil {

@@ -28,7 +28,7 @@ receivers:
       - type: regex_parser
         parse_from: body["logging.googleapis.com/trace"]
         parse_to: body
-        regex: projects/.+/traces/(?P<trace_id>.*)
+        regex: (?P<trace_id>.*)
         trace:
           span_id:
             parse_from: body["logging.googleapis.com/spanId"]
@@ -53,8 +53,6 @@ exporters:
   # Export logs and traces using the standard googelcloud exporter
   googlecloud:
     project: $GOOGLE_CLOUD_PROJECT
-    # Needed when using Application Default Credentials in Cloud Shell to call Cloud Trace
-    destination_project_quota: true
     log:
       default_log_name: "opentelemetry.io/collector-exported-log"
   # Export metrics to Google Managed service for Prometheus
