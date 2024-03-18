@@ -772,39 +772,39 @@ func Snippet_metadataPropertiesForKind() {
 	_ = keys // Use keys to find property names, and props for their representations.
 }
 
-func SnippetQuery_RunQueryWithExplainMode(w io.Writer) {
+func SnippetQuery_RunQueryWithExplain(w io.Writer) {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	defer client.Close()
 
-	// [START datastore_run_query_with_explain_mode]
+	// [START datastore_run_query_with_explain]
 	// Build the query
 	query := datastore.NewQuery("Task")
 
-	// Set the query mode to EXPLAIN to get back *only* the plan info
-	it := client.Run(ctx, query, []datastore.RunOption{datastore.QueryModeExplain}...)
+	// Pass ExplainOptions to get *only* metrics from the planning stages
+	it := client.Run(ctx, query, []datastore.RunOption{datastore.ExplainOptions{}}...)
 	_, err := it.Next(nil)
 
-	// Get the query plan
-	queryPlan := it.Stats.QueryPlan
-	fmt.Fprintln(w, "----- Plan Info -----")
-	fmt.Fprintf(w, "%+v\n", queryPlan.PlanInfo)
-	// [END datastore_run_query_with_explain_mode]
+	// Print plan summary
+	planSummary := it.ExplainMetrics.PlanSummary
+	fmt.Fprintln(w, "----- Plan Summary -----")
+	fmt.Fprintf(w, "%+v\n", planSummary)
+	// [END datastore_run_query_with_explain]
 	_ = err // Check non-nil errors other than Iterator.Done
 }
 
-func SnippetQuery_RunQueryWithExplainAnalyzeMode(w io.Writer) {
+func SnippetQuery_RunQueryWithExplainAnalyze(w io.Writer) {
 	ctx := context.Background()
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	defer client.Close()
 
-	// [START datastore_run_query_with_explain_analyze_mode]
+	// [START datastore_run_query_with_explain_analyze]
 	// Build the query
 	query := datastore.NewQuery("Task")
 
-	// Set the query mode to EXPLAIN_ANALYZE to get back the query stats, plan info, and query
-	// results
-	it := client.Run(ctx, query, []datastore.RunOption{datastore.QueryModeExplainAnalyze}...)
+	// Pass ExplainOptions with Analyze set to true to get full query results along with
+	// both planning and execution stage metrics.
+	it := client.Run(ctx, query, []datastore.RunOption{datastore.ExplainOptions{Analyze: true}}...)
 
 	// Get the query results
 	fmt.Fprintln(w, "----- Query Results -----")
@@ -820,14 +820,14 @@ func SnippetQuery_RunQueryWithExplainAnalyzeMode(w io.Writer) {
 		fmt.Fprintf(w, "Task %q, Priority %d\n", task.Description, task.Priority)
 	}
 
-	// Get the query plan
-	queryPlan := it.Stats.QueryPlan
-	fmt.Fprintln(w, "----- Plan Info -----")
-	fmt.Fprintf(w, "%+v\n", queryPlan.PlanInfo)
+	// Print plan summary
+	planSummary := it.ExplainMetrics.PlanSummary
+	fmt.Fprintln(w, "----- Plan Summary -----")
+	fmt.Fprintf(w, "%+v\n", planSummary)
 
-	// Get the query stats
-	queryStats := it.Stats.QueryStats
-	fmt.Fprintln(w, "----- Query Stats -----")
-	fmt.Fprintf(w, "%+v\n", queryStats)
-	// [END datastore_run_query_with_explain_analyze_mode]
+	// Print aggregated stats from the execution of the query
+	executionStats := it.ExplainMetrics.ExecutionStats
+	fmt.Fprintln(w, "----- Execution Stats -----")
+	fmt.Fprintf(w, "%+v\n", executionStats)
+	// [END datastore_run_query_with_explain_analyze]
 }
