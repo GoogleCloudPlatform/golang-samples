@@ -23,13 +23,14 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-func createTopicWithKinesisIngestion(w io.Writer, projectID, topicID, streamARN, consumerARN, awsRoleARN, gcpSA string) error {
+func createTopicWithKinesisIngestion(w io.Writer, projectID, topicID string) error {
 	// projectID := "my-project-id"
 	// topicID := "my-topic"
-	// streamARN := "stream-arn"
-	// consumerARN := "consumer-arn"
-	// awsRoleARN := "aws-role-arn"
-	// gcpServiceAccount := "gcp-service-account"
+	streamARN := "stream-arn"
+	consumerARN := "consumer-arn"
+	awsRoleARN := "aws-role-arn"
+	gcpServiceAccount := "gcp-service-account"
+
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -43,7 +44,7 @@ func createTopicWithKinesisIngestion(w io.Writer, projectID, topicID, streamARN,
 				StreamARN:         streamARN,
 				ConsumerARN:       consumerARN,
 				AWSRoleARN:        awsRoleARN,
-				GCPServiceAccount: gcpSA,
+				GCPServiceAccount: gcpServiceAccount,
 			},
 		},
 	}
