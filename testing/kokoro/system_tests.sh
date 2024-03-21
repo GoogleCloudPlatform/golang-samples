@@ -34,6 +34,8 @@ date
 cd "${1:-github/golang-samples}"
 PROJECT_ROOT=$(pwd)
 
+# Test the loop variable change that may appear in 1.22: https://go.dev/wiki/LoopvarExperiment
+export GOEXPERIMENT=loopvar
 export GO111MODULE=on # Always use modules.
 export GOPROXY=https://proxy.golang.org
 TIMEOUT=60m
