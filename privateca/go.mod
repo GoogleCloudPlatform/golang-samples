@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/security v1.15.4
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240111005027-4c7a1933dce2
 	google.golang.org/api v0.156.0
-	google.golang.org/protobuf v1.32.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
