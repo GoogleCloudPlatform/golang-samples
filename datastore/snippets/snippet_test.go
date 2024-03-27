@@ -771,3 +771,63 @@ func Snippet_metadataPropertiesForKind() {
 	_ = err  // Check error.
 	_ = keys // Use keys to find property names, and props for their representations.
 }
+
+func SnippetQuery_RunQueryWithExplain(w io.Writer) {
+	ctx := context.Background()
+	client, _ := datastore.NewClient(ctx, "my-proj")
+	defer client.Close()
+
+	// [START datastore_run_query_with_explain]
+	// Build the query
+	query := datastore.NewQuery("Task")
+
+	// Pass ExplainOptions to get *only* metrics from the planning stages
+	it := client.Run(ctx, query, []datastore.RunOption{datastore.ExplainOptions{}}...)
+	_, err := it.Next(nil)
+
+	// Print plan summary
+	planSummary := it.ExplainMetrics.PlanSummary
+	fmt.Fprintln(w, "----- Plan Summary -----")
+	fmt.Fprintf(w, "%+v\n", planSummary)
+	// [END datastore_run_query_with_explain]
+	_ = err // Check non-nil errors other than Iterator.Done
+}
+
+func SnippetQuery_RunQueryWithExplainAnalyze(w io.Writer) {
+	ctx := context.Background()
+	client, _ := datastore.NewClient(ctx, "my-proj")
+	defer client.Close()
+
+	// [START datastore_run_query_with_explain_analyze]
+	// Build the query
+	query := datastore.NewQuery("Task")
+
+	// Pass ExplainOptions with Analyze set to true to get full query results along with
+	// both planning and execution stage metrics.
+	it := client.Run(ctx, query, []datastore.RunOption{datastore.ExplainOptions{Analyze: true}}...)
+
+	// Get the query results
+	fmt.Fprintln(w, "----- Query Results -----")
+	for {
+		var task Task
+		_, err := it.Next(&task)
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatalf("Error fetching next task: %v", err)
+		}
+		fmt.Fprintf(w, "Task %q, Priority %d\n", task.Description, task.Priority)
+	}
+
+	// Print plan summary
+	planSummary := it.ExplainMetrics.PlanSummary
+	fmt.Fprintln(w, "----- Plan Summary -----")
+	fmt.Fprintf(w, "%+v\n", planSummary)
+
+	// Print aggregated stats from the execution of the query
+	executionStats := it.ExplainMetrics.ExecutionStats
+	fmt.Fprintln(w, "----- Execution Stats -----")
+	fmt.Fprintf(w, "%+v\n", executionStats)
+	// [END datastore_run_query_with_explain_analyze]
+}
