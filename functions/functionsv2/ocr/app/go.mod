@@ -12,7 +12,7 @@ require (
 	github.com/googleapis/google-cloudevents-go v0.7.1
 	golang.org/x/text v0.14.0
 	google.golang.org/genproto v0.0.0-20240108191215-35c7eff3a6b1
-	google.golang.org/protobuf v1.32.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
