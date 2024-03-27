@@ -3,16 +3,16 @@ module github.com/GoogleCloudPlatform/golang-samples/pubsub
 go 1.19
 
 require (
-	cloud.google.com/go/bigquery v1.59.1
-	cloud.google.com/go/iam v1.1.6
+	cloud.google.com/go/bigquery v1.60.0
+	cloud.google.com/go/iam v1.1.7
 	cloud.google.com/go/pubsub v1.37.0
-	cloud.google.com/go/storage v1.39.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240111005027-4c7a1933dce2
+	cloud.google.com/go/storage v1.39.1
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240327000816-dd8737fbc60d
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
-	github.com/googleapis/gax-go/v2 v2.12.2
+	github.com/googleapis/gax-go/v2 v2.12.3
 	github.com/linkedin/goavro/v2 v2.12.0
-	google.golang.org/api v0.169.0
+	google.golang.org/api v0.172.0
 	google.golang.org/grpc v1.62.1
 	google.golang.org/protobuf v1.33.0
 )
@@ -56,6 +56,6 @@ require (
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto v0.0.0-20240304212257-790db918fca8 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240304212257-790db918fca8 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240304212257-790db918fca8 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240314234333-6e1732d8331c // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240318140521-94a12d6c2237 // indirect
 )
