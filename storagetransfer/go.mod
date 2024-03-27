@@ -12,7 +12,7 @@ require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240111005027-4c7a1933dce2
 	github.com/aws/aws-sdk-go v1.44.290
 	google.golang.org/genproto v0.0.0-20240108191215-35c7eff3a6b1
-	google.golang.org/protobuf v1.32.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
