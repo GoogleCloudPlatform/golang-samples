@@ -4,7 +4,7 @@ go 1.20
 
 require github.com/GoogleCloudPlatform/functions-framework-go v1.8.0
 
-require google.golang.org/protobuf v1.32.0
+require google.golang.org/protobuf v1.33.0
 
 require (
 	github.com/cloudevents/sdk-go/v2 v2.14.0
