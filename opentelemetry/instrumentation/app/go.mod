@@ -3,9 +3,9 @@ module github.com/GoogleCloudPlatform/golang-samples/opentelemetry/instrumentati
 go 1.21
 
 require (
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240111005027-4c7a1933dce2
-	github.com/stretchr/testify v1.8.4
-	go.opentelemetry.io/collector/pdata v1.2.0
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240327000816-dd8737fbc60d
+	github.com/stretchr/testify v1.9.0
+	go.opentelemetry.io/collector/pdata v1.4.0
 	go.opentelemetry.io/contrib/exporters/autoexport v0.49.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0
 	go.opentelemetry.io/contrib/propagators/autoprop v0.49.0
@@ -73,7 +73,7 @@ require (
 	google.golang.org/genproto v0.0.0-20240213162025-012b6fc9bca9 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240221002015-b0ce06bbee7c // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240221002015-b0ce06bbee7c // indirect
-	google.golang.org/grpc v1.62.0 // indirect
-	google.golang.org/protobuf v1.32.0 // indirect
+	google.golang.org/grpc v1.62.1 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

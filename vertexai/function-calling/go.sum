@@ -16,8 +16,8 @@ cloud.google.com/go/storage v1.36.0/go.mod h1:M6M/3V/D3KpzMTJyPOR/HU6n2Si5QdaXYE
 cloud.google.com/go/vertexai v0.7.1 h1:CSdqsEwjklLIlI1e5SrsnkwG/I+CeJekkBbMTzeYhVg=
 cloud.google.com/go/vertexai v0.7.1/go.mod h1:HfnfYR9aPS+qF2436S6Hzuw0Fp+PORjzK3ggqymdzSU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240215053133-28d24e441ba2 h1:qzooN/u8vn3XhGBP7FYiT+jKq1ML2vsM8TH761fs0m0=
-github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240215053133-28d24e441ba2/go.mod h1:rYhSZIJ6EfJfeHJm5LKufLfIQl1SWN8VhekdcjxZWn0=
+github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240327000816-dd8737fbc60d h1:uhW8HhKPwVuFFp2KvmPnEli4xG/GS/zuSC8eeLsCqao=
+github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240327000816-dd8737fbc60d/go.mod h1:rYhSZIJ6EfJfeHJm5LKufLfIQl1SWN8VhekdcjxZWn0=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=
