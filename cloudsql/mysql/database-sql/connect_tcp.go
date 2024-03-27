@@ -60,6 +60,8 @@ func connectTCPSocket() (*sql.DB, error) {
 	// For deployments that connect directly to a Cloud SQL instance without
 	// using the Cloud SQL Proxy, configuring SSL certificates will ensure the
 	// connection is encrypted.
+	// Change InsecureSkipVerify to false in production environments to
+	// verify the certificate and host name in the certificate.
 	if dbRootCert, ok := os.LookupEnv("DB_ROOT_CERT"); ok { // e.g., '/path/to/my/server-ca.pem'
 		var (
 			dbCert = mustGetenv("DB_CERT") // e.g. '/path/to/my/client-cert.pem'
