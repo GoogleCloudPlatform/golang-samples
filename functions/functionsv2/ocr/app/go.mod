@@ -8,7 +8,7 @@ require (
 	cloud.google.com/go/translate v1.10.0
 	cloud.google.com/go/vision v1.2.0
 	github.com/GoogleCloudPlatform/functions-framework-go v1.8.0
-	github.com/cloudevents/sdk-go/v2 v2.14.0
+	github.com/cloudevents/sdk-go/v2 v2.15.2
 	github.com/googleapis/google-cloudevents-go v0.7.1
 	golang.org/x/text v0.14.0
 	google.golang.org/genproto v0.0.0-20240108191215-35c7eff3a6b1
