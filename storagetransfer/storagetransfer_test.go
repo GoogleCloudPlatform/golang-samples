@@ -162,7 +162,7 @@ func TestQuickstart(t *testing.T) {
 
 		got := buf.String()
 		if want := "transferJobs/"; !strings.Contains(got, want) {
-			t.Errorf("quickstart: got %q, want %q", got, want)
+			r.Errorf("quickstart: got %q, want %q", got, want)
 		}
 	})
 }
@@ -182,7 +182,7 @@ func TestTransferFromAws(t *testing.T) {
 
 		got := buf.String()
 		if want := "transferJobs/"; !strings.Contains(got, want) {
-			t.Errorf("transfer_from_aws: got %q, want %q", got, want)
+			r.Errorf("transfer_from_aws: got %q, want %q", got, want)
 		}
 	})
 }
@@ -202,7 +202,7 @@ func TestTransferToNearline(t *testing.T) {
 
 		got := buf.String()
 		if want := "transferJobs/"; !strings.Contains(got, want) {
-			t.Errorf("transfer_to_nearline: got %q, want %q", got, want)
+			r.Errorf("transfer_to_nearline: got %q, want %q", got, want)
 		}
 	})
 }
@@ -255,7 +255,7 @@ func TestDownloadToPosix(t *testing.T) {
 
 		got := buf.String()
 		if want := "transferJobs/"; !strings.Contains(got, want) {
-			t.Errorf("download_to_posix: got %q, want %q", got, want)
+			r.Errorf("download_to_posix: got %q, want %q", got, want)
 		}
 	})
 }
@@ -283,7 +283,7 @@ func TestTransferFromPosix(t *testing.T) {
 
 		got := buf.String()
 		if want := "transferJobs/"; !strings.Contains(got, want) {
-			t.Errorf("transfer_from_posix: got %q, want %q", got, want)
+			r.Errorf("transfer_from_posix: got %q, want %q", got, want)
 		}
 	})
 }
@@ -317,7 +317,7 @@ func TestTransferBetweenPosix(t *testing.T) {
 
 		got := buf.String()
 		if want := "transferJobs/"; !strings.Contains(got, want) {
-			t.Errorf("transfer_between_posix: got %q, want %q", got, want)
+			r.Errorf("transfer_between_posix: got %q, want %q", got, want)
 		}
 	})
 }
@@ -347,7 +347,7 @@ func TestTransferUsingManifest(t *testing.T) {
 
 		got := buf.String()
 		if want := "transferJobs/"; !strings.Contains(got, want) {
-			t.Errorf("transfer_using_manifest: got %q, want %q", got, want)
+			r.Errorf("transfer_using_manifest: got %q, want %q", got, want)
 		}
 	})
 }
@@ -371,7 +371,7 @@ func TestTransferFromS3CompatibleSource(t *testing.T) {
 
 		got := buf.String()
 		if want := "transferJobs/"; !strings.Contains(got, want) {
-			t.Errorf("transfer_from_s3_compatible_source: got %q, want %q", got, want)
+			r.Errorf("transfer_from_s3_compatible_source: got %q, want %q", got, want)
 		}
 	})
 }
@@ -391,7 +391,7 @@ func TestTransferFromAzure(t *testing.T) {
 
 		got := buf.String()
 		if want := "transferJobs/"; !strings.Contains(got, want) {
-			t.Errorf("transfer_from_azure: got %q, want %q", got, want)
+			r.Errorf("transfer_from_azure: got %q, want %q", got, want)
 		}
 	})
 }
@@ -446,7 +446,7 @@ func TestCreateEventDrivenGCSTransfer(t *testing.T) {
 
 		got := buf.String()
 		if want := "transferJobs/"; !strings.Contains(got, want) {
-			t.Errorf("create_event_driven_gcs_transfer: got %q, want %q", got, want)
+			r.Errorf("create_event_driven_gcs_transfer: got %q, want %q", got, want)
 		}
 	})
 }
@@ -491,7 +491,7 @@ func TestCreateEventDrivenAWSTransfer(t *testing.T) {
 
 		got := buf.String()
 		if want := "transferJobs/"; !strings.Contains(got, want) {
-			t.Errorf("create_event_driven_aws_transfer: got %q, want %q", got, want)
+			r.Errorf("create_event_driven_aws_transfer: got %q, want %q", got, want)
 		}
 	})
 }
