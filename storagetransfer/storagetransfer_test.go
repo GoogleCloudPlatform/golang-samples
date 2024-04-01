@@ -150,90 +150,89 @@ func TestMain(m *testing.M) {
 func TestQuickstart(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	buf := new(bytes.Buffer)
 	testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+
 		resp, err := quickstart(buf, tc.ProjectID, gcsSourceBucket, gcsSinkBucket)
 		defer cleanupSTSJob(resp, tc.ProjectID)
 
 		if err != nil {
-			t.Errorf("quickstart: %#v", err)
+			r.Errorf("quickstart: %#v", err)
+		}
+
+		got := buf.String()
+		if want := "transferJobs/"; !strings.Contains(got, want) {
+			t.Errorf("quickstart: got %q, want %q", got, want)
 		}
 	})
-
-	got := buf.String()
-	if want := "transferJobs/"; !strings.Contains(got, want) {
-		t.Errorf("quickstart: got %q, want %q", got, want)
-	}
 }
 
 func TestTransferFromAws(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	buf := new(bytes.Buffer)
-
 	testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+
 		resp, err := transferFromAws(buf, tc.ProjectID, s3Bucket, gcsSinkBucket)
 		defer cleanupSTSJob(resp, tc.ProjectID)
 
 		if err != nil {
-			t.Errorf("transfer_from_aws: %#v", err)
+			r.Errorf("transfer_from_aws: %#v", err)
+		}
+
+		got := buf.String()
+		if want := "transferJobs/"; !strings.Contains(got, want) {
+			t.Errorf("transfer_from_aws: got %q, want %q", got, want)
 		}
 	})
-
-	got := buf.String()
-	if want := "transferJobs/"; !strings.Contains(got, want) {
-		t.Errorf("transfer_from_aws: got %q, want %q", got, want)
-	}
 }
 
 func TestTransferToNearline(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	buf := new(bytes.Buffer)
-
 	testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+
 		resp, err := transferToNearline(buf, tc.ProjectID, gcsSourceBucket, gcsSinkBucket)
 		defer cleanupSTSJob(resp, tc.ProjectID)
 
 		if err != nil {
-			t.Errorf("transfer_from_aws: %#v", err)
+			r.Errorf("transfer_from_aws: %#v", err)
+		}
+
+		got := buf.String()
+		if want := "transferJobs/"; !strings.Contains(got, want) {
+			t.Errorf("transfer_to_nearline: got %q, want %q", got, want)
 		}
 	})
-
-	got := buf.String()
-	if want := "transferJobs/"; !strings.Contains(got, want) {
-		t.Errorf("transfer_to_nearline: got %q, want %q", got, want)
-	}
 }
 
 func TestGetLatestTransferOperation(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	buf := new(bytes.Buffer)
-
 	testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+
 		job, err := transferToNearline(buf, tc.ProjectID, gcsSourceBucket, gcsSinkBucket)
 		defer cleanupSTSJob(job, tc.ProjectID)
 
 		op, err := checkLatestTransferOperation(buf, tc.ProjectID, job.Name)
 
 		if err != nil {
-			t.Errorf("check_latest_transfer_operation: %#v", err)
+			r.Errorf("check_latest_transfer_operation: %#v", err)
 		}
 		if !strings.Contains(op.Name, "transferOperations/") {
-			t.Errorf("check_latest_transfer_operation: Operation returned didn't have a valid operation name: %q", op.Name)
+			r.Errorf("check_latest_transfer_operation: Operation returned didn't have a valid operation name: %q", op.Name)
 		}
 		got := buf.String()
 		if want := op.Name; !strings.Contains(got, want) {
-			t.Errorf("check_latest_transfer_operation: got %q, want %q", got, want)
+			r.Errorf("check_latest_transfer_operation: got %q, want %q", got, want)
 		}
 	})
 }
 
 func TestDownloadToPosix(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
-	buf := new(bytes.Buffer)
 
 	rootDirectory, err := ioutil.TempDir("", "download-to-posix-test")
 	if err != nil {
@@ -245,24 +244,24 @@ func TestDownloadToPosix(t *testing.T) {
 	gcsSourcePath := rootDirectory + "/"
 
 	testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+
 		resp, err := downloadToPosix(buf, tc.ProjectID, sinkAgentPoolName, gcsSinkBucket, gcsSourcePath, rootDirectory)
 		defer cleanupSTSJob(resp, tc.ProjectID)
 
 		if err != nil {
-			t.Errorf("download_to_posix: %#v", err)
+			r.Errorf("download_to_posix: %#v", err)
+		}
+
+		got := buf.String()
+		if want := "transferJobs/"; !strings.Contains(got, want) {
+			t.Errorf("download_to_posix: got %q, want %q", got, want)
 		}
 	})
-
-	got := buf.String()
-	if want := "transferJobs/"; !strings.Contains(got, want) {
-		t.Errorf("download_to_posix: got %q, want %q", got, want)
-	}
 }
 
 func TestTransferFromPosix(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
-	buf := new(bytes.Buffer)
 
 	rootDirectory, err := ioutil.TempDir("", "transfer-from-posix-test")
 	if err != nil {
@@ -273,24 +272,24 @@ func TestTransferFromPosix(t *testing.T) {
 	sourceAgentPoolName := "" //use default agent pool
 
 	testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+
 		resp, err := transferFromPosix(buf, tc.ProjectID, sourceAgentPoolName, rootDirectory, gcsSinkBucket)
 		defer cleanupSTSJob(resp, tc.ProjectID)
 
 		if err != nil {
-			t.Errorf("transfer_from_posix: %#v", err)
+			r.Errorf("transfer_from_posix: %#v", err)
+		}
+
+		got := buf.String()
+		if want := "transferJobs/"; !strings.Contains(got, want) {
+			t.Errorf("transfer_from_posix: got %q, want %q", got, want)
 		}
 	})
-
-	got := buf.String()
-	if want := "transferJobs/"; !strings.Contains(got, want) {
-		t.Errorf("transfer_from_posix: got %q, want %q", got, want)
-	}
 }
 
 func TestTransferBetweenPosix(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
-	buf := new(bytes.Buffer)
 
 	rootDirectory, err := ioutil.TempDir("", "transfer-between-posix-test-source")
 	if err != nil {
@@ -308,24 +307,23 @@ func TestTransferBetweenPosix(t *testing.T) {
 	sinkAgentPoolName := ""   //use default agent pool
 
 	testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
 
 		resp, err := transferBetweenPosix(buf, tc.ProjectID, sourceAgentPoolName, sinkAgentPoolName, rootDirectory, destinationDirectory, gcsSinkBucket)
 		if err != nil {
-			t.Errorf("transfer_between_posix: %#v", err)
+			r.Errorf("transfer_between_posix: %#v", err)
 		}
 		defer cleanupSTSJob(resp, tc.ProjectID)
-	})
 
-	got := buf.String()
-	if want := "transferJobs/"; !strings.Contains(got, want) {
-		t.Errorf("transfer_between_posix: got %q, want %q", got, want)
-	}
+		got := buf.String()
+		if want := "transferJobs/"; !strings.Contains(got, want) {
+			t.Errorf("transfer_between_posix: got %q, want %q", got, want)
+		}
+	})
 }
 
 func TestTransferUsingManifest(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
-	buf := new(bytes.Buffer)
 
 	rootDirectory, err := ioutil.TempDir("", "transfer-using-manifest-test")
 	if err != nil {
@@ -338,64 +336,68 @@ func TestTransferUsingManifest(t *testing.T) {
 	defer object.Delete(context.Background())
 
 	testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+
 		resp, err := transferUsingManifest(buf, tc.ProjectID, sourceAgentPoolName, rootDirectory, gcsSinkBucket, gcsSourceBucket, "manifest.csv")
 		defer cleanupSTSJob(resp, tc.ProjectID)
 
 		if err != nil {
 			r.Errorf("transfer_using_manifest: %#v", err)
 		}
-	})
 
-	got := buf.String()
-	if want := "transferJobs/"; !strings.Contains(got, want) {
-		t.Errorf("transfer_using_manifest: got %q, want %q", got, want)
-	}
+		got := buf.String()
+		if want := "transferJobs/"; !strings.Contains(got, want) {
+			t.Errorf("transfer_using_manifest: got %q, want %q", got, want)
+		}
+	})
 }
 
 func TestTransferFromS3CompatibleSource(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
-	buf := new(bytes.Buffer)
 
 	sourceAgentPoolName := "" //use default agent pool
 	sourcePath := ""          //use root directory
 	gcsPath := ""             //use root directory
 
 	testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+
 		resp, err := transferFromS3CompatibleSource(buf, tc.ProjectID, sourceAgentPoolName, s3Bucket, sourcePath, gcsSinkBucket, gcsPath)
 
 		if err != nil {
-			t.Errorf("transfer_from_s3_compatible_source: %#v", err)
+			r.Errorf("transfer_from_s3_compatible_source: %#v", err)
 		}
 		defer cleanupSTSJob(resp, tc.ProjectID)
+
+		got := buf.String()
+		if want := "transferJobs/"; !strings.Contains(got, want) {
+			t.Errorf("transfer_from_s3_compatible_source: got %q, want %q", got, want)
+		}
 	})
-	got := buf.String()
-	if want := "transferJobs/"; !strings.Contains(got, want) {
-		t.Errorf("transfer_from_s3_compatible_source: got %q, want %q", got, want)
-	}
 }
 
 func TestTransferFromAzure(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
 
 	accountName := os.Getenv("AZURE_STORAGE_ACCOUNT")
 	testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+
 		resp, err := transferFromAzure(buf, tc.ProjectID, accountName, azureContainer, gcsSinkBucket)
 		if err != nil {
-			t.Errorf("transfer_from_azure: %#v", err)
+			r.Errorf("transfer_from_azure: %#v", err)
 		}
 		defer cleanupSTSJob(resp, tc.ProjectID)
+
+		got := buf.String()
+		if want := "transferJobs/"; !strings.Contains(got, want) {
+			t.Errorf("transfer_from_azure: got %q, want %q", got, want)
+		}
 	})
-	got := buf.String()
-	if want := "transferJobs/"; !strings.Contains(got, want) {
-		t.Errorf("transfer_from_azure: got %q, want %q", got, want)
-	}
 }
 
 func TestCreateEventDrivenGCSTransfer(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
 	ctx := context.Background()
 
 	pubSubTopicId := testutil.UniqueBucketName("pubsubtopic")
@@ -434,21 +436,23 @@ func TestCreateEventDrivenGCSTransfer(t *testing.T) {
 	pubSubSubscriptionID := sub.String()
 
 	testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+
 		resp, err := createEventDrivenGCSTransfer(buf, tc.ProjectID, gcsSourceBucket, gcsSinkBucket, pubSubSubscriptionID)
 		if err != nil {
-			t.Errorf("create_event_driven_gcs_transfer: %#v", err)
+			r.Errorf("create_event_driven_gcs_transfer: %#v", err)
 		}
 		defer cleanupSTSJob(resp, tc.ProjectID)
+
+		got := buf.String()
+		if want := "transferJobs/"; !strings.Contains(got, want) {
+			t.Errorf("create_event_driven_gcs_transfer: got %q, want %q", got, want)
+		}
 	})
-	got := buf.String()
-	if want := "transferJobs/"; !strings.Contains(got, want) {
-		t.Errorf("create_event_driven_gcs_transfer: got %q, want %q", got, want)
-	}
 }
 
 func TestCreateEventDrivenAWSTransfer(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
 
 	queue := testutil.UniqueBucketName("stssqsqueue")
 	sqsClient := sqs.New(sess)
@@ -477,16 +481,19 @@ func TestCreateEventDrivenAWSTransfer(t *testing.T) {
 	sqsQueueARN := *attributes.Attributes["QueueArn"]
 
 	testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+
 		resp, err := createEventDrivenAWSTransfer(buf, tc.ProjectID, s3Bucket, gcsSinkBucket, sqsQueueARN)
 		if err != nil {
-			t.Errorf("create_event_driven_aws_transfer: %#v", err)
+			r.Errorf("create_event_driven_aws_transfer: %#v", err)
 		}
 		defer cleanupSTSJob(resp, tc.ProjectID)
+
+		got := buf.String()
+		if want := "transferJobs/"; !strings.Contains(got, want) {
+			t.Errorf("create_event_driven_aws_transfer: got %q, want %q", got, want)
+		}
 	})
-	got := buf.String()
-	if want := "transferJobs/"; !strings.Contains(got, want) {
-		t.Errorf("create_event_driven_aws_transfer: got %q, want %q", got, want)
-	}
 }
 
 func grantSTSPermissions(bucketName string, str *storage.Client) {
