@@ -27,7 +27,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestHelloWorld(t *testing.T) {
+func ExampleTestHelloWorld(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
 	helloworld := &aeintegrate.App{
