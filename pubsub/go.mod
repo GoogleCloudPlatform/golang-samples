@@ -12,7 +12,6 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/googleapis/gax-go/v2 v2.12.2
 	github.com/linkedin/goavro/v2 v2.12.0
-
 	google.golang.org/api v0.169.0
 	google.golang.org/grpc v1.62.1
 	google.golang.org/protobuf v1.33.0
