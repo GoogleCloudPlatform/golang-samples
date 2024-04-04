@@ -27,7 +27,7 @@ require (
 	cloud.google.com/go/storage v1.30.1 // indirect
 	github.com/GoogleCloudPlatform/functions-framework-go v1.8.0
 	github.com/MicahParks/keyfunc v1.9.0 // indirect
-	github.com/cloudevents/sdk-go/v2 v2.14.0
+	github.com/cloudevents/sdk-go/v2 v2.15.2
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
