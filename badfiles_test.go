@@ -91,6 +91,9 @@ var allowList = []string{
 	// Cloud Functions gen2 picture.
 	"functions/functionsv2/imagemagick/zombie.jpg",
 
+	// Cloud Profiler test outputs
+	"profiler/export/**",
+
 	// Samples that aren't really code. Legacy.
 	"**/appengine/**/*.txt",
 
