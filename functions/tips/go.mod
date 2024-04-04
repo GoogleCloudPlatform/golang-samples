@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/tips
 require cloud.google.com/go/storage v1.36.0
 
 require (
-	github.com/cloudevents/sdk-go/v2 v2.14.0 // indirect
+	github.com/cloudevents/sdk-go/v2 v2.15.2 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
