@@ -27,24 +27,10 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-func If[T any](cond bool, vtrue, vfalse T) T {
-	if cond {
-		return vtrue
-	}
-	return vfalse
-}
-
 func embedTextsPreview(
 	apiEndpoint, project, model string, texts []string,
 	task string, dimensionality *int) ([][]float32, error) {
 	ctx := context.Background()
-
-	re := regexp.MustCompile(`(.+)-aiplatform.+`)
-	match := re.FindStringSubmatch(apiEndpoint)
-	location := "us-central1"
-	if match != nil {
-		location = match[1]
-	}
 
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {
@@ -52,6 +38,11 @@ func embedTextsPreview(
 	}
 	defer client.Close()
 
+	match := regexp.MustCompile(`^(\w+-\w+)`).FindStringSubmatch(apiEndpoint)
+	location := "us-central1"
+	if match != nil {
+		location = match[1]
+	}
 	endpoint := fmt.Sprintf("projects/%s/locations/%s/publishers/google/models/%s", project, location, model)
 	instances := make([]*structpb.Value, len(texts))
 	for i, text := range texts {
@@ -62,7 +53,10 @@ func embedTextsPreview(
 			},
 		})
 	}
-	outputDimensionality := If(dimensionality != nil, structpb.NewNumberValue(float64(*dimensionality)), structpb.NewNullValue())
+	outputDimensionality := structpb.NewNullValue()
+	if dimensionality != nil {
+		outputDimensionality = structpb.NewNumberValue(float64(*dimensionality))
+	}
 	params := structpb.NewStructValue(&structpb.Struct{
 		Fields: map[string]*structpb.Value{"outputDimensionality": outputDimensionality},
 	})

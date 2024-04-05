@@ -28,16 +28,8 @@ import (
 )
 
 func embedTexts(
-	apiEndpoint, project, model string, texts []string,
-	task string) ([][]float32, error) {
+	apiEndpoint, project, model string, texts []string, task string) ([][]float32, error) {
 	ctx := context.Background()
-
-	re := regexp.MustCompile(`(.+)-aiplatform.+`)
-	match := re.FindStringSubmatch(apiEndpoint)
-	location := "us-central1"
-	if match != nil {
-		location = match[1]
-	}
 
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {
@@ -45,6 +37,11 @@ func embedTexts(
 	}
 	defer client.Close()
 
+	match := regexp.MustCompile(`^(\w+-\w+)`).FindStringSubmatch(apiEndpoint)
+	location := "us-central1"
+	if match != nil {
+		location = match[1]
+	}
 	endpoint := fmt.Sprintf("projects/%s/locations/%s/publishers/google/models/%s", project, location, model)
 	instances := make([]*structpb.Value, len(texts))
 	for i, text := range texts {
