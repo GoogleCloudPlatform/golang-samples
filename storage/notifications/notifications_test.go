@@ -168,20 +168,21 @@ func TestNotifications(t *testing.T) {
 func createTestTopic(t *testing.T, projectID, topicName string) {
 	t.Helper()
 	ctx := context.Background()
-
 	topic := pubsubClient.Topic(topicName)
 
 	// Create the topic if it doesn't exist.
-	exists, err := topic.Exists(ctx)
-	if err != nil {
-		t.Errorf("topic.Exists: %v", err)
-	}
-	if !exists {
-		_, err = pubsubClient.CreateTopic(ctx, topicName)
+	testutil.Retry(t, 10, time.Millisecond, func(r *testutil.R) {
+		exists, err := topic.Exists(ctx)
 		if err != nil {
-			t.Errorf("topic.CreateTopic: %v", err)
+			r.Errorf("topic.Exists: %v", err)
 		}
-	}
+		if !exists {
+			_, err = pubsubClient.CreateTopic(ctx, topicName)
+			if err != nil {
+				r.Errorf("topic.CreateTopic: %v", err)
+			}
+		}
+	})
 
 	// Add the service agent to the topic's permissions so we can access it from storage.
 	policy, err := topic.IAM().Policy(ctx)
