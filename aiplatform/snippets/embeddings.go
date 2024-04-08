@@ -21,7 +21,7 @@ import (
 	"regexp"
 
 	aiplatform "cloud.google.com/go/aiplatform/apiv1"
-	aiplatformpb "cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
+	"cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
 
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/structpb"
