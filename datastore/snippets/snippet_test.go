@@ -782,7 +782,7 @@ func SnippetQuery_RunQueryWithExplain(w io.Writer) {
 	query := datastore.NewQuery("Task")
 
 	// Pass ExplainOptions to get *only* metrics from the planning stages
-	it := client.Run(ctx, query, []datastore.RunOption{datastore.ExplainOptions{}}...)
+	it := client.RunWithOptions(ctx, query, []datastore.RunOption{datastore.ExplainOptions{}}...)
 	_, err := it.Next(nil)
 
 	// Print plan summary
@@ -804,7 +804,7 @@ func SnippetQuery_RunQueryWithExplainAnalyze(w io.Writer) {
 
 	// Pass ExplainOptions with Analyze set to true to get full query results along with
 	// both planning and execution stage metrics.
-	it := client.Run(ctx, query, []datastore.RunOption{datastore.ExplainOptions{Analyze: true}}...)
+	it := client.RunWithOptions(ctx, query, []datastore.RunOption{datastore.ExplainOptions{Analyze: true}}...)
 
 	// Get the query results
 	fmt.Fprintln(w, "----- Query Results -----")
