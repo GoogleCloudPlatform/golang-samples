@@ -19,6 +19,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"time"
@@ -28,31 +29,36 @@ import (
 )
 
 func main() {
+	// Set this flag to an existing Cloud Storage bucket when running the sample.
+	bucketName := flag.String("bucket", "", "Cloud Storage bucket name")
+	flag.Parse()
+	log.Printf("bucket : %v", *bucketName)
+
 	ctx := context.Background()
 
 	// Create a client.
 	client, err := control.NewStorageControlClient(ctx)
 	if err != nil {
-		log.Fatal("failed to create client: %v", err)
+		log.Fatalf("failed to create client: %v", err)
 	}
 	defer client.Close()
 
-	bucketName := "my-bucket"
-
 	// Create a request to get the storage layout for the bucket.
 	req := &controlpb.GetStorageLayoutRequest{
-		Name: fmt.Sprintf("projects/_/buckets/%v/storageLayout", bucketName),
+		Name: fmt.Sprintf("projects/_/buckets/%v/storageLayout", *bucketName),
 	}
 
 	// Set a context timeout and send the request.
-	ctx, _ = context.WithTimeout(ctx, time.Minute)
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+
 	res, err := client.GetStorageLayout(ctx, req)
 	if err != nil {
 		log.Fatalf("GetStorageLayout: %v", err)
 	}
 
 	// Use response.
-	log.Printf("Bucket %v has location type %v", bucketName, res.LocationType)
+	fmt.Printf("Bucket %v has location type %v", bucketName, res.LocationType)
 }
 
 // [END storage_control_quickstart_sample]
