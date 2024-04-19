@@ -61,7 +61,7 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
-	bucketName := testutil.TestBucket(ctx, t, tc.ProjectID, "golang-samples-transcoder-test")
+	bucketName := testutil.TestBucket(ctx, t, tc.ProjectID, "golang-samples-transcoder")
 	inputURI := "gs://" + bucketName + "/" + testBucketDirName + testVideoFileName
 	inputConcatURI := "gs://" + bucketName + "/" + testBucketDirName + testConcatFileName
 	inputOverlayImageURI := "gs://" + bucketName + "/" + testBucketDirName + testOverlayImageFileName

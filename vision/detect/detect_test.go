@@ -17,7 +17,6 @@ package main
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"strings"
 	"testing"
@@ -86,42 +85,6 @@ func TestDetect(t *testing.T) {
 }
 
 func TestDetectAsyncDocument(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	ctx := context.Background()
-
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	bucketName := fmt.Sprintf("%s-vision", tc.ProjectID)
-	bucket := client.Bucket(bucketName)
-	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
-
-	var buf bytes.Buffer
-	gcsSourceURI := "gs://python-docs-samples-tests/HodgeConj.pdf"
-	gcsDestinationURI := "gs://" + bucketName + "/vision/"
-	err = detectAsyncDocumentURI(&buf, gcsSourceURI, gcsDestinationURI)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Check that the output files exist
-	expectedFiles := []string{
-		"vision/output-1-to-2.json",
-		"vision/output-3-to-4.json",
-		"vision/output-5-to-5.json",
-	}
-	for _, filename := range expectedFiles {
-		_, err = bucket.Object(filename).Attrs(ctx)
-		if err != nil {
-			t.Fatalf("wanted object %q, got error: %v", filename, err)
-		}
-	}
-}
-
-func TestDetectAsyncDocument1(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	ctx := context.Background()

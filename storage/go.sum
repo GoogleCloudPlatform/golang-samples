@@ -16,6 +16,8 @@ cloud.google.com/go/pubsub v1.37.0/go.mod h1:YQOQr1uiUM092EXwKs56OPT650nwnawc+8/
 cloud.google.com/go/storage v1.40.0 h1:VEpDQV5CJxFmJ6ueWNsKxcr1QAYOXEgxDa+sBbJahPw=
 cloud.google.com/go/storage v1.40.0/go.mod h1:Rrj7/hKlG87BLqDJYtwR0fbPld8uJPbQ2ucUMY7Ir0g=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
+github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240111005027-4c7a1933dce2 h1:DNb3eKB9N5Q105t4x1Bbez/xzYFCw/CHPF6UaB0zeYw=
+github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240111005027-4c7a1933dce2/go.mod h1:gn/LQZWQYA+7rZhZO4Jvtx9EwxCp3CF0Ac1/hJHWqTc=
 github.com/aws/aws-sdk-go v1.44.290 h1:Md4+os9DQtJjow0lWLMzeJljsimD+XS2xwwHDr5Z+Lk=
 github.com/aws/aws-sdk-go v1.44.290/go.mod h1:aVsgQcEevwlmQ7qHE9I3h+dtQgpqhFB+i8Phjh7fkwI=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
