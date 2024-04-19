@@ -2,6 +2,8 @@ module github.com/GoogleCloudPlatform/golang-samples/vision
 
 go 1.19
 
+replace github.com/GoogleCloudPlatform/golang-samples => ../
+
 require (
 	cloud.google.com/go/storage v1.36.0
 	cloud.google.com/go/vision v1.2.0

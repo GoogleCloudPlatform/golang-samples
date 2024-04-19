@@ -2,6 +2,8 @@ module github.com/GoogleCloudPlatform/golang-samples/asset
 
 go 1.19
 
+replace github.com/GoogleCloudPlatform/golang-samples => ../
+
 require (
 	cloud.google.com/go/asset v1.17.0
 	cloud.google.com/go/bigquery v1.57.1
@@ -23,7 +25,7 @@ require (
 	cloud.google.com/go/longrunning v0.5.4 // indirect
 	cloud.google.com/go/orgpolicy v1.12.0 // indirect
 	cloud.google.com/go/osconfig v1.12.4 // indirect
-	cloud.google.com/go/storage v1.30.1 // indirect
+	cloud.google.com/go/storage v1.36.0 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/apache/arrow/go/v12 v12.0.0 // indirect
 	github.com/apache/thrift v0.16.0 // indirect
