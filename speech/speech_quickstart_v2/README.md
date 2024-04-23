@@ -21,7 +21,7 @@
 Before running any example you must first install the Speech API client:
 
 ```bash
-go get -u cloud.google.com/go/speech/apiv1
+go get -u cloud.google.com/go/speech/apiv2
 ```
 
 To run the example:
