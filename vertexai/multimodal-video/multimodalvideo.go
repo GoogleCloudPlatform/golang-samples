@@ -47,12 +47,12 @@ func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, 
 	model.SetTemperature(0.4)
 
 	// Given a video file URL, prepare video file as genai.Part
-	img := genai.FileData{
+	part := genai.FileData{
 		MIMEType: mime.TypeByExtension(filepath.Ext(video)),
 		FileURI:  video,
 	}
 
-	res, err := model.GenerateContent(ctx, img, genai.Text(prompt))
+	res, err := model.GenerateContent(ctx, part, genai.Text(prompt))
 	if err != nil {
 		return fmt.Errorf("unable to generate contents: %v", err)
 	}
