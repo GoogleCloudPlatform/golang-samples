@@ -27,11 +27,21 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// generateMultimodalContent generates a response into w, based upon the prompt
-// and video provided.
-// video and image are a Google Cloud Storage paths starting with "gs://"
-func generateMultimodalContent(w io.Writer, prompt, video, image, projectID, location, modelName string) error {
-	// prompt := `
+// multimodalPrompt is a sample prompt type consisting of one video, one image, and a text question.
+type multimodalPrompt struct {
+	// video and image are Google Cloud Storage paths starting with "gs://"
+	video, image string
+	// question is the question asked to the model
+	question string
+}
+
+// generateMultimodalContent generates a response into w, based upon the multimodal prompt
+// provided.
+func generateMultimodalContent(w io.Writer, prompt multimodalPrompt, projectID, location, modelName string) error {
+	// prompt := multimodalPrompt{
+	// 	video: "gs://cloud-samples-data/generative-ai/video/behind_the_scenes_pixel.mp4",
+	// 	image: "gs://cloud-samples-data/generative-ai/image/a-man-and-a-dog.png",
+	// 	question: `
 	// 		Watch each frame in the video carefully and answer the questions.
 	// 		Only base your answers strictly on what information is available in the video attached.
 	// 		Do not make up any information that is not part of the video and do not be too
@@ -40,36 +50,32 @@ func generateMultimodalContent(w io.Writer, prompt, video, image, projectID, loc
 	// 		Questions:
 	// 		- When is the moment in the image happening in the video? Provide a timestamp.
 	// 		- What is the context of the moment and what does the narrator say about it?
-	// `
-	//
-	// video := "gs://cloud-samples-data/generative-ai/video/behind_the_scenes_pixel.mp4"
-	// image := "gs://cloud-samples-data/generative-ai/image/a-man-and-a-dog.png"
+	// `,
 	// location := "us-central1"
 	// modelName := "gemini-1.5-pro-preview-0409"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {
-		return fmt.Errorf("unable to create client: %v", err)
+		return fmt.Errorf("unable to create client: %w", err)
 	}
 	defer client.Close()
 
 	model := client.GenerativeModel(modelName)
-	model.SetTemperature(0.4)
 
 	vidPart := genai.FileData{
-		MIMEType: mime.TypeByExtension(filepath.Ext(video)),
-		FileURI:  video,
+		MIMEType: mime.TypeByExtension(filepath.Ext(prompt.video)),
+		FileURI:  prompt.video,
 	}
 
 	imgPart := genai.FileData{
-		MIMEType: mime.TypeByExtension(filepath.Ext(image)),
-		FileURI:  image,
+		MIMEType: mime.TypeByExtension(filepath.Ext(prompt.image)),
+		FileURI:  prompt.image,
 	}
 
-	res, err := model.GenerateContent(ctx, vidPart, imgPart, genai.Text(prompt))
+	res, err := model.GenerateContent(ctx, vidPart, imgPart, genai.Text(prompt.question))
 	if err != nil {
-		return fmt.Errorf("unable to generate contents: %v", err)
+		return fmt.Errorf("unable to generate contents: %w", err)
 	}
 
 	if len(res.Candidates) == 0 ||
