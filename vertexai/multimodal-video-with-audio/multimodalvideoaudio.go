@@ -27,8 +27,8 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// generateMultimodalContent generates a response into w, based upon the prompt
-// and video provided.
+// generateMultimodalContent shows how to send video and text prompts to a model, writing the response to
+// the provided io.Writer.
 // video is a Google Cloud Storage path starting with "gs://"
 func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, modelName string) error {
 	// prompt := `
@@ -42,12 +42,11 @@ func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, 
 
 	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {
-		return fmt.Errorf("unable to create client: %v", err)
+		return fmt.Errorf("unable to create client: %w", err)
 	}
 	defer client.Close()
 
 	model := client.GenerativeModel(modelName)
-	model.SetTemperature(0.4)
 
 	// Given a video file URL, prepare video file as genai.Part
 	part := genai.FileData{
@@ -57,7 +56,7 @@ func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, 
 
 	res, err := model.GenerateContent(ctx, part, genai.Text(prompt))
 	if err != nil {
-		return fmt.Errorf("unable to generate contents: %v", err)
+		return fmt.Errorf("unable to generate contents: %w", err)
 	}
 
 	if len(res.Candidates) == 0 ||
