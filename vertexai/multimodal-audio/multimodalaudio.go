@@ -40,9 +40,8 @@ type audioPrompt struct {
 // [END generativeaionvertexai_gemini_audio_summarization]
 
 // [START generativeaionvertexai_gemini_audio_summarization]
-// summarizeAudio generates a response into w, based upon the prompt
-// and audio provided.
-// audio is a Google Cloud Storage path starting with "gs://"
+// summarizeAudio shows how to send an audio asset and a text question to a model, writing the response to the
+// provided io.Writer.
 func summarizeAudio(w io.Writer, prompt audioPrompt, projectID, location, modelName string) error {
 	// prompt := audioPrompt{
 	// 	audio: "gs://cloud-samples-data/generative-ai/audio/pixel.mp3",
