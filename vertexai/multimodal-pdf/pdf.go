@@ -25,36 +25,44 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// generateContentFromPDF generates a response into w, based upon the prompt
-// and the pdf file provided.
-// pdf is a Google Cloud Storage path starting with "gs://"
-func generateContentFromPDF(w io.Writer, prompt, pdf, projectID, location, modelName string) error {
-	// prompt := `
-	// 		Your are a very professional document summarization specialist.
+// pdfPrompt is a sample prompt type consisting of one PDF asset, and a text question.
+type pdfPrompt struct {
+	// pdfPath is a Google Cloud Storage path starting with "gs://"
+	pdfPath string
+	// question asked to the model
+	question string
+}
+
+// generateContentFromPDF generates a response into the provided io.Writer, based upon the PDF
+// asset and the question provided in the multimodal prompt.
+func generateContentFromPDF(w io.Writer, prompt pdfPrompt, projectID, location, modelName string) error {
+	// prompt := pdfPrompt{
+	// 	pdfPath: "gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf",
+	// 	question: `
+	// 		You are a very professional document summarization specialist.
 	// 		Please summarize the given document.
-	// `
-	// pdf := "gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf"
+	// 	`,
+	// }
 	// location := "us-central1"
 	// modelName := "gemini-1.5-pro-preview-0409"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {
-		return fmt.Errorf("unable to create client: %v", err)
+		return fmt.Errorf("unable to create client: %w", err)
 	}
 	defer client.Close()
 
 	model := client.GenerativeModel(modelName)
-	model.SetTemperature(0.4)
 
 	part := genai.FileData{
 		MIMEType: "application/pdf",
-		FileURI:  pdf,
+		FileURI:  prompt.pdfPath,
 	}
 
-	res, err := model.GenerateContent(ctx, part, genai.Text(prompt))
+	res, err := model.GenerateContent(ctx, part, genai.Text(prompt.question))
 	if err != nil {
-		return fmt.Errorf("unable to generate contents: %v", err)
+		return fmt.Errorf("unable to generate contents: %w", err)
 	}
 
 	if len(res.Candidates) == 0 ||

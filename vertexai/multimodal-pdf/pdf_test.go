@@ -26,15 +26,17 @@ func Test_generateContentFromPDF(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
-	prompt := `
-		Your are a very professional document summarization specialist.
-    	Please summarize the given document.
-	`
-	pdf := "gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf"
+	prompt := pdfPrompt{
+		pdfPath: "gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf",
+		question: `
+			You are a very professional document summarization specialist.
+    		Please summarize the given document.
+		`,
+	}
 	location := "us-central1"
 	modelName := "gemini-1.5-pro-preview-0409"
 
-	err := generateContentFromPDF(buf, prompt, pdf, tc.ProjectID, location, modelName)
+	err := generateContentFromPDF(buf, prompt, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Errorf("Test_generateMultimodalContent: %v", err.Error())
 	}
@@ -48,7 +50,7 @@ func Test_generateContentFromPDF(t *testing.T) {
 		"tokens",
 	} {
 		if !strings.Contains(generatedSummaryLowercase, word) {
-			t.Errorf("expected the word %q in the description of %s", word, pdf)
+			t.Errorf("expected the word %q in the description of %s", word, prompt.pdfPath)
 		}
 	}
 }
