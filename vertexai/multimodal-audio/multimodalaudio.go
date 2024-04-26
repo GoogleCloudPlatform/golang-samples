@@ -28,6 +28,14 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
+// audioPrompt is a sample prompt type consisting of one audio asset, and a text question.
+type audioPrompt struct {
+	// audio is a Google Cloud Storage path starting with "gs://"
+	audio string
+	// question asked to the model
+	question string
+}
+
 // [END generativeaionvertexai_gemini_audio_transcription]
 // [END generativeaionvertexai_gemini_audio_summarization]
 
@@ -35,20 +43,22 @@ import (
 // summarizeAudio generates a response into w, based upon the prompt
 // and audio provided.
 // audio is a Google Cloud Storage path starting with "gs://"
-func summarizeAudio(w io.Writer, prompt, audio, projectID, location, modelName string) error {
-	// prompt := `
+func summarizeAudio(w io.Writer, prompt audioPrompt, projectID, location, modelName string) error {
+	// prompt := audioPrompt{
+	// 	audio: "gs://cloud-samples-data/generative-ai/audio/pixel.mp3",
+	// 	question: `
 	// 		Please provide a summary for the audio.
 	// 		Provide chapter titles with timestamps, be concise and short, no need to provide chapter summaries.
 	// 		Do not make up any information that is not part of the audio and do not be verbose.
-	// `
-	// audio := "gs://cloud-samples-data/generative-ai/audio/pixel.mp3"
+	// 	`,
+	// }
 	// location := "us-central1"
 	// modelName := "gemini-1.5-pro-preview-0409"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {
-		return fmt.Errorf("unable to create client: %v", err)
+		return fmt.Errorf("unable to create client: %w", err)
 	}
 	defer client.Close()
 
@@ -57,13 +67,13 @@ func summarizeAudio(w io.Writer, prompt, audio, projectID, location, modelName s
 
 	// Given an audio file URL, prepare audio file as genai.Part
 	part := genai.FileData{
-		MIMEType: mime.TypeByExtension(filepath.Ext(audio)),
-		FileURI:  audio,
+		MIMEType: mime.TypeByExtension(filepath.Ext(prompt.audio)),
+		FileURI:  prompt.audio,
 	}
 
-	res, err := model.GenerateContent(ctx, part, genai.Text(prompt))
+	res, err := model.GenerateContent(ctx, part, genai.Text(prompt.question))
 	if err != nil {
-		return fmt.Errorf("unable to generate contents: %v", err)
+		return fmt.Errorf("unable to generate contents: %w", err)
 	}
 
 	if len(res.Candidates) == 0 ||
@@ -78,37 +88,41 @@ func summarizeAudio(w io.Writer, prompt, audio, projectID, location, modelName s
 // [END generativeaionvertexai_gemini_audio_summarization]
 
 // [START generativeaionvertexai_gemini_audio_transcription]
-// transcriptAudio generates a response into w, based upon the prompt
+// transcribeAudio generates a response into w, based upon the prompt
 // and audio provided.
 // audio is a Google Cloud Storage path starting with "gs://"
-func transcriptAudio(w io.Writer, prompt, audio, projectID, location, modelName string) error {
-	// prompt := `
+func transcribeAudio(w io.Writer, prompt audioPrompt, projectID, location, modelName string) error {
+	// prompt := audioPrompt{
+	// 	audio: "gs://cloud-samples-data/generative-ai/audio/pixel.mp3",
+	// 	question: `
 	// 		Can you transcribe this interview, in the format of timecode, speaker, caption.
 	// 		Use speaker A, speaker B, etc. to identify speakers.
-	// `
-	// audio := "gs://cloud-samples-data/generative-ai/audio/pixel.mp3"
+	// 	`,
+	// },
 	// location := "us-central1"
 	// modelName := "gemini-1.5-pro-preview-0409"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {
-		return fmt.Errorf("unable to create client: %v", err)
+		return fmt.Errorf("unable to create client: %w", err)
 	}
 	defer client.Close()
 
 	model := client.GenerativeModel(modelName)
+
+	// Optional: set an explicit temperature
 	model.SetTemperature(0.4)
 
 	// Given an audio file URL, prepare audio file as genai.Part
 	img := genai.FileData{
-		MIMEType: mime.TypeByExtension(filepath.Ext(audio)),
-		FileURI:  audio,
+		MIMEType: mime.TypeByExtension(filepath.Ext(prompt.audio)),
+		FileURI:  prompt.audio,
 	}
 
-	res, err := model.GenerateContent(ctx, img, genai.Text(prompt))
+	res, err := model.GenerateContent(ctx, img, genai.Text(prompt.question))
 	if err != nil {
-		return fmt.Errorf("unable to generate contents: %v", err)
+		return fmt.Errorf("unable to generate contents: %w", err)
 	}
 
 	if len(res.Candidates) == 0 ||
