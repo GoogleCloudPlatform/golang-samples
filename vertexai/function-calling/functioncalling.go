@@ -40,7 +40,7 @@ import (
 // - convert the second structured function call response into natural language
 func functionCallsChat(w io.Writer, projectID, location, modelName string) error {
 	// location := "us-central1"
-	// modelName := "gemini-1.0-pro"
+	// modelName := "gemini-1.0-pro-002"
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {
