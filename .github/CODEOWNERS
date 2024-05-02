@@ -98,3 +98,7 @@
 
 /appengine/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/serverless-runtimes
 /appengine_flexible/                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/serverless-runtimes
+
+## OpenTelemetry
+/opencensus/                       @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/opentelemetry-ops
+/opentelemetry/                       @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/opentelemetry-ops

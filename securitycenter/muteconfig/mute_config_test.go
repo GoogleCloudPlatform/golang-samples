@@ -251,6 +251,7 @@ func TestSetMuteFinding(t *testing.T) {
 }
 
 func TestSetUnmuteFinding(t *testing.T) {
+	t.Skip("see https://github.com/GoogleCloudPlatform/golang-samples/issues/3793")
 	testutil.SystemTest(t)
 
 	var buf bytes.Buffer

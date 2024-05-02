@@ -85,9 +85,8 @@ func setup(t *testing.T) *pubsub.Client {
 				}
 				timeTCreated := time.Unix(0, timestamp)
 				if time.Since(timeTCreated) > expireAge {
-					if err := t.Delete(ctx); err != nil {
-						fmt.Printf("Delete topic err: %v: %v", t.String(), err)
-					}
+					// Topic deletion can be fire and forget
+					t.Delete(ctx)
 				}
 			}
 		}
@@ -112,9 +111,8 @@ func setup(t *testing.T) *pubsub.Client {
 				}
 				timeTCreated := time.Unix(0, timestamp)
 				if time.Since(timeTCreated) > expireAge {
-					if err := s.Delete(ctx); err != nil {
-						fmt.Printf("Delete sub err: %v: %v", s.String(), err)
-					}
+					// Subscription deletion can be fire and forget
+					s.Delete(ctx)
 				}
 			}
 		}

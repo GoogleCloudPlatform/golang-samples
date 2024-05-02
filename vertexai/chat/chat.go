@@ -25,10 +25,11 @@ import (
 
 var projectId = "PROJECT_ID"
 var region = "us-central1"
-var modelName = "gemini-pro-vision"
+var modelName = "gemini-1.0-pro-vision"
 
 func makeChatRequests(projectId string, region string, modelName string) error {
-	client, err := genai.NewClient(context.TODO(), projectId, region)
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, projectId, region)
 	if err != nil {
 		return fmt.Errorf("error creating client: %v", err)
 	}
@@ -38,7 +39,7 @@ func makeChatRequests(projectId string, region string, modelName string) error {
 	chat := gemini.StartChat()
 
 	r, err := chat.SendMessage(
-		context.TODO(),
+		ctx,
 		genai.Text("Hello"))
 	if err != nil {
 		return err
@@ -47,7 +48,7 @@ func makeChatRequests(projectId string, region string, modelName string) error {
 	fmt.Println(string(rb))
 
 	r, err = chat.SendMessage(
-		context.TODO(),
+		ctx,
 		genai.Text("What are all the colors in a rainbow?"))
 	if err != nil {
 		return err
@@ -56,7 +57,7 @@ func makeChatRequests(projectId string, region string, modelName string) error {
 	fmt.Println(string(rb))
 
 	r, err = chat.SendMessage(
-		context.TODO(),
+		ctx,
 		genai.Text("Why does it appear when it rains?"))
 	if err != nil {
 		return err

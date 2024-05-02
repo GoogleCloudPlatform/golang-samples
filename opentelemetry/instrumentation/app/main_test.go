@@ -68,7 +68,7 @@ func TestWriteTelemetry(t *testing.T) {
 		t:               t,
 		expectationsMet: make(chan struct{}),
 		expectations: []*metricExpectation{
-			{name: "http.rquest.duration"},
+			{name: "http.server.duration"},
 		},
 	}
 	http.HandleFunc("/v1/metrics", ms.handleMetrics)
@@ -123,7 +123,7 @@ func TestWriteTelemetry(t *testing.T) {
 		select {
 		case <-time.After(timeoutSeconds * time.Second):
 			t.Error("Timeout waiting for metrics")
-		case <-ts.expectationsMet:
+		case <-ms.expectationsMet:
 		}
 		wg.Done()
 	}()
@@ -295,6 +295,7 @@ func (t *metricsServer) handleMetrics(w http.ResponseWriter, req *http.Request) 
 			scopeMetric := resourceMetric.ScopeMetrics().At(j)
 			for k := 0; k < scopeMetric.Metrics().Len(); k++ {
 				metric := scopeMetric.Metrics().At(k)
+				t.t.Logf("metric: %+v", metric.Name())
 				allMet := true
 				for _, expected := range t.expectations {
 					expected.update(metric)

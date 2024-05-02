@@ -12,6 +12,9 @@ INTERFACE_ACTIONS="build test lint"
 export GOLANG_SAMPLES_E2E_TEST ?= true
 export GOLANG_SAMPLES_PROJECT_ID ?=${GOOGLE_SAMPLES_PROJECT}
 
+# Required for cloud profiler tests to run
+export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn
+
 build:
 	go -C ${dir} build .
 

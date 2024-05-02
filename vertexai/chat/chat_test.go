@@ -23,7 +23,7 @@ import (
 func Test_makeChatRequests(t *testing.T) {
 	t.Skip("TODO(muncus): remove skip")
 	tc := testutil.SystemTest(t)
-	err := makeChatRequests(tc.ProjectID, "us-central1", "gemini-pro-vision")
+	err := makeChatRequests(tc.ProjectID, "us-central1", "gemini-1.0-pro-vision")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err.Error())
 	}
