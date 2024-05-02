@@ -34,7 +34,7 @@ func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, 
 	// prompt := "What is in this video?"
 	// video := "gs://cloud-samples-data/video/animals.mp4"
 	// location := "us-central1"
-	// modelName := "gemini-1.0-pro-vision"
+	// modelName := "gemini-1.0-pro-vision-001"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)

@@ -33,7 +33,7 @@ func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, 
 	// prompt := "describe what is in this picture"
 	// image := "gs://generativeai-downloads/images/scones.jpg"
 	// location := "us-central1"
-	// modelName := "gemini-1.0-pro-vision"
+	// modelName := "gemini-1.0-pro-vision-001"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
