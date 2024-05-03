@@ -14,8 +14,8 @@
 
 // systeminstruction shows an example of providing the model with additional context to understand the task
 // and get customized responses.
-// For developers, product-level behavior can be specified in system instructions, separate from prompts
-// provided by end users.
+// For developers, product-level behavior can be specified in system instructions (also known as system
+// prompts), separate from prompts provided by end users.
 package systeminstruction
 
 // [START generativeaionvertexai_gemini_system_instruction]
