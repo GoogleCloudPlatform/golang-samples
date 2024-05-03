@@ -27,9 +27,9 @@ import (
 
 // countTokens returns the number of tokens for this prompt.
 func countTokens(w io.Writer, prompt, projectID, location, modelName string) error {
-	// prompt := "why is sky blue?"
+	// prompt := "why is the sky blue?"
 	// location := "us-central1"
-	// modelName := "gemini-1.0-pro"
+	// modelName := "gemini-1.0-pro-002"
 
 	ctx := context.Background()
 
