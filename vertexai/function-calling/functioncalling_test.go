@@ -26,7 +26,7 @@ func Test_functionCallsChat(t *testing.T) {
 
 	w := io.Discard
 	location := "us-central1"
-	modelName := "gemini-1.0-pro"
+	modelName := "gemini-1.0-pro-002"
 
 	err := functionCallsChat(w, tc.ProjectID, location, modelName)
 	if err != nil {
