@@ -36,7 +36,8 @@ func textInput(w io.Writer, projectID string, location string, modelName string)
 		return fmt.Errorf("error creating client: %w", err)
 	}
 	gemini := client.GenerativeModel(modelName)
-
+	// Movie review from https://www.imdb.com/review/rw0005574/?ref_=rw_urv.
+	// Does the returned sentiment score match the reviewer's movie rating?
 	prompt := genai.Text(`Give a score from 1 - 10 to suggest if the
             following movie review is negative or positive (1 is most
             negative, 10 is most positive, 5 will be neutral). Include an
