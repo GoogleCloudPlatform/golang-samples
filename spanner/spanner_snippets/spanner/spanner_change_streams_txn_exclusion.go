@@ -83,6 +83,27 @@ func applyExcludedFromChangeStreams(w io.Writer, db string) error {
 	return err
 }
 
+// applyExcludedFromChangeStreams apply the insert mutations on Singers table excluded from allowed tracking change streams
+func applyAtLeastOnceExcludedFromChangeStreams(w io.Writer, db string) error {
+	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
+	ctx := context.Background()
+	client, err := spanner.NewClient(ctx, db)
+	if err != nil {
+		return fmt.Errorf("applyExcludedFromChangeStreams.NewClient: %w", err)
+	}
+	defer client.Close()
+	m := spanner.Insert("Singers",
+		[]string{"SingerId", "FirstName", "LastName"},
+		[]interface{}{989, "Hellen", "Lee"})
+	_, err = client.Apply(ctx, []*spanner.Mutation{m}, []spanner.ApplyOption{spanner.ExcludeTxnFromChangeStreams(), spanner.ApplyAtLeastOnce()}...)
+
+	if err != nil {
+		return err
+	}
+	fmt.Fprint(w, "applyExcludedFromChangeStreams.ApplyAtLeastOnce: New singer inserted.")
+	return err
+}
+
 // batchWriteExcludedFromChangeStreams executes the insert mutation on Singers table excluded from allowed tracking change streams
 func batchWriteExcludedFromChangeStreams(w io.Writer, db string) error {
 	// db := "projects/my-project/instances/my-instance/databases/my-database"
