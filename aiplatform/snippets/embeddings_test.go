@@ -23,14 +23,15 @@ import (
 func TestGenerateEmbeddings(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	apiEndpoint := "us-central1-aiplatform.googleapis.com:443"
-	model := "textembedding-gecko@003"
+	model := "text-embedding-004"
 	texts := []string{"banana muffins? ", "banana bread? banana muffins?"}
-	embeddings, err := embedTexts(apiEndpoint, tc.ProjectID, model, texts, "RETRIEVAL_DOCUMENT")
+	dimensionality := 5
+	embeddings, err := embedTextsPreview(apiEndpoint, tc.ProjectID, model, texts, "QUESTION_ANSWERING", &dimensionality)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(embeddings) != len(texts) || len(embeddings[0]) != 768 {
-		t.Errorf("len(embeddings), len(embeddings[0]) = %d, %d, want %d, 768", len(embeddings), len(embeddings[0]), len(texts))
+	if len(embeddings) != len(texts) || len(embeddings[0]) != dimensionality {
+		t.Errorf("len(embeddings), len(embeddings[0]) = %d, %d, want %d, %d", len(embeddings), len(embeddings[0]), len(texts), dimensionality)
 	}
 }
 
