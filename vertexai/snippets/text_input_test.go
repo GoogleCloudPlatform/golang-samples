@@ -15,7 +15,7 @@ package snippets
 
 import (
 	"bytes"
-	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -26,7 +26,9 @@ func TestTextInput(t *testing.T) {
 	buf := &bytes.Buffer{}
 	err := generateContentFromText(buf, tc.ProjectID)
 	if err != nil {
-		t.Errorf("unexpected error: %v", err)
+		t.Errorf("generateContentFromText error: %v", err)
 	}
-	fmt.Println(buf)
+	if got := buf.String(); !strings.Contains(got, "Candidates") {
+		t.Error("Candidates JSON not found in response")
+	}
 }
