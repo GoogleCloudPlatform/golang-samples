@@ -16,7 +16,6 @@ package snippets
 import (
 	"bytes"
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -25,12 +24,9 @@ import (
 func TestTextInput(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
-	err := textInput(buf, tc.ProjectID, "us-central1", "gemini-1.0-pro-vision-001")
+	err := generateContentFromText(buf, tc.ProjectID)
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, "positive") {
-		t.Error("expected text content not found in response")
 	}
 	fmt.Println(buf)
 }

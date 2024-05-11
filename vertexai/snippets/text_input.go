@@ -23,9 +23,9 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-func textInput(w io.Writer, projectID string, location string, modelName string) error {
-	// location := "us-central1"
-	// modelName := "gemini-1.0-pro-vision-001"
+func generateContentFromText(w io.Writer, projectID string) error {
+	location := "us-central1"
+	modelName := "gemini-1.0-pro-vision-001"
 
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, projectID, location)
@@ -33,23 +33,15 @@ func textInput(w io.Writer, projectID string, location string, modelName string)
 		return fmt.Errorf("error creating client: %w", err)
 	}
 	gemini := client.GenerativeModel(modelName)
-	// Does the returned sentiment score match the reviewer's movie rating?
-	prompt := genai.Text(`Give a score from 1 - 10 to suggest if the
-            following movie review is negative or positive (1 is most
-            negative, 10 is most positive, 5 will be neutral). Include an
-            explanation.
-
-            The movie takes some time to build, but that is part of its beauty.
-            By the time you are hooked, this tale of friendship and hope is
-            thrilling and affecting, until the very last scene. You will find
-            yourself rooting for the hero every step of the way. This is the
-            sharpest, most original animated film I have seen in years.
-            I would give it 8 out of 10 stars.`)
+	prompt := genai.Text(
+		"What's a good name for a flower shop that specializes in selling bouquets of dried flowers?")
 
 	resp, err := gemini.GenerateContent(ctx, prompt)
 	if err != nil {
 		return fmt.Errorf("error generating content: %w", err)
 	}
+	// See the JSON response in
+	// https://pkg.go.dev/cloud.google.com/go/vertexai/genai#GenerateContentResponse.
 	rb, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
 		return fmt.Errorf("json.MarshalIndent: %w", err)
