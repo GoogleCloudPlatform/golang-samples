@@ -777,19 +777,23 @@ func SnippetQuery_RunQueryWithExplain(w io.Writer) {
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	defer client.Close()
 
-	// [START datastore_run_query_with_explain]
+	// [START datastore_query_explain_entity]
 	// Build the query
 	query := datastore.NewQuery("Task")
 
-	// Pass ExplainOptions to get *only* metrics from the planning stages
-	it := client.RunWithOptions(ctx, query, []datastore.RunOption{datastore.ExplainOptions{}}...)
+	// Set the explain options to get back *only* the plan summary
+	it := client.RunWithOptions(ctx, query, datastore.ExplainOptions{})
 	_, err := it.Next(nil)
 
-	// Print plan summary
-	planSummary := it.ExplainMetrics.PlanSummary
-	fmt.Fprintln(w, "----- Plan Summary -----")
-	fmt.Fprintf(w, "%+v\n", planSummary)
-	// [END datastore_run_query_with_explain]
+	// Get the explain metrics
+	explainMetrics := it.ExplainMetrics
+
+	planSummary := explainMetrics.PlanSummary
+	fmt.Fprintln(w, "----- Indexes Used -----")
+	for k, v := range planSummary.IndexesUsed {
+		fmt.Fprintf(w, "%+v: %+v\n", k, v)
+	}
+	// [END datastore_query_explain_entity]
 	_ = err // Check non-nil errors other than Iterator.Done
 }
 
@@ -798,13 +802,13 @@ func SnippetQuery_RunQueryWithExplainAnalyze(w io.Writer) {
 	client, _ := datastore.NewClient(ctx, "my-proj")
 	defer client.Close()
 
-	// [START datastore_run_query_with_explain_analyze]
+	// [START datastore_query_explain_analyze_entity]
 	// Build the query
 	query := datastore.NewQuery("Task")
 
-	// Pass ExplainOptions with Analyze set to true to get full query results along with
-	// both planning and execution stage metrics.
-	it := client.RunWithOptions(ctx, query, []datastore.RunOption{datastore.ExplainOptions{Analyze: true}}...)
+	// Set explain options with analzye = true to get back the query stats, plan info, and query
+	// results
+	it := client.RunWithOptions(ctx, query, datastore.ExplainOptions{Analyze: true})
 
 	// Get the query results
 	fmt.Fprintln(w, "----- Query Results -----")
@@ -815,19 +819,91 @@ func SnippetQuery_RunQueryWithExplainAnalyze(w io.Writer) {
 			break
 		}
 		if err != nil {
-			log.Fatalf("Error fetching next task: %v", err)
+			fmt.Fprintf(w, "Error fetching next task: %v", err)
+			return
 		}
 		fmt.Fprintf(w, "Task %q, Priority %d\n", task.Description, task.Priority)
 	}
 
-	// Print plan summary
+	// Get plan summary
 	planSummary := it.ExplainMetrics.PlanSummary
-	fmt.Fprintln(w, "----- Plan Summary -----")
-	fmt.Fprintf(w, "%+v\n", planSummary)
+	fmt.Fprintln(w, "----- Indexes Used -----")
+	for k, v := range planSummary.IndexesUsed {
+		fmt.Fprintf(w, "%+v: %+v\n", k, v)
+	}
 
-	// Print aggregated stats from the execution of the query
+	// Get the execution stats
 	executionStats := it.ExplainMetrics.ExecutionStats
 	fmt.Fprintln(w, "----- Execution Stats -----")
 	fmt.Fprintf(w, "%+v\n", executionStats)
-	// [END datastore_run_query_with_explain_analyze]
+	fmt.Fprintln(w, "----- Debug Stats -----")
+	for k, v := range *executionStats.DebugStats {
+		fmt.Fprintf(w, "%+v: %+v\n", k, v)
+	}
+	// [END datastore_query_explain_analyze_entity]
+}
+
+func SnippetQuery_RunAggregationQueryWithExplain(w io.Writer) {
+	ctx := context.Background()
+	client, _ := datastore.NewClient(ctx, "my-proj")
+	defer client.Close()
+
+	// [START datastore_query_explain_aggregation]
+	// Build the query
+	query := datastore.NewQuery("Task")
+
+	// Set the explain options to get back *only* the plan summary
+	ar, err := client.RunAggregationQueryWithOptions(ctx, query.NewAggregationQuery().WithCount("count"), datastore.ExplainOptions{})
+
+	// Get the explain metrics
+	explainMetrics := ar.ExplainMetrics
+
+	planSummary := explainMetrics.PlanSummary
+	fmt.Fprintln(w, "----- Indexes Used -----")
+	for k, v := range planSummary.IndexesUsed {
+		fmt.Fprintf(w, "%+v: %+v\n", k, v)
+	}
+	// [END datastore_query_explain_aggregation]
+
+	_ = err // Check non-nil errors
+}
+
+func SnippetQuery_RunAggregationQueryWithExplainAnalyze(w io.Writer) {
+	ctx := context.Background()
+	client, _ := datastore.NewClient(ctx, "my-proj")
+	defer client.Close()
+
+	// [START datastore_query_explain_analyze_aggregation]
+	// Build the query
+	query := datastore.NewQuery("Task")
+
+	// Set explain options with analzye = true to get back the query stats, plan info, and query
+	// results
+	countAlias := "count"
+	ar, err := client.RunAggregationQueryWithOptions(ctx,
+		query.NewAggregationQuery().WithCount(countAlias), datastore.ExplainOptions{Analyze: true})
+
+	// Get the query results
+	fmt.Fprintln(w, "----- Query Results -----")
+	result := ar.Result[countAlias]
+	fmt.Fprintf(w, "Count %v\n", result)
+
+	// Get plan summary
+	planSummary := ar.ExplainMetrics.PlanSummary
+	fmt.Fprintln(w, "----- Indexes Used -----")
+	for k, v := range planSummary.IndexesUsed {
+		fmt.Fprintf(w, "%+v: %+v\n", k, v)
+	}
+
+	// Get the execution stats
+	executionStats := ar.ExplainMetrics.ExecutionStats
+	fmt.Fprintln(w, "----- Execution Stats -----")
+	fmt.Fprintf(w, "%+v\n", executionStats)
+	fmt.Fprintln(w, "----- Debug Stats -----")
+	for k, v := range *executionStats.DebugStats {
+		fmt.Fprintf(w, "%+v: %+v\n", k, v)
+	}
+	// [END datastore_query_explain_analyze_aggregation]
+
+	_ = err // Check non-nil errors
 }
