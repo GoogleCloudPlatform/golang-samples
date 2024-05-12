@@ -22,10 +22,9 @@ import (
 )
 
 func Test_tryGemini(t *testing.T) {
-	t.Skip("TODO(muncus): remove skip")
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
-	err := tryGemini(buf, tc.ProjectID, "us-central1", "gemini-1.0-pro-vision")
+	err := tryGemini(buf, tc.ProjectID, "us-central1", "gemini-1.0-pro-vision-001")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}

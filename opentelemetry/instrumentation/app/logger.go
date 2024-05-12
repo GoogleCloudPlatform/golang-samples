@@ -57,11 +57,16 @@ func replacer(groups []string, a slog.Attr) slog.Attr {
 	// Rename attribute keys to match Cloud Logging structured log format
 	switch a.Key {
 	case slog.LevelKey:
-		return slog.Any("severity", a.Value)
+		a.Key = "severity"
+		// Map slog.Level string values to Cloud Logging LogSeverity
+		// https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity
+		if level := a.Value.Any().(slog.Level); level == slog.LevelWarn {
+			a.Value = slog.StringValue("WARNING")
+		}
 	case slog.TimeKey:
-		return slog.Any("timestamp", a.Value)
+		a.Key = "timestamp"
 	case slog.MessageKey:
-		return slog.Any("message", a.Value)
+		a.Key = "message"
 	}
 	return a
 }
