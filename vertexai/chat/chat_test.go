@@ -15,15 +15,16 @@
 package chat
 
 import (
+	"io"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func Test_makeChatRequests(t *testing.T) {
-	t.Skip("TODO(muncus): remove skip")
+	w := io.Discard
 	tc := testutil.SystemTest(t)
-	err := makeChatRequests(tc.ProjectID, "us-central1", "gemini-1.0-pro-vision")
+	err := makeChatRequests(w, tc.ProjectID, "us-central1", "gemini-1.0-pro-002")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err.Error())
 	}
