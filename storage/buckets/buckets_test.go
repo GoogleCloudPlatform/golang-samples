@@ -702,8 +702,6 @@ func TestRPO(t *testing.T) {
 		t.Fatalf("createBucketTurboReplication: %v", err)
 	}
 
-	testutil.WaitForBucketToExist(ctx, t, bucket)
-
 	// Verify that RPO was set correctly on creation
 	attrs, err := bucket.Attrs(ctx)
 	if err != nil {
