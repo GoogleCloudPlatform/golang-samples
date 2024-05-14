@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// multimodalall shows an example of understanding as multimodal input a video having audio
+// multimodalall shows an example of understanding a video with audio as multimodal input
 package multimodalall
 
 // [START generativeaionvertexai_gemini_all_modalities]
