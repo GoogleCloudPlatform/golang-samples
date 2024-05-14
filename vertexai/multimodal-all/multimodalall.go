@@ -35,9 +35,9 @@ type multimodalPrompt struct {
 	question string
 }
 
-// generateMultimodalContent shows how to send a multi-modal prompt to a model, writing the response to
+// generateContentFromVideoWithAudio shows how to send a multi-modal prompt to a model, writing the response to
 // the provided io.Writer.
-func generateMultimodalContent(w io.Writer, prompt multimodalPrompt, projectID, location, modelName string) error {
+func generateContentFromVideoWithAudio(w io.Writer, prompt multimodalPrompt, projectID, location, modelName string) error {
 	// prompt := multimodalPrompt{
 	// 	video: "gs://cloud-samples-data/generative-ai/video/behind_the_scenes_pixel.mp4",
 	// 	image: "gs://cloud-samples-data/generative-ai/image/a-man-and-a-dog.png",

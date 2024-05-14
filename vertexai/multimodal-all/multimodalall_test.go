@@ -21,7 +21,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func Test_generateMultimodalContent(t *testing.T) {
+func Test_generateContentFromVideoWithAudio(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
@@ -43,9 +43,9 @@ func Test_generateMultimodalContent(t *testing.T) {
 	location := "us-central1"
 	modelName := "gemini-1.5-pro-preview-0409"
 
-	err := generateMultimodalContent(buf, prompt, tc.ProjectID, location, modelName)
+	err := generateContentFromVideoWithAudio(buf, prompt, tc.ProjectID, location, modelName)
 	if err != nil {
-		t.Errorf("Test_generateMultimodalContent: %v", err.Error())
+		t.Errorf("Test_generateContentFromVideoWithAudio: %v", err.Error())
 	}
 
 	// The generated text may look like "The moment in the image happens at
