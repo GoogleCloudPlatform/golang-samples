@@ -15,7 +15,6 @@
 package main
 
 // [START cloudrun_grpc_conn]
-// [START run_grpc_conn]
 
 import (
 	"crypto/tls"
@@ -51,5 +50,4 @@ func NewConn(host string, insecure bool) (*grpc.ClientConn, error) {
 	return grpc.Dial(host, opts...)
 }
 
-// [END run_grpc_conn]
 // [END cloudrun_grpc_conn]
