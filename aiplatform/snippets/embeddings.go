@@ -28,7 +28,7 @@ import (
 )
 
 func embedTexts(
-	project, texts []string) ([][]float32, error) {
+	project string, texts []string) ([][]float32, error) {
 	ctx := context.Background()
 
 	apiEndpoint := "us-central1-aiplatform.googleapis.com"
