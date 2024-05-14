@@ -28,9 +28,13 @@ import (
 )
 
 func embedTexts(
-	apiEndpoint, project, model string, texts []string,
-	task string, customOutputDimensionality *int) ([][]float32, error) {
+	project, texts []string) ([][]float32, error) {
 	ctx := context.Background()
+
+	apiEndpoint := "us-central1-aiplatform.googleapis.com"
+	model := "text-embedding-004"
+	task := "classification"
+	customOutputDimensionality := 256
 
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {
