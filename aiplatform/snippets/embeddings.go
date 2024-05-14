@@ -57,7 +57,7 @@ func embedTexts(
 			},
 		})
 	}
-	outputDimensionality = structpb.NewNumberValue(float64(*customOutputDimensionality))
+	outputDimensionality = structpb.NewNumberValue(float64(customOutputDimensionality))
 
 	params := structpb.NewStructValue(&structpb.Struct{
 		Fields: map[string]*structpb.Value{"outputDimensionality": outputDimensionality},
