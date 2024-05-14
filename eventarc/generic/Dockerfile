@@ -5,14 +5,13 @@
 # You may obtain a copy of the License at
 #
 #    https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START eventarc_generic_dockerfile]
 
 # Use the offical golang image to create a binary.
 # This is based on Debian and sets the GOPATH to /go.
@@ -47,5 +46,3 @@ COPY --from=builder /app/server /server
 
 # Run the web service on container startup.
 CMD ["/server"]
-
-# [END eventarc_generic_dockerfile]
