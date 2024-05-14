@@ -40,6 +40,7 @@ func TestGenerateEmbeddings(t *testing.T) {
 
 func TestGenerateEmbeddingsPreview(t *testing.T) {
 	tc := testutil.SystemTest(t)
+	apiEndpoint := "us-central1-aiplatform.googleapis.com:443"
 	model := "text-embedding-preview-0409"
 	texts := []string{"banana muffins? ", "banana bread? banana muffins?"}
 	dimensionality := 5
