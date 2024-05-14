@@ -53,10 +53,9 @@ func systemInstruction(w io.Writer, instruction, prompt, projectID, location, mo
 		Parts: []genai.Part{genai.Text(instruction)},
 	}
 
-	chat := model.StartChat()
-	res, err := chat.SendMessage(ctx, genai.Text(prompt))
+	res, err := model.GenerateContent(ctx, genai.Text(prompt))
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to generate contents: %w", err)
 	}
 	if len(res.Candidates) == 0 ||
 		len(res.Candidates[0].Content.Parts) == 0 {
