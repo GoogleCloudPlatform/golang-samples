@@ -24,7 +24,7 @@ func TestGenerateEmbeddings(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	texts := []string{"banana muffins? ", "banana bread? banana muffins?"}
 	dimensionality := 5
-	embeddings, err := embedTextsPreview(tc.ProjectID, texts)
+	embeddings, err := embedTexts(tc.ProjectID, texts)
 	if err != nil {
 		t.Fatal(err)
 	}
