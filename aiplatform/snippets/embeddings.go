@@ -33,7 +33,7 @@ func embedTexts(
 
 	apiEndpoint := "us-central1-aiplatform.googleapis.com:443"
 	model := "text-embedding-004"
-	task := "classification"
+	task := "QUESTION_ANSWERING"
 	customOutputDimensionality := 5
 
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
