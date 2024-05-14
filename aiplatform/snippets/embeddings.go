@@ -34,7 +34,7 @@ func embedTexts(
 	apiEndpoint := "us-central1-aiplatform.googleapis.com"
 	model := "text-embedding-004"
 	task := "classification"
-	customOutputDimensionality := 256
+	customOutputDimensionality := 5
 
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {

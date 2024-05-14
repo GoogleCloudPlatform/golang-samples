@@ -23,7 +23,8 @@ import (
 func TestGenerateEmbeddings(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	texts := []string{"banana muffins? ", "banana bread? banana muffins?"}
-	embeddings, err := embedTextsPreview(tc.ProjectID, texts, &dimensionality)
+	dimensionality := 5
+	embeddings, err := embedTextsPreview(tc.ProjectID, texts)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,7 +40,6 @@ func TestGenerateEmbeddings(t *testing.T) {
 
 func TestGenerateEmbeddingsPreview(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	apiEndpoint := "us-central1-aiplatform.googleapis.com:443"
 	model := "text-embedding-preview-0409"
 	texts := []string{"banana muffins? ", "banana bread? banana muffins?"}
 	dimensionality := 5
