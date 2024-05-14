@@ -31,7 +31,7 @@ func embedTexts(
 	project string, texts []string) ([][]float32, error) {
 	ctx := context.Background()
 
-	apiEndpoint := "us-central1-aiplatform.googleapis.com"
+	apiEndpoint := "us-central1-aiplatform.googleapis.com:443"
 	model := "text-embedding-004"
 	task := "classification"
 	customOutputDimensionality := 5
