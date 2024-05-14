@@ -1,5 +1,9 @@
 assign_issues_by:
 - labels:
+  - 'api: routeoptimization'
+  to:
+  - bshi
+- labels:
   - "api: asset"
   to:
   - GoogleCloudPlatform/cloud-asset-analysis-team
