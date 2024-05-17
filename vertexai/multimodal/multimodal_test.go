@@ -28,7 +28,7 @@ func Test_generateMultimodalContent(t *testing.T) {
 	prompt := "describe what is in this picture"
 	image := "gs://generativeai-downloads/images/scones.jpg"
 	location := "us-central1"
-	modelName := "gemini-1.0-pro-vision"
+	modelName := "gemini-1.0-pro-vision-001"
 
 	err := generateMultimodalContent(buf, prompt, image, tc.ProjectID, location, modelName)
 	if err != nil {

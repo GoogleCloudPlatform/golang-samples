@@ -61,7 +61,7 @@ func CreateTestBucket(ctx context.Context, t *testing.T, client *storage.Client,
 	return bucketName
 }
 
-// DeleteBucketIfExists deletes a bucket and all its objects
+// DeleteBucketIfExists deletes a bucket and all its objects.
 func DeleteBucketIfExists(ctx context.Context, client *storage.Client, bucket string) error {
 	b := client.Bucket(bucket)
 
@@ -126,7 +126,7 @@ func UniqueBucketName(prefix string) string {
 	return strings.Join([]string{prefix, uuid.New().String()}, "-")
 }
 
-// DeleteExpiredBuckets deletes old testing buckets that weren't cleaned previously
+// DeleteExpiredBuckets deletes old testing buckets that weren't cleaned previously.
 func DeleteExpiredBuckets(client *storage.Client, projectID, prefix string, expireAge time.Duration) error {
 	ctx := context.Background()
 

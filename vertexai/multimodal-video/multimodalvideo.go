@@ -34,7 +34,7 @@ func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, 
 	// prompt := "What is in this video?"
 	// video := "gs://cloud-samples-data/video/animals.mp4"
 	// location := "us-central1"
-	// modelName := "gemini-1.0-pro-vision"
+	// modelName := "gemini-1.0-pro-vision-001"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
@@ -47,12 +47,12 @@ func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, 
 	model.SetTemperature(0.4)
 
 	// Given a video file URL, prepare video file as genai.Part
-	img := genai.FileData{
+	part := genai.FileData{
 		MIMEType: mime.TypeByExtension(filepath.Ext(video)),
 		FileURI:  video,
 	}
 
-	res, err := model.GenerateContent(ctx, img, genai.Text(prompt))
+	res, err := model.GenerateContent(ctx, part, genai.Text(prompt))
 	if err != nil {
 		return fmt.Errorf("unable to generate contents: %v", err)
 	}

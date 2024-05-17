@@ -13,7 +13,6 @@
 // limitations under the License.
 
 // [START cloudrun_imageproc_controller]
-// [START run_imageproc_controller]
 
 // Sample image-processing is a Cloud Run service which performs asynchronous processing on images.
 package main
@@ -87,5 +86,4 @@ func HelloPubSub(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// [END run_imageproc_controller]
 // [END cloudrun_imageproc_controller]
