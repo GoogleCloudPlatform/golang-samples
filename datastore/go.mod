@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	cloud.google.com/go/datastore v1.15.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240111005027-4c7a1933dce2
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240514191801-f4bb2dc7b27f
 	google.golang.org/api v0.176.1
 	google.golang.org/genproto v0.0.0-20240227224415-6ceb2ff114de
 )
@@ -16,7 +16,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.3.0 // indirect
 	cloud.google.com/go/iam v1.1.6 // indirect
 	cloud.google.com/go/longrunning v0.5.5 // indirect
-	cloud.google.com/go/storage v1.36.0 // indirect
+	cloud.google.com/go/storage v1.37.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
