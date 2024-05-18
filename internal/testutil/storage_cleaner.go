@@ -120,8 +120,7 @@ func DeleteBucketIfExists(ctx context.Context, client *storage.Client, bucket st
 	return fmt.Errorf("failed to delete bucket %q", bucket)
 }
 
-// UniqueBucketName returns a unique name with the test prefix
-// Any bucket created with this prefix may be deleted by DeleteExpiredBuckets.
+// UniqueBucketName returns a unique name with the test prefix.
 func UniqueBucketName(prefix string) string {
 	return strings.Join([]string{prefix, uuid.New().String()}, "-")
 }
