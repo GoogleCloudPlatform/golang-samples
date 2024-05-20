@@ -25,14 +25,12 @@ import (
 )
 
 // setAutoclass sets the Autoclass configuration for a bucket.
-// See https://cloud.google.com/storage/docs/using-autoclass for more information.
-
-// Note: To modify Autoclass, you must provide the updated Autoclass configuration
-// with the enabled field explicitly set.
 func setAutoclass(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
-	// Enable Autoclass for a bucket. Set enabled to false to disable Autoclass.
-	// Set Autoclass.TerminalStorageClass, valid values are NEARLINE and ARCHIVE.
+
+	// To update the configuration for Autoclass.TerminalStorageClass,
+	// Autoclass.Enabled must also be set to true.
+	// To disable autoclass on the bucket, set to an empty &Autoclass{}.
 	enabled := true
 	terminalStorageClass := "ARCHIVE"
 	ctx := context.Background()
