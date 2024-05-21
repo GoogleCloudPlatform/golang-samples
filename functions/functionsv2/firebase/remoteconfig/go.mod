@@ -7,6 +7,11 @@ require github.com/GoogleCloudPlatform/functions-framework-go v1.8.0
 require google.golang.org/protobuf v1.33.0
 
 require (
+	github.com/google/go-cmp v0.6.0 // indirect
+	golang.org/x/time v0.5.0 // indirect
+)
+
+require (
 	github.com/cloudevents/sdk-go/v2 v2.15.2
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/google-cloudevents-go v0.7.1
