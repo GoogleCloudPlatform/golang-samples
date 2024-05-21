@@ -30,7 +30,7 @@ import (
 func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, modelName string) error {
 	// prompt := "describe this image."
 	// location := "us-central1"
-	// model := "gemini-1.0-pro-vision"
+	// model := "gemini-1.0-pro-vision-001"
 	// image := "gs://cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg"
 	ctx := context.Background()
 

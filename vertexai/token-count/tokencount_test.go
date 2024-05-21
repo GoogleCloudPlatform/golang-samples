@@ -26,9 +26,9 @@ import (
 func Test_countTokens(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	prompt := "why is sky blue?"
+	prompt := "why is the sky blue?"
 	location := "us-central1"
-	modelName := "gemini-1.0-pro"
+	modelName := "gemini-1.0-pro-002"
 
 	var buf bytes.Buffer
 	err := countTokens(&buf, prompt, tc.ProjectID, location, modelName)
@@ -44,7 +44,7 @@ func Test_countTokens(t *testing.T) {
 		t.Fatalf("Test_countTokens: %v", err.Error())
 	}
 
-	// "why is sky blue?" is expected to account for (more or less) 5 tokens
+	// "why is the sky blue?" is expected to account for (more or less) 5 tokens
 	// Extremely low or high values would not be correct
 	if n <= 1 {
 		t.Errorf("Expected more than 1 token, got %d", n)

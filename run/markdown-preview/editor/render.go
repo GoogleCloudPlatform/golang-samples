@@ -15,7 +15,6 @@
 package main
 
 // [START cloudrun_secure_request]
-// [START run_secure_request]
 import (
 	"bytes"
 	"context"
@@ -65,11 +64,9 @@ func (s *RenderService) NewRequest(method string) (*http.Request, error) {
 	return req, nil
 }
 
-// [END run_secure_request]
 // [END cloudrun_secure_request]
 
 // [START cloudrun_secure_request_do]
-// [START run_secure_request_do]
 
 var renderClient = &http.Client{Timeout: 30 * time.Second}
 
@@ -99,5 +96,4 @@ func (s *RenderService) Render(in []byte) ([]byte, error) {
 	return out, nil
 }
 
-// [END run_secure_request_do]
 // [END cloudrun_secure_request_do]
