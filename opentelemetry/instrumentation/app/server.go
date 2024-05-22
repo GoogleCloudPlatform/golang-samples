@@ -19,7 +19,6 @@ import (
 	"log/slog"
 	"math/rand"
 	"net/http"
-	"time"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
@@ -28,11 +27,9 @@ import (
 // the number of milliseconds slept as its response.
 // [START opentelemetry_instrumentation_handle_single]
 func handleSingle(w http.ResponseWriter, r *http.Request) {
-	sleepTime := time.Duration(100+rand.Intn(100)) * time.Millisecond
+	elapsedTime := doWork(r.Context(), r.Host)
 
-	time.Sleep(sleepTime)
-
-	fmt.Fprintf(w, "slept %v\n", sleepTime)
+	fmt.Fprintf(w, "work completed in %v\n", elapsedTime)
 }
 
 // [END opentelemetry_instrumentation_handle_single]
