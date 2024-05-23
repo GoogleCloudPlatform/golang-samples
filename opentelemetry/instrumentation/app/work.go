@@ -14,6 +14,7 @@ const name = "work"
 
 var (
 	meter         = otel.Meter(name)
+	tracer        = otel.Tracer(name)
 	workHistogram metric.Int64Histogram
 )
 
@@ -35,13 +36,17 @@ func doWork(ctx context.Context, host string) time.Duration {
 	start := time.Now()
 	hostValue := attribute.String("host.value", host)
 
+	// simulate the overall work by sleeping
 	sleepTime := time.Duration(100+rand.Intn(100)) * time.Millisecond
 	time.Sleep(sleepTime)
 
+	// wrap the random number generation in a span - to better visualize the time spent in this part
+	traceCtx, span := tracer.Start(ctx, "doWork")
 	for i := 0; i < 10; i++ {
 		randomNum := rand.Intn(100)
-		workHistogram.Record(ctx, int64(randomNum), metric.WithAttributes(hostValue))
+		workHistogram.Record(traceCtx, int64(randomNum), metric.WithAttributes(hostValue))
 	}
+	span.End()
 
 	elapsedTime := time.Since(start)
 	return elapsedTime
