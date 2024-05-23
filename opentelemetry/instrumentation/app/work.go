@@ -28,13 +28,16 @@ func init() {
 	}
 }
 
+// doWork simulates a some job being triggerred in response to an API call to the server.
+// This function computes 10 random values and records them into a histogram which can be
+// later visualized as a distribution.
 func doWork(ctx context.Context, host string) time.Duration {
 	start := time.Now()
-
 	hostValue := attribute.String("host.value", host)
 
 	sleepTime := time.Duration(100+rand.Intn(100)) * time.Millisecond
 	time.Sleep(sleepTime)
+
 	for i := 0; i < 10; i++ {
 		randomNum := rand.Intn(100)
 		workHistogram.Record(ctx, int64(randomNum), metric.WithAttributes(hostValue))
