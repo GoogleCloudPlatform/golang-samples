@@ -13,15 +13,16 @@ import (
 const name = "work"
 
 var (
-	meter   = otel.Meter(name)
-	workCnt metric.Int64Counter
+	meter         = otel.Meter(name)
+	workHistogram metric.Int64Histogram
 )
 
 func init() {
 	var err error
-	workCnt, err = meter.Int64Counter("example.counter",
-		metric.WithDescription("Processed Jobs"),
-		metric.WithUnit("{job_processed}"))
+	workHistogram, err = meter.Int64Histogram("example.histogram",
+		metric.WithDescription("Sample histogram"),
+		metric.WithUnit("1"))
+
 	if err != nil {
 		panic(err)
 	}
@@ -29,11 +30,15 @@ func init() {
 
 func doWork(ctx context.Context, host string) time.Duration {
 	start := time.Now()
+
+	hostValue := attribute.String("host.value", host)
+
 	sleepTime := time.Duration(100+rand.Intn(100)) * time.Millisecond
 	time.Sleep(sleepTime)
-
-	jobAttrs := attribute.String("host.value", host)
-	workCnt.Add(ctx, 1, metric.WithAttributes(jobAttrs))
+	for i := 0; i < 10; i++ {
+		randomNum := rand.Intn(100)
+		workHistogram.Record(ctx, int64(randomNum), metric.WithAttributes(hostValue))
+	}
 
 	elapsedTime := time.Since(start)
 	return elapsedTime
