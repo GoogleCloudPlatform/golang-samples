@@ -16,8 +16,6 @@ package main
 
 import (
 	"fmt"
-	"log/slog"
-	"math/rand"
 	"net/http"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
@@ -37,17 +35,10 @@ func handleSingle(w http.ResponseWriter, r *http.Request) {
 // /single endpoint.
 // [START opentelemetry_instrumentation_handle_multi]
 func handleMulti(w http.ResponseWriter, r *http.Request) {
-	subRequests := 3 + rand.Intn(4)
-	// Write a structured log with the request context, which allows the log to
-	// be linked with the trace for this request.
-	slog.InfoContext(r.Context(), "handle /multi request", slog.Int("subRequests", subRequests))
-
-	// Make 3-7 http requests to the /single endpoint.
-	for i := 0; i < subRequests; i++ {
-		if err := callSingle(r.Context()); err != nil {
-			http.Error(w, err.Error(), http.StatusBadGateway)
-			return
-		}
+	err := computeSubrequests(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadGateway)
+		return
 	}
 
 	fmt.Fprintln(w, "ok")

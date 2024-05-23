@@ -15,6 +15,7 @@
 package main
 
 import (
+	"log/slog"
 	"math/rand"
 	"net/http"
 	"time"
@@ -27,9 +28,10 @@ import (
 const name = "work"
 
 var (
-	meter          = otel.Meter(name)
-	tracer         = otel.Tracer(name)
-	sleepHistogram metric.Int64Histogram
+	meter                = otel.Meter(name)
+	tracer               = otel.Tracer(name)
+	sleepHistogram       metric.Int64Histogram
+	subRequestsHistogram metric.Int64Histogram
 )
 
 func init() {
@@ -38,15 +40,22 @@ func init() {
 		metric.WithDescription("Sample histogram to measure time spent in sleeping"),
 		metric.WithExplicitBucketBoundaries(50, 75, 100, 125, 150, 200),
 		metric.WithUnit("ms"))
+	if err != nil {
+		panic(err)
+	}
 
+	subRequestsHistogram, err = meter.Int64Histogram("example.subrequests.histogram",
+		metric.WithDescription("Sample histogram to measure time spent in sleeping"),
+		metric.WithExplicitBucketBoundaries(2, 4, 6, 8, 10),
+		metric.WithUnit("1"))
 	if err != nil {
 		panic(err)
 	}
 }
 
 // randomSleep simulates a some job being triggerred in response to an API call to the server.
-// This function computes 10 random values and records them into a histogram which can be
-// later visualized as a distribution.
+// This function records the time spent in sleeping in a histogram which can later be
+// visualized as a distribution.
 func randomSleep(r *http.Request) time.Duration {
 	ctx, span := tracer.Start(r.Context(), "randomSleep")
 	defer span.End()
@@ -60,4 +69,28 @@ func randomSleep(r *http.Request) time.Duration {
 	// record time slept
 	sleepHistogram.Record(ctx, int64(sleepTime/time.Millisecond), metric.WithAttributes(hostValue))
 	return sleepTime
+}
+
+// computeSubrequests performs the task of making 3-7 http of requests to /single endpoint on localhost:8080.
+// This function records the number of subrequests made in a histogram which can later be visualized
+// as a distribution.
+func computeSubrequests(r *http.Request) error {
+	ctx, span := tracer.Start(r.Context(), "subrequests")
+	defer span.End()
+
+	subRequests := 3 + rand.Intn(4)
+	// Write a structured log with the request context, which allows the log to
+	// be linked with the trace for this request.
+	slog.InfoContext(ctx, "computing multiple requests", slog.Int("subRequests", subRequests))
+
+	// Make 3-7 http requests to the /single endpoint.
+	for i := 0; i < subRequests; i++ {
+		if err := callSingle(ctx); err != nil {
+			return err
+		}
+	}
+
+	// record number of sub-requests made
+	subRequestsHistogram.Record(ctx, int64(subRequests))
+	return nil
 }
