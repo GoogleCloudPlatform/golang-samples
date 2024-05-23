@@ -15,8 +15,8 @@
 package main
 
 import (
-	"context"
 	"math/rand"
+	"net/http"
 	"time"
 
 	"go.opentelemetry.io/otel"
@@ -27,41 +27,37 @@ import (
 const name = "work"
 
 var (
-	meter         = otel.Meter(name)
-	tracer        = otel.Tracer(name)
-	workHistogram metric.Int64Histogram
+	meter          = otel.Meter(name)
+	tracer         = otel.Tracer(name)
+	sleepHistogram metric.Int64Histogram
 )
 
 func init() {
 	var err error
-	workHistogram, err = meter.Int64Histogram("example.histogram",
-		metric.WithDescription("Sample histogram"),
-		metric.WithUnit("1"))
+	sleepHistogram, err = meter.Int64Histogram("example.sleep.histogram",
+		metric.WithDescription("Sample histogram to measure time spent in sleeping"),
+		metric.WithExplicitBucketBoundaries(50, 75, 100, 125, 150, 200),
+		metric.WithUnit("ms"))
 
 	if err != nil {
 		panic(err)
 	}
 }
 
-// doWork simulates a some job being triggerred in response to an API call to the server.
+// randomSleep simulates a some job being triggerred in response to an API call to the server.
 // This function computes 10 random values and records them into a histogram which can be
 // later visualized as a distribution.
-func doWork(ctx context.Context, host string) time.Duration {
-	start := time.Now()
-	hostValue := attribute.String("host.value", host)
+func randomSleep(r *http.Request) time.Duration {
+	ctx, span := tracer.Start(r.Context(), "randomSleep")
+	defer span.End()
 
-	// simulate the overall work by sleeping
+	hostValue := attribute.String("host.value", r.Host)
+
+	// simulate the work by sleeping
 	sleepTime := time.Duration(100+rand.Intn(100)) * time.Millisecond
 	time.Sleep(sleepTime)
 
-	// wrap the random number generation in a span - to better visualize the time spent in this part
-	traceCtx, span := tracer.Start(ctx, "doWork")
-	for i := 0; i < 10; i++ {
-		randomNum := rand.Intn(100)
-		workHistogram.Record(traceCtx, int64(randomNum), metric.WithAttributes(hostValue))
-	}
-	span.End()
-
-	elapsedTime := time.Since(start)
-	return elapsedTime
+	// record time slept
+	sleepHistogram.Record(ctx, int64(sleepTime/time.Millisecond), metric.WithAttributes(hostValue))
+	return sleepTime
 }

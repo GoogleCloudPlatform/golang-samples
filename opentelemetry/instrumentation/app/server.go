@@ -27,9 +27,8 @@ import (
 // the number of milliseconds slept as its response.
 // [START opentelemetry_instrumentation_handle_single]
 func handleSingle(w http.ResponseWriter, r *http.Request) {
-	elapsedTime := doWork(r.Context(), r.Host)
-
-	fmt.Fprintf(w, "work completed in %v\n", elapsedTime)
+	sleepTime := randomSleep(r)
+	fmt.Fprintf(w, "work completed in %v\n", sleepTime)
 }
 
 // [END opentelemetry_instrumentation_handle_single]
