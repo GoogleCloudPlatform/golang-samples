@@ -36,10 +36,7 @@ func TestInspectWithStoredInfotype(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer client.Close()
-	outputBucketPathForStoredInfotype, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
-	if err != nil {
-		t.Fatal(err)
-	}
+	outputBucketPathForStoredInfotype := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 	outputPath := fmt.Sprintf("gs://" + outputBucketPathForStoredInfotype + "/")
 
 	infoTypeId, err := createStoredInfoTypeForTesting(t, tc.ProjectID, outputPath)

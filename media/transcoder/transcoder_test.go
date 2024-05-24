@@ -61,7 +61,7 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
-	bucketName := tc.ProjectID + "-golang-samples-transcoder-test"
+	bucketName := testutil.TestBucket(ctx, t, tc.ProjectID, "golang-samples-transcoder")
 	inputURI := "gs://" + bucketName + "/" + testBucketDirName + testVideoFileName
 	inputConcatURI := "gs://" + bucketName + "/" + testBucketDirName + testConcatFileName
 	inputOverlayImageURI := "gs://" + bucketName + "/" + testBucketDirName + testOverlayImageFileName
@@ -95,7 +95,7 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 
 	testJobTemplates(t, projectNumber)
 	t.Logf("\ntestJobTemplates() completed\n")
-	writeTestGCSFiles(t, tc.ProjectID, bucketName)
+	writeTestGCSFiles(t, bucketName)
 	t.Logf("\nwriteTestGCSFiles() completed\n")
 	testJobFromPreset(t, projectNumber, inputURI, outputURIForPreset)
 	t.Logf("\ntestJobFromPreset() completed\n")
@@ -191,10 +191,8 @@ func testJobTemplates(t *testing.T, projectNumber string) {
 	})
 }
 
-func writeTestGCSFiles(t *testing.T, projectID string, bucketName string) {
+func writeTestGCSFiles(t *testing.T, bucketName string) {
 	t.Helper()
-	ctx := context.Background()
-	testutil.CleanBucket(ctx, t, projectID, bucketName)
 	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testVideoFileName)
 	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testOverlayImageFileName)
 	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testConcatFileName)

@@ -35,16 +35,11 @@ func TestUpdateStoredInfoType(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer client.Close()
-	outputBucket, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
-	if err != nil {
-		t.Fatal(err)
-	}
+	outputBucket := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
+
 	outputPath := fmt.Sprintf("gs://" + outputBucket + "/")
 
-	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
-	if err != nil {
-		t.Fatal(err)
-	}
+	bucketName := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
 
 	fileSetUrl, gcsUri, err := filesForUpdateStoredInfoType(t, tc.ProjectID, bucketName)
 	if err != nil {
