@@ -57,9 +57,6 @@ func init() {
 // This function records the time spent in sleeping in a histogram which can later be
 // visualized as a distribution.
 func randomSleep(r *http.Request) time.Duration {
-	ctx, span := tracer.Start(r.Context(), "randomSleep")
-	defer span.End()
-
 	hostValue := attribute.String("host.value", r.Host)
 
 	// simulate the work by sleeping
@@ -67,7 +64,7 @@ func randomSleep(r *http.Request) time.Duration {
 	time.Sleep(sleepTime)
 
 	// record time slept
-	sleepHistogram.Record(ctx, int64(sleepTime/time.Millisecond), metric.WithAttributes(hostValue))
+	sleepHistogram.Record(r.Context(), int64(sleepTime/time.Millisecond), metric.WithAttributes(hostValue))
 	return sleepTime
 }
 
@@ -75,22 +72,22 @@ func randomSleep(r *http.Request) time.Duration {
 // This function records the number of subrequests made in a histogram which can later be visualized
 // as a distribution.
 func computeSubrequests(r *http.Request) error {
-	ctx, span := tracer.Start(r.Context(), "subrequests")
-	defer span.End()
-
 	subRequests := 3 + rand.Intn(4)
 	// Write a structured log with the request context, which allows the log to
 	// be linked with the trace for this request.
-	slog.InfoContext(ctx, "computing multiple requests", slog.Int("subRequests", subRequests))
+	slog.InfoContext(r.Context(), "computing multiple requests", slog.Int("subRequests", subRequests))
 
+	// Add custom span representing the work done for the subrequests
+	ctx, span := tracer.Start(r.Context(), "subrequests")
 	// Make 3-7 http requests to the /single endpoint.
 	for i := 0; i < subRequests; i++ {
 		if err := callSingle(ctx); err != nil {
 			return err
 		}
 	}
-
 	// record number of sub-requests made
 	subRequestsHistogram.Record(ctx, int64(subRequests))
+	span.End()
+
 	return nil
 }
