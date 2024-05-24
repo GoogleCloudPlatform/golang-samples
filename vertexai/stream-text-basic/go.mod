@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/vertexai/stream-text-basic
 
-go 1.22.3
+go 1.21
 
 require (
 	cloud.google.com/go/vertexai v0.10.0
