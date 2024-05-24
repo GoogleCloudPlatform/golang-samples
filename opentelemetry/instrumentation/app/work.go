@@ -29,16 +29,16 @@ const scopeName = "github.com/GoogleCloudPlatform/golang-samples/opentelemetry/i
 var (
 	meter                = otel.Meter(scopeName)
 	tracer               = otel.Tracer(scopeName)
-	sleepHistogram       metric.Int64Histogram
+	sleepHistogram       metric.Float64Histogram
 	subRequestsHistogram metric.Int64Histogram
 )
 
 func init() {
 	var err error
-	sleepHistogram, err = meter.Int64Histogram("example.sleep.histogram",
+	sleepHistogram, err = meter.Float64Histogram("example.sleep.histogram",
 		metric.WithDescription("Sample histogram to measure time spent in sleeping"),
-		metric.WithExplicitBucketBoundaries(50, 75, 100, 125, 150, 200),
-		metric.WithUnit("ms"))
+		metric.WithExplicitBucketBoundaries(0.05, 0.075, 0.1, 0.125, 0.150, 0.2),
+		metric.WithUnit("s"))
 	if err != nil {
 		panic(err)
 	}
@@ -63,7 +63,7 @@ func randomSleep(r *http.Request) time.Duration {
 	time.Sleep(sleepTime)
 
 	// record time slept
-	sleepHistogram.Record(r.Context(), int64(sleepTime/time.Millisecond), metric.WithAttributes(hostValue))
+	sleepHistogram.Record(r.Context(), sleepTime.Seconds(), metric.WithAttributes(hostValue))
 	return sleepTime
 }
 
