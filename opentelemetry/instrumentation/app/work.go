@@ -46,7 +46,7 @@ func init() {
 
 	subRequestsHistogram, err = meter.Int64Histogram("example.subrequests.histogram",
 		metric.WithDescription("Sample histogram to measure time spent in sleeping"),
-		metric.WithExplicitBucketBoundaries(2, 4, 6, 8, 10),
+		metric.WithExplicitBucketBoundaries(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
 		metric.WithUnit("1"))
 	if err != nil {
 		panic(err)
