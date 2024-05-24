@@ -4,8 +4,8 @@ go 1.20
 
 require (
 	cloud.google.com/go/aiplatform v1.60.0
-	cloud.google.com/go/storage v1.36.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240111005027-4c7a1933dce2
+	cloud.google.com/go/storage v1.37.0
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240514191801-f4bb2dc7b27f
 	google.golang.org/api v0.176.1
 	google.golang.org/protobuf v1.33.0
 )
