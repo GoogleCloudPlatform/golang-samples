@@ -23,6 +23,7 @@ package functioncalling
 
 // [START aiplatform_gemini_function_calling]
 // [START aiplatform_gemini_function_calling_chat]
+// [START generativeaionvertexai_function_calling_advanced]
 import (
 	"context"
 	"encoding/json"
@@ -197,5 +198,6 @@ func functionCallsChat(w io.Writer, projectID, location, modelName string) error
 	return nil
 }
 
+// [END generativeaionvertexai_function_calling_advanced]
 // [END aiplatform_gemini_function_calling_chat]
 // [END aiplatform_gemini_function_calling]
