@@ -25,11 +25,11 @@ import (
 	"go.opentelemetry.io/otel/metric"
 )
 
-const name = "work"
+const scopeName = "github.com/GoogleCloudPlatform/golang-samples/opentelemetry/instrumentation/app/work"
 
 var (
-	meter                = otel.Meter(name)
-	tracer               = otel.Tracer(name)
+	meter                = otel.Meter(scopeName)
+	tracer               = otel.Tracer(scopeName)
 	sleepHistogram       metric.Int64Histogram
 	subRequestsHistogram metric.Int64Histogram
 )
