@@ -88,6 +88,5 @@ func computeSubrequests(r *http.Request) error {
 	// record number of sub-requests made
 	subRequestsHistogram.Record(ctx, int64(subRequests))
 	span.End()
-
 	return nil
 }
