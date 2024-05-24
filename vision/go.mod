@@ -3,10 +3,10 @@ module github.com/GoogleCloudPlatform/golang-samples/vision
 go 1.19
 
 require (
-	cloud.google.com/go/storage v1.36.0
+	cloud.google.com/go/storage v1.37.0
 	cloud.google.com/go/vision v1.2.0
 	cloud.google.com/go/vision/v2 v2.8.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240111005027-4c7a1933dce2
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240514191801-f4bb2dc7b27f
 	google.golang.org/api v0.176.1
 	google.golang.org/genproto v0.0.0-20240227224415-6ceb2ff114de
 )

@@ -134,6 +134,9 @@ var allowList = []string{
 
 	// deprecated tests (introduced for IoT samples)
 	"**/*_test.go.deprecated",
+
+	// Spanner proto data files.
+	"spanner/spanner_snippets/spanner/testdata/protos/descriptors.pb",
 }
 
 // Check whether accidental binary files have been checked in.
