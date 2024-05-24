@@ -15,7 +15,6 @@
 package main
 
 import (
-	"log/slog"
 	"math/rand"
 	"net/http"
 	"time"
@@ -47,7 +46,7 @@ func init() {
 	subRequestsHistogram, err = meter.Int64Histogram("example.subrequests.histogram",
 		metric.WithDescription("Sample histogram to measure time spent in sleeping"),
 		metric.WithExplicitBucketBoundaries(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
-		metric.WithUnit("1"))
+		metric.WithUnit("{request}"))
 	if err != nil {
 		panic(err)
 	}
@@ -68,18 +67,15 @@ func randomSleep(r *http.Request) time.Duration {
 	return sleepTime
 }
 
-// computeSubrequests performs the task of making 3-7 http of requests to /single endpoint on localhost:8080.
-// This function records the number of subrequests made in a histogram which can later be visualized
-// as a distribution.
-func computeSubrequests(r *http.Request) error {
-	subRequests := 3 + rand.Intn(4)
-	// Write a structured log with the request context, which allows the log to
-	// be linked with the trace for this request.
-	slog.InfoContext(r.Context(), "computing multiple requests", slog.Int("subRequests", subRequests))
-
+// computeSubrequests performs the task of making a given number of http requests to /single endpoint on
+// localhost:8080. This function records the number of subrequests made in a histogram which can later
+// be visualized as a distribution.
+func computeSubrequests(r *http.Request, subRequests int) error {
 	// Add custom span representing the work done for the subrequests
 	ctx, span := tracer.Start(r.Context(), "subrequests")
-	// Make 3-7 http requests to the /single endpoint.
+	defer span.End()
+
+	// Make specified http requests to the /single endpoint.
 	for i := 0; i < subRequests; i++ {
 		if err := callSingle(ctx); err != nil {
 			return err
@@ -87,6 +83,5 @@ func computeSubrequests(r *http.Request) error {
 	}
 	// record number of sub-requests made
 	subRequestsHistogram.Record(ctx, int64(subRequests))
-	span.End()
 	return nil
 }
