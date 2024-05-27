@@ -17,6 +17,7 @@ package streamtextbasic
 // [START generativeaionvertexai_stream_text_basic]
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 
@@ -44,23 +45,21 @@ func generateContent(w io.Writer, projectID, modelName string) error {
 	for {
 		resp, err := iter.Next()
 		if err == iterator.Done {
-			break
+			return nil
+		}
+		if len(resp.Candidates) == 0 || len(resp.Candidates[0].Content.Parts) == 0 {
+			return errors.New("empty response from model")
 		}
 		if err != nil {
 			return err
 		}
-		printResponse(w, resp)
-	}
-	return nil
-}
-
-// [END generativeaionvertexai_stream_text_basic]
-
-func printResponse(w io.Writer, resp *genai.GenerateContentResponse) {
-	fmt.Fprint(w, "generated response: ")
-	for _, c := range resp.Candidates {
-		for _, p := range c.Content.Parts {
-			fmt.Fprintf(w, "%s ", p)
+		fmt.Fprint(w, "generated response: ")
+		for _, c := range resp.Candidates {
+			for _, p := range c.Content.Parts {
+				fmt.Fprintf(w, "%s ", p)
+			}
 		}
 	}
 }
+
+// [END generativeaionvertexai_stream_text_basic]
