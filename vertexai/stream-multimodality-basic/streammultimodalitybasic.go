@@ -52,7 +52,6 @@ func generateContent(w io.Writer, projectID, modelName string) error {
 		if err == iterator.Done {
 			return nil
 		}
-
 		if len(resp.Candidates) == 0 || len(resp.Candidates[0].Content.Parts) == 0 {
 			return errors.New("empty response from model")
 		}
