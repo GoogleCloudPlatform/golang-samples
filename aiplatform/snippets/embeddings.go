@@ -28,10 +28,10 @@ import (
 )
 
 func embedTexts(
-	project string, texts []string) ([][]float32, error) {
+	project, location string, texts []string) ([][]float32, error) {
 	ctx := context.Background()
 
-	apiEndpoint := "us-central1-aiplatform.googleapis.com:443"
+	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	model := "text-embedding-004"
 	task := "QUESTION_ANSWERING"
 	customOutputDimensionality := 5
