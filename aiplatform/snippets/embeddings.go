@@ -43,7 +43,6 @@ func embedTexts(
 	defer client.Close()
 
 	match := regexp.MustCompile(`^(\w+-\w+)`).FindStringSubmatch(apiEndpoint)
-	location := "us-central1"
 	if match != nil {
 		location = match[1]
 	}
