@@ -16,7 +16,7 @@ Note the connection string, database user, and database password that you create
 Note the database name.
 
 1. Set up [Application Default Credentials][adc] and ensure you have
-   add the 'Cloud SQL Client' role to your IAM principal.
+   added the 'Cloud SQL Client' role to your IAM principal.
 
 [adc]: https://cloud.google.com/docs/authentication/provide-credentials-adc
 
