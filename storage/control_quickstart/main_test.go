@@ -50,13 +50,7 @@ func TestControlQuickstart(t *testing.T) {
 		}
 	})
 
-	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
-	t.Cleanup(func() {
-		testutil.DeleteBucketIfExists(ctx, client, bucketName)
-	})
-	if err != nil {
-		t.Fatalf("creating bucket: %v", err)
-	}
+	bucketName := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 
 	stdOut, stdErr, err := m.Run(nil, time.Minute, "--bucket", bucketName)
 
@@ -69,5 +63,4 @@ func TestControlQuickstart(t *testing.T) {
 	if got, want := string(stdOut[:]), "location type multi-region"; !strings.Contains(got, want) {
 		t.Errorf("got output: %q, want to contain: %q", got, want)
 	}
-
 }

@@ -82,10 +82,7 @@ func setupImportDatasetImageClassification(t *testing.T) func() {
 	}
 	defer sc.Close()
 
-	b, er := testutil.CreateTestBucket(ctx, t, sc, tc.ProjectID, "vertex-image-classification")
-	if er != nil {
-		t.Fatalf("testutil.CreateTestBucket: %v", er)
-	}
+	b := testutil.CreateTestBucket(ctx, t, sc, tc.ProjectID, "vertex-image-classification")
 
 	bucket := sc.Bucket(b)
 	f, err := os.Open("../testdata/icn-dataset.jsonl")

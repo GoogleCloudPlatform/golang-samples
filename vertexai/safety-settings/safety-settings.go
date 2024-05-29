@@ -27,7 +27,7 @@ import (
 func generateContent(w io.Writer, prompt, projectID, location, modelName string, temperature float32) error {
 	// prompt := "hello, say something mean to me."
 	// location := "us-central1"
-	// model := "gemini-1.0-pro"
+	// model := "gemini-1.0-pro-002"
 	// temp := float32(0.8)
 	ctx := context.Background()
 

@@ -36,10 +36,7 @@ func TestInspectGcsFileWithSampling(t *testing.T) {
 	}
 	defer sc.Close()
 
-	bucketnameForInspectGCSFileWithSampling, err := testutil.CreateTestBucket(ctx, t, sc, tc.ProjectID, "dlp-test-inspect-prefix")
-	if err != nil {
-		t.Fatal(err)
-	}
+	bucketnameForInspectGCSFileWithSampling := testutil.CreateTestBucket(ctx, t, sc, tc.ProjectID, "dlp-test-inspect-prefix")
 	GCSUri := "gs://" + bucketnameForInspectGCSFileWithSampling + "/"
 
 	var buf bytes.Buffer
