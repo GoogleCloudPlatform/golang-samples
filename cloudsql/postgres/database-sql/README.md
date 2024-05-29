@@ -15,7 +15,8 @@ This repo contains the Go source code for a simple web app that can be deployed 
    [instructions](https://cloud.google.com/sql/docs/postgres/create-manage-databases).
    Note the database name.
 
-1. Set up [Application Default Credentials][adc]
+1. Set up [Application Default Credentials][adc] and ensure you have
+   added the 'Cloud SQL Client' role to your IAM principal.
 
 [adc]: https://cloud.google.com/docs/authentication/provide-credentials-adc
 
