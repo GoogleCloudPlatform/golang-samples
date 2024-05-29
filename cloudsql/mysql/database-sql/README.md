@@ -15,7 +15,8 @@ Note the connection string, database user, and database password that you create
 [instructions](https://cloud.google.com/sql/docs/mysql/create-manage-databases).
 Note the database name.
 
-1. Set up [Application Default Credentials][adc]
+1. Set up [Application Default Credentials][adc] and ensure you have
+   add the 'Cloud SQL Client' role to your IAM principal.
 
 [adc]: https://cloud.google.com/docs/authentication/provide-credentials-adc
 
