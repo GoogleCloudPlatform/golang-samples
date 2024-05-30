@@ -17,6 +17,7 @@ package subscriptions
 // [START pubsub_optimistic_subscribe]
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"time"
@@ -26,8 +27,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// optimisticSubscribe shows the recommended pattern for checking if a subscription exists
-// prior to starting the subscriber application.
+// optimisticSubscribe shows the recommended pattern for optimistically
+// assuming a subscription exists prior to pulling messages.
 func optimisticSubscribe(w io.Writer, projectID, topicID, subID string) error {
 	// projectID := "my-project-id"
 	// topicID := "my-topic"
@@ -47,24 +48,29 @@ func optimisticSubscribe(w io.Writer, projectID, topicID, subID string) error {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
+	// Optimistically start the subscriber client.
 	err = sub.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
-		fmt.Fprintf(w, "Got message: %q\n", string(msg.Data))
+		fmt.Fprintf(w, "Got from existing subscription: %q\n", string(msg.Data))
 		msg.Ack()
 	})
+	// If a not found error is returned, then try creating the subscription.
 	if err != nil {
 		if st, ok := status.FromError(err); ok {
 			if st.Code() == codes.NotFound {
-				ctx2, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 				defer cancel()
-				s, err := client.CreateSubscription(ctx2, subID, pubsub.SubscriptionConfig{
+				s, err := client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
 					Topic: client.Topic(topicID),
 				})
-				fmt.Fprintf(w, "Created subscription: %q\n", subID)
 				if err != nil {
-					s.Receive(ctx2, func(ctx context.Context, msg *pubsub.Message) {
-						fmt.Fprintf(w, "Got : %q\n", string(msg.Data))
-						msg.Ack()
-					})
+					return err
+				}
+				fmt.Fprintf(w, "Created subscription: %q\n", subID)
+				err = s.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
+					fmt.Fprintf(w, "Got from new subscription: %q\n", string(msg.Data))
+					msg.Ack()
+				})
+				if err != nil && !errors.Is(err, context.Canceled) {
+					return err
 				}
 			}
 		}
