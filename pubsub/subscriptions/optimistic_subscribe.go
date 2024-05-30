@@ -28,7 +28,7 @@ import (
 )
 
 // optimisticSubscribe shows the recommended pattern for optimistically
-// assuming a subscription exists prior to pulling messages.
+// assuming a subscription exists prior to receiving messages.
 func optimisticSubscribe(w io.Writer, projectID, topicID, subID string) error {
 	// projectID := "my-project-id"
 	// topicID := "my-topic"
@@ -48,16 +48,16 @@ func optimisticSubscribe(w io.Writer, projectID, topicID, subID string) error {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	// Optimistically start the subscriber client.
+	// Instead of checking if the subscription exists, optimistically try to
+	// receive from the subscription.
 	err = sub.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
 		fmt.Fprintf(w, "Got from existing subscription: %q\n", string(msg.Data))
 		msg.Ack()
 	})
-	// If a not found error is returned, then try creating the subscription.
 	if err != nil {
 		if st, ok := status.FromError(err); ok {
 			if st.Code() == codes.NotFound {
-				defer cancel()
+				// Since the subscription does not exist, create the subscription.
 				s, err := client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
 					Topic: client.Topic(topicID),
 				})
@@ -65,6 +65,8 @@ func optimisticSubscribe(w io.Writer, projectID, topicID, subID string) error {
 					return err
 				}
 				fmt.Fprintf(w, "Created subscription: %q\n", subID)
+
+				// Pull from the new subscription.
 				err = s.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 					fmt.Fprintf(w, "Got from new subscription: %q\n", string(msg.Data))
 					msg.Ack()
@@ -75,7 +77,6 @@ func optimisticSubscribe(w io.Writer, projectID, topicID, subID string) error {
 			}
 		}
 	}
-
 	return nil
 }
 
