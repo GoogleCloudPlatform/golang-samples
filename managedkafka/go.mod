@@ -45,4 +45,4 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240528184218-531527333157 // indirect
 )
 
-replace cloud.google.com/go/managedkafka => ./internal-google-cloud-go/managedkafka/
+replace cloud.google.com/go/managedkafka => ../internal/managedkafka/
