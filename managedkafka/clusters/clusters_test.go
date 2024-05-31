@@ -21,8 +21,8 @@ import (
 	"testing"
 	"time"
 
+	"cloud.google.com/go/managedkafka/fake"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/GoogleCloudPlatform/golang-samples/managedkafka/fake"
 )
 
 const (
