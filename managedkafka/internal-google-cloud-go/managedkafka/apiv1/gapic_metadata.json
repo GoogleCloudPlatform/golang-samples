@@ -1,0 +1,223 @@
+{
+  "schema": "1.0",
+  "comment": "This file maps proto services/RPCs to the corresponding library clients/methods.",
+  "language": "go",
+  "protoPackage": "google.cloud.managedkafka.v1",
+  "libraryPackage": "cloud.google.com/go/managedkafka/apiv1",
+  "services": {
+    "ManagedKafka": {
+      "clients": {
+        "grpc": {
+          "libraryClient": "Client",
+          "rpcs": {
+            "CancelOperation": {
+              "methods": [
+                "CancelOperation"
+              ]
+            },
+            "CreateCluster": {
+              "methods": [
+                "CreateCluster"
+              ]
+            },
+            "CreateTopic": {
+              "methods": [
+                "CreateTopic"
+              ]
+            },
+            "DeleteCluster": {
+              "methods": [
+                "DeleteCluster"
+              ]
+            },
+            "DeleteConsumerGroup": {
+              "methods": [
+                "DeleteConsumerGroup"
+              ]
+            },
+            "DeleteOperation": {
+              "methods": [
+                "DeleteOperation"
+              ]
+            },
+            "DeleteTopic": {
+              "methods": [
+                "DeleteTopic"
+              ]
+            },
+            "GetCluster": {
+              "methods": [
+                "GetCluster"
+              ]
+            },
+            "GetConsumerGroup": {
+              "methods": [
+                "GetConsumerGroup"
+              ]
+            },
+            "GetLocation": {
+              "methods": [
+                "GetLocation"
+              ]
+            },
+            "GetOperation": {
+              "methods": [
+                "GetOperation"
+              ]
+            },
+            "GetTopic": {
+              "methods": [
+                "GetTopic"
+              ]
+            },
+            "ListClusters": {
+              "methods": [
+                "ListClusters"
+              ]
+            },
+            "ListConsumerGroups": {
+              "methods": [
+                "ListConsumerGroups"
+              ]
+            },
+            "ListLocations": {
+              "methods": [
+                "ListLocations"
+              ]
+            },
+            "ListOperations": {
+              "methods": [
+                "ListOperations"
+              ]
+            },
+            "ListTopics": {
+              "methods": [
+                "ListTopics"
+              ]
+            },
+            "UpdateCluster": {
+              "methods": [
+                "UpdateCluster"
+              ]
+            },
+            "UpdateConsumerGroup": {
+              "methods": [
+                "UpdateConsumerGroup"
+              ]
+            },
+            "UpdateTopic": {
+              "methods": [
+                "UpdateTopic"
+              ]
+            }
+          }
+        },
+        "rest": {
+          "libraryClient": "Client",
+          "rpcs": {
+            "CancelOperation": {
+              "methods": [
+                "CancelOperation"
+              ]
+            },
+            "CreateCluster": {
+              "methods": [
+                "CreateCluster"
+              ]
+            },
+            "CreateTopic": {
+              "methods": [
+                "CreateTopic"
+              ]
+            },
+            "DeleteCluster": {
+              "methods": [
+                "DeleteCluster"
+              ]
+            },
+            "DeleteConsumerGroup": {
+              "methods": [
+                "DeleteConsumerGroup"
+              ]
+            },
+            "DeleteOperation": {
+              "methods": [
+                "DeleteOperation"
+              ]
+            },
+            "DeleteTopic": {
+              "methods": [
+                "DeleteTopic"
+              ]
+            },
+            "GetCluster": {
+              "methods": [
+                "GetCluster"
+              ]
+            },
+            "GetConsumerGroup": {
+              "methods": [
+                "GetConsumerGroup"
+              ]
+            },
+            "GetLocation": {
+              "methods": [
+                "GetLocation"
+              ]
+            },
+            "GetOperation": {
+              "methods": [
+                "GetOperation"
+              ]
+            },
+            "GetTopic": {
+              "methods": [
+                "GetTopic"
+              ]
+            },
+            "ListClusters": {
+              "methods": [
+                "ListClusters"
+              ]
+            },
+            "ListConsumerGroups": {
+              "methods": [
+                "ListConsumerGroups"
+              ]
+            },
+            "ListLocations": {
+              "methods": [
+                "ListLocations"
+              ]
+            },
+            "ListOperations": {
+              "methods": [
+                "ListOperations"
+              ]
+            },
+            "ListTopics": {
+              "methods": [
+                "ListTopics"
+              ]
+            },
+            "UpdateCluster": {
+              "methods": [
+                "UpdateCluster"
+              ]
+            },
+            "UpdateConsumerGroup": {
+              "methods": [
+                "UpdateConsumerGroup"
+              ]
+            },
+            "UpdateTopic": {
+              "methods": [
+                "UpdateTopic"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
