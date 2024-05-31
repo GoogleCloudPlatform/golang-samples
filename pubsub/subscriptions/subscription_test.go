@@ -958,7 +958,7 @@ func TestOptimisticSubscribe(t *testing.T) {
 	optTopicID := topicID + "-opt"
 	optSubID := subID + "-opt"
 
-	testutil.Retry(t, 1, 5*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
 		topic, err := getOrCreateTopic(ctx, client, optTopicID)
 		if err != nil {
 			r.Errorf("getOrCreateTopic: %v", err)
