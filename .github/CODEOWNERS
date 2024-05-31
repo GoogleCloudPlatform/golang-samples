@@ -44,6 +44,7 @@
 /documentai/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 /jobs/                                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 /language/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
+/managedkafka/                         @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 /pubsub/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai 
 /pubsublite/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
 /speech/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
