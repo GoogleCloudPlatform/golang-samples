@@ -41,8 +41,8 @@ func updateConsumerGroup(w io.Writer, projectID, region, clusterID, consumerGrou
 	}
 	defer client.Close()
 
-	parent := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectID, region, clusterID)
-	name := fmt.Sprintf("%s/consumerGroups/%s", parent, consumerGroupID)
+	clusterPath := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectID, region, clusterID)
+	consumerGroupPath := fmt.Sprintf("%s/consumerGroups/%s", clusterPath, consumerGroupID)
 	partitionMetadata := map[int32]*managedkafkapb.ConsumerPartitionMetadata{
 		int32(partitionIndex): {
 			Offset: int64(offset),
@@ -53,7 +53,7 @@ func updateConsumerGroup(w io.Writer, projectID, region, clusterID, consumerGrou
 		},
 	}
 	consumerGroupConfig := managedkafkapb.ConsumerGroup{
-		Name:   name,
+		Name:   consumerGroupPath,
 		Topics: topicConfig,
 	}
 	paths := []string{"topics"}

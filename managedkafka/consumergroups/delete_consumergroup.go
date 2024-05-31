@@ -38,10 +38,10 @@ func deleteConsumerGroup(w io.Writer, projectID, region, clusterID, consumerGrou
 	}
 	defer client.Close()
 
-	parent := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectID, region, clusterID)
-	name := fmt.Sprintf("%s/consumerGroups/%s", parent, consumerGroupID)
+	clusterPath := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectID, region, clusterID)
+	consumerGroupPath := fmt.Sprintf("%s/consumerGroups/%s", clusterPath, consumerGroupID)
 	req := &managedkafkapb.DeleteConsumerGroupRequest{
-		Name: name,
+		Name: consumerGroupPath,
 	}
 	if err := client.DeleteConsumerGroup(ctx, req); err != nil {
 		return fmt.Errorf("client.DeleteConsumerGroup got err: %w", err)

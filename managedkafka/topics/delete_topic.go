@@ -38,10 +38,10 @@ func deleteTopic(w io.Writer, projectID, region, clusterID, topicID string, opts
 	}
 	defer client.Close()
 
-	parent := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectID, region, clusterID)
-	name := fmt.Sprintf("%s/topics/%s", parent, topicID)
+	clusterPath := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectID, region, clusterID)
+	topicPath := fmt.Sprintf("%s/topics/%s", clusterPath, topicID)
 	req := &managedkafkapb.DeleteTopicRequest{
-		Name: name,
+		Name: topicPath,
 	}
 	if err := client.DeleteTopic(ctx, req); err != nil {
 		return fmt.Errorf("client.DeleteTopic got err: %w", err)

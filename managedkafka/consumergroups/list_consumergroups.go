@@ -38,9 +38,9 @@ func listConsumerGroups(w io.Writer, projectID, region, clusterID string, opts .
 	}
 	defer client.Close()
 
-	parent := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectID, region, clusterID)
+	clusterPath := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectID, region, clusterID)
 	req := &managedkafkapb.ListConsumerGroupsRequest{
-		Parent: parent,
+		Parent: clusterPath,
 	}
 	consumerGroupIter := client.ListConsumerGroups(ctx, req)
 	for {

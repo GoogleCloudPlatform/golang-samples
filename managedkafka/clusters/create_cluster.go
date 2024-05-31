@@ -40,8 +40,8 @@ func createCluster(w io.Writer, projectID, region, clusterID, subnet string, cpu
 	}
 	defer client.Close()
 
-	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, region)
-	name := fmt.Sprintf("%s/clusters/%s", parent, clusterID)
+	locationPath := fmt.Sprintf("projects/%s/locations/%s", projectID, region)
+	clusterPath := fmt.Sprintf("%s/clusters/%s", locationPath, clusterID)
 	capacityConfig := &managedkafkapb.CapacityConfig{
 		VcpuCount:   cpu,
 		MemoryBytes: memoryBytes,
@@ -61,14 +61,14 @@ func createCluster(w io.Writer, projectID, region, clusterID, subnet string, cpu
 		Mode: managedkafkapb.RebalanceConfig_AUTO_REBALANCE_ON_SCALE_UP,
 	}
 	cluster := &managedkafkapb.Cluster{
-		Name:            name,
+		Name:            clusterPath,
 		CapacityConfig:  capacityConfig,
 		PlatformConfig:  platformConfig,
 		RebalanceConfig: rebalanceConfig,
 	}
 
 	req := &managedkafkapb.CreateClusterRequest{
-		Parent:    parent,
+		Parent:    locationPath,
 		ClusterId: clusterID,
 		Cluster:   cluster,
 	}

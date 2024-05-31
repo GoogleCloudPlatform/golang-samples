@@ -40,10 +40,10 @@ func updateTopic(w io.Writer, projectID, region, clusterID, topicID string, part
 	}
 	defer client.Close()
 
-	parent := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectID, region, clusterID)
-	name := fmt.Sprintf("%s/topics/%s", parent, topicID)
+	clusterPath := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectID, region, clusterID)
+	topicPath := fmt.Sprintf("%s/topics/%s", clusterPath, topicID)
 	TopicConfig := managedkafkapb.Topic{
-		Name:           name,
+		Name:           topicPath,
 		PartitionCount: partitionCount,
 	}
 	paths := []string{"partition_count"}

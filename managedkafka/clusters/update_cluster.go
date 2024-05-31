@@ -39,12 +39,12 @@ func updateCluster(w io.Writer, projectID, region, clusterID string, memory int6
 	}
 	defer client.Close()
 
-	name := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectID, region, clusterID)
+	clusterPath := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectID, region, clusterID)
 	capacityConfig := &managedkafkapb.CapacityConfig{
 		MemoryBytes: memory,
 	}
 	cluster := &managedkafkapb.Cluster{
-		Name:           name,
+		Name:           clusterPath,
 		CapacityConfig: capacityConfig,
 	}
 	paths := []string{"capacity_config.memory_bytes"}

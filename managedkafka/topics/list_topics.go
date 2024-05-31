@@ -38,9 +38,9 @@ func listTopics(w io.Writer, projectID, region, clusterID string, opts ...option
 	}
 	defer client.Close()
 
-	parent := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectID, region, clusterID)
+	clusterPath := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectID, region, clusterID)
 	req := &managedkafkapb.ListTopicsRequest{
-		Parent: parent,
+		Parent: clusterPath,
 	}
 	topicIter := client.ListTopics(ctx, req)
 	for {

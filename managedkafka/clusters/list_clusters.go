@@ -37,8 +37,9 @@ func listClusters(w io.Writer, projectID, region string, opts ...option.ClientOp
 	}
 	defer client.Close()
 
+	locationPath := fmt.Sprintf("projects/%s/locations/%s", projectID, region)
 	req := &managedkafkapb.ListClustersRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, region),
+		Parent: locationPath,
 	}
 	clusterIter := client.ListClusters(ctx, req)
 	for {
