@@ -31,7 +31,6 @@ const (
 )
 
 func TestClusters(t *testing.T) {
-	t.Parallel()
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 	clusterID := fmt.Sprintf("%s-%d", clusterPrefix, time.Now().UnixNano())

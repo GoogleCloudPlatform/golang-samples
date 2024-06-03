@@ -26,13 +26,14 @@ import (
 	managedkafka "cloud.google.com/go/managedkafka/apiv1"
 )
 
-func createTopic(w io.Writer, projectID, region, clusterID, topicID string, partitionCount, replicationFactor int32, opts ...option.ClientOption) error {
+func createTopic(w io.Writer, projectID, region, clusterID, topicID string, partitionCount, replicationFactor int32, configs map[string]string, opts ...option.ClientOption) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// clusterID := "my-cluster"
 	// topicID := "my-topic"
 	// partitionCount := 10
 	// replicationFactor := 3
+	// configs := "{'min.insync.replicas':'1'}"
 	ctx := context.Background()
 	client, err := managedkafka.NewClient(ctx, opts...)
 	if err != nil {
@@ -46,6 +47,7 @@ func createTopic(w io.Writer, projectID, region, clusterID, topicID string, part
 		Name:              topicPath,
 		PartitionCount:    partitionCount,
 		ReplicationFactor: replicationFactor,
+		Configs:           configs,
 	}
 
 	req := &managedkafkapb.CreateTopicRequest{

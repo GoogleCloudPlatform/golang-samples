@@ -32,7 +32,6 @@ const (
 )
 
 func TestConsumerGroups(t *testing.T) {
-	t.Parallel()
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 	consumerGroupID := fmt.Sprintf("%s-%d", consumerGroupPrefix, time.Now().UnixNano())
@@ -48,10 +47,11 @@ func TestConsumerGroups(t *testing.T) {
 		}
 	})
 	t.Run("UpdateConsumerGroup", func(t *testing.T) {
-		partitionIndex := 1
-		offset := 10
+		partitionOffset := map[int32]int64{
+			1: 10,
+		}
 		topicPath := "fake-topic-path"
-		if err := updateConsumerGroup(buf, tc.ProjectID, region, parentClusterID, consumerGroupID, topicPath, partitionIndex, offset, options...); err != nil {
+		if err := updateConsumerGroup(buf, tc.ProjectID, region, parentClusterID, consumerGroupID, topicPath, partitionOffset, options...); err != nil {
 			t.Fatalf("failed to update consumer group: %v", err)
 		}
 		got := buf.String()

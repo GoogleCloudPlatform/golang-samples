@@ -27,13 +27,13 @@ import (
 	managedkafka "cloud.google.com/go/managedkafka/apiv1"
 )
 
-func updateConsumerGroup(w io.Writer, projectID, region, clusterID, consumerGroupID, topicPath string, partitionIndex, offset int, opts ...option.ClientOption) error {
+func updateConsumerGroup(w io.Writer, projectID, region, clusterID, consumerGroupID, topicPath string, partitionOffsets map[int32]int64, opts ...option.ClientOption) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// clusterID := "my-cluster"
 	// consumerGroupID := "my-consumer-group"
 	// topicPath := "my-topic-path"
-	// offset := 10
+	// partitionOffsets := {1: 10, 2: 20, 3: 30}
 	ctx := context.Background()
 	client, err := managedkafka.NewClient(ctx, opts...)
 	if err != nil {
@@ -43,10 +43,11 @@ func updateConsumerGroup(w io.Writer, projectID, region, clusterID, consumerGrou
 
 	clusterPath := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectID, region, clusterID)
 	consumerGroupPath := fmt.Sprintf("%s/consumerGroups/%s", clusterPath, consumerGroupID)
-	partitionMetadata := map[int32]*managedkafkapb.ConsumerPartitionMetadata{
-		int32(partitionIndex): {
-			Offset: int64(offset),
-		}}
+
+	var partitionMetadata map[int32]*managedkafkapb.ConsumerPartitionMetadata
+	for partition, offset := range partitionOffsets {
+		partitionMetadata[partition].Offset = offset
+	}
 	topicConfig := map[string]*managedkafkapb.ConsumerTopicMetadata{
 		topicPath: {
 			Partitions: partitionMetadata,

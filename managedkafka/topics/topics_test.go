@@ -32,7 +32,6 @@ const (
 )
 
 func TestTopics(t *testing.T) {
-	t.Parallel()
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 	topicID := fmt.Sprintf("%s-%d", topicPrefix, time.Now().UnixNano())
@@ -40,7 +39,10 @@ func TestTopics(t *testing.T) {
 	t.Run("CreateTopic", func(t *testing.T) {
 		partitionCount := 10
 		replicationFactor := 3
-		if err := createTopic(buf, tc.ProjectID, region, parentClusterID, topicID, int32(partitionCount), int32(replicationFactor), options...); err != nil {
+		configs := map[string]string{
+			"min.insync.replicas": "1",
+		}
+		if err := createTopic(buf, tc.ProjectID, region, parentClusterID, topicID, int32(partitionCount), int32(replicationFactor), configs, options...); err != nil {
 			t.Fatalf("failed to create a topic: %v", err)
 		}
 		got := buf.String()
