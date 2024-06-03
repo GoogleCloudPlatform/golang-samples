@@ -42,6 +42,8 @@ func createCluster(w io.Writer, projectID, region, clusterID, subnet string, cpu
 
 	locationPath := fmt.Sprintf("projects/%s/locations/%s", projectID, region)
 	clusterPath := fmt.Sprintf("%s/clusters/%s", locationPath, clusterID)
+
+	// Memory must be between 1 GiB and 8 GiB per CPU.
 	capacityConfig := &managedkafkapb.CapacityConfig{
 		VcpuCount:   cpu,
 		MemoryBytes: memoryBytes,
