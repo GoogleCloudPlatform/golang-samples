@@ -63,7 +63,10 @@ func TestTopics(t *testing.T) {
 	})
 	t.Run("UpdateTopic", func(t *testing.T) {
 		partitionCount := 20
-		if err := updateTopic(buf, tc.ProjectID, region, parentClusterID, topicID, int32(partitionCount), options...); err != nil {
+		configs := map[string]string{
+			"min.insync.replicas": "2",
+		}
+		if err := updateTopic(buf, tc.ProjectID, region, parentClusterID, topicID, int32(partitionCount), configs, options...); err != nil {
 			t.Fatalf("failed to update topic: %v", err)
 		}
 		got := buf.String()

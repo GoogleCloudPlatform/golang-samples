@@ -76,6 +76,7 @@ func createCluster(w io.Writer, projectID, region, clusterID, subnet string, cpu
 	if err != nil {
 		return fmt.Errorf("client.CreateCluster got err: %w", err)
 	}
+	// The duration of this operation can vary considerably, typically taking 10-40 minutes.
 	resp, err := op.Wait(ctx)
 	if err != nil {
 		return fmt.Errorf("op.Wait got err: %w", err)

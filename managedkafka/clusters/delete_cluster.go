@@ -30,7 +30,6 @@ func deleteCluster(w io.Writer, projectID, region, clusterID string, opts ...opt
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// clusterID := "my-cluster"
-	// opts := []option.ClientOption{}
 	ctx := context.Background()
 	client, err := managedkafka.NewClient(ctx, opts...)
 	if err != nil {

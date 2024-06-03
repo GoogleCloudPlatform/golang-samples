@@ -27,12 +27,13 @@ import (
 	managedkafka "cloud.google.com/go/managedkafka/apiv1"
 )
 
-func updateTopic(w io.Writer, projectID, region, clusterID, topicID string, partitionCount int32, opts ...option.ClientOption) error {
+func updateTopic(w io.Writer, projectID, region, clusterID, topicID string, partitionCount int32, configs map[string]string, opts ...option.ClientOption) error {
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// clusterID := "my-cluster"
 	// topicID := "my-topic"
 	// partitionCount := 20
+	// configs := "{'min.insync.replicas':'1'}"
 	ctx := context.Background()
 	client, err := managedkafka.NewClient(ctx, opts...)
 	if err != nil {
@@ -45,8 +46,9 @@ func updateTopic(w io.Writer, projectID, region, clusterID, topicID string, part
 	TopicConfig := managedkafkapb.Topic{
 		Name:           topicPath,
 		PartitionCount: partitionCount,
+		Configs:        configs,
 	}
-	paths := []string{"partition_count"}
+	paths := []string{"partition_count", "configs"}
 	updateMask := &fieldmaskpb.FieldMask{
 		Paths: paths,
 	}
