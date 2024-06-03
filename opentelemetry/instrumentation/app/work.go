@@ -55,20 +55,24 @@ func init() {
 // randomSleep simulates a some job being triggerred in response to an API call to the server.
 // This function records the time spent in sleeping in a histogram which can later be
 // visualized as a distribution.
+// [START opentelemetry_instrumentation_random_sleep]
 func randomSleep(r *http.Request) time.Duration {
 	// simulate the work by sleeping 100 to 200 ms
 	sleepTime := time.Duration(100+rand.Intn(100)) * time.Millisecond
 	time.Sleep(sleepTime)
 
 	hostValue := attribute.String("host.value", r.Host)
-	// record time slept in seconds
+	// custom histogram metric to record time slept in seconds
 	sleepHistogram.Record(r.Context(), sleepTime.Seconds(), metric.WithAttributes(hostValue))
 	return sleepTime
 }
 
+// [END opentelemetry_instrumentation_random_sleep]
+
 // computeSubrequests performs the task of making a given number of http requests to /single endpoint on
 // localhost:8080. This function records the number of subrequests made in a histogram which can later
 // be visualized as a distribution.
+// [START opentelemetry_instrumentation_compute_subrequests]
 func computeSubrequests(r *http.Request, subRequests int) error {
 	// Add custom span representing the work done for the subrequests
 	ctx, span := tracer.Start(r.Context(), "subrequests")
@@ -84,3 +88,5 @@ func computeSubrequests(r *http.Request, subRequests int) error {
 	subRequestsHistogram.Record(ctx, int64(subRequests))
 	return nil
 }
+
+// [END opentelemetry_instrumentation_compute_subrequests]
