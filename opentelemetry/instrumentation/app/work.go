@@ -56,12 +56,11 @@ func init() {
 // This function records the time spent in sleeping in a histogram which can later be
 // visualized as a distribution.
 func randomSleep(r *http.Request) time.Duration {
-	hostValue := attribute.String("host.value", r.Host)
-
 	// simulate the work by sleeping 100 to 200 ms
 	sleepTime := time.Duration(100+rand.Intn(100)) * time.Millisecond
 	time.Sleep(sleepTime)
 
+	hostValue := attribute.String("host.value", r.Host)
 	// record time slept in seconds
 	sleepHistogram.Record(r.Context(), sleepTime.Seconds(), metric.WithAttributes(hostValue))
 	return sleepTime
