@@ -44,9 +44,11 @@ func updateConsumerGroup(w io.Writer, projectID, region, clusterID, consumerGrou
 	clusterPath := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectID, region, clusterID)
 	consumerGroupPath := fmt.Sprintf("%s/consumerGroups/%s", clusterPath, consumerGroupID)
 
-	var partitionMetadata map[int32]*managedkafkapb.ConsumerPartitionMetadata
+	partitionMetadata := make(map[int32]*managedkafkapb.ConsumerPartitionMetadata)
 	for partition, offset := range partitionOffsets {
-		partitionMetadata[partition].Offset = offset
+		partitionMetadata[partition] = &managedkafkapb.ConsumerPartitionMetadata{
+			Offset: offset,
+		}
 	}
 	topicConfig := map[string]*managedkafkapb.ConsumerTopicMetadata{
 		topicPath: {
