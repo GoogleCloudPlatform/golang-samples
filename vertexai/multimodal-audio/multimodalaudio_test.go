@@ -39,7 +39,7 @@ func Test_summarizeAudio(t *testing.T) {
 
 	err := summarizeAudio(buf, prompt, tc.ProjectID, location, modelName)
 	if err != nil {
-		t.Errorf("Test_generateMultimodalContent: %v", err.Error())
+		t.Errorf("Test_summarizeAudio: %v", err.Error())
 	}
 }
 
@@ -59,7 +59,7 @@ func Test_transcribeAudio(t *testing.T) {
 
 	err := transcribeAudio(buf, prompt, tc.ProjectID, location, modelName)
 	if err != nil {
-		t.Fatalf("Test_generateMultimodalContent: %v", err.Error())
+		t.Fatalf("Test_transcribeAudio: %v", err.Error())
 	}
 
 	transcript := buf.String()
