@@ -28,8 +28,13 @@ import (
 )
 
 func embedTexts(
-	apiEndpoint, project, model string, texts []string, task string) ([][]float32, error) {
+	project, location string, texts []string) ([][]float32, error) {
 	ctx := context.Background()
+
+	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
+	model := "text-embedding-004"
+	task := "QUESTION_ANSWERING"
+	customOutputDimensionality := 5
 
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {
@@ -38,7 +43,6 @@ func embedTexts(
 	defer client.Close()
 
 	match := regexp.MustCompile(`^(\w+-\w+)`).FindStringSubmatch(apiEndpoint)
-	location := "us-central1"
 	if match != nil {
 		location = match[1]
 	}
@@ -52,10 +56,17 @@ func embedTexts(
 			},
 		})
 	}
+	outputDimensionality := structpb.NewNullValue()
+	outputDimensionality = structpb.NewNumberValue(float64(customOutputDimensionality))
+
+	params := structpb.NewStructValue(&structpb.Struct{
+		Fields: map[string]*structpb.Value{"outputDimensionality": outputDimensionality},
+	})
 
 	req := &aiplatformpb.PredictRequest{
-		Endpoint:  endpoint,
-		Instances: instances,
+		Endpoint:   endpoint,
+		Instances:  instances,
+		Parameters: params,
 	}
 	resp, err := client.Predict(ctx, req)
 	if err != nil {
