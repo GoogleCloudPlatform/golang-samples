@@ -17,6 +17,18 @@ receivers:
           layout: '%Y-%m-%dT%H:%M:%S.%fZ'
         severity:
           parse_from: body.severity
+          preset: none
+          # parse minimal set of severity strings that Cloud Logging explicitly supports
+          # https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity
+          mapping:
+            debug: debug
+            info: info
+            info3: notice
+            warn: warning
+            error: error
+            fatal: critical
+            fatal3: alert
+            fatal4: emergency
 
       # set trace_flags to SAMPLED if GCP attribute is set to true
       - type: add
@@ -28,7 +40,7 @@ receivers:
       - type: regex_parser
         parse_from: body["logging.googleapis.com/trace"]
         parse_to: body
-        regex: projects/.+/traces/(?P<trace_id>.*)
+        regex: (?P<trace_id>.*)
         trace:
           span_id:
             parse_from: body["logging.googleapis.com/spanId"]

@@ -19,6 +19,7 @@ package main
 // [START opentelemetry_trace_import]
 import (
 	"context"
+	"errors"
 	"log"
 	"os"
 
@@ -52,7 +53,9 @@ func main() {
 			semconv.ServiceNameKey.String("my-application"),
 		),
 	)
-	if err != nil {
+	if errors.Is(err, resource.ErrPartialResource) || errors.Is(err, resource.ErrSchemaURLConflict) {
+		log.Println(err)
+	} else if err != nil {
 		log.Fatalf("resource.New: %v", err)
 	}
 

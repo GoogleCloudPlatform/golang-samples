@@ -19,18 +19,18 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 
 	"cloud.google.com/go/vertexai/genai"
 )
 
-var projectId = "PROJECT_ID"
-var region = "us-central1"
-var modelName = "gemini-pro-vision"
-
-func makeChatRequests(projectId string, region string, modelName string) error {
-	client, err := genai.NewClient(context.TODO(), projectId, region)
+func makeChatRequests(w io.Writer, projectID string, location string, modelName string) error {
+	// location := "us-central1"
+	// modelName := "gemini-1.0-pro-002"
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {
-		return fmt.Errorf("error creating client: %v", err)
+		return fmt.Errorf("error creating client: %w", err)
 	}
 	defer client.Close()
 
@@ -38,31 +38,40 @@ func makeChatRequests(projectId string, region string, modelName string) error {
 	chat := gemini.StartChat()
 
 	r, err := chat.SendMessage(
-		context.TODO(),
+		ctx,
 		genai.Text("Hello"))
 	if err != nil {
 		return err
 	}
-	rb, _ := json.MarshalIndent(r, "", "  ")
-	fmt.Println(string(rb))
+	rb, err := json.MarshalIndent(r, "", "  ")
+	if err != nil {
+		return fmt.Errorf("json.MarshalIndent: %w", err)
+	}
+	fmt.Fprintln(w, string(rb))
 
 	r, err = chat.SendMessage(
-		context.TODO(),
+		ctx,
 		genai.Text("What are all the colors in a rainbow?"))
 	if err != nil {
 		return err
 	}
-	rb, _ = json.MarshalIndent(r, "", "  ")
-	fmt.Println(string(rb))
+	rb, err = json.MarshalIndent(r, "", "  ")
+	if err != nil {
+		return fmt.Errorf("json.MarshalIndent: %w", err)
+	}
+	fmt.Fprintln(w, string(rb))
 
 	r, err = chat.SendMessage(
-		context.TODO(),
+		ctx,
 		genai.Text("Why does it appear when it rains?"))
 	if err != nil {
-		return err
+		return fmt.Errorf("chat.SendMessage: %w", err)
 	}
-	rb, _ = json.MarshalIndent(r, "", "  ")
-	fmt.Println(string(rb))
+	rb, err = json.MarshalIndent(r, "", "  ")
+	if err != nil {
+		return fmt.Errorf("json.MarshalIndent: %w", err)
+	}
+	fmt.Fprintln(w, string(rb))
 
 	return nil
 }
