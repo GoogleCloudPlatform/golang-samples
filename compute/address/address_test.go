@@ -159,8 +159,6 @@ func _deleteRegionalIPAddress(ctx context.Context, projectID, region, addressNam
 	return nil
 }
 
-// end helper functions
-
 func TestReserveNewRegionalExternal(t *testing.T) {
 	ctx := context.Background()
 	var seededRand = rand.New(
@@ -370,6 +368,80 @@ func TestReleaseNonExistentExternal(t *testing.T) {
 	err = releaseGlobalStaticExternal(buf, tc.ProjectID, addressName)
 	if err == nil {
 		t.Errorf("releaseGlobalStaticExternal should have returned an error")
+	}
+
+}
+
+func TestGetGlobalExternal(t *testing.T) {
+	ctx := context.Background()
+	var seededRand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+	tc := testutil.SystemTest(t)
+	addressName := "test-global-address-" + fmt.Sprint(seededRand.Int())
+
+	buf := &bytes.Buffer{}
+
+	defer func() {
+		if err := deleteIPAddress(ctx, tc.ProjectID, "", addressName); err != nil {
+			t.Errorf("deleteGlobalIPAddress got err: %v", err)
+		}
+	}()
+
+	haveAddress, err := reserveNewGlobalExternal(buf, tc.ProjectID, addressName, true)
+	if err != nil {
+		t.Errorf("reserveNewGlobalExternal got err: %v", err)
+	}
+	buf.Reset()
+
+	gotAddress, err := getGlobalExternal(buf, tc.ProjectID, addressName)
+	if err != nil {
+		t.Errorf("getGlobalExternal got err: %v", err)
+	}
+
+	if gotAddress.Region != nil {
+		t.Error("returned global IP address region is not global")
+	}
+
+	expectedResult := fmt.Sprintf("Global address %v has external IP address: %v", *haveAddress.Name, *haveAddress.Address)
+	if got := buf.String(); !strings.Contains(got, expectedResult) {
+		t.Errorf("getGlobalExternal got %q, want %q", got, expectedResult)
+	}
+}
+
+func TestGetRegionalExternal(t *testing.T) {
+	ctx := context.Background()
+	var seededRand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+	tc := testutil.SystemTest(t)
+	addressName := "test-address-" + fmt.Sprint(seededRand.Int())
+	region := "us-central1"
+
+	defer func() {
+		if err := deleteIPAddress(ctx, tc.ProjectID, region, addressName); err != nil {
+			t.Errorf("deleteIPAddress got err: %v", err)
+		}
+	}()
+
+	buf := &bytes.Buffer{}
+
+	haveAddress, err := reserveNewRegionalExternal(buf, tc.ProjectID, region, addressName, true)
+	if err != nil {
+		t.Errorf("reserveNewRegionalExternal got err: %v", err)
+	}
+	buf.Reset()
+
+	gotAddress, err := getRegionalExternal(buf, tc.ProjectID, region, addressName)
+	if err != nil {
+		t.Errorf("getRegionalExternal got err: %v", err)
+	}
+
+	if !strings.Contains(*gotAddress.Region, *haveAddress.Region) {
+		t.Errorf("returned regional IP address region is not equal to requested: %s != %s", *gotAddress.Region, *haveAddress.Region)
+	}
+
+	expectedResult := fmt.Sprintf("Regional address %v has external IP address: %v", *haveAddress.Name, *haveAddress.Address)
+	if got := buf.String(); !strings.Contains(got, expectedResult) {
+		t.Errorf("getRegionalExternal got %q, want %q", got, expectedResult)
 	}
 
 }
