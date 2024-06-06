@@ -24,6 +24,7 @@ import (
 	"go.opentelemetry.io/otel/metric"
 )
 
+// [START opentelemetry_instrumentation_work_globals]
 const scopeName = "github.com/GoogleCloudPlatform/golang-samples/opentelemetry/instrumentation/app/work"
 
 var (
@@ -33,8 +34,11 @@ var (
 	subRequestsHistogram metric.Int64Histogram
 )
 
+// [END opentelemetry_instrumentation_work_globals]
+
 func init() {
 	var err error
+	// [START opentelemetry_instrumentation_sleep_histogram_init]
 	sleepHistogram, err = meter.Float64Histogram("example.sleep.duration",
 		metric.WithDescription("Sample histogram to measure time spent in sleeping"),
 		metric.WithExplicitBucketBoundaries(0.05, 0.075, 0.1, 0.125, 0.150, 0.2),
@@ -42,6 +46,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	// [END opentelemetry_instrumentation_sleep_histogram_init]
 
 	subRequestsHistogram, err = meter.Int64Histogram("example.subrequests",
 		metric.WithDescription("Sample histogram to measure the number of subrequests made"),
