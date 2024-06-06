@@ -25,30 +25,6 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func cleanup(t *testing.T, projectID, routeName string, buf *bytes.Buffer) error {
-	expectedResult := fmt.Sprintf("- %s", routeName)
-	if err := deleteRoute(buf, projectID, routeName); err != nil {
-		t.Fatalf("deleteRoute got error: %v", err)
-	}
-
-	expectedResult2 := "Route deleted"
-	if got := buf.String(); !strings.Contains(got, expectedResult2) {
-		t.Errorf("deleteRoute got %q, want %q", got, expectedResult)
-	}
-	buf.Reset()
-
-	if err := listRoutes(buf, projectID); err != nil {
-		t.Fatalf("listRoutes got error: %v", err)
-	}
-
-	if got := buf.String(); strings.Contains(got, expectedResult) {
-		t.Errorf("listInstances got %q, want %q", got, expectedResult)
-	}
-
-	buf.Reset()
-	return nil
-}
-
 func TestCreateRoute(t *testing.T) {
 	buf := &bytes.Buffer{}
 	tc := testutil.SystemTest(t)
@@ -57,16 +33,25 @@ func TestCreateRoute(t *testing.T) {
 	routeName := fmt.Sprintf("testname-%v", r.Int())
 
 	if err := createRoute(buf, tc.ProjectID, routeName); err != nil {
-		t.Fatalf("createRoute got error: %v", err)
+		t.Errorf("createRoute got error: %v", err)
 	}
-	defer cleanup(t, tc.ProjectID, routeName, buf)
 
 	if err := listRoutes(buf, tc.ProjectID); err != nil {
-		t.Fatalf("listRoutes got error: %v", err)
+		t.Errorf("listRoutes got error: %v", err)
 	}
 
 	expectedResult := fmt.Sprintf("- %s", routeName)
 	if got := buf.String(); !strings.Contains(got, expectedResult) {
 		t.Errorf("listInstances got %q, want %q", got, expectedResult)
 	}
+
+	if err := deleteRoute(buf, tc.ProjectID, routeName); err != nil {
+		t.Errorf("deleteRoute got error: %v", err)
+	}
+
+	expectedResult2 := "Route deleted"
+	if got := buf.String(); !strings.Contains(got, expectedResult2) {
+		t.Errorf("deleteRoute got %q, want %q", got, expectedResult)
+	}
+	buf.Reset()
 }

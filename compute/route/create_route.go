@@ -30,10 +30,6 @@ func createRoute(w io.Writer, projectID, name string) error {
 	// projectID := "your_project_id"
 	// name := "testname"
 
-	network := proto.String("global/networks/default")
-	destRange := proto.String("0.0.0.0/0")
-	nextGW := proto.String("global/gateways/default-internet-gateway")
-
 	ctx := context.Background()
 	client, err := compute.NewRoutesRESTClient(ctx)
 	if err != nil {
@@ -43,9 +39,9 @@ func createRoute(w io.Writer, projectID, name string) error {
 
 	route := &computepb.Route{
 		Name:           proto.String(name),
-		Network:        network,
-		DestRange:      destRange,
-		NextHopGateway: nextGW,
+		Network:        proto.String("global/networks/default"),
+		DestRange:      proto.String("0.0.0.0/0"),
+		NextHopGateway: proto.String("global/gateways/default-internet-gateway"),
 	}
 
 	req := &computepb.InsertRouteRequest{
