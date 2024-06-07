@@ -262,3 +262,114 @@ func TestReserveNewGlobalExternal(t *testing.T) {
 		t.Errorf("Global address %v not found in the list of reserved addresses", addressName)
 	}
 }
+
+func TestReleaseGlobalExternal(t *testing.T) {
+	ctx := context.Background()
+	var seededRand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+	tc := testutil.SystemTest(t)
+	addressName := "test-global-address-" + fmt.Sprint(seededRand.Int())
+
+	buf := &bytes.Buffer{}
+
+	defer func() {
+		if err := deleteIPAddress(ctx, tc.ProjectID, "", addressName); err != nil {
+			// cleanup in case of unexpected result
+		}
+	}()
+
+	_, err := reserveNewGlobalExternal(buf, tc.ProjectID, addressName, true)
+	if err != nil {
+		t.Errorf("reserveNewGlobalExternal got err: %v", err)
+	}
+	buf.Reset()
+
+	if err := releaseGlobalStaticExternal(buf, tc.ProjectID, addressName); err != nil {
+		t.Errorf("releaseGlobalStaticExternal got err: %v", err)
+	}
+
+	expectedResult := "Static external IP address released"
+	if got := buf.String(); !strings.Contains(got, expectedResult) {
+		t.Errorf("releaseGlobalStaticExternal got %q, want %q", got, expectedResult)
+	}
+
+	// List global IP addresses and verify the new address is not in the list
+	addresses, err := listIPAddresses(ctx, tc.ProjectID, "")
+	if err != nil {
+		t.Errorf("listGlobalIPAddresses got err: %v", err)
+	}
+
+	for _, address := range addresses {
+		if address == addressName {
+			t.Errorf("Global address %v found in the list of reserved addresses", addressName)
+		}
+	}
+
+}
+
+func TestReleaseRegionalExternal(t *testing.T) {
+	ctx := context.Background()
+	var seededRand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+	tc := testutil.SystemTest(t)
+	addressName := "test-address-" + fmt.Sprint(seededRand.Int())
+	region := "us-central1"
+
+	buf := &bytes.Buffer{}
+
+	defer func() {
+		if err := deleteIPAddress(ctx, tc.ProjectID, region, addressName); err != nil {
+			// cleanup in case of unexpected result
+		}
+	}()
+
+	_, err := reserveNewRegionalExternal(buf, tc.ProjectID, region, addressName, true)
+	if err != nil {
+		t.Errorf("reserveNewRegionalExternal got err: %v", err)
+	}
+	buf.Reset()
+
+	if err := releaseRegionalStaticExternal(buf, tc.ProjectID, region, addressName); err != nil {
+		t.Errorf("releaseRegionalStaticExternal got err: %v", err)
+	}
+
+	expectedResult := "Static external IP address released"
+	if got := buf.String(); !strings.Contains(got, expectedResult) {
+		t.Errorf("releaseRegionalStaticExternal got %q, want %q", got, expectedResult)
+	}
+
+	// List regional IP addresses and verify the new address is not in the list
+	addresses, err := listIPAddresses(ctx, tc.ProjectID, region)
+	if err != nil {
+		t.Errorf("listIPAddresses got err: %v", err)
+	}
+
+	for _, address := range addresses {
+		if address == addressName {
+			t.Errorf("Regional address %v found in the list of reserved addresses", addressName)
+		}
+	}
+
+}
+
+func TestReleaseNonExistentExternal(t *testing.T) {
+	var seededRand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+	tc := testutil.SystemTest(t)
+	addressName := "test-address-" + fmt.Sprint(seededRand.Int())
+	region := "us-central1"
+
+	buf := &bytes.Buffer{}
+
+	err := releaseRegionalStaticExternal(buf, tc.ProjectID, region, addressName)
+	if err == nil {
+		t.Errorf("releaseRegionalStaticExternal should have returned an error")
+	}
+	buf.Reset()
+
+	err = releaseGlobalStaticExternal(buf, tc.ProjectID, addressName)
+	if err == nil {
+		t.Errorf("releaseGlobalStaticExternal should have returned an error")
+	}
+
+}
