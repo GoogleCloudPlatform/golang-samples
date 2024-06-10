@@ -27,7 +27,9 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// countTokensMultimodal returns the number of tokens for this prompt.
+// countTokensMultimodal finds the number of tokens for this multimodal prompt (video+text), and prints
+// it to the provide Writer. Then, it calls the model with the multimodal prompt and prints token counts
+// from the response metadata.
 //
 // video is a Google Cloud Storage path starting with "gs://"
 func countTokensMultimodal(w io.Writer, prompt, video, projectID, location, modelName string) error {
@@ -54,6 +56,8 @@ func countTokensMultimodal(w io.Writer, prompt, video, projectID, location, mode
 		FileURI:  video,
 	}
 
+	// Finds the total number of tokens for the 2 parts (text, video) of the multimodal prompt,
+	// before actually calling the model for inference.
 	resp, err := model.CountTokens(ctx, part1, part2)
 	if err != nil {
 		return err
@@ -66,6 +70,7 @@ func countTokensMultimodal(w io.Writer, prompt, video, projectID, location, mode
 		return fmt.Errorf("unable to generate contents: %w", err)
 	}
 
+	// The token counts are also provided in the model response metadata, after inference.
 	fmt.Fprintln(w, "\nModel response")
 	md := res.UsageMetadata
 	fmt.Fprintf(w, "Prompt Token Count: %d\n", md.PromptTokenCount)
