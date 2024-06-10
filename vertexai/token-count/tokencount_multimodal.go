@@ -27,9 +27,8 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// countTokensMultimodal finds the number of tokens for this multimodal prompt (video+text), and prints
-// it to the provide Writer. Then, it calls the model with the multimodal prompt and prints token counts
-// from the response metadata.
+// countTokensMultimodal finds the number of tokens for this multimodal prompt (video+text), and write to w. Then,
+// it calls the model with the multimodal prompt and writes token counts from the response metadata to w.
 //
 // video is a Google Cloud Storage path starting with "gs://"
 func countTokensMultimodal(w io.Writer, prompt, video, projectID, location, modelName string) error {
