@@ -24,11 +24,8 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-func makeChatRequests(w io.Writer, projectID string, location string, modelName string) error {
-	// location := "us-central1"
-	// modelName := "gemini-1.0-pro-002"
-	ctx := context.Background()
-	client, err := genai.NewClient(ctx, projectID, location)
+func makeChatRequests(ctx context.Context, w io.Writer, projectID, region, modelName string) error {
+	client, err := genai.NewClient(ctx, projectID, region)
 	if err != nil {
 		return fmt.Errorf("error creating client: %w", err)
 	}
@@ -37,43 +34,26 @@ func makeChatRequests(w io.Writer, projectID string, location string, modelName 
 	gemini := client.GenerativeModel(modelName)
 	chat := gemini.StartChat()
 
-	r, err := chat.SendMessage(
-		ctx,
-		genai.Text("Hello"))
-	if err != nil {
+	send := func(message string) error {
+		r, err := chat.SendMessage(ctx, genai.Text(message))
+		if err != nil {
+			return err
+		}
+		rb, err := json.MarshalIndent(r, "", "  ")
+		if err != nil {
+			return err
+		}
+		fmt.Fprintln(w, string(rb))
+		return nil
+	}
+
+	if err := send("Hello"); err != nil {
 		return err
 	}
-	rb, err := json.MarshalIndent(r, "", "  ")
-	if err != nil {
-		return fmt.Errorf("json.MarshalIndent: %w", err)
-	}
-	fmt.Fprintln(w, string(rb))
-
-	r, err = chat.SendMessage(
-		ctx,
-		genai.Text("What are all the colors in a rainbow?"))
-	if err != nil {
+	if err := send("What are all the colors in a rainbow?"); err != nil {
 		return err
 	}
-	rb, err = json.MarshalIndent(r, "", "  ")
-	if err != nil {
-		return fmt.Errorf("json.MarshalIndent: %w", err)
-	}
-	fmt.Fprintln(w, string(rb))
-
-	r, err = chat.SendMessage(
-		ctx,
-		genai.Text("Why does it appear when it rains?"))
-	if err != nil {
-		return fmt.Errorf("chat.SendMessage: %w", err)
-	}
-	rb, err = json.MarshalIndent(r, "", "  ")
-	if err != nil {
-		return fmt.Errorf("json.MarshalIndent: %w", err)
-	}
-	fmt.Fprintln(w, string(rb))
-
-	return nil
+	return send("Why does it appear when it rains?")
 }
 
 // [END aiplatform_gemini_multiturn_chat]
