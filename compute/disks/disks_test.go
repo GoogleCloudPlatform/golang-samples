@@ -465,4 +465,37 @@ func TestComputeDisksSnippets(t *testing.T) {
 		// Cannot clean up the disk just yet because it must be done after the VM is terminated.
 		// It will be done by deleteInstance function.
 	})
+	t.Run("Create Hyperdisk", func(t *testing.T) {
+		instanceRegionalHyperDiskName := fmt.Sprintf("test-hyper-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		disksClient, err := compute.NewDisksRESTClient(ctx)
+		if err != nil {
+			t.Fatalf("NewDisksRESTClient: %v", err)
+		}
+		defer disksClient.Close()
+		diskSizeGb := int64(10)
+		var buf bytes.Buffer
+		err = createHyperdisk(&buf, tc.ProjectID, zone, instanceRegionalHyperDiskName, diskSizeGb)
+		if err != nil {
+			t.Fatalf("createHyperdisk got err: %v", err)
+		}
+		defer deleteDisk(&buf, tc.ProjectID, zone, instanceRegionalHyperDiskName)
+		disk, err := disksClient.Get(ctx, &computepb.GetDiskRequest{
+			Project: tc.ProjectID,
+			Zone:    zone,
+			Disk:    instanceRegionalHyperDiskName,
+		})
+		if err != nil {
+			t.Errorf("Get disk got err: %v", err)
+		}
+
+		if disk.GetName() != instanceRegionalHyperDiskName {
+			t.Errorf("Disk name mismatch (-want +got):\n%s / %s", disk.GetName(), instanceRegionalHyperDiskName)
+		}
+		wantDiskType := fmt.Sprintf("zones/%s/diskTypes/hyperdisk-balanced", zone)
+
+		if !strings.Contains(disk.GetType(), wantDiskType) {
+			t.Errorf("Disk type mismatch (-want to contain +got):\n%s / %s", disk.GetType(), wantDiskType)
+		}
+
+	})
 }
