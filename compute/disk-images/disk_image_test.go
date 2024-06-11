@@ -81,6 +81,11 @@ func TestComputeDiskImageSnippets(t *testing.T) {
 	imageName := fmt.Sprintf("test-image-go-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	diskName := fmt.Sprintf("test-disk-go-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	sourceImage := "projects/debian-cloud/global/images/family/debian-11"
+	sourceProjectId := "debian-cloud"
+	sourceImageName := "debian-11"
+	guestOsFeatures := []*computepb.GuestOsFeature{
+		{Type: proto.String(computepb.GuestOsFeature_WINDOWS.String())},
+	}
 
 	buf := &bytes.Buffer{}
 
@@ -113,7 +118,7 @@ func TestComputeDiskImageSnippets(t *testing.T) {
 		buf.Reset()
 		want = "Newest disk image was found"
 
-		err = getDiskImageFromFamily(buf, "debian-cloud", "debian-11")
+		_, err = getDiskImageFromFamily(buf, "debian-cloud", "debian-11")
 		if err != nil {
 			t.Errorf("getDiskImageFromFamily got err: %v", err)
 		}
@@ -136,4 +141,30 @@ func TestComputeDiskImageSnippets(t *testing.T) {
 	if err != nil {
 		t.Errorf("deleteDisk got err: %v", err)
 	}
+
+	t.Run("Test creation and deletion from image", func(t *testing.T) {
+		buf.Reset()
+		want := "created"
+		image, err2 := getDiskImageFromFamily(buf, sourceProjectId, sourceImageName)
+		if err2 != nil {
+			t.Fatalf("getDiskImageFromFamily got err: %v", err2)
+		}
+
+		if err := createImageFromImage(buf, tc.ProjectID, sourceProjectId, *image.Name, imageName, []string{}, guestOsFeatures); err != nil {
+			t.Fatalf("createImageFromImage got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("createImageFromImage got %q, want %q", got, want)
+		}
+
+		buf.Reset()
+		want = "deleted"
+
+		if err := deleteDiskImage(buf, tc.ProjectID, imageName); err != nil {
+			t.Errorf("deleteDiskImage got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("deleteDiskImage got %q, want %q", got, want)
+		}
+	})
 }
