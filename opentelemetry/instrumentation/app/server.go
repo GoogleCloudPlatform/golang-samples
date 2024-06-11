@@ -19,7 +19,6 @@ import (
 	"log/slog"
 	"math/rand"
 	"net/http"
-	"time"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
@@ -28,11 +27,8 @@ import (
 // the number of milliseconds slept as its response.
 // [START opentelemetry_instrumentation_handle_single]
 func handleSingle(w http.ResponseWriter, r *http.Request) {
-	sleepTime := time.Duration(100+rand.Intn(100)) * time.Millisecond
-
-	time.Sleep(sleepTime)
-
-	fmt.Fprintf(w, "slept %v\n", sleepTime)
+	sleepTime := randomSleep(r)
+	fmt.Fprintf(w, "work completed in %v\n", sleepTime)
 }
 
 // [END opentelemetry_instrumentation_handle_single]
@@ -46,12 +42,10 @@ func handleMulti(w http.ResponseWriter, r *http.Request) {
 	// be linked with the trace for this request.
 	slog.InfoContext(r.Context(), "handle /multi request", slog.Int("subRequests", subRequests))
 
-	// Make 3-7 http requests to the /single endpoint.
-	for i := 0; i < subRequests; i++ {
-		if err := callSingle(r.Context()); err != nil {
-			http.Error(w, err.Error(), http.StatusBadGateway)
-			return
-		}
+	err := computeSubrequests(r, subRequests)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadGateway)
+		return
 	}
 
 	fmt.Fprintln(w, "ok")

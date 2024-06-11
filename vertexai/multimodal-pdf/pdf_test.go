@@ -38,7 +38,7 @@ func Test_generateContentFromPDF(t *testing.T) {
 
 	err := generateContentFromPDF(buf, prompt, tc.ProjectID, location, modelName)
 	if err != nil {
-		t.Errorf("Test_generateMultimodalContent: %v", err.Error())
+		t.Errorf("Test_generateContentFromPDF: %v", err.Error())
 	}
 
 	generatedSummary := buf.String()
