@@ -732,3 +732,36 @@ func TestAutoclass(t *testing.T) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
+
+func TestCreateBucketHierarchicalNamespace(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	bucketName := testutil.UniqueBucketName(testPrefix)
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	// Test creating new bucket with HNS enabled.
+	buf := new(bytes.Buffer)
+	if err := createBucketHierarchicalNamespace(buf, tc.ProjectID, bucketName); err != nil {
+		t.Fatalf("createBucketHierarchicalNamespace: %v", err)
+	}
+
+	if got, want := buf.String(), "Created bucket"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+
+	// Verify that HNS was set as expected.
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if got, want := (attrs.HierarchicalNamespace), (&storage.HierarchicalNamespace{Enabled: true}); got == nil || !got.Enabled {
+		t.Errorf("Attrs.HierarchicalNamespace: got %v, want %v", got, want)
+	}
+}
