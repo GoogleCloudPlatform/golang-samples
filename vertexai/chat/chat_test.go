@@ -24,7 +24,7 @@ import (
 func Test_makeChatRequests(t *testing.T) {
 	w := io.Discard
 	tc := testutil.SystemTest(t)
-	err := makeChatRequests(w, tc.ProjectID, "us-central1", "gemini-1.0-pro-002")
+	err := makeChatRequests(w, tc.ProjectID, "us-central1", "gemini-1.5-flash-001")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err.Error())
 	}

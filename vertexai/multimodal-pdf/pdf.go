@@ -44,7 +44,7 @@ func generateContentFromPDF(w io.Writer, prompt pdfPrompt, projectID, location, 
 	// 	`,
 	// }
 	// location := "us-central1"
-	// modelName := "gemini-1.5-pro-preview-0409"
+	// modelName := "gemini-1.5-flash-001"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
