@@ -24,9 +24,9 @@ import (
 	"time"
 
 	compute "cloud.google.com/go/compute/apiv1"
+	computepb "cloud.google.com/go/compute/apiv1/computepb"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 )
 
 func createBucket(t *testing.T, projectID, bucketName string) error {

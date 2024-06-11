@@ -19,14 +19,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 
 	"cloud.google.com/go/vertexai/genai"
 )
 
-func makeChatRequests(ctx context.Context, projectID, region, modelName string) error {
+func makeChatRequests(ctx context.Context, w io.Writer, projectID, region, modelName string) error {
 	client, err := genai.NewClient(ctx, projectID, region)
 	if err != nil {
-		return fmt.Errorf("error creating client: %v", err)
+		return fmt.Errorf("error creating client: %w", err)
 	}
 	defer client.Close()
 
@@ -42,7 +43,7 @@ func makeChatRequests(ctx context.Context, projectID, region, modelName string) 
 		if err != nil {
 			return err
 		}
-		fmt.Println(string(rb))
+		fmt.Fprintln(w, string(rb))
 		return nil
 	}
 

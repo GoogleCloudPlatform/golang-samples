@@ -15,6 +15,7 @@
 package chat
 
 import (
+	"bytes"
 	"context"
 	"testing"
 
@@ -23,7 +24,8 @@ import (
 
 func Test_makeChatRequests(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	err := makeChatRequests(context.Background(), tc.ProjectID, "us-central1", "gemini-pro-vision")
+	w := &bytes.Buffer{}
+	err := makeChatRequests(context.Background(), w, tc.ProjectID, "us-central1", "gemini-pro-vision")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err.Error())
 	}
