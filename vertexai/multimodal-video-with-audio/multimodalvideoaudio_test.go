@@ -32,7 +32,7 @@ func Test_generateMultimodalContent(t *testing.T) {
 	`
 	video := "gs://cloud-samples-data/generative-ai/video/pixel8.mp4"
 	location := "us-central1"
-	modelName := "gemini-1.5-pro-preview-0409"
+	modelName := "gemini-1.5-flash-001"
 
 	err := generateMultimodalContent(buf, prompt, video, tc.ProjectID, location, modelName)
 	if err != nil {
