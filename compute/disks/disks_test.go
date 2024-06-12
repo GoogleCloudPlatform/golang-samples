@@ -194,6 +194,39 @@ func errorIfNot404(t *testing.T, msg string, err error) {
 	}
 }
 
+// deleteStoragePool deletes the specified storage pool in the given project and zone.
+// It writes a confirmation message to the provided writer upon success.
+func deleteStoragePool(projectId, zone, storagePoolName string) error {
+	ctx := context.Background()
+	client, err := compute.NewStoragePoolsRESTClient(ctx)
+	if err != nil {
+		return fmt.Errorf("NewStoragePoolsRESTClient: %v", err)
+	}
+	defer client.Close()
+
+	// Create the delete storage pool request
+	req := &computepb.DeleteStoragePoolRequest{
+		Project:     projectId,
+		Zone:        zone,
+		StoragePool: storagePoolName,
+	}
+
+	// Send the delete storage pool request
+	op, err := client.Delete(ctx, req)
+	if err != nil {
+		return fmt.Errorf("Delete storage pool request failed: %v", err)
+	}
+
+	// Wait for the delete storage pool operation to complete
+	if err = op.Wait(ctx); err != nil {
+		return fmt.Errorf("unable to wait for the operation: %w", err)
+	}
+
+	// Write a confirmation message
+	fmt.Printf("Storage pool deleted: %s\n", storagePoolName)
+	return nil
+}
+
 func TestComputeDisksSnippets(t *testing.T) {
 	ctx := context.Background()
 	var r *rand.Rand = rand.New(
@@ -497,5 +530,72 @@ func TestComputeDisksSnippets(t *testing.T) {
 			t.Errorf("Disk type mismatch (-want to contain +got):\n%s / %s", disk.GetType(), wantDiskType)
 		}
 
+	})
+}
+
+func TestCreateHyperdiskStoragePool(t *testing.T) {
+	ctx := context.Background()
+	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
+	tc := testutil.SystemTest(t)
+	zone := "europe-west4-b"
+	storagePoolName := fmt.Sprintf("test-storage-pool-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+	storagePoolType := fmt.Sprintf("projects/%s/zones/%s/storagePoolTypes/hyperdisk-balanced", tc.ProjectID, zone)
+	capacityProvisioningType := "ADVANCED"
+	provisionedCapacity := int64(10240)
+	provisionedIops := int64(10000)
+	provisionedThroughput := int64(1024)
+
+	t.Run("CreateHyperdiskStoragePool", func(t *testing.T) {
+		storagePoolsClient, err := compute.NewStoragePoolsRESTClient(ctx)
+		if err != nil {
+			t.Fatalf("NewStoragePoolsRESTClient: %v", err)
+		}
+		defer storagePoolsClient.Close()
+
+		// Create the storage pool
+		var buf bytes.Buffer
+		err = createHyperdiskStoragePool(&buf, tc.ProjectID, zone, storagePoolName, storagePoolType, capacityProvisioningType, provisionedCapacity, provisionedIops, provisionedThroughput)
+		if err != nil {
+			t.Fatalf("createHyperdiskStoragePool got err: %v", err)
+		}
+		defer func() {
+			if err := deleteStoragePool(tc.ProjectID, zone, storagePoolName); err != nil {
+				t.Fatalf("deleteStoragePool got err: %v", err)
+			}
+		}()
+
+		// Verify the storage pool creation
+		storagePool, err := storagePoolsClient.Get(ctx, &computepb.GetStoragePoolRequest{
+			Project:     tc.ProjectID,
+			Zone:        zone,
+			StoragePool: storagePoolName,
+		})
+		if err != nil {
+			t.Errorf("Get storage pool got err: %v", err)
+		}
+
+		if storagePool.GetName() != storagePoolName {
+			t.Errorf("Storage pool name mismatch: got %v, want %v", storagePool.GetName(), storagePoolName)
+		}
+
+		if !strings.Contains(storagePool.GetStoragePoolType(), "hyperdisk-balanced") {
+			t.Errorf("Storage pool type mismatch: got %v, want to contain %v", storagePool.GetStoragePoolType(), "hyperdisk-balanced")
+		}
+
+		if storagePool.GetCapacityProvisioningType() != capacityProvisioningType {
+			t.Errorf("Capacity provisioning type mismatch: got %v, want %v", storagePool.GetCapacityProvisioningType(), capacityProvisioningType)
+		}
+
+		if storagePool.GetPoolProvisionedCapacityGb() != provisionedCapacity {
+			t.Errorf("Provisioned capacity mismatch: got %v, want %v", storagePool.GetPoolProvisionedCapacityGb(), provisionedCapacity)
+		}
+
+		if storagePool.GetPoolProvisionedIops() != provisionedIops {
+			t.Errorf("Provisioned IOPS mismatch: got %v, want %v", storagePool.GetPoolProvisionedIops(), provisionedIops)
+		}
+
+		if storagePool.GetPoolProvisionedThroughput() != provisionedThroughput {
+			t.Errorf("Provisioned throughput mismatch: got %v, want %v", storagePool.GetPoolProvisionedThroughput(), provisionedThroughput)
+		}
 	})
 }
