@@ -25,9 +25,7 @@ func TestAnalyzeSentiment(t *testing.T) {
 
 	text := "Google is located in Mountain View."
 	err := analyzeSentiment(buf, text)
-	if err != nil {
-		t.Fatalf("TestAnalyzeSentiment: %v", err)
-	}
+	if err != nil { t.Fatalf("TestAnalyzeSentiment: %v", err) }
 
 	got := buf.String()
 	if want := "document_sentiment:"; !strings.Contains(got, want) {
