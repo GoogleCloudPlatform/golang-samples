@@ -32,7 +32,7 @@ func Test_systemInstruction(t *testing.T) {
 			User input: I like bagels.
     		Answer:`
 	location := "us-central1"
-	modelName := "gemini-1.0-pro"
+	modelName := "gemini-1.5-flash-001"
 
 	var buf bytes.Buffer
 	err := systemInstruction(&buf, instruction, prompt, tc.ProjectID, location, modelName)
