@@ -14,6 +14,7 @@
 // safety-settings-multimodal shows how to adjust safety settings for mixed text and image input
 package safetysettingsmultimodal
 
+// [START generativeaionvertexai_gemini_safety_settings]
 // [START aiplatform_gemini_safety_settings]
 import (
 	"context"
@@ -30,7 +31,7 @@ import (
 func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, modelName string) error {
 	// prompt := "describe this image."
 	// location := "us-central1"
-	// model := "gemini-1.0-pro-vision-001"
+	// model := "gemini-1.5-flash-001"
 	// image := "gs://cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg"
 	ctx := context.Background()
 
@@ -70,3 +71,4 @@ func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, 
 }
 
 // [END aiplatform_gemini_safety_settings]
+// [END generativeaionvertexai_gemini_safety_settings]

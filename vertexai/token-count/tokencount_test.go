@@ -28,7 +28,7 @@ func Test_countTokens(t *testing.T) {
 
 	prompt := "why is the sky blue?"
 	location := "us-central1"
-	modelName := "gemini-1.0-pro-002"
+	modelName := "gemini-1.5-flash-001"
 
 	var buf bytes.Buffer
 	err := countTokens(&buf, prompt, tc.ProjectID, location, modelName)
