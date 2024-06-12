@@ -57,13 +57,11 @@ func Test_countTokens(t *testing.T) {
 func Test_countTokensMultimodal(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	prompt := "Provide a description of the video."
-	video := "gs://cloud-samples-data/generative-ai/video/pixel8.mp4"
 	location := "us-central1"
 	modelName := "gemini-1.5-flash-001"
 
 	var buf bytes.Buffer
-	err := countTokensMultimodal(&buf, prompt, video, tc.ProjectID, location, modelName)
+	err := countTokensMultimodal(&buf, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Fatalf("Test_countTokensMultimodal: %v", err.Error())
 	}

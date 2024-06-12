@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// token-count shows an example of determining how many tokens correspond to
+// tokencount shows an example of determining how many tokens correspond to
 // a given prompt string
 package tokencount
 
@@ -27,15 +27,15 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// countTokensMultimodal finds the number of tokens for this multimodal prompt (video+text), and write to w. Then,
+// countTokensMultimodal finds the number of tokens for a multimodal prompt (video+text), and writes to w. Then,
 // it calls the model with the multimodal prompt and writes token counts from the response metadata to w.
 //
 // video is a Google Cloud Storage path starting with "gs://"
-func countTokensMultimodal(w io.Writer, prompt, video, projectID, location, modelName string) error {
-	// prompt := "Provide a description of the video."
-	// video := "gs://cloud-samples-data/generative-ai/video/pixel8.mp4"
+func countTokensMultimodal(w io.Writer, projectID, location, modelName string) error {
 	// location := "us-central1"
 	// modelName := "gemini-1.5-flash-001"
+	prompt := "Provide a description of the video."
+	video := "gs://cloud-samples-data/generative-ai/video/pixel8.mp4"
 
 	ctx := context.Background()
 
