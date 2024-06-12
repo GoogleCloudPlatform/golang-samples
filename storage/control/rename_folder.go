@@ -36,6 +36,7 @@ func renameFolder(w io.Writer, bucket, src, dst string) error {
 	if err != nil {
 		return fmt.Errorf("NewStorageControlClient: %w", err)
 	}
+	defer client.Close()
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
 	defer cancel()
