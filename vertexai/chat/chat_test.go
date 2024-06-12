@@ -25,7 +25,7 @@ import (
 func Test_makeChatRequests(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	w := &bytes.Buffer{}
-	err := makeChatRequests(context.Background(), w, tc.ProjectID, "us-central1", "gemini-pro-vision")
+	err := makeChatRequests(context.Background(), w, tc.ProjectID, "us-central1", "gemini-1.5-flash-001")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err.Error())
 	}
