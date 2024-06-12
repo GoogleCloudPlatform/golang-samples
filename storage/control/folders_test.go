@@ -89,26 +89,36 @@ func TestFolders(t *testing.T) {
 	newFolderName := "bar"
 	newFolderPath := fmt.Sprintf("projects/_/buckets/%v/folders/%v", bucketName, newFolderName)
 
-	// Create folder.
-	buf := &bytes.Buffer{}
-	if err := createFolder(buf, bucketName, folderName); err != nil {
-		t.Fatalf("createFolder: %v", err)
-	}
-	if got, want := buf.String(), folderPath; !strings.Contains(got, want) {
-		t.Errorf("createFolder: got %q, want to contain %q", got, want)
+	// Create folder. Retry because there is no automatic retry in the client
+	// for this op.
+	if ok := testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := &bytes.Buffer{}
+		if err := createFolder(buf, bucketName, folderName); err != nil {
+			r.Errorf("createFolder: %v", err)
+		}
+		if got, want := buf.String(), folderPath; !strings.Contains(got, want) {
+			r.Errorf("createFolder: got %q, want to contain %q", got, want)
+		}
+	}); !ok {
+		t.Fatalf("failed to create folder; can't continue")
 	}
 
-	// Get folder.
-	buf = &bytes.Buffer{}
-	if err := getFolder(buf, bucketName, folderName); err != nil {
-		t.Fatalf("getFolder: %v", err)
-	}
-	if got, want := buf.String(), folderPath; !strings.Contains(got, want) {
-		t.Errorf("getFolder: got %q, want to contain %q", got, want)
+	// Get folder. Retry because there is no automatic retry in the client
+	// for this op.
+	if ok := testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := &bytes.Buffer{}
+		if err := getFolder(buf, bucketName, folderName); err != nil {
+			r.Errorf("getFolder: %v", err)
+		}
+		if got, want := buf.String(), folderPath; !strings.Contains(got, want) {
+			r.Errorf("getFolder: got %q, want to contain %q", got, want)
+		}
+	}); !ok {
+		t.Fatalf("failed to get folder; can't continue")
 	}
 
 	// List folders.
-	buf = &bytes.Buffer{}
+	buf := &bytes.Buffer{}
 	if err := listFolders(buf, bucketName); err != nil {
 		t.Fatalf("listFolders: %v", err)
 	}
