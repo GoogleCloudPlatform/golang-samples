@@ -22,6 +22,7 @@ import (
 
 func TestAnalyzeSentiment(t *testing.T) {
 	buf := new(bytes.Buffer)
+	t.Fatalf("This should fail!")
 
 	text := "Google is located in Mountain View."
 	err := analyzeSentiment(buf, text)
