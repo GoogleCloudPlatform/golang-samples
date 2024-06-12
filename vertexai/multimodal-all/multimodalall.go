@@ -52,7 +52,7 @@ func generateContentFromVideoWithAudio(w io.Writer, prompt multimodalPrompt, pro
 	// 		- What is the context of the moment and what does the narrator say about it?
 	// `,
 	// location := "us-central1"
-	// modelName := "gemini-1.5-pro-preview-0409"
+	// modelName := "gemini-1.5-flash-001"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)

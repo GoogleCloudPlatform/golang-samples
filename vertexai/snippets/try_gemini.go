@@ -13,6 +13,7 @@
 // limitations under the License.
 package snippets
 
+// [START generativeaionvertexai_gemini_image]
 // [START aiplatform_gemini_get_started]
 import (
 	"context"
@@ -53,3 +54,4 @@ func tryGemini(w io.Writer, projectID string, location string, modelName string)
 }
 
 // [END aiplatform_gemini_get_started]
+// [END generativeaionvertexai_gemini_image]
