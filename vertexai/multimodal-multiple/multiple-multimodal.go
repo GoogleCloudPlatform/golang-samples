@@ -14,6 +14,7 @@
 // multiple-multimodal shows how to generate content from mixed image and text content
 package main
 
+// [START generativeaionvertexai_gemini_single_turn_multi_image]
 // [START aiplatform_gemini_single_turn_multi_image]
 import (
 	"context"
@@ -31,7 +32,7 @@ import (
 func main() {
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	location := "us-central1"
-	modelName := "gemini-1.0-pro-vision"
+	modelName := "gemini-1.5-flash-001"
 	temperature := 0.4
 
 	if projectID == "" {
@@ -128,3 +129,4 @@ func partFromImageURL(image string) (genai.Part, error) {
 }
 
 // [END aiplatform_gemini_single_turn_multi_image]
+// [END generativeaionvertexai_gemini_single_turn_multi_image]

@@ -37,7 +37,7 @@ func systemInstruction(w io.Writer, instruction, prompt, projectID, location, mo
 	//		User input: I like bagels.
 	//		Answer:`
 	// location := "us-central1"
-	// modelName := "gemini-1.0-pro"
+	// modelName := "gemini-1.5-flash-001"
 
 	ctx := context.Background()
 

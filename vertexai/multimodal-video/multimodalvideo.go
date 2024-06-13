@@ -15,6 +15,7 @@
 // multimodalvideo shows an example of understanding multimodal input including video
 package multimodalvideo
 
+// [START generativeaionvertexai_gemini_video]
 // [START aiplatform_gemini_single_turn_video]
 import (
 	"context"
@@ -34,7 +35,7 @@ func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, 
 	// prompt := "What is in this video?"
 	// video := "gs://cloud-samples-data/video/animals.mp4"
 	// location := "us-central1"
-	// modelName := "gemini-1.0-pro-vision-001"
+	// modelName := "gemini-1.5-flash-001"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
@@ -67,3 +68,4 @@ func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, 
 }
 
 // [END aiplatform_gemini_single_turn_video]
+// [END generativeaionvertexai_gemini_video]

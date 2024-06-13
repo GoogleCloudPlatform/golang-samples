@@ -27,7 +27,7 @@ func TestGenerateContent(t *testing.T) {
 
 	prompt := "hello, say something mean to me."
 	location := "us-central1"
-	model := "gemini-1.0-pro-002"
+	model := "gemini-1.5-flash-001"
 	temp := 0.8
 
 	var buf bytes.Buffer
