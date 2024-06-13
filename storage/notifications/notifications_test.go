@@ -89,11 +89,7 @@ func TestNotifications(t *testing.T) {
 	createTestTopic(t, tc.ProjectID, topicName)
 	createTestTopic(t, tc.ProjectID, topicName2)
 
-	bucketName, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
-	if err != nil {
-		t.Fatalf("creating bucket: %v", err)
-	}
-	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+	bucketName := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 
 	var buf bytes.Buffer
 

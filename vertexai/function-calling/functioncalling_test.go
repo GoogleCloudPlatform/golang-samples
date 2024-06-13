@@ -21,12 +21,26 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
+func Test_functionCallsBasic(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	w := io.Discard
+	prompt := "What's the weather like in Boston?"
+	location := "us-central1"
+	modelName := "gemini-1.5-flash-001"
+
+	err := functionCallsBasic(w, prompt, tc.ProjectID, location, modelName)
+	if err != nil {
+		t.Errorf("Test_functionCalls: %v", err.Error())
+	}
+}
+
 func Test_functionCallsChat(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	w := io.Discard
 	location := "us-central1"
-	modelName := "gemini-1.0-pro-002"
+	modelName := "gemini-1.5-flash-001"
 
 	err := functionCallsChat(w, tc.ProjectID, location, modelName)
 	if err != nil {

@@ -37,10 +37,7 @@ func TestInspectGCSFileSendToScc(t *testing.T) {
 	defer sc.Close()
 
 	// Creates a bucket using a function available in testutil.
-	bucketNameForInspectGCSSendToScc, err := testutil.CreateTestBucket(ctx, t, sc, tc.ProjectID, "dlp-test-inspect-prefix")
-	if err != nil {
-		t.Fatal(err)
-	}
+	bucketNameForInspectGCSSendToScc := testutil.CreateTestBucket(ctx, t, sc, tc.ProjectID, "dlp-test-inspect-prefix")
 
 	// Uploads a file on created bucket.
 	filePathtoGCS(t, tc.ProjectID, bucketNameForInspectGCSSendToScc, dirPathForInspectGCSSendToScc)

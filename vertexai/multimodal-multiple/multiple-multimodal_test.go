@@ -30,7 +30,7 @@ func TestGenerateMultimodalContent(t *testing.T) {
 	projectID := tc.ProjectID
 	location := "us-central1"
 
-	modelName := "gemini-1.0-pro-vision"
+	modelName := "gemini-1.5-flash-001"
 	temperature := 0.8
 
 	colosseum, err := partFromImageURL("https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark1.png")

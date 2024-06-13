@@ -35,11 +35,11 @@ func Test_summarizeAudio(t *testing.T) {
 	`,
 	}
 	location := "us-central1"
-	modelName := "gemini-1.5-pro-preview-0409"
+	modelName := "gemini-1.5-flash-001"
 
 	err := summarizeAudio(buf, prompt, tc.ProjectID, location, modelName)
 	if err != nil {
-		t.Errorf("Test_generateMultimodalContent: %v", err.Error())
+		t.Errorf("Test_summarizeAudio: %v", err.Error())
 	}
 }
 
@@ -55,11 +55,11 @@ func Test_transcribeAudio(t *testing.T) {
 		`,
 	}
 	location := "us-central1"
-	modelName := "gemini-1.5-pro-preview-0409"
+	modelName := "gemini-1.5-flash-001"
 
 	err := transcribeAudio(buf, prompt, tc.ProjectID, location, modelName)
 	if err != nil {
-		t.Fatalf("Test_generateMultimodalContent: %v", err.Error())
+		t.Fatalf("Test_transcribeAudio: %v", err.Error())
 	}
 
 	transcript := buf.String()

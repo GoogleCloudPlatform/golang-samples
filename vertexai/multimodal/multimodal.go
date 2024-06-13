@@ -15,6 +15,7 @@
 // multimodal shows an example of understanding multimodal input
 package multimodal
 
+// [START generativeaionvertexai_gemini_pro_example]
 import (
 	"context"
 	"errors"
@@ -33,7 +34,7 @@ func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, 
 	// prompt := "describe what is in this picture"
 	// image := "gs://generativeai-downloads/images/scones.jpg"
 	// location := "us-central1"
-	// modelName := "gemini-1.0-pro-vision-001"
+	// modelName := "gemini-1.5-flash-001"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
@@ -64,3 +65,5 @@ func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, 
 	fmt.Fprintf(w, "generated response: %s\n", res.Candidates[0].Content.Parts[0])
 	return nil
 }
+
+// [END generativeaionvertexai_gemini_pro_example]

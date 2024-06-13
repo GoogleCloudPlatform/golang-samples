@@ -52,7 +52,7 @@ func summarizeAudio(w io.Writer, prompt audioPrompt, projectID, location, modelN
 	// 	`,
 	// }
 	// location := "us-central1"
-	// modelName := "gemini-1.5-pro-preview-0409"
+	// modelName := "gemini-1.5-flash-001"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
@@ -99,7 +99,7 @@ func transcribeAudio(w io.Writer, prompt audioPrompt, projectID, location, model
 	// 	`,
 	// },
 	// location := "us-central1"
-	// modelName := "gemini-1.5-pro-preview-0409"
+	// modelName := "gemini-1.5-flash-001"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
