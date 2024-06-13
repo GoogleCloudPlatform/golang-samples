@@ -416,7 +416,7 @@ func TestSample(t *testing.T) {
 
 	out = runSample(t, rwTxnExcludedFromChangeStreams, dbName, "failed to commit rw txn excluded from change streams")
 	assertContains(t, out, "New singer inserted.")
-	assertContains(t, out, "Singer first name updated.")	
+	assertContains(t, out, "Singer first name updated.")
 	out = runSample(t, applyExcludedFromChangeStreams, dbName, "failed to apply mutations excluded from change streams")
 	assertContains(t, out, "New singer inserted.")
 	out = runSample(t, applyAtLeastOnceExcludedFromChangeStreams, dbName, "failed to apply at least once mutations excluded from change streams")
