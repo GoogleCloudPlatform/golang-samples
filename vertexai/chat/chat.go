@@ -14,6 +14,7 @@
 
 package chat
 
+// [START generativeaionvertexai_gemini_multiturn_chat]
 // [START aiplatform_gemini_multiturn_chat]
 import (
 	"context"
@@ -26,6 +27,7 @@ import (
 
 func makeChatRequests(ctx context.Context, w io.Writer, projectID, region, modelName string) error {
 	client, err := genai.NewClient(ctx, projectID, region)
+
 	if err != nil {
 		return fmt.Errorf("error creating client: %w", err)
 	}
@@ -57,3 +59,4 @@ func makeChatRequests(ctx context.Context, w io.Writer, projectID, region, model
 }
 
 // [END aiplatform_gemini_multiturn_chat]
+// [END generativeaionvertexai_gemini_multiturn_chat]

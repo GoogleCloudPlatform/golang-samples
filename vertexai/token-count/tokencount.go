@@ -30,7 +30,7 @@ import (
 func countTokens(w io.Writer, prompt, projectID, location, modelName string) error {
 	// prompt := "why is the sky blue?"
 	// location := "us-central1"
-	// modelName := "gemini-1.0-pro-002"
+	// modelName := "gemini-1.5-flash-001"
 
 	ctx := context.Background()
 

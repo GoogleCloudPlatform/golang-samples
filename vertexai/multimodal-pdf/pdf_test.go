@@ -34,7 +34,7 @@ func Test_generateContentFromPDF(t *testing.T) {
 		`,
 	}
 	location := "us-central1"
-	modelName := "gemini-1.5-pro-preview-0409"
+	modelName := "gemini-1.5-flash-001"
 
 	err := generateContentFromPDF(buf, prompt, tc.ProjectID, location, modelName)
 	if err != nil {
