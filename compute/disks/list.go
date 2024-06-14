@@ -31,7 +31,7 @@ func listDisks(w io.Writer, projectID, zone, filter string) error {
 	// filter := ""
 
 	// Formatting for filters:
-	//https://cloud.google.com/python/docs/reference/compute/latest/google.cloud.compute_v1.types.ListDisksRequest
+	// https://cloud.google.com/php/docs/reference/cloud-compute/latest/V1.ListDisksRequest
 
 	ctx := context.Background()
 	client, err := compute.NewDisksRESTClient(ctx)
