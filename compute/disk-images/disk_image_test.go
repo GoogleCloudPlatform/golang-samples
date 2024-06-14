@@ -100,6 +100,17 @@ func TestComputeDiskImageSnippets(t *testing.T) {
 		}
 
 		buf.Reset()
+		want = "was found"
+
+		err = getDiskImage(buf, tc.ProjectID, imageName)
+		if err != nil {
+			t.Errorf("getDiskImage got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("getDiskImage got %q, want %q", got, want)
+		}
+
+		buf.Reset()
 		want = "deleted"
 
 		if err := deleteDiskImage(buf, tc.ProjectID, imageName); err != nil {
