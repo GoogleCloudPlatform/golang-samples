@@ -111,6 +111,17 @@ func TestComputeDiskImageSnippets(t *testing.T) {
 		}
 
 		buf.Reset()
+		want = "Newest disk image was found"
+
+		err = getDiskImageFromFamily(buf, "debian-cloud", "debian-11")
+		if err != nil {
+			t.Errorf("getDiskImageFromFamily got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("getDiskImageFromFamily got %q, want %q", got, want)
+		}
+
+		buf.Reset()
 		want = "deleted"
 
 		if err := deleteDiskImage(buf, tc.ProjectID, imageName); err != nil {
