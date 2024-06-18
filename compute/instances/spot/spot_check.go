@@ -25,8 +25,6 @@ import (
 	"cloud.google.com/go/compute/apiv1/computepb"
 )
 
-// [START compute_spot_create]
-
 // isSpotVM checks if a given instance is a Spot VM or not.
 func isSpotVM(w io.Writer, projectID, zone, instanceName string) (bool, error) {
 	// projectID := "your_project_id"
