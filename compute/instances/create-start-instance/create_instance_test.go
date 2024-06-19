@@ -201,19 +201,6 @@ func TestComputeCreateInstanceSnippets(t *testing.T) {
 }
 
 func TestComputeBulkCreateInstanceSnippets(t *testing.T) {
-	//ctx := context.Background()
-	//var r *rand.Rand = rand.New(
-	//	rand.NewSource(time.Now().UnixNano()))
-	//tc := testutil.SystemTest(t)
-	//zone := "europe-central2-b"
-	//instanceName := fmt.Sprintf("test-instance-%v-%v", time.Now().Format("01-02-2006"), r.Int())
-	//bootDiskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
-	//diskName2 := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
-	//networkName := "global/networks/default"
-	//subnetworkName := "regions/europe-central2/subnetworks/default"
-	//expectedResult := "Instance created"
-
-	/////
 	ctx := context.Background()
 
 	instanceTemplatesClient, err := compute.NewInstanceTemplatesRESTClient(ctx)
@@ -228,7 +215,7 @@ func TestComputeBulkCreateInstanceSnippets(t *testing.T) {
 	zone := "europe-central2-b"
 	instanceTemplateName := "test-instance-template" + fmt.Sprint(seededRand.Int())
 	machineType := "n1-standard-1"
-	sourceImage := "projects/debian-cloud/global/images/family/debian-10"
+	sourceImage := "projects/debian-cloud/global/images/family/debian-12"
 	networkName := "global/networks/default"
 
 	insertTemplateReq := &computepb.InsertInstanceTemplateRequest{
@@ -269,17 +256,15 @@ func TestComputeBulkCreateInstanceSnippets(t *testing.T) {
 	namePattern := "i-#-" + fmt.Sprint(seededRand.Int())[0:5]
 	buf := &bytes.Buffer{}
 
-	_, err = createFiveInstances(buf, tc.ProjectID, zone, instanceTemplateName, namePattern)
+	instances, err := createFiveInstances(buf, tc.ProjectID, zone, instanceTemplateName, namePattern)
 	if err != nil {
 		t.Errorf("createFiveInstances got err: %v", err)
 	}
 
-	for i := 1; i <= 5; i++ {
-		instanceName := strings.Replace(namePattern, "#", fmt.Sprint(i), 1)
-		if err := deleteInstance(ctx, tc.ProjectID, zone, instanceName); err != nil {
+	for _, instance := range instances {
+		if err := deleteInstance(ctx, tc.ProjectID, zone, *instance.Name); err != nil {
 			t.Errorf("deleteInstance got err: %v", err)
 		}
-
 	}
 
 	deleteTemplateReq := &computepb.DeleteInstanceTemplateRequest{
@@ -290,9 +275,5 @@ func TestComputeBulkCreateInstanceSnippets(t *testing.T) {
 	op, err = instanceTemplatesClient.Delete(ctx, deleteTemplateReq)
 	if err != nil {
 		t.Errorf("unable to delete instance template: %v", err)
-	}
-
-	if err = op.Wait(ctx); err != nil {
-		t.Errorf("unable to wait for the operation: %v", err)
 	}
 }
