@@ -29,11 +29,10 @@ import (
 func deprecateDiskImage(
 	w io.Writer,
 	projectID, imageName string,
-	// deprecationStatus *computepb.DeprecationStatus,
 ) error {
 	// projectID := "your_project_id"
 	// imageName := "my_image"
-	// deprecationStatus :=
+
 	deprecationStatus := &computepb.DeprecationStatus{
 		State: proto.String(computepb.DeprecationStatus_DEPRECATED.String()),
 	}
