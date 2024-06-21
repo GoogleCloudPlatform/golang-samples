@@ -28,15 +28,13 @@ import (
 func createImageFromSnapshot(
 	w io.Writer,
 	projectID, snapshotName, imageName string,
-	storageLocations []string,
-	guestOsFeatures []*computepb.GuestOsFeature,
 ) error {
 	// projectID := "your_project_id"
 	// snapshotName := "your_image_name"
 	// imageName := "my_image"
+
 	// // If storageLocations empty, automatically selects the closest one to the source
-	// storageLocations := []string{}
-	// guestOsFeatures := []*computepb.GuestOsFeature{}
+	storageLocations := []string{}
 
 	ctx := context.Background()
 	imagesClient, err := compute.NewImagesRESTClient(ctx)
@@ -68,7 +66,6 @@ func createImageFromSnapshot(
 			Name:             &imageName,
 			SourceSnapshot:   snapshot.SelfLink,
 			StorageLocations: storageLocations,
-			GuestOsFeatures:  guestOsFeatures,
 		},
 		Project: projectID,
 	}

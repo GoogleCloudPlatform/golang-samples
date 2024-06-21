@@ -149,16 +149,13 @@ func TestComputeDiskImageSnippets(t *testing.T) {
 	imageName := fmt.Sprintf("test-image-go-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	diskName := fmt.Sprintf("test-disk-go-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	sourceImage := "projects/debian-cloud/global/images/family/debian-11"
-	guestOsFeatures := []*computepb.GuestOsFeature{
-		{Type: proto.String(computepb.GuestOsFeature_WINDOWS.String())},
-	}
 	snapshotName := fmt.Sprintf("test-snapshot-go-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 
 	buf := &bytes.Buffer{}
 
 	err := createDisk(ctx, tc.ProjectID, zone, diskName, sourceImage)
 	if err != nil {
-		t.Fatalf("createDisk got err: %v", err)
+		t.Errorf("createDisk got err: %v", err)
 	}
 
 	t.Run("Test snapshot creation and deletion", func(t *testing.T) {
@@ -205,7 +202,7 @@ func TestComputeDiskImageSnippets(t *testing.T) {
 		}
 
 		want := "created"
-		if err := createImageFromSnapshot(buf, tc.ProjectID, snapshotName, imageName, []string{}, guestOsFeatures); err != nil {
+		if err := createImageFromSnapshot(buf, tc.ProjectID, snapshotName, imageName); err != nil {
 			t.Fatalf("createImageFromDisk got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, want) {
