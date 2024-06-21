@@ -83,9 +83,6 @@ func TestComputeDiskImageSnippets(t *testing.T) {
 	sourceImage := "projects/debian-cloud/global/images/family/debian-11"
 	sourceProjectId := "debian-cloud"
 	sourceImageName := "debian-11"
-	guestOsFeatures := []*computepb.GuestOsFeature{
-		{Type: proto.String(computepb.GuestOsFeature_WINDOWS.String())},
-	}
 
 	buf := &bytes.Buffer{}
 
@@ -150,8 +147,8 @@ func TestComputeDiskImageSnippets(t *testing.T) {
 			t.Fatalf("getDiskImageFromFamily got err: %v", err2)
 		}
 
-		if err := createImageFromImage(buf, tc.ProjectID, sourceProjectId, *image.Name, imageName, []string{}, guestOsFeatures); err != nil {
-			t.Fatalf("createImageFromImage got err: %v", err)
+		if err := createImageFromImage(buf, tc.ProjectID, sourceProjectId, *image.Name, imageName); err != nil {
+			t.Errorf("createImageFromImage got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, want) {
 			t.Errorf("createImageFromImage got %q, want %q", got, want)

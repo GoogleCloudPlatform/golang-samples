@@ -28,17 +28,14 @@ import (
 func createImageFromImage(
 	w io.Writer,
 	projectID, sourceProjectId, sourceImageName, imageName string,
-	storageLocations []string,
-	guestOsFeatures []*computepb.GuestOsFeature,
 ) error {
 	// projectID := "your_project_id"
+	// sourceProjectId := "your_project_id"
 	// sourceImageName := "your_image_name"
 	// imageName := "my_image"
-	// // If storageLocations empty, automatically selects the closest one to the source
-	// storageLocations := []string{}
-	// sourceProjectId := "your_project_id"
-	// guestOsFeatures := []*computepb.GuestOsFeature{}
 
+	// If storageLocations empty, automatically selects the closest one to the source
+	storageLocations := []string{}
 	ctx := context.Background()
 	imagesClient, err := compute.NewImagesRESTClient(ctx)
 	if err != nil {
@@ -63,7 +60,6 @@ func createImageFromImage(
 			Name:             &imageName,
 			SourceImage:      image.SelfLink,
 			StorageLocations: storageLocations,
-			GuestOsFeatures:  guestOsFeatures,
 		},
 		Project: projectID,
 	}
