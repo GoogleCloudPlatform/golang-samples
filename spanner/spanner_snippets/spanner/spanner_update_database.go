@@ -30,7 +30,7 @@ func updateDatabase(ctx context.Context, w io.Writer, db string) error {
 	// Instantiate database admin client.
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("updateDatabase.NewDatabaseAdminClient: %v", err)
+		return fmt.Errorf("updateDatabase.NewDatabaseAdminClient: %w", err)
 	}
 	defer adminClient.Close()
 
@@ -45,13 +45,13 @@ func updateDatabase(ctx context.Context, w io.Writer, db string) error {
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("updateDatabase.UpdateDatabase: %v", err)
+		return fmt.Errorf("updateDatabase.UpdateDatabase: %w", err)
 	}
 
 	// Wait for update database operation to complete.
 	fmt.Fprintf(w, "Waiting for update database operation to complete [%s]\n", db)
 	if _, err := op.Wait(ctx); err != nil {
-		return fmt.Errorf("updateDatabase.Wait: %v", err)
+		return fmt.Errorf("updateDatabase.Wait: %w", err)
 	}
 	fmt.Fprintf(w, "Updated database [%s]\n", db)
 	return nil
