@@ -64,7 +64,7 @@ func transcribe_diarization_gcs_beta(w io.Writer, gcsUri string) error {
 
 	operation, err := client.LongRunningRecognize(ctx, longRunningRecognizeRequest)
 	if err != nil {
-		return fmt.Errorf("error running recognize %v", err)
+		return fmt.Errorf("error running recognize %w", err)
 	}
 
 	response, err := operation.Wait(ctx)
