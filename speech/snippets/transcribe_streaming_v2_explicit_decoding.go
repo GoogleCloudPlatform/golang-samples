@@ -96,7 +96,7 @@ func transcribeStreamingSpecificDecodingV2(w io.Writer, projectID string, path s
 						Audio: buf[:n],
 					},
 				}); err != nil {
-					return fmt.Errorf("could not send audio: %v", err)
+					return fmt.Errorf("could not send audio: %w", err)
 				}
 			}
 			if err == io.EOF {
@@ -119,7 +119,7 @@ func transcribeStreamingSpecificDecodingV2(w io.Writer, projectID string, path s
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("cannot stream results: %v", err)
+			return fmt.Errorf("cannot stream results: %w", err)
 		}
 		for i, result := range resp.Results {
 			fmt.Fprintf(w, "%s\n", strings.Repeat("-", 20))
