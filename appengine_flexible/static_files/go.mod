@@ -1,8 +1,8 @@
 module staticfiles
 
-go 1.19
+go 1.22
 
-require google.golang.org/appengine v1.6.7
+require google.golang.org/appengine v2.0.6
 
 require (
 	github.com/golang/protobuf v1.3.1 // indirect

@@ -17,11 +17,11 @@ env: flex
 
 runtime_config:
   operating_system: 'ubuntu22'
-  runtime_version: '1.19'
+  runtime_version: '1.22'
 
 automatic_scaling:
   min_num_instances: 1
 
 env_variables:
-  GCLOUD_DATASET_ID: your-project-id
+  GCLOUD_DATASET_ID: kenneth-dev3
 
