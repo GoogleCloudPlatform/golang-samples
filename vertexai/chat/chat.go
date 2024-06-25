@@ -14,58 +14,49 @@
 
 package chat
 
+// [START generativeaionvertexai_gemini_multiturn_chat]
 // [START aiplatform_gemini_multiturn_chat]
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 
 	"cloud.google.com/go/vertexai/genai"
 )
 
-var projectId = "PROJECT_ID"
-var region = "us-central1"
-var modelName = "gemini-1.0-pro-vision"
+func makeChatRequests(ctx context.Context, w io.Writer, projectID, region, modelName string) error {
+	client, err := genai.NewClient(ctx, projectID, region)
 
-func makeChatRequests(projectId string, region string, modelName string) error {
-	ctx := context.Background()
-	client, err := genai.NewClient(ctx, projectId, region)
 	if err != nil {
-		return fmt.Errorf("error creating client: %v", err)
+		return fmt.Errorf("error creating client: %w", err)
 	}
 	defer client.Close()
 
 	gemini := client.GenerativeModel(modelName)
 	chat := gemini.StartChat()
 
-	r, err := chat.SendMessage(
-		ctx,
-		genai.Text("Hello"))
-	if err != nil {
+	send := func(message string) error {
+		r, err := chat.SendMessage(ctx, genai.Text(message))
+		if err != nil {
+			return err
+		}
+		rb, err := json.MarshalIndent(r, "", "  ")
+		if err != nil {
+			return err
+		}
+		fmt.Fprintln(w, string(rb))
+		return nil
+	}
+
+	if err := send("Hello"); err != nil {
 		return err
 	}
-	rb, _ := json.MarshalIndent(r, "", "  ")
-	fmt.Println(string(rb))
-
-	r, err = chat.SendMessage(
-		ctx,
-		genai.Text("What are all the colors in a rainbow?"))
-	if err != nil {
+	if err := send("What are all the colors in a rainbow?"); err != nil {
 		return err
 	}
-	rb, _ = json.MarshalIndent(r, "", "  ")
-	fmt.Println(string(rb))
-
-	r, err = chat.SendMessage(
-		ctx,
-		genai.Text("Why does it appear when it rains?"))
-	if err != nil {
-		return err
-	}
-	rb, _ = json.MarshalIndent(r, "", "  ")
-	fmt.Println(string(rb))
-
-	return nil
+	return send("Why does it appear when it rains?")
 }
 
 // [END aiplatform_gemini_multiturn_chat]
+// [END generativeaionvertexai_gemini_multiturn_chat]

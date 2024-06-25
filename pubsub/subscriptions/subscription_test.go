@@ -85,9 +85,8 @@ func setup(t *testing.T) *pubsub.Client {
 				}
 				timeTCreated := time.Unix(0, timestamp)
 				if time.Since(timeTCreated) > expireAge {
-					if err := t.Delete(ctx); err != nil {
-						fmt.Printf("Delete topic err: %v: %v", t.String(), err)
-					}
+					// Topic deletion can be fire and forget
+					t.Delete(ctx)
 				}
 			}
 		}
@@ -112,9 +111,8 @@ func setup(t *testing.T) *pubsub.Client {
 				}
 				timeTCreated := time.Unix(0, timestamp)
 				if time.Since(timeTCreated) > expireAge {
-					if err := s.Delete(ctx); err != nil {
-						fmt.Printf("Delete sub err: %v: %v", s.String(), err)
-					}
+					// Subscription deletion can be fire and forget
+					s.Delete(ctx)
 				}
 			}
 		}
@@ -950,6 +948,43 @@ func TestReceiveMessagesWithExactlyOnceDelivery(t *testing.T) {
 	if !strings.Contains(got, want) {
 		t.Fatalf("receiveMessagesWithExactlyOnceDeliveryEnabled got %s\nwant %s", got, want)
 	}
+}
+
+func TestOptimisticSubscribe(t *testing.T) {
+	t.Parallel()
+	client := setup(t)
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	optTopicID := topicID + "-opt"
+	optSubID := subID + "-opt"
+
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		topic, err := getOrCreateTopic(ctx, client, optTopicID)
+		if err != nil {
+			r.Errorf("getOrCreateTopic: %v", err)
+		}
+		defer topic.Delete(ctx)
+		defer topic.Stop()
+
+		buf := new(bytes.Buffer)
+		err = optimisticSubscribe(buf, tc.ProjectID, optTopicID, optSubID)
+		if err != nil {
+			r.Errorf("failed to pull messages: %v", err)
+		}
+
+		// Check that we created the subscription instead of using
+		// an existing one. We can't test receiving a message
+		// since a message published won't be delivered to a new
+		// subscription.
+		got := buf.String()
+		want := "Created subscription"
+		if !strings.Contains(got, want) {
+			r.Errorf("optimisticSubscribe\ngot: %s\nwant: %s", got, want)
+		}
+
+		sub := client.Subscription(optSubID)
+		sub.Delete(ctx)
+	})
 }
 
 func publishMsgs(ctx context.Context, t *pubsub.Topic, numMsgs int) error {

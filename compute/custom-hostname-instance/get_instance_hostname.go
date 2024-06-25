@@ -21,7 +21,7 @@ import (
 	"io"
 
 	compute "cloud.google.com/go/compute/apiv1"
-	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
+	computepb "cloud.google.com/go/compute/apiv1/computepb"
 )
 
 // getInstanceHostname prints the hostname of the Google Cloud VM instance.

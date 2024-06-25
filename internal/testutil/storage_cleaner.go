@@ -24,61 +24,44 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/google/uuid"
-	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 )
 
-// CreateTestBucket creates a new bucket with the given prefix
-func CreateTestBucket(ctx context.Context, t *testing.T, client *storage.Client, projectID, prefix string) (string, error) {
-	t.Helper()
-	bucketName := UniqueBucketName(prefix)
-	return bucketName, cleanBucketWithClient(ctx, t, client, projectID, bucketName)
-}
-
-// CleanBucket creates a new bucket. If the bucket already exists, it will be
-// deleted and recreated.
-func CleanBucket(ctx context.Context, t *testing.T, projectID, bucket string) error {
+// TestBucket creates a new bucket with the given prefix and registers a cleanup
+// function to delete the bucket and any objects it contains when the test finishes.
+// TestBucket returns the bucket name. It fails the test if bucket creation fails.
+func TestBucket(ctx context.Context, t *testing.T, projectID, prefix string) string {
 	t.Helper()
 
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		t.Fatalf("storage.NewClient: %v", err)
 	}
-	return cleanBucketWithClient(ctx, t, client, projectID, bucket)
+	t.Cleanup(func() { client.Close() })
+	return CreateTestBucket(ctx, t, client, projectID, prefix)
 }
 
-// cleanBucketWithClient creates a new bucket. If the bucket already exists, it will be
-// deleted and recreated.
-// Like CleanBucket but you must provide the storage client.
-func cleanBucketWithClient(ctx context.Context, t *testing.T, client *storage.Client, projectID, bucket string) error {
+// CreateTestBucket creates a new bucket with the given prefix and registers a
+// cleanup function to delete the bucket and any objects it contains.
+// It is equivalent to TestBucket but allows Storage Client re-use.
+func CreateTestBucket(ctx context.Context, t *testing.T, client *storage.Client, projectID, prefix string) string {
 	t.Helper()
+	bucketName := UniqueBucketName(prefix)
 
-	// Delete the bucket if it exists.
-	if err := DeleteBucketIfExists(ctx, client, bucket); err != nil {
-		return fmt.Errorf("error deleting bucket: %w", err)
+	b := client.Bucket(bucketName)
+	if err := b.Create(ctx, projectID, nil); err != nil {
+		t.Fatalf("Bucket.Create(%q): %v", bucketName, err)
 	}
-	b := client.Bucket(bucket)
 
-	// Now create the bucket.
-	// Retry because the bucket can take time to fully delete.
-	Retry(t, 10, 30*time.Second, func(r *R) {
-		if err := b.Create(ctx, projectID, nil); err != nil {
-			if err, ok := err.(*googleapi.Error); ok {
-				// Just in case...
-				if err.Code == 409 {
-					DeleteBucketIfExists(ctx, client, bucket) // Ignore error.
-				}
-			}
-			r.Errorf("Bucket.Create(%q): %v", bucket, err)
+	t.Cleanup(func() {
+		if err := DeleteBucketIfExists(ctx, client, bucketName); err != nil {
+			log.Printf("Bucket.Delete(%q): %v", bucketName, err)
 		}
 	})
-
-	WaitForBucketToExist(ctx, t, b)
-
-	return nil
+	return bucketName
 }
 
-// DeleteBucketIfExists deletes a bucket and all its objects
+// DeleteBucketIfExists deletes a bucket and all its objects.
 func DeleteBucketIfExists(ctx context.Context, client *storage.Client, bucket string) error {
 	b := client.Bucket(bucket)
 
@@ -137,26 +120,12 @@ func DeleteBucketIfExists(ctx context.Context, client *storage.Client, bucket st
 	return fmt.Errorf("failed to delete bucket %q", bucket)
 }
 
-// WaitForBucketToExist waits for a bucket to exist, as it can take time to propagate
-// Errors after 10 unsuccessful attempts at retrieving the bucket's attrs
-func WaitForBucketToExist(ctx context.Context, t *testing.T, b *storage.BucketHandle) {
-	t.Helper()
-	Retry(t, 10, 30*time.Second, func(r *R) {
-		if _, err := b.Attrs(ctx); err != nil {
-			// Bucket does not exist
-			r.Errorf("Bucket was not created")
-			return
-		}
-	})
-}
-
-// UniqueBucketName returns a unique name with the test prefix
-// Any bucket created with this prefix may be deleted by DeleteExpiredBuckets
+// UniqueBucketName returns a unique name with the test prefix.
 func UniqueBucketName(prefix string) string {
 	return strings.Join([]string{prefix, uuid.New().String()}, "-")
 }
 
-// DeleteExpiredBuckets deletes old testing buckets that weren't cleaned previously
+// DeleteExpiredBuckets deletes old testing buckets that weren't cleaned previously.
 func DeleteExpiredBuckets(client *storage.Client, projectID, prefix string, expireAge time.Duration) error {
 	ctx := context.Background()
 

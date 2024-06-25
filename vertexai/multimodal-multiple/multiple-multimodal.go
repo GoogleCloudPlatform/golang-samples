@@ -14,6 +14,7 @@
 // multiple-multimodal shows how to generate content from mixed image and text content
 package main
 
+// [START generativeaionvertexai_gemini_single_turn_multi_image]
 // [START aiplatform_gemini_single_turn_multi_image]
 import (
 	"context"
@@ -31,7 +32,7 @@ import (
 func main() {
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	location := "us-central1"
-	modelName := "gemini-1.0-pro-vision"
+	modelName := "gemini-1.5-flash-001"
 	temperature := 0.4
 
 	if projectID == "" {
@@ -91,7 +92,7 @@ func generateMultimodalContent(w io.Writer, parts []genai.Part, projectID, locat
 
 	res, err := model.GenerateContent(ctx, parts...)
 	if err != nil {
-		return fmt.Errorf("unable to generate contents: %v", err)
+		return fmt.Errorf("unable to generate contents: %w", err)
 	}
 
 	fmt.Fprintf(w, "generated response: %s\n", res.Candidates[0].Content.Parts[0])
@@ -114,7 +115,7 @@ func partFromImageURL(image string) (genai.Part, error) {
 	defer res.Body.Close()
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
-		return img, fmt.Errorf("unable to read from http: %v", err)
+		return img, fmt.Errorf("unable to read from http: %w", err)
 	}
 
 	position := strings.LastIndex(imageURL.Path, ".")
@@ -128,3 +129,4 @@ func partFromImageURL(image string) (genai.Part, error) {
 }
 
 // [END aiplatform_gemini_single_turn_multi_image]
+// [END generativeaionvertexai_gemini_single_turn_multi_image]
