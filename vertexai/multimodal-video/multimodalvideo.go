@@ -40,7 +40,7 @@ func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, 
 
 	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {
-		return fmt.Errorf("unable to create client: %v", err)
+		return fmt.Errorf("unable to create client: %w", err)
 	}
 	defer client.Close()
 
@@ -55,7 +55,7 @@ func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, 
 
 	res, err := model.GenerateContent(ctx, part, genai.Text(prompt))
 	if err != nil {
-		return fmt.Errorf("unable to generate contents: %v", err)
+		return fmt.Errorf("unable to generate contents: %w", err)
 	}
 
 	if len(res.Candidates) == 0 ||

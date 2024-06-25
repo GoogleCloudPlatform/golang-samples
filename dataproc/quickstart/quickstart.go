@@ -29,7 +29,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"regexp"
 
@@ -161,7 +161,7 @@ func main() {
 
 	defer reader.Close()
 
-	body, err := ioutil.ReadAll(reader)
+	body, err := io.ReadAll(reader)
 	if err != nil {
 		fmt.Printf("could not read output from Dataproc Job: %v\n", err)
 		return
