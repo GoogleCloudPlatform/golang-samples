@@ -30,7 +30,7 @@ import (
 // sourceName is the full resource name of the source the finding should
 // be associated with.
 func createFinding(w io.Writer, sourceName string) error {
-	// sourceName := "organizations/111122222444/sources/1234"
+	// sourceName := "organizations/111122222444/sources/1234/locations/global"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
@@ -51,7 +51,7 @@ func createFinding(w io.Writer, sourceName string) error {
 			State: securitycenterpb.Finding_ACTIVE,
 			// Resource the finding is associated with. This is an
 			// example any resource identifier can be used.
-			ResourceName: "//cloudresourcemanager.googleapis.com/organizations/11232",
+			ResourceName: "//cloudresourcemanager.googleapis.com/organizations/11232/locations/global",
 			// A free-form category.
 			Category: "MEDIUM_RISK_ONE",
 			// The time associated with discovering the issue.

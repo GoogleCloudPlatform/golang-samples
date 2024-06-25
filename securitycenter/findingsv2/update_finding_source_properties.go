@@ -31,7 +31,7 @@ import (
 // updateFindingSourceProperties demonstrates how to update a security finding
 // in CSCC. findingName is the full resource name of the finding to update.
 func updateFindingSourceProperties(w io.Writer, findingName string) error {
-	// findingName := "organizations/111122222444/sources/1234/findings/findingid"
+	// findingName := "organizations/111122222444/sources/1234/locations/global/findings/findingid"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)

@@ -29,7 +29,7 @@ import (
 // updateFindingState demonstrates how to update a security finding's state
 // in CSCC.  findingName is the full resource name of the finding to update.
 func setFindingState(w io.Writer, findingName string) error {
-	// findingName := "organizations/111122222444/sources/1234"
+	// findingName := "organizations/111122222444/sources/1234/locations/global"
 	// Instantiate a context and a security service client to make API calls.
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
