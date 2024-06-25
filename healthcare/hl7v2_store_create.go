@@ -34,7 +34,8 @@ func createHL7V2Store(w io.Writer, projectID, location, datasetID, hl7V2StoreID 
 
 	storesService := healthcareService.Projects.Locations.Datasets.Hl7V2Stores
 
-	store := &healthcare.Hl7V2Store{}
+	// Set the HL7v2 store parser version to V3.
+	store := &healthcare.Hl7V2Store{ParserConfig: &healthcare.ParserConfig{Version: "V3"}}
 	parent := fmt.Sprintf("projects/%s/locations/%s/datasets/%s", projectID, location, datasetID)
 
 	resp, err := storesService.Create(parent, store).Hl7V2StoreId(hl7V2StoreID).Do()

@@ -24,8 +24,8 @@ import (
 	"time"
 
 	compute "cloud.google.com/go/compute/apiv1"
+	computepb "cloud.google.com/go/compute/apiv1/computepb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -97,6 +97,28 @@ func TestComputeDiskImageSnippets(t *testing.T) {
 		}
 		if got := buf.String(); !strings.Contains(got, want) {
 			t.Errorf("createImageFromDisk got %q, want %q", got, want)
+		}
+
+		buf.Reset()
+		want = "was found"
+
+		err = getDiskImage(buf, tc.ProjectID, imageName)
+		if err != nil {
+			t.Errorf("getDiskImage got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("getDiskImage got %q, want %q", got, want)
+		}
+
+		buf.Reset()
+		want = "Newest disk image was found"
+
+		err = getDiskImageFromFamily(buf, "debian-cloud", "debian-11")
+		if err != nil {
+			t.Errorf("getDiskImageFromFamily got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("getDiskImageFromFamily got %q, want %q", got, want)
 		}
 
 		buf.Reset()

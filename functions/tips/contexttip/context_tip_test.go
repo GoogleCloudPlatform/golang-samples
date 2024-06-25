@@ -24,18 +24,16 @@ import (
 	"testing"
 
 	"cloud.google.com/go/pubsub"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestPublishMessage(t *testing.T) {
-	// TODO: Use testutil to get the project.
-	projectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
-	if projectID == "" {
-		t.Skip("Missing GOLANG_SAMPLES_PROJECT_ID.")
-	}
+	tc := testutil.SystemTest(t)
+	os.Setenv("GOOGLE_CLOUD_PROJECT", tc.ProjectID)
 
 	ctx := context.Background()
 	var err error
-	client, err = pubsub.NewClient(ctx, projectID)
+	client, err = pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("pubsub.NewClient: %v", err)
 	}

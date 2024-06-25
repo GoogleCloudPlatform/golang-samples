@@ -47,7 +47,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -192,7 +191,7 @@ func (p *App) envAppYaml() (string, error) {
 		return p.tempAppYaml, nil
 	}
 
-	b, err := ioutil.ReadFile(filepath.Join(p.Dir, base))
+	b, err := os.ReadFile(filepath.Join(p.Dir, base))
 	if err != nil {
 		return "", err
 	}
@@ -232,7 +231,7 @@ func (p *App) envAppYaml() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if err := ioutil.WriteFile(filepath.Join(p.Dir, tmp), b, 0755); err != nil {
+	if err := os.WriteFile(filepath.Join(p.Dir, tmp), b, 0755); err != nil {
 		return "", err
 	}
 
@@ -270,7 +269,7 @@ func (p *App) readService() error {
 		return nil
 	}
 
-	b, err := ioutil.ReadFile(filepath.Join(p.Dir, p.appYaml()))
+	b, err := os.ReadFile(filepath.Join(p.Dir, p.appYaml()))
 	if err != nil {
 		return err
 	}

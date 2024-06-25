@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,17 +21,17 @@ import (
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 // createCDNKeyAkamai creates an Akamai CDN key. A CDN key is used to retrieve
 // protected media.
-func createCDNKeyAkamai(w io.Writer, projectID, keyID, hostname, akamaiTokenKey string) error {
+func createCDNKeyAkamai(w io.Writer, projectID, keyID, akamaiTokenKey string) error {
 	// projectID := "my-project-id"
 	// keyID := "my-cdn-key"
-	// hostname := "cdn.example.com"
 	// akamaiTokenKey := "my-private-token-key"
 	location := "us-central1"
+	hostname := "cdn.example.com"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
 	if err != nil {
@@ -39,12 +39,12 @@ func createCDNKeyAkamai(w io.Writer, projectID, keyID, hostname, akamaiTokenKey 
 	}
 	defer client.Close()
 
-	req := &stitcherpb.CreateCdnKeyRequest{
+	req := &stitcherstreampb.CreateCdnKeyRequest{
 		Parent:   fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 		CdnKeyId: keyID,
-		CdnKey: &stitcherpb.CdnKey{
-			CdnKeyConfig: &stitcherpb.CdnKey_AkamaiCdnKey{
-				AkamaiCdnKey: &stitcherpb.AkamaiCdnKey{
+		CdnKey: &stitcherstreampb.CdnKey{
+			CdnKeyConfig: &stitcherstreampb.CdnKey_AkamaiCdnKey{
+				AkamaiCdnKey: &stitcherstreampb.AkamaiCdnKey{
 					TokenKey: []byte(akamaiTokenKey),
 				},
 			},
@@ -53,9 +53,13 @@ func createCDNKeyAkamai(w io.Writer, projectID, keyID, hostname, akamaiTokenKey 
 	}
 
 	// Creates the CDN key.
-	response, err := client.CreateCdnKey(ctx, req)
+	op, err := client.CreateCdnKey(ctx, req)
 	if err != nil {
 		return fmt.Errorf("client.CreateCdnKey: %w", err)
+	}
+	response, err := op.Wait(ctx)
+	if err != nil {
+		return err
 	}
 
 	fmt.Fprintf(w, "CDN key: %v", response.GetName())
