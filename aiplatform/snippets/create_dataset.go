@@ -38,7 +38,7 @@ func createDataset(w io.Writer, projectID, location string) error {
 	ctx := context.Background()
 	client, err := aiplatform.NewDatasetClient(ctx, clientOption)
 	if err != nil {
-		return fmt.Errorf("aiplatform.NewDatasetClient: %v", err)
+		return fmt.Errorf("aiplatform.NewDatasetClient: %w", err)
 	}
 	defer client.Close()
 
