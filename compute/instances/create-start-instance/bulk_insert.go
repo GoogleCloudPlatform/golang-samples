@@ -68,7 +68,9 @@ func createFiveInstances(w io.Writer, projectID, zone, templateName, namePattern
 		NamePattern:            &namePattern,
 	}
 
-	labels := make(map[string]string)
+	labels := map[string]string{
+	  "bulk_batch": uuid.New().String()
+	}
 	labels["bulk_batch"] = uuid.New().String()
 	instanceProp := &computepb.InstanceProperties{
 		Labels: labels,
