@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/appengine_flexible/storage
 
-go 1.22
+go 1.21
 
 require (
 	cloud.google.com/go/storage v1.36.0
