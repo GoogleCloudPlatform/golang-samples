@@ -89,7 +89,7 @@ func downloadProfiles(ctx context.Context, w io.Writer, project, pageToken strin
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("error reading profile from response: %v", err)
+			return fmt.Errorf("error reading profile from response: %w", err)
 		}
 		profileCount++
 
@@ -97,7 +97,7 @@ func downloadProfiles(ctx context.Context, w io.Writer, project, pageToken strin
 		err = os.WriteFile(filename, profile.ProfileBytes, 0640)
 
 		if err != nil {
-			return fmt.Errorf("unable to write file %s: %v", filename, err)
+			return fmt.Errorf("unable to write file %s: %w", filename, err)
 		}
 		fmt.Fprintf(w, "deployment target: %v\n", profile.Deployment.Labels)
 
