@@ -26,15 +26,12 @@ import (
 
 // [START compute_hyperdisk_create]
 // createHyperdisk creates a new Hyperdisk in the specified project and zone.
-func createHyperdisk(w io.Writer, projectId, zone, diskName string, diskSizeGb int64) error {
+func createHyperdisk(w io.Writer, projectId, zone, diskName string) error {
 	//   projectID := "your_project_id"
 	//   zone := "europe-central2-b"
 	//   diskName := "your_disk_name"
-	//   diskSizeGb := int64(10)
 
-	// Optional fields
-	//   provisionedIops := int64(3000)
-	//   provisionedThroughput := int64(140)
+	diskSizeGb := int64(10)
 
 	ctx := context.Background()
 	client, err := compute.NewDisksRESTClient(ctx)
@@ -52,8 +49,6 @@ func createHyperdisk(w io.Writer, projectId, zone, diskName string, diskSizeGb i
 		Type:   proto.String(diskType),
 		SizeGb: proto.Int64(diskSizeGb),
 		Zone:   proto.String(zone),
-		//ProvisionedIops:       proto.Int64(provisionedIops), // Optional field
-		//ProvisionedThroughput: proto.Int64(provisionedThroughput), // Optional field
 	}
 
 	req := &computepb.InsertDiskRequest{

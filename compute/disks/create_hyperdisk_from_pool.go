@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"time"
 
 	compute "cloud.google.com/go/compute/apiv1"
 	computepb "cloud.google.com/go/compute/apiv1/computepb"
@@ -28,16 +27,17 @@ import (
 // [START compute_hyperdisk_create_from_pool]
 
 // createDiskInStoragePool creates a new Hyperdisk in the specified storage pool.
-func createDiskInStoragePool(w io.Writer, projectId, zone, diskName, storagePoolName, diskType string, diskSizeGb, provisionedIops, provisionedThroughput int64) error {
+func createDiskInStoragePool(w io.Writer, projectId, zone, diskName, storagePoolName, diskType string) error {
 	// Example usage:
 	//   projectID := "your_project_id"
 	//   zone := "europe-central2-b"
 	//   diskName := "your_disk_name"
 	//   storagePoolName := "https://www.googleapis.com/compute/v1/projects/your_project_id/zones/europe-central2-b/storagePools/your_storage_pool"
 	//   diskType := "zones/europe-central2-b/diskTypes/hyperdisk-balanced"
-	//   diskSizeGb := int64(10)
-	//   provisionedIops := int64(3000)
-	//   provisionedThroughput := int64(140)
+
+	diskSizeGb := int64(50)
+	provisionedIops := int64(10000)
+	provisionedThroughput := int64(1024)
 
 	ctx := context.Background()
 	client, err := compute.NewDisksRESTClient(ctx)
@@ -75,20 +75,7 @@ func createDiskInStoragePool(w io.Writer, projectId, zone, diskName, storagePool
 		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
-	// Wait for server update
-	time.Sleep(10 * time.Second)
-
-	// Retrieve and return the created disk
-	createdDisk, err := client.Get(ctx, &computepb.GetDiskRequest{
-		Project: projectId,
-		Zone:    zone,
-		Disk:    diskName,
-	})
-	if err != nil {
-		return fmt.Errorf("Get disk request failed: %v", err)
-	}
-
-	fmt.Fprintf(w, "Disk created in storage pool: %v\n", createdDisk.GetName())
+	fmt.Fprintf(w, "Disk created in storage pool: %v\n", disk.Name)
 	return nil
 }
 

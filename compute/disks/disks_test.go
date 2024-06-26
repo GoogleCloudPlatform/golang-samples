@@ -505,11 +505,10 @@ func TestComputeDisksSnippets(t *testing.T) {
 			t.Fatalf("NewDisksRESTClient: %v", err)
 		}
 		defer disksClient.Close()
-		diskSizeGb := int64(10)
 		var buf bytes.Buffer
-		err = createHyperdisk(&buf, tc.ProjectID, zone, instanceRegionalHyperDiskName, diskSizeGb)
+		err = createHyperdisk(&buf, tc.ProjectID, zone, instanceRegionalHyperDiskName)
 		if err != nil {
-			t.Fatalf("createHyperdisk got err: %v", err)
+			t.Errorf("createHyperdisk got err: %v", err)
 		}
 		defer deleteDisk(&buf, tc.ProjectID, zone, instanceRegionalHyperDiskName)
 		disk, err := disksClient.Get(ctx, &computepb.GetDiskRequest{
@@ -533,17 +532,33 @@ func TestComputeDisksSnippets(t *testing.T) {
 	})
 }
 
-func TestCreateHyperdiskStoragePool(t *testing.T) {
+func TestCreateDisksStoragePool(t *testing.T) {
 	ctx := context.Background()
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
-	zone := "europe-west4-b"
+	capacityProvisioningType := "ADVANCED"
+	diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+	diskSizeGb := int64(50)
+	diskType := fmt.Sprintf("zones/%s/diskTypes/hyperdisk-balanced", zone)
 	storagePoolName := fmt.Sprintf("test-storage-pool-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	storagePoolType := fmt.Sprintf("projects/%s/zones/%s/storagePoolTypes/hyperdisk-balanced", tc.ProjectID, zone)
-	capacityProvisioningType := "ADVANCED"
+	storagePoolLink := fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/storagePools/%s", tc.ProjectID, zone, storagePoolName)
 	provisionedCapacity := int64(10240)
 	provisionedIops := int64(10000)
 	provisionedThroughput := int64(1024)
+	zone := "europe-west4-b"
+
+	// Create the storage pool
+	var buf bytes.Buffer
+	err = createHyperdiskStoragePool(&buf, tc.ProjectID, zone, storagePoolName, storagePoolType)
+	if err != nil {
+		t.Fatalf("createHyperdiskStoragePool got err: %v", err)
+	}
+	defer func() {
+		if err := deleteStoragePool(tc.ProjectID, zone, storagePoolName); err != nil {
+			t.Errorf("deleteStoragePool got err: %v", err)
+		}
+	}()
 
 	t.Run("CreateHyperdiskStoragePool", func(t *testing.T) {
 		storagePoolsClient, err := compute.NewStoragePoolsRESTClient(ctx)
@@ -551,18 +566,6 @@ func TestCreateHyperdiskStoragePool(t *testing.T) {
 			t.Fatalf("NewStoragePoolsRESTClient: %v", err)
 		}
 		defer storagePoolsClient.Close()
-
-		// Create the storage pool
-		var buf bytes.Buffer
-		err = createHyperdiskStoragePool(&buf, tc.ProjectID, zone, storagePoolName, storagePoolType, capacityProvisioningType, provisionedCapacity, provisionedIops, provisionedThroughput)
-		if err != nil {
-			t.Fatalf("createHyperdiskStoragePool got err: %v", err)
-		}
-		defer func() {
-			if err := deleteStoragePool(tc.ProjectID, zone, storagePoolName); err != nil {
-				t.Fatalf("deleteStoragePool got err: %v", err)
-			}
-		}()
 
 		// Verify the storage pool creation
 		storagePool, err := storagePoolsClient.Get(ctx, &computepb.GetStoragePoolRequest{
@@ -598,37 +601,6 @@ func TestCreateHyperdiskStoragePool(t *testing.T) {
 			t.Errorf("Provisioned throughput mismatch: got %v, want %v", storagePool.GetPoolProvisionedThroughput(), provisionedThroughput)
 		}
 	})
-}
-func TestCreateDiskInStoragePool(t *testing.T) {
-	ctx := context.Background()
-	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
-	tc := testutil.SystemTest(t)
-	zone := "europe-west4-b"
-	storagePoolName := fmt.Sprintf("test-storage-pool-%v-%v", time.Now().Format("01-02-2006"), r.Int())
-	storagePoolType := fmt.Sprintf("projects/%s/zones/%s/storagePoolTypes/hyperdisk-balanced", tc.ProjectID, zone)
-
-	storagePoolLink := fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/storagePools/%s", tc.ProjectID, zone, storagePoolName)
-	diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
-	diskType := fmt.Sprintf("zones/%s/diskTypes/hyperdisk-balanced", zone)
-	diskSizeGb := int64(50)
-	provisionedCapacity := int64(10240)
-	provisionedIops := int64(10000)
-	provisionedThroughput := int64(1024)
-
-	capacityProvisioningType := "ADVANCED"
-
-	// Create the storage pool
-	var buf bytes.Buffer
-	err := createHyperdiskStoragePool(&buf, tc.ProjectID, zone, storagePoolName, storagePoolType, capacityProvisioningType, provisionedCapacity, provisionedIops, provisionedThroughput)
-	if err != nil {
-		t.Fatalf("createHyperdiskStoragePool got err: %v", err)
-	}
-
-	defer func() {
-		if err := deleteStoragePool(tc.ProjectID, zone, storagePoolName); err != nil {
-			t.Fatalf("deleteStoragePool got err: %v", err)
-		}
-	}()
 
 	t.Run("CreateDiskInStoragePool", func(t *testing.T) {
 		disksClient, err := compute.NewDisksRESTClient(ctx)
@@ -638,7 +610,7 @@ func TestCreateDiskInStoragePool(t *testing.T) {
 		defer disksClient.Close()
 
 		// Create the disk
-		err = createDiskInStoragePool(&buf, tc.ProjectID, zone, diskName, storagePoolLink, diskType, diskSizeGb, provisionedIops, provisionedThroughput)
+		err = createDiskInStoragePool(&buf, tc.ProjectID, zone, diskName, storagePoolLink, diskType)
 		if err != nil {
 			t.Fatalf("createDiskInStoragePool got err: %v", err)
 		}
@@ -650,7 +622,7 @@ func TestCreateDiskInStoragePool(t *testing.T) {
 			Disk:    diskName,
 		})
 		if err != nil {
-			t.Fatalf("Get disk got err: %v", err)
+			t.Errorf("Get disk got err: %v", err)
 		}
 
 		if disk.GetName() != diskName {
@@ -675,7 +647,7 @@ func TestCreateDiskInStoragePool(t *testing.T) {
 
 		// Cleanup the disk
 		if err := deleteDisk(&buf, tc.ProjectID, zone, diskName); err != nil {
-			t.Fatalf("deleteDisk got err: %v", err)
+			t.Errorf("deleteDisk got err: %v", err)
 		}
 	})
 }
