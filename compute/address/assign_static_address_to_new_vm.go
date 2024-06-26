@@ -77,14 +77,12 @@ func assignStaticExternalToNewVM(w io.Writer, projectID, zone, instanceName, ipA
 			MachineType: proto.String(fmt.Sprintf("zones/%s/machineTypes/n1-standard-1", zone)),
 			NetworkInterfaces: []*computepb.NetworkInterface{
 				{
-					//Name: proto.String("global/networks/default"),
 					AccessConfigs: []*computepb.AccessConfig{
 						{
 							Type:        proto.String(computepb.AccessConfig_ONE_TO_ONE_NAT.String()),
 							Name:        proto.String("External NAT"),
 							NetworkTier: proto.String(computepb.AccessConfig_PREMIUM.String()),
-							// HERE IS ACTUAL IP ADDRESS ASSIGN. OTHER PARAMS OF VM CAN VARY AND DISPLAYED AS AN EXAMPLE
-							NatIP: proto.String(ipAddress),
+							NatIP:       proto.String(ipAddress),
 						},
 					},
 				},
