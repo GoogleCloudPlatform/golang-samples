@@ -71,41 +71,6 @@ func getInstance(ctx context.Context, projectID, zone, instanceName string) (*co
 	return instance, nil
 }
 
-func TestSpotCreate(t *testing.T) {
-	ctx := context.Background()
-	var seededRand = rand.New(
-		rand.NewSource(time.Now().UnixNano()))
-	tc := testutil.SystemTest(t)
-	zone := "europe-central2-b"
-	instanceName := "spot-instance-name" + fmt.Sprint(seededRand.Int())
-	buf := &bytes.Buffer{}
-
-	err := createSpotInstance(buf, tc.ProjectID, zone, instanceName)
-	if err != nil {
-		t.Fatalf("Failed to create spot instance: %v", err)
-	}
-
-	// cleanup
-	defer func() {
-		if err := deleteInstance(ctx, tc.ProjectID, zone, instanceName); err != nil {
-			t.Errorf("deleteInstance got err: %v", err)
-		}
-
-	}()
-
-	buf.Reset()
-
-	// Check if the instance exists
-	instance, err := getInstance(ctx, tc.ProjectID, zone, instanceName)
-	if err != nil {
-		t.Fatalf("Failed to get instance: %v", err)
-	}
-
-	if instance == nil {
-		t.Errorf("Instance %q does not exist", instanceName)
-	}
-}
-
 func TestIsSpotVM(t *testing.T) {
 	ctx := context.Background()
 	var seededRand = rand.New(
@@ -128,6 +93,18 @@ func TestIsSpotVM(t *testing.T) {
 		}
 
 	}()
+
+	buf.Reset()
+
+	// Check if the instance exists
+	instance, err := getInstance(ctx, tc.ProjectID, zone, instanceName)
+	if err != nil {
+		t.Errorf("Failed to get instance: %v", err)
+	}
+
+	if instance == nil {
+		t.Errorf("Instance %q does not exist", instanceName)
+	}
 
 	buf.Reset()
 

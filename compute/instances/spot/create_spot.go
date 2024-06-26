@@ -26,91 +26,6 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// getImageFromFamily retrieves the newest image that is part of a given family in a project.
-func getImageFromFamily(project, family string) (*computepb.Image, error) {
-	ctx := context.Background()
-	client, err := compute.NewImagesRESTClient(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("NewImagesRESTClient: %w", err)
-	}
-	defer client.Close()
-
-	req := &computepb.GetFromFamilyImageRequest{
-		Project: project,
-		Family:  family,
-	}
-
-	resp, err := client.GetFromFamily(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("GetFromFamily: %w", err)
-	}
-	return resp, nil
-}
-
-// diskFromImage creates an AttachedDisk object to be used in VM instance creation using an image as the source.
-func diskFromImage(diskType string, diskSizeGb int64, boot bool, sourceImage string, autoDelete bool) *computepb.AttachedDisk {
-	return &computepb.AttachedDisk{
-		AutoDelete: proto.Bool(autoDelete),
-		Boot:       proto.Bool(boot),
-		InitializeParams: &computepb.AttachedDiskInitializeParams{
-			DiskSizeGb:  proto.Int64(diskSizeGb),
-			DiskType:    proto.String(diskType),
-			SourceImage: proto.String(sourceImage),
-		},
-		Type: proto.String(computepb.AttachedDisk_PERSISTENT.String()),
-	}
-}
-
-// createInstance sends an instance creation request to the Compute Engine API and waits for it to complete.
-func createInstance(ctx context.Context, projectID, zone, instanceName string, disks []*computepb.AttachedDisk, machineType, networkLink string, spot bool) (*computepb.Instance, error) {
-	client, err := compute.NewInstancesRESTClient(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("NewInstancesRESTClient: %w", err)
-	}
-	defer client.Close()
-
-	networkInterface := &computepb.NetworkInterface{
-		Name: proto.String(networkLink),
-	}
-
-	instance := &computepb.Instance{
-		Name:              proto.String(instanceName),
-		Disks:             disks,
-		MachineType:       proto.String(fmt.Sprintf("zones/%s/machineTypes/%s", zone, machineType)),
-		NetworkInterfaces: []*computepb.NetworkInterface{networkInterface},
-		Scheduling: &computepb.Scheduling{
-			ProvisioningModel: proto.String(computepb.Scheduling_SPOT.String()),
-		},
-	}
-
-	req := &computepb.InsertInstanceRequest{
-		Project:          projectID,
-		Zone:             zone,
-		InstanceResource: instance,
-	}
-
-	op, err := client.Insert(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("Insert: %w", err)
-	}
-
-	opClient, err := compute.NewZoneOperationsRESTClient(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("NewZoneOperationsRESTClient: %w", err)
-	}
-	defer opClient.Close()
-
-	if err = op.Wait(ctx); err != nil {
-		return nil, fmt.Errorf("unable to wait for the operation: %w", err)
-	}
-
-	return client.Get(ctx, &computepb.GetInstanceRequest{
-		Project:  projectID,
-		Zone:     zone,
-		Instance: instanceName,
-	})
-}
-
 // createSpotInstance creates a new Spot VM instance with Debian 10 operating system.
 func createSpotInstance(w io.Writer, projectID, zone, instanceName string) error {
 	// projectID := "your_project_id"
@@ -118,17 +33,74 @@ func createSpotInstance(w io.Writer, projectID, zone, instanceName string) error
 	// instanceName := "your_instance_name"
 
 	ctx := context.Background()
-	image, err := getImageFromFamily("debian-cloud", "debian-11")
+	imagesClient, err := compute.NewImagesRESTClient(ctx)
+	if err != nil {
+		return fmt.Errorf("NewImagesRESTClient: %w", err)
+	}
+	defer imagesClient.Close()
+
+	instancesClient, err := compute.NewInstancesRESTClient(ctx)
+	if err != nil {
+		return fmt.Errorf("NewInstancesRESTClient: %w", err)
+	}
+	defer instancesClient.Close()
+
+	req := &computepb.GetFromFamilyImageRequest{
+		Project: "debian-cloud",
+		Family:  "debian-11",
+	}
+
+	image, err := imagesClient.GetFromFamily(ctx, req)
 	if err != nil {
 		return fmt.Errorf("getImageFromFamily: %w", err)
 	}
 
 	diskType := fmt.Sprintf("zones/%s/diskTypes/pd-standard", zone)
 	disks := []*computepb.AttachedDisk{
-		diskFromImage(diskType, 10, true, image.GetSelfLink(), true),
+		{
+			AutoDelete: proto.Bool(true),
+			Boot:       proto.Bool(true),
+			InitializeParams: &computepb.AttachedDiskInitializeParams{
+				DiskSizeGb:  proto.Int64(10),
+				DiskType:    proto.String(diskType),
+				SourceImage: proto.String(image.GetSelfLink()),
+			},
+			Type: proto.String(computepb.AttachedDisk_PERSISTENT.String()),
+		},
 	}
 
-	instance, err := createInstance(ctx, projectID, zone, instanceName, disks, "n1-standard-1", "global/networks/default", true)
+	req2 := &computepb.InsertInstanceRequest{
+		Project: projectID,
+		Zone:    zone,
+		InstanceResource: &computepb.Instance{
+			Name:        proto.String(instanceName),
+			Disks:       disks,
+			MachineType: proto.String(fmt.Sprintf("zones/%s/machineTypes/%s", zone, "n1-standard-1")),
+			NetworkInterfaces: []*computepb.NetworkInterface{
+				{
+					Name: proto.String("global/networks/default"),
+				},
+			},
+			Scheduling: &computepb.Scheduling{
+				ProvisioningModel: proto.String(computepb.Scheduling_SPOT.String()),
+			},
+		},
+	}
+	op, err := instancesClient.Insert(ctx, req2)
+	if err != nil {
+		return fmt.Errorf("insert: %w", err)
+	}
+
+	if err = op.Wait(ctx); err != nil {
+		return fmt.Errorf("unable to wait for the operation: %w", err)
+	}
+
+	instance, err := instancesClient.Get(ctx, &computepb.GetInstanceRequest{
+		Project:  projectID,
+		Zone:     zone,
+		Instance: instanceName,
+	})
+
 	if err != nil {
 		return fmt.Errorf("createInstance: %w", err)
 	}
