@@ -43,7 +43,7 @@ func getCDNKey(w io.Writer, projectID, keyID string) error {
 	// Gets the CDN key.
 	response, err := client.GetCdnKey(ctx, req)
 	if err != nil {
-		return fmt.Errorf("client.GetCdnKey: %v", err)
+		return fmt.Errorf("client.GetCdnKey: %w", err)
 	}
 	b, err := json.MarshalIndent(response, "", " ")
 	if err != nil {

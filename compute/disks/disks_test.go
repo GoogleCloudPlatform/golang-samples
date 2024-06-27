@@ -498,6 +498,42 @@ func TestComputeDisksSnippets(t *testing.T) {
 		// Cannot clean up the disk just yet because it must be done after the VM is terminated.
 		// It will be done by deleteInstance function.
 	})
+	t.Run("list disks", func(t *testing.T) {
+		var buf bytes.Buffer
+
+		if err := listDisks(&buf, tc.ProjectID, zone, ""); err != nil {
+			t.Errorf("listDisks got err: %v", err)
+		}
+
+		if got := buf.String(); !strings.Contains(got, diskName) {
+			t.Errorf("listDisks got %q, want it to contain %q", got, diskName)
+		}
+	})
+	t.Run("List disks with a filter", func(t *testing.T) {
+		var buf bytes.Buffer
+
+		filter := fmt.Sprintf("name = %s", diskName)
+		if err := listDisks(&buf, tc.ProjectID, zone, filter); err != nil {
+			t.Errorf("listDisks with filter got err: %v", err)
+		}
+
+		if got := buf.String(); !strings.Contains(got, diskName) {
+			t.Errorf("listDisks with filter %s got %q, want it to contain %q", filter, got, diskName)
+		}
+		buf.Reset()
+
+		notExistentDiskName := diskName + "aaa"
+
+		filter = fmt.Sprintf("name eq %s", notExistentDiskName)
+		if err := listDisks(&buf, tc.ProjectID, zone, filter); err != nil {
+			t.Errorf("listDisks with filter got err: %v", err)
+		}
+
+		if got := buf.String(); strings.Contains(got, notExistentDiskName) {
+			t.Errorf("listDisks with filter %s got %q, want it to NOT contain %q", filter, got, notExistentDiskName)
+		}
+
+	})
 	t.Run("Create Hyperdisk", func(t *testing.T) {
 		instanceRegionalHyperDiskName := fmt.Sprintf("test-hyper-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 		disksClient, err := compute.NewDisksRESTClient(ctx)
