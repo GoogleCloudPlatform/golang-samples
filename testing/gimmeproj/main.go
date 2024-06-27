@@ -255,7 +255,7 @@ func status(ctx context.Context) error {
 		for _, proj := range pool.Projects {
 			exp := ""
 			if !proj.Expired() {
-				secs := proj.LeaseExpiry.Sub(time.Now()) / time.Second * time.Second
+				secs := time.Until(proj.LeaseExpiry)
 				exp = secs.String()
 			}
 			switch *format {
