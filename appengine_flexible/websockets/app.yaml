@@ -3,7 +3,7 @@ env: flex
 
 runtime_config:
   operating_system: ubuntu22
-  runtime_version: 1.19
+  runtime_version: 1.21
 
 # Use only a single instance, so that this local-memory-only chat app will work
 # consistently with multiple users. To work across multiple instances, an
