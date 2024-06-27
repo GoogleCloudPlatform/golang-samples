@@ -765,3 +765,21 @@ func TestCreateBucketHierarchicalNamespace(t *testing.T) {
 		t.Errorf("Attrs.HierarchicalNamespace: got %v, want %v", got, want)
 	}
 }
+
+func TestCreateBucketObjectRetention(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	bucketName := testutil.UniqueBucketName(testPrefix)
+	ctx := context.Background()
+
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	buf := new(bytes.Buffer)
+
+	if err := createBucketObjectRetention(buf, tc.ProjectID, bucketName); err != nil {
+		t.Fatalf("createBucketObjectRetention: %v", err)
+	}
+
+	if got, want := buf.String(), "Enabled"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
