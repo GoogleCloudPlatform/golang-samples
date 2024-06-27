@@ -19,11 +19,9 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"time"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv2"
 	"cloud.google.com/go/securitycenter/apiv2/securitycenterpb"
-	"github.com/golang/protobuf/ptypes"
 )
 
 // updateFindingState demonstrates how to update a security finding's state
@@ -37,17 +35,11 @@ func setFindingState(w io.Writer, findingName string) error {
 		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
-	// Use now as the eventTime for the security finding.
-	now, err := ptypes.TimestampProto(time.Now())
-	if err != nil {
-		return fmt.Errorf("TimestampProto: %w", err)
-	}
 
 	req := &securitycenterpb.SetFindingStateRequest{
 		Name:  findingName,
 		State: securitycenterpb.Finding_INACTIVE,
 		// New state is effective immediately.
-		StartTime: now,
 	}
 
 	finding, err := client.SetFindingState(ctx, req)
