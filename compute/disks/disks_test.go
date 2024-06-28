@@ -573,6 +573,7 @@ func TestCreateDisksStoragePool(t *testing.T) {
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	capacityProvisioningType := "ADVANCED"
+	zone := "europe-west4-b"
 	diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	diskSizeGb := int64(50)
 	diskType := fmt.Sprintf("zones/%s/diskTypes/hyperdisk-balanced", zone)
@@ -582,11 +583,10 @@ func TestCreateDisksStoragePool(t *testing.T) {
 	provisionedCapacity := int64(10240)
 	provisionedIops := int64(10000)
 	provisionedThroughput := int64(1024)
-	zone := "europe-west4-b"
 
 	// Create the storage pool
 	var buf bytes.Buffer
-	err = createHyperdiskStoragePool(&buf, tc.ProjectID, zone, storagePoolName, storagePoolType)
+	err := createHyperdiskStoragePool(&buf, tc.ProjectID, zone, storagePoolName, storagePoolType)
 	if err != nil {
 		t.Fatalf("createHyperdiskStoragePool got err: %v", err)
 	}
