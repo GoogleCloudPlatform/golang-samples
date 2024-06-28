@@ -950,6 +950,43 @@ func TestReceiveMessagesWithExactlyOnceDelivery(t *testing.T) {
 	}
 }
 
+func TestOptimisticSubscribe(t *testing.T) {
+	t.Parallel()
+	client := setup(t)
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	optTopicID := topicID + "-opt"
+	optSubID := subID + "-opt"
+
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		topic, err := getOrCreateTopic(ctx, client, optTopicID)
+		if err != nil {
+			r.Errorf("getOrCreateTopic: %v", err)
+		}
+		defer topic.Delete(ctx)
+		defer topic.Stop()
+
+		buf := new(bytes.Buffer)
+		err = optimisticSubscribe(buf, tc.ProjectID, optTopicID, optSubID)
+		if err != nil {
+			r.Errorf("failed to pull messages: %v", err)
+		}
+
+		// Check that we created the subscription instead of using
+		// an existing one. We can't test receiving a message
+		// since a message published won't be delivered to a new
+		// subscription.
+		got := buf.String()
+		want := "Created subscription"
+		if !strings.Contains(got, want) {
+			r.Errorf("optimisticSubscribe\ngot: %s\nwant: %s", got, want)
+		}
+
+		sub := client.Subscription(optSubID)
+		sub.Delete(ctx)
+	})
+}
+
 func publishMsgs(ctx context.Context, t *pubsub.Topic, numMsgs int) error {
 	var results []*pubsub.PublishResult
 	for i := 0; i < numMsgs; i++ {

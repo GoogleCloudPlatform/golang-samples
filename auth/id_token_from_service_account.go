@@ -19,7 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 
 	"google.golang.org/api/idtoken"
 	"google.golang.org/api/option"
@@ -41,7 +41,7 @@ func getIdTokenFromServiceAccount(w io.Writer, jsonCredentialsPath, url string) 
 
 	ctx := context.Background()
 
-	data, err := ioutil.ReadFile(jsonCredentialsPath)
+	data, err := os.ReadFile(jsonCredentialsPath)
 	if err != nil {
 		return fmt.Errorf("failed to read json file: %w", err)
 	}
