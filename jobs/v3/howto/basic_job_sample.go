@@ -25,7 +25,6 @@ import (
 )
 
 // [START job_create_job]
-// [START create_job]
 
 // createJob create a job as given.
 func createJob(w io.Writer, projectID string, jobToCreate *talent.Job) (*talent.Job, error) {
@@ -52,7 +51,6 @@ func createJob(w io.Writer, projectID string, jobToCreate *talent.Job) (*talent.
 	return job, err
 }
 
-// [END create_job]
 // [END job_create_job]
 
 // [START job_get_job]
@@ -84,7 +82,6 @@ func getJob(w io.Writer, jobName string) (*talent.Job, error) {
 // [END job_get_job]
 
 // [START job_update_job]
-// [START update_job]
 
 // updateJob update a job with all fields except name.
 func updateJob(w io.Writer, jobName string, jobToUpdate *talent.Job) (*talent.Job, error) {
@@ -111,11 +108,9 @@ func updateJob(w io.Writer, jobName string, jobToUpdate *talent.Job) (*talent.Jo
 	return job, err
 }
 
-// [END update_job]
 // [END job_update_job]
 
 // [START job_update_job_with_field_mask]
-// [START update_job_with_field_mask]
 
 // updateJobWithMask updates a job by name with specific fields.
 // mask is a comma separated list top-level fields of talent.Job.
@@ -144,11 +139,9 @@ func updateJobWithMask(w io.Writer, jobName string, mask string, jobToUpdate *ta
 	return job, err
 }
 
-// [END update_job_with_field_mask]
 // [END job_update_job_with_field_mask]
 
 // [START job_delete_job]
-// [START delete_job]
 
 // deleteJob deletes an existing job by name.
 func deleteJob(w io.Writer, jobName string) error {
@@ -171,11 +164,9 @@ func deleteJob(w io.Writer, jobName string) error {
 	return err
 }
 
-// [END delete_job]
 // [END job_delete_job]
 
 // [START job_list_jobs]
-// [START list_jobs]
 
 // listJobs lists jobs with a filter, for example
 // `companyName="projects/my-project/companies/123"`.
@@ -206,5 +197,4 @@ func listJobs(w io.Writer, projectID, filter string) (*talent.ListJobsResponse, 
 	return resp, err
 }
 
-// [END list_jobs]
 // [END job_list_jobs]
