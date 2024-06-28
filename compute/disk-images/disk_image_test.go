@@ -101,6 +101,16 @@ func TestComputeDiskImageSnippets(t *testing.T) {
 			t.Errorf("createImageFromDisk got %q, want %q", got, want)
 		}
 
+		want = "deprecated"
+		buf.Reset()
+
+		if err := deprecateDiskImage(buf, tc.ProjectID, imageName); err != nil {
+			t.Errorf("deprecateDiskImage got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("deprecateDiskImage got %q, want %q", got, want)
+		}
+
 		buf.Reset()
 		want = "was found"
 

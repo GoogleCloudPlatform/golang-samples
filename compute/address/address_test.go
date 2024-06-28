@@ -23,6 +23,8 @@ import (
 	"testing"
 	"time"
 
+	"google.golang.org/protobuf/proto"
+
 	compute "cloud.google.com/go/compute/apiv1"
 	"google.golang.org/api/iterator"
 
@@ -31,6 +33,107 @@ import (
 )
 
 // helper functions
+
+func createTestInstance(projectID, zone, instanceName string) error {
+	// projectID := "your_project_id"
+	// zone := "europe-central2-b"
+	// instanceName := "your_instance_name"
+
+	ctx := context.Background()
+	instancesClient, err := compute.NewInstancesRESTClient(ctx)
+	if err != nil {
+		return fmt.Errorf("NewInstancesRESTClient: %w", err)
+	}
+	defer instancesClient.Close()
+
+	imagesClient, err := compute.NewImagesRESTClient(ctx)
+	if err != nil {
+		return fmt.Errorf("NewImagesRESTClient: %w", err)
+	}
+	defer imagesClient.Close()
+
+	// List of public operating system (OS) images: https://cloud.google.com/compute/docs/images/os-details.
+	newestDebianReq := &computepb.GetFromFamilyImageRequest{
+		Project: "debian-cloud",
+		Family:  "debian-12",
+	}
+	newestDebian, err := imagesClient.GetFromFamily(ctx, newestDebianReq)
+	if err != nil {
+		return fmt.Errorf("unable to get image from family: %w", err)
+	}
+
+	req := &computepb.InsertInstanceRequest{
+		Project: projectID,
+		Zone:    zone,
+		InstanceResource: &computepb.Instance{
+			Name: proto.String(instanceName),
+			Disks: []*computepb.AttachedDisk{
+				{
+					InitializeParams: &computepb.AttachedDiskInitializeParams{
+						DiskSizeGb:  proto.Int64(10),
+						SourceImage: newestDebian.SelfLink,
+						DiskType:    proto.String(fmt.Sprintf("zones/%s/diskTypes/pd-standard", zone)),
+					},
+					AutoDelete: proto.Bool(true),
+					Boot:       proto.Bool(true),
+					Type:       proto.String(computepb.AttachedDisk_PERSISTENT.String()),
+				},
+			},
+			MachineType: proto.String(fmt.Sprintf("zones/%s/machineTypes/n1-standard-1", zone)),
+			NetworkInterfaces: []*computepb.NetworkInterface{
+				{
+					//Name: proto.String("global/networks/default"),
+					AccessConfigs: []*computepb.AccessConfig{
+						{
+							Type:        proto.String(computepb.AccessConfig_ONE_TO_ONE_NAT.String()),
+							Name:        proto.String("External NAT"),
+							NetworkTier: proto.String(computepb.AccessConfig_PREMIUM.String()),
+						},
+					},
+				},
+			},
+		},
+	}
+
+	op, err := instancesClient.Insert(ctx, req)
+	if err != nil {
+		return fmt.Errorf("unable to create instance: %w", err)
+	}
+
+	if err = op.Wait(ctx); err != nil {
+		return fmt.Errorf("unable to wait for the operation: %w", err)
+	}
+
+	return nil
+}
+
+func deleteInstance(projectID, zone, instanceName string) error {
+	ctx := context.Background()
+	client, err := compute.NewInstancesRESTClient(ctx)
+	if err != nil {
+		return fmt.Errorf("NewInstancesRESTClient: %w", err)
+	}
+	defer client.Close()
+
+	req := &computepb.DeleteInstanceRequest{
+		Project:  projectID,
+		Zone:     zone,
+		Instance: instanceName,
+	}
+
+	op, err := client.Delete(ctx, req)
+	if err != nil {
+		return fmt.Errorf("DeleteInstance: %w", err)
+	}
+
+	err = op.Wait(ctx)
+	if err != nil {
+		return fmt.Errorf("Wait for DeleteInstance operation: %w", err)
+	}
+
+	return nil
+}
+
 func listIPAddresses(ctx context.Context, projectID, region string) ([]string, error) {
 	var addresses []string
 	var err error
@@ -158,6 +261,8 @@ func _deleteRegionalIPAddress(ctx context.Context, projectID, region, addressNam
 
 	return nil
 }
+
+// end helper functions
 
 func TestReserveNewRegionalExternal(t *testing.T) {
 	ctx := context.Background()
@@ -444,4 +549,82 @@ func TestGetRegionalExternal(t *testing.T) {
 		t.Errorf("getRegionalExternal got %q, want %q", got, expectedResult)
 	}
 
+}
+
+func TestAssignStaticAddressToExistingVM(t *testing.T) {
+	ctx := context.Background()
+	var seededRand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+	tc := testutil.SystemTest(t)
+	instanceName := "test-instance-" + fmt.Sprint(seededRand.Int())
+	addressName := "test-address-" + fmt.Sprint(seededRand.Int())
+	zone := "us-central1-a"
+	region := "us-central1"
+	buf := &bytes.Buffer{}
+
+	// initiate instance
+	err := createTestInstance(tc.ProjectID, zone, instanceName)
+	if err != nil {
+		t.Fatalf("createTestInstance got err: %v", err)
+		return
+	}
+
+	defer func() {
+		if err := deleteInstance(tc.ProjectID, zone, instanceName); err != nil {
+			t.Errorf("deleteInstance got err: %v", err)
+		}
+
+	}()
+
+	// create and retrieve address
+	address, err := reserveNewRegionalExternal(buf, tc.ProjectID, region, addressName, true)
+	if err != nil {
+		t.Fatalf("reserveNewRegionalExternal got err: %v", err)
+		return
+	}
+
+	defer func() {
+
+		if err := deleteIPAddress(ctx, tc.ProjectID, region, addressName); err != nil {
+			t.Errorf("deleteIPAddress got err: %v", err)
+		}
+	}()
+
+	// assign address to test
+	if err := assignStaticAddressToExistingVM(buf, tc.ProjectID, zone, instanceName, address.GetAddress(), "nic0"); err != nil {
+		t.Errorf("assignStaticAddressToExistingVM got err: %v", err)
+	}
+
+	// verify output
+	expectedResult := fmt.Sprintf("Static address %s assigned to the instance %s", address.GetAddress(), instanceName)
+	if got := buf.String(); !strings.Contains(got, expectedResult) {
+		t.Errorf("assignStaticAddressToExistingVM got %q, want %q", got, expectedResult)
+	}
+
+	reqGet := &computepb.GetInstanceRequest{
+		Project:  tc.ProjectID,
+		Zone:     zone,
+		Instance: instanceName,
+	}
+
+	// verify address assign
+	instancesClient, err := compute.NewInstancesRESTClient(ctx)
+	instance, err := instancesClient.Get(ctx, reqGet)
+	if err != nil {
+		t.Errorf("instancesClient.Get got err: %v", err)
+	}
+
+	for _, ni := range instance.NetworkInterfaces {
+		if *ni.Name != "nic0" {
+			continue
+		}
+		for _, ac := range ni.AccessConfigs {
+
+			if ac.NatIP != nil && *ac.NatIP == address.GetAddress() {
+				return // address assign verified
+			}
+		}
+
+	}
+	t.Error("IP address did not assigned properly") // address assign not verified
 }
