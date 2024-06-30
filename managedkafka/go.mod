@@ -3,8 +3,9 @@ module github.com/GoogleCloudPlatform/golang-samples/managedkafka
 go 1.19
 
 require (
-	cloud.google.com/go/managedkafka v0.0.0-00010101000000-000000000000
+	cloud.google.com/go/managedkafka v0.1.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240529190426-bba205b73ac2
+	github.com/GoogleCloudPlatform/golang-samples/internal/managedkafka v0.0.0-20240625174605-9f1ab639fd5b
 	google.golang.org/api v0.182.0
 	google.golang.org/protobuf v1.34.1
 )
@@ -45,4 +46,4 @@ require (
 	google.golang.org/grpc v1.64.0 // indirect
 )
 
-replace cloud.google.com/go/managedkafka => ../internal/managedkafka/
+replace github.com/GoogleCloudPlatform/golang-samples/internal/managedkafka => ../internal/managedkafka/

@@ -54,7 +54,7 @@ func transcribe_diarization(w io.Writer, filename string) error {
 	// Get the contents of the local audio file
 	content, err := os.ReadFile(filename)
 	if err != nil {
-		return fmt.Errorf("error reading file %v", err)
+		return fmt.Errorf("error reading file %w", err)
 	}
 	audio := &speechpb.RecognitionAudio{
 		AudioSource: &speechpb.RecognitionAudio_Content{Content: content},
@@ -67,7 +67,7 @@ func transcribe_diarization(w io.Writer, filename string) error {
 
 	operation, err := client.LongRunningRecognize(ctx, longRunningRecognizeRequest)
 	if err != nil {
-		return fmt.Errorf("error running recognize %v", err)
+		return fmt.Errorf("error running recognize %w", err)
 	}
 
 	response, err := operation.Wait(ctx)
