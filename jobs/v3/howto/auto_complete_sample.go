@@ -23,7 +23,7 @@ import (
 	talent "google.golang.org/api/jobs/v3"
 )
 
-// [START auto_complete_job_title]
+// [START job_auto_complete_job_title]
 
 // jobTitleAutoComplete suggests the job titles of the given companyName based
 // on query.
@@ -58,9 +58,9 @@ func jobTitleAutoComplete(w io.Writer, projectID, companyName, query string) (*t
 	return resp, nil
 }
 
-// [END auto_complete_job_title]
+// [END job_auto_complete_job_title]
 
-// [START auto_complete_default]
+// [START job_auto_complete_default]
 
 // defaultAutoComplete suggests job titles or company display names of given companyName based on query.
 func defaultAutoComplete(w io.Writer, projectID, companyName, query string) (*talent.CompleteQueryResponse, error) {
@@ -96,4 +96,4 @@ func defaultAutoComplete(w io.Writer, projectID, companyName, query string) (*ta
 
 }
 
-// [END auto_complete_default]
+// [END job_auto_complete_default]
