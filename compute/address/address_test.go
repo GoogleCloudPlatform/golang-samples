@@ -651,7 +651,6 @@ func TestPromoteEphemeralAddress(t *testing.T) {
 		if err := deleteInstance(tc.ProjectID, zone, instanceName); err != nil {
 			t.Errorf("deleteInstance got err: %v", err)
 		}
-
 	}()
 
 	reqGet := &computepb.GetInstanceRequest{
@@ -703,6 +702,13 @@ func TestPromoteEphemeralAddress(t *testing.T) {
 	if err := promoteEphemeralAddress(buf, tc.ProjectID, region, ephemeralIP, addressName); err != nil {
 		t.Errorf("promoteEphemeralAddress got err: %v", err)
 	}
+
+	// release static ip
+	defer func() {
+		if err = releaseRegionalStaticExternal(buf, tc.ProjectID, region, addressName); err != nil {
+			t.Errorf("releaseRegionalStaticExternal got err: %v", err)
+		}
+	}()
 
 	// verify output
 	expectedResult := fmt.Sprintf("Ephemeral IP %s address promoted successfully", ephemeralIP)
