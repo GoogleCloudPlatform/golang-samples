@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/compute v1.27.0
 	cloud.google.com/go/storage v1.40.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240614224000-8947784936bb
+	github.com/google/uuid v1.6.0
 	google.golang.org/api v0.180.0
 	google.golang.org/protobuf v1.34.1
 )
