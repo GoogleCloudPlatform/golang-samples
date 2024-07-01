@@ -37,7 +37,7 @@ func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, 
 
 	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {
-		return fmt.Errorf("unable to create client: %v", err)
+		return fmt.Errorf("unable to create client: %w", err)
 	}
 	defer client.Close()
 

@@ -92,7 +92,7 @@ func generateMultimodalContent(w io.Writer, parts []genai.Part, projectID, locat
 
 	res, err := model.GenerateContent(ctx, parts...)
 	if err != nil {
-		return fmt.Errorf("unable to generate contents: %v", err)
+		return fmt.Errorf("unable to generate contents: %w", err)
 	}
 
 	fmt.Fprintf(w, "generated response: %s\n", res.Candidates[0].Content.Parts[0])
@@ -115,7 +115,7 @@ func partFromImageURL(image string) (genai.Part, error) {
 	defer res.Body.Close()
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
-		return img, fmt.Errorf("unable to read from http: %v", err)
+		return img, fmt.Errorf("unable to read from http: %w", err)
 	}
 
 	position := strings.LastIndex(imageURL.Path, ".")

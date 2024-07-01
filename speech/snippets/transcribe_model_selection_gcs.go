@@ -61,7 +61,7 @@ func transcribe_model_selection_gcs(w io.Writer, gcsUri string, model string) er
 
 	operation, err := client.LongRunningRecognize(ctx, longRunningRecognizeRequest)
 	if err != nil {
-		return fmt.Errorf("error running recognize %v", err)
+		return fmt.Errorf("error running recognize %w", err)
 	}
 
 	response, err := operation.Wait(ctx)
