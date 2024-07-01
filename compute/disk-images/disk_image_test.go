@@ -192,7 +192,7 @@ func TestComputeDiskImageSnippets(t *testing.T) {
 		buf.Reset()
 		want = "Newest disk image was found"
 
-		err = getDiskImageFromFamily(buf, "debian-cloud", "debian-11")
+		_, err = getDiskImageFromFamily(buf, "debian-cloud", "debian-11")
 		if err != nil {
 			t.Errorf("getDiskImageFromFamily got err: %v", err)
 		}
