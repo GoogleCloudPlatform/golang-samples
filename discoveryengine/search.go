@@ -40,7 +40,7 @@ func search(projectID, location, searchEngineID, query string) error {
 	}
 	client, err := discoveryengine.NewSearchClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
-	    	return fmt.Errorf("creating Vertex AI Search client: %w", err)
+		return fmt.Errorf("creating Vertex AI Search client: %w", err)
 	}
 	defer client.Close()
 
