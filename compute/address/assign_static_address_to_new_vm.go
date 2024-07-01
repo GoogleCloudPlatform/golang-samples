@@ -27,7 +27,7 @@ import (
 // [START compute_ip_address_assign_static_external_new_vm]
 
 // assignStaticExternalToNewVM creates a new VM instance and assigns a static external IP address to it.
-// NOTE: ip address expected to be existed and located in same region as new VM
+// NOTE: ip address is expected to exist and be located in the same region as new VM
 func assignStaticExternalToNewVM(w io.Writer, projectID, zone, instanceName, ipAddress string) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
