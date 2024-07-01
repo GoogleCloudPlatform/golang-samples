@@ -56,7 +56,6 @@ func createJob(w io.Writer, projectID string, jobToCreate *talent.Job) (*talent.
 // [END job_create_job]
 
 // [START job_get_job]
-// [START get_job]
 
 // getJob gets a job by name.
 func getJob(w io.Writer, jobName string) (*talent.Job, error) {
@@ -82,7 +81,6 @@ func getJob(w io.Writer, jobName string) (*talent.Job, error) {
 	return job, err
 }
 
-// [END get_job]
 // [END job_get_job]
 
 // [START job_update_job]
