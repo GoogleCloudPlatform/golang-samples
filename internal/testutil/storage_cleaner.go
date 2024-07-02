@@ -83,17 +83,27 @@ func DeleteBucketIfExists(ctx context.Context, client *storage.Client, bucket st
 		if err != nil {
 			return fmt.Errorf("Bucket.Objects(%q): %v", bucket, err)
 		}
+		obj := b.Object(attrs.Name)
 		// Objects with a hold must have the hold released
 		if attrs.EventBasedHold || attrs.TemporaryHold {
-			if _, err := b.Object(attrs.Name).Update(ctx, storage.ObjectAttrsToUpdate{
+			if _, err := obj.Update(ctx, storage.ObjectAttrsToUpdate{
 				TemporaryHold:  false,
 				EventBasedHold: false,
 			}); err != nil {
 				return fmt.Errorf("Bucket(%q).Object(%q).Update: %v", bucket, attrs.Name, err)
 			}
 		}
-		obj := b.Object(attrs.Name).Generation(attrs.Generation)
-		if err := obj.Delete(ctx); err != nil {
+		// Objects with a retention policy must must have the policy removed.
+		if attrs.Retention != nil {
+			_, err = obj.OverrideUnlockedRetention(true).Update(ctx, storage.ObjectAttrsToUpdate{
+				Retention: &storage.ObjectRetention{},
+			})
+			if err != nil {
+				return fmt.Errorf("failed to remove retention from object(%q): %v", attrs.Name, err)
+			}
+		}
+
+		if err := obj.Generation(attrs.Generation).Delete(ctx); err != nil {
 			return fmt.Errorf("Bucket(%q).Object(%q).Delete: %v", bucket, attrs.Name, err)
 		}
 	}
