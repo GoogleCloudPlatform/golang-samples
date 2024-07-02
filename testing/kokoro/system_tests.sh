@@ -54,15 +54,16 @@ SIGNIFICANT_CHANGES=$(git --no-pager diff --name-only main..HEAD | grep -Ev '(\.
 # but weren't deleted by the current PR.
 # CHANGED_DIRS will be empty when run on main.
 CHANGED_DIRS=$(echo "$SIGNIFICANT_CHANGES" | tr ' ' '\n' | grep "/" | cut -d/ -f1 | sort -u | tr '\n' ' ' | xargs --no-run-if-empty ls -d 2>/dev/null || true)
+GO_CHANGED_PKGS=$(echo "$SIGNIFICANT_CHANGES" | tr ' ' '\n' | grep "/" | tr '\n' ' ' | xargs --no-run-if-empty ls -d 2>/dev/null || true)
 
 # List all modules in changed directories.
 # If running on main will collect all modules in the repo, including the root module.
 # shellcheck disable=SC2086
-GO_CHANGED_MODULES="$(find ${CHANGED_DIRS:-.} -name go.mod)"
-# If we didn't find any modules, use the root module.
-GO_CHANGED_MODULES=${GO_CHANGED_MODULES:-./go.mod}
-# Exclude the root module, if present, from the list of sub-modules.
-GO_CHANGED_SUBMODULES=${GO_CHANGED_MODULES#./go.mod}
+GO_CHANGED_MODULES="$(find ${GO_CHANGED_PKGS:-.} -name go.mod | xargs --no-run-if-empty dirname)"
+# # If we didn't find any modules, use the root module.
+# GO_CHANGED_MODULES=${GO_CHANGED_MODULES:-./go.mod}
+# # Exclude the root module, if present, from the list of sub-modules.
+# GO_CHANGED_SUBMODULES=${GO_CHANGED_MODULES#./go.mod}
 
 # Override to determine if all go tests should be run.
 # Does not include static analysis checks.
@@ -239,8 +240,8 @@ elif [[ -z "${CHANGED_DIRS// }" ]]; then
   runTests .
 else
   runTests . # Always run root tests.
-  echo "Running tests in modified directories: $CHANGED_DIRS"
-  for d in $CHANGED_DIRS; do
+  echo "Running tests in modified directories: $GO_CHANGED_PKGS"
+  for d in $GO_CHANGED_PKGS; do
     mods=$(find "$d" -name go.mod)
     # If there are no modules, just run the tests directly.
     if [[ -z "$mods" ]]; then
