@@ -3,19 +3,20 @@ module github.com/GoogleCloudPlatform/golang-samples/kms
 go 1.19
 
 require (
-	cloud.google.com/go/kms v1.15.7
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240111005027-4c7a1933dce2
+	cloud.google.com/go/kms v1.18.2
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240701223052-15721cc48b6c
 	github.com/gofrs/uuid v3.4.0+incompatible
 	github.com/google/tink/go v1.7.0
-	google.golang.org/api v0.176.1
-	google.golang.org/genproto v0.0.0-20240227224415-6ceb2ff114de
-	google.golang.org/grpc v1.63.2
-	google.golang.org/protobuf v1.33.0
+	google.golang.org/api v0.187.0
+	google.golang.org/genproto v0.0.0-20240701130421-f6361c86f094
+	google.golang.org/grpc v1.64.0
+	google.golang.org/protobuf v1.34.2
 )
 
 require (
-	cloud.google.com/go/auth v0.3.0 // indirect
+	cloud.google.com/go/auth v0.6.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.2 // indirect
+	cloud.google.com/go/longrunning v0.5.8 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -28,33 +29,33 @@ require (
 	go.opentelemetry.io/otel/trace v1.24.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240311132316-a219d84964c2 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240415180920-8c6c420018be // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240624140628-dc46fd24d27d // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240624140628-dc46fd24d27d // indirect
 )
 
 require (
-	cloud.google.com/go v0.112.0 // indirect
+	cloud.google.com/go v0.115.0 // indirect
 	cloud.google.com/go/compute/metadata v0.3.0 // indirect
-	cloud.google.com/go/iam v1.1.6 // indirect
-	cloud.google.com/go/storage v1.36.0 // indirect
-	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
-	github.com/goccy/go-json v0.10.2 // indirect
+	cloud.google.com/go/iam v1.1.9 // indirect
+	cloud.google.com/go/storage v1.41.0 // indirect
+	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.3.0 // indirect
+	github.com/goccy/go-json v0.10.3 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
-	github.com/googleapis/gax-go/v2 v2.12.3 // indirect
+	github.com/googleapis/gax-go/v2 v2.12.5 // indirect
 	// Note that the library 'lestrrat-go' is NOT endoresed for anything beyond conversion to JWK.
 	github.com/lestrrat-go/blackmagic v1.0.2 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
 	github.com/lestrrat-go/httprc v1.0.5 // indirect
 	github.com/lestrrat-go/iter v1.0.2 // indirect
-	github.com/lestrrat-go/jwx/v2 v2.0.21
+	github.com/lestrrat-go/jwx/v2 v2.1.0
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/crypto v0.22.0 // indirect
-	golang.org/x/net v0.24.0 // indirect
-	golang.org/x/oauth2 v0.19.0 // indirect
-	golang.org/x/sys v0.19.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/crypto v0.24.0 // indirect
+	golang.org/x/net v0.26.0 // indirect
+	golang.org/x/oauth2 v0.21.0 // indirect
+	golang.org/x/sys v0.21.0 // indirect
+	golang.org/x/text v0.16.0 // indirect
 )
