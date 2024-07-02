@@ -29,7 +29,6 @@ import (
 )
 
 func TestDenyPolicySnippets(t *testing.T) {
-	t.Skip("Skipped while investigating https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 	var r *rand.Rand = rand.New(
