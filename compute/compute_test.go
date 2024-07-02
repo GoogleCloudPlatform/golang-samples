@@ -36,7 +36,7 @@ func TestComputeSnippets(t *testing.T) {
 	instanceName := "test-" + fmt.Sprint(seededRand.Int())
 	instanceName2 := "test-" + fmt.Sprint(seededRand.Int())
 	machineType := "n1-standard-1"
-	sourceImage := "projects/debian-cloud/global/images/family/debian-10"
+	sourceImage := "projects/debian-cloud/global/images/family/debian-11"
 	networkName := "global/networks/default"
 
 	buf := &bytes.Buffer{}
