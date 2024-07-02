@@ -51,7 +51,7 @@ func TestCreateInstanceFromTemplateSnippets(t *testing.T) {
 	instanceName2 := "test-instance-" + fmt.Sprint(seededRand.Int())
 	instanceTemplateName := "test-instance-template" + fmt.Sprint(seededRand.Int())
 	machineType := "n1-standard-1"
-	sourceImage := "projects/debian-cloud/global/images/family/debian-10"
+	sourceImage := "projects/debian-cloud/global/images/family/debian-11"
 	networkName := "global/networks/default"
 
 	insertTemplateReq := &computepb.InsertInstanceTemplateRequest{

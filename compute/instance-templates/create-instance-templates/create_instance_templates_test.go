@@ -40,7 +40,7 @@ func TestCreateInstanceTemplatesSnippets(t *testing.T) {
 	templateName2 := "test-template-" + fmt.Sprint(seededRand.Int())
 	templateName3 := "test-template-" + fmt.Sprint(seededRand.Int())
 	machineType := "n1-standard-1"
-	sourceImage := "projects/debian-cloud/global/images/family/debian-10"
+	sourceImage := "projects/debian-cloud/global/images/family/debian-11"
 	networkName := "global/networks/default-compute"
 	subnetworkName := "regions/asia-east1/subnetworks/default-compute"
 
