@@ -44,17 +44,18 @@ export GOLANG_SAMPLES_E2E_TEST=""
 # allow files to be owned by a different user than our current uid.
 # Kokoro runs a double-nested container, and UIDs may not match.
 git config --global --add safe.directory $(pwd)
-GIT_CHANGES=$(git --no-pager diff --name-only main..HEAD)
+# Allow $GIT_CHANGES to be set in the env, enabling local testing of the change detection below.
+GIT_CHANGES=${GIT_CHANGES:-$(git --no-pager diff --name-only main..HEAD)}
 if [[ -z $GIT_CHANGES && $KOKORO_JOB_NAME != *"system-tests"* ]]; then
   echo "No diffs detected. This is unexpected - check above for additional error messages."
   exit 2
 fi
-SIGNIFICANT_CHANGES=$(git --no-pager diff --name-only main..HEAD | grep -Ev '(\.md$|^\.github)' || true )
+SIGNIFICANT_CHANGES=$(echo $GIT_CHANGES | grep -Ev '(\.md$|^\.github)' || true )
 # CHANGED_DIRS is the list of significant top-level directories that changed,
 # but weren't deleted by the current PR.
 # CHANGED_DIRS will be empty when run on main.
 CHANGED_DIRS=$(echo "$SIGNIFICANT_CHANGES" | tr ' ' '\n' | grep "/" | cut -d/ -f1 | sort -u | tr '\n' ' ' | xargs --no-run-if-empty ls -d 2>/dev/null || true)
-GO_CHANGED_PKGS=$(echo "$SIGNIFICANT_CHANGES" | tr ' ' '\n' | grep "/" | tr '\n' ' ' | xargs --no-run-if-empty ls -d 2>/dev/null || true)
+GO_CHANGED_PKGS=$(echo "$SIGNIFICANT_CHANGES" | tr ' ' '\n' | grep "/" | tr '\n' ' ' | xargs --no-run-if-empty dirname | xargs --no-run-if-empty ls -d 2>/dev/null || true)
 
 # List all modules in changed directories.
 # If running on main will collect all modules in the repo, including the root module.
