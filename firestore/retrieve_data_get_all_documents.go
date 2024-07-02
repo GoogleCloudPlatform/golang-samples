@@ -27,6 +27,7 @@ import (
 func allDocs(ctx context.Context, client *firestore.Client) error {
 	fmt.Println("All cities:")
 	iter := client.Collection("cities").Documents(ctx)
+	defer iter.Stop()
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
