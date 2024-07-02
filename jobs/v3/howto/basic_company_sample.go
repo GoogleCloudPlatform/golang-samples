@@ -23,6 +23,7 @@ import (
 	talent "google.golang.org/api/jobs/v3"
 )
 
+// [START job_create_company]
 // [START create_company]
 
 // createCompany creates a company as given.
@@ -52,7 +53,9 @@ func createCompany(w io.Writer, projectID string, companyToCreate *talent.Compan
 }
 
 // [END create_company]
+// [END job_create_company]
 
+// [START job_get_company]
 // [START get_company]
 
 // getCompany gets an existing company by name.
@@ -80,7 +83,9 @@ func getCompany(w io.Writer, name string) (*talent.Company, error) {
 }
 
 // [END get_company]
+// [END job_get_company]
 
+// [START job_update_company]
 // [START update_company]
 
 // updateCompany update a company with all fields.
@@ -109,7 +114,9 @@ func updateCompany(w io.Writer, name string, companyToUpdate *talent.Company) (*
 }
 
 // [END update_company]
+// [END job_update_company]
 
+// [START job_update_company_with_field_mask]
 // [START update_company_with_field_mask]
 
 // updateCompanyWithMask updates a company with specific fields.
@@ -140,7 +147,9 @@ func updateCompanyWithMask(w io.Writer, name string, mask string, companyToUpdat
 }
 
 // [END update_company_with_field_mask]
+// [END job_update_company_with_field_mask]
 
+// [START job_delete_company]
 // [START delete_company]
 
 // deleteCompany deletes an existing company by name.
@@ -165,7 +174,9 @@ func deleteCompany(w io.Writer, name string) error {
 }
 
 // [END delete_company]
+// [END job_delete_company]
 
+// [START job_list_companies]
 // [START list_companies]
 
 // listCompanies lists all companies in the project.
@@ -197,3 +208,4 @@ func listCompanies(w io.Writer, projectID string) (*talent.ListCompaniesResponse
 }
 
 // [END list_companies]
+// [END job_list_companies]
