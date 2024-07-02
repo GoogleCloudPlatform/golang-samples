@@ -25,6 +25,7 @@ import (
 )
 
 // [START job_create_job]
+// [START create_job]
 
 // createJob create a job as given.
 func createJob(w io.Writer, projectID string, jobToCreate *talent.Job) (*talent.Job, error) {
@@ -51,6 +52,7 @@ func createJob(w io.Writer, projectID string, jobToCreate *talent.Job) (*talent.
 	return job, err
 }
 
+// [END create_job]
 // [END job_create_job]
 
 // [START job_get_job]
