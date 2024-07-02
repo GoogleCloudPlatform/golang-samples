@@ -33,7 +33,7 @@ func createInstanceFromTemplateWithOverrides(w io.Writer, projectID, zone, insta
 	// instanceName := "your_instance_name"
 	// instanceTemplateName := "your_instance_template_name"
 	// machineType := "n1-standard-2"
-	// newDiskSourceImage := "projects/debian-cloud/global/images/family/debian-10"
+	// newDiskSourceImage := "projects/debian-cloud/global/images/family/debian-11"
 
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)

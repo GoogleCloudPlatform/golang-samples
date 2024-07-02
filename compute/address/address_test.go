@@ -728,3 +728,104 @@ func TestAssignStaticExternalToNewVM(t *testing.T) {
 	t.Error("IP address did not assigned properly") // address assign not verified
 
 }
+
+func TestPromoteEphemeralAddress(t *testing.T) {
+	ctx := context.Background()
+	var seededRand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+	tc := testutil.SystemTest(t)
+	instanceName := "test-instance-" + fmt.Sprint(seededRand.Int())
+	addressName := "address-promoted-" + fmt.Sprint(seededRand.Int())
+	zone := "us-central1-a"
+	region := "us-central1"
+	buf := &bytes.Buffer{}
+
+	// initiate instance
+	err := createTestInstance(tc.ProjectID, zone, instanceName)
+	if err != nil {
+		t.Errorf("createTestInstance got err: %v", err)
+		return
+	}
+
+	defer func() {
+		if err := deleteInstance(tc.ProjectID, zone, instanceName); err != nil {
+			t.Errorf("deleteInstance got err: %v", err)
+		}
+	}()
+
+	reqGet := &computepb.GetInstanceRequest{
+		Project:  tc.ProjectID,
+		Zone:     zone,
+		Instance: instanceName,
+	}
+
+	// verify address assign
+	instancesClient, err := compute.NewInstancesRESTClient(ctx)
+	instance, err := instancesClient.Get(ctx, reqGet)
+	if err != nil {
+		t.Errorf("instancesClient.Get got err: %v", err)
+	}
+
+	ephemeralIP := ""
+
+	for _, ni := range instance.NetworkInterfaces {
+		if *ni.Name != "nic0" {
+			continue
+		}
+		for _, ac := range ni.AccessConfigs {
+			if *ac.Type == computepb.AccessConfig_ONE_TO_ONE_NAT.String() {
+				ephemeralIP = *ac.NatIP
+				break
+			}
+		}
+	}
+
+	if ephemeralIP == "" {
+		t.Error("no ephemeral IP found in instance")
+		return
+	}
+
+	// List IP addresses to verify the new address is NOT in the list yet
+	addresses, err := listIPAddresses(ctx, tc.ProjectID, region)
+	if err != nil {
+		t.Errorf("listIPAddresses got err: %v", err)
+	}
+
+	for _, address := range addresses {
+		if strings.Contains(address, addressName) {
+			t.Error("ephemeral IP address already promoted")
+			return
+		}
+	}
+
+	// promote ephemeral address
+	if err := promoteEphemeralAddress(buf, tc.ProjectID, region, ephemeralIP, addressName); err != nil {
+		t.Errorf("promoteEphemeralAddress got err: %v", err)
+	}
+
+	// release static ip
+	defer func() {
+		if err = releaseRegionalStaticExternal(buf, tc.ProjectID, region, addressName); err != nil {
+			t.Errorf("releaseRegionalStaticExternal got err: %v", err)
+		}
+	}()
+
+	// verify output
+	expectedResult := fmt.Sprintf("Ephemeral IP %s address promoted successfully", ephemeralIP)
+	if got := buf.String(); !strings.Contains(got, expectedResult) {
+		t.Errorf("promoteEphemeralAddress got %q, want %q", got, expectedResult)
+	}
+
+	// List IP addresses to verify the new address is in the list already
+	addresses, err = listIPAddresses(ctx, tc.ProjectID, region)
+	if err != nil {
+		t.Errorf("listIPAddresses got err: %v", err)
+	}
+
+	for _, address := range addresses {
+		if strings.Contains(address, addressName) {
+			return
+		}
+	}
+	t.Error("ephemeral IP was not promoted")
+}
