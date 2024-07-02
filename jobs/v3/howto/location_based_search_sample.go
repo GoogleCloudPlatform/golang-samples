@@ -23,7 +23,7 @@ import (
 	talent "google.golang.org/api/jobs/v3"
 )
 
-// [START basic_location_search]
+// [START job_basic_location_search]
 
 // basicLocationSearch searches for jobs within distance of location.
 func basicLocationSearch(w io.Writer, projectID, companyName, location string, distance float64) (*talent.SearchJobsResponse, error) {
@@ -82,8 +82,9 @@ func basicLocationSearch(w io.Writer, projectID, companyName, location string, d
 	return resp, nil
 }
 
-// [END basic_location_search]
+// [END job_basic_location_search]
 
+// [START job_city_location_search]
 // [START city_location_search]
 
 // cityLocationSearch searches for jobs in the same city of given location.
@@ -143,7 +144,9 @@ func cityLocationSearch(w io.Writer, projectID, companyName, location string) (*
 }
 
 // [END city_location_search]
+// [END job_city_location_search]
 
+// [START job_broadening_location_search]
 // [START broadening_location_search]
 
 // broadeningLocationSearch searches for jobs with a broadening area of given
@@ -205,8 +208,9 @@ func broadeningLocationSearch(w io.Writer, projectID, companyName, location stri
 }
 
 // [END broadening_location_search]
+// [END job_broadening_location_search]
 
-// [START keyword_location_search]
+// [START job_keyword_location_search]
 
 // keywordLocationSearch searches for jobs with given keyword and within the
 // distance of given location.
@@ -267,9 +271,9 @@ func keywordLocationSearch(w io.Writer, projectID, companyName, location string,
 	return resp, nil
 }
 
-// [END keyword_location_search]
+// [END job_keyword_location_search]
 
-// [START multi_locations_search]
+// [START job_multi_locations_search]
 
 // multiLocationsSearch searches for jobs that fall in the distance of any given
 // locations.
@@ -333,4 +337,4 @@ func multiLocationsSearch(w io.Writer, projectID, companyName, location, locatio
 	return resp, nil
 }
 
-// [END multi_locations_search]
+// [END job_multi_locations_search]
