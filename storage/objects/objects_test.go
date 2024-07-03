@@ -635,6 +635,7 @@ func TestObjectBucketLock(t *testing.T) {
 func TestObjectRetention(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
+	start := time.Now()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		t.Fatalf("storage.NewClient: %v", err)
@@ -648,7 +649,7 @@ func TestObjectRetention(t *testing.T) {
 
 	bucket := client.Bucket(bucketName).SetObjectRetention(true)
 	if err := bucket.Create(ctx, tc.ProjectID, nil); err != nil {
-		t.Fatalf("Bucket(%q).Create:: %v", bucketName, err)
+		t.Fatalf("Bucket(%q).Create: %v", bucketName, err)
 	}
 	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
@@ -666,6 +667,13 @@ func TestObjectRetention(t *testing.T) {
 	}
 
 	if attrs.Retention == nil {
-		t.Errorf("mismatching retention config, wanted %+v, got nil", attrs.Retention)
+		t.Errorf("mismatching retention config, got nil, wanted %+v", attrs.Retention)
+	}
+
+	if got, want := attrs.Retention.RetainUntil, start.Add(time.Hour*24*9); got.Before(want) {
+		t.Errorf("retention time should be more than 9 days from the start of the test; got %v, want after %v", got, want)
+	}
+	if got, want := attrs.Retention.RetainUntil, start.Add(time.Hour*24*10); got.After(want) {
+		t.Errorf("retention time should be less than 10 days from the start of the test; got %v, want sooner than %v", got, want)
 	}
 }
