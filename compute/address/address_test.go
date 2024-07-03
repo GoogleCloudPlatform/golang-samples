@@ -551,7 +551,7 @@ func TestGetRegionalExternal(t *testing.T) {
 
 }
 
-func TestAssignStaticAddressToExistingVM(t *testing.T) {
+func TestAssignUnassignStaticAddressToExistingVM(t *testing.T) {
 	ctx := context.Background()
 	var seededRand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
@@ -627,4 +627,104 @@ func TestAssignStaticAddressToExistingVM(t *testing.T) {
 
 	}
 	t.Error("IP address did not assigned properly") // address assign not verified
+
+	// unassign address
+	if err := unassignStaticAddressFromExistingVM(buf, tc.ProjectID, zone, instanceName, "nic0"); err != nil {
+		t.Errorf("unassignStaticAddressFromExistingVM got err: %v", err)
+	}
+
+	// verify output
+	expectedResult = fmt.Sprintf("Static address %s unassigned from the instance %s", address.GetAddress(), instanceName)
+	if got := buf.String(); !strings.Contains(got, expectedResult) {
+		t.Errorf("unassignStaticAddressFromExistingVM got %q, want %q", got, expectedResult)
+	}
+
+	// verify address unassign
+	instance, err = instancesClient.Get(ctx, reqGet)
+	if err != nil {
+		t.Errorf("instancesClient.Get got err: %v", err)
+	}
+
+	for _, ni := range instance.NetworkInterfaces {
+		if *ni.Name != "nic0" {
+			continue
+		}
+		for _, ac := range ni.AccessConfigs {
+			if ac.NatIP != nil && *ac.NatIP == address.GetAddress() {
+				t.Errorf("address %v still found in the list of assigned addresses", addressName)
+				return
+			}
+		}
+	}
+}
+
+func TestAssignStaticExternalToNewVM(t *testing.T) {
+	ctx := context.Background()
+	var seededRand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+	tc := testutil.SystemTest(t)
+	instanceName := "test-instance-" + fmt.Sprint(seededRand.Int())
+	addressName := "test-address-" + fmt.Sprint(seededRand.Int())
+	zone := "us-central1-a"
+	region := "us-central1"
+	buf := &bytes.Buffer{}
+
+	// create and retrieve address
+	address, err := reserveNewRegionalExternal(buf, tc.ProjectID, region, addressName, true)
+	if err != nil {
+		t.Errorf("reserveNewRegionalExternal got err: %v", err)
+		return
+	}
+
+	defer func() {
+		if err := deleteIPAddress(ctx, tc.ProjectID, region, addressName); err != nil {
+			t.Errorf("deleteIPAddress got err: %v", err)
+		}
+	}()
+
+	// assign address to test
+	if err := assignStaticExternalToNewVM(buf, tc.ProjectID, zone, instanceName, address.GetAddress()); err != nil {
+		t.Errorf("assignStaticExternalToNewVM got err: %v", err)
+	}
+
+	defer func() {
+		if err := deleteInstance(tc.ProjectID, zone, instanceName); err != nil {
+			t.Errorf("deleteInstance got err: %v", err)
+		}
+
+	}()
+
+	// verify output
+	expectedResult := fmt.Sprintf("Static address %s assigned to new VM", address.GetAddress())
+	if got := buf.String(); !strings.Contains(got, expectedResult) {
+		t.Errorf("assignStaticExternalToNewVM got %q, want %q", got, expectedResult)
+	}
+
+	// verify address assign
+	reqGet := &computepb.GetInstanceRequest{
+		Project:  tc.ProjectID,
+		Zone:     zone,
+		Instance: instanceName,
+	}
+
+	instancesClient, err := compute.NewInstancesRESTClient(ctx)
+	instance, err := instancesClient.Get(ctx, reqGet)
+	if err != nil {
+		t.Errorf("instancesClient.Get got err: %v", err)
+	}
+
+	for _, ni := range instance.NetworkInterfaces {
+		if *ni.Name != "nic0" {
+			continue
+		}
+		for _, ac := range ni.AccessConfigs {
+
+			if ac.NatIP != nil && *ac.NatIP == address.GetAddress() {
+				return // address assign verified
+			}
+		}
+
+	}
+	t.Error("IP address did not assigned properly") // address assign not verified
+
 }
