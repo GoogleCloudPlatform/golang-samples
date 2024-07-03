@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,23 +14,25 @@
 
 package snippets
 
-// [START compute_instances_create_from_image_plus_snapshot_disk]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	compute "cloud.google.com/go/compute/apiv1"
-	computepb "cloud.google.com/go/compute/apiv1/computepb"
+	"cloud.google.com/go/compute/apiv1/computepb"
 	"google.golang.org/protobuf/proto"
 )
 
-// createInstanceWithSnapshottedDataDisk creates a new VM instance with Debian 10 operating system and data disk created from snapshot.
-func createInstanceWithSnapshottedDataDisk(w io.Writer, projectID, zone, instanceName, snapshotLink string) error {
+// [START compute_ip_address_assign_static_external_new_vm]
+
+// assignStaticExternalToNewVM creates a new VM instance and assigns a static external IP address to it.
+// NOTE: ip address is expected to exist and be located in the same region as new VM
+func assignStaticExternalToNewVM(w io.Writer, projectID, zone, instanceName, ipAddress string) error {
 	// projectID := "your_project_id"
 	// zone := "europe-central2-b"
 	// instanceName := "your_instance_name"
-	// snapshotLink := "projects/project_name/global/snapshots/snapshot_name"
+	// ipAddress := 301.222.11.123
 
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
@@ -71,21 +73,18 @@ func createInstanceWithSnapshottedDataDisk(w io.Writer, projectID, zone, instanc
 					Boot:       proto.Bool(true),
 					Type:       proto.String(computepb.AttachedDisk_PERSISTENT.String()),
 				},
-				{
-					InitializeParams: &computepb.AttachedDiskInitializeParams{
-						DiskSizeGb:     proto.Int64(11),
-						SourceSnapshot: proto.String(snapshotLink),
-						DiskType:       proto.String(fmt.Sprintf("zones/%s/diskTypes/pd-standard", zone)),
-					},
-					AutoDelete: proto.Bool(true),
-					Boot:       proto.Bool(false),
-					Type:       proto.String(computepb.AttachedDisk_PERSISTENT.String()),
-				},
 			},
 			MachineType: proto.String(fmt.Sprintf("zones/%s/machineTypes/n1-standard-1", zone)),
 			NetworkInterfaces: []*computepb.NetworkInterface{
 				{
-					Name: proto.String("global/networks/default"),
+					AccessConfigs: []*computepb.AccessConfig{
+						{
+							Type:        proto.String(computepb.AccessConfig_ONE_TO_ONE_NAT.String()),
+							Name:        proto.String("External NAT"),
+							NetworkTier: proto.String(computepb.AccessConfig_PREMIUM.String()),
+							NatIP:       proto.String(ipAddress),
+						},
+					},
 				},
 			},
 		},
@@ -100,9 +99,9 @@ func createInstanceWithSnapshottedDataDisk(w io.Writer, projectID, zone, instanc
 		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
-	fmt.Fprintln(w, "Instance created")
+	fmt.Fprintf(w, "Static address %s assigned to new VM", ipAddress)
 
 	return nil
 }
 
-// [END compute_instances_create_from_image_plus_snapshot_disk]
+// [END compute_ip_address_assign_static_external_new_vm]
