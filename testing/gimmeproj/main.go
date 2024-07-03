@@ -26,6 +26,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime/debug"
 	"time"
 
 	ds "cloud.google.com/go/datastore"
@@ -38,6 +39,7 @@ var (
 	datastore   *ds.Client
 
 	version       = "dev"
+	buildSource   = "unknown"
 	buildDate     = "unknown"
 	ErrNoProjects = errors.New("could not find a free project")
 )
@@ -92,6 +94,22 @@ func (p *Project) Expired() bool {
 	return time.Now().After(p.LeaseExpiry)
 }
 
+func init() {
+	// set version info from embedded details.
+	if bi, ok := debug.ReadBuildInfo(); ok {
+		for _, s := range bi.Settings {
+			switch s.Key {
+			case "vcs":
+				buildSource = s.Value
+			case "vcs.revision":
+				version = s.Value
+			case "vcs.time":
+				buildDate = s.Value
+			}
+		}
+	}
+}
+
 func main() {
 	flag.Parse()
 	if err := submain(); err != nil {
@@ -120,7 +138,7 @@ Administrative commands:
 `)
 
 	if flag.Arg(0) == "version" {
-		fmt.Printf("gimmeproj %s; built at %s\n", version, buildDate)
+		fmt.Printf("gimmeproj %s@%s; built at %s\n", buildSource, version, buildDate)
 		return nil
 	}
 
