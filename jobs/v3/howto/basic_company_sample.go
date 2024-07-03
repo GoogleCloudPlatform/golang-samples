@@ -24,7 +24,6 @@ import (
 )
 
 // [START job_create_company]
-// [START create_company]
 
 // createCompany creates a company as given.
 func createCompany(w io.Writer, projectID string, companyToCreate *talent.Company) (*talent.Company, error) {
@@ -52,11 +51,9 @@ func createCompany(w io.Writer, projectID string, companyToCreate *talent.Compan
 	return company, nil
 }
 
-// [END create_company]
 // [END job_create_company]
 
 // [START job_get_company]
-// [START get_company]
 
 // getCompany gets an existing company by name.
 func getCompany(w io.Writer, name string) (*talent.Company, error) {
@@ -82,11 +79,9 @@ func getCompany(w io.Writer, name string) (*talent.Company, error) {
 	return company, nil
 }
 
-// [END get_company]
 // [END job_get_company]
 
 // [START job_update_company]
-// [START update_company]
 
 // updateCompany update a company with all fields.
 func updateCompany(w io.Writer, name string, companyToUpdate *talent.Company) (*talent.Company, error) {
@@ -113,11 +108,9 @@ func updateCompany(w io.Writer, name string, companyToUpdate *talent.Company) (*
 	return company, nil
 }
 
-// [END update_company]
 // [END job_update_company]
 
 // [START job_update_company_with_field_mask]
-// [START update_company_with_field_mask]
 
 // updateCompanyWithMask updates a company with specific fields.
 // mask is a comma separated list of top-level fields of talent.Company.
@@ -146,11 +139,9 @@ func updateCompanyWithMask(w io.Writer, name string, mask string, companyToUpdat
 	return company, nil
 }
 
-// [END update_company_with_field_mask]
 // [END job_update_company_with_field_mask]
 
 // [START job_delete_company]
-// [START delete_company]
 
 // deleteCompany deletes an existing company by name.
 func deleteCompany(w io.Writer, name string) error {
@@ -173,11 +164,9 @@ func deleteCompany(w io.Writer, name string) error {
 	return nil
 }
 
-// [END delete_company]
 // [END job_delete_company]
 
 // [START job_list_companies]
-// [START list_companies]
 
 // listCompanies lists all companies in the project.
 func listCompanies(w io.Writer, projectID string) (*talent.ListCompaniesResponse, error) {
@@ -207,5 +196,4 @@ func listCompanies(w io.Writer, projectID string) (*talent.ListCompaniesResponse
 	return resp, nil
 }
 
-// [END list_companies]
 // [END job_list_companies]
