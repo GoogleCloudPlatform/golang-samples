@@ -97,10 +97,11 @@ func (p *Project) Expired() bool {
 func init() {
 	// set version info from embedded details.
 	if bi, ok := debug.ReadBuildInfo(); ok {
+		packagename := bi.Main.Path
 		for _, s := range bi.Settings {
 			switch s.Key {
 			case "vcs":
-				buildSource = s.Value
+				buildSource = fmt.Sprintf("%s://%s", s.Value, packagename)
 			case "vcs.revision":
 				version = s.Value
 			case "vcs.time":
