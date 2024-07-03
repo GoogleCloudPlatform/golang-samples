@@ -49,7 +49,7 @@ func createInstanceWithSubnet(w io.Writer, projectID, zone, instanceName, networ
 	// List of public operating system (OS) images: https://cloud.google.com/compute/docs/images/os-details.
 	newestDebianReq := &computepb.GetFromFamilyImageRequest{
 		Project: "debian-cloud",
-		Family:  "debian-10",
+		Family:  "debian-12",
 	}
 	newestDebian, err := imagesClient.GetFromFamily(ctx, newestDebianReq)
 	if err != nil {

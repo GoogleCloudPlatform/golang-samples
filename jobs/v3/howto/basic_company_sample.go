@@ -24,7 +24,6 @@ import (
 )
 
 // [START job_create_company]
-// [START create_company]
 
 // createCompany creates a company as given.
 func createCompany(w io.Writer, projectID string, companyToCreate *talent.Company) (*talent.Company, error) {
@@ -52,7 +51,6 @@ func createCompany(w io.Writer, projectID string, companyToCreate *talent.Compan
 	return company, nil
 }
 
-// [END create_company]
 // [END job_create_company]
 
 // [START job_get_company]

@@ -156,6 +156,7 @@ func filterOnLongValueCustomAttribute(w io.Writer, projectID string) (*talent.Se
 	return resp, nil
 }
 
+// [END job_custom_attribute_filter_long_value]
 // [END custom_attribute_filter_long_value]
 // [END job_custom_attribute_filter_long_value]
 
