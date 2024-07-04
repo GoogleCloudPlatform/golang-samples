@@ -829,3 +829,78 @@ func TestPromoteEphemeralAddress(t *testing.T) {
 	}
 	t.Error("ephemeral IP was not promoted")
 }
+
+func TestGetInstanceIPAddresses(t *testing.T) {
+	buf := &bytes.Buffer{}
+	instance := &computepb.Instance{
+		NetworkInterfaces: []*computepb.NetworkInterface{
+			{
+				NetworkIP: proto.String("10.128.0.1"),
+				AccessConfigs: []*computepb.AccessConfig{
+					{
+						Type:  proto.String(computepb.AccessConfig_ONE_TO_ONE_NAT.String()),
+						NatIP: proto.String("34.68.123.45"),
+					},
+					{
+						Type:  proto.String(computepb.AccessConfig_ONE_TO_ONE_NAT.String()),
+						NatIP: proto.String("34.68.123.46"),
+					},
+				},
+				Ipv6AccessConfigs: []*computepb.AccessConfig{
+					{
+						Type:         proto.String(computepb.AccessConfig_DIRECT_IPV6.String()),
+						ExternalIpv6: proto.String("2600:1901:0:1234::"),
+					},
+				},
+				Ipv6Address: proto.String("2600:1901:0:5678::"),
+			},
+		},
+	}
+
+	tests := []struct {
+		name        string
+		addressType computepb.Address_AddressType
+		isIPV6      bool
+		want        []string
+	}{
+		{
+			name:        "External IPv4",
+			addressType: computepb.Address_EXTERNAL,
+			isIPV6:      false,
+			want:        []string{"34.68.123.45", "34.68.123.46"},
+		},
+		{
+			name:        "Internal IPv4",
+			addressType: computepb.Address_INTERNAL,
+			isIPV6:      false,
+			want:        []string{"10.128.0.1"},
+		},
+		{
+			name:        "External IPv6",
+			addressType: computepb.Address_EXTERNAL,
+			isIPV6:      true,
+			want:        []string{"2600:1901:0:1234::"},
+		},
+		{
+			name:        "Internal IPv6",
+			addressType: computepb.Address_INTERNAL,
+			isIPV6:      true,
+			want:        []string{"2600:1901:0:5678::"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := getInstanceIPAddresses(buf, instance, tt.addressType, tt.isIPV6)
+			if len(got) != len(tt.want) {
+				t.Errorf("getInstanceIPAddresses() = %v, want %v", got, tt.want)
+				return
+			}
+			for i, ip := range got {
+				if ip != tt.want[i] {
+					t.Errorf("getInstanceIPAddresses() = %v, want %v", got, tt.want)
+				}
+			}
+		})
+	}
+}
