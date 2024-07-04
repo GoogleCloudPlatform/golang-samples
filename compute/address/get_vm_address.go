@@ -25,33 +25,6 @@ import (
 
 // getInstanceIPAddresses retrieves the specified type of IP address (IPv4 or IPv6, internal or external) of a specified Compute Engine instance.
 func getInstanceIPAddresses(w io.Writer, instance *computepb.Instance, addressType computepb.Address_AddressType, isIPV6 bool) []string {
-	//instance := &computepb.Instance{  // or query compute.NewImagesRESTClient actual instance
-	//	NetworkInterfaces: []*computepb.NetworkInterface{
-	//		{
-	//			NetworkIP: proto.String("10.128.0.1"),
-	//			AccessConfigs: []*computepb.AccessConfig{
-	//				{
-	//					Type:  proto.String(computepb.AccessConfig_ONE_TO_ONE_NAT.String()),
-	//					NatIP: proto.String("34.68.123.45"),
-	//				},
-	//				{
-	//					Type:  proto.String(computepb.AccessConfig_ONE_TO_ONE_NAT.String()),
-	//					NatIP: proto.String("34.68.123.46"),
-	//				},
-	//			},
-	//			Ipv6AccessConfigs: []*computepb.AccessConfig{
-	//				{
-	//					Type:         proto.String(computepb.AccessConfig_DIRECT_IPV6.String()),
-	//					ExternalIpv6: proto.String("2600:1901:0:1234::"),
-	//				},
-	//			},
-	//			Ipv6Address: proto.String("2600:1901:0:5678::"),
-	//		},
-	//	},
-	//}
-	// addressType := computepb.Address_EXTERNAL
-	// isIPV6 := false
-
 	var ips []string
 
 	if instance.GetNetworkInterfaces() == nil {
