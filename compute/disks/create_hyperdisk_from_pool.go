@@ -35,10 +35,6 @@ func createDiskInStoragePool(w io.Writer, projectId, zone, diskName, storagePool
 	//   storagePoolName := "https://www.googleapis.com/compute/v1/projects/your_project_id/zones/europe-central2-b/storagePools/your_storage_pool"
 	//   diskType := "zones/europe-central2-b/diskTypes/hyperdisk-balanced"
 
-	diskSizeGb := int64(50)
-	provisionedIops := int64(10000)
-	provisionedThroughput := int64(1024)
-
 	ctx := context.Background()
 	client, err := compute.NewDisksRESTClient(ctx)
 	if err != nil {
@@ -50,11 +46,11 @@ func createDiskInStoragePool(w io.Writer, projectId, zone, diskName, storagePool
 	disk := &computepb.Disk{
 		Name:                  proto.String(diskName),
 		Type:                  proto.String(diskType),
-		SizeGb:                proto.Int64(diskSizeGb),
+		SizeGb:                proto.Int64(50),
 		Zone:                  proto.String(zone),
 		StoragePool:           proto.String(storagePoolName),
-		ProvisionedIops:       proto.Int64(provisionedIops),
-		ProvisionedThroughput: proto.Int64(provisionedThroughput),
+		ProvisionedIops:       proto.Int64(10000),
+		ProvisionedThroughput: proto.Int64(1024),
 	}
 
 	// Create the insert disk request

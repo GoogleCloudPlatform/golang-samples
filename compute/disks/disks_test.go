@@ -195,7 +195,6 @@ func errorIfNot404(t *testing.T, msg string, err error) {
 }
 
 // deleteStoragePool deletes the specified storage pool in the given project and zone.
-// It writes a confirmation message to the provided writer upon success.
 func deleteStoragePool(projectId, zone, storagePoolName string) error {
 	ctx := context.Background()
 	client, err := compute.NewStoragePoolsRESTClient(ctx)
@@ -222,8 +221,6 @@ func deleteStoragePool(projectId, zone, storagePoolName string) error {
 		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
-	// Write a confirmation message
-	fmt.Printf("Storage pool deleted: %s\n", storagePoolName)
 	return nil
 }
 

@@ -31,8 +31,6 @@ func createHyperdisk(w io.Writer, projectId, zone, diskName string) error {
 	//   zone := "europe-central2-b"
 	//   diskName := "your_disk_name"
 
-	diskSizeGb := int64(10)
-
 	ctx := context.Background()
 	client, err := compute.NewDisksRESTClient(ctx)
 	if err != nil {
@@ -47,7 +45,7 @@ func createHyperdisk(w io.Writer, projectId, zone, diskName string) error {
 	disk := &computepb.Disk{
 		Name:   proto.String(diskName),
 		Type:   proto.String(diskType),
-		SizeGb: proto.Int64(diskSizeGb),
+		SizeGb: proto.Int64(10),
 		Zone:   proto.String(zone),
 	}
 

@@ -33,11 +33,6 @@ func createHyperdiskStoragePool(w io.Writer, projectId, zone, storagePoolName, s
 	// storagePoolName := "your_storage_pool_name"
 	// storagePoolType := "projects/**your_project_id**/zones/europe-west4-b/diskTypes/hyperdisk-balanced"
 
-	capacityProvisioningType := "advanced"
-	provisionedCapacity := int64(10240)
-	provisionedIops := int64(10000)
-	provisionedThroughput := int64(1024)
-
 	ctx := context.Background()
 	client, err := compute.NewStoragePoolsRESTClient(ctx)
 	if err != nil {
@@ -50,10 +45,10 @@ func createHyperdiskStoragePool(w io.Writer, projectId, zone, storagePoolName, s
 		Name:                      proto.String(storagePoolName),
 		Zone:                      proto.String(zone),
 		StoragePoolType:           proto.String(storagePoolType),
-		CapacityProvisioningType:  proto.String(capacityProvisioningType),
-		PoolProvisionedCapacityGb: proto.Int64(provisionedCapacity),
-		PoolProvisionedIops:       proto.Int64(provisionedIops),
-		PoolProvisionedThroughput: proto.Int64(provisionedThroughput),
+		CapacityProvisioningType:  proto.String("advanced"),
+		PoolProvisionedCapacityGb: proto.Int64(10240),
+		PoolProvisionedIops:       proto.Int64(10000),
+		PoolProvisionedThroughput: proto.Int64(1024),
 	}
 
 	// Create the insert storage pool request
