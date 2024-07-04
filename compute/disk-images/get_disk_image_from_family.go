@@ -28,14 +28,14 @@ import (
 func getDiskImageFromFamily(
 	w io.Writer,
 	projectID, family string,
-) error {
+) (*computepb.Image, error) {
 	// projectID := "your_project_id"
 	// family := "my_family"
 
 	ctx := context.Background()
 	imagesClient, err := compute.NewImagesRESTClient(ctx)
 	if err != nil {
-		return fmt.Errorf("NewImagesRESTClient: %w", err)
+		return nil, fmt.Errorf("NewImagesRESTClient: %w", err)
 	}
 	defer imagesClient.Close()
 
@@ -46,12 +46,12 @@ func getDiskImageFromFamily(
 
 	newestImage, err := imagesClient.GetFromFamily(ctx, source_req)
 	if err != nil {
-		return fmt.Errorf("unable to get image: %w", err)
+		return nil, fmt.Errorf("unable to get image: %w", err)
 	}
 
 	fmt.Fprintf(w, "Newest disk image was found: %s\n", *newestImage.Name)
 
-	return nil
+	return newestImage, nil
 }
 
 // [END compute_images_get_from_family]

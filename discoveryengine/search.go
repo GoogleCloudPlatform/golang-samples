@@ -22,6 +22,7 @@ import (
 	discoveryengine "cloud.google.com/go/discoveryengine/apiv1beta"
 	discoveryenginepb "cloud.google.com/go/discoveryengine/apiv1beta/discoveryenginepb"
 	"google.golang.org/api/iterator"
+	"google.golang.org/api/option"
 )
 
 // search searches for a query in a search engine given the Google Cloud Project ID,
@@ -33,9 +34,13 @@ func search(projectID, location, searchEngineID, query string) error {
 	ctx := context.Background()
 
 	// Create a client
-	client, err := discoveryengine.NewSearchClient(ctx)
+	endpoint := "discoveryengine.googleapis.com:443" // Default to global endpoint
+	if location != "global" {
+		endpoint = fmt.Sprintf("%s-%s", location, endpoint)
+	}
+	client, err := discoveryengine.NewSearchClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
-		return err
+		return fmt.Errorf("creating Vertex AI Search client: %w", err)
 	}
 	defer client.Close()
 
