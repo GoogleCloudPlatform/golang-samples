@@ -23,7 +23,7 @@ import (
 	talent "google.golang.org/api/jobs/v3"
 )
 
-// [START commute_search]
+// [START job_discovery_commute_search]
 
 // commuteSearch searches for jobs within commute filter.
 func commuteSearch(w io.Writer, projectID, companyName string) (*talent.SearchJobsResponse, error) {
@@ -79,4 +79,4 @@ func commuteSearch(w io.Writer, projectID, companyName string) (*talent.SearchJo
 	return resp, nil
 }
 
-// [END commute_search]
+// [END job_discovery_commute_search]

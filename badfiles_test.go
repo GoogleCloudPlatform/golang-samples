@@ -64,6 +64,7 @@ var allowList = []string{
 	"**/testdata/**/*.txt",
 	"**/testdata/**/*.csv",
 	"**/testdata/**/*.mp4",
+	"**/testdata/*.jsonl",
 
 	// Healthcare data.
 	"healthcare/testdata/dicom_00000001_000.dcm",
@@ -89,6 +90,9 @@ var allowList = []string{
 
 	// Cloud Functions gen2 picture.
 	"functions/functionsv2/imagemagick/zombie.jpg",
+
+	// Cloud Profiler test outputs
+	"profiler/export/**",
 
 	// Samples that aren't really code. Legacy.
 	"**/appengine/**/*.txt",
@@ -130,6 +134,9 @@ var allowList = []string{
 
 	// deprecated tests (introduced for IoT samples)
 	"**/*_test.go.deprecated",
+
+	// Spanner proto data files.
+	"spanner/spanner_snippets/spanner/testdata/protos/descriptors.pb",
 }
 
 // Check whether accidental binary files have been checked in.

@@ -21,7 +21,7 @@ import (
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 // createVodSession creates a video on demand (VOD) session in which to insert ads.
@@ -46,11 +46,12 @@ func createVodSession(w io.Writer, projectID, sourceURI string) error {
 	}
 	defer client.Close()
 
-	req := &stitcherpb.CreateVodSessionRequest{
+	req := &stitcherstreampb.CreateVodSessionRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
-		VodSession: &stitcherpb.VodSession{
-			SourceUri: sourceURI,
-			AdTagUri:  adTagURI,
+		VodSession: &stitcherstreampb.VodSession{
+			SourceUri:  sourceURI,
+			AdTagUri:   adTagURI,
+			AdTracking: stitcherstreampb.AdTracking_SERVER,
 		},
 	}
 	// Creates the VOD session.

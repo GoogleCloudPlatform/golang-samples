@@ -20,10 +20,9 @@ import (
 	"fmt"
 	"io"
 
-	"google.golang.org/api/iterator"
-
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
 	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
+	"google.golang.org/api/iterator"
 )
 
 // listLiveAdTagDetails lists the ad tag details for the specified live session.

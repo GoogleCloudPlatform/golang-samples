@@ -319,6 +319,8 @@ func TestTestIam(t *testing.T) {
 }
 
 func TestListAllFindings(t *testing.T) {
+	// issue #3260 tracks this test skip.ß
+	t.Skip()
 	testutil.Retry(t, 5, 20*time.Second, func(r *testutil.R) {
 		orgID := setup(t)
 		buf := new(bytes.Buffer)

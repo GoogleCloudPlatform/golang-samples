@@ -1,5 +1,9 @@
 assign_issues_by:
 - labels:
+  - 'api: routeoptimization'
+  to:
+  - bshi
+- labels:
   - "api: asset"
   to:
   - GoogleCloudPlatform/cloud-asset-analysis-team
@@ -44,7 +48,7 @@ assign_issues_by:
 - labels:
   - 'api: cloudsql'
   to:
-  - GoogleCloudPlatform/infra-db-dpes
+  - GoogleCloudPlatform/infra-db-sdk
 - labels:
   - 'api: dlp'
   to:
@@ -76,7 +80,7 @@ assign_prs_by:
 - labels:
   - 'api: cloudsql'
   to:
-  - GoogleCloudPlatform/infra-db-dpes
+  - GoogleCloudPlatform/infra-db-sdk
 - labels:
   - 'api: dlp'
   to:
