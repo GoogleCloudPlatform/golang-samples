@@ -31,7 +31,7 @@ func createInstance(w io.Writer, projectID, zone, instanceName, machineType, sou
 	// zone := "europe-central2-b"
 	// instanceName := "your_instance_name"
 	// machineType := "n1-standard-1"
-	// sourceImage := "projects/debian-cloud/global/images/family/debian-10"
+	// sourceImage := "projects/debian-cloud/global/images/family/debian-12"
 	// networkName := "global/networks/default"
 
 	ctx := context.Background()

@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START compute_images_get_from_family]
+// [START compute_images_set_deprecation_status]
 import (
 	"context"
 	"fmt"
@@ -22,36 +22,42 @@ import (
 
 	compute "cloud.google.com/go/compute/apiv1"
 	computepb "cloud.google.com/go/compute/apiv1/computepb"
+	"google.golang.org/protobuf/proto"
 )
 
-// Geg a disk image from family for the given project
-func getDiskImageFromFamily(
+// Geg a disk image from the given project
+func deprecateDiskImage(
 	w io.Writer,
-	projectID, family string,
-) (*computepb.Image, error) {
+	projectID, imageName string,
+) error {
 	// projectID := "your_project_id"
-	// family := "my_family"
+	// imageName := "my_image"
+
+	deprecationStatus := &computepb.DeprecationStatus{
+		State: proto.String(computepb.DeprecationStatus_DEPRECATED.String()),
+	}
 
 	ctx := context.Background()
 	imagesClient, err := compute.NewImagesRESTClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("NewImagesRESTClient: %w", err)
+		return fmt.Errorf("NewImagesRESTClient: %w", err)
 	}
 	defer imagesClient.Close()
 
-	source_req := &computepb.GetFromFamilyImageRequest{
-		Project: projectID,
-		Family:  family,
+	source_req := &computepb.DeprecateImageRequest{
+		Project:                   projectID,
+		Image:                     imageName,
+		DeprecationStatusResource: deprecationStatus,
 	}
 
-	newestImage, err := imagesClient.GetFromFamily(ctx, source_req)
-	if err != nil {
-		return nil, fmt.Errorf("unable to get image: %w", err)
+	op, err := imagesClient.Deprecate(ctx, source_req)
+	if err = op.Wait(ctx); err != nil {
+		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
-	fmt.Fprintf(w, "Newest disk image was found: %s\n", *newestImage.Name)
+	fmt.Fprintf(w, "Disk image %s deprecated\n", imageName)
 
-	return newestImage, nil
+	return nil
 }
 
-// [END compute_images_get_from_family]
+// [END compute_images_set_deprecation_status]
