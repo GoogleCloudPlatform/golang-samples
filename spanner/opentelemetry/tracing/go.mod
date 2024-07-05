@@ -8,7 +8,7 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.24.0
 	// [END spanner_opentelemetry_traces_cloudtrace_dependencies]
 	go.opentelemetry.io/otel v1.28.0
-    // [START spanner_opentelemetry_traces_otlp_dependencies]
+	// [START spanner_opentelemetry_traces_otlp_dependencies]
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.28.0
 	// [END spanner_opentelemetry_traces_otlp_dependencies]
 	go.opentelemetry.io/otel/sdk v1.28.0
