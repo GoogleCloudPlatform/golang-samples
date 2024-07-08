@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START compute_list_disks]
+// [START compute_disk_list]
 import (
 	"context"
 	"fmt"
@@ -65,4 +65,4 @@ func listDisks(w io.Writer, projectID, zone, filter string) error {
 	return nil
 }
 
-// [END compute_list_disks]
+// [END compute_disk_list]
