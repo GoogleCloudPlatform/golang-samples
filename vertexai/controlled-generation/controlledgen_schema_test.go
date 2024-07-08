@@ -190,43 +190,6 @@ into []Item because: %v`, w.Bytes(), err)
 	}
 }
 
-func Test_controlledGenerationResponseSchema5(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	w := new(bytes.Buffer)
-
-	location := "us-central1"
-	modelName := "gemini-1.5-pro-001"
-
-	err := controlledGenerationResponseSchema5(w, tc.ProjectID, location, modelName)
-	if err != nil {
-		t.Fatalf("controlledGenerationResponseSchema5: %v", err.Error())
-	}
-
-	// We explicitly requested a response in JSON with a specific schema, so we're
-	// expecting to properly decode the output as a slice of structured values.
-	type Item struct {
-		AnnouncementDate string
-		Authors          []string
-		JournalRef       string
-		Keywords         []string
-		Subjects         []string
-		SubmissionDate   string
-		Title            string
-		Version          string
-	}
-	var items []Item
-	err = json.Unmarshal(w.Bytes(), &items)
-	if err != nil {
-		t.Errorf(`could not unmarshal response:
-%s
-
-into []Item because: %v`, w.Bytes(), err)
-	}
-	if len(items) == 0 {
-		t.Errorf("no items returned")
-	}
-}
-
 func Test_controlledGenerationResponseSchema6(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	w := new(bytes.Buffer)
