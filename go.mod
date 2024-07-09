@@ -6,7 +6,6 @@ require (
 	cloud.google.com/go/batch v1.8.0
 	cloud.google.com/go/bigquery v1.59.1
 	cloud.google.com/go/compute v1.24.0
-	cloud.google.com/go/datastore v1.15.0
 	cloud.google.com/go/errorreporting v0.3.0
 	cloud.google.com/go/logging v1.9.0
 	cloud.google.com/go/storage v1.37.0
