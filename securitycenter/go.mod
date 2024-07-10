@@ -1,7 +1,7 @@
 module github.com/GoogleCloudPlatform/golang-samples/securitycenter
 
 go 1.21
-
+ 
 require (
 	cloud.google.com/go/pubsub v1.39.0
 	cloud.google.com/go/securitycenter v1.31.0
