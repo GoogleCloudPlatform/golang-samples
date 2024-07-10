@@ -38,6 +38,7 @@ var instanceID = "instanceID"
 var databaseID = "databaseID"
 var useCloudTraceExporter = true
 
+// Sample to export traces to cloudtrace(default) or OTLP in the Go spanner client library
 func main() {
 	db := fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceID, databaseID)
 	ctx := context.Background()
