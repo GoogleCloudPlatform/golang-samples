@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	"cloud.google.com/go/batch/apiv1/batchpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
@@ -121,5 +122,52 @@ func TestBatchContainerJob(t *testing.T) {
 	}
 	if !succeeded {
 		t.Errorf("The test job has failed: %v", err)
+	}
+}
+
+func TestBatchNotifications(t *testing.T) {
+	var r *rand.Rand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+	tc := testutil.SystemTest(t)
+	region := "us-central1"
+	jobName := fmt.Sprintf("test-job-go-docker-%v-%v", time.Now().Format("2006-12-25"), r.Int())
+	topicName := "someTopic"
+
+	buf := &bytes.Buffer{}
+
+	job, err := createJobNotification(buf, tc.ProjectID, region, jobName, topicName)
+
+	if err != nil {
+		t.Errorf("createJobNotification got err: %v", err)
+	}
+	notifications := job.GetNotifications()
+
+	jobNotificationFound := false
+	for _, notif := range notifications {
+		if notif.Message.Type == batchpb.JobNotification_TASK_STATE_CHANGED &&
+			notif.Message.NewTaskState == batchpb.TaskStatus_FAILED {
+			jobNotificationFound = true
+			break
+		}
+	}
+	if !jobNotificationFound {
+		t.Error("Task notification wasn't set")
+	}
+
+	taskNotificationsFound := false
+	for _, notif := range notifications {
+		if notif.Message.Type == batchpb.JobNotification_JOB_STATE_CHANGED {
+			taskNotificationsFound = true
+			break
+		}
+	}
+	if !taskNotificationsFound {
+		t.Error("Job notification wasn't set")
+	}
+
+	buf.Reset()
+
+	if err := deleteJob(buf, tc.ProjectID, region, jobName); err != nil {
+		t.Errorf("deleteJob got err: %v", err)
 	}
 }
