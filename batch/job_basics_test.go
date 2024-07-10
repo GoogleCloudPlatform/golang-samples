@@ -135,10 +135,10 @@ func TestBatchNotifications(t *testing.T) {
 
 	buf := &bytes.Buffer{}
 
-	job, err := createJobNotification(buf, tc.ProjectID, region, jobName, topicName)
+	job, err := createJobWithNotifications(buf, tc.ProjectID, region, jobName, topicName)
 
 	if err != nil {
-		t.Errorf("createJobNotification got err: %v", err)
+		t.Errorf("createJobWithNotifications got err: %v", err)
 	}
 	notifications := job.GetNotifications()
 
@@ -164,8 +164,6 @@ func TestBatchNotifications(t *testing.T) {
 	if !taskNotificationsFound {
 		t.Error("Job notification wasn't set")
 	}
-
-	buf.Reset()
 
 	if err := deleteJob(buf, tc.ProjectID, region, jobName); err != nil {
 		t.Errorf("deleteJob got err: %v", err)

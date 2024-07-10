@@ -25,8 +25,8 @@ import (
 	durationpb "google.golang.org/protobuf/types/known/durationpb"
 )
 
-// Creates and runs a job that runs the specified container
-func createJobNotification(w io.Writer, projectID, region, jobName, topicName string) (*batchpb.Job, error) {
+// Creates and runs a job with configured notifications
+func createJobWithNotifications(w io.Writer, projectID, region, jobName, topicName string) (*batchpb.Job, error) {
 
 	ctx := context.Background()
 	batchClient, err := batch.NewClient(ctx)
@@ -45,6 +45,7 @@ func createJobNotification(w io.Writer, projectID, region, jobName, topicName st
 
 	taskSpec := &batchpb.TaskSpec{
 		ComputeResource: &batchpb.ComputeResource{
+			// CpuMilli is milliseconds per cpu-second. This means the task requires 2 whole CPUs.
 			CpuMilli:  2000,
 			MemoryMib: 16,
 		},
@@ -66,6 +67,9 @@ func createJobNotification(w io.Writer, projectID, region, jobName, topicName st
 
 	labels := map[string]string{"env": "testing", "type": "container"}
 
+	// Policies are used to define on what kind of virtual machines the tasks will run on.
+	// In this case, we tell the system to use "e2-standard-4" machine type.
+	// Read more about machine types here: https://cloud.google.com/compute/docs/machine-types
 	allocationPolicy := &batchpb.AllocationPolicy{
 		Instances: []*batchpb.AllocationPolicy_InstancePolicyOrTemplate{{
 			PolicyTemplate: &batchpb.AllocationPolicy_InstancePolicyOrTemplate_Policy{
@@ -76,6 +80,7 @@ func createJobNotification(w io.Writer, projectID, region, jobName, topicName st
 		}},
 	}
 
+	// We use Cloud Logging as it's an out of the box available option
 	logsPolicy := &batchpb.LogsPolicy{
 		Destination: batchpb.LogsPolicy_CLOUD_LOGGING,
 	}
