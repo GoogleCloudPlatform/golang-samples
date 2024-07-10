@@ -2,7 +2,10 @@
 
 ## Setup
 
-This sample requires [Go](https://go.dev/doc/install).
+This sample requires [Go](https://go.dev/doc/install) and [gcloud](https://cloud.google.com/sdk/docs/install).
+
+Ensure that your Go runtime version is supported by the OpenTelemetry-Go compatibility policy before enabling OpenTelemetry instrumentation. 
+Refer to compatibility here https://github.com/googleapis/google-cloud-go/blob/main/debug.md#opentelemetry
 
 1.  **Follow the set-up instructions in [the documentation](https://cloud.google.com/go/docs/setup).**
 
@@ -22,28 +25,28 @@ This sample requires [Go](https://go.dev/doc/install).
 ## Run the Example
 
 1. Set up database configuration in the `spanner_opentelemetry_tracing.go` file:
-    ````
-    var projectId = "projectId"
-    var instanceId = "instanceId"
-    var databaseId = "databaseId"
-    ````
+    ```
+    var projectID = "projectID"
+    var instanceID = "instanceID"
+    var databaseID = "databaseID"
+    ```
 
-2. Configure trace data export. You can use either the OpenTelemetry [Collector](https://opentelemetry.io/docs/collector/quick-start/ with the OTLP Exporter or the Cloud Trace Exporter. By default, the Cloud Trace Exporter is used.
+2. Configure trace data export. You can use either the OpenTelemetry [Collector](https://opentelemetry.io/docs/collector/quick-start/) with the OTLP Exporter or the Cloud Trace Exporter. By default, the Cloud Trace Exporter is used.
 
 - To use OTLP Exporter, Set up the OpenTelemetry [Collector](https://opentelemetry.io/docs/collector/quick-start/) and update the OTLP endpoint in `spanner_opentelemetry_tracing.go` file
-    ````
+    ```
     var useCloudTraceExporter = true; // Replace to false for OTLP
     defaultOtlpEndpoint := "http://localhost:4317"; // Replace with your OTLP endpoint
-    ````
+    ```
 
 3. Enable OpenTelemetry traces by setting environment variable.
-    ````
-    GOOGLE_API_GO_EXPERIMENTAL_TELEMETRY_PLATFORM_TRACING="opentelemetry"
-    ````
+    ```
+    export GOOGLE_API_GO_EXPERIMENTAL_TELEMETRY_PLATFORM_TRACING="opentelemetry"
+    ```
 
 4. Then run the application from command line, after switching to this directory:
-    ````
+    ```
     go run spanner_opentelemetry_tracing.go
-    ````
+    ```
 
 You should start seeing traces in Cloud Trace .

@@ -33,13 +33,13 @@ import (
 // Refer to compatibility here https://github.com/googleapis/google-cloud-go/blob/main/debug.md#opentelemetry
 
 // TODO(developer): Replace below variables before running the sample.
-var projectId = "projectId"
-var instanceId = "instanceId"
-var databaseId = "databaseId"
+var projectID = "projectID"
+var instanceID = "instanceID"
+var databaseID = "databaseID"
 var useCloudTraceExporter = true
 
 func main() {
-	db := fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectId, instanceId, databaseId)
+	db := fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceID, databaseID)
 	ctx := context.Background()
 	var tracerProvider *sdktrace.TracerProvider
 
@@ -138,7 +138,7 @@ func enableTracingWithCloudTraceExporter() *sdktrace.TracerProvider {
 	}
 
 	// Create a new cloud trace exporter
-	exporter, err := traceExporter.New(traceExporter.WithProjectID(projectId))
+	exporter, err := traceExporter.New(traceExporter.WithProjectID(projectID))
 	if err != nil {
 		log.Fatal(err)
 	}
