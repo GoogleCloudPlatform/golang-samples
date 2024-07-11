@@ -15,7 +15,7 @@
 // contextcaching shows an example of caching the tokens of a mulitple PDF prompt
 package contextcaching
 
-// [START generativeaionvertexai_gemini_get_context_cache]
+// [START generativeaionvertexai_gemini_delete_context_cache]
 import (
 	"context"
 	"fmt"
@@ -43,4 +43,4 @@ func deleteContextCache(w io.Writer, contentName string, projectID, location str
 	return nil
 }
 
-// [END generativeaionvertexai_gemini_get_context_cache]
+// [END generativeaionvertexai_gemini_delete_context_cache]
