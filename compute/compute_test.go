@@ -32,11 +32,11 @@ func TestComputeSnippets(t *testing.T) {
 	var seededRand *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
-	zone := "europe-central2-b"
+	zone := "us-central1-a"
 	instanceName := "test-" + fmt.Sprint(seededRand.Int())
 	instanceName2 := "test-" + fmt.Sprint(seededRand.Int())
 	machineType := "n1-standard-1"
-	sourceImage := "projects/debian-cloud/global/images/family/debian-10"
+	sourceImage := "projects/debian-cloud/global/images/family/debian-12"
 	networkName := "global/networks/default"
 
 	buf := &bytes.Buffer{}

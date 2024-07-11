@@ -12,7 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-// [START selecting_the_runtime]
 runtime: go
 api_version: go1
-// [END selecting_the_runtime]
