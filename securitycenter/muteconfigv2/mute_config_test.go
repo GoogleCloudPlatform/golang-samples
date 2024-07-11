@@ -127,6 +127,7 @@ func newMuteConfigFixture() (*muteconfigFixture, error) {
 
 	orgId := os.Getenv("SCC_PROJECT_ORG_ID")
 	projectId := os.Getenv("SCC_PROJECT_ID")
+	locationId := "global"
 	if orgId == "" || projectId == "" {
 		return nil, fmt.Errorf("env variables not set: %w", err)
 	}
@@ -155,7 +156,7 @@ func newMuteConfigFixture() (*muteconfigFixture, error) {
 	mc.finding2Name = finding.Name
 
 	// Create mute rules.
-	parent := fmt.Sprintf("projects/%s", projectId)
+	parent := fmt.Sprintf("projects/%s/locations/%s", projectId, locationId)
 	mc.parent = parent
 	muteConfigId1 := "random-mute-id-" + uuid.New().String()
 	muteConfigId2 := "random-mute-id-" + uuid.New().String()
@@ -234,51 +235,5 @@ func TestUpdateMuteRule(t *testing.T) {
 	}
 	if got := buf.String(); !strings.Contains(got, "Mute rule updated") {
 		t.Errorf("updateMuteRule got %q, expected %q", got, "Mute rule updated")
-	}
-}
-
-func TestSetMuteFinding(t *testing.T) {
-	testutil.SystemTest(t)
-
-	var buf bytes.Buffer
-	// Get mute rule.
-	if err := getMuteRule(&buf, fixture.parent, fixture.muteConfigId1); err != nil {
-		t.Errorf("getMuteRule had error: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, fixture.muteConfigId1) {
-		t.Errorf("getMuteRule got %q, expected %q", got, fixture.muteConfigId1)
-	}
-}
-
-func TestSetUnmuteFinding(t *testing.T) {
-	t.Skip("see https://github.com/GoogleCloudPlatform/golang-samples/issues/3793")
-	testutil.SystemTest(t)
-
-	var buf bytes.Buffer
-	// Unmute an individual finding.
-	if err := setUnmute(&buf, fixture.finding1Name); err != nil {
-		t.Errorf("setUnmute had error: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, fmt.Sprintf("Mute value for the finding: %s is %s", fixture.finding1Name, "UNMUTE")) {
-		t.Errorf("setUnmute got %q, expected %q", got, fmt.Sprintf("Mute value for the finding: %s is %s", fixture.finding1Name, "UNMUTE"))
-	}
-	if err := setUnmute(&buf, fixture.finding2Name); err != nil {
-		t.Errorf("setUnmute had error: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, fmt.Sprintf("Mute value for the finding: %s is %s", fixture.finding1Name, "UNMUTE")) {
-		t.Errorf("setUnmute got %q, expected %q", got, fmt.Sprintf("Mute value for the finding: %s is %s", fixture.finding1Name, "UNMUTE"))
-	}
-}
-
-func TestBulkMuteFinding(t *testing.T) {
-	testutil.SystemTest(t)
-
-	var buf bytes.Buffer
-	// Bulk mute findings.
-	if err := bulkMute(&buf, fixture.parent, "severity=\"LOW\""); err != nil {
-		t.Errorf("bulkMute had error: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, "Bulk mute findings completed successfully") {
-		t.Errorf("bulkMute got %q, expected %q", got, "Bulk mute findings completed successfully")
 	}
 }

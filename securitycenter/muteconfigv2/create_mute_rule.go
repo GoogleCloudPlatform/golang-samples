@@ -51,6 +51,7 @@ func createMuteRule(w io.Writer, parent string, muteConfigId string) error {
 		Filter: "severity=\"LOW\" OR severity=\"MEDIUM\" AND " +
 			"category=\"Persistence: IAM Anomalous Grant\" AND " +
 			"-resource.type:\"compute\"",
+		Type: securitycenterpb.MuteConfig_STATIC,
 	}
 
 	req := &securitycenterpb.CreateMuteConfigRequest{
