@@ -168,7 +168,7 @@ func TestQueries(t *testing.T) {
 		})
 		t.Run("queryStateless", func(t *testing.T) {
 			t.Parallel()
-			if err := queryStateless(io.Discard, tc.ProjectID); err != nil {
+			if err := queryShortMode(io.Discard, tc.ProjectID); err != nil {
 				t.Errorf("queryStateless: %v", err)
 			}
 		})

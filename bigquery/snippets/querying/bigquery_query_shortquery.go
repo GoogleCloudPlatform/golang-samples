@@ -14,7 +14,7 @@
 
 package querying
 
-// [START bigquery_query_stateless]
+// [START bigquery_query_shortquery]
 import (
 	"context"
 	"fmt"
@@ -24,11 +24,11 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// queryStateless demonstrates issuing a query that may be run statelessly.
+// queryShortMode demonstrates issuing a query that may be run in short query mode.
 //
-// To enable the stateless query preview feature, the QUERY_PREVIEW_ENABLED
+// To enable the short query mode preview feature, the QUERY_PREVIEW_ENABLED
 // environmental variable should be set to `TRUE`.
-func queryStateless(w io.Writer, projectID string) error {
+func queryShortMode(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
@@ -37,21 +37,29 @@ func queryStateless(w io.Writer, projectID string) error {
 	}
 	defer client.Close()
 
-	// This example uses a nondeterministic query that doesn't reference
-	// existing table(s).
-	q := client.Query(
-		"SELECT SESSION_USER() as whoami, CURRENT_TIMESTAMP as ts")
+	q := client.Query(`
+		SELECT
+  			name, gender,
+  			SUM(number) AS total
+		FROM
+			bigquery-public-data.usa_names.usa_1910_2013
+		GROUP BY 
+			name, gender
+		ORDER BY
+			total DESC
+		LIMIT 10
+		`)
 	// Run the query and process the returned row iterator.
 	it, err := q.Read(ctx)
 	if err != nil {
 		return fmt.Errorf("query.Read(): %w", err)
 	}
 
-	// The iterator provides information about the source query execution.
-	// Queries that were run in stateless mode will not have the source job
+	// The iterator provides information about the query execution.
+	// Queries that were run in short query mode will not have the source job
 	// populated.
 	if it.SourceJob() == nil {
-		fmt.Fprintf(w, "Query was run statelessly.  Query ID: %q\n", it.QueryID())
+		fmt.Fprintf(w, "Query was run in short mode.  Query ID: %q\n", it.QueryID())
 	} else {
 		j := it.SourceJob()
 		qualifiedJobID := fmt.Sprintf("%s:%s.%s", j.ProjectID(), j.Location(), j.ID())
@@ -74,4 +82,4 @@ func queryStateless(w io.Writer, projectID string) error {
 	return nil
 }
 
-// [END bigquery_query_stateless]
+// [END bigquery_query_shortquery]
