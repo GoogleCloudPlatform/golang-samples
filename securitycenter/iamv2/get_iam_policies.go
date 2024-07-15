@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"io"
 
-	securitycenter "cloud.google.com/go/securitycenter/apiv2"
 	iampb "cloud.google.com/go/iam/apiv1/iampb"
+	securitycenter "cloud.google.com/go/securitycenter/apiv2"
 )
 
 // getSourceIamPolicy prints the policy for sourceName to w and return it.
@@ -31,17 +31,17 @@ func getSourceIamPolicy(w io.Writer, sourceName string) error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-			return fmt.Errorf("securitycenter.NewClient: %w", err)
+		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
 	req := &iampb.GetIamPolicyRequest{
-			Resource: sourceName,
+		Resource: sourceName,
 	}
 
 	policy, err := client.GetIamPolicy(ctx, req)
 	if err != nil {
-			return fmt.Errorf("GetIamPolicy(%s): %w", sourceName, err)
+		return fmt.Errorf("GetIamPolicy(%s): %w", sourceName, err)
 	}
 
 	fmt.Fprintf(w, "Policy: %v", policy)
