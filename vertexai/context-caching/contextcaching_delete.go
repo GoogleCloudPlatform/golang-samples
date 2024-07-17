@@ -25,6 +25,7 @@ import (
 )
 
 // deleteContextCache shows how to delete a cached content
+// contentName is the ID of the cached content
 func deleteContextCache(w io.Writer, contentName string, projectID, location string) error {
 	// location := "us-central1"
 	ctx := context.Background()

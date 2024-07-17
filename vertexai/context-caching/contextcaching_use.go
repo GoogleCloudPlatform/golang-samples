@@ -26,6 +26,7 @@ import (
 )
 
 // useContextCache shows how to use an existing cached content, when prompting the model
+// contentName is the ID of the cached content
 func useContextCache(w io.Writer, contentName string, projectID, location, modelName string) error {
 	// location := "us-central1"
 	// modelName := "gemini-1.5-pro-001"

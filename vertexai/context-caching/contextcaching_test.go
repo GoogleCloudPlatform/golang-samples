@@ -34,7 +34,7 @@ func TestContextCaching(t *testing.T) {
 	location := "us-central1"
 	modelName := "gemini-1.5-pro-001"
 
-	// 1) Create a cached content. The generated content name is be used in steps 2, 3, 4.
+	// 1) Create a cached content. The generated content name will be used in steps 2, 3, 4.
 	contentName, err := createContextCache(buf, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Fatalf("createContextCache: %v", err.Error())

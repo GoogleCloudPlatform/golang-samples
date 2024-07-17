@@ -27,6 +27,7 @@ import (
 
 // updateContextCache shows how to update the expiration time of a cached content, by specifying
 // a new TTL (time-to-live duration)
+// contentName is the ID of the cached content to update
 func updateContextCache(w io.Writer, contentName string, projectID, location string) error {
 	// location := "us-central1"
 	ctx := context.Background()
@@ -47,7 +48,7 @@ func updateContextCache(w io.Writer, contentName string, projectID, location str
 	}
 
 	_, err = client.UpdateCachedContent(ctx, cachedContent, update)
-	fmt.Fprintf(w, "Update cached content %q", contentName)
+	fmt.Fprintf(w, "Updated cached content %q", contentName)
 	return err
 }
 

@@ -24,7 +24,8 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// getContextCache shows how to retrieve the metadata of a cached content, by its name
+// getContextCache shows how to retrieve the metadata of a cached content
+// contentName is the ID of the cached content to retrieve
 func getContextCache(w io.Writer, contentName string, projectID, location string) error {
 	// location := "us-central1"
 	ctx := context.Background()
