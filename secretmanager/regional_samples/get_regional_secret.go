@@ -12,22 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
-// [START secretmanager_delete_regional_secret_with_etag]
+// [START secretmanager_get_regional_secret]
 import (
 	"context"
 	"fmt"
+	"io"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"google.golang.org/api/option"
 )
 
-// deleteSecretWithEtag deletes the secret with the given name and all of its versions.
-func deleteRegionalSecretWithEtag(projectId, locationId, secretId, etag string) error {
+// getSecret gets information about the given secret. This only returns metadata
+// about the secret container, not any secret material.
+func GetRegionalSecret(w io.Writer, projectId, locationId, secretId string) error {
 	// name := "projects/my-project/locations/my-location/secrets/my-secret"
-	// etag := `"123"`
 
 	// Create the client.
 	ctx := context.Background()
@@ -36,24 +37,24 @@ func deleteRegionalSecretWithEtag(projectId, locationId, secretId, etag string) 
 	client, err := secretmanager.NewClient(ctx, option.WithEndpoint(endpoint))
 
 	if err != nil {
-		return fmt.Errorf("failed to create secretmanager client: %w", err)
+		return fmt.Errorf("failed to create regional secretmanager client: %w", err)
 	}
 	defer client.Close()
 
-	//Endpoint to send the request to regional server
 	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
-
 	// Build the request.
-	req := &secretmanagerpb.DeleteSecretRequest{
+	req := &secretmanagerpb.GetSecretRequest{
 		Name: name,
-		Etag: etag,
 	}
 
 	// Call the API.
-	if err := client.DeleteSecret(ctx, req); err != nil {
-		return fmt.Errorf("failed to delete regional secret: %w", err)
+	result, err := client.GetSecret(ctx, req)
+	if err != nil {
+		return fmt.Errorf("failed to get secret: %w", err)
 	}
+
+	fmt.Fprintf(w, "Found regional secret %s \n", result.Name)
 	return nil
 }
 
-// [END secretmanager_delete_regional_secret_with_etag]
+// [END secretmanager_get_regional_secret]

@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
-// [START secretmanager_update_regional_secret]
+// [START secretmanager_update_regional_secret_with_alias]
 import (
 	"context"
 	"fmt"
@@ -26,8 +26,8 @@ import (
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-// updateSecret updates the metadata about an existing secret.
-func updateRegionalSecret(w io.Writer, projectId, locationId, secretId string) error {
+// updateSecret updates the alias map on an existing secret.
+func UpdateRegionalSecretWithAlias(w io.Writer, projectId, locationId, secretId string) error {
 	// name := "projects/my-project/locations/my-location/secrets/my-secret"
 
 	// Create the client.
@@ -47,12 +47,12 @@ func updateRegionalSecret(w io.Writer, projectId, locationId, secretId string) e
 	req := &secretmanagerpb.UpdateSecretRequest{
 		Secret: &secretmanagerpb.Secret{
 			Name: name,
-			Labels: map[string]string{
-				"secretmanager": "rocks",
+			VersionAliases: map[string]int64{
+				"test": 1,
 			},
 		},
 		UpdateMask: &field_mask.FieldMask{
-			Paths: []string{"labels"},
+			Paths: []string{"version_aliases"},
 		},
 	}
 
@@ -65,4 +65,4 @@ func updateRegionalSecret(w io.Writer, projectId, locationId, secretId string) e
 	return nil
 }
 
-// [END secretmanager_update_regional_secret]
+// [END secretmanager_update_regional_secret_with_alias]

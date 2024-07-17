@@ -12,24 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
-// [START secretmanager_enable_regional_secret_version_with_etag]
+// [START secretmanager_list_regional_secret_versions_with_filter]
 import (
 	"context"
 	"fmt"
+	"io"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
+	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
 
-// enableSecretVersionWithEtag enables the given secret version, enabling it to be
-// accessed after previously being disabled. Other secrets versions are
-// unaffected.
-func enableRegionalSecretVersionWithEtag(projectId, locationId, secretId, versionId, etag string) error {
-	// name := "projects/my-project/locations/my-location/secrets/my-secret/versions/5"
-	// etag := `"123"`
+// listSecretVersionsWithFilter lists all filter-matching secret versions in the given
+// secret and their metadata.
+func ListRegionalSecretVersionsWithFilter(w io.Writer, projectId, locationId, secretId string, filter string) error {
+	// parent := "projects/my-project/locations/my-location/secrets/my-secret"
+	// Follow https://cloud.google.com/secret-manager/docs/filtering
+	// for filter syntax and examples.
+	// filter := "create_time>2021-01-01T00:00:00Z"
 
 	// Create the client.
 	ctx := context.Background()
@@ -42,18 +45,30 @@ func enableRegionalSecretVersionWithEtag(projectId, locationId, secretId, versio
 	}
 	defer client.Close()
 
-	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s/versions/%s", projectId, locationId, secretId, versionId)
+	parent := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
 	// Build the request.
-	req := &secretmanagerpb.EnableSecretVersionRequest{
-		Name: name,
-		Etag: etag,
+	req := &secretmanagerpb.ListSecretVersionsRequest{
+		Parent: parent,
+		Filter: filter,
 	}
 
 	// Call the API.
-	if _, err := client.EnableSecretVersion(ctx, req); err != nil {
-		return fmt.Errorf("failed to enable regional secret version: %w", err)
+	it := client.ListSecretVersions(ctx, req)
+	for {
+		resp, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+
+		if err != nil {
+			return fmt.Errorf("failed to list regional secret versions: %w", err)
+		}
+
+		fmt.Fprintf(w, "Found secret regional version %s with state %s\n",
+			resp.Name, resp.State)
 	}
+
 	return nil
 }
 
-// [END secretmanager_enable_regional_secret_version_with_etag]
+// [END secretmanager_list_regional_secret_versions_with_filter]

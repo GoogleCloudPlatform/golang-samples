@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
-// [START secretmanager_list_regional_secrets_with_filter]
+// [START secretmanager_create_regional_secret]
 import (
 	"context"
 	"fmt"
@@ -22,51 +22,42 @@ import (
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
-	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
 
-// listSecretsWithFilter lists all filter-matching secrets in the given project.
-func listRegionalSecretsWithFilter(w io.Writer, projectId, locationId string, filter string) error {
+// createSecret creates a new secret with the given name. A secret is a logical
+// wrapper around a collection of secret versions. Secret versions hold the
+// actual secret material.
+func CreateRegionalSecret(w io.Writer, projectId, locationId, id string) error {
 	// parent := "projects/my-project/locations/my-location"
-	// Follow https://cloud.google.com/secret-manager/docs/filtering
-	// for filter syntax and examples.
-	// filter := "name:name-substring"
+	// id := "my-secret"
 
 	// Create the client.
 	ctx := context.Background()
+
 	//Endpoint to send the request to regional server
 	endpoint := fmt.Sprintf("secretmanager.%s.rep.googleapis.com:443", locationId)
 	client, err := secretmanager.NewClient(ctx, option.WithEndpoint(endpoint))
-
 	if err != nil {
-		return fmt.Errorf("failed to create regional secretmanager client: %w", err)
+		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
 	defer client.Close()
 
 	parent := fmt.Sprintf("projects/%s/locations/%s", projectId, locationId)
+
 	// Build the request.
-	req := &secretmanagerpb.ListSecretsRequest{
-		Parent: parent,
-		Filter: filter,
+	req := &secretmanagerpb.CreateSecretRequest{
+		Parent:   parent,
+		SecretId: id,
 	}
 
 	// Call the API.
-	it := client.ListSecrets(ctx, req)
-	for {
-		resp, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-
-		if err != nil {
-			return fmt.Errorf("failed to list regional secrets: %w", err)
-		}
-
-		fmt.Fprintf(w, "Found regional secret %s\n", resp.Name)
+	result, err := client.CreateSecret(ctx, req)
+	if err != nil {
+		return fmt.Errorf("failed to create regional secret: %w", err)
 	}
-
+	fmt.Fprintf(w, "Created regional secret: %s\n", result.Name)
 	return nil
 }
 
-// [END secretmanager_list_regional_secrets_with_filter]
+// [END secretmanager_create_regional_secret]

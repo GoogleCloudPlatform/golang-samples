@@ -12,35 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
-// [START secretmanager_add_regional_secret_version]
+// [START secretmanager_list_regional_secret_versions]
 import (
 	"context"
 	"fmt"
-	"hash/crc32"
 	"io"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
+	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
 
-// addSecretVersion adds a new secret version to the given secret with the
-// provided payload.
-func addRegionalSecretVersion(w io.Writer, projectId, locationId, secretId string) error {
+// listSecretVersions lists all secret versions in the given secret and their
+// metadata.
+func ListRegionalSecretVersions(w io.Writer, projectId, locationId, secretId string) error {
 	// parent := "projects/my-project/locations/my-location/secrets/my-secret"
-
-	// Declare the payload to store.
-	payload := []byte("my super secret data")
-	// Compute checksum, use Castagnoli polynomial. Providing a checksum
-	// is optional.
-	crc32c := crc32.MakeTable(crc32.Castagnoli)
-	checksum := int64(crc32.Checksum(payload, crc32c))
 
 	// Create the client.
 	ctx := context.Background()
-
 	//Endpoint to send the request to regional server
 	endpoint := fmt.Sprintf("secretmanager.%s.rep.googleapis.com:443", locationId)
 	client, err := secretmanager.NewClient(ctx, option.WithEndpoint(endpoint))
@@ -51,23 +43,28 @@ func addRegionalSecretVersion(w io.Writer, projectId, locationId, secretId strin
 	defer client.Close()
 
 	parent := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
-
 	// Build the request.
-	req := &secretmanagerpb.AddSecretVersionRequest{
+	req := &secretmanagerpb.ListSecretVersionsRequest{
 		Parent: parent,
-		Payload: &secretmanagerpb.SecretPayload{
-			Data:       payload,
-			DataCrc32C: &checksum,
-		},
 	}
 
 	// Call the API.
-	result, err := client.AddSecretVersion(ctx, req)
-	if err != nil {
-		return fmt.Errorf("failed to add regional secret version: %w", err)
+	it := client.ListSecretVersions(ctx, req)
+	for {
+		resp, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+
+		if err != nil {
+			return fmt.Errorf("failed to list regional secret versions: %w", err)
+		}
+
+		fmt.Fprintf(w, "Found regional secret version %s with state %s\n",
+			resp.Name, resp.State)
 	}
-	fmt.Fprintf(w, "Added regional secret version: %s\n", result.Name)
+
 	return nil
 }
 
-// [END secretmanager_add_regional_secret_version]
+// [END secretmanager_list_regional_secret_versions]

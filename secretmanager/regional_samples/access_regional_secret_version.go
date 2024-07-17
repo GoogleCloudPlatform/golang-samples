@@ -12,46 +12,62 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
-// [START secretmanager_enable_regional_secret_version]
+// [START secretmanager_access_regional_secret_version]
 import (
 	"context"
 	"fmt"
+	"hash/crc32"
+	"io"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"google.golang.org/api/option"
 )
 
-// enableSecretVersion enables the given secret version, enabling it to be
-// accessed after previously being disabled. Other secrets versions are
-// unaffected.
-func enableRegionalSecretVersion(projectId, locationId, secretId, versionId string) error {
+// accessSecretVersion accesses the payload for the given secret version if one
+// exists. The version can be a version number as a string (e.g. "5") or an
+// alias (e.g. "latest").
+func AccessRegionalSecretVersion(w io.Writer, projectId, locationId, secretId, versionId string) error {
 	// name := "projects/my-project/locations/my-location/secrets/my-secret/versions/5"
+	// name := "projects/my-project/locations/my-location/secrets/my-secret/versions/latest"
 
 	// Create the client.
 	ctx := context.Background()
-	//Endpoint to send the request to regional server
+
+	// Endpoint to call the regional secret manager sever
 	endpoint := fmt.Sprintf("secretmanager.%s.rep.googleapis.com:443", locationId)
 	client, err := secretmanager.NewClient(ctx, option.WithEndpoint(endpoint))
-
 	if err != nil {
-		return fmt.Errorf("failed to create regional secretmanager client: %w", err)
+		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
 	defer client.Close()
 
 	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s/versions/%s", projectId, locationId, secretId, versionId)
+
 	// Build the request.
-	req := &secretmanagerpb.EnableSecretVersionRequest{
+	req := &secretmanagerpb.AccessSecretVersionRequest{
 		Name: name,
 	}
 
 	// Call the API.
-	if _, err := client.EnableSecretVersion(ctx, req); err != nil {
-		return fmt.Errorf("failed to enable regional secret version: %w", err)
+	result, err := client.AccessSecretVersion(ctx, req)
+	if err != nil {
+		return fmt.Errorf("failed to access regional secret version: %w", err)
 	}
+
+	// Verify the data checksum.
+	crc32c := crc32.MakeTable(crc32.Castagnoli)
+	checksum := int64(crc32.Checksum(result.Payload.Data, crc32c))
+	if checksum != *result.Payload.DataCrc32C {
+		return fmt.Errorf("Data corruption detected.")
+	}
+
+	// WARNING: Do not print the secret in a production environment - this snippet
+	// is showing how to access the secret material.
+	fmt.Fprintf(w, "Plaintext: %s\n", string(result.Payload.Data))
 	return nil
 }
 
-// [END secretmanager_enable_regional_secret_version]
+// [END secretmanager_access_regional_secret_version]

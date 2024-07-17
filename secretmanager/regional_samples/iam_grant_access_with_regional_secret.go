@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
-// [START secretmanager_iam_revoke_access_with_regional_secret]
+// [START secretmanager_iam_grant_access_with_regional_secret]
 import (
 	"context"
 	"fmt"
@@ -24,8 +24,8 @@ import (
 	"google.golang.org/api/option"
 )
 
-// iamRevokeAccess revokes the given member's access on the secret.
-func iamRevokeAccessWithRegionalSecret(w io.Writer, projectId, locationId, secretId, member string) error {
+// iamGrantAccess grants the given member access to the secret.
+func IamGrantAccessWithRegionalSecret(w io.Writer, projectId, locationId, secretId, member string) error {
 	// name := "projects/my-project/locations/my-location/secrets/my-secret"
 	// member := "user:foo@example.com"
 
@@ -41,7 +41,6 @@ func iamRevokeAccessWithRegionalSecret(w io.Writer, projectId, locationId, secre
 	defer client.Close()
 
 	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
-
 	// Get the current IAM policy.
 	handle := client.IAM(name)
 	policy, err := handle.Policy(ctx)
@@ -50,7 +49,7 @@ func iamRevokeAccessWithRegionalSecret(w io.Writer, projectId, locationId, secre
 	}
 
 	// Grant the member access permissions.
-	policy.Remove(member, "roles/secretmanager.secretAccessor")
+	policy.Add(member, "roles/secretmanager.secretAccessor")
 	if err = handle.SetPolicy(ctx, policy); err != nil {
 		return fmt.Errorf("failed to save policy: %w", err)
 	}
@@ -59,4 +58,4 @@ func iamRevokeAccessWithRegionalSecret(w io.Writer, projectId, locationId, secre
 	return nil
 }
 
-// [END secretmanager_iam_revoke_access_with_regional_secret]
+// [END secretmanager_iam_grant_access_with_regional_secret]

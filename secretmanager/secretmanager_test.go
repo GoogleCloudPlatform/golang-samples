@@ -27,6 +27,7 @@ import (
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	regional_secretmanager "github.com/GoogleCloudPlatform/golang-samples/secretmanager/regional_samples"
 	"github.com/gofrs/uuid"
 	"google.golang.org/api/option"
 	grpccodes "google.golang.org/grpc/codes"
@@ -228,7 +229,7 @@ func TestAccessRegionalSecretVersion(t *testing.T) {
 	testRegionalSecretVersion(t, secret.Name, payload)
 
 	var b bytes.Buffer
-	if err := accessRegionalSecretVersion(&b, tc.ProjectID, locationID, secretID, "1"); err != nil {
+	if err := regional_secretmanager.AccessRegionalSecretVersion(&b, tc.ProjectID, locationID, secretID, "1"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -262,7 +263,7 @@ func TestAddRegionalSecretVersion(t *testing.T) {
 	locationID := testLocation(t)
 
 	var b bytes.Buffer
-	if err := addRegionalSecretVersion(&b, tc.ProjectID, locationID, secretID); err != nil {
+	if err := regional_secretmanager.AddRegionalSecretVersion(&b, tc.ProjectID, locationID, secretID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -315,7 +316,7 @@ func TestCreateRegionalSecret(t *testing.T) {
 	defer testCleanupRegionalSecret(t, fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID))
 
 	var b bytes.Buffer
-	if err := createRegionalSecret(&b, tc.ProjectID, locationID, secretID); err != nil {
+	if err := regional_secretmanager.CreateRegionalSecret(&b, tc.ProjectID, locationID, secretID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -370,7 +371,7 @@ func TestDeleteRegionalSecret(t *testing.T) {
 
 	locationID := testLocation(t)
 
-	if err := deleteRegionalSecret(tc.ProjectID, locationID, secretId); err != nil {
+	if err := regional_secretmanager.DeleteRegionalSecret(tc.ProjectID, locationID, secretId); err != nil {
 		t.Fatal(err)
 	}
 
@@ -410,7 +411,7 @@ func TestDeleteRegionalSecretWithEtag(t *testing.T) {
 
 	locationID := testLocation(t)
 
-	if err := deleteRegionalSecretWithEtag(tc.ProjectID, locationID, secretId, secret.Etag); err != nil {
+	if err := regional_secretmanager.DeleteRegionalSecretWithEtag(tc.ProjectID, locationID, secretId, secret.Etag); err != nil {
 		t.Fatal(err)
 	}
 
@@ -459,7 +460,7 @@ func TestDestroyRegionalSecretVersion(t *testing.T) {
 
 	version := testRegionalSecretVersion(t, secret.Name, payload)
 
-	if err := destroyRegionalSecretVersion(tc.ProjectID, locationID, secretID, "1"); err != nil {
+	if err := regional_secretmanager.DestroyRegionalSecretVersion(tc.ProjectID, locationID, secretID, "1"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -509,7 +510,7 @@ func TestDestroyRegionalSecretVersionWithEtag(t *testing.T) {
 
 	version := testRegionalSecretVersion(t, secret.Name, payload)
 
-	if err := destroyRegionalSecretVersionWithEtag(tc.ProjectID, locationID, secretID, "1", version.Etag); err != nil {
+	if err := regional_secretmanager.DestroyRegionalSecretVersionWithEtag(tc.ProjectID, locationID, secretID, "1", version.Etag); err != nil {
 		t.Fatal(err)
 	}
 
@@ -575,7 +576,7 @@ func TestDisableEnableRegionalSecretVersion(t *testing.T) {
 
 	version := testRegionalSecretVersion(t, secret.Name, payload)
 
-	if err := disableRegionalSecretVersion(tc.ProjectID, locationID, secretID, "1"); err != nil {
+	if err := regional_secretmanager.DisableRegionalSecretVersion(tc.ProjectID, locationID, secretID, "1"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -590,7 +591,7 @@ func TestDisableEnableRegionalSecretVersion(t *testing.T) {
 		t.Errorf("testRegionalSecretVersion: expected %v to be %v", got, want)
 	}
 
-	if err := enableRegionalSecretVersion(tc.ProjectID, locationID, secretID, "1"); err != nil {
+	if err := regional_secretmanager.EnableRegionalSecretVersion(tc.ProjectID, locationID, secretID, "1"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -655,7 +656,7 @@ func TestDisableEnableRegionalSecretVersionWithEtag(t *testing.T) {
 
 	version := testRegionalSecretVersion(t, secret.Name, payload)
 
-	if err := disableRegionalSecretVersionWithEtag(tc.ProjectID, locationId, secretID, "1", version.Etag); err != nil {
+	if err := regional_secretmanager.DisableRegionalSecretVersionWithEtag(tc.ProjectID, locationId, secretID, "1", version.Etag); err != nil {
 		t.Fatal(err)
 	}
 
@@ -670,7 +671,7 @@ func TestDisableEnableRegionalSecretVersionWithEtag(t *testing.T) {
 		t.Errorf("testRegionalSecretVersion: expected %v to be %v", got, want)
 	}
 
-	if err := enableRegionalSecretVersionWithEtag(tc.ProjectID, locationId, secretID, "1", v.Etag); err != nil {
+	if err := regional_secretmanager.EnableRegionalSecretVersionWithEtag(tc.ProjectID, locationId, secretID, "1", v.Etag); err != nil {
 		t.Fatal(err)
 	}
 
@@ -716,7 +717,7 @@ func TestGetRegionalSecretVersion(t *testing.T) {
 	testRegionalSecretVersion(t, secret.Name, payload)
 
 	var b bytes.Buffer
-	if err := getRegionalSecretVersion(&b, tc.ProjectID, locationID, secretID, "1"); err != nil {
+	if err := regional_secretmanager.GetRegionalSecretVersion(&b, tc.ProjectID, locationID, secretID, "1"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -750,7 +751,7 @@ func TestGetRegionalSecret(t *testing.T) {
 	locationID := testLocation(t)
 
 	var b bytes.Buffer
-	if err := getRegionalSecret(&b, tc.ProjectID, locationID, secretdID); err != nil {
+	if err := regional_secretmanager.GetRegionalSecret(&b, tc.ProjectID, locationID, secretdID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -806,7 +807,7 @@ func TestIamGrantAccessWithRegionalSecret(t *testing.T) {
 	iamUser := testIamUser(t)
 
 	var b bytes.Buffer
-	if err := iamGrantAccessWithRegionalSecret(&b, tc.ProjectID, locationID, secretID, iamUser); err != nil {
+	if err := regional_secretmanager.IamGrantAccessWithRegionalSecret(&b, tc.ProjectID, locationID, secretID, iamUser); err != nil {
 		t.Fatal(err)
 	}
 
@@ -875,7 +876,7 @@ func TestIamRevokeAccessWithRegionalSecret(t *testing.T) {
 	iamUser := testIamUser(t)
 
 	var b bytes.Buffer
-	if err := iamRevokeAccessWithRegionalSecret(&b, tc.ProjectID, locationID, secretID, iamUser); err != nil {
+	if err := regional_secretmanager.IamRevokeAccessWithRegionalSecret(&b, tc.ProjectID, locationID, secretID, iamUser); err != nil {
 		t.Fatal(err)
 	}
 
@@ -934,7 +935,7 @@ func TestListRegionalSecretVersions(t *testing.T) {
 	version2 := testRegionalSecretVersion(t, secret.Name, payload)
 
 	var b bytes.Buffer
-	if err := listRegionalSecretVersions(&b, tc.ProjectID, locationID, secretID); err != nil {
+	if err := regional_secretmanager.ListRegionalSecretVersions(&b, tc.ProjectID, locationID, secretID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -984,7 +985,7 @@ func TestListRegionalSecretVersionsWithFilter(t *testing.T) {
 	version2 := testRegionalSecretVersion(t, secret.Name, payload)
 
 	var b bytes.Buffer
-	if err := listRegionalSecretVersionsWithFilter(&b, tc.ProjectID, locationID, secretID, fmt.Sprintf("name:%s", version1.Name)); err != nil {
+	if err := regional_secretmanager.ListRegionalSecretVersionsWithFilter(&b, tc.ProjectID, locationID, secretID, fmt.Sprintf("name:%s", version1.Name)); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1032,7 +1033,7 @@ func TestListRegionalSecrets(t *testing.T) {
 	locationID := testLocation(t)
 
 	var b bytes.Buffer
-	if err := listRegionalSecrets(&b, tc.ProjectID, locationID); err != nil {
+	if err := regional_secretmanager.ListRegionalSecrets(&b, tc.ProjectID, locationID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1080,7 +1081,7 @@ func TestListRegionalSecretsWithFilter(t *testing.T) {
 	locationID := testLocation(t)
 
 	var b bytes.Buffer
-	if err := listRegionalSecretsWithFilter(&b, tc.ProjectID, locationID, fmt.Sprintf("name:%s", secret1.Name)); err != nil {
+	if err := regional_secretmanager.ListRegionalSecretsWithFilter(&b, tc.ProjectID, locationID, fmt.Sprintf("name:%s", secret1.Name)); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1130,7 +1131,7 @@ func TestRegionalUpdateSecret(t *testing.T) {
 	locationID := testLocation(t)
 
 	var b bytes.Buffer
-	if err := updateRegionalSecret(&b, tc.ProjectID, locationID, secretID); err != nil {
+	if err := regional_secretmanager.UpdateRegionalSecret(&b, tc.ProjectID, locationID, secretID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1188,7 +1189,7 @@ func TestUpdateRegionalSecretWithEtag(t *testing.T) {
 	locationID := testLocation(t)
 
 	var b bytes.Buffer
-	if err := updateRegionalSecretWithEtag(&b, tc.ProjectID, locationID, secretID, secret.Etag); err != nil {
+	if err := regional_secretmanager.UpdateRegionalSecretWithEtag(&b, tc.ProjectID, locationID, secretID, secret.Etag); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1250,7 +1251,7 @@ func TestUpdateRegionalSecretWithAlias(t *testing.T) {
 	testRegionalSecretVersion(t, secret.Name, []byte("my-secret"))
 
 	var b bytes.Buffer
-	if err := updateRegionalSecretWithAlias(&b, tc.ProjectID, locationID, secretID); err != nil {
+	if err := regional_secretmanager.UpdateRegionalSecretWithAlias(&b, tc.ProjectID, locationID, secretID); err != nil {
 		t.Fatal(err)
 	}
 

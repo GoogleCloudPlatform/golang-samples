@@ -12,24 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
-// [START secretmanager_get_regional_secret_version]
+// [START secretmanager_delete_regional_secret]
 import (
 	"context"
 	"fmt"
-	"io"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"google.golang.org/api/option"
 )
 
-// getSecretVersion gets information about the given secret version. It does not
-// include the payload data.
-func getRegionalSecretVersion(w io.Writer, projectId, locationId, secretId, versionId string) error {
-	// name := "projects/my-project/locations/my-location/secrets/my-secret/versions/5"
-	// name := "projects/my-project/locations/my-location/secrets/my-secret/versions/latest"
+// deleteSecret deletes the secret with the given name and all of its versions.
+func DeleteRegionalSecret(projectId, locationId, secretId string) error {
+	// name := "projects/my-project/locations/my-location/secrets/my-secret"
 
 	// Create the client.
 	ctx := context.Background()
@@ -42,21 +39,17 @@ func getRegionalSecretVersion(w io.Writer, projectId, locationId, secretId, vers
 	}
 	defer client.Close()
 
-	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s/versions/%s", projectId, locationId, secretId, versionId)
+	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
 	// Build the request.
-	req := &secretmanagerpb.GetSecretVersionRequest{
+	req := &secretmanagerpb.DeleteSecretRequest{
 		Name: name,
 	}
 
 	// Call the API.
-	result, err := client.GetSecretVersion(ctx, req)
-	if err != nil {
-		return fmt.Errorf("failed to get regional secret version: %w", err)
+	if err := client.DeleteSecret(ctx, req); err != nil {
+		return fmt.Errorf("failed to delete regional secret: %w", err)
 	}
-
-	fmt.Fprintf(w, "Found regional secret version %s with state %s\n",
-		result.Name, result.State)
 	return nil
 }
 
-// [END secretmanager_get_regional_secret_version]
+// [END secretmanager_delete_regional_secret]

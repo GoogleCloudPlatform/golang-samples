@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
-// [START secretmanager_list_regional_secret_versions_with_filter]
+// [START secretmanager_get_regional_secret_version]
 import (
 	"context"
 	"fmt"
@@ -22,17 +22,14 @@ import (
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
-	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
 
-// listSecretVersionsWithFilter lists all filter-matching secret versions in the given
-// secret and their metadata.
-func listRegionalSecretVersionsWithFilter(w io.Writer, projectId, locationId, secretId string, filter string) error {
-	// parent := "projects/my-project/locations/my-location/secrets/my-secret"
-	// Follow https://cloud.google.com/secret-manager/docs/filtering
-	// for filter syntax and examples.
-	// filter := "create_time>2021-01-01T00:00:00Z"
+// getSecretVersion gets information about the given secret version. It does not
+// include the payload data.
+func GetRegionalSecretVersion(w io.Writer, projectId, locationId, secretId, versionId string) error {
+	// name := "projects/my-project/locations/my-location/secrets/my-secret/versions/5"
+	// name := "projects/my-project/locations/my-location/secrets/my-secret/versions/latest"
 
 	// Create the client.
 	ctx := context.Background()
@@ -45,30 +42,21 @@ func listRegionalSecretVersionsWithFilter(w io.Writer, projectId, locationId, se
 	}
 	defer client.Close()
 
-	parent := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
+	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s/versions/%s", projectId, locationId, secretId, versionId)
 	// Build the request.
-	req := &secretmanagerpb.ListSecretVersionsRequest{
-		Parent: parent,
-		Filter: filter,
+	req := &secretmanagerpb.GetSecretVersionRequest{
+		Name: name,
 	}
 
 	// Call the API.
-	it := client.ListSecretVersions(ctx, req)
-	for {
-		resp, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-
-		if err != nil {
-			return fmt.Errorf("failed to list regional secret versions: %w", err)
-		}
-
-		fmt.Fprintf(w, "Found secret regional version %s with state %s\n",
-			resp.Name, resp.State)
+	result, err := client.GetSecretVersion(ctx, req)
+	if err != nil {
+		return fmt.Errorf("failed to get regional secret version: %w", err)
 	}
 
+	fmt.Fprintf(w, "Found regional secret version %s with state %s\n",
+		result.Name, result.State)
 	return nil
 }
 
-// [END secretmanager_list_regional_secret_versions_with_filter]
+// [END secretmanager_get_regional_secret_version]

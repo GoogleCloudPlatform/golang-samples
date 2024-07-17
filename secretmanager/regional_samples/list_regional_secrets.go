@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
-// [START secretmanager_list_regional_secret_versions]
+// [START secretmanager_list_regional_secrets]
 import (
 	"context"
 	"fmt"
@@ -26,10 +26,9 @@ import (
 	"google.golang.org/api/option"
 )
 
-// listSecretVersions lists all secret versions in the given secret and their
-// metadata.
-func listRegionalSecretVersions(w io.Writer, projectId, locationId, secretId string) error {
-	// parent := "projects/my-project/locations/my-location/secrets/my-secret"
+// listSecrets lists all secrets in the given project.
+func ListRegionalSecrets(w io.Writer, projectId, locationId string) error {
+	// parent := "projects/my-project/locations/my-location"
 
 	// Create the client.
 	ctx := context.Background()
@@ -42,14 +41,15 @@ func listRegionalSecretVersions(w io.Writer, projectId, locationId, secretId str
 	}
 	defer client.Close()
 
-	parent := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
+	parent := fmt.Sprintf("projects/%s/locations/%s", projectId, locationId)
+
 	// Build the request.
-	req := &secretmanagerpb.ListSecretVersionsRequest{
+	req := &secretmanagerpb.ListSecretsRequest{
 		Parent: parent,
 	}
 
 	// Call the API.
-	it := client.ListSecretVersions(ctx, req)
+	it := client.ListSecrets(ctx, req)
 	for {
 		resp, err := it.Next()
 		if err == iterator.Done {
@@ -57,14 +57,13 @@ func listRegionalSecretVersions(w io.Writer, projectId, locationId, secretId str
 		}
 
 		if err != nil {
-			return fmt.Errorf("failed to list regional secret versions: %w", err)
+			return fmt.Errorf("failed to list regional secrets: %w", err)
 		}
 
-		fmt.Fprintf(w, "Found regional secret version %s with state %s\n",
-			resp.Name, resp.State)
+		fmt.Fprintf(w, "Found regional secret %s\n", resp.Name)
 	}
 
 	return nil
 }
 
-// [END secretmanager_list_regional_secret_versions]
+// [END secretmanager_list_regional_secrets]

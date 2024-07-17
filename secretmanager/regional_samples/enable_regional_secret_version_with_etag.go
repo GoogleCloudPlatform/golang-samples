@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
-// [START secretmanager_destroy_regional_secret_version_with_etag]
+// [START secretmanager_enable_regional_secret_version_with_etag]
 import (
 	"context"
 	"fmt"
@@ -24,9 +24,10 @@ import (
 	"google.golang.org/api/option"
 )
 
-// destroySecretVersionWithEtag destroys the given secret version, making the payload
-// irrecoverable. Other secrets versions are unaffected.
-func destroyRegionalSecretVersionWithEtag(projectId, locationId, secretId, versionId, etag string) error {
+// enableSecretVersionWithEtag enables the given secret version, enabling it to be
+// accessed after previously being disabled. Other secrets versions are
+// unaffected.
+func EnableRegionalSecretVersionWithEtag(projectId, locationId, secretId, versionId, etag string) error {
 	// name := "projects/my-project/locations/my-location/secrets/my-secret/versions/5"
 	// etag := `"123"`
 
@@ -43,16 +44,16 @@ func destroyRegionalSecretVersionWithEtag(projectId, locationId, secretId, versi
 
 	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s/versions/%s", projectId, locationId, secretId, versionId)
 	// Build the request.
-	req := &secretmanagerpb.DestroySecretVersionRequest{
+	req := &secretmanagerpb.EnableSecretVersionRequest{
 		Name: name,
 		Etag: etag,
 	}
 
 	// Call the API.
-	if _, err := client.DestroySecretVersion(ctx, req); err != nil {
-		return fmt.Errorf("failed to destroy regional secret version: %w", err)
+	if _, err := client.EnableSecretVersion(ctx, req); err != nil {
+		return fmt.Errorf("failed to enable regional secret version: %w", err)
 	}
 	return nil
 }
 
-// [END secretmanager_destroy_regional_secret_version_with_etag]
+// [END secretmanager_enable_regional_secret_version_with_etag]

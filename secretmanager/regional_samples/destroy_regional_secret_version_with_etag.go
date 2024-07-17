@@ -12,22 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
-// [START secretmanager_iam_grant_access_with_regional_secret]
+// [START secretmanager_destroy_regional_secret_version_with_etag]
 import (
 	"context"
 	"fmt"
-	"io"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
+	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"google.golang.org/api/option"
 )
 
-// iamGrantAccess grants the given member access to the secret.
-func iamGrantAccessWithRegionalSecret(w io.Writer, projectId, locationId, secretId, member string) error {
-	// name := "projects/my-project/locations/my-location/secrets/my-secret"
-	// member := "user:foo@example.com"
+// destroySecretVersionWithEtag destroys the given secret version, making the payload
+// irrecoverable. Other secrets versions are unaffected.
+func DestroyRegionalSecretVersionWithEtag(projectId, locationId, secretId, versionId, etag string) error {
+	// name := "projects/my-project/locations/my-location/secrets/my-secret/versions/5"
+	// etag := `"123"`
 
 	// Create the client.
 	ctx := context.Background()
@@ -40,22 +41,18 @@ func iamGrantAccessWithRegionalSecret(w io.Writer, projectId, locationId, secret
 	}
 	defer client.Close()
 
-	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
-	// Get the current IAM policy.
-	handle := client.IAM(name)
-	policy, err := handle.Policy(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to get policy: %w", err)
+	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s/versions/%s", projectId, locationId, secretId, versionId)
+	// Build the request.
+	req := &secretmanagerpb.DestroySecretVersionRequest{
+		Name: name,
+		Etag: etag,
 	}
 
-	// Grant the member access permissions.
-	policy.Add(member, "roles/secretmanager.secretAccessor")
-	if err = handle.SetPolicy(ctx, policy); err != nil {
-		return fmt.Errorf("failed to save policy: %w", err)
+	// Call the API.
+	if _, err := client.DestroySecretVersion(ctx, req); err != nil {
+		return fmt.Errorf("failed to destroy regional secret version: %w", err)
 	}
-
-	fmt.Fprintf(w, "Updated IAM policy for %s\n", name)
 	return nil
 }
 
-// [END secretmanager_iam_grant_access_with_regional_secret]
+// [END secretmanager_destroy_regional_secret_version_with_etag]

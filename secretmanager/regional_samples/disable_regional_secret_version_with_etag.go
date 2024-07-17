@@ -12,23 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
-// [START secretmanager_get_regional_secret]
+// [START secretmanager_disable_regional_secret_version_with_etag]
 import (
 	"context"
 	"fmt"
-	"io"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"google.golang.org/api/option"
 )
 
-// getSecret gets information about the given secret. This only returns metadata
-// about the secret container, not any secret material.
-func getRegionalSecret(w io.Writer, projectId, locationId, secretId string) error {
-	// name := "projects/my-project/locations/my-location/secrets/my-secret"
+// disableSecretVersionWithEtag disables the given secret version. Future requests will
+// throw an error until the secret version is enabled. Other secrets versions
+// are unaffected.
+func DisableRegionalSecretVersionWithEtag(projectId, locationId, secretId, versionId, etag string) error {
+	// name := "projects/my-project/locations/my-location/secrets/my-secret/versions/5"
+	// etag := `"123"`
 
 	// Create the client.
 	ctx := context.Background()
@@ -41,20 +42,18 @@ func getRegionalSecret(w io.Writer, projectId, locationId, secretId string) erro
 	}
 	defer client.Close()
 
-	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
+	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s/versions/%s", projectId, locationId, secretId, versionId)
 	// Build the request.
-	req := &secretmanagerpb.GetSecretRequest{
+	req := &secretmanagerpb.DisableSecretVersionRequest{
 		Name: name,
+		Etag: etag,
 	}
 
 	// Call the API.
-	result, err := client.GetSecret(ctx, req)
-	if err != nil {
-		return fmt.Errorf("failed to get secret: %w", err)
+	if _, err := client.DisableSecretVersion(ctx, req); err != nil {
+		return fmt.Errorf("failed to disable regional secret version: %w", err)
 	}
-
-	fmt.Fprintf(w, "Found regional secret %s \n", result.Name)
 	return nil
 }
 
-// [END secretmanager_get_regional_secret]
+// [END secretmanager_disable_regional_secret_version_with_etag]

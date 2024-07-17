@@ -12,23 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
-// [START secretmanager_disable_regional_secret_version]
+// [START secretmanager_update_regional_secret_with_etag]
 import (
 	"context"
 	"fmt"
+	"io"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"google.golang.org/api/option"
+	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-// disableSecretVersion disables the given secret version. Future requests will
-// throw an error until the secret version is enabled. Other secrets versions
-// are unaffected.
-func disableRegionalSecretVersion(projectId, locationId, secretId, versionId string) error {
-	// name := "projects/my-project/locations/my-location/secrets/my-secret/versions/5"
+// updateSecretWithEtag updates the metadata about an existing secret.
+func UpdateRegionalSecretWithEtag(w io.Writer, projectId, locationId, secretId, etag string) error {
+	// name := "projects/my-project/locations/my-location/secrets/my-secret"
+	// etag := `"123"`
 
 	// Create the client.
 	ctx := context.Background()
@@ -41,17 +42,28 @@ func disableRegionalSecretVersion(projectId, locationId, secretId, versionId str
 	}
 	defer client.Close()
 
-	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s/versions/%s", projectId, locationId, secretId, versionId)
+	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
 	// Build the request.
-	req := &secretmanagerpb.DisableSecretVersionRequest{
-		Name: name,
+	req := &secretmanagerpb.UpdateSecretRequest{
+		Secret: &secretmanagerpb.Secret{
+			Name: name,
+			Etag: etag,
+			Labels: map[string]string{
+				"secretmanager": "rocks",
+			},
+		},
+		UpdateMask: &field_mask.FieldMask{
+			Paths: []string{"labels"},
+		},
 	}
 
 	// Call the API.
-	if _, err := client.DisableSecretVersion(ctx, req); err != nil {
-		return fmt.Errorf("failed to disable regional secret version: %w", err)
+	result, err := client.UpdateSecret(ctx, req)
+	if err != nil {
+		return fmt.Errorf("failed to update regional secret: %w", err)
 	}
+	fmt.Fprintf(w, "Updated regional secret: %s\n", result.Name)
 	return nil
 }
 
-// [END secretmanager_disable_regional_secret_version]
+// [END secretmanager_update_regional_secret_with_etag]

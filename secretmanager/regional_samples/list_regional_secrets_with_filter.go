@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
-// [START secretmanager_update_regional_secret_with_etag]
+// [START secretmanager_list_regional_secrets_with_filter]
 import (
 	"context"
 	"fmt"
@@ -22,14 +22,16 @@ import (
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
+	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
-	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-// updateSecretWithEtag updates the metadata about an existing secret.
-func updateRegionalSecretWithEtag(w io.Writer, projectId, locationId, secretId, etag string) error {
-	// name := "projects/my-project/locations/my-location/secrets/my-secret"
-	// etag := `"123"`
+// listSecretsWithFilter lists all filter-matching secrets in the given project.
+func ListRegionalSecretsWithFilter(w io.Writer, projectId, locationId string, filter string) error {
+	// parent := "projects/my-project/locations/my-location"
+	// Follow https://cloud.google.com/secret-manager/docs/filtering
+	// for filter syntax and examples.
+	// filter := "name:name-substring"
 
 	// Create the client.
 	ctx := context.Background()
@@ -42,28 +44,29 @@ func updateRegionalSecretWithEtag(w io.Writer, projectId, locationId, secretId, 
 	}
 	defer client.Close()
 
-	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
+	parent := fmt.Sprintf("projects/%s/locations/%s", projectId, locationId)
 	// Build the request.
-	req := &secretmanagerpb.UpdateSecretRequest{
-		Secret: &secretmanagerpb.Secret{
-			Name: name,
-			Etag: etag,
-			Labels: map[string]string{
-				"secretmanager": "rocks",
-			},
-		},
-		UpdateMask: &field_mask.FieldMask{
-			Paths: []string{"labels"},
-		},
+	req := &secretmanagerpb.ListSecretsRequest{
+		Parent: parent,
+		Filter: filter,
 	}
 
 	// Call the API.
-	result, err := client.UpdateSecret(ctx, req)
-	if err != nil {
-		return fmt.Errorf("failed to update regional secret: %w", err)
+	it := client.ListSecrets(ctx, req)
+	for {
+		resp, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+
+		if err != nil {
+			return fmt.Errorf("failed to list regional secrets: %w", err)
+		}
+
+		fmt.Fprintf(w, "Found regional secret %s\n", resp.Name)
 	}
-	fmt.Fprintf(w, "Updated regional secret: %s\n", result.Name)
+
 	return nil
 }
 
-// [END secretmanager_update_regional_secret_with_etag]
+// [END secretmanager_list_regional_secrets_with_filter]

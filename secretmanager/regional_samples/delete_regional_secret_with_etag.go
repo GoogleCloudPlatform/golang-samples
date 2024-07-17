@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
-// [START secretmanager_disable_regional_secret_version_with_etag]
+// [START secretmanager_delete_regional_secret_with_etag]
 import (
 	"context"
 	"fmt"
@@ -24,11 +24,9 @@ import (
 	"google.golang.org/api/option"
 )
 
-// disableSecretVersionWithEtag disables the given secret version. Future requests will
-// throw an error until the secret version is enabled. Other secrets versions
-// are unaffected.
-func disableRegionalSecretVersionWithEtag(projectId, locationId, secretId, versionId, etag string) error {
-	// name := "projects/my-project/locations/my-location/secrets/my-secret/versions/5"
+// deleteSecretWithEtag deletes the secret with the given name and all of its versions.
+func DeleteRegionalSecretWithEtag(projectId, locationId, secretId, etag string) error {
+	// name := "projects/my-project/locations/my-location/secrets/my-secret"
 	// etag := `"123"`
 
 	// Create the client.
@@ -38,22 +36,24 @@ func disableRegionalSecretVersionWithEtag(projectId, locationId, secretId, versi
 	client, err := secretmanager.NewClient(ctx, option.WithEndpoint(endpoint))
 
 	if err != nil {
-		return fmt.Errorf("failed to create regional secretmanager client: %w", err)
+		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
 	defer client.Close()
 
-	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s/versions/%s", projectId, locationId, secretId, versionId)
+	//Endpoint to send the request to regional server
+	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
+
 	// Build the request.
-	req := &secretmanagerpb.DisableSecretVersionRequest{
+	req := &secretmanagerpb.DeleteSecretRequest{
 		Name: name,
 		Etag: etag,
 	}
 
 	// Call the API.
-	if _, err := client.DisableSecretVersion(ctx, req); err != nil {
-		return fmt.Errorf("failed to disable regional secret version: %w", err)
+	if err := client.DeleteSecret(ctx, req); err != nil {
+		return fmt.Errorf("failed to delete regional secret: %w", err)
 	}
 	return nil
 }
 
-// [END secretmanager_disable_regional_secret_version_with_etag]
+// [END secretmanager_delete_regional_secret_with_etag]

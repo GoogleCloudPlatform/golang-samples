@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
-// [START secretmanager_delete_regional_secret]
+// [START secretmanager_disable_regional_secret_version]
 import (
 	"context"
 	"fmt"
@@ -24,9 +24,11 @@ import (
 	"google.golang.org/api/option"
 )
 
-// deleteSecret deletes the secret with the given name and all of its versions.
-func deleteRegionalSecret(projectId, locationId, secretId string) error {
-	// name := "projects/my-project/locations/my-location/secrets/my-secret"
+// disableSecretVersion disables the given secret version. Future requests will
+// throw an error until the secret version is enabled. Other secrets versions
+// are unaffected.
+func DisableRegionalSecretVersion(projectId, locationId, secretId, versionId string) error {
+	// name := "projects/my-project/locations/my-location/secrets/my-secret/versions/5"
 
 	// Create the client.
 	ctx := context.Background()
@@ -39,17 +41,17 @@ func deleteRegionalSecret(projectId, locationId, secretId string) error {
 	}
 	defer client.Close()
 
-	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
+	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s/versions/%s", projectId, locationId, secretId, versionId)
 	// Build the request.
-	req := &secretmanagerpb.DeleteSecretRequest{
+	req := &secretmanagerpb.DisableSecretVersionRequest{
 		Name: name,
 	}
 
 	// Call the API.
-	if err := client.DeleteSecret(ctx, req); err != nil {
-		return fmt.Errorf("failed to delete regional secret: %w", err)
+	if _, err := client.DisableSecretVersion(ctx, req); err != nil {
+		return fmt.Errorf("failed to disable regional secret version: %w", err)
 	}
 	return nil
 }
 
-// [END secretmanager_delete_regional_secret]
+// [END secretmanager_disable_regional_secret_version]
