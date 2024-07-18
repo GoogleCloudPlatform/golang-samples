@@ -65,6 +65,7 @@ func getBucketMetadata(w io.Writer, bucketName string) (*storage.BucketAttrs, er
 		fmt.Fprintf(w, "RetentionPeriod: %v\n", attrs.RetentionPolicy.RetentionPeriod)
 		fmt.Fprintf(w, "RetentionPolicyIsLocked: %v\n", attrs.RetentionPolicy.IsLocked)
 	}
+	fmt.Fprintf(w, "ObjectRetentionMode: %v\n", attrs.ObjectRetentionMode)
 	fmt.Fprintf(w, "RequesterPays: %v\n", attrs.RequesterPays)
 	fmt.Fprintf(w, "VersioningEnabled: %v\n", attrs.VersioningEnabled)
 	if attrs.Logging != nil {
