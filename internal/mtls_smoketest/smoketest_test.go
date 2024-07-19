@@ -21,10 +21,10 @@ import (
 	"time"
 
 	bqstorage "cloud.google.com/go/bigquery/storage/apiv1"
+	"cloud.google.com/go/bigquery/storage/apiv1/storagepb"
 	vision "cloud.google.com/go/vision/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"google.golang.org/api/option"
-	bqstoragepb "google.golang.org/genproto/googleapis/cloud/bigquery/storage/v1"
 )
 
 var shouldFail = os.Getenv("GOOGLE_API_USE_MTLS") == "always"
@@ -92,11 +92,11 @@ func TestBigquerystorage(t *testing.T) {
 	}
 	defer client.Close()
 
-	createReadSessionRequest := &bqstoragepb.CreateReadSessionRequest{
+	createReadSessionRequest := &storagepb.CreateReadSessionRequest{
 		Parent: "projects/" + tc.ProjectID,
-		ReadSession: &bqstoragepb.ReadSession{
+		ReadSession: &storagepb.ReadSession{
 			Table:      "projects/bigquery-public-data/datasets/usa_names/tables/usa_1910_current",
-			DataFormat: bqstoragepb.DataFormat_AVRO,
+			DataFormat: storagepb.DataFormat_AVRO,
 		},
 		MaxStreamCount: 1,
 	}

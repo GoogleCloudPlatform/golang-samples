@@ -38,12 +38,12 @@ import (
 	"time"
 
 	bqStorage "cloud.google.com/go/bigquery/storage/apiv1"
+	"cloud.google.com/go/bigquery/storage/apiv1/storagepb"
 	"github.com/apache/arrow/go/v10/arrow"
 	"github.com/apache/arrow/go/v10/arrow/ipc"
 	"github.com/apache/arrow/go/v10/arrow/memory"
 	gax "github.com/googleapis/gax-go/v2"
 	goavro "github.com/linkedin/goavro/v2"
-	bqStoragepb "google.golang.org/genproto/googleapis/cloud/bigquery/storage/v1"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -101,18 +101,18 @@ func main() {
 	// We limit the output columns to a subset of those allowed in the table,
 	// and set a simple filter to only report names from the state of
 	// Washington (WA).
-	tableReadOptions := &bqStoragepb.ReadSession_TableReadOptions{
+	tableReadOptions := &storagepb.ReadSession_TableReadOptions{
 		SelectedFields: []string{"name", "number", "state"},
 		RowRestriction: `state = "WA"`,
 	}
 
-	dataFormat := bqStoragepb.DataFormat_AVRO
+	dataFormat := storagepb.DataFormat_AVRO
 	if *format == ARROW_FORMAT {
-		dataFormat = bqStoragepb.DataFormat_ARROW
+		dataFormat = storagepb.DataFormat_ARROW
 	}
-	createReadSessionRequest := &bqStoragepb.CreateReadSessionRequest{
+	createReadSessionRequest := &storagepb.CreateReadSessionRequest{
 		Parent: fmt.Sprintf("projects/%s", *projectID),
-		ReadSession: &bqStoragepb.ReadSession{
+		ReadSession: &storagepb.ReadSession{
 			Table:       readTable,
 			DataFormat:  dataFormat,
 			ReadOptions: tableReadOptions,
@@ -126,7 +126,7 @@ func main() {
 		if !ts.IsValid() {
 			log.Fatalf("Invalid snapshot millis (%d): %v", *snapshotMillis, err)
 		}
-		createReadSessionRequest.ReadSession.TableModifiers = &bqStoragepb.ReadSession_TableModifiers{
+		createReadSessionRequest.ReadSession.TableModifiers = &storagepb.ReadSession_TableModifiers{
 			SnapshotTime: ts,
 		}
 	}
@@ -148,7 +148,7 @@ func main() {
 	// increasing the MaxStreamCount.
 	readStream := session.GetStreams()[0].Name
 
-	ch := make(chan *bqStoragepb.ReadRowsResponse)
+	ch := make(chan *storagepb.ReadRowsResponse)
 
 	// Use a waitgroup to coordinate the reading and decoding goroutines.
 	var wg sync.WaitGroup
@@ -258,7 +258,7 @@ func valueFromTypeMap(field interface{}) interface{} {
 // data blocks to a channel. This function will retry on transient stream
 // failures and bookmark progress to avoid re-reading data that's already been
 // successfully transmitted.
-func processStream(ctx context.Context, client *bqStorage.BigQueryReadClient, st string, ch chan<- *bqStoragepb.ReadRowsResponse) error {
+func processStream(ctx context.Context, client *bqStorage.BigQueryReadClient, st string, ch chan<- *storagepb.ReadRowsResponse) error {
 	var offset int64
 
 	// Streams may be long-running.  Rather than using a global retry for the
@@ -267,7 +267,7 @@ func processStream(ctx context.Context, client *bqStorage.BigQueryReadClient, st
 	retries := 0
 	for {
 		// Send the initiating request to start streaming row blocks.
-		rowStream, err := client.ReadRows(ctx, &bqStoragepb.ReadRowsRequest{
+		rowStream, err := client.ReadRows(ctx, &storagepb.ReadRowsRequest{
 			ReadStream: st,
 			Offset:     offset,
 		}, rpcOpts)
@@ -330,7 +330,7 @@ func processStream(ctx context.Context, client *bqStorage.BigQueryReadClient, st
 // schema to decode the blocks into individual row messages for printing.  Will
 // continue to run until the channel is closed or the provided context is
 // cancelled.
-func processArrow(ctx context.Context, schema []byte, ch <-chan *bqStoragepb.ReadRowsResponse) error {
+func processArrow(ctx context.Context, schema []byte, ch <-chan *storagepb.ReadRowsResponse) error {
 	mem := memory.NewGoAllocator()
 	buf := bytes.NewBuffer(schema)
 	r, err := ipc.NewReader(buf, ipc.WithAllocator(mem))
@@ -372,7 +372,7 @@ func processArrow(ctx context.Context, schema []byte, ch <-chan *bqStoragepb.Rea
 // schema to decode the blocks into individual row messages for printing.  Will
 // continue to run until the channel is closed or the provided context is
 // cancelled.
-func processAvro(ctx context.Context, schema string, ch <-chan *bqStoragepb.ReadRowsResponse) error {
+func processAvro(ctx context.Context, schema string, ch <-chan *storagepb.ReadRowsResponse) error {
 	// Establish a decoder that can process blocks of messages using the
 	// reference schema. All blocks share the same schema, so the decoder
 	// can be long-lived.
