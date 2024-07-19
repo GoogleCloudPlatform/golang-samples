@@ -42,11 +42,6 @@ func createContextCache(w io.Writer, projectID, location, modelName string) (str
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel(modelName)
-	model.SystemInstruction = &genai.Content{
-		Parts: []genai.Part{genai.Text(systemInstruction)},
-	}
-
 	// These PDF are viewable at
 	//   https://storage.googleapis.com/cloud-samples-data/generative-ai/pdf/2312.11805v3.pdf
 	//   https://storage.googleapis.com/cloud-samples-data/generative-ai/pdf/2403.05530.pdf
@@ -62,7 +57,10 @@ func createContextCache(w io.Writer, projectID, location, modelName string) (str
 	}
 
 	content := &genai.CachedContent{
-		Model:      modelName,
+		Model: modelName,
+		SystemInstruction: &genai.Content{
+			Parts: []genai.Part{genai.Text(systemInstruction)},
+		},
 		Expiration: genai.ExpireTimeOrTTL{TTL: 60 * time.Minute},
 		Contents: []*genai.Content{
 			{
