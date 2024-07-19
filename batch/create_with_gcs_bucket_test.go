@@ -27,14 +27,13 @@ import (
 )
 
 func TestCreateJobWithBucket(t *testing.T) {
-	t.Skip("Skipped while investigating https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	t.Parallel()
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	region := "us-central1"
-	jobName := fmt.Sprintf("test-job-go-bucket-%v-%v", time.Now().Format("2006-12-25"), r.Int())
-	bucketName := fmt.Sprintf("test-bucket-go-batch-%v-%v", time.Now().Format("2006-12-25"), r.Int())
+	jobName := fmt.Sprintf("test-job-go-bucket-%v-%v", time.Now().Format("2006-01-02"), r.Int())
+	bucketName := fmt.Sprintf("test-bucket-go-batch-%v-%v", time.Now().Format("2006-01-02"), r.Int())
 	buf := &bytes.Buffer{}
 
 	if err := createBucket(tc.ProjectID, bucketName); err != nil {

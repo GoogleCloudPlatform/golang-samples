@@ -728,3 +728,179 @@ func TestAssignStaticExternalToNewVM(t *testing.T) {
 	t.Error("IP address did not assigned properly") // address assign not verified
 
 }
+
+func TestPromoteEphemeralAddress(t *testing.T) {
+	ctx := context.Background()
+	var seededRand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+	tc := testutil.SystemTest(t)
+	instanceName := "test-instance-" + fmt.Sprint(seededRand.Int())
+	addressName := "address-promoted-" + fmt.Sprint(seededRand.Int())
+	zone := "us-central1-a"
+	region := "us-central1"
+	buf := &bytes.Buffer{}
+
+	// initiate instance
+	err := createTestInstance(tc.ProjectID, zone, instanceName)
+	if err != nil {
+		t.Errorf("createTestInstance got err: %v", err)
+		return
+	}
+
+	defer func() {
+		if err := deleteInstance(tc.ProjectID, zone, instanceName); err != nil {
+			t.Errorf("deleteInstance got err: %v", err)
+		}
+	}()
+
+	reqGet := &computepb.GetInstanceRequest{
+		Project:  tc.ProjectID,
+		Zone:     zone,
+		Instance: instanceName,
+	}
+
+	// verify address assign
+	instancesClient, err := compute.NewInstancesRESTClient(ctx)
+	instance, err := instancesClient.Get(ctx, reqGet)
+	if err != nil {
+		t.Errorf("instancesClient.Get got err: %v", err)
+	}
+
+	ephemeralIP := ""
+
+	for _, ni := range instance.NetworkInterfaces {
+		if *ni.Name != "nic0" {
+			continue
+		}
+		for _, ac := range ni.AccessConfigs {
+			if *ac.Type == computepb.AccessConfig_ONE_TO_ONE_NAT.String() {
+				ephemeralIP = *ac.NatIP
+				break
+			}
+		}
+	}
+
+	if ephemeralIP == "" {
+		t.Error("no ephemeral IP found in instance")
+		return
+	}
+
+	// List IP addresses to verify the new address is NOT in the list yet
+	addresses, err := listIPAddresses(ctx, tc.ProjectID, region)
+	if err != nil {
+		t.Errorf("listIPAddresses got err: %v", err)
+	}
+
+	for _, address := range addresses {
+		if strings.Contains(address, addressName) {
+			t.Error("ephemeral IP address already promoted")
+			return
+		}
+	}
+
+	// promote ephemeral address
+	if err := promoteEphemeralAddress(buf, tc.ProjectID, region, ephemeralIP, addressName); err != nil {
+		t.Errorf("promoteEphemeralAddress got err: %v", err)
+	}
+
+	// release static ip
+	defer func() {
+		if err = releaseRegionalStaticExternal(buf, tc.ProjectID, region, addressName); err != nil {
+			t.Errorf("releaseRegionalStaticExternal got err: %v", err)
+		}
+	}()
+
+	// verify output
+	expectedResult := fmt.Sprintf("Ephemeral IP %s address promoted successfully", ephemeralIP)
+	if got := buf.String(); !strings.Contains(got, expectedResult) {
+		t.Errorf("promoteEphemeralAddress got %q, want %q", got, expectedResult)
+	}
+
+	// List IP addresses to verify the new address is in the list already
+	addresses, err = listIPAddresses(ctx, tc.ProjectID, region)
+	if err != nil {
+		t.Errorf("listIPAddresses got err: %v", err)
+	}
+
+	for _, address := range addresses {
+		if strings.Contains(address, addressName) {
+			return
+		}
+	}
+	t.Error("ephemeral IP was not promoted")
+}
+
+func TestGetInstanceIPAddresses(t *testing.T) {
+	buf := &bytes.Buffer{}
+	instance := &computepb.Instance{
+		NetworkInterfaces: []*computepb.NetworkInterface{
+			{
+				NetworkIP: proto.String("10.128.0.1"),
+				AccessConfigs: []*computepb.AccessConfig{
+					{
+						Type:  proto.String(computepb.AccessConfig_ONE_TO_ONE_NAT.String()),
+						NatIP: proto.String("34.68.123.45"),
+					},
+					{
+						Type:  proto.String(computepb.AccessConfig_ONE_TO_ONE_NAT.String()),
+						NatIP: proto.String("34.68.123.46"),
+					},
+				},
+				Ipv6AccessConfigs: []*computepb.AccessConfig{
+					{
+						Type:         proto.String(computepb.AccessConfig_DIRECT_IPV6.String()),
+						ExternalIpv6: proto.String("2600:1901:0:1234::"),
+					},
+				},
+				Ipv6Address: proto.String("2600:1901:0:5678::"),
+			},
+		},
+	}
+
+	tests := []struct {
+		name        string
+		addressType computepb.Address_AddressType
+		isIPV6      bool
+		want        []string
+	}{
+		{
+			name:        "External IPv4",
+			addressType: computepb.Address_EXTERNAL,
+			isIPV6:      false,
+			want:        []string{"34.68.123.45", "34.68.123.46"},
+		},
+		{
+			name:        "Internal IPv4",
+			addressType: computepb.Address_INTERNAL,
+			isIPV6:      false,
+			want:        []string{"10.128.0.1"},
+		},
+		{
+			name:        "External IPv6",
+			addressType: computepb.Address_EXTERNAL,
+			isIPV6:      true,
+			want:        []string{"2600:1901:0:1234::"},
+		},
+		{
+			name:        "Internal IPv6",
+			addressType: computepb.Address_INTERNAL,
+			isIPV6:      true,
+			want:        []string{"2600:1901:0:5678::"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := getInstanceIPAddresses(buf, instance, tt.addressType, tt.isIPV6)
+			if len(got) != len(tt.want) {
+				t.Errorf("getInstanceIPAddresses() = %v, want %v", got, tt.want)
+				return
+			}
+			for i, ip := range got {
+				if ip != tt.want[i] {
+					t.Errorf("getInstanceIPAddresses() = %v, want %v", got, tt.want)
+				}
+			}
+		})
+	}
+}
