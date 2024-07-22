@@ -27,13 +27,12 @@ import (
 )
 
 func TestBatchJobCRUD(t *testing.T) {
-	t.Skip("Skipped while investigating https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	t.Parallel()
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	region := "us-central1"
-	jobName := fmt.Sprintf("test-job-go-script-%v-%v", time.Now().Format("2006-12-25"), r.Int())
+	jobName := fmt.Sprintf("test-job-go-script-%v-%v", time.Now().Format("2006-01-02"), r.Int())
 
 	buf := &bytes.Buffer{}
 
@@ -102,13 +101,12 @@ func TestBatchJobCRUD(t *testing.T) {
 }
 
 func TestBatchContainerJob(t *testing.T) {
-	t.Skip("Skipped while investigating https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	t.Parallel()
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	region := "us-central1"
-	jobName := fmt.Sprintf("test-job-go-docker-%v-%v", time.Now().Format("2006-12-25"), r.Int())
+	jobName := fmt.Sprintf("test-job-go-docker-%v-%v", time.Now().Format("2006-01-02"), r.Int())
 
 	buf := &bytes.Buffer{}
 
