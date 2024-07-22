@@ -128,7 +128,7 @@ func TestBatchNotifications(t *testing.T) {
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	region := "us-central1"
-	jobName := fmt.Sprintf("test-job-go-docker-%v-%v", time.Now().Format("2006-12-25"), r.Int())
+	jobName := fmt.Sprintf("test-job-go-docker-%v-%v", time.Now().Format("2006-01-02"), r.Int())
 	topicName := "someTopic"
 
 	buf := &bytes.Buffer{}
