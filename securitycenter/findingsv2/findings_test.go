@@ -70,6 +70,7 @@ func setupEntities() (func(), error) {
 	if err != nil {
 		return nil, fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
+	defer client.Close()
 
 	source, err := client.CreateSource(ctx, &securitycenterpb.CreateSourceRequest{
 		Source: &securitycenterpb.Source{
@@ -80,26 +81,25 @@ func setupEntities() (func(), error) {
 	})
 
 	if err != nil {
-		client.Close()
 		return nil, fmt.Errorf("CreateSource: %w", err)
 	}
 	sourceName = source.Name
 	finding, err := createTestFinding(ctx, client, "updated", "MEDIUM_RISK_ONE")
 	if err != nil {
-		client.Close()
 		return nil, fmt.Errorf("createTestFinding: %w", err)
 	}
 	findingName = finding.Name
 	finding, err = createTestFinding(ctx, client, "untouched", "XSS")
 	if err != nil {
-		client.Close()
 		return nil, fmt.Errorf("createTestFinding: %w", err)
 	}
 	untouchedFindingName = finding.Name
 
-    cleanup := func() {
-        client.Close()
-    }
+	cleanup := func() {
+		client.DeleteSource(ctx, &securitycenterpb.DeleteSourceRequest{
+			Name: sourceName,
+		})
+	}
 
 	return cleanup, nil
 }
@@ -167,6 +167,12 @@ func TestUpdateFindingSourceProperties(t *testing.T) {
             r.Errorf("Failed to create finding: %v", err)
         }
 
+		t.Cleanup(func() {
+			client.DeleteFinding(ctx, &securitycenterpb.DeleteFindingRequest{
+				Name: finding.Name,
+			})
+		})
+
         buf := new(bytes.Buffer)
         err = updateFindingSourceProperties(buf, finding.Name)
 
@@ -199,6 +205,12 @@ func TestSetFindingState(t *testing.T) {
         if err != nil {
             r.Errorf("Failed to create finding: %v", err)
         }
+
+		t.Cleanup(func() {
+			client.DeleteFinding(ctx, &securitycenterpb.DeleteFindingRequest{
+				Name: finding.Name,
+			})
+		})
 
         buf := new(bytes.Buffer)
         err = setFindingState(buf, finding.Name)
