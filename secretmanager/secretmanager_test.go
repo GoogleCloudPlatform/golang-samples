@@ -67,7 +67,7 @@ func testSecret(tb testing.TB, projectID string) *secretmanagerpb.Secret {
 					Automatic: &secretmanagerpb.Replication_Automatic{},
 				},
 			},
-                        Labels: map[string]string{
+			Labels: map[string]string{
 				"secretmanager": "rocks",
 			},
 		},
@@ -199,12 +199,12 @@ func TestCreateSecretWithLabels(t *testing.T) {
 	labelValue := "rocks"
 
 	parent := fmt.Sprintf("projects/%s", tc.ProjectID)
-	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
 
 	var b bytes.Buffer
 	if err := createSecretWithLabels(&b, parent, secretID, labelKey, labelValue); err != nil {
 		t.Fatal(err)
 	}
+	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
 
 	if got, want := b.String(), "Created secret with labels:"; !strings.Contains(got, want) {
 		t.Errorf("createSecretWithLabels: expected %q to contain %q", got, want)

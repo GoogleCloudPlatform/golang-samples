@@ -25,8 +25,6 @@ import (
 )
 
 // createSecretWithLabels creates a new secret with the given name and labels.
-// A secret is a logical wrapper around a collection of secret versions. 
-// Secret versions hold the actual secret material.
 func createSecretWithLabels(w io.Writer, parent, id, labelKey, labelValue string) error {
 	// parent := "projects/my-project"
 	// id := "my-secret"
@@ -52,7 +50,7 @@ func createSecretWithLabels(w io.Writer, parent, id, labelKey, labelValue string
 				},
 			},
 			Labels: map[string]string{
-			        labelKey: labelValue,
+				labelKey: labelValue,
 			},
 		},
 	}

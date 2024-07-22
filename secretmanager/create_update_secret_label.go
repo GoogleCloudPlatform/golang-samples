@@ -25,7 +25,8 @@ import (
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-// updateSecret updates the metadata about an existing secret.
+// createUpdateSecretLabel updates the labels about an existing secret.
+// If the label key exists, it updates the label, otherwise it creates a new one.
 func createUpdateSecretLabel(w io.Writer, name, labelKey, labelValue string) error {
 	// name := "projects/my-project/secrets/my-secret"
 
@@ -55,7 +56,7 @@ func createUpdateSecretLabel(w io.Writer, name, labelKey, labelValue string) err
 	// Build the request to update the secret.
 	update_req := &secretmanagerpb.UpdateSecretRequest{
 		Secret: &secretmanagerpb.Secret{
-			Name: name,
+			Name:   name,
 			Labels: labels,
 		},
 		UpdateMask: &field_mask.FieldMask{
