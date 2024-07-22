@@ -301,7 +301,7 @@ func (s *Service) Build() error {
 	}
 
 	if out, err := gcloud(s.operationLabel(labelOperationBuild), s.buildCmd()); err != nil {
-		fmt.Printf(string(out))
+		fmt.Print(string(out))
 		return fmt.Errorf("gcloud: %s: %q", s.Image, err)
 	}
 	s.built = true

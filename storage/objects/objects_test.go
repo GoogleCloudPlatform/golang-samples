@@ -631,3 +631,49 @@ func TestObjectBucketLock(t *testing.T) {
 		t.Errorf("temporary hold is not disabled")
 	}
 }
+
+func TestObjectRetention(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+	start := time.Now()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	t.Cleanup(func() { client.Close() })
+
+	var (
+		bucketName = testutil.UniqueBucketName(testPrefix)
+		objectName = "foo.txt"
+	)
+
+	bucket := client.Bucket(bucketName).SetObjectRetention(true)
+	if err := bucket.Create(ctx, tc.ProjectID, nil); err != nil {
+		t.Fatalf("Bucket(%q).Create: %v", bucketName, err)
+	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	if err := uploadFile(io.Discard, bucketName, objectName); err != nil {
+		t.Fatalf("uploadFile(%q): %v", objectName, err)
+	}
+
+	err = setObjectRetentionPolicy(io.Discard, bucketName, objectName)
+	if err != nil {
+		t.Errorf("setObjectRetention: %v", err)
+	}
+	attrs, err := bucket.Object(objectName).Attrs(ctx)
+	if err != nil {
+		t.Errorf("object.Attrs: %v", err)
+	}
+
+	if attrs.Retention == nil {
+		t.Errorf("mismatching retention config, got nil, wanted %+v", attrs.Retention)
+	}
+
+	if got, want := attrs.Retention.RetainUntil, start.Add(time.Hour*24*9); got.Before(want) {
+		t.Errorf("retention time should be more than 9 days from the start of the test; got %v, want after %v", got, want)
+	}
+	if got, want := attrs.Retention.RetainUntil, start.Add(time.Hour*24*10); got.After(want) {
+		t.Errorf("retention time should be less than 10 days from the start of the test; got %v, want sooner than %v", got, want)
+	}
+}
