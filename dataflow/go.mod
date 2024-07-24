@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/dataflow
 
 go 1.21
 
-toolchain go1.22.5
-
 require github.com/apache/beam/sdks/v2 v2.57.0
 
 require (

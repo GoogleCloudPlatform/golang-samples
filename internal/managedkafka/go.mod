@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/internal/managedkafka
 
 go 1.21
 
-toolchain go1.22.5
-
 require (
 	cloud.google.com/go/longrunning v0.5.10
 	cloud.google.com/go/managedkafka v0.1.3

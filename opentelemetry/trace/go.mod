@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/opentelemetry/trace
 
 go 1.21
 
-toolchain go1.22.5
-
 require (
 	cloud.google.com/go/trace v1.10.10
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7

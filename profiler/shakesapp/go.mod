@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/profiler/shakesapp
 
 go 1.21
 
-toolchain go1.22.5
-
 require (
 	cloud.google.com/go/profiler v0.4.1
 	cloud.google.com/go/storage v1.43.0
