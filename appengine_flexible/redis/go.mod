@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/appengine_flexible/redis
 go 1.21
 
 require (
-	github.com/gomodule/redigo v1.8.9
+	github.com/gomodule/redigo v1.9.2
 	google.golang.org/appengine v1.6.8
 )
 

@@ -15,6 +15,7 @@
 package snippets
 
 // [START aiplatform_text_embeddings]
+// [START generativeaionvertexai_text_embeddings]
 import (
 	"context"
 	"fmt"
@@ -84,3 +85,4 @@ func embedTexts(
 }
 
 // [END aiplatform_text_embeddings]
+// [END generativeaionvertexai_text_embeddings]
