@@ -24,7 +24,8 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-func infoTransaction(ctx context.Context, client *firestore.Client) error {
+func infoTransaction(ctx context.Context, client *firestore.Client) (int64, error) {
+	var updatedPop int64
 	ref := client.Collection("cities").Doc("SF")
 	err := client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
 		doc, err := tx.Get(ref)
@@ -37,9 +38,13 @@ func infoTransaction(ctx context.Context, client *firestore.Client) error {
 		}
 		newpop := pop.(int64) + 1
 		if newpop <= 1000000 {
-			return tx.Set(ref, map[string]interface{}{
-				"population": pop.(int64) + 1,
+			err := tx.Set(ref, map[string]interface{}{
+				"population": newpop,
 			}, firestore.MergeAll)
+			if err == nil {
+				updatedPop = newpop
+			}
+			return err
 		}
 		return errors.New("population is too big")
 	})
@@ -47,8 +52,7 @@ func infoTransaction(ctx context.Context, client *firestore.Client) error {
 		// Handle any errors in an appropriate way, such as returning them.
 		log.Printf("An error has occurred: %s", err)
 	}
-
-	return err
+	return updatedPop, err
 }
 
 // [END firestore_transaction_document_update_conditional]
