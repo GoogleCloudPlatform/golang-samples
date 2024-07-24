@@ -31,7 +31,10 @@ import (
 	"cloud.google.com/go/speech/apiv2/speechpb"
 )
 
-func transcribeStreamingSpecificDecodingV2(w io.Writer, projectID string, path string) error {
+func transcribeStreamingSpecificDecodingV2(w io.Writer) error {
+	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	path := "../testdata/audio.raw"
+
 	const location = "global"
 	audioFile, err := filepath.Abs(path)
 	if err != nil {
