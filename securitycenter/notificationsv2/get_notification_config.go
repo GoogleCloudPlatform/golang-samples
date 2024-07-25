@@ -37,10 +37,10 @@ func getNotificationConfig(w io.Writer, orgID string, notificationConfigID strin
 	defer client.Close()
 
 	// Parent must be in one of the following formats:
-	//		"organizations/{orgId}"
-	//		"projects/{projectId}"
-	//		"folders/{folderId}"
-	parent := fmt.Sprintf("organizations/%s", orgID)
+	//		"organizations/{orgId}/locations/global"
+	//		"projects/{projectId}/locations/global"
+	//		"folders/{folderId}/locations/global"
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 	req := &securitycenterpb.GetNotificationConfigRequest{
 		Name: fmt.Sprintf("%s/notificationConfigs/%s", parent, notificationConfigID),
 	}

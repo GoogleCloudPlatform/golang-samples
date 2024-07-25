@@ -25,7 +25,11 @@ import (
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-func updateNotificationConfig(w io.Writer, orgID string, notificationConfigID string, updatedPubsubTopic string) error {
+func formatPubsubTopic(projectID, updatedPubsubTopic string) string {
+	return fmt.Sprintf("projects/%s/topics/%s", projectID, updatedPubsubTopic)
+}
+
+func updateNotificationConfig(w io.Writer, orgID string, notificationConfigID string, updatedPubsubTopic string, projectID string) error {
 	// orgID := "your-org-id"
 	// notificationConfigID := "your-config-id"
 	// updatedPubsubTopic := "projects/{new-project}/topics/{new-topic}"
@@ -41,15 +45,16 @@ func updateNotificationConfig(w io.Writer, orgID string, notificationConfigID st
 	updatedDescription := "Updated sample config"
 	updatedFilter := `state = "INACTIVE"`
 	// Parent must be in one of the following formats:
-	//		"organizations/{orgId}"
-	//		"projects/{projectId}"
-	//		"folders/{folderId}"
-	parent := fmt.Sprintf("organizations/%s", orgID)
+	//		"organizations/{orgId}/locations/global"
+	//		"projects/{projectId}/locations/global"
+	//		"folders/{folderId}/locations/global"
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+	fullPubsubTopic := formatPubsubTopic(projectID, updatedPubsubTopic)
 	req := &securitycenterpb.UpdateNotificationConfigRequest{
 		NotificationConfig: &securitycenterpb.NotificationConfig{
 			Name:        fmt.Sprintf("%s/notificationConfigs/%s", parent, notificationConfigID),
 			Description: updatedDescription,
-			PubsubTopic: updatedPubsubTopic,
+			PubsubTopic: fullPubsubTopic,
 			NotifyConfig: &securitycenterpb.NotificationConfig_StreamingConfig_{
 				StreamingConfig: &securitycenterpb.NotificationConfig_StreamingConfig{
 					Filter: updatedFilter,

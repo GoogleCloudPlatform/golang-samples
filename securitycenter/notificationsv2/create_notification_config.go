@@ -39,9 +39,9 @@ func createNotificationConfig(w io.Writer, orgID string, pubsubTopic string, not
 
 	req := &securitycenterpb.CreateNotificationConfigRequest{
 		// Parent must be in one of the following formats:
-		//		"organizations/{orgId}"
-		//		"projects/{projectId}"
-		//		"folders/{folderId}"
+		//		"organizations/{orgId}/locations/global"
+		//		"projects/{projectId}/locations/global"
+		//		"folders/{folderId}/locations/global"
 		Parent:   fmt.Sprintf("organizations/%s", orgID),
 		ConfigId: notificationConfigID,
 		NotificationConfig: &securitycenterpb.NotificationConfig{
