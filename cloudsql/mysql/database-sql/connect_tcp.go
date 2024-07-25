@@ -60,8 +60,6 @@ func connectTCPSocket() (*sql.DB, error) {
 	// For deployments that connect directly to a Cloud SQL instance without
 	// using the Cloud SQL Proxy, configuring SSL certificates will ensure the
 	// connection is encrypted.
-	// Change InsecureSkipVerify to false in production environments to
-	// verify the certificate and host name in the certificate.
 	if dbRootCert, ok := os.LookupEnv("DB_ROOT_CERT"); ok { // e.g., '/path/to/my/server-ca.pem'
 		var (
 			dbCert = mustGetenv("DB_CERT") // e.g. '/path/to/my/client-cert.pem'
@@ -80,8 +78,13 @@ func connectTCPSocket() (*sql.DB, error) {
 			return nil, err
 		}
 		mysql.RegisterTLSConfig("cloudsql", &tls.Config{
-			RootCAs:               pool,
-			Certificates:          []tls.Certificate{cert},
+			RootCAs:      pool,
+			Certificates: []tls.Certificate{cert},
+			// InsecureSkipVerify and a custom VerifyPeerCertificate function is
+			// required to handle Cloud SQL's custom certificates.
+			// As an alternative it's also possible to inspect the server
+			// certificate and extract the SAN field and use that a ServerName
+			// while removing InsecureSkipVerify and VerifyPeerCertificate.
 			InsecureSkipVerify:    true,
 			VerifyPeerCertificate: verifyPeerCertFunc(pool),
 		})
