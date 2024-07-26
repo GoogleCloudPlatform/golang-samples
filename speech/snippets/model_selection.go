@@ -31,7 +31,7 @@ import (
 
 // [START speech_transcribe_model_selection]
 
-func modelSelection(w io.Writer, path string) error {
+func modelSelection(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := speech.NewClient(ctx)
@@ -40,8 +40,7 @@ func modelSelection(w io.Writer, path string) error {
 	}
 	defer client.Close()
 
-	// path = "../testdata/Google_Gnome.wav"
-	data, err := ioutil.ReadFile(path)
+	data, err := ioutil.ReadFile("../testdata/Google_Gnome.wav")
 	if err != nil {
 		return fmt.Errorf("ReadFile: %w", err)
 	}
