@@ -42,7 +42,7 @@ func createManagedFolder(w io.Writer, bucket, folder string) error {
 
 	req := &controlpb.CreateManagedFolderRequest{
 		Parent:   fmt.Sprintf("projects/_/buckets/%v", bucket),
-		FolderId: folder,
+		ManagedFolderId: folder,
 	}
 	f, err := client.CreateManagedFolder(ctx, req)
 	if err != nil {
