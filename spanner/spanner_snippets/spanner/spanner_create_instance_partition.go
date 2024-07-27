@@ -43,7 +43,6 @@ func createInstancePartition(w io.Writer, projectID, instanceID, instancePartiti
 		Parent:              fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID),
 		InstancePartitionId: instancePartitionID,
 		InstancePartition: &instancepb.InstancePartition{
-			Name:            fmt.Sprintf("projects/%s/instances/%s/instancePartitions/%s", projectID, instanceID, instancePartitionID),
 			Config:          fmt.Sprintf("projects/%s/instanceConfigs/%s", projectID, "nam3"),
 			DisplayName:     "my-instance-partition",
 			ComputeCapacity: &instancepb.InstancePartition_NodeCount{NodeCount: 1},
