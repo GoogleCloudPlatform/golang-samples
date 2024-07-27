@@ -26,7 +26,7 @@ func TestAutoPunctuation(t *testing.T) {
 	testutil.SystemTest(t)
 
 	var buf bytes.Buffer
-	err := autoPunctuation(&buf, "../testdata/commercial_mono.wav")
+	err := autoPunctuation(&buf)
 	if err != nil {
 		t.Fatal(err)
 	}
