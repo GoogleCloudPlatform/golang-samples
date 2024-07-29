@@ -27,30 +27,9 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// multimodalPrompt is a sample prompt type consisting of one video, one image, and a text question.
-type multimodalPrompt struct {
-	// video and image are Google Cloud Storage paths starting with "gs://"
-	video, image string
-	// question is the question asked to the model
-	question string
-}
-
 // generateContentFromVideoWithAudio shows how to send a multi-modal prompt to a model, writing the response to
 // the provided io.Writer.
-func generateContentFromVideoWithAudio(w io.Writer, prompt multimodalPrompt, projectID, location, modelName string) error {
-	// prompt := multimodalPrompt{
-	// 	video: "gs://cloud-samples-data/generative-ai/video/behind_the_scenes_pixel.mp4",
-	// 	image: "gs://cloud-samples-data/generative-ai/image/a-man-and-a-dog.png",
-	// 	question: `
-	// 		Watch each frame in the video carefully and answer the questions.
-	// 		Only base your answers strictly on what information is available in the video attached.
-	// 		Do not make up any information that is not part of the video and do not be too
-	// 		verbose, be to the point.
-	//
-	// 		Questions:
-	// 		- When is the moment in the image happening in the video? Provide a timestamp.
-	// 		- What is the context of the moment and what does the narrator say about it?
-	// `,
+func generateContentFromVideoWithAudio(w io.Writer, projectID, location, modelName string) error {
 	// location := "us-central1"
 	// modelName := "gemini-1.5-flash-001"
 	ctx := context.Background()
@@ -64,16 +43,25 @@ func generateContentFromVideoWithAudio(w io.Writer, prompt multimodalPrompt, pro
 	model := client.GenerativeModel(modelName)
 
 	vidPart := genai.FileData{
-		MIMEType: mime.TypeByExtension(filepath.Ext(prompt.video)),
-		FileURI:  prompt.video,
+		MIMEType: mime.TypeByExtension(filepath.Ext("behind_the_scenes_pixel.mp4")),
+		FileURI:  "gs://cloud-samples-data/generative-ai/video/behind_the_scenes_pixel.mp4",
 	}
 
 	imgPart := genai.FileData{
-		MIMEType: mime.TypeByExtension(filepath.Ext(prompt.image)),
-		FileURI:  prompt.image,
+		MIMEType: mime.TypeByExtension(filepath.Ext("a-man-and-a-dog.png")),
+		FileURI:  "gs://cloud-samples-data/generative-ai/image/a-man-and-a-dog.png",
 	}
 
-	res, err := model.GenerateContent(ctx, vidPart, imgPart, genai.Text(prompt.question))
+	res, err := model.GenerateContent(ctx, vidPart, imgPart, genai.Text(`
+		Watch each frame in the video carefully and answer the questions.
+		Only base your answers strictly on what information is available in the video attached.
+		Do not make up any information that is not part of the video and do not be too
+		verbose, be to the point.
+
+		Questions:
+		- When is the moment in the image happening in the video? Provide a timestamp.
+		- What is the context of the moment and what does the narrator say about it?
+	`))
 	if err != nil {
 		return fmt.Errorf("unable to generate contents: %w", err)
 	}
