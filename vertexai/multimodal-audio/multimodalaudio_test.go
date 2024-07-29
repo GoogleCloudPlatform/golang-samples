@@ -26,18 +26,10 @@ func Test_summarizeAudio(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
-	prompt := audioPrompt{
-		audio: "gs://cloud-samples-data/generative-ai/audio/pixel.mp3",
-		question: `
-		Please provide a summary for the audio.
-		Provide chapter titles with timestamps, be concise and short, no need to provide chapter summaries.
-		Do not make up any information that is not part of the audio and do not be verbose.
-	`,
-	}
 	location := "us-central1"
 	modelName := "gemini-1.5-flash-001"
 
-	err := summarizeAudio(buf, prompt, tc.ProjectID, location, modelName)
+	err := summarizeAudio(buf, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Errorf("Test_summarizeAudio: %v", err.Error())
 	}
@@ -47,17 +39,10 @@ func Test_transcribeAudio(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
-	prompt := audioPrompt{
-		audio: "gs://cloud-samples-data/generative-ai/audio/pixel.mp3",
-		question: `
-			Can you transcribe this interview, in the format of timecode, speaker, caption.
-			Use speaker A, speaker B, etc. to identify speakers.
-		`,
-	}
 	location := "us-central1"
 	modelName := "gemini-1.5-flash-001"
 
-	err := transcribeAudio(buf, prompt, tc.ProjectID, location, modelName)
+	err := transcribeAudio(buf, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Fatalf("Test_transcribeAudio: %v", err.Error())
 	}
@@ -71,7 +56,7 @@ func Test_transcribeAudio(t *testing.T) {
 		"feature",
 	} {
 		if !strings.Contains(transcriptLowercase, word) {
-			t.Errorf("expected the word %q in the transcript of %s", word, prompt.audio)
+			t.Errorf("expected the word %q in the transcript of %s", word, "gs://cloud-samples-data/generative-ai/audio/pixel.mp3")
 		}
 	}
 }
