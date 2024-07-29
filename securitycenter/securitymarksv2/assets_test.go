@@ -68,7 +68,7 @@ func attemptLease(client *securitycenter.Client, asset *securitycenterpb.Asset, 
 	if lease != "" {
 		i, err := strconv.ParseInt(lease, 10, 64)
 		if err != nil {
-			fmt.Printf("strconv.ParseInt(%v, 10, 64): %v", lease, err)
+			return fmt.Errorf("failed to parse lease value %q: %w", lease, err)
 		}
 		okToLease = now > i
 	}
@@ -190,11 +190,11 @@ func TestAddSecurityMarks(t *testing.T) {
 
 		got := buf.String()
 		if want := "key_a = value_a"; !strings.Contains(got, want) {
-			r.Errorf("addSecurityMarks(%s) got: %s want %s", marksAssetName, got, want)
+			r.Errorf("addSecurityMarks(%s) got: %q want %q", marksAssetName, got, want)
 		}
 
 		if want := "key_b = value_b"; !strings.Contains(got, want) {
-			r.Errorf("addSecurityMarks(%s) got: %s want %s", marksAssetName, got, want)
+			r.Errorf("addSecurityMarks(%s) got: %q want %q", marksAssetName, got, want)
 		}
 	})
 }
@@ -218,11 +218,11 @@ func TestDeleteSecurityMarks(t *testing.T) {
 
 		got := buf.String()
 		if dontWant := "key_a = value_a"; strings.Contains(got, dontWant) {
-			r.Errorf("deleteSecurityMarks(%s) got: %s dont want %q", marksAssetName, got, dontWant)
+			r.Errorf("deleteSecurityMarks(%s) got: %q dont want %q", marksAssetName, got, dontWant)
 		}
 
 		if dontWant := "key_b = value_b"; strings.Contains(got, dontWant) {
-			r.Errorf("deleteSecurityMarks(%s) got: %s dont want %q", marksAssetName, got, dontWant)
+			r.Errorf("deleteSecurityMarks(%s) got: %q dont want %q", marksAssetName, got, dontWant)
 		}
 	})
 }
@@ -246,11 +246,11 @@ func TestAddDeleteSecurityMarks(t *testing.T) {
 
 		got := buf.String()
 		if want := "key_a = new_value_a"; !strings.Contains(got, want) {
-			r.Errorf("addDeleteSecurityMarks(%s) got: %s want %s", marksAssetName, got, want)
+			r.Errorf("addDeleteSecurityMarks(%s) got: %q want %q", marksAssetName, got, want)
 		}
 
 		if dontWant := "key_b = value_b"; strings.Contains(got, dontWant) {
-			r.Errorf("addDeleteSecurityMarks(%s) got: %s dont want %q", marksAssetName, got, dontWant)
+			r.Errorf("addDeleteSecurityMarks(%s) got: %q want %q", marksAssetName, got, dontWant)
 		}
 	})
 }
