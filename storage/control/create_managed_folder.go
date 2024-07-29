@@ -41,7 +41,7 @@ func createManagedFolder(w io.Writer, bucket, folder string) error {
 	defer cancel()
 
 	req := &controlpb.CreateManagedFolderRequest{
-		Parent:   fmt.Sprintf("projects/_/buckets/%v", bucket),
+		Parent:          fmt.Sprintf("projects/_/buckets/%v", bucket),
 		ManagedFolderId: folder,
 	}
 	f, err := client.CreateManagedFolder(ctx, req)
