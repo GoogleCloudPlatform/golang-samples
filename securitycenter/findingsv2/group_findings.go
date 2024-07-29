@@ -34,7 +34,7 @@ func groupFindings(w io.Writer, orgID string) error {
 	}
 	defer client.Close()
 
-	parent := fmt.Sprintf("organizations/%s/sources/-", orgID)
+	parent := fmt.Sprintf("organizations/%s/sources/-/locations/global", orgID)
 	req := &securitycenterpb.GroupFindingsRequest{
 		Parent:  parent,
 		GroupBy: "category",

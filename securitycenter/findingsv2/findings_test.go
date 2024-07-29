@@ -57,6 +57,27 @@ func createTestFinding(ctx context.Context, client *securitycenter.Client, findi
 	return client.CreateFinding(ctx, req)
 }
 
+func disableTestFinding(ctx context.Context, client *securitycenter.Client, findingName string) error {
+	req := &securitycenterpb.UpdateFindingRequest{
+		Finding: &securitycenterpb.Finding{
+			Name:  findingName,
+			State: securitycenterpb.Finding_INACTIVE,
+		},
+	}
+	_, err := client.UpdateFinding(ctx, req)
+	return err
+}
+
+func clearSecurityMarks(ctx context.Context, client *securitycenter.Client, findingName string) error {
+	req := &securitycenterpb.UpdateSecurityMarksRequest{
+		SecurityMarks: &securitycenterpb.SecurityMarks{
+			Name: findingName + "/securityMarks",
+		},
+	}
+	_, err := client.UpdateSecurityMarks(ctx, req)
+	return err
+}
+
 // setupEntities initializes variables in this file with entityNames to
 // use for testing.
 func setupEntities() error {
@@ -72,18 +93,13 @@ func setupEntities() error {
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
-	source, err := client.CreateSource(ctx, &securitycenterpb.CreateSourceRequest{
-		Source: &securitycenterpb.Source{
-			DisplayName: "Customized Display Name",
-			Description: "A new custom source that does X",
-		},
-		Parent: fmt.Sprintf("organizations/%s", orgID),
-	})
-
-	if err != nil {
-		return fmt.Errorf("CreateSource: %w", err)
+	buf := new(bytes.Buffer)
+	if err := createSource(buf, orgID); err != nil {
+		return fmt.Errorf("createSource: %w", err)
 	}
-	sourceName = source.Name
+
+	sourceName = strings.TrimSpace(strings.Split(buf.String(), ":")[1])
+
 	finding, err := createTestFinding(ctx, client, "updated", "MEDIUM_RISK_ONE")
 	if err != nil {
 		return fmt.Errorf("createTestFinding: %w", err)
@@ -94,6 +110,41 @@ func setupEntities() error {
 		return fmt.Errorf("createTestFinding: %w", err)
 	}
 	untouchedFindingName = finding.Name
+	return nil
+}
+
+func cleanupEntities() error {
+	if orgID == "" || sourceName == "" {
+		return nil
+	}
+	ctx := context.Background()
+	client, err := securitycenter.NewClient(ctx)
+
+	if err != nil {
+		return fmt.Errorf("securitycenter.NewClient: %w", err)
+	}
+
+	defer client.Close()
+
+	if findingName != "" {
+		if err := disableTestFinding(ctx, client, findingName); err != nil {
+			return fmt.Errorf("disableTestFinding: %w", err)
+		}
+
+		if err := clearSecurityMarks(ctx, client, findingName); err != nil {
+			return fmt.Errorf("clearSecurityMarks: %w", err)
+		}
+	}
+
+	if untouchedFindingName != "" {
+		if err := disableTestFinding(ctx, client, untouchedFindingName); err != nil {
+			return fmt.Errorf("disableTestFinding: %w", err)
+		}
+	
+		if err := clearSecurityMarks(ctx, client, untouchedFindingName); err != nil {
+			return fmt.Errorf("clearSecurityMarks: %w", err)
+		}	
+	}
 	return nil
 }
 
@@ -114,6 +165,9 @@ func TestMain(m *testing.M) {
 		return
 	}
 	code := m.Run()
+	if err := cleanupEntities(); err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to clean up findings test environment: %v\n", err)
+	}
 	os.Exit(code)
 }
 
@@ -286,7 +340,7 @@ func TestListFindingsWithMarks(t *testing.T) {
 		buf := new(bytes.Buffer)
 		// Ensure security marks have been added so filter is effective.
 		err := addSecurityMarks(buf, findingName)
-		buf.Truncate(0)
+		buf.Reset()
 		if err != nil {
 			r.Errorf("listFindingsWithMark(%s) adding marks had error: %v", findingName, err)
 			return

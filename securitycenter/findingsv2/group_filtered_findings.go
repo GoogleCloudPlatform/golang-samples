@@ -35,7 +35,7 @@ func groupFindingsWithFilter(w io.Writer, sourceName string) error {
 	defer client.Close()
 
 	req := &securitycenterpb.GroupFindingsRequest{
-		Parent: sourceName,
+		Parent:  sourceName,
 		GroupBy: "category",
 		Filter:  `state="ACTIVE"`,
 	}

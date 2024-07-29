@@ -40,10 +40,10 @@ func listFindings(w io.Writer, orgID string) error {
 	req := &securitycenterpb.ListFindingsRequest{
 		// List findings across all sources.
 		// Parent must be in one of the following formats:
-		//		"organizations/{orgId}/sources/-"
-		//		"projects/{projectId}/sources/-"
-		//		"folders/{folderId}/sources/-"
-		Parent: fmt.Sprintf("organizations/%s/sources/-", orgID),
+		//		"organizations/{orgId}/sources/-/locations/global"
+		//		"projects/{projectId}/sources/-/locations/global"
+		//		"folders/{folderId}/sources/-/locations/global"
+		Parent: fmt.Sprintf("organizations/%s/sources/-/locations/global", orgID),
 	}
 	it := client.ListFindings(ctx, req)
 	for {

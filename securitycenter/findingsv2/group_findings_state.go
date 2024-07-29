@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	//"time"
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv2"
 	"cloud.google.com/go/securitycenter/apiv2/securitycenterpb"
@@ -34,11 +33,9 @@ func groupFindingsByState(w io.Writer, sourceName string) error {
 	}
 	defer client.Close()
 
-	//compareDuration := 30 * 24 * time.Hour // 30 days
-
 	req := &securitycenterpb.GroupFindingsRequest{
-		Parent:          sourceName,
-		GroupBy:         "state_change",
+		Parent:  sourceName,
+		GroupBy: "state_change",
 	}
 
 	it := client.GroupFindings(ctx, req)
