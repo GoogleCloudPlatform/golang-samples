@@ -31,7 +31,7 @@ import (
 
 // [START speech_transcribe_enhanced_model]
 
-func enhancedModel(w io.Writer, path string) error {
+func enhancedModel(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := speech.NewClient(ctx)
@@ -40,8 +40,7 @@ func enhancedModel(w io.Writer, path string) error {
 	}
 	defer client.Close()
 
-	// path = "../testdata/commercial_mono.wav"
-	data, err := ioutil.ReadFile(path)
+	data, err := ioutil.ReadFile("../testdata/commercial_mono.wav")
 	if err != nil {
 		return fmt.Errorf("ReadFile: %w", err)
 	}
