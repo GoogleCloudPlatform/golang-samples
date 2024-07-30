@@ -14,6 +14,7 @@
 
 package iamv2
 
+// [START securitycenter_set_iam_policies_v2]
 import (
 	"context"
 	"fmt"
@@ -72,3 +73,5 @@ func setSourceIamPolicy(w io.Writer, sourceName string, user string) error {
 	}
 	return nil
 }
+
+// [END securitycenter_set_iam_policies_v2]

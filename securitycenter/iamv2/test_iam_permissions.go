@@ -14,6 +14,7 @@
 
 package iamv2
 
+// [START securitycenter_test_iam_permissions_v2]
 import (
 	"context"
 	"fmt"
@@ -63,3 +64,5 @@ func testIam(w io.Writer, sourceName string) error {
 
 	return nil
 }
+
+// [END securitycenter_test_iam_permissions_v2]

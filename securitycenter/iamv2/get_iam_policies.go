@@ -14,6 +14,7 @@
 
 package iamv2
 
+// [START securitycenter_get_iam_policies_v2]
 import (
 	"context"
 	"fmt"
@@ -47,3 +48,5 @@ func getSourceIamPolicy(w io.Writer, sourceName string) error {
 	fmt.Fprintf(w, "Policy: %v", policy)
 	return nil
 }
+
+// [END securitycenter_get_iam_policies_v2]
