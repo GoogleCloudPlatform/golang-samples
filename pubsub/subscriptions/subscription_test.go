@@ -62,8 +62,9 @@ func setup(t *testing.T) *pubsub.Client {
 	}
 
 	once.Do(func() {
-		topicID = fmt.Sprintf("%s-%d", topicPrefix, time.Now().UnixNano())
-		subID = fmt.Sprintf("%s-%d", subPrefix, time.Now().UnixNano())
+		var now = time.Now().UnixNano()
+		topicID = fmt.Sprintf("%s-%d", topicPrefix, now)
+		subID = fmt.Sprintf("%s-%d", subPrefix, now)
 
 		// Cleanup resources from the previous tests.
 		it := client.Topics(ctx)
@@ -1153,7 +1154,7 @@ func createOrGetStorageBucket(projectID, bucketID string) error {
 	}
 	b := c.Bucket(bucketID)
 	_, err = b.Attrs(ctx)
-	if errors.Is(storage.ErrBucketNotExist, err) {
+	if errors.Is(err, storage.ErrBucketNotExist) {
 		if err := b.Create(ctx, projectID, nil); err != nil {
 			return fmt.Errorf("error creating bucket: %w", err)
 		}
