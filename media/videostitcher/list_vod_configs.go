@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 package videostitcher
 
-// [START videostitcher_create_vod_session]
+// [START videostitcher_list_vod_configs]
 import (
 	"context"
 	"fmt"
@@ -22,13 +22,12 @@ import (
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
 	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
+	"google.golang.org/api/iterator"
 )
 
-// createVodSession creates a video on demand (VOD) session in which to insert ads.
-// VOD sessions are ephemeral resources that expire after a few hours.
-func createVodSession(w io.Writer, projectID, vodConfigID string) error {
+// listVodConfigs lists all VOD configs for a given location.
+func listVodConfigs(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
-	// vodConfigID := "my-vod-config-id"
 	location := "us-central1"
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
@@ -37,21 +36,24 @@ func createVodSession(w io.Writer, projectID, vodConfigID string) error {
 	}
 	defer client.Close()
 
-	req := &stitcherstreampb.CreateVodSessionRequest{
+	req := &stitcherstreampb.ListVodConfigsRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
-		VodSession: &stitcherstreampb.VodSession{
-			VodConfig:  fmt.Sprintf("projects/%s/locations/%s/vodConfigs/%s", projectID, location, vodConfigID),
-			AdTracking: stitcherstreampb.AdTracking_SERVER,
-		},
-	}
-	// Creates the VOD session.
-	response, err := client.CreateVodSession(ctx, req)
-	if err != nil {
-		return fmt.Errorf("client.CreateVodSession: %w", err)
 	}
 
-	fmt.Fprintf(w, "VOD session: %v", response.GetName())
+	it := client.ListVodConfigs(ctx, req)
+	fmt.Fprintln(w, "VOD configs:")
+
+	for {
+		response, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("it.Next(): %w", err)
+		}
+		fmt.Fprintln(w, response.GetName())
+	}
 	return nil
 }
 
-// [END videostitcher_create_vod_session]
+// [END videostitcher_list_vod_configs]
