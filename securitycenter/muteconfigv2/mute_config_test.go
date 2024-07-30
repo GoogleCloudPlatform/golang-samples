@@ -29,7 +29,7 @@ import (
 	securitycenter "cloud.google.com/go/securitycenter/apiv2"
 	"cloud.google.com/go/securitycenter/apiv2/securitycenterpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/golang/protobuf/ptypes"	
+	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
 )
 
@@ -85,7 +85,7 @@ func createSource(w io.Writer, orgId string) error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %v", err)
+		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
 	source, err := client.CreateSource(ctx, &securitycenterpb.CreateSourceRequest{
 		Source: &securitycenterpb.Source{
@@ -96,7 +96,7 @@ func createSource(w io.Writer, orgId string) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("CreateSource: %v", err)
+		return fmt.Errorf("CreateSource: %w", err)
 	}
 	fmt.Fprintf(w, source.Name)
 	return nil
@@ -129,7 +129,7 @@ func newMuteConfigFixture() (*muteconfigFixture, error) {
 	projectId := os.Getenv("SCC_PROJECT_ID")
 	locationId := "global"
 	if orgId == "" || projectId == "" {
-		return nil, fmt.Errorf("env variables not set: %w", err)
+		return nil, fmt.Errorf("env variables not set: %v", err)
 	}
 	mc.orgId = orgId
 	mc.projectId = projectId
@@ -137,7 +137,7 @@ func newMuteConfigFixture() (*muteconfigFixture, error) {
 	// Create source.
 	buf := &bytes.Buffer{}
 	if err := createSource(buf, orgId); err != nil {
-		return nil, fmt.Errorf("createSource: %v", err)
+		return nil, fmt.Errorf("createSource: %w", err)
 	}
 	sourceName := buf.String()
 	mc.sourceName = sourceName
@@ -146,12 +146,12 @@ func newMuteConfigFixture() (*muteconfigFixture, error) {
 	// Create findings.
 	finding, err := createFinding("updated", "MEDIUM_RISK_ONE", sourceName, orgId)
 	if err != nil {
-		return nil, fmt.Errorf("createTestFinding: %v", err)
+		return nil, fmt.Errorf("createTestFinding: %w", err)
 	}
 	mc.finding1Name = finding.Name
 	finding, err = createFinding("untouched", "XSS", sourceName, orgId)
 	if err != nil {
-		return nil, fmt.Errorf("createTestFinding: %v", err)
+		return nil, fmt.Errorf("createTestFinding: %w", err)
 	}
 	mc.finding2Name = finding.Name
 
@@ -162,11 +162,11 @@ func newMuteConfigFixture() (*muteconfigFixture, error) {
 	muteConfigId2 := "random-mute-id-" + uuid.New().String()
 	err = createMuteRule(buf, parent, muteConfigId1)
 	if err != nil {
-		return nil, fmt.Errorf("createMuteRule failed: %v", err)
+		return nil, fmt.Errorf("createMuteRule failed: %w", err)
 	}
 	err = createMuteRule(buf, parent, muteConfigId2)
 	if err != nil {
-		return nil, fmt.Errorf("createMuteRule failed: %v", err)
+		return nil, fmt.Errorf("createMuteRule failed: %w", err)
 	}
 	mc.muteConfigId1 = muteConfigId1
 	mc.muteConfigId2 = muteConfigId2
@@ -179,14 +179,14 @@ func (mc *muteconfigFixture) Cleanup() error {
 	// Delete mute rules.
 	buf := &bytes.Buffer{}
 	if err := deleteMuteRule(buf, mc.parent, mc.muteConfigId1); err != nil {
-		return fmt.Errorf("deleteMuteRule had error: %v", err)
+		return fmt.Errorf("deleteMuteRule had error: %w", err)
 	}
 	if got := buf.String(); !strings.Contains(got, "Mute rule deleted successfully") {
 		return fmt.Errorf("deleteMuteRule got %q, expected %q", got, mc.muteConfigId1)
 	}
 	buf.Reset()
 	if err := deleteMuteRule(buf, mc.parent, mc.muteConfigId2); err != nil {
-		return fmt.Errorf("deleteMuteRule had error: %v", err)
+		return fmt.Errorf("deleteMuteRule had error: %w", err)
 	}
 	if got := buf.String(); !strings.Contains(got, "Mute rule deleted successfully") {
 		return fmt.Errorf("deleteMuteRule got %q, expected %q", got, mc.muteConfigId2)
