@@ -167,3 +167,42 @@ func TestBatchNotifications(t *testing.T) {
 		t.Errorf("deleteJob got err: %v", err)
 	}
 }
+
+func TestBatchCustomEvents(t *testing.T) {
+	expected := map[string]bool{
+		"script 1":   false,
+		"barrier 1":  false,
+		"script 2":   false,
+		"eventFound": false,
+	}
+	var r *rand.Rand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+	tc := testutil.SystemTest(t)
+	region := "us-central1"
+	jobName := fmt.Sprintf("test-job-go-%v-%v", time.Now().Format("2006-01-02"), r.Int())
+
+	buf := &bytes.Buffer{}
+	job, err := createJobWithCustomEvents(buf, tc.ProjectID, jobName)
+	if err != nil {
+		t.Errorf("createJobWithCustomEvents got err: %v", err)
+	}
+
+	tg := job.GetTaskGroups()[0]
+	for _, runn := range tg.TaskSpec.Runnables {
+		if strings.Contains(runn.GetScript().GetText(), "'{\"batch/custom/event\": \"DESCRIPTION\"}'") {
+			expected["eventFound"] = true
+		} else if _, ok := expected[runn.DisplayName]; ok {
+			expected[runn.DisplayName] = true
+		}
+	}
+
+	for k, v := range expected {
+		if !v {
+			t.Errorf("%v wasn't found", k)
+		}
+	}
+
+	if err := deleteJob(buf, tc.ProjectID, region, jobName); err != nil {
+		t.Errorf("deleteJob got err: %v", err)
+	}
+}
