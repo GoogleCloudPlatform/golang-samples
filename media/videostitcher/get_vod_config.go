@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
 
 package videostitcher
 
-// [START videostitcher_create_vod_session]
+// [START videostitcher_get_vod_config]
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -24,9 +25,8 @@ import (
 	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
-// createVodSession creates a video on demand (VOD) session in which to insert ads.
-// VOD sessions are ephemeral resources that expire after a few hours.
-func createVodSession(w io.Writer, projectID, vodConfigID string) error {
+// getVodConfig gets a previously-created VOD config.
+func getVodConfig(w io.Writer, projectID, vodConfigID string) error {
 	// projectID := "my-project-id"
 	// vodConfigID := "my-vod-config-id"
 	location := "us-central1"
@@ -37,21 +37,21 @@ func createVodSession(w io.Writer, projectID, vodConfigID string) error {
 	}
 	defer client.Close()
 
-	req := &stitcherstreampb.CreateVodSessionRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
-		VodSession: &stitcherstreampb.VodSession{
-			VodConfig:  fmt.Sprintf("projects/%s/locations/%s/vodConfigs/%s", projectID, location, vodConfigID),
-			AdTracking: stitcherstreampb.AdTracking_SERVER,
-		},
-	}
-	// Creates the VOD session.
-	response, err := client.CreateVodSession(ctx, req)
-	if err != nil {
-		return fmt.Errorf("client.CreateVodSession: %w", err)
+	req := &stitcherstreampb.GetVodConfigRequest{
+		Name: fmt.Sprintf("projects/%s/locations/%s/vodConfigs/%s", projectID, location, vodConfigID),
 	}
 
-	fmt.Fprintf(w, "VOD session: %v", response.GetName())
+	response, err := client.GetVodConfig(ctx, req)
+	if err != nil {
+		return fmt.Errorf("client.GetVodConfig: %w", err)
+	}
+	b, err := json.MarshalIndent(response, "", " ")
+	if err != nil {
+		return fmt.Errorf("json.MarshalIndent: %w", err)
+	}
+
+	fmt.Fprintf(w, "VOD config:\n%s", string(b))
 	return nil
 }
 
-// [END videostitcher_create_vod_session]
+// [END videostitcher_get_vod_config]
