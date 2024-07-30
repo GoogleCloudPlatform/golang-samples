@@ -42,10 +42,10 @@ func TestGenerateEmbeddings(t *testing.T) {
 func TestGenerateEmbeddingsPreview(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	apiEndpoint := "us-central1-aiplatform.googleapis.com:443"
-	model := "text-embedding-preview-0409"
+	model := "text-embedding-preview-0815"
 	texts := []string{"banana muffins? ", "banana bread? banana muffins?"}
 	dimensionality := 5
-	embeddings, err := embedTextsPreview(apiEndpoint, tc.ProjectID, model, texts, "QUESTION_ANSWERING", &dimensionality)
+	embeddings, err := embedTextsPreview(apiEndpoint, tc.ProjectID, model, texts, "CODE_RETRIEVAL_QUERY", &dimensionality)
 	if err != nil {
 		t.Fatal(err)
 	}
