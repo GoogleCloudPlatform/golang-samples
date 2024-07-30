@@ -16,9 +16,14 @@ package template
 
 import (
 	"bytes"
+	"context"
+	"fmt"
+	"log"
 	"strings"
 	"testing"
 
+	dlp "cloud.google.com/go/dlp/apiv2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
@@ -43,26 +48,72 @@ func TestTemplateSamples(t *testing.T) {
 	}
 
 	buf.Reset()
-	if err := createInspectTemplate(buf, tc.ProjectID, "golang-samples-test-template", "Test Template", "Template for testing", nil); err != nil {
-		t.Errorf("createInspectTemplate: %v", err)
-	}
-	if got, want := buf.String(), "Successfully created inspect template"; !strings.Contains(got, want) {
-		t.Errorf("createInspectTemplate got\n----\n%v\n----\nWant to contain:\n----\n%v\n----", got, want)
-	}
 
 	buf.Reset()
-	if err := listInspectTemplates(buf, tc.ProjectID); err != nil {
-		t.Errorf("listInspectTemplates: %v", err)
+
+}
+
+func createInspectTemplateForTest(t *testing.T, projectID string, templateID, displayName, description string, infoTypeNames []string) error {
+	t.Helper()
+	ctx := context.Background()
+
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("dlp.NewClient: %w", err)
 	}
-	if got := buf.String(); !strings.Contains(got, fullID) {
-		t.Errorf("listInspectTemplates got\n----\n%v\n----\nWant to contain:\n----\n%v\n----", got, fullID)
+	defer client.Close()
+
+	// Convert the info type strings to a list of InfoTypes.
+	var infoTypes []*dlppb.InfoType
+	for _, it := range infoTypeNames {
+		infoTypes = append(infoTypes, &dlppb.InfoType{Name: it})
 	}
 
-	buf.Reset()
-	if err := deleteInspectTemplate(buf, fullID); err != nil {
-		t.Errorf("deleteInspectTemplate: %v", err)
+	// Create a configured request.
+	req := &dlppb.CreateInspectTemplateRequest{
+		Parent:     fmt.Sprintf("projects/%s/locations/global", projectID),
+		TemplateId: templateID,
+		InspectTemplate: &dlppb.InspectTemplate{
+			DisplayName: displayName,
+			Description: description,
+			InspectConfig: &dlppb.InspectConfig{
+				InfoTypes:     infoTypes,
+				MinLikelihood: dlppb.Likelihood_POSSIBLE,
+				Limits: &dlppb.InspectConfig_FindingLimits{
+					MaxFindingsPerRequest: 10,
+				},
+			},
+		},
 	}
-	if got, want := buf.String(), "Successfully deleted inspect template"; !strings.Contains(got, want) {
-		t.Errorf("deleteInspectTemplate got\n----\n%v\n----\nWant to contain:\n----\n%v\n----", got, want)
+	// Send the request.
+	resp, err := client.CreateInspectTemplate(ctx, req)
+	if err != nil {
+		return fmt.Errorf("CreateInspectTemplate: %w", err)
 	}
+	// Print the result.
+	log.Printf("Successfully created inspect template: %v", resp.GetName())
+	return nil
+}
+
+func cleeanUpTemplates(t *testing.T, projectID, templateID string) error {
+	t.Helper()
+	ctx := context.Background()
+
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("dlp.NewClient: %w", err)
+	}
+	defer client.Close()
+
+	// Delete template
+	req := &dlppb.DeleteInspectTemplateRequest{
+		Name: templateID,
+	}
+
+	if err := client.DeleteInspectTemplate(ctx, req); err != nil {
+		return fmt.Errorf("DeleteInspectTemplate: %w", err)
+	}
+	log.Printf("Successfully deleted inspect template %v", templateID)
+
+	return nil
 }

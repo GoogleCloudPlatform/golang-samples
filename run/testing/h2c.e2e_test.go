@@ -15,7 +15,7 @@
 package cloudruntests
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -61,7 +61,7 @@ func TestHTTP2Server(t *testing.T) {
 			r.Errorf("http2.Get: unexpected response status: %s", resp.Status)
 		}
 		defer resp.Body.Close()
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			r.Errorf("resp.Body.Read failed: %v", err)
 		}

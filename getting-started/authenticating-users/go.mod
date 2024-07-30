@@ -3,8 +3,8 @@ module github.com/GoogleCloudPlatform/golang-samples/getting-started/authenticat
 go 1.19
 
 require (
-	cloud.google.com/go/compute/metadata v0.2.3
+	cloud.google.com/go/compute/metadata v0.5.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 )
 
-require cloud.google.com/go/compute v1.14.0 // indirect
+require golang.org/x/sys v0.22.0 // indirect

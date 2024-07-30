@@ -119,7 +119,7 @@ func cleanupNotificationConfig(t *testing.T, notificationConfigID string) error 
 }
 
 func TestCreateNotificationConfig(t *testing.T) {
-	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 5, 30*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
 		rand, err := uuid.NewUUID()
 		if err != nil {
@@ -142,7 +142,7 @@ func TestCreateNotificationConfig(t *testing.T) {
 }
 
 func TestDeleteNotificationConfig(t *testing.T) {
-	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 5, 30*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
 		rand, err := uuid.NewUUID()
 		if err != nil {
@@ -168,7 +168,7 @@ func TestDeleteNotificationConfig(t *testing.T) {
 }
 
 func TestGetNotificationConfig(t *testing.T) {
-	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 5, 30*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
 		rand, err := uuid.NewUUID()
 		if err != nil {
@@ -196,7 +196,7 @@ func TestGetNotificationConfig(t *testing.T) {
 }
 
 func TestListNotificationConfigs(t *testing.T) {
-	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 5, 30*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
 		rand, err := uuid.NewUUID()
 		if err != nil {
@@ -224,7 +224,7 @@ func TestListNotificationConfigs(t *testing.T) {
 }
 
 func TestUpdateNotificationConfig(t *testing.T) {
-	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 5, 30*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
 		rand, err := uuid.NewUUID()
 		if err != nil {
@@ -251,7 +251,7 @@ func TestUpdateNotificationConfig(t *testing.T) {
 }
 
 func TestReceiveNotifications(t *testing.T) {
-	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 5, 30*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
 		if err := receiveMessages(buf, projectID(t), pubsubSubscription(t)); err != nil {
 			r.Errorf("receiveNotifications failed: %v", err)

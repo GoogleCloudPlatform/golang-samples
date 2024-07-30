@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START quick_start]
+// [START job_search_quick_start]
 
 // Command quickstart is an example of using the Google Cloud Talent Solution API.
 package main
@@ -60,4 +60,4 @@ func main() {
 	}
 }
 
-// [END quick_start]
+// [END job_search_quick_start]

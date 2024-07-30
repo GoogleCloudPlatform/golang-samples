@@ -15,11 +15,10 @@
 package cloudruntests
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -56,10 +55,9 @@ func TestRendererService(t *testing.T) {
 		if err != nil {
 			t.Fatalf("service.NewRequest: %q", err)
 		}
-		req.Body = ioutil.NopCloser(strings.NewReader(test.input))
+		req.Body = io.NopCloser(strings.NewReader(test.input))
 
-		client := http.Client{Timeout: 10 * time.Second}
-		resp, err := client.Do(req)
+		resp, err := service.Do(req)
 		if err != nil {
 			t.Fatalf("client.Do: %v", err)
 		}
@@ -70,9 +68,10 @@ func TestRendererService(t *testing.T) {
 			t.Errorf("response status: got %d, want %d", got, http.StatusOK)
 		}
 
-		out, err := ioutil.ReadAll(resp.Body)
+		out, err := io.ReadAll(resp.Body)
 		if err != nil {
-			t.Fatalf("ioutil.ReadAll: %v", err)
+			t.Errorf("io.ReadAll: %v", err)
+			return
 		}
 
 		if got := string(out); got != test.want {

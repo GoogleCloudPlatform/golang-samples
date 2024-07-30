@@ -24,8 +24,8 @@ import (
 	"time"
 
 	compute "cloud.google.com/go/compute/apiv1"
+	computepb "cloud.google.com/go/compute/apiv1/computepb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -197,5 +197,83 @@ func TestComputeCreateInstanceSnippets(t *testing.T) {
 	err = deleteDisk(ctx, tc.ProjectID, zone, diskName2)
 	if err != nil {
 		t.Errorf("deleteDisk got err: %v", err)
+	}
+}
+
+func TestComputeBulkCreateInstanceSnippets(t *testing.T) {
+	ctx := context.Background()
+
+	instanceTemplatesClient, err := compute.NewInstanceTemplatesRESTClient(ctx)
+	if err != nil {
+		t.Fatalf("NewInstanceTemplatesRESTClient: %v", err)
+	}
+	defer instanceTemplatesClient.Close()
+
+	var seededRand *rand.Rand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+	tc := testutil.SystemTest(t)
+	zone := "europe-central2-b"
+	instanceTemplateName := "test-instance-template" + fmt.Sprint(seededRand.Int())
+	machineType := "n1-standard-1"
+	sourceImage := "projects/debian-cloud/global/images/family/debian-12"
+	networkName := "global/networks/default"
+
+	insertTemplateReq := &computepb.InsertInstanceTemplateRequest{
+		Project: tc.ProjectID,
+		InstanceTemplateResource: &computepb.InstanceTemplate{
+			Name: &instanceTemplateName,
+			Properties: &computepb.InstanceProperties{
+				MachineType: proto.String(machineType),
+				Disks: []*computepb.AttachedDisk{
+					{
+						InitializeParams: &computepb.AttachedDiskInitializeParams{
+							DiskSizeGb:  proto.Int64(10),
+							SourceImage: proto.String(sourceImage),
+						},
+						AutoDelete: proto.Bool(true),
+						Boot:       proto.Bool(true),
+						Type:       proto.String(computepb.AttachedDisk_PERSISTENT.String()),
+					},
+				},
+				NetworkInterfaces: []*computepb.NetworkInterface{
+					{
+						Name: proto.String(networkName),
+					},
+				},
+			},
+		},
+	}
+
+	op, err := instanceTemplatesClient.Insert(ctx, insertTemplateReq)
+	if err != nil {
+		t.Fatalf("unable to create instance template: %v", err)
+	}
+
+	if err = op.Wait(ctx); err != nil {
+		t.Errorf("unable to wait for the operation: %v", err)
+	}
+
+	namePattern := "i-#-" + fmt.Sprint(seededRand.Int())[0:5]
+	buf := &bytes.Buffer{}
+
+	instances, err := createFiveInstances(buf, tc.ProjectID, zone, instanceTemplateName, namePattern)
+	if err != nil {
+		t.Errorf("createFiveInstances got err: %v", err)
+	}
+
+	for _, instance := range instances {
+		if err := deleteInstance(ctx, tc.ProjectID, zone, *instance.Name); err != nil {
+			t.Errorf("deleteInstance got err: %v", err)
+		}
+	}
+
+	deleteTemplateReq := &computepb.DeleteInstanceTemplateRequest{
+		Project:          tc.ProjectID,
+		InstanceTemplate: instanceTemplateName,
+	}
+
+	op, err = instanceTemplatesClient.Delete(ctx, deleteTemplateReq)
+	if err != nil {
+		t.Errorf("unable to delete instance template: %v", err)
 	}
 }

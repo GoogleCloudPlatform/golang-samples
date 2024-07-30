@@ -19,6 +19,7 @@ package subscriptions
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -29,6 +30,7 @@ import (
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/storage"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 
@@ -85,9 +87,8 @@ func setup(t *testing.T) *pubsub.Client {
 				}
 				timeTCreated := time.Unix(0, timestamp)
 				if time.Since(timeTCreated) > expireAge {
-					if err := t.Delete(ctx); err != nil {
-						fmt.Printf("Delete topic err: %v: %v", t.String(), err)
-					}
+					// Topic deletion can be fire and forget
+					t.Delete(ctx)
 				}
 			}
 		}
@@ -112,9 +113,8 @@ func setup(t *testing.T) *pubsub.Client {
 				}
 				timeTCreated := time.Unix(0, timestamp)
 				if time.Since(timeTCreated) > expireAge {
-					if err := s.Delete(ctx); err != nil {
-						fmt.Printf("Delete sub err: %v: %v", s.String(), err)
-					}
+					// Subscription deletion can be fire and forget
+					s.Delete(ctx)
 				}
 			}
 		}
@@ -323,7 +323,10 @@ func TestPullMsgsAsync(t *testing.T) {
 		// we're not testing client library functionality,
 		// and makes the sample more readable.
 		const numMsgs = 1
-		publishMsgs(ctx, topic, numMsgs)
+		err = publishMsgs(ctx, topic, numMsgs)
+		if err != nil {
+			r.Errorf("failed to publish message: %v", err)
+		}
 
 		buf := new(bytes.Buffer)
 		err = pullMsgs(buf, tc.ProjectID, asyncSubID)
@@ -369,7 +372,10 @@ func TestPullMsgsSync(t *testing.T) {
 		// we're not testing client library functionality,
 		// and makes the sample more readable.
 		const numMsgs = 1
-		publishMsgs(ctx, topic, numMsgs)
+		err = publishMsgs(ctx, topic, numMsgs)
+		if err != nil {
+			r.Errorf("failed to publish message: %v", err)
+		}
 
 		buf := new(bytes.Buffer)
 		err = pullMsgsSync(buf, tc.ProjectID, subIDSync)
@@ -412,7 +418,10 @@ func TestPullMsgsConcurrencyControl(t *testing.T) {
 
 		// Publish 5 message to test with.
 		const numMsgs = 5
-		publishMsgs(ctx, topic, numMsgs)
+		err = publishMsgs(ctx, topic, numMsgs)
+		if err != nil {
+			r.Errorf("failed to publish message: %v", err)
+		}
 
 		buf := new(bytes.Buffer)
 		if err := pullMsgsConcurrencyControl(buf, tc.ProjectID, subIDConc); err != nil {
@@ -731,8 +740,8 @@ func TestDetachSubscription(t *testing.T) {
 	}
 	defer sub.Delete(ctx)
 
-	buf := new(bytes.Buffer)
-	if err = detachSubscription(buf, tc.ProjectID, sub.String()); err != nil {
+	var buf bytes.Buffer
+	if err = detachSubscription(&buf, tc.ProjectID, sub.String()); err != nil {
 		t.Fatalf("detachSubscription: %v", err)
 	}
 	got := buf.String()
@@ -762,9 +771,9 @@ func TestCreateWithFilter(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateTopic: %v", err)
 	}
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 	filter := "attributes.author=\"unknown\""
-	if err := createWithFilter(buf, tc.ProjectID, filterSubID, filter, topic); err != nil {
+	if err := createWithFilter(&buf, tc.ProjectID, filterSubID, filter, topic); err != nil {
 		t.Fatalf("failed to create subscription with filter: %v", err)
 	}
 
@@ -786,7 +795,82 @@ func TestCreateWithFilter(t *testing.T) {
 	}
 }
 
-func TestBigQuerySubscription(t *testing.T) {
+func TestCreatePushSubscription(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+	defer client.Close()
+
+	t.Run("default push subscription", func(t *testing.T) {
+		topicID := topicID + "-default-push"
+		subID := subID + "-default-push"
+		t.Cleanup(func() {
+			// Don't check delete errors since if it doesn't exist
+			// that's fine.
+			topic := client.Topic(topicID)
+			topic.Delete(ctx)
+
+			sub := client.Subscription(subID)
+			sub.Delete(ctx)
+		})
+
+		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+			topic, err := getOrCreateTopic(ctx, client, topicID)
+			if err != nil {
+				r.Errorf("CreateTopic: %v", err)
+			}
+
+			var b bytes.Buffer
+			endpoint := "https://my-test-project.appspot.com/push"
+			if err := createWithEndpoint(&b, tc.ProjectID, subID, topic, endpoint); err != nil {
+				r.Errorf("failed to create push subscription: %v", err)
+			}
+
+			got := b.String()
+			want := "Created push subscription"
+			if !strings.Contains(got, want) {
+				r.Errorf("got %s, want %s", got, want)
+			}
+		})
+	})
+
+	t.Run("no wrapper", func(t *testing.T) {
+		topicID := topicID + "-no-wrapper"
+		subID := subID + "-no-wrapper"
+
+		t.Cleanup(func() {
+			// Don't check delete errors since if it doesn't exist
+			// that's fine.
+			topic := client.Topic(topicID)
+			topic.Delete(ctx)
+
+			sub := client.Subscription(subID)
+			sub.Delete(ctx)
+		})
+
+		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+			topic, err := getOrCreateTopic(ctx, client, topicID)
+			if err != nil {
+				r.Errorf("CreateTopic: %v", err)
+			}
+
+			var b bytes.Buffer
+			endpoint := "https://my-test-project.appspot.com/push"
+			if err := createPushNoWrapperSubscription(&b, tc.ProjectID, subID, topic, endpoint); err != nil {
+				r.Errorf("failed to create push subscription: %v", err)
+			}
+
+			got := b.String()
+			want := "Created push no wrapper subscription"
+			if !strings.Contains(got, want) {
+				r.Errorf("got %s, want %s", got, want)
+			}
+		})
+	})
+}
+
+func TestCreateBigQuerySubscription(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
@@ -799,7 +883,7 @@ func TestBigQuerySubscription(t *testing.T) {
 		if err != nil {
 			r.Errorf("CreateTopic: %v", err)
 		}
-		buf := new(bytes.Buffer)
+		var buf bytes.Buffer
 
 		datasetID := "go_pubsub_samples_dataset"
 		tableID := "go_pubsub_samples_table"
@@ -809,7 +893,7 @@ func TestBigQuerySubscription(t *testing.T) {
 
 		bqTable := fmt.Sprintf("%s.%s.%s", tc.ProjectID, datasetID, tableID)
 
-		if err := createBigQuerySubscription(buf, tc.ProjectID, bqSubID, topic, bqTable); err != nil {
+		if err := createBigQuerySubscription(&buf, tc.ProjectID, bqSubID, topic, bqTable); err != nil {
 			r.Errorf("failed to create bigquery subscription: %v", err)
 		}
 		got := buf.String()
@@ -832,6 +916,36 @@ func TestBigQuerySubscription(t *testing.T) {
 	})
 
 	sub := client.Subscription(bqSubID)
+	sub.Delete(ctx)
+}
+
+func TestCreateCloudStorageSubscription(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+	defer client.Close()
+	storageSubID := subID + "-cloud-storage"
+
+	topic, err := getOrCreateTopic(ctx, client, topicID)
+	if err != nil {
+		t.Fatalf("CreateTopic: %v", err)
+	}
+	var buf bytes.Buffer
+
+	// Use the same bucket across test instances. This
+	// is safe since we're not writing to the bucket
+	// and this makes us not have to do bucket cleanups.
+	bucketID := fmt.Sprintf("%s-%s", tc.ProjectID, "pubsub-storage-sub-sink")
+	if err := createOrGetStorageBucket(tc.ProjectID, bucketID); err != nil {
+		t.Fatalf("failed to get or create storage bucket: %v", err)
+	}
+
+	if err := createCloudStorageSubscription(&buf, tc.ProjectID, storageSubID, topic, bucketID); err != nil {
+		t.Fatalf("failed to create cloud storage subscription: %v", err)
+	}
+
+	sub := client.Subscription(storageSubID)
 	sub.Delete(ctx)
 }
 
@@ -888,7 +1002,10 @@ func TestReceiveMessagesWithExactlyOnceDelivery(t *testing.T) {
 	// we're not testing client library functionality,
 	// and makes the sample more readable.
 	const numMsgs = 1
-	publishMsgs(ctx, topic, numMsgs)
+	err = publishMsgs(ctx, topic, numMsgs)
+	if err != nil {
+		t.Fatalf("failed to publish message: %v", err)
+	}
 
 	buf := new(bytes.Buffer)
 	err = receiveMessagesWithExactlyOnceDeliveryEnabled(buf, tc.ProjectID, eodSubID)
@@ -902,6 +1019,43 @@ func TestReceiveMessagesWithExactlyOnceDelivery(t *testing.T) {
 	}
 }
 
+func TestOptimisticSubscribe(t *testing.T) {
+	t.Parallel()
+	client := setup(t)
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	optTopicID := topicID + "-opt"
+	optSubID := subID + "-opt"
+
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		topic, err := getOrCreateTopic(ctx, client, optTopicID)
+		if err != nil {
+			r.Errorf("getOrCreateTopic: %v", err)
+		}
+		defer topic.Delete(ctx)
+		defer topic.Stop()
+
+		var buf bytes.Buffer
+		err = optimisticSubscribe(&buf, tc.ProjectID, optTopicID, optSubID)
+		if err != nil {
+			r.Errorf("failed to pull messages: %v", err)
+		}
+
+		// Check that we created the subscription instead of using
+		// an existing one. We can't test receiving a message
+		// since a message published won't be delivered to a new
+		// subscription.
+		got := buf.String()
+		want := "Created subscription"
+		if !strings.Contains(got, want) {
+			r.Errorf("optimisticSubscribe\ngot: %s\nwant: %s", got, want)
+		}
+
+		sub := client.Subscription(optSubID)
+		sub.Delete(ctx)
+	})
+}
+
 func publishMsgs(ctx context.Context, t *pubsub.Topic, numMsgs int) error {
 	var results []*pubsub.PublishResult
 	for i := 0; i < numMsgs; i++ {
@@ -913,7 +1067,7 @@ func publishMsgs(ctx context.Context, t *pubsub.Topic, numMsgs int) error {
 	// Check that all messages were published.
 	for _, r := range results {
 		if _, err := r.Get(ctx); err != nil {
-			return fmt.Errorf("Get publish result: %w", err)
+			return fmt.Errorf("get publish result %w", err)
 		}
 	}
 	return nil
@@ -963,18 +1117,18 @@ func ensureExistsBQTable(projectID, datasetID, tableID string) error {
 	}
 	dataset := c.Dataset(datasetID)
 	if _, err = dataset.Metadata(ctx); err != nil {
-		if e, ok := err.(*googleapi.Error); ok && e.Code == 404 {
+		var e *googleapi.Error
+		if errors.As(err, &e) && e.Code == 404 {
 			if err = dataset.Create(ctx, &bigquery.DatasetMetadata{Location: "US"}); err != nil {
 				return fmt.Errorf("error creating dataset: %w", err)
 			}
-		} else {
-			return fmt.Errorf("error accessing dataset metadata: %w", err)
 		}
 	}
 
 	table := dataset.Table(tableID)
 	if _, err := table.Metadata(ctx); err != nil {
-		if e, ok := err.(*googleapi.Error); ok && e.Code == 404 {
+		var e *googleapi.Error
+		if errors.As(err, &e) && e.Code == 404 {
 			schema := []*bigquery.FieldSchema{
 				{Name: "data", Type: bigquery.BytesFieldType, Required: true},
 				{Name: "message_id", Type: bigquery.StringFieldType, Required: true},
@@ -985,9 +1139,27 @@ func ensureExistsBQTable(projectID, datasetID, tableID string) error {
 			if err := table.Create(ctx, &bigquery.TableMetadata{Schema: schema}); err != nil {
 				return fmt.Errorf("error creating table: %w", err)
 			}
-		} else {
-			return fmt.Errorf("error accessing table metadata: %w", err)
 		}
 	}
+	return nil
+}
+
+func createOrGetStorageBucket(projectID, bucketID string) error {
+	ctx := context.Background()
+
+	c, err := storage.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("error instantiating storage client: %w", err)
+	}
+	b := c.Bucket(bucketID)
+	_, err = b.Attrs(ctx)
+	if errors.Is(storage.ErrBucketNotExist, err) {
+		if err := b.Create(ctx, projectID, nil); err != nil {
+			return fmt.Errorf("error creating bucket: %w", err)
+		}
+	} else if err != nil {
+		return fmt.Errorf("error retrieving existing bucket: %w", err)
+	}
+
 	return nil
 }
