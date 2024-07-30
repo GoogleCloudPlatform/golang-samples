@@ -3,6 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples/securitycenter
 go 1.20
 
 require (
+	cloud.google.com/go/iam v1.1.11
 	cloud.google.com/go/pubsub v1.40.0
 	cloud.google.com/go/securitycenter v1.33.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
@@ -18,7 +19,6 @@ require (
 	cloud.google.com/go/auth v0.7.2 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.3 // indirect
 	cloud.google.com/go/compute/metadata v0.5.0 // indirect
-	cloud.google.com/go/iam v1.1.11 // indirect
 	cloud.google.com/go/longrunning v0.5.10 // indirect
 	cloud.google.com/go/storage v1.41.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
