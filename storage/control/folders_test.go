@@ -167,8 +167,6 @@ func TestManagedFolders(t *testing.T) {
 
 	folderName := "managed-foo"
 	folderPath := fmt.Sprintf("projects/_/buckets/%v/folders/%v", bucketName, folderName)
-	newFolderName := "managed-bar"
-	newFolderPath := fmt.Sprintf("projects/_/buckets/%v/folders/%v", bucketName, newFolderName)
 
 	// Create Managed folder. Retry because there is no automatic retry in the client
 	// for this op.
@@ -209,10 +207,10 @@ func TestManagedFolders(t *testing.T) {
 
 	// Delete managed folder.
 	buf = &bytes.Buffer{}
-	if err := deleteManagedFolder(buf, bucketName, newFolderName); err != nil {
+	if err := deleteManagedFolder(buf, bucketName, folderName); err != nil {
 		t.Fatalf("deleteManagedFolder: %v", err)
 	}
-	if got, want := buf.String(), newFolderPath; !strings.Contains(got, want) {
+	if got, want := buf.String(), folderPath; !strings.Contains(got, want) {
 		t.Errorf("deleteManagedFolder: got %q, want to contain %q", got, want)
 	}
 }
