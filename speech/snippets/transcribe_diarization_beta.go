@@ -28,8 +28,7 @@ import (
 )
 
 // transcribe_diarization_gcs_beta Transcribes a remote audio file using speaker diarization.
-func transcribe_diarization(w io.Writer, filename string) error {
-	// filename := "path-to-an-audio-file"
+func transcribe_diarization(w io.Writer) error {
 
 	ctx := context.Background()
 	client, err := speech.NewClient(ctx)
@@ -52,7 +51,7 @@ func transcribe_diarization(w io.Writer, filename string) error {
 	}
 
 	// Get the contents of the local audio file
-	content, err := os.ReadFile(filename)
+	content, err := os.ReadFile("../resources/commercial_mono.wav")
 	if err != nil {
 		return fmt.Errorf("error reading file %w", err)
 	}

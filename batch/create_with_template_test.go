@@ -35,8 +35,8 @@ func TestCreateJobWithTemplate(t *testing.T) {
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	region := "us-central1"
-	jobName := fmt.Sprintf("test-job-go-template-%v-%v", time.Now().Format("2006-12-25"), r.Int())
-	templateName := fmt.Sprintf("test-template-go-batch-%v-%v", time.Now().Format("2006-12-25"), r.Int())
+	jobName := fmt.Sprintf("test-job-go-template-%v-%v", time.Now().Format("2006-01-02"), r.Int())
+	templateName := fmt.Sprintf("test-template-go-batch-%v-%v", time.Now().Format("2006-01-02"), r.Int())
 	buf := &bytes.Buffer{}
 
 	if err := createTemplate(tc.ProjectID, templateName); err != nil {
