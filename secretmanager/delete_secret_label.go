@@ -53,9 +53,9 @@ func deleteSecretLabel(w io.Writer, name, labelKey string) error {
 	delete(labels, labelKey)
 
 	// Build the request to update the secret.
-	update_req := &secretmanagerpb.UpdateSecretRequest{
+	updateReq := &secretmanagerpb.UpdateSecretRequest{
 		Secret: &secretmanagerpb.Secret{
-			Name: name,
+			Name:   name,
 			Labels: labels,
 		},
 		UpdateMask: &field_mask.FieldMask{
@@ -64,11 +64,11 @@ func deleteSecretLabel(w io.Writer, name, labelKey string) error {
 	}
 
 	// Call the API.
-	update_result, err := client.UpdateSecret(ctx, update_req)
+	updateResult, err := client.UpdateSecret(ctx, updateReq)
 	if err != nil {
 		return fmt.Errorf("failed to update secret: %w", err)
 	}
-	fmt.Fprintf(w, "Updated secret: %s\n", update_result.Name)
+	fmt.Fprintf(w, "Updated secret: %s\n", updateResult.Name)
 	return nil
 }
 
