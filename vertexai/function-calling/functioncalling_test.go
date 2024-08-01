@@ -15,7 +15,9 @@
 package functioncalling
 
 import (
+	"bytes"
 	"io"
+	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -24,7 +26,7 @@ import (
 func Test_functionCallsBasic(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	w := io.Discard
+	w := new(bytes.Buffer)
 	prompt := "What's the weather like in Boston?"
 	location := "us-central1"
 	modelName := "gemini-1.5-flash-001"
@@ -32,6 +34,11 @@ func Test_functionCallsBasic(t *testing.T) {
 	err := functionCallsBasic(w, prompt, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Errorf("Test_functionCalls: %v", err.Error())
+	}
+
+	content := w.String()
+	if !strings.Contains(content, "Boston") {
+		t.Errorf("expected the word %v in the content", "Boston")
 	}
 }
 
