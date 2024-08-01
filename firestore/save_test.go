@@ -105,7 +105,7 @@ func TestSave(t *testing.T) {
 	if err = runSimpleTransaction(ctx, client); err != nil {
 		t.Fatalf("runSimpleTransaction: %v", err)
 	}
-	if err = infoTransaction(ctx, client); err != nil {
+	if _, err = infoTransaction(ctx, client); err != nil {
 		t.Fatalf("infoTransaction: %v", err)
 	}
 	if err = batchWrite(ctx, client); err != nil {
