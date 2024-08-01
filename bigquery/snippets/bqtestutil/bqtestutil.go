@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 
 	"github.com/gofrs/uuid"
 )
@@ -40,8 +41,10 @@ func UniqueBucketName(prefix, projectID string) (string, error) {
 	f := fmt.Sprintf("%s-%s-%s", sanitize(prefix, "-"), sanitize(projectID, "-"), sanitize(u.String(), "-"))
 	// bucket max name length is 63 chars, so we truncate.
 	if len(f) > 63 {
-		return f[:63], nil
+		f = f[:63]
 	}
+	// a trailing dash would make an invalid bucket name
+	f = strings.TrimSuffix(f, "-")
 	return f, nil
 }
 
