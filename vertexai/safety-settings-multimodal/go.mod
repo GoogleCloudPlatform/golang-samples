@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	cloud.google.com/go/vertexai v0.12.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240111005027-4c7a1933dce2
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
 )
 
 require (
