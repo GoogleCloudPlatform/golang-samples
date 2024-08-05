@@ -65,7 +65,7 @@
 /kms/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/dee-infra
 /privateca/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/dee-infra
 /securitycenter/                       @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/dee-infra @GoogleCloudPlatform/gcp-security-command-center
-/secretmanager/                        @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/dee-infra
+/secretmanager/                        @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/dee-infra @GoogleCloudPlatform/cloud-secrets-team
 /mediacdn/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/dee-infra
 
 # DEE Platform Ops
