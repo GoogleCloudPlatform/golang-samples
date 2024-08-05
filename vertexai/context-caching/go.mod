@@ -4,13 +4,13 @@ go 1.21
 
 require (
 	cloud.google.com/go/vertexai v0.12.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240805200830-05d5bd3e71d5
 )
 
 require (
 	cloud.google.com/go v0.115.0 // indirect
 	cloud.google.com/go/aiplatform v1.68.0 // indirect
-	cloud.google.com/go/auth v0.7.0 // indirect
+	cloud.google.com/go/auth v0.7.2 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.3 // indirect
 	cloud.google.com/go/compute/metadata v0.5.0 // indirect
 	cloud.google.com/go/iam v1.1.11 // indirect
@@ -38,10 +38,10 @@ require (
 	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
-	google.golang.org/api v0.188.0 // indirect
-	google.golang.org/genproto v0.0.0-20240709173604-40e1e62336c5 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240709173604-40e1e62336c5 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240709173604-40e1e62336c5 // indirect
+	google.golang.org/api v0.189.0 // indirect
+	google.golang.org/genproto v0.0.0-20240723171418-e6d459c13d2a // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240722135656-d784300faade // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240722135656-d784300faade // indirect
 	google.golang.org/grpc v1.65.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 )
