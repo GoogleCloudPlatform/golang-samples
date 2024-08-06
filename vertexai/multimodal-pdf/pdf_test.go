@@ -25,11 +25,11 @@ import (
 func Test_generateContentFromPDF(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 	location := "us-central1"
 	modelName := "gemini-1.5-flash-001"
 
-	err := generateContentFromPDF(buf, tc.ProjectID, location, modelName)
+	err := generateContentFromPDF(&buf, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Errorf("Test_generateContentFromPDF: %v", err.Error())
 	}
