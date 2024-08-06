@@ -16,7 +16,6 @@ package functioncalling
 
 import (
 	"bytes"
-	"io"
 	"strings"
 	"testing"
 
@@ -26,17 +25,17 @@ import (
 func Test_functionCallsBasic(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	var w bytes.Buffer
+	var buf bytes.Buffer
 	prompt := "What's the weather like in Boston?"
 	location := "us-central1"
 	modelName := "gemini-1.5-flash-001"
 
-	err := functionCallsBasic(&w, prompt, tc.ProjectID, location, modelName)
+	err := functionCallsBasic(&buf, prompt, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Errorf("Test_functionCalls: %v", err.Error())
 	}
 
-	content := w.String()
+	content := buf.String()
 	if !strings.Contains(content, "Boston") {
 		t.Errorf("expected the word %v in the content", "Boston")
 	}
@@ -45,11 +44,11 @@ func Test_functionCallsBasic(t *testing.T) {
 func Test_functionCallsChat(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	w := io.Discard
+	var buf bytes.Buffer
 	location := "us-central1"
 	modelName := "gemini-1.5-flash-001"
 
-	err := functionCallsChat(w, tc.ProjectID, location, modelName)
+	err := functionCallsChat(&buf, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Errorf("Test_functionCallsChat: %v", err.Error())
 	}
