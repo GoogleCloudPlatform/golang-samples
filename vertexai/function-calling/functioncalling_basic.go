@@ -35,7 +35,7 @@ import (
 // functionCallsBasic opens a chat session and sends 2 messages to the model:
 // - first, to convert a text into a structured function call request
 // - second, to convert a structured function call response into natural language.
-// Put the outout of the second call in w buffer.
+// Writes output of second call to w.
 func functionCallsBasic(w io.Writer, prompt, projectID, location, modelName string) error {
 	// prompt := "What's the weather like in Boston?"
 	// location := "us-central1"
