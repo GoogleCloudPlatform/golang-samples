@@ -140,10 +140,10 @@ func cleanupEntities() error {
 		if err := disableTestFinding(ctx, client, untouchedFindingName); err != nil {
 			return fmt.Errorf("disableTestFinding: %w", err)
 		}
-	
+
 		if err := clearSecurityMarks(ctx, client, untouchedFindingName); err != nil {
 			return fmt.Errorf("clearSecurityMarks: %w", err)
-		}	
+		}
 	}
 	return nil
 }
