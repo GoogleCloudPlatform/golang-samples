@@ -2,8 +2,10 @@ module github.com/GoogleCloudPlatform/golang-samples/firestore
 
 go 1.19
 
+replace cloud.google.com/go/firestore => /usr/local/google/home/bahaaiman/Documents/cfdb-workspace-01/google-cloud-go/firestore
+
 require (
-	cloud.google.com/go/firestore v1.14.0
+	cloud.google.com/go/firestore v1.15.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240111005027-4c7a1933dce2
 	google.golang.org/api v0.176.1
 	google.golang.org/grpc v1.63.2
@@ -19,10 +21,13 @@ require (
 	cloud.google.com/go/storage v1.36.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
+	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.3 // indirect
