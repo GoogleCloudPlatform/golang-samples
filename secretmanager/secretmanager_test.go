@@ -98,6 +98,9 @@ func testSecret(tb testing.TB, projectID string) *secretmanagerpb.Secret {
 					Automatic: &secretmanagerpb.Replication_Automatic{},
 				},
 			},
+			Labels: map[string]string{
+				"secretmanager": "rocks",
+			},
 		},
 	})
 	if err != nil {
@@ -307,6 +310,26 @@ func TestCreateSecret(t *testing.T) {
 	}
 }
 
+
+func TestCreateSecretWithLabels(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secretID := "createSecretWithLabels"
+	labelKey := "secretmanager"
+	labelValue := "rocks"
+
+	parent := fmt.Sprintf("projects/%s", tc.ProjectID)
+
+	var b bytes.Buffer
+	if err := createSecretWithLabels(&b, parent, secretID, labelKey, labelValue); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
+
+	if got, want := b.String(), "Created secret with labels:"; !strings.Contains(got, want) {
+		t.Errorf("createSecretWithLabels: expected %q to contain %q", got, want)
+  }
+}
 func TestCreateRegionalSecret(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -363,6 +386,32 @@ func TestDeleteSecret(t *testing.T) {
 	}
 }
 
+func TestDeleteSecretLabel(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	labelKey := "secretmanager"
+
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
+	var b bytes.Buffer
+	if err := deleteSecretLabel(&b, secret.Name, labelKey); err != nil {
+		t.Fatal(err)
+	}
+
+	client, ctx := testClient(t)
+	s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secret.Name,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := s.Labels, map[string]string{"secretmanager": "rocks"}; reflect.DeepEqual(got, want) {
+		t.Errorf("deleteSecretLabel: expected %q to be %q", got, want)
+	}
+}
+
 func TestDeleteRegionalSecret(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -382,6 +431,7 @@ func TestDeleteRegionalSecret(t *testing.T) {
 	if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
 		t.Errorf("deleteRegionalSecret: expected %v to be not found", err)
 	}
+
 }
 
 func TestDeleteSecretWithEtag(t *testing.T) {
@@ -1021,6 +1071,34 @@ func TestListSecrets(t *testing.T) {
 	}
 }
 
+func TestViewSecretLabels(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
+	var b bytes.Buffer
+	if err := viewSecretLabels(&b, secret.Name); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Found secret"; !strings.Contains(got, want) {
+		t.Errorf("viewSecretLabels: expected %q to contain %q", got, want)
+	}
+
+	client, ctx := testClient(t)
+	s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secret.Name,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := s.Labels, map[string]string{"secretmanager": "rocks"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("viewSecretLabels: expected %q to be %q", got, want)
+  }
+}
+
 func TestListRegionalSecrets(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1122,6 +1200,38 @@ func TestUpdateSecret(t *testing.T) {
 	}
 }
 
+func TestCreateUpdateSecretLabel(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	updatedLabelKey := "gcp"
+	updatedLabelValue := "rock"
+
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
+	var b bytes.Buffer
+	if err := createUpdateSecretLabel(&b, secret.Name, updatedLabelKey, updatedLabelValue); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Updated secret"; !strings.Contains(got, want) {
+		t.Errorf("updateSecret: expected %q to contain %q", got, want)
+	}
+
+	client, ctx := testClient(t)
+
+  s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secret.Name,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+  if got, want := s.Labels, map[string]string{updatedLabelKey: updatedLabelValue, "secretmanager": "rocks"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("createUpdateSecretLabel: expected %q to be %q", got, want)
+  }
+}
+
 func TestRegionalUpdateSecret(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1140,6 +1250,7 @@ func TestRegionalUpdateSecret(t *testing.T) {
 	}
 
 	client, ctx := testRegionalClient(t)
+
 	s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
 		Name: secret.Name,
 	})
