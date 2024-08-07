@@ -3,7 +3,6 @@ module github.com/GoogleCloudPlatform/golang-samples
 go 1.19
 
 require (
-
 	cloud.google.com/go/batch v1.9.1
 	cloud.google.com/go/bigquery v1.62.0
 	cloud.google.com/go/compute v1.27.3
