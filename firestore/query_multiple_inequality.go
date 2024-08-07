@@ -23,21 +23,27 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-func multipleInequalities(w io.Writer, projectID string) error {
+func multipleInequalitiesQuery(w io.Writer, projectID string) error {
 	ctx := context.Background()
+
+	// Create client
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("firestore.NewClient: %v", err)
+		return fmt.Errorf("firestore.NewClient: %w", err)
 	}
+	defer client.Close()
+
+	// Create query
 	query := client.Collection("cities").
 		Where("population", ">", 1000000).
 		Where("density", "<", 10000)
 
+	// Get documents
 	docSnapshots, err := query.Documents(ctx).GetAll()
 	for _, doc := range docSnapshots {
 		fmt.Fprintln(w, doc.Data())
 	}
-	return err
+	return fmt.Errorf("GetAll: %w", err)
 }
 
 // [END firestore_query_filter_compound_multi_ineq]

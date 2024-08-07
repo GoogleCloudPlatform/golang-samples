@@ -17,19 +17,22 @@ package firestore
 import (
 	"bytes"
 	"context"
+	"os"
 	"strings"
 	"testing"
 
 	"cloud.google.com/go/firestore"
 	apiv1 "cloud.google.com/go/firestore/apiv1/admin"
 	"cloud.google.com/go/firestore/apiv1/admin/adminpb"
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestMultipleInequalities(t *testing.T) {
-	tc := testutil.SystemTest(t)
+func TestMultipleInequalitiesQuery(t *testing.T) {
+	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
+	if projectID == "" {
+		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
+	}
+
 	ctx := context.Background()
-	projectID = tc.ProjectID
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
 		t.Fatal(err)
@@ -109,7 +112,7 @@ func TestMultipleInequalities(t *testing.T) {
 	})
 
 	// Create indexes for multiple inequality query
-	indexParent := "projects/" + tc.ProjectID + "/databases/(default)/collectionGroups/" + colName
+	indexParent := "projects/" + projectID + "/databases/(default)/collectionGroups/" + colName
 	adminPbIndexFields := []*adminpb.Index_IndexField{
 		{
 			FieldPath: "density",
@@ -156,7 +159,7 @@ func TestMultipleInequalities(t *testing.T) {
 
 	// Run sample and capture console output
 	buf := new(bytes.Buffer)
-	if err = multipleInequalities(buf, projectID); err != nil {
+	if err = multipleInequalitiesQuery(buf, projectID); err != nil {
 		t.Errorf("multipleInequalities: %v", err)
 	}
 
