@@ -26,10 +26,8 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// generateMultimodalContent generates a response into w, based upon the prompt
-// and image provided.
-func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, modelName string) error {
-	// prompt := "describe this image."
+// generateMultimodalContent generates a response into w, based upon the  provided image.
+func generateMultimodalContent(w io.Writer, image, projectID, location, modelName string) error {
 	// location := "us-central1"
 	// model := "gemini-1.5-flash-001"
 	// image := "gs://cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg"
@@ -61,7 +59,7 @@ func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, 
 		FileURI:  image,
 	}
 
-	res, err := model.GenerateContent(ctx, img, genai.Text(prompt))
+	res, err := model.GenerateContent(ctx, img, genai.Text("describe this image."))
 	if err != nil {
 		return fmt.Errorf("unable to generate contents: %w", err)
 	}
