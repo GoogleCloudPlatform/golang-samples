@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 package muteconfig
 
-// [START securitycenter_set_mute]
+// [START securitycenter_set_mute_undefined]
 import (
 	"context"
 	"fmt"
@@ -27,7 +27,7 @@ import (
 // setMute mutes an individual finding, can also unmute or reset the mute state of a finding.
 // If a finding is already muted, muting it again has no effect.
 // Various mute states are: UNDEFINED/MUTE/UNMUTE.
-func setMute(w io.Writer, findingPath string) error {
+func setMuteUndefined(w io.Writer, findingPath string) error {
 	// findingPath: The relative resource name of the finding. See:
 	// https://cloud.google.com/apis/design/resource_names#relative_resource_name
 	// Use any one of the following formats:
@@ -44,7 +44,7 @@ func setMute(w io.Writer, findingPath string) error {
 
 	req := &securitycenterpb.SetMuteRequest{
 		Name: findingPath,
-		Mute: securitycenterpb.Finding_MUTED}
+		Mute: securitycenterpb.Finding_UNDEFINED}
 
 	finding, err := client.SetMute(ctx, req)
 	if err != nil {
@@ -54,4 +54,4 @@ func setMute(w io.Writer, findingPath string) error {
 	return nil
 }
 
-// [END securitycenter_set_mute]
+// [END securitycenter_set_mute_undefined]
