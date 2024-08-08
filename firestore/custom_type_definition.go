@@ -23,6 +23,7 @@ type City struct {
 	Country    string   `firestore:"country,omitempty"`
 	Capital    bool     `firestore:"capital,omitempty"`
 	Population int64    `firestore:"population,omitempty"`
+	Density    int64    `firestore:"density,omitempty"`
 	Regions    []string `firestore:"regions,omitempty"`
 }
 
