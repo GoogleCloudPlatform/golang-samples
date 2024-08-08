@@ -15,6 +15,7 @@
 package snippets
 
 // [START aiplatform_text_predictions]
+// [START generativeaionvertexai_text_predictions]
 
 import (
 	"context"
@@ -80,3 +81,4 @@ func textPredict(w io.Writer, prompt, projectID, location, publisher, model stri
 }
 
 // [END aiplatform_text_predictions]
+// [END generativeaionvertexai_text_predictions]

@@ -16,20 +16,16 @@ package snippets
 
 import (
 	"bytes"
-	"os"
 	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-var recognitionAudioFileRawLINEAR16 = "../testdata/audio.raw"
-
 func TestTranscribeStreamingV2SpecificDecoding(t *testing.T) {
 	testutil.SystemTest(t)
-	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 	var buf bytes.Buffer
-	if err := transcribeStreamingSpecificDecodingV2(&buf, projectID, recognitionAudioFileRawLINEAR16); err != nil {
+	if err := transcribeStreamingSpecificDecodingV2(&buf); err != nil {
 		t.Fatalf("error in transcribe rawfile %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, "Brooklyn Bridge") {

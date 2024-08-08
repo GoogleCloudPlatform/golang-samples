@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci/testing
 
 go 1.19
 
-require github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240111005027-4c7a1933dce2
+require github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
 
 require (
 	cloud.google.com/go v0.112.0 // indirect
@@ -12,7 +12,7 @@ require (
 	cloud.google.com/go/iam v1.1.6 // indirect
 	cloud.google.com/go/logging v1.9.0 // indirect
 	cloud.google.com/go/longrunning v0.5.5 // indirect
-	cloud.google.com/go/storage v1.36.0 // indirect
+	cloud.google.com/go/storage v1.37.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect

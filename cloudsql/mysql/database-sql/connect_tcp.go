@@ -78,8 +78,13 @@ func connectTCPSocket() (*sql.DB, error) {
 			return nil, err
 		}
 		mysql.RegisterTLSConfig("cloudsql", &tls.Config{
-			RootCAs:               pool,
-			Certificates:          []tls.Certificate{cert},
+			RootCAs:      pool,
+			Certificates: []tls.Certificate{cert},
+			// InsecureSkipVerify and a custom VerifyPeerCertificate function is
+			// required to handle Cloud SQL's custom certificates.
+			// As an alternative it's also possible to inspect the server
+			// certificate and extract the SAN field and use that a ServerName
+			// while removing InsecureSkipVerify and VerifyPeerCertificate.
 			InsecureSkipVerify:    true,
 			VerifyPeerCertificate: verifyPeerCertFunc(pool),
 		})

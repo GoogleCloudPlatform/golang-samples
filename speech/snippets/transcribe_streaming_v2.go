@@ -31,8 +31,11 @@ import (
 	"cloud.google.com/go/speech/apiv2/speechpb"
 )
 
-func transcribeStreamingV2(w io.Writer, projectID string, path string) error {
+func transcribeStreamingV2(w io.Writer) error {
+	path := "../resources/commercial_mono.wav"
+	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 	const location = "global"
+
 	audioFile, err := filepath.Abs(path)
 	if err != nil {
 		log.Println("Failed to load file: ", path)

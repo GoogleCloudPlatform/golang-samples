@@ -28,29 +28,13 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// audioPrompt is a sample prompt type consisting of one audio asset, and a text question.
-type audioPrompt struct {
-	// audio is a Google Cloud Storage path starting with "gs://"
-	audio string
-	// question asked to the model
-	question string
-}
-
 // [END generativeaionvertexai_gemini_audio_transcription]
 // [END generativeaionvertexai_gemini_audio_summarization]
 
 // [START generativeaionvertexai_gemini_audio_summarization]
 // summarizeAudio shows how to send an audio asset and a text question to a model, writing the response to the
 // provided io.Writer.
-func summarizeAudio(w io.Writer, prompt audioPrompt, projectID, location, modelName string) error {
-	// prompt := audioPrompt{
-	// 	audio: "gs://cloud-samples-data/generative-ai/audio/pixel.mp3",
-	// 	question: `
-	// 		Please provide a summary for the audio.
-	// 		Provide chapter titles with timestamps, be concise and short, no need to provide chapter summaries.
-	// 		Do not make up any information that is not part of the audio and do not be verbose.
-	// 	`,
-	// }
+func summarizeAudio(w io.Writer, projectID, location, modelName string) error {
 	// location := "us-central1"
 	// modelName := "gemini-1.5-flash-001"
 	ctx := context.Background()
@@ -66,11 +50,16 @@ func summarizeAudio(w io.Writer, prompt audioPrompt, projectID, location, modelN
 
 	// Given an audio file URL, prepare audio file as genai.Part
 	part := genai.FileData{
-		MIMEType: mime.TypeByExtension(filepath.Ext(prompt.audio)),
-		FileURI:  prompt.audio,
+		MIMEType: mime.TypeByExtension(filepath.Ext("pixel.mp3")),
+		FileURI:  "gs://cloud-samples-data/generative-ai/audio/pixel.mp3",
 	}
 
-	res, err := model.GenerateContent(ctx, part, genai.Text(prompt.question))
+	res, err := model.GenerateContent(ctx, part, genai.Text(`
+		Please provide a summary for the audio.
+		Provide chapter titles with timestamps, be concise and short, no need to provide chapter summaries.
+		Do not make up any information that is not part of the audio and do not be verbose.
+	`,
+	))
 	if err != nil {
 		return fmt.Errorf("unable to generate contents: %w", err)
 	}
@@ -87,19 +76,11 @@ func summarizeAudio(w io.Writer, prompt audioPrompt, projectID, location, modelN
 // [END generativeaionvertexai_gemini_audio_summarization]
 
 // [START generativeaionvertexai_gemini_audio_transcription]
-// transcribeAudio generates a response into w, based upon the prompt
-// and audio provided.
-// audio is a Google Cloud Storage path starting with "gs://"
-func transcribeAudio(w io.Writer, prompt audioPrompt, projectID, location, modelName string) error {
-	// prompt := audioPrompt{
-	// 	audio: "gs://cloud-samples-data/generative-ai/audio/pixel.mp3",
-	// 	question: `
-	// 		Can you transcribe this interview, in the format of timecode, speaker, caption.
-	// 		Use speaker A, speaker B, etc. to identify speakers.
-	// 	`,
-	// },
+// transcribeAudio generates a response into w
+func transcribeAudio(w io.Writer, projectID, location, modelName string) error {
 	// location := "us-central1"
 	// modelName := "gemini-1.5-flash-001"
+
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
@@ -115,11 +96,14 @@ func transcribeAudio(w io.Writer, prompt audioPrompt, projectID, location, model
 
 	// Given an audio file URL, prepare audio file as genai.Part
 	img := genai.FileData{
-		MIMEType: mime.TypeByExtension(filepath.Ext(prompt.audio)),
-		FileURI:  prompt.audio,
+		MIMEType: mime.TypeByExtension(filepath.Ext("pixel.mp3")),
+		FileURI:  "gs://cloud-samples-data/generative-ai/audio/pixel.mp3",
 	}
 
-	res, err := model.GenerateContent(ctx, img, genai.Text(prompt.question))
+	res, err := model.GenerateContent(ctx, img, genai.Text(`
+			Can you transcribe this interview, in the format of timecode, speaker, caption.
+			Use speaker A, speaker B, etc. to identify speakers.
+	`))
 	if err != nil {
 		return fmt.Errorf("unable to generate contents: %w", err)
 	}

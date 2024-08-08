@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log"
 	"strings"
 	"testing"
 
@@ -90,7 +91,7 @@ func createInspectTemplateForTest(t *testing.T, projectID string, templateID, di
 		return fmt.Errorf("CreateInspectTemplate: %w", err)
 	}
 	// Print the result.
-	fmt.Printf("Successfully created inspect template: %v", resp.GetName())
+	log.Printf("Successfully created inspect template: %v", resp.GetName())
 	return nil
 }
 
@@ -112,7 +113,7 @@ func cleeanUpTemplates(t *testing.T, projectID, templateID string) error {
 	if err := client.DeleteInspectTemplate(ctx, req); err != nil {
 		return fmt.Errorf("DeleteInspectTemplate: %w", err)
 	}
-	fmt.Printf("Successfully deleted inspect template %v", templateID)
+	log.Printf("Successfully deleted inspect template %v", templateID)
 
 	return nil
 }

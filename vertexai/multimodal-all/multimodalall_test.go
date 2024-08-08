@@ -25,25 +25,10 @@ func Test_generateContentFromVideoWithAudio(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
-
-	prompt := multimodalPrompt{
-		video: "gs://cloud-samples-data/generative-ai/video/behind_the_scenes_pixel.mp4",
-		image: "gs://cloud-samples-data/generative-ai/image/a-man-and-a-dog.png",
-		question: `
-		Watch each frame in the video carefully and answer the questions.
-		Only base your answers strictly on what information is available in the video attached.
-		Do not make up any information that is not part of the video and do not be too
-		verbose, be to the point.
-
-		Questions:
-		- When is the moment in the image happening in the video? Provide a timestamp.
-		- What is the context of the moment and what does the narrator say about it?
-	`,
-	}
 	location := "us-central1"
 	modelName := "gemini-1.5-flash-001"
 
-	err := generateContentFromVideoWithAudio(buf, prompt, tc.ProjectID, location, modelName)
+	err := generateContentFromVideoWithAudio(buf, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Errorf("Test_generateContentFromVideoWithAudio: %v", err.Error())
 	}

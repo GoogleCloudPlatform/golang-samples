@@ -27,8 +27,21 @@ import (
 func TestGetVodAdTagDetail(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
+	uuid, err := getUUID()
+	if err != nil {
+		t.Fatalf("getUUID err: %v", err)
+	}
 
-	sessionID := createTestVodSession(t)
+	vodConfigID := fmt.Sprintf("%s-%s", vodConfigIDPrefix, uuid)
+	vodConfigName := fmt.Sprintf("projects/%s/locations/%s/vodConfigs/%s", tc.ProjectID, location, vodConfigID)
+
+	createTestVodConfig(vodConfigID, t)
+	t.Cleanup(func() {
+		// Can't delete VOD sessions
+		deleteTestVodConfig(vodConfigName, t)
+	})
+
+	sessionID := createTestVodSession(vodConfigID, t)
 	vodAdTagDetailID := listTestVodAdTagDetails(sessionID, t)
 	vodAdTagDetail := fmt.Sprintf("/locations/%s/vodSessions/%s/vodAdTagDetails/%s", location, sessionID, vodAdTagDetailID)
 

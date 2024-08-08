@@ -26,7 +26,7 @@ func TestEnhancedModel(t *testing.T) {
 	testutil.SystemTest(t)
 
 	var buf bytes.Buffer
-	err := enhancedModel(&buf, "../testdata/commercial_mono.wav")
+	err := enhancedModel(&buf)
 	if err != nil {
 		t.Fatalf("%v - You may need to enable data logging. See https://cloud.google.com/speech-to-text/docs/enable-data-logging", err)
 	}

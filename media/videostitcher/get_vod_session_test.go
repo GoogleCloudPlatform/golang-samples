@@ -27,8 +27,21 @@ import (
 func TestGetVodSession(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
+	uuid, err := getUUID()
+	if err != nil {
+		t.Fatalf("getUUID err: %v", err)
+	}
 
-	sessionID := createTestVodSession(t)
+	vodConfigID := fmt.Sprintf("%s-%s", vodConfigIDPrefix, uuid)
+	vodConfigName := fmt.Sprintf("projects/%s/locations/%s/vodConfigs/%s", tc.ProjectID, location, vodConfigID)
+
+	createTestVodConfig(vodConfigID, t)
+	t.Cleanup(func() {
+		// Can't delete VOD sessions
+		deleteTestVodConfig(vodConfigName, t)
+	})
+
+	sessionID := createTestVodSession(vodConfigID, t)
 	vodSession := fmt.Sprintf("/locations/%s/vodSessions/%s", location, sessionID)
 
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {

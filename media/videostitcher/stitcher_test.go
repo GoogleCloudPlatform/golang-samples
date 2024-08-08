@@ -49,8 +49,11 @@ const (
 	updatedHostname      = "updated.cdn.example.com"
 	keyName              = "my-key"
 
-	vodURI      = "https://storage.googleapis.com/cloud-samples-data/media/hls-vod/manifest.m3u8"
-	vodAdTagURI = "https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpreonly&ciu_szs=300x250%2C728x90&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&correlator="
+	vodConfigIDPrefix       = "go-test-vod-config"
+	deleteVodConfigResponse = "Deleted VOD config"
+	vodURI                  = "https://storage.googleapis.com/cloud-samples-data/media/hls-vod/manifest.m3u8"
+	updatedVodURI           = "https://storage.googleapis.com/cloud-samples-data/media/hls-vod/manifest.mpd"
+	vodAdTagURI             = "https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/vmap_ad_samples&sz=640x480&cust_params=sample_ar%3Dpreonly&ciu_szs=300x250%2C728x90&gdfp_req=1&ad_rule=1&output=vmap&unviewed_position_start=1&env=vp&impl=s&correlator="
 
 	liveConfigIDPrefix       = "go-test-live-config"
 	deleteLiveConfigResponse = "Deleted live config"
@@ -196,6 +199,43 @@ func cleanStaleResources(projectID string) {
 			}
 		}
 	}
+
+	// VOD configs
+	req4 := &stitcherstreampb.ListVodConfigsRequest{
+		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+	}
+
+	it4 := client.ListVodConfigs(ctx, req4)
+
+	for {
+		response, err := it4.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Printf("Can't find next VOD config: %s", err)
+			continue
+		}
+		if strings.Contains(response.GetName(), vodConfigIDPrefix) {
+
+			arr := strings.Split(response.GetName(), "-")
+			t := arr[len(arr)-1]
+			if isResourceStale(t) == true {
+				req := &stitcherstreampb.DeleteVodConfigRequest{
+					Name: response.GetName(),
+				}
+				// Deletes the VOD config.
+				op, err := client.DeleteVodConfig(ctx, req)
+				if err != nil {
+					log.Printf("cleanStaleResources DeleteVodConfig: %s", err)
+				}
+				err = op.Wait(ctx)
+				if err != nil {
+					log.Printf("cleanStaleResources Wait: %s", err)
+				}
+			}
+		}
+	}
 }
 
 func isResourceStale(timestamp string) bool {
@@ -307,6 +347,58 @@ func deleteTestSlate(slateName string, t *testing.T) {
 	op, err := client.DeleteSlate(ctx, req)
 	if err != nil {
 		t.Errorf("client.DeleteSlate: %v", err)
+	}
+	err = op.Wait(ctx)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func createTestVodConfig(vodConfigID string, t *testing.T) {
+	t.Helper()
+	ctx := context.Background()
+
+	client, err := stitcher.NewVideoStitcherClient(ctx)
+	if err != nil {
+		t.Fatalf("stitcher.NewVideoStitcherClient: %v", err)
+	}
+	defer client.Close()
+
+	tc := testutil.SystemTest(t)
+	req := &stitcherstreampb.CreateVodConfigRequest{
+		Parent:      fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, location),
+		VodConfigId: vodConfigID,
+		VodConfig: &stitcherstreampb.VodConfig{
+			SourceUri: vodURI,
+			AdTagUri:  vodAdTagURI,
+		},
+	}
+	op, err := client.CreateVodConfig(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = op.Wait(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func deleteTestVodConfig(vodConfigName string, t *testing.T) {
+	t.Helper()
+	ctx := context.Background()
+	client, err := stitcher.NewVideoStitcherClient(ctx)
+	if err != nil {
+		t.Fatalf("stitcher.NewVideoStitcherClient: %v", err)
+	}
+	defer client.Close()
+
+	// Delete the VOD config.
+	req := &stitcherstreampb.DeleteVodConfigRequest{
+		Name: vodConfigName,
+	}
+	op, err := client.DeleteVodConfig(ctx, req)
+	if err != nil {
+		t.Errorf("client.DeleteVodConfig: %v", err)
 	}
 	err = op.Wait(ctx)
 	if err != nil {
@@ -469,7 +561,7 @@ func createTestLiveSession(liveConfigID string, t *testing.T) (string, string) {
 	return sessionID, playURI
 }
 
-func createTestVodSession(t *testing.T) string {
+func createTestVodSession(vodConfigID string, t *testing.T) string {
 	t.Helper()
 	ctx := context.Background()
 	client, err := stitcher.NewVideoStitcherClient(ctx)
@@ -482,11 +574,11 @@ func createTestVodSession(t *testing.T) string {
 	req := &stitcherstreampb.CreateVodSessionRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, location),
 		VodSession: &stitcherstreampb.VodSession{
-			SourceUri:  vodURI,
-			AdTagUri:   vodAdTagURI,
+			VodConfig:  fmt.Sprintf("projects/%s/locations/%s/vodConfigs/%s", tc.ProjectID, location, vodConfigID),
 			AdTracking: stitcherstreampb.AdTracking_SERVER,
 		},
 	}
+
 	// Creates the VOD session. VOD sessions are
 	// ephemeral resources that expire after a few hours.
 	response, err := client.CreateVodSession(ctx, req)

@@ -29,7 +29,7 @@ import (
 
 // contextClasses provides "hints" to the speech recognizer
 // to favour specific classes of words in the results.
-func contextClasses(w io.Writer, gcsURI string) error {
+func contextClasses(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := speech.NewClient(ctx)
@@ -53,7 +53,7 @@ func contextClasses(w io.Writer, gcsURI string) error {
 			SpeechContexts:  []*speechpb.SpeechContext{speechContext},
 		},
 		Audio: &speechpb.RecognitionAudio{
-			AudioSource: &speechpb.RecognitionAudio_Uri{Uri: gcsURI},
+			AudioSource: &speechpb.RecognitionAudio_Uri{Uri: "gs://cloud-samples-data/speech/commercial_mono.wav"},
 		},
 	})
 	if err != nil {

@@ -27,7 +27,7 @@ func TestContextClasses(t *testing.T) {
 
 	var buf bytes.Buffer
 	gcsURI := "gs://cloud-samples-data/speech/commercial_mono.wav"
-	err := contextClasses(&buf, gcsURI)
+	err := contextClasses(&buf)
 	if err != nil {
 		t.Fatalf("contextClasses got err: %v", err)
 	}

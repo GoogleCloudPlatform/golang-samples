@@ -16,7 +16,6 @@ package snippets
 
 import (
 	"bytes"
-	"os"
 	"strings"
 	"testing"
 
@@ -25,9 +24,8 @@ import (
 
 func TestTranscribeStreamingV2(t *testing.T) {
 	testutil.SystemTest(t)
-	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 	var buf bytes.Buffer
-	if err := transcribeStreamingV2(&buf, projectID, recognitionAudioFile); err != nil {
+	if err := transcribeStreamingV2(&buf); err != nil {
 		t.Fatalf("error in transcribe %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, "Chromecast") {

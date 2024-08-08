@@ -15,21 +15,18 @@
 // Package snippets contains speech examples.
 package snippets
 
+// [START speech_transcribe_auto_punctuation]
+
 import (
+	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 	"strings"
-
-	// [START imports]
-	"context"
 
 	speech "cloud.google.com/go/speech/apiv1"
 	"cloud.google.com/go/speech/apiv1/speechpb"
-	// [END imports]
 )
-
-// [START speech_transcribe_auto_punctuation]
 
 func autoPunctuation(w io.Writer, path string) error {
 	ctx := context.Background()
@@ -41,7 +38,7 @@ func autoPunctuation(w io.Writer, path string) error {
 	defer client.Close()
 
 	// path = "../testdata/commercial_mono.wav"
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("ReadFile: %w", err)
 	}

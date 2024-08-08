@@ -524,16 +524,18 @@ func SnippetIterator_Cursor() {
 	}
 
 	// Read the tasks.
-	var tasks []Task
-	var task Task
 	it := client.Run(ctx, query)
-	_, err := it.Next(&task)
-	for err == nil {
+	var tasks []Task
+	for {
+		var task Task
+		_, err := it.Next(&task)
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatalf("Failed fetching results: %v", err)
+		}
 		tasks = append(tasks, task)
-		_, err = it.Next(&task)
-	}
-	if err != iterator.Done {
-		log.Fatalf("Failed fetching results: %v", err)
 	}
 
 	// Get the cursor for the next page of results.

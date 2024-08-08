@@ -3,8 +3,8 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/helloworld
 go 1.19
 
 require (
-	cloud.google.com/go/functions v1.15.4
-	github.com/GoogleCloudPlatform/functions-framework-go v1.8.0
+	cloud.google.com/go/functions v1.16.5
+	github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
 )
 
 require (
@@ -15,5 +15,4 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
-	golang.org/x/time v0.5.0 // indirect
 )

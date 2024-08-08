@@ -27,12 +27,23 @@ import (
 func TestCreateVodSession(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
+	uuid, err := getUUID()
+	if err != nil {
+		t.Fatalf("getUUID err: %v", err)
+	}
+
+	vodConfigID := fmt.Sprintf("%s-%s", vodConfigIDPrefix, uuid)
+	vodConfigName := fmt.Sprintf("projects/%s/locations/%s/vodConfigs/%s", tc.ProjectID, location, vodConfigID)
+	createTestVodConfig(vodConfigID, t)
+	t.Cleanup(func() {
+		deleteTestVodConfig(vodConfigName, t)
+	})
 
 	// Create a new VOD session and return the play URI. VOD sessions are
 	// ephemeral resources that expire after a few hours.
 	sessionPrefix := fmt.Sprintf("locations/%s/vodSessions/", location)
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
-		if err := createVodSession(&buf, tc.ProjectID, vodURI); err != nil {
+		if err := createVodSession(&buf, tc.ProjectID, vodConfigID); err != nil {
 			r.Errorf("createVodSession got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, sessionPrefix) {

@@ -19,10 +19,10 @@ set -ex
 apt-get update && apt-get install -y imagemagick graphviz
 rm -rf /var/lib/apt/lists/*
 
-# Install in GOPATH mode since Go 1.11 doesn't let you use go get without a go.mod.
-GO111MODULE=off go get github.com/GoogleCloudPlatform/golang-samples/testing/gimmeproj \
-    github.com/jstemmer/go-junit-report \
-    golang.org/x/tools/cmd/goimports
+# Install tools used in testing workflows
+GOPROXY=direct go install github.com/GoogleCloudPlatform/golang-samples/testing/gimmeproj@latest
+go install golang.org/x/tools/cmd/goimports@latest
+go install gotest.tools/gotestsum@latest
 
 (
 # Get the SDK tar and untar it.
