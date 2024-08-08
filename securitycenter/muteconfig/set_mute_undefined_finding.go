@@ -44,7 +44,7 @@ func setMuteUndefined(w io.Writer, findingPath string) error {
 
 	req := &securitycenterpb.SetMuteRequest{
 		Name: findingPath,
-		Mute: securitycenterpb.Finding_MUTE_UNDEFINED}
+		Mute: securitycenterpb.Finding_UNDEFINED}
 
 	finding, err := client.SetMute(ctx, req)
 	if err != nil {
