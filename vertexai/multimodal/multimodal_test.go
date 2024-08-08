@@ -25,12 +25,10 @@ func Test_generateMultimodalContent(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
-	prompt := "describe what is in this picture"
-	image := "gs://generativeai-downloads/images/scones.jpg"
 	location := "us-central1"
 	modelName := "gemini-1.5-flash-001"
 
-	err := generateMultimodalContent(buf, prompt, image, tc.ProjectID, location, modelName)
+	err := generateMultimodalContent(buf, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Errorf("Test_generateMultimodalContent: %v", err.Error())
 	}
