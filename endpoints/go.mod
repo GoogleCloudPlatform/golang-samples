@@ -6,9 +6,9 @@ require (
 	github.com/golang/protobuf v1.5.4
 	github.com/gorilla/mux v1.8.1
 	golang.org/x/net v0.27.0
-	golang.org/x/oauth2 v0.21.0
+	golang.org/x/oauth2 v0.22.0
 	google.golang.org/grpc v1.65.0
-	google.golang.org/grpc/examples v0.0.0-20240723201342-aae9e64cf3ad
+	google.golang.org/grpc/examples v0.0.0-20240802160953-e524655becd8
 )
 
 require (
