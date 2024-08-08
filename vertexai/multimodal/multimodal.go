@@ -27,9 +27,7 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// generateMultimodalContent generates a response into w, based upon the prompt
-// and image provided.
-// image is a Google Cloud Storage path starting with "gs://"
+// generateMultimodalContent generates a response into w, based upon the prompt and image.
 func generateMultimodalContent(w io.Writer, projectID, location, modelName string) error {
 	// location := "us-central1"
 	// modelName := "gemini-1.5-flash-001"
