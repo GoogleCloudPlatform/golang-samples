@@ -1,10 +1,10 @@
-// Copyright 2023 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//     https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package safetysettingsmultimodal
+package inspect
 
 import (
 	"bytes"
@@ -22,19 +22,16 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestGenerateContent(t *testing.T) {
+func TestInspectStringRep(t *testing.T) {
 	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
 
-	location := "us-central1"
-	model := "gemini-1.5-flash-001"
-	image := "gs://cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg"
-
-	var buf bytes.Buffer
-	if err := generateMultimodalContent(&buf, image, tc.ProjectID, location, model); err != nil {
-		t.Fatal(err)
+	if err := inspectStringRep(buf, tc.ProjectID, "us-west1", "I'm Gary and my email is gary@example.com"); err != nil {
+		t.Errorf("TestInspectFile: %v", err)
 	}
 
-	if got := buf.String(); !strings.Contains(got, "generated response: ") {
-		t.Error("generated text content not found in response")
+	got := buf.String()
+	if want := "Info type: EMAIL_ADDRESS"; !strings.Contains(got, want) {
+		t.Errorf("inspectString got %q, want %q", got, want)
 	}
 }

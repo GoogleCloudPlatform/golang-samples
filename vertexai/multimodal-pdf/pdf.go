@@ -25,26 +25,11 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// pdfPrompt is a sample prompt type consisting of one PDF asset, and a text question.
-type pdfPrompt struct {
-	// pdfPath is a Google Cloud Storage path starting with "gs://"
-	pdfPath string
-	// question asked to the model
-	question string
-}
-
 // generateContentFromPDF generates a response into the provided io.Writer, based upon the PDF
-// asset and the question provided in the multimodal prompt.
-func generateContentFromPDF(w io.Writer, prompt pdfPrompt, projectID, location, modelName string) error {
-	// prompt := pdfPrompt{
-	// 	pdfPath: "gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf",
-	// 	question: `
-	// 		You are a very professional document summarization specialist.
-	// 		Please summarize the given document.
-	// 	`,
-	// }
+func generateContentFromPDF(w io.Writer, projectID, location, modelName string) error {
 	// location := "us-central1"
 	// modelName := "gemini-1.5-flash-001"
+
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
@@ -57,10 +42,13 @@ func generateContentFromPDF(w io.Writer, prompt pdfPrompt, projectID, location, 
 
 	part := genai.FileData{
 		MIMEType: "application/pdf",
-		FileURI:  prompt.pdfPath,
+		FileURI:  "gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf",
 	}
 
-	res, err := model.GenerateContent(ctx, part, genai.Text(prompt.question))
+	res, err := model.GenerateContent(ctx, part, genai.Text(`
+			You are a very professional document summarization specialist.
+    		Please summarize the given document.
+	`))
 	if err != nil {
 		return fmt.Errorf("unable to generate contents: %w", err)
 	}
