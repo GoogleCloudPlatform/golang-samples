@@ -43,7 +43,11 @@ func multipleInequalitiesQuery(w io.Writer, projectID string) error {
 	for _, doc := range docSnapshots {
 		fmt.Fprintln(w, doc.Data())
 	}
-	return fmt.Errorf("GetAll: %w", err)
+	if err != nil {
+		return fmt.Errorf("GetAll: %w", err)
+	}
+
+	return nil
 }
 
 // [END firestore_query_filter_compound_multi_ineq]

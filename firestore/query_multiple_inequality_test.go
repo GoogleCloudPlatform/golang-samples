@@ -99,16 +99,22 @@ func TestMultipleInequalitiesQuery(t *testing.T) {
 	}
 	bw.End()
 	t.Cleanup(func() {
-		// New BulkWriter instance
 		bw = client.BulkWriter(ctx)
-
 		for _, r := range refs {
 			if _, err := bw.Delete(r); err != nil {
 				t.Fatal(err)
 			}
 		}
 		bw.End()
+	})
 
+	// Create admin client
+	adminClient, err := apiv1.NewFirestoreAdminClient(ctx)
+	if err != nil {
+		t.Fatalf("NewFirestoreAdminClient: %v", err)
+	}
+	t.Cleanup(func() {
+		adminClient.Close()
 	})
 
 	// Create indexes for multiple inequality query
@@ -134,13 +140,6 @@ func TestMultipleInequalitiesQuery(t *testing.T) {
 			Fields:     adminPbIndexFields,
 		},
 	}
-	adminClient, err := apiv1.NewFirestoreAdminClient(ctx)
-	if err != nil {
-		t.Fatalf("NewFirestoreAdminClient: %v", err)
-	}
-	t.Cleanup(func() {
-		adminClient.Close()
-	})
 	op, createErr := adminClient.CreateIndex(ctx, req)
 	if createErr != nil {
 		t.Fatalf("CreateIndex: %v", createErr)
