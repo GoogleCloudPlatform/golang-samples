@@ -39,7 +39,6 @@ func createTestFinding(ctx context.Context, client *securitycenter.Client, findi
 	if err != nil {
 		return nil, fmt.Errorf("TimestampProto: %w", err)
 	}
-
 	req := &securitycenterpb.CreateFindingRequest{
 		Parent:    sourceName,
 		FindingId: findingID,
@@ -58,6 +57,7 @@ func createTestFinding(ctx context.Context, client *securitycenter.Client, findi
 }
 
 func disableTestFinding(ctx context.Context, client *securitycenter.Client, findingName string) error {
+
 	req := &securitycenterpb.UpdateFindingRequest{
 		Finding: &securitycenterpb.Finding{
 			Name:  findingName,
@@ -93,12 +93,13 @@ func setupEntities() error {
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 
-	buf := new(bytes.Buffer)
-	if err := createSource(buf, orgID); err != nil {
+	var buf bytes.Buffer
+	if err := createSource(&buf, orgID); err != nil {
 		return fmt.Errorf("createSource: %w", err)
 	}
 
-	sourceName = strings.TrimSpace(strings.Split(buf.String(), ":")[1])
+	sourceInfo := strings.Split(buf.String(), ":")[1]
+	sourceName = strings.TrimSpace(strings.Split(sourceInfo, "\n")[0])
 
 	finding, err := createTestFinding(ctx, client, "updated", "MEDIUM_RISK_ONE")
 	if err != nil {
@@ -174,9 +175,9 @@ func TestMain(m *testing.M) {
 func TestCreateSource(t *testing.T) {
 	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
 		orgID := setup(t)
-		buf := new(bytes.Buffer)
+		var buf bytes.Buffer
 
-		err := createSource(buf, orgID)
+		err := createSource(&buf, orgID)
 
 		if err != nil {
 			r.Errorf("createSource(%s) had error: %v", orgID, err)
@@ -196,9 +197,9 @@ func TestCreateSource(t *testing.T) {
 func TestGetSource(t *testing.T) {
 	setup(t)
 	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
-		buf := new(bytes.Buffer)
+		var buf bytes.Buffer
 
-		err := getSource(buf, sourceName)
+		err := getSource(&buf, sourceName)
 
 		if err != nil {
 			r.Errorf("getSource(%s) had error: %v", sourceName, err)
@@ -218,9 +219,9 @@ func TestGetSource(t *testing.T) {
 func TestListSources(t *testing.T) {
 	setup(t)
 	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
-		buf := new(bytes.Buffer)
+		var buf bytes.Buffer
 
-		err := listSources(buf, orgID)
+		err := listSources(&buf, orgID)
 
 		if err != nil {
 			r.Errorf("listSource(%s) had error: %v", orgID, err)
@@ -240,9 +241,9 @@ func TestListSources(t *testing.T) {
 func TestUpdateSource(t *testing.T) {
 	setup(t)
 	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
-		buf := new(bytes.Buffer)
+		var buf bytes.Buffer
 
-		err := updateSource(buf, sourceName)
+		err := updateSource(&buf, sourceName)
 
 		if err != nil {
 			r.Errorf("updateSource(%s) had error: %v", sourceName, err)
@@ -268,9 +269,9 @@ func TestListAllFindings(t *testing.T) {
 	t.Skip()
 	testutil.Retry(t, 5, 20*time.Second, func(r *testutil.R) {
 		orgID := setup(t)
-		buf := new(bytes.Buffer)
+		var buf bytes.Buffer
 
-		err := listFindings(buf, orgID)
+		err := listFindings(&buf, orgID)
 
 		if err != nil {
 			r.Errorf("listFindings(%s) had error: %v", orgID, err)
@@ -291,9 +292,9 @@ func TestListAllFindings(t *testing.T) {
 func TestListFilteredFindings(t *testing.T) {
 	setup(t)
 	testutil.Retry(t, 5, 20*time.Second, func(r *testutil.R) {
-		buf := new(bytes.Buffer)
+		var buf bytes.Buffer
 
-		err := listFilteredFindings(buf, sourceName)
+		err := listFilteredFindings(&buf, sourceName)
 
 		if err != nil {
 			r.Errorf("listFilteredFindings(%s) had error: %v", sourceName, err)
@@ -314,9 +315,9 @@ func TestListFilteredFindings(t *testing.T) {
 func TestAddSecurityMarks(t *testing.T) {
 	setup(t)
 	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
-		buf := new(bytes.Buffer)
+		var buf bytes.Buffer
 
-		err := addSecurityMarks(buf, findingName)
+		err := addSecurityMarks(&buf, findingName)
 
 		if err != nil {
 			r.Errorf("addSecurityMarks(%s) adding marks had error: %v", findingName, err)
@@ -337,16 +338,16 @@ func TestAddSecurityMarks(t *testing.T) {
 func TestListFindingsWithMarks(t *testing.T) {
 	testutil.Retry(t, 5, 20*time.Second, func(r *testutil.R) {
 		orgID := setup(t)
-		buf := new(bytes.Buffer)
+		var buf bytes.Buffer
 		// Ensure security marks have been added so filter is effective.
-		err := addSecurityMarks(buf, findingName)
+		err := addSecurityMarks(&buf, findingName)
 		buf.Reset()
 		if err != nil {
 			r.Errorf("listFindingsWithMark(%s) adding marks had error: %v", findingName, err)
 			return
 		}
 
-		err = listFindingsWithMarks(buf, sourceName)
+		err = listFindingsWithMarks(&buf, sourceName)
 
 		if err != nil {
 			r.Errorf("listFindingsWithMark(%s) had error: %v", sourceName, err)
@@ -368,9 +369,9 @@ func TestListFindingsWithMarks(t *testing.T) {
 func TestGroupFindings(t *testing.T) {
 	orgID := setup(t)
 	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
-		buf := new(bytes.Buffer)
+		var buf bytes.Buffer
 
-		err := groupFindings(buf, orgID)
+		err := groupFindings(&buf, orgID)
 
 		if err != nil {
 			r.Errorf("groupFindings(%s) had error: %v", orgID, err)
@@ -378,7 +379,7 @@ func TestGroupFindings(t *testing.T) {
 		}
 
 		got := buf.String()
-		if want := "Grouped Findings"; !strings.Contains(got, want) {
+		if want := "Grouped Finding"; !strings.Contains(got, want) {
 			r.Errorf("groupFindings(%s) got: %s want %s", orgID, got, want)
 		}
 	})
@@ -387,9 +388,9 @@ func TestGroupFindings(t *testing.T) {
 func TestGroupFindingsWithFilter(t *testing.T) {
 	setup(t)
 	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
-		buf := new(bytes.Buffer)
+		var buf bytes.Buffer
 
-		err := groupFindingsWithFilter(buf, sourceName)
+		err := groupFindingsWithFilter(&buf, sourceName)
 
 		if err != nil {
 			r.Errorf("groupFindingsWithFilter(%s) had error: %v", sourceName, err)
@@ -397,7 +398,7 @@ func TestGroupFindingsWithFilter(t *testing.T) {
 		}
 
 		got := buf.String()
-		if want := "Grouped Findings"; !strings.Contains(got, want) {
+		if want := "Grouped Finding"; !strings.Contains(got, want) {
 			r.Errorf("groupFindingsWithFilter(%s) got: %s want %s", sourceName, got, want)
 		}
 	})
@@ -406,17 +407,16 @@ func TestGroupFindingsWithFilter(t *testing.T) {
 func TestGroupFindingsByState(t *testing.T) {
 	setup(t)
 	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
-		buf := new(bytes.Buffer)
+		var buf bytes.Buffer
 
-		err := groupFindingsByState(buf, sourceName)
+		err := groupFindingsByState(&buf, sourceName)
 
 		if err != nil {
 			r.Errorf("groupFindingsByState(%s) had error: %v", sourceName, err)
 			return
 		}
-
 		got := buf.String()
-		if want := "Grouped Findings by State"; !strings.Contains(got, want) {
+		if want := "Grouped Finding"; !strings.Contains(got, want) {
 			r.Errorf("groupFindingsByState(%s) got: %s want %s", sourceName, got, want)
 		}
 	})

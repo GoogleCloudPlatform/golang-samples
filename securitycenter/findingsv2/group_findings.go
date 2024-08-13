@@ -49,7 +49,7 @@ func groupFindings(w io.Writer, orgID string) error {
 		if err != nil {
 			return fmt.Errorf("it.Next: %w", err)
 		}
-		fmt.Fprintf(w, "%d: %v\n", i+1, groupResult)
+		fmt.Fprintf(w, "Grouped Finding %d: State: %v, Count: %d\n", i+1, groupResult.Properties["state"], groupResult.Count)
 	}
 	return nil
 }
