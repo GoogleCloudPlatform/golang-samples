@@ -265,8 +265,8 @@ func TestSetUnmuteFinding(t *testing.T) {
 	if err := setUnmute(&buf, fixture.finding2Name); err != nil {
 		t.Errorf("setUnmute had error: %v", err)
 	}
-	if got := buf.String(); !strings.Contains(got, fmt.Sprintf("Mute value for the finding: %s is %s", fixture.finding1Name, "UNMUTE")) {
-		t.Errorf("setUnmute got %q, expected %q", got, fmt.Sprintf("Mute value for the finding: %s is %s", fixture.finding1Name, "UNMUTE"))
+	if got := buf.String(); !strings.Contains(got, fmt.Sprintf("Mute value for the finding: %s is %s", fixture.finding2Name, "UNMUTE")) {
+		t.Errorf("setUnmute got %q, expected %q", got, fmt.Sprintf("Mute value for the finding: %s is %s", fixture.finding2Name, "UNMUTE"))
 	}
 }
 
