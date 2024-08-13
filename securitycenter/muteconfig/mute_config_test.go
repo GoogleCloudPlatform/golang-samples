@@ -270,6 +270,19 @@ func TestSetUnmuteFinding(t *testing.T) {
 	}
 }
 
+func TestSetMuteUndefinedFinding(t *testing.T) {
+	testutil.SystemTest(t)
+
+	var buf bytes.Buffer
+	// Reset an individual finding mute state to UNDEFINED.
+	if err := setMuteUndefined(&buf, fixture.finding1Name); err != nil {
+		t.Errorf("setMuteUndefined had error: %v", err)
+	}
+	if got := buf.String(); !strings.Contains(got, fmt.Sprintf("Mute value for the finding: %s is %s", fixture.finding1Name, "UNDEFINED")) {
+		t.Errorf("setMuteUndefined got %q, expected %q", got, fmt.Sprintf("Mute value for the finding: %s is %s", fixture.finding1Name, "UNDEFINED"))
+	}
+}
+
 func TestBulkMuteFinding(t *testing.T) {
 	testutil.SystemTest(t)
 
