@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START generativeaionvertexai_sdk_embedding]
+// [START generativeaionvertexai_text_predictions]
 import (
 	"context"
 	"fmt"
@@ -83,4 +83,4 @@ func embedTextsPreview(
 	return embeddings, nil
 }
 
-// [END generativeaionvertexai_sdk_embedding]
+// [END generativeaionvertexai_text_predictions]
