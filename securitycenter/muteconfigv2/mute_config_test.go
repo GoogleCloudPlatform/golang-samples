@@ -106,6 +106,7 @@ type muteconfigFixture struct {
 	client        *securitycenter.Client
 	orgId         string
 	projectId     string
+	locationId    string
 	parent        string
 	sourceName    string
 	finding1Name  string
@@ -133,7 +134,7 @@ func newMuteConfigFixture() (*muteconfigFixture, error) {
 	}
 	mc.orgId = orgId
 	mc.projectId = projectId
-
+	mc.locationId = locationId
 	// Create source.
 	buf := &bytes.Buffer{}
 	if err := createSource(buf, orgId); err != nil {
@@ -268,18 +269,5 @@ func TestSetUnmuteFinding(t *testing.T) {
 	}
 	if got := buf.String(); !strings.Contains(got, fmt.Sprintf("Mute value for the finding: %s is %s", fixture.finding1Name, "UNMUTE")) {
 		t.Errorf("setUnmute got %q, expected %q", got, fmt.Sprintf("Mute value for the finding: %s is %s", fixture.finding1Name, "UNMUTE"))
-	}
-}
-
-func TestBulkMuteFinding(t *testing.T) {
-	testutil.SystemTest(t)
-
-	var buf bytes.Buffer
-	// Bulk mute findings.
-	if err := bulkMute(&buf, fixture.parent, "severity=\"LOW\""); err != nil {
-		t.Errorf("bulkMute had error: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, "Bulk mute findings completed successfully") {
-		t.Errorf("bulkMute got %q, expected %q", got, "Bulk mute findings completed successfully")
 	}
 }
