@@ -27,6 +27,8 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
+// Embeds code query with a pre-trained, foundational model by specifying the task type as 'CODE_RETRIEVAL_QUERY'. e.g. 'Retrieve a function that adds two numbers'.
+// Embeds code block with a pre-trained, foundational model by specifying the task type as 'RETRIEVAL_DOCUMENT'. e.g. 'texts := []string{"def func(a, b): return a + b", "def func(a, b): return a - b", "def func(a, b): return (a ** 2 + b ** 2) ** 0.5"}'.
 func embedTextsPreview(
 	apiEndpoint, project, model string, texts []string,
 	task string, dimensionality *int) ([][]float32, error) {
