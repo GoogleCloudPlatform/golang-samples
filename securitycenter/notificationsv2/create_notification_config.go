@@ -42,7 +42,7 @@ func createNotificationConfig(w io.Writer, orgID string, pubsubTopic string, not
 		//		"organizations/{orgId}/locations/global"
 		//		"projects/{projectId}/locations/global"
 		//		"folders/{folderId}/locations/global"
-		Parent:   fmt.Sprintf("organizations/%s", orgID),
+		Parent:   fmt.Sprintf("organizations/%s/locations/global", orgID),
 		ConfigId: notificationConfigID,
 		NotificationConfig: &securitycenterpb.NotificationConfig{
 			Description: "Go sample config",

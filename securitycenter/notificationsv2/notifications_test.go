@@ -35,6 +35,7 @@ func orgID(t *testing.T) string {
 	if orgID == "" {
 		t.Fatal("GCLOUD_ORGANIZATION not set")
 	}
+	orgID = strings.TrimSpace(orgID)
 	return orgID
 }
 
@@ -43,6 +44,7 @@ func projectID(t *testing.T) string {
 	if projectID == "" {
 		t.Fatal("SCC_PUBSUB_PROJECT not set")
 	}
+	projectID = strings.TrimSpace(projectID)
 	return projectID
 }
 
@@ -51,6 +53,7 @@ func pubsubTopic(t *testing.T) string {
 	if pubsubTopic == "" {
 		t.Fatal("SCC_PUBSUB_TOPIC not set")
 	}
+	pubsubTopic = strings.TrimSpace(pubsubTopic)
 	return pubsubTopic
 }
 
@@ -59,10 +62,11 @@ func pubsubSubscription(t *testing.T) string {
 	if pubsubSubscription == "" {
 		t.Fatal("SCC_PUBSUB_SUBSCRIPTION not set")
 	}
+	pubsubSubscription = strings.TrimSpace(pubsubSubscription)
 	return pubsubSubscription
 }
 
-func createTestNotificationConfig(buf *bytes.Buffer, orgID, pubsubTopic, configID string) error {
+func createTestNotificationConfig(buf *bytes.Buffer, orgID string, pubsubTopic string, configID string) error {
 
 	projectID := projectIDFromEnv()
 	fullPubsubTopic := fmt.Sprintf("projects/%s/topics/%s", projectID, pubsubTopic)
