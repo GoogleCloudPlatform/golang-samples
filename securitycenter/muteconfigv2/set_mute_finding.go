@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package muteconfig
+package muteconfigv2
 
-// [START securitycenter_set_mute]
+// [START securitycenter_set_mute_v2]
 import (
 	"context"
 	"fmt"
 	"io"
 
-	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
+	securitycenter "cloud.google.com/go/securitycenter/apiv2"
+	"cloud.google.com/go/securitycenter/apiv2/securitycenterpb"
 )
 
-// setMute mutes an individual finding, can also unmute or reset the mute state of a finding.
+// setMute mutes an individual finding.
 // If a finding is already muted, muting it again has no effect.
-// Various mute states are: UNDEFINED/MUTE/UNMUTE.
+// Various mute states are: MUTE_UNSPECIFIED/MUTE/UNMUTE.
 func setMute(w io.Writer, findingPath string) error {
 	// findingPath: The relative resource name of the finding. See:
 	// https://cloud.google.com/apis/design/resource_names#relative_resource_name
@@ -54,4 +54,4 @@ func setMute(w io.Writer, findingPath string) error {
 	return nil
 }
 
-// [END securitycenter_set_mute]
+// [END securitycenter_set_mute_v2]
