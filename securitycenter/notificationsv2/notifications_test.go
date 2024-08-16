@@ -54,6 +54,7 @@ func pubsubTopic(t *testing.T) string {
 		t.Fatal("SCC_PUBSUB_TOPIC not set")
 	}
 	pubsubTopic = strings.TrimSpace(pubsubTopic)
+	fmt.Printf("PubsubTopic: %v\n", pubsubTopic)
 	return pubsubTopic
 }
 
@@ -70,6 +71,7 @@ func createTestNotificationConfig(buf *bytes.Buffer, orgID string, pubsubTopic s
 
 	projectID := projectIDFromEnv()
 	fullPubsubTopic := fmt.Sprintf("projects/%s/topics/%s", projectID, pubsubTopic)
+	fmt.Printf("FullPubSubTopic: %v\n", fullPubsubTopic)
 
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
