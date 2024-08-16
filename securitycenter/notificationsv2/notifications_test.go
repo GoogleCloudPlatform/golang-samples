@@ -54,7 +54,6 @@ func pubsubTopic(t *testing.T) string {
 		t.Fatal("SCC_PUBSUB_TOPIC not set")
 	}
 	pubsubTopic = strings.TrimSpace(pubsubTopic)
-	fmt.Printf("PubsubTopic: %v\n", pubsubTopic)
 	return pubsubTopic
 }
 
@@ -69,10 +68,6 @@ func pubsubSubscription(t *testing.T) string {
 
 func createTestNotificationConfig(buf *bytes.Buffer, orgID string, pubsubTopic string, configID string) error {
 
-	projectID := projectIDFromEnv()
-	fullPubsubTopic := fmt.Sprintf("projects/%s/topics/%s", projectID, pubsubTopic)
-	fmt.Printf("FullPubSubTopic: %v\n", fullPubsubTopic)
-
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
@@ -85,7 +80,7 @@ func createTestNotificationConfig(buf *bytes.Buffer, orgID string, pubsubTopic s
 		ConfigId: configID,
 		NotificationConfig: &securitycenterpb.NotificationConfig{
 			Description: "Go sample config",
-			PubsubTopic: fullPubsubTopic,
+			PubsubTopic: pubsubTopic,
 			NotifyConfig: &securitycenterpb.NotificationConfig_StreamingConfig_{
 				StreamingConfig: &securitycenterpb.NotificationConfig_StreamingConfig{
 					Filter: `state = "ACTIVE"`,
@@ -313,7 +308,8 @@ func sendTestNotification(pubsubTopic string) error {
 	}
 	defer client.Close()
 
-	topic := client.Topic(pubsubTopic)
+	topicID := pubsubTopic[strings.LastIndex(pubsubTopic, "/")+1:]
+	topic := client.Topic(topicID)
 
 	msg := &pubsub.Message{
 		Data: []byte("Test notification"),

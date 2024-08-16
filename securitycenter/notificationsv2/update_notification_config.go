@@ -25,10 +25,6 @@ import (
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-func formatPubsubTopic(projectID, updatedPubsubTopic string) string {
-	return fmt.Sprintf("projects/%s/topics/%s", projectID, updatedPubsubTopic)
-}
-
 func updateNotificationConfig(w io.Writer, orgID string, notificationConfigID string, updatedPubsubTopic string, projectID string) error {
 	// orgID := "your-org-id"
 	// notificationConfigID := "your-config-id"
@@ -49,12 +45,11 @@ func updateNotificationConfig(w io.Writer, orgID string, notificationConfigID st
 	//		"projects/{projectId}/locations/global"
 	//		"folders/{folderId}/locations/global"
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
-	fullPubsubTopic := formatPubsubTopic(projectID, updatedPubsubTopic)
 	req := &securitycenterpb.UpdateNotificationConfigRequest{
 		NotificationConfig: &securitycenterpb.NotificationConfig{
 			Name:        fmt.Sprintf("%s/notificationConfigs/%s", parent, notificationConfigID),
 			Description: updatedDescription,
-			PubsubTopic: fullPubsubTopic,
+			PubsubTopic: updatedPubsubTopic,
 			NotifyConfig: &securitycenterpb.NotificationConfig_StreamingConfig_{
 				StreamingConfig: &securitycenterpb.NotificationConfig_StreamingConfig{
 					Filter: updatedFilter,
