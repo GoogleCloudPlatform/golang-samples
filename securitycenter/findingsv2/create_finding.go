@@ -51,7 +51,7 @@ func createFinding(w io.Writer, sourceName string) error {
 			State: securitycenterpb.Finding_ACTIVE,
 			// Resource the finding is associated with. This is an
 			// example any resource identifier can be used.
-			ResourceName: "//cloudresourcemanager.googleapis.com/organizations/11232/locations/global",
+			ResourceName: "//cloudresourcemanager.googleapis.com/organizations/11232/sources/-/locations/global",
 			// A free-form category.
 			Category: "MEDIUM_RISK_ONE",
 			// The time associated with discovering the issue.

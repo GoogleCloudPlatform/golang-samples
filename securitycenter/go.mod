@@ -3,7 +3,6 @@ module github.com/GoogleCloudPlatform/golang-samples/securitycenter
 go 1.20
 
 require (
-
 	cloud.google.com/go/iam v1.1.11
 	cloud.google.com/go/pubsub v1.40.0
 	cloud.google.com/go/securitycenter v1.33.0
