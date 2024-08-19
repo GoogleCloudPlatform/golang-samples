@@ -19,7 +19,6 @@ package snippets
 import (
 	"context"
 	"fmt"
-	"regexp"
 
 	aiplatform "cloud.google.com/go/aiplatform/apiv1"
 	"cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
@@ -28,14 +27,12 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-func embedTexts(
-	project, location string, texts []string) ([][]float32, error) {
+func embedTexts(project, location, model string) ([][]float32, error) {
 	ctx := context.Background()
 
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
-	model := "text-embedding-004"
-	task := "QUESTION_ANSWERING"
-	customOutputDimensionality := 5
+	dimensionality := 5
+	texts := []string{"banana muffins? ", "banana bread? banana muffins?"}
 
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {
@@ -43,25 +40,21 @@ func embedTexts(
 	}
 	defer client.Close()
 
-	match := regexp.MustCompile(`^(\w+-\w+)`).FindStringSubmatch(apiEndpoint)
-	if match != nil {
-		location = match[1]
-	}
 	endpoint := fmt.Sprintf("projects/%s/locations/%s/publishers/google/models/%s", project, location, model)
 	instances := make([]*structpb.Value, len(texts))
 	for i, text := range texts {
 		instances[i] = structpb.NewStructValue(&structpb.Struct{
 			Fields: map[string]*structpb.Value{
 				"content":   structpb.NewStringValue(text),
-				"task_type": structpb.NewStringValue(task),
+				"task_type": structpb.NewStringValue("QUESTION_ANSWERING"),
 			},
 		})
 	}
-	outputDimensionality := structpb.NewNullValue()
-	outputDimensionality = structpb.NewNumberValue(float64(customOutputDimensionality))
 
 	params := structpb.NewStructValue(&structpb.Struct{
-		Fields: map[string]*structpb.Value{"outputDimensionality": outputDimensionality},
+		Fields: map[string]*structpb.Value{
+			"outputDimensionality": structpb.NewNumberValue(float64(dimensionality)),
+		},
 	})
 
 	req := &aiplatformpb.PredictRequest{
