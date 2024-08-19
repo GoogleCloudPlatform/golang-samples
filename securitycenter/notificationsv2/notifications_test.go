@@ -24,8 +24,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/pubsub"
-	securitycenter "cloud.google.com/go/securitycenter/apiv2"
-	"cloud.google.com/go/securitycenter/apiv2/securitycenterpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
 )
@@ -66,68 +64,6 @@ func pubsubSubscription(t *testing.T) string {
 	return pubsubSubscription
 }
 
-func createTestNotificationConfig(buf *bytes.Buffer, orgID string, pubsubTopic string, configID string) error {
-
-	ctx := context.Background()
-	client, err := securitycenter.NewClient(ctx)
-	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %w", err)
-	}
-	defer client.Close()
-
-	req := &securitycenterpb.CreateNotificationConfigRequest{
-		Parent:   fmt.Sprintf("organizations/%s/locations/global", orgID),
-		ConfigId: configID,
-		NotificationConfig: &securitycenterpb.NotificationConfig{
-			Description: "Go sample config",
-			PubsubTopic: pubsubTopic,
-			NotifyConfig: &securitycenterpb.NotificationConfig_StreamingConfig_{
-				StreamingConfig: &securitycenterpb.NotificationConfig_StreamingConfig{
-					Filter: `state = "ACTIVE"`,
-				},
-			},
-		},
-	}
-
-	_, err = client.CreateNotificationConfig(ctx, req)
-	if err != nil {
-		return fmt.Errorf("Failed to create notification config: %w", err)
-	}
-
-	buf.WriteString("New NotificationConfig created")
-	return nil
-}
-
-func projectIDFromEnv() string {
-	projectID := os.Getenv("SCC_PUBSUB_PROJECT")
-	if projectID == "" {
-		panic("SCC_PUBSUB_PROJECT not set")
-	}
-	return projectID
-}
-
-func cleanupNotificationConfig(t *testing.T, notificationConfigID string) error {
-	orgID := orgID(t)
-
-	ctx := context.Background()
-	client, err := securitycenter.NewClient(ctx)
-	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %w", err)
-	}
-	defer client.Close()
-
-	name := fmt.Sprintf("organizations/%s/notificationConfigs/%s", orgID, notificationConfigID)
-	req := &securitycenterpb.DeleteNotificationConfigRequest{
-		Name: name,
-	}
-
-	if err = client.DeleteNotificationConfig(ctx, req); err != nil {
-		return fmt.Errorf("Failed to delete notification config: %w", err)
-	}
-
-	return nil
-}
-
 func TestCreateNotificationConfig(t *testing.T) {
 	testutil.Retry(t, 5, 30*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
@@ -138,15 +74,15 @@ func TestCreateNotificationConfig(t *testing.T) {
 		}
 		configID := "go-test-create-config-id" + rand.String()
 
-		if err := createTestNotificationConfig(buf, orgID(t), pubsubTopic(t), configID); err != nil {
-			r.Errorf("createTestNotificationConfig failed: %v", err)
+		if err := createNotificationConfig(buf, orgID(t), pubsubTopic(t), configID); err != nil {
+			r.Errorf("createNotificationConfig failed: %v", err)
 			return
 		}
 
-		defer cleanupNotificationConfig(t, configID)
+		defer deleteNotificationConfig(buf, orgID(t), configID)
 
 		if !strings.Contains(buf.String(), "New NotificationConfig created") {
-			r.Errorf("createTestNotificationConfig did not create.")
+			r.Errorf("createNotificationConfig did not create.")
 		}
 	})
 }
@@ -161,12 +97,10 @@ func TestDeleteNotificationConfig(t *testing.T) {
 		}
 		configID := "go-test-delete-config-id" + rand.String()
 
-		if err := createTestNotificationConfig(buf, orgID(t), pubsubTopic(t), configID); err != nil {
+		if err := createNotificationConfig(buf, orgID(t), pubsubTopic(t), configID); err != nil {
 			r.Errorf("Could not setup test environment: %v", err)
 			return
 		}
-
-		defer cleanupNotificationConfig(t, configID)
 
 		if err := deleteNotificationConfig(buf, orgID(t), configID); err != nil {
 			r.Errorf("deleteNotificationConfig failed: %v", err)
@@ -189,12 +123,12 @@ func TestGetNotificationConfig(t *testing.T) {
 		}
 		configID := "go-test-get-config-id" + rand.String()
 
-		if err := createTestNotificationConfig(buf, orgID(t), pubsubTopic(t), configID); err != nil {
+		if err := createNotificationConfig(buf, orgID(t), pubsubTopic(t), configID); err != nil {
 			r.Errorf("Could not setup test environment: %v", err)
 			return
 		}
 
-		defer cleanupNotificationConfig(t, configID)
+		defer deleteNotificationConfig(buf, orgID(t), configID)
 
 		if err := getNotificationConfig(buf, orgID(t), configID); err != nil {
 			r.Errorf("getNotificationConfig failed: %v", err)
@@ -217,12 +151,12 @@ func TestListNotificationConfigs(t *testing.T) {
 		}
 		configID := "go-test-list-config-id" + rand.String()
 
-		if err := createTestNotificationConfig(buf, orgID(t), pubsubTopic(t), configID); err != nil {
+		if err := createNotificationConfig(buf, orgID(t), pubsubTopic(t), configID); err != nil {
 			r.Errorf("Could not setup test environment: %v", err)
 			return
 		}
 
-		defer cleanupNotificationConfig(t, configID)
+		defer deleteNotificationConfig(buf, orgID(t), configID)
 
 		if err := listNotificationConfigs(buf, orgID(t)); err != nil {
 			r.Errorf("listNotificationConfig failed: %v", err)
@@ -244,14 +178,14 @@ func TestUpdateNotificationConfig(t *testing.T) {
 			return
 		}
 		configID := "go-test-update-config-id" + rand.String()
-		projectID := projectIDFromEnv()
+		projectID := projectID(t)
 
-		if err := createTestNotificationConfig(buf, orgID(t), pubsubTopic(t), configID); err != nil {
+		if err := createNotificationConfig(buf, orgID(t), pubsubTopic(t), configID); err != nil {
 			r.Errorf("Could not setup test environment: %v", err)
 			return
 		}
 
-		defer cleanupNotificationConfig(t, configID)
+		defer deleteNotificationConfig(buf, orgID(t), configID)
 
 		if err := updateNotificationConfig(buf, orgID(t), configID, pubsubTopic(t), projectID); err != nil {
 			r.Errorf("updateNotificationConfig failed: %v", err)
@@ -274,12 +208,12 @@ func TestReceiveNotifications(t *testing.T) {
 		}
 		configID := "go-test-receive-config-id" + rand.String()
 
-		if err := createTestNotificationConfig(buf, orgID(t), pubsubTopic(t), configID); err != nil {
+		if err := createNotificationConfig(buf, orgID(t), pubsubTopic(t), configID); err != nil {
 			r.Errorf("Could not setup test environment: %v", err)
 			return
 		}
 
-		defer cleanupNotificationConfig(t, configID)
+		defer deleteNotificationConfig(buf, orgID(t), configID)
 
 		// Ensure a notification is sent before receiving
 		if err := sendTestNotification(pubsubTopic(t)); err != nil {
