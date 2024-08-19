@@ -24,9 +24,9 @@ import (
 	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 )
 
-// setMute mutes an individual finding.
+// setMute mutes an individual finding, can also unmute or reset the mute state of a finding.
 // If a finding is already muted, muting it again has no effect.
-// Various mute states are: MUTE_UNSPECIFIED/MUTE/UNMUTE.
+// Various mute states are: UNDEFINED/MUTE/UNMUTE.
 func setMute(w io.Writer, findingPath string) error {
 	// findingPath: The relative resource name of the finding. See:
 	// https://cloud.google.com/apis/design/resource_names#relative_resource_name
