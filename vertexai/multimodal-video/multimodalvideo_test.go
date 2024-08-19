@@ -25,12 +25,10 @@ func Test_generateMultimodalContent(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
-	prompt := "What is in this video?"
-	video := "gs://cloud-samples-data/video/animals.mp4"
 	location := "us-central1"
 	modelName := "gemini-1.5-flash-001"
 
-	err := generateMultimodalContent(buf, prompt, video, tc.ProjectID, location, modelName)
+	err := generateMultimodalContent(buf, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Errorf("Test_generateMultimodalContent: %v", err.Error())
 	}

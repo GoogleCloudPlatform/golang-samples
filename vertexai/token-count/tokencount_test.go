@@ -26,12 +26,11 @@ import (
 func Test_countTokens(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	prompt := "why is the sky blue?"
 	location := "us-central1"
 	modelName := "gemini-1.5-flash-001"
 
 	var buf bytes.Buffer
-	err := countTokens(&buf, prompt, tc.ProjectID, location, modelName)
+	err := countTokens(&buf, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Fatalf("Test_countTokens: %v", err.Error())
 	}

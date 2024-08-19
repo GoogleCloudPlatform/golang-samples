@@ -27,8 +27,7 @@ import (
 )
 
 // countTokens returns the number of tokens for this prompt.
-func countTokens(w io.Writer, prompt, projectID, location, modelName string) error {
-	// prompt := "why is the sky blue?"
+func countTokens(w io.Writer, projectID, location, modelName string) error {
 	// location := "us-central1"
 	// modelName := "gemini-1.5-flash-001"
 
@@ -42,7 +41,7 @@ func countTokens(w io.Writer, prompt, projectID, location, modelName string) err
 
 	model := client.GenerativeModel(modelName)
 
-	resp, err := model.CountTokens(ctx, genai.Text(prompt))
+	resp, err := model.CountTokens(ctx, genai.Text("Why is the sky blue?"))
 	if err != nil {
 		return err
 	}

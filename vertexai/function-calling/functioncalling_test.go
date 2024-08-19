@@ -26,11 +26,10 @@ func Test_functionCallsBasic(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	var buf bytes.Buffer
-	prompt := "What's the weather like in Boston?"
 	location := "us-central1"
 	modelName := "gemini-1.5-flash-001"
 
-	err := functionCallsBasic(&buf, prompt, tc.ProjectID, location, modelName)
+	err := functionCallsBasic(&buf, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Errorf("Test_functionCalls: %v", err.Error())
 	}
