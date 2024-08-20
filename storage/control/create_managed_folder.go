@@ -39,13 +39,12 @@ func createManagedFolder(w io.Writer, bucket, folder string) error {
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
 	defer cancel()
-	mf := &controlpb.ManagedFolder{
-		Name: fmt.Sprintf("projects/_/buckets/%v/folders/%v", bucket, folder),
-	}
+	mf := &controlpb.ManagedFolder{}
 
 	req := &controlpb.CreateManagedFolderRequest{
-		Parent:        fmt.Sprintf("projects/_/buckets/%v", bucket),
-		ManagedFolder: mf,
+		Parent:          fmt.Sprintf("projects/_/buckets/%v", bucket),
+		ManagedFolder:   mf,
+		ManagedFolderId: folder,
 	}
 	f, err := client.CreateManagedFolder(ctx, req)
 	if err != nil {
