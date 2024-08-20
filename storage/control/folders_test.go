@@ -167,19 +167,19 @@ func TestManagedFolders(t *testing.T) {
 
 	folderName := "managed-foo"
 	folderPath := fmt.Sprintf("projects/_/buckets/%v/folders/%v", bucketName, folderName)
+	buf := &bytes.Buffer{}
+	if err := deleteManagedFolder(buf, bucketName, folderName); err != nil {
+		log.Printf("Trying to delete folder before test %v", err)
+	}
 
 	// Create Managed folder. Retry because there is no automatic retry in the client
 	// for this op.
-	if ok := testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
-		buf := &bytes.Buffer{}
-		if err := createManagedFolder(buf, bucketName, folderName); err != nil {
-			r.Errorf("createManagedFolder: %v", err)
-		}
-		if got, want := buf.String(), folderPath; !strings.Contains(got, want) {
-			r.Errorf("createManagedFolder: got %q, want to contain %q", got, want)
-		}
-	}); !ok {
-		t.Fatalf("failed to create managed folder; can't continue")
+	buf.Reset()
+	if err := createManagedFolder(buf, bucketName, folderName); err != nil {
+		t.Fatalf("createManagedFolder: %v", err)
+	}
+	if got, want := buf.String(), folderPath; !strings.Contains(got, want) {
+		t.Fatalf("createManagedFolder: got %q, want to contain %q", got, want)
 	}
 
 	// Get managed folder. Retry because there is no automatic retry in the client
@@ -197,7 +197,7 @@ func TestManagedFolders(t *testing.T) {
 	}
 
 	// List managed folders.
-	buf := &bytes.Buffer{}
+	buf.Reset()
 	if err := listManagedFolders(buf, bucketName); err != nil {
 		t.Fatalf("listManagedFolders: %v", err)
 	}
@@ -206,7 +206,7 @@ func TestManagedFolders(t *testing.T) {
 	}
 
 	// Delete managed folder.
-	buf = &bytes.Buffer{}
+	buf.Reset()
 	if err := deleteManagedFolder(buf, bucketName, folderName); err != nil {
 		t.Fatalf("deleteManagedFolder: %v", err)
 	}
