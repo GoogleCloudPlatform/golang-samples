@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,22 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package muteconfig
+package muteconfigv2
 
-// [START securitycenter_set_mute]
+// [START securitycenter_set_unmute_v2]
+
 import (
 	"context"
 	"fmt"
 	"io"
 
-	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
+	securitycenter "cloud.google.com/go/securitycenter/apiv2"
+	"cloud.google.com/go/securitycenter/apiv2/securitycenterpb"
 )
 
-// setMute mutes an individual finding, can also unmute or reset the mute state of a finding.
-// If a finding is already muted, muting it again has no effect.
-// Various mute states are: UNDEFINED/MUTE/UNMUTE.
-func setMute(w io.Writer, findingPath string) error {
+// setUnmute unmutes an individual finding.
+// Unmuting a finding that isn't muted has no effect.
+// Various mute states are: MUTE_UNSPECIFIED/MUTE/UNMUTE.
+func setUnmute(w io.Writer, findingPath string) error {
 	// findingPath: The relative resource name of the finding. See:
 	// https://cloud.google.com/apis/design/resource_names#relative_resource_name
 	// Use any one of the following formats:
@@ -44,7 +45,7 @@ func setMute(w io.Writer, findingPath string) error {
 
 	req := &securitycenterpb.SetMuteRequest{
 		Name: findingPath,
-		Mute: securitycenterpb.Finding_MUTED}
+		Mute: securitycenterpb.Finding_UNMUTED}
 
 	finding, err := client.SetMute(ctx, req)
 	if err != nil {
@@ -54,4 +55,4 @@ func setMute(w io.Writer, findingPath string) error {
 	return nil
 }
 
-// [END securitycenter_set_mute]
+// [END securitycenter_set_unmute_v2]
