@@ -41,7 +41,7 @@ func getManagedFolder(w io.Writer, bucket, folder string) error {
 	defer cancel()
 
 	// Construct folder path including the bucket name.
-	folderPath := fmt.Sprintf("projects/_/buckets/%v/folders/%v", bucket, folder)
+	folderPath := fmt.Sprintf("projects/_/buckets/%v/managedFolders/%v/", bucket, folder)
 
 	req := &controlpb.GetManagedFolderRequest{
 		Name: folderPath,
