@@ -41,7 +41,7 @@ func importDataImageClassification(w io.Writer, projectID, location, datasetID, 
 	ctx := context.Background()
 	aiplatformClient, err := aiplatform.NewDatasetClient(ctx, clientOption)
 	if err != nil {
-		return fmt.Errorf("aiplatform.NewDatasetClient: %v", err)
+		return fmt.Errorf("aiplatform.NewDatasetClient: %w", err)
 	}
 	defer aiplatformClient.Close()
 
@@ -59,7 +59,7 @@ func importDataImageClassification(w io.Writer, projectID, location, datasetID, 
 		ImportConfigs: importConfigs,
 	})
 	if err != nil {
-		return fmt.Errorf("ImportData: %v", err)
+		return fmt.Errorf("ImportData: %w", err)
 	}
 	fmt.Fprintf(os.Stdout, "Processing operation name: %q\n", op.Name())
 

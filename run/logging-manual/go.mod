@@ -2,6 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/run/logging-manual
 
 go 1.19
 
-require cloud.google.com/go/compute/metadata v0.2.3
+require cloud.google.com/go/compute/metadata v0.5.0
 
-require cloud.google.com/go/compute v1.19.1 // indirect
+require golang.org/x/sys v0.22.0 // indirect

@@ -13,6 +13,7 @@
 // limitations under the License.
 package snippets
 
+// [START generativeaionvertexai_gemini_image]
 // [START aiplatform_gemini_get_started]
 import (
 	"context"
@@ -23,13 +24,15 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-var projectId = "PROJECT_ID"
-var region = "us-central1"
-
-func tryGemini(w io.Writer, projectId string, region string, modelName string) error {
+func tryGemini(w io.Writer, projectID string, location string, modelName string) error {
+	// location := "us-central1"
+	// modelName := "gemini-1.5-flash-001"
 
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, projectId, region)
+	client, err := genai.NewClient(ctx, projectID, location)
+	if err != nil {
+		return fmt.Errorf("error creating client: %w", err)
+	}
 	gemini := client.GenerativeModel(modelName)
 
 	img := genai.FileData{
@@ -37,13 +40,18 @@ func tryGemini(w io.Writer, projectId string, region string, modelName string) e
 		FileURI:  "gs://generativeai-downloads/images/scones.jpg",
 	}
 	prompt := genai.Text("What is in this image?")
+
 	resp, err := gemini.GenerateContent(ctx, img, prompt)
 	if err != nil {
 		return fmt.Errorf("error generating content: %w", err)
 	}
-	rb, _ := json.MarshalIndent(resp, "", "  ")
+	rb, err := json.MarshalIndent(resp, "", "  ")
+	if err != nil {
+		return fmt.Errorf("json.MarshalIndent: %w", err)
+	}
 	fmt.Fprintln(w, string(rb))
 	return nil
 }
 
 // [END aiplatform_gemini_get_started]
+// [END generativeaionvertexai_gemini_image]

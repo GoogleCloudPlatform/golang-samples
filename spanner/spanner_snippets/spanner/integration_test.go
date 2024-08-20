@@ -48,6 +48,7 @@ type instanceSampleFunc func(w io.Writer, projectID, instanceID string) error
 type backupSampleFunc func(ctx context.Context, w io.Writer, dbName, backupID string) error
 type backupSampleFuncWithoutContext func(w io.Writer, dbName, backupID string) error
 type createBackupSampleFunc func(ctx context.Context, w io.Writer, dbName, backupID string, versionTime time.Time) error
+type instancePartitionSampleFunc func(w io.Writer, projectID, instanceID, instancePartitionID string) error
 
 var (
 	validInstancePattern = regexp.MustCompile("^projects/(?P<project>[^/]+)/instances/(?P<instance>[^/]+)$")
@@ -60,7 +61,8 @@ func initTest(t *testing.T, id string) (instName, dbName string, cleanup func())
 		configName = "regional-us-central1"
 	}
 	log.Printf("Running test by using the instance config: %s\n", configName)
-	instName, cleanup = createTestInstance(t, projectID, configName)
+	instanceID, cleanup := createTestInstance(t, projectID, configName)
+	instName = fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
 	dbID := validLength(fmt.Sprintf("smpl-%s", id), t)
 	dbName = fmt.Sprintf("%s/databases/%s", instName, dbID)
 
@@ -69,7 +71,8 @@ func initTest(t *testing.T, id string) (instName, dbName string, cleanup func())
 
 func initTestWithConfig(t *testing.T, id string, instanceConfigName string) (instName, dbName string, cleanup func()) {
 	projectID := getSampleProjectId(t)
-	instName, cleanup = createTestInstance(t, projectID, instanceConfigName)
+	instanceID, cleanup := createTestInstance(t, projectID, instanceConfigName)
+	instName = fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
 	dbID := validLength(fmt.Sprintf("smpl-%s", id), t)
 	dbName = fmt.Sprintf("%s/databases/%s", instName, dbID)
 
@@ -107,6 +110,14 @@ func initBackupTest(t *testing.T, id, instName string) (restoreDBName, backupID,
 	cancelledBackupID = validLength(fmt.Sprintf("cancel-%s", id), t)
 
 	return
+}
+
+func initInstancePartitionTest(t *testing.T, id string) (string, string, string, func()) {
+	projectID := getSampleProjectId(t)
+	instancePartitionID := fmt.Sprintf("instance-partition-%s", id)
+	instanceID, cleanup := createTestInstance(t, projectID, "regional-us-central1")
+
+	return projectID, instanceID, instancePartitionID, cleanup
 }
 
 func TestCreateInstances(t *testing.T) {
@@ -271,6 +282,9 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "record(s) inserted")
 
 	out = runSample(t, setCustomTimeoutAndRetry, dbName, "failed to insert using DML with custom timeout and retry")
+	assertContains(t, out, "record(s) inserted")
+
+	out = runSample(t, setStatementTimeout, dbName, "failed to execute statement with a timeout")
 	assertContains(t, out, "record(s) inserted")
 
 	out = runSample(t, transactionTimeout, dbName, "failed to run transaction with a timeout")
@@ -460,6 +474,19 @@ func TestBackupSample(t *testing.T) {
 
 	out = runBackupSample(ctx, t, deleteBackup, dbName, backupID, "failed to delete a backup")
 	assertContains(t, out, fmt.Sprintf("Deleted backup %s", backupID))
+}
+
+func TestInstancePartitionSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	id := randomID()
+	projectID, instanceID, instancePartitionID, cleanup := initInstancePartitionTest(t, id)
+	defer cleanup()
+
+	var out string
+	out = runInstancePartitionSample(t, createInstancePartition, projectID, instanceID, instancePartitionID, "failed to create an instance partition")
+	assertContains(t, out, fmt.Sprintf("Created instance partition [%s]", instancePartitionID))
 }
 
 func TestCreateDatabaseWithRetentionPeriodSample(t *testing.T) {
@@ -1069,6 +1096,46 @@ func TestPgOrderNulls(t *testing.T) {
 	assertContains(t, out, "Singers ORDER BY Name DESC NULLS LAST\n\tBruce\n\tAlice\n\t<null>")
 }
 
+func TestProtoColumnSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	_, dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+
+	statements := []string{
+		`CREATE TABLE Singers (
+				SingerId   INT64 NOT NULL,
+				FirstName  STRING(1024),
+				LastName   STRING(1024),
+			) PRIMARY KEY (SingerId)`,
+		`CREATE TABLE Albums (
+				SingerId     INT64 NOT NULL,
+				AlbumId      INT64 NOT NULL,
+				AlbumTitle   STRING(MAX)
+			) PRIMARY KEY (SingerId, AlbumId),
+			INTERLEAVE IN PARENT Singers ON DELETE CASCADE`,
+	}
+	dbCleanup, err := createTestDatabase(dbName, statements...)
+	if err != nil {
+		t.Fatalf("failed to create test database: %v", err)
+	}
+	defer dbCleanup()
+
+	var out string
+	runSample(t, write, dbName, "failed to insert data")
+	runSampleWithContext(ctx, t, addProtoColumn, dbName, "failed to update db for proto columns")
+	out = runSample(t, updateDataWithProtoColumn, dbName, "failed to update data with proto columns")
+	assertContains(t, out, "Data updated\n")
+	out = runSample(t, updateDataWithProtoColumnWithDml, dbName, "failed to update data with proto columns using dml")
+	assertContains(t, out, "record(s) updated.")
+	out = runSample(t, queryWithProtoParameter, dbName, "failed to query with proto parameter")
+	assertContains(t, out, "2 singer_id:2")
+}
+
 func maybeCreateKey(projectId, locationId, keyRingId, keyId string) error {
 	client, err := kms.NewKeyManagementClient(context.Background())
 	if err != nil {
@@ -1161,6 +1228,14 @@ func runBackupSampleWithRetry(ctx context.Context, t *testing.T, f backupSampleF
 	return b.String()
 }
 
+func runInstancePartitionSample(t *testing.T, f instancePartitionSampleFunc, projectID, instanceID, instancePartitionID, errMsg string) string {
+	var b bytes.Buffer
+	if err := f(&b, projectID, instanceID, instancePartitionID); err != nil {
+		t.Errorf("%s: %v", errMsg, err)
+	}
+	return b.String()
+}
+
 func runInstanceSample(t *testing.T, f instanceSampleFunc, projectID, instanceID, errMsg string) string {
 	var b bytes.Buffer
 
@@ -1190,10 +1265,10 @@ func mustRunSample(t *testing.T, f sampleFuncWithContext, dbName, errMsg string)
 	return b.String()
 }
 
-func createTestInstance(t *testing.T, projectID string, instanceConfigName string) (instanceName string, cleanup func()) {
+func createTestInstance(t *testing.T, projectID string, instanceConfigName string) (instanceID string, cleanup func()) {
 	ctx := context.Background()
-	instanceID := fmt.Sprintf("go-sample-%s", uuid.New().String()[:16])
-	instanceName = fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
+	instanceID = fmt.Sprintf("go-sample-%s", uuid.New().String()[:16])
+	instanceName := fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
 	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
 	if err != nil {
 		t.Fatalf("failed to create InstanceAdminClient: %v", err)
@@ -1263,7 +1338,7 @@ func createTestInstance(t *testing.T, projectID string, instanceConfigName strin
 		}
 	})
 
-	return instanceName, func() {
+	return instanceID, func() {
 		deleteInstanceAndBackups(t, instanceName, instanceAdmin, databaseAdmin)
 		instanceAdmin.Close()
 		databaseAdmin.Close()
@@ -1316,6 +1391,44 @@ func createTestPgDatabase(db string, extraStatements ...string) (func(), error) 
 		if err := opUpdate.Wait(ctx); err != nil {
 			return dropDb, err
 		}
+	}
+	return dropDb, nil
+}
+
+func createTestDatabase(db string, extraStatements ...string) (func(), error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+	m := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
+	if m == nil || len(m) != 3 {
+		return func() {}, fmt.Errorf("invalid database id %s", db)
+	}
+
+	client, err := database.NewDatabaseAdminClient(ctx)
+	if err != nil {
+		return func() {}, err
+	}
+	defer client.Close()
+
+	opCreate, err := client.CreateDatabase(ctx, &adminpb.CreateDatabaseRequest{
+		Parent:          m[1],
+		CreateStatement: "CREATE DATABASE `" + m[2] + "`",
+		ExtraStatements: extraStatements,
+	})
+	if err != nil {
+		return func() {}, err
+	}
+	if _, err := opCreate.Wait(ctx); err != nil {
+		return func() {}, err
+	}
+	dropDb := func() {
+		client, err := database.NewDatabaseAdminClient(ctx)
+		if err != nil {
+			return
+		}
+		defer client.Close()
+		client.DropDatabase(context.Background(), &adminpb.DropDatabaseRequest{
+			Database: db,
+		})
 	}
 	return dropDb, nil
 }

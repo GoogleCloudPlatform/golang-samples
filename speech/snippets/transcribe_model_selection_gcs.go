@@ -28,13 +28,7 @@ import (
 
 // transcribe_model_selection_gcs Transcribes the given audio file asynchronously with
 // the selected model.
-func transcribe_model_selection_gcs(w io.Writer, gcsUri string, model string) error {
-	// Google Cloud Storage URI pointing to the audio content.
-	// gcsUri := "gs://bucket-name/path_to_audio_file"
-
-	// The speech recognition model to use
-	// See, https://cloud.google.com/speech-to-text/docs/speech-to-text-requests#select-model
-	// model := "default"
+func transcribe_model_selection_gcs(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := speech.NewClient(ctx)
@@ -44,14 +38,16 @@ func transcribe_model_selection_gcs(w io.Writer, gcsUri string, model string) er
 	defer client.Close()
 
 	audio := &speechpb.RecognitionAudio{
-		AudioSource: &speechpb.RecognitionAudio_Uri{Uri: gcsUri},
+		AudioSource: &speechpb.RecognitionAudio_Uri{Uri: "gs://cloud-samples-tests/speech/Google_Gnome.wav"},
 	}
 
+	// The speech recognition model to use
+	// See, https://cloud.google.com/speech-to-text/docs/speech-to-text-requests#select-model
 	recognitionConfig := &speechpb.RecognitionConfig{
 		Encoding:        speechpb.RecognitionConfig_LINEAR16,
 		SampleRateHertz: 16000,
 		LanguageCode:    "en-US",
-		Model:           model,
+		Model:           "video",
 	}
 
 	longRunningRecognizeRequest := &speechpb.LongRunningRecognizeRequest{
@@ -61,7 +57,7 @@ func transcribe_model_selection_gcs(w io.Writer, gcsUri string, model string) er
 
 	operation, err := client.LongRunningRecognize(ctx, longRunningRecognizeRequest)
 	if err != nil {
-		return fmt.Errorf("error running recognize %v", err)
+		return fmt.Errorf("error running recognize %w", err)
 	}
 
 	response, err := operation.Wait(ctx)
