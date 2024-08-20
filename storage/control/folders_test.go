@@ -168,9 +168,6 @@ func TestManagedFolders(t *testing.T) {
 	folderName := "managed-foo"
 	folderPath := fmt.Sprintf("projects/_/buckets/%v/folders/%v", bucketName, folderName)
 	buf := &bytes.Buffer{}
-	if err := deleteManagedFolder(buf, bucketName, folderName); err != nil {
-		log.Printf("Trying to delete folder before test %v", err)
-	}
 
 	// Create Managed folder. Retry because there is no automatic retry in the client
 	// for this op.
