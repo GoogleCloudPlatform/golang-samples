@@ -149,7 +149,7 @@ func TestManagedFolders(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
-	bucketName := testutil.UniqueBucketName(testPrefix)
+	bucketName := testutil.UniqueBucketName(testPrefix + "mf")
 	b := client.Bucket(bucketName)
 	attrs := &storage.BucketAttrs{
 		UniformBucketLevelAccess: storage.UniformBucketLevelAccess{
