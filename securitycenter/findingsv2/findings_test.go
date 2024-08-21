@@ -39,6 +39,23 @@ func createTestFinding(ctx context.Context, client *securitycenter.Client, findi
 	if err != nil {
 		return nil, fmt.Errorf("TimestampProto: %w", err)
 	}
+
+	// First, try to list existing findings to check if the one we want to create already exists
+	listReq := &securitycenterpb.ListFindingsRequest{
+		Parent: sourceName,
+	}
+	it := client.ListFindings(ctx, listReq)
+	for {
+		resp, err := it.Next()
+		if err != nil {
+			break
+		}
+		if strings.HasSuffix(resp.Finding.Name, findingID) {
+			// If the finding already exists, return it
+			return resp.Finding, nil
+		}
+	}
+
 	req := &securitycenterpb.CreateFindingRequest{
 		Parent:    sourceName,
 		FindingId: findingID,
@@ -46,14 +63,20 @@ func createTestFinding(ctx context.Context, client *securitycenter.Client, findi
 			State: securitycenterpb.Finding_ACTIVE,
 			// Resource the finding is associated with.  This is an
 			// example any resource identifier can be used.
-			ResourceName: "//cloudresourcemanager.googleapis.com/organizations/11232",
+			ResourceName: "//cloudresourcemanager.googleapis.com/organizations/11232/sources/-/locations/global",
 			// A free-form category.
 			Category: category,
 			// The time associated with discovering the issue.
 			EventTime: eventTime,
 		},
 	}
-	return client.CreateFinding(ctx, req)
+
+  finding, err := client.CreateFinding(ctx, req)
+
+	if err != nil {
+		return nil, fmt.Errorf("CreateFinding: %w", err)
+	}
+	return finding, nil
 }
 
 func disableTestFinding(ctx context.Context, client *securitycenter.Client, findingName string) error {
@@ -289,6 +312,58 @@ func TestListAllFindings(t *testing.T) {
 	})
 }
 
+func TestCreateFinding(t *testing.T) {
+	setup(t)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+
+		err := createFinding(buf, sourceName)
+
+		if err != nil {
+			r.Errorf("createFinding(%s) had error: %v", sourceName, err)
+      	return
+		}
+    got := buf.String()
+		if want := fmt.Sprintf("%s/locations/global/findings/samplefindingid", sourceName); !strings.Contains(got, want) {
+			r.Errorf("createFinding(%s) got: %s want %s", sourceName, got, want)
+		}
+	})
+}
+
+func TestUpdateFindingSourceProperties(t *testing.T) {
+	setup(t)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		ctx := context.Background()
+		client, err := securitycenter.NewClient(ctx)
+		if err != nil {
+			r.Errorf("Failed to create client: %v", err)
+		}
+		defer client.Close()
+
+		finding, err := createTestFinding(ctx, client, "updateFinding", "MEDIUM_RISK_ONE")
+
+		if err != nil {
+			r.Errorf("Failed to create finding: %v", err)
+		}
+
+		buf := new(bytes.Buffer)
+		err = updateFindingSourceProperties(buf, finding.Name)
+
+		if err != nil {
+			r.Errorf("updateFindingSourceProperties(%s) had error: %v", finding.Name, err)
+			return
+		}
+    
+    got := buf.String()
+		if want := "s_value"; !strings.Contains(got, want) {
+			r.Errorf("updateFindingSourceProperties(%s) got: %s want %s", finding.Name, got, want)
+		}
+		if !strings.Contains(got, finding.Name) {
+			r.Errorf("updateFindingSourceProperties(%s) got: %s want %s", finding.Name, got, finding.Name)
+		}
+	})
+}
+    
 func TestListFilteredFindings(t *testing.T) {
 	setup(t)
 	testutil.Retry(t, 5, 20*time.Second, func(r *testutil.R) {
@@ -298,9 +373,8 @@ func TestListFilteredFindings(t *testing.T) {
 
 		if err != nil {
 			r.Errorf("listFilteredFindings(%s) had error: %v", sourceName, err)
-			return
+      return
 		}
-
 		got := buf.String()
 		if !strings.Contains(got, findingName) {
 			r.Errorf("listFilteredFindings(%s) got: %s want %s", sourceName, got, findingName)
@@ -385,6 +459,41 @@ func TestGroupFindings(t *testing.T) {
 	})
 }
 
+
+
+func TestSetFindingState(t *testing.T) {
+	setup(t)
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		ctx := context.Background()
+		client, err := securitycenter.NewClient(ctx)
+		if err != nil {
+			r.Errorf("Failed to create client: %v", err)
+		}
+		defer client.Close()
+
+		finding, err := createTestFinding(ctx, client, "setFindingState", "LOW_RISK")
+		if err != nil {
+			r.Errorf("Failed to create finding: %v", err)
+		}
+
+		buf := new(bytes.Buffer)
+		err = setFindingState(buf, finding.Name)
+
+		if err != nil {
+			r.Errorf("setFindingState(%s) had error: %v", finding.Name, err)
+			return
+		}
+    
+    got := buf.String()
+		if want := "INACTIVE"; !strings.Contains(got, want) {
+			r.Errorf("setFindingState(%s) got: %s want %s", finding.Name, got, want)
+		}
+		if !strings.Contains(got, finding.Name) {
+			r.Errorf("setFindingState(%s) got: %s want %s", finding.Name, got, finding.Name)
+		}
+	})
+}
+
 func TestGroupFindingsWithFilter(t *testing.T) {
 	setup(t)
 	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
@@ -394,9 +503,9 @@ func TestGroupFindingsWithFilter(t *testing.T) {
 
 		if err != nil {
 			r.Errorf("groupFindingsWithFilter(%s) had error: %v", sourceName, err)
-			return
+      return
 		}
-
+    
 		got := buf.String()
 		if want := "Grouped Finding"; !strings.Contains(got, want) {
 			r.Errorf("groupFindingsWithFilter(%s) got: %s want %s", sourceName, got, want)
