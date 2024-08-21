@@ -31,8 +31,8 @@ func publishWithOrderingKey(w io.Writer, projectID, topicID string) {
 	// topicID := "my-topic"
 	ctx := context.Background()
 
-	// Sending messages to the same region ensures they are received in order
-	// even when multiple publishers are used.
+	// Pub/Sub's ordered delivery guarantee only applies when publishes for an ordering key are in the same region.
+	// For list of locational endpoints for Pub/Sub, see https://cloud.google.com/pubsub/docs/reference/service_apis_overview#list_of_locational_endpoints
 	client, err := pubsub.NewClient(ctx, projectID,
 		option.WithEndpoint("us-east1-pubsub.googleapis.com:443"))
 	if err != nil {
