@@ -71,7 +71,7 @@ func createTestFinding(ctx context.Context, client *securitycenter.Client, findi
 		},
 	}
 
-  finding, err := client.CreateFinding(ctx, req)
+	finding, err := client.CreateFinding(ctx, req)
 
 	if err != nil {
 		return nil, fmt.Errorf("CreateFinding: %w", err)
@@ -321,9 +321,9 @@ func TestCreateFinding(t *testing.T) {
 
 		if err != nil {
 			r.Errorf("createFinding(%s) had error: %v", sourceName, err)
-      	return
+			return
 		}
-    got := buf.String()
+		got := buf.String()
 		if want := fmt.Sprintf("%s/locations/global/findings/samplefindingid", sourceName); !strings.Contains(got, want) {
 			r.Errorf("createFinding(%s) got: %s want %s", sourceName, got, want)
 		}
@@ -353,8 +353,8 @@ func TestUpdateFindingSourceProperties(t *testing.T) {
 			r.Errorf("updateFindingSourceProperties(%s) had error: %v", finding.Name, err)
 			return
 		}
-    
-    got := buf.String()
+
+		got := buf.String()
 		if want := "s_value"; !strings.Contains(got, want) {
 			r.Errorf("updateFindingSourceProperties(%s) got: %s want %s", finding.Name, got, want)
 		}
@@ -363,7 +363,7 @@ func TestUpdateFindingSourceProperties(t *testing.T) {
 		}
 	})
 }
-    
+
 func TestListFilteredFindings(t *testing.T) {
 	setup(t)
 	testutil.Retry(t, 5, 20*time.Second, func(r *testutil.R) {
@@ -373,7 +373,7 @@ func TestListFilteredFindings(t *testing.T) {
 
 		if err != nil {
 			r.Errorf("listFilteredFindings(%s) had error: %v", sourceName, err)
-      return
+			return
 		}
 		got := buf.String()
 		if !strings.Contains(got, findingName) {
@@ -459,8 +459,6 @@ func TestGroupFindings(t *testing.T) {
 	})
 }
 
-
-
 func TestSetFindingState(t *testing.T) {
 	setup(t)
 	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
@@ -483,8 +481,8 @@ func TestSetFindingState(t *testing.T) {
 			r.Errorf("setFindingState(%s) had error: %v", finding.Name, err)
 			return
 		}
-    
-    got := buf.String()
+
+		got := buf.String()
 		if want := "INACTIVE"; !strings.Contains(got, want) {
 			r.Errorf("setFindingState(%s) got: %s want %s", finding.Name, got, want)
 		}
@@ -503,9 +501,9 @@ func TestGroupFindingsWithFilter(t *testing.T) {
 
 		if err != nil {
 			r.Errorf("groupFindingsWithFilter(%s) had error: %v", sourceName, err)
-      return
+			return
 		}
-    
+
 		got := buf.String()
 		if want := "Grouped Finding"; !strings.Contains(got, want) {
 			r.Errorf("groupFindingsWithFilter(%s) got: %s want %s", sourceName, got, want)
