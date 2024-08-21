@@ -36,9 +36,9 @@ func updateGraphDataWithGraphQueryInDml(w io.Writer, db string) error {
 		stmt := spanner.Statement{
 			SQL: `UPDATE Account SET is_blocked = true 
             	  WHERE id IN {
-            	  GRAPH FinGraph 
-            	  MATCH (a:Account WHERE a.id = 1)-[:TRANSFERS]->{1,2}(b:Account)
-            	  RETURN b.id}`,
+            	    GRAPH FinGraph 
+            	    MATCH (a:Account WHERE a.id = 1)-[:TRANSFERS]->{1,2}(b:Account)
+            	    RETURN b.id}`,
 		}
 		rowCount, err := txn.Update(ctx, stmt)
 		if err != nil {
