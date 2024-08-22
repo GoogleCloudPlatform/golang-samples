@@ -144,3 +144,70 @@ func TestFolders(t *testing.T) {
 		t.Errorf("deleteFolder: got %q, want to contain %q", got, want)
 	}
 }
+
+func TestManagedFolders(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	bucketName := testutil.UniqueBucketName(testPrefix + "mf")
+	b := client.Bucket(bucketName)
+	attrs := &storage.BucketAttrs{
+		UniformBucketLevelAccess: storage.UniformBucketLevelAccess{
+			Enabled: true,
+		},
+	}
+	if err := b.Create(ctx, tc.ProjectID, attrs); err != nil {
+		t.Fatalf("Bucket.Create(%q): %v", bucketName, err)
+	}
+	t.Cleanup(func() {
+		if err := testutil.DeleteBucketIfExists(ctx, client, bucketName); err != nil {
+			log.Printf("Bucket.Delete(%q): %v", bucketName, err)
+		}
+	})
+
+	folderName := "managed-foo"
+	folderPath := fmt.Sprintf("projects/_/buckets/%v/managedFolders/%v/", bucketName, folderName)
+	buf := &bytes.Buffer{}
+
+	// Create Managed folder. Retry because there is no automatic retry in the client
+	// for this op.
+	buf.Reset()
+	if err := createManagedFolder(buf, bucketName, folderName); err != nil {
+		t.Fatalf("createManagedFolder: %v", err)
+	}
+	if got, want := buf.String(), folderPath; !strings.Contains(got, want) {
+		t.Fatalf("createManagedFolder: got %q, want to contain %q", got, want)
+	}
+
+	// Get managed folder. Retry because there is no automatic retry in the client
+	// for this op.
+	if ok := testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := &bytes.Buffer{}
+		if err := getManagedFolder(buf, bucketName, folderName); err != nil {
+			r.Errorf("getManagedFolder: %v", err)
+		}
+		if got, want := buf.String(), folderPath; !strings.Contains(got, want) {
+			r.Errorf("getManagedFolder: got %q, want to contain %q", got, want)
+		}
+	}); !ok {
+		t.Fatalf("failed to get managed folder; can't continue")
+	}
+
+	// List managed folders.
+	buf.Reset()
+	if err := listManagedFolders(buf, bucketName); err != nil {
+		t.Fatalf("listManagedFolders: %v", err)
+	}
+	if got, want := buf.String(), folderPath; !strings.Contains(got, want) {
+		t.Errorf("listManagedFolders: got %q, want to contain %q", got, want)
+	}
+
+	// Delete managed folder.
+	buf.Reset()
+	if err := deleteManagedFolder(buf, bucketName, folderName); err != nil {
+		t.Fatalf("deleteManagedFolder: %v", err)
+	}
+	if got, want := buf.String(), folderPath; !strings.Contains(got, want) {
+		t.Errorf("deleteManagedFolder: got %q, want to contain %q", got, want)
+	}
+}
