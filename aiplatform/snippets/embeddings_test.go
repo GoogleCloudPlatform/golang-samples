@@ -25,8 +25,8 @@ func TestGenerateEmbeddings(t *testing.T) {
 	texts := []string{"banana muffins? ", "banana bread? banana muffins?"}
 	dimensionality := 5
 	location := "us-central1"
-	model := "text-embedding-004"
-	embeddings, err := embedTexts(tc.ProjectID, location, model)
+
+	embeddings, err := embedTexts(tc.ProjectID, location)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,11 +42,11 @@ func TestGenerateEmbeddings(t *testing.T) {
 
 func TestGenerateEmbeddingsPreview(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	model := "text-embedding-preview-0409"
 	texts := []string{"banana muffins? ", "banana bread? banana muffins?"}
 	location := "us-central1"
 	dimensionality := 5
-	embeddings, err := embedTextsPreview(tc.ProjectID, location, model)
+
+	embeddings, err := embedTextsPreview(tc.ProjectID, location)
 	if err != nil {
 		t.Fatal(err)
 	}

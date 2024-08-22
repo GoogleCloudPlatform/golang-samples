@@ -27,11 +27,14 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-func embedTexts(project, location, model string) ([][]float32, error) {
+// embedTexts shows how embeddings are set for text-embedding-preview-0409 model
+func embedTexts(project, location string) ([][]float32, error) {
+	// location := "us-central1"
 	ctx := context.Background()
 
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	dimensionality := 5
+	model := "text-embedding-004"
 	texts := []string{"banana muffins? ", "banana bread? banana muffins?"}
 
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))

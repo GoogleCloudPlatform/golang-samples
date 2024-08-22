@@ -26,11 +26,14 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-func embedTextsPreview(project, location, model string) ([][]float32, error) {
+// embedTextsPreview shows how embeddings are set for text-embedding-preview-0409 model
+func embedTextsPreview(projectID, location string) ([][]float32, error) {
+	// location := "us-central1"
 	ctx := context.Background()
 
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	dimensionality := 5
+	model := "text-embedding-preview-0409"
 	texts := []string{"banana muffins? ", "banana bread? banana muffins?"}
 
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
@@ -39,7 +42,7 @@ func embedTextsPreview(project, location, model string) ([][]float32, error) {
 	}
 	defer client.Close()
 
-	endpoint := fmt.Sprintf("projects/%s/locations/%s/publishers/google/models/%s", project, location, model)
+	endpoint := fmt.Sprintf("projects/%s/locations/%s/publishers/google/models/%s", projectID, location, model)
 	instances := make([]*structpb.Value, len(texts))
 	for i, text := range texts {
 		instances[i] = structpb.NewStructValue(&structpb.Struct{
