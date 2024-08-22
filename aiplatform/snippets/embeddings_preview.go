@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START generativeaionvertexai_sdk_embedding]
+// [START generativeaionvertexai_text_predictions]
 import (
 	"context"
 	"fmt"
@@ -26,14 +26,16 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-// embedTextsPreview shows how embeddings are set for text-embedding-preview-0409 model
+// Embeds code query with a pre-trained, foundational model by specifying the task type as 'CODE_RETRIEVAL_QUERY'. e.g. 'Retrieve a function that adds two numbers'.
+// Embeds code block with a pre-trained, foundational model by specifying the task type as 'RETRIEVAL_DOCUMENT'. e.g. 'texts := []string{"def func(a, b): return a + b", "def func(a, b): return a - b", "def func(a, b): return (a ** 2 + b ** 2) ** 0.5"}'.
+// embedTextsPreview shows how embeddings are set for text-embedding-preview-0815 model
 func embedTextsPreview(projectID, location string) ([][]float32, error) {
 	// location := "us-central1"
 	ctx := context.Background()
 
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	dimensionality := 5
-	model := "text-embedding-preview-0409"
+	model := "text-embedding-preview-0815"
 	texts := []string{"banana muffins? ", "banana bread? banana muffins?"}
 
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
@@ -48,7 +50,7 @@ func embedTextsPreview(projectID, location string) ([][]float32, error) {
 		instances[i] = structpb.NewStructValue(&structpb.Struct{
 			Fields: map[string]*structpb.Value{
 				"content":   structpb.NewStringValue(text),
-				"task_type": structpb.NewStringValue("QUESTION_ANSWERING"),
+				"task_type": structpb.NewStringValue("CODE_RETRIEVAL_QUERY"),
 			},
 		})
 	}
@@ -79,4 +81,4 @@ func embedTextsPreview(projectID, location string) ([][]float32, error) {
 	return embeddings, nil
 }
 
-// [END generativeaionvertexai_sdk_embedding]
+// [END generativeaionvertexai_text_predictions]
