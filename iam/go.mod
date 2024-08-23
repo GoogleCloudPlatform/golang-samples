@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/iam
 
-go 1.19
+go 1.21
 
 require (
 	cloud.google.com/go/iam v1.1.11
