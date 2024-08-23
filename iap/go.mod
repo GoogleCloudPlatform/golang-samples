@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/iap
 
-go 1.19
+go 1.21
 
 require google.golang.org/api v0.189.0
 

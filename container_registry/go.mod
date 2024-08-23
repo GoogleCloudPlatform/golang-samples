@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/container_registry
 
-go 1.19
+go 1.21
 
 require (
 	cloud.google.com/go/containeranalysis v0.12.0

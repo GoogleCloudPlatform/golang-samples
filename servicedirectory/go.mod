@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/servicedirectory
 
-go 1.19
+go 1.21
 
 require (
 	cloud.google.com/go/servicedirectory v1.11.10
