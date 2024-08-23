@@ -18,6 +18,7 @@ package snippets
 import (
 	"context"
 	"fmt"
+	"io"
 
 	aiplatform "cloud.google.com/go/aiplatform/apiv1"
 	"cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
@@ -29,7 +30,7 @@ import (
 // Embeds code query with a pre-trained, foundational model by specifying the task type as 'CODE_RETRIEVAL_QUERY'. e.g. 'Retrieve a function that adds two numbers'.
 // Embeds code block with a pre-trained, foundational model by specifying the task type as 'RETRIEVAL_DOCUMENT'. e.g. 'texts := []string{"def func(a, b): return a + b", "def func(a, b): return a - b", "def func(a, b): return (a ** 2 + b ** 2) ** 0.5"}'.
 // embedTextsPreview shows how embeddings are set for text-embedding-preview-0815 model
-func embedTextsPreview(projectID, location string) ([][]float32, error) {
+func embedTextsPreview(w io.Writer, projectID, location string) error {
 	// location := "us-central1"
 	ctx := context.Background()
 
@@ -40,7 +41,7 @@ func embedTextsPreview(projectID, location string) ([][]float32, error) {
 
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer client.Close()
 
@@ -68,7 +69,7 @@ func embedTextsPreview(projectID, location string) ([][]float32, error) {
 	}
 	resp, err := client.Predict(ctx, req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	embeddings := make([][]float32, len(resp.Predictions))
 	for i, prediction := range resp.Predictions {
@@ -78,7 +79,9 @@ func embedTextsPreview(projectID, location string) ([][]float32, error) {
 			embeddings[i][j] = float32(value.GetNumberValue())
 		}
 	}
-	return embeddings, nil
+
+	fmt.Fprintf(w, "Dimensionality: %d. Embeddings length: %d", len(embeddings[0]), len(embeddings))
+	return nil
 }
 
 // [END generativeaionvertexai_text_predictions]

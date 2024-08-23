@@ -15,6 +15,8 @@
 package snippets
 
 import (
+	"bytes"
+	"fmt"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -25,18 +27,16 @@ func TestGenerateEmbeddings(t *testing.T) {
 	texts := []string{"banana muffins? ", "banana bread? banana muffins?"}
 	dimensionality := 5
 	location := "us-central1"
+	var buf bytes.Buffer
 
-	embeddings, err := embedTexts(tc.ProjectID, location)
+	err := embedTexts(&buf, tc.ProjectID, location)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	embeddingsLen := len(embeddings)
-	textsLen := len(texts)
-	embeddingDimensionality := len(embeddings[0])
-
-	if embeddingsLen != textsLen || embeddingDimensionality != dimensionality {
-		t.Errorf("embeddingsLen, embeddingDimensionality = %d, %d, want %d, %d", embeddingsLen, embeddingDimensionality, textsLen, dimensionality)
+	output := buf.String()
+	if output != fmt.Sprintf("Dimensionality: %d. Embeddings length: %d", dimensionality, len(texts)) {
+		t.Error("Embeddings length and dimensionality doesn't match")
 	}
 }
 
@@ -45,12 +45,15 @@ func TestGenerateEmbeddingsPreview(t *testing.T) {
 	texts := []string{"banana muffins? ", "banana bread? banana muffins?"}
 	location := "us-central1"
 	dimensionality := 5
+	var buf bytes.Buffer
 
-	embeddings, err := embedTextsPreview(tc.ProjectID, location)
+	err := embedTextsPreview(&buf, tc.ProjectID, location)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(embeddings) != len(texts) || len(embeddings[0]) != dimensionality {
-		t.Errorf("len(embeddings), len(embeddings[0]) = %d, %d, want %d, %d", len(embeddings), len(embeddings[0]), len(texts), dimensionality)
+
+	output := buf.String()
+	if output != fmt.Sprintf("Dimensionality: %d. Embeddings length: %d", dimensionality, len(texts)) {
+		t.Error("Embeddings length and dimensionality doesn't match")
 	}
 }

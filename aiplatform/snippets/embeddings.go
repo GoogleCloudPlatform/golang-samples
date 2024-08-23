@@ -19,6 +19,7 @@ package snippets
 import (
 	"context"
 	"fmt"
+	"io"
 
 	aiplatform "cloud.google.com/go/aiplatform/apiv1"
 	"cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
@@ -28,7 +29,7 @@ import (
 )
 
 // embedTexts shows how embeddings are set for text-embedding-preview-0409 model
-func embedTexts(project, location string) ([][]float32, error) {
+func embedTexts(w io.Writer, project, location string) error {
 	// location := "us-central1"
 	ctx := context.Background()
 
@@ -39,7 +40,7 @@ func embedTexts(project, location string) ([][]float32, error) {
 
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer client.Close()
 
@@ -67,7 +68,7 @@ func embedTexts(project, location string) ([][]float32, error) {
 	}
 	resp, err := client.Predict(ctx, req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	embeddings := make([][]float32, len(resp.Predictions))
 	for i, prediction := range resp.Predictions {
@@ -77,7 +78,9 @@ func embedTexts(project, location string) ([][]float32, error) {
 			embeddings[i][j] = float32(value.GetNumberValue())
 		}
 	}
-	return embeddings, nil
+
+	fmt.Fprintf(w, "Dimensionality: %d. Embeddings length: %d", len(embeddings[0]), len(embeddings))
+	return nil
 }
 
 // [END aiplatform_text_embeddings]
