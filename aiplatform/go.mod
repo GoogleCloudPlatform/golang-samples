@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/aiplatform
 
-go 1.20
+go 1.21
 
 require (
 	cloud.google.com/go/aiplatform v1.68.0
