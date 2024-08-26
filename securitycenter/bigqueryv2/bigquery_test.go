@@ -49,8 +49,6 @@ func addBigQueryExport(t *testing.T, bigQueryExportID string) error {
 	orgID := orgID(t)
 	bigQueryDatasetName := bigQueryDatasetName(t)
 
-	// fmt.Printf("Big Query Dataset Name: %s\n", bigQueryDatasetName)
-
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
