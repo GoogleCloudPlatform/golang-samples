@@ -21,10 +21,10 @@ import (
 	"time"
 
 	bqstorage "cloud.google.com/go/bigquery/storage/apiv1"
+	bqstoragepb "cloud.google.com/go/bigquery/storage/apiv1/storagepb"
 	vision "cloud.google.com/go/vision/apiv1"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"google.golang.org/api/option"
-	bqstoragepb "google.golang.org/genproto/googleapis/cloud/bigquery/storage/v1"
 )
 
 var shouldFail = os.Getenv("GOOGLE_API_USE_MTLS") == "always"
