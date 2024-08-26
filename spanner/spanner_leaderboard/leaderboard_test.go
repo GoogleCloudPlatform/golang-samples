@@ -24,9 +24,9 @@ import (
 	"testing"
 	"time"
 
+	adminpb "cloud.google.com/go/spanner/admin/database/apiv1/databasepb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
-	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
 func randomID() string {
