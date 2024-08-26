@@ -313,3 +313,19 @@ func TestTopicKinesis(t *testing.T) {
 		t.Fatalf("failed to update a topic type to kinesis ingestion: %v", err)
 	}
 }
+
+func TestPublishOpenTelemetryTracing(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	// Use the pstest fake with emulator settings.
+	srv := pstest.NewServer()
+	t.Setenv("PUBSUB_EMULATOR_HOST", srv.Addr)
+
+	if err := create(buf, tc.ProjectID, topicID); err != nil {
+		t.Fatalf("failed to create a topic: %v", err)
+	}
+	if err := publishOpenTelemetryTracing(buf, tc.ProjectID, topicID, 1.0); err != nil {
+		t.Fatalf("failed to publish message with otel tracing: %v", err)
+	}
+}

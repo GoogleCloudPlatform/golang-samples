@@ -27,13 +27,14 @@ import (
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
 
-func publishOpenTelemetryTracing(w io.Writer, projectID, topicID, msg string) error {
+// publishOpenTelemetryTracing publishes a single message with OpenTelemetry tracing
+// enabled, exporting to Cloud Trace.
+func publishOpenTelemetryTracing(w io.Writer, projectID, topicID string, sampling float64) error {
 	// projectID := "my-project-id"
 	// topicID := "my-topic"
-	// msg := "Hello World"
 	ctx := context.Background()
 
 	exporter, err := texporter.New(texporter.WithProjectID(projectID),
@@ -56,7 +57,7 @@ func publishOpenTelemetryTracing(w io.Writer, projectID, topicID, msg string) er
 		sdktrace.WithBatcher(exporter),
 		sdktrace.WithResource(resources),
 		sdktrace.WithSampler(
-			sdktrace.ParentBased(sdktrace.TraceIDRatioBased(1.0)),
+			sdktrace.ParentBased(sdktrace.TraceIDRatioBased(sampling)),
 		),
 	)
 
@@ -74,7 +75,7 @@ func publishOpenTelemetryTracing(w io.Writer, projectID, topicID, msg string) er
 
 	t := client.Topic(topicID)
 	result := t.Publish(ctx, &pubsub.Message{
-		Data: []byte(msg),
+		Data: []byte("Publishing message with tracing"),
 	})
 	if _, err := result.Get(ctx); err != nil {
 		return fmt.Errorf("pubsub: result.Get: %w", err)

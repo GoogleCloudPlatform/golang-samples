@@ -29,6 +29,7 @@ import (
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/pstest"
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
 
@@ -985,6 +986,32 @@ func TestOptimisticSubscribe(t *testing.T) {
 		sub := client.Subscription(optSubID)
 		sub.Delete(ctx)
 	})
+}
+
+func TestSubscribeOpenTelemetryTracing(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+	ctx := context.Background()
+
+	otelTopicID := topicID + "-otel"
+	otelSubID := subID + "-otel"
+
+	// Use the pstest fake with emulator settings.
+	srv := pstest.NewServer()
+	t.Setenv("PUBSUB_EMULATOR_HOST", srv.Addr)
+	client := setup(t)
+
+	topic, err := client.CreateTopic(ctx, otelTopicID)
+	if err != nil {
+		t.Fatalf("failed to create topic: %v", err)
+	}
+
+	if err := create(buf, tc.ProjectID, otelSubID, topic); err != nil {
+		t.Fatalf("failed to create a topic: %v", err)
+	}
+	if err := subscribeOpenTelemetryTracing(buf, tc.ProjectID, otelSubID, 1.0); err != nil {
+		t.Fatalf("failed to subscribe message with otel tracing: %v", err)
+	}
 }
 
 func publishMsgs(ctx context.Context, t *pubsub.Topic, numMsgs int) error {

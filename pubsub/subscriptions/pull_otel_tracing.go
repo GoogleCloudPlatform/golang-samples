@@ -31,9 +31,10 @@ import (
 	"google.golang.org/api/option"
 )
 
-func subscribeOpenTelemetryTracing(w io.Writer, projectID, subID string) error {
+func subscribeOpenTelemetryTracing(w io.Writer, projectID, subID string, sampleRate float64) error {
 	// projectID := "my-project-id"
 	// subID := "my-sub"
+	// sampleRate := "1.0"
 	ctx := context.Background()
 
 	exporter, err := texporter.New(texporter.WithProjectID(projectID),
@@ -48,7 +49,7 @@ func subscribeOpenTelemetryTracing(w io.Writer, projectID, subID string) error {
 
 	resources := resource.NewWithAttributes(
 		semconv.SchemaURL,
-		semconv.ServiceNameKey.String("publisher"),
+		semconv.ServiceNameKey.String("subscriber"),
 	)
 
 	// Instantiate a tracer provider with the following settings
@@ -56,7 +57,7 @@ func subscribeOpenTelemetryTracing(w io.Writer, projectID, subID string) error {
 		sdktrace.WithBatcher(exporter),
 		sdktrace.WithResource(resources),
 		sdktrace.WithSampler(
-			sdktrace.ParentBased(sdktrace.TraceIDRatioBased(1.0)),
+			sdktrace.ParentBased(sdktrace.TraceIDRatioBased(sampleRate)),
 		),
 	)
 
