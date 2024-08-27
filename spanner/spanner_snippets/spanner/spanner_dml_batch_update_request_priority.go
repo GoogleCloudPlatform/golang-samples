@@ -22,7 +22,7 @@ import (
 	"io"
 
 	"cloud.google.com/go/spanner"
-	sppb "google.golang.org/genproto/googleapis/spanner/v1"
+	sppb "cloud.google.com/go/spanner/apiv1/spannerpb"
 )
 
 // updateUsingBatchDMLRequestPriority updates a database using batch DML with request priority set
