@@ -48,7 +48,7 @@ func generateMultimodalContent(w io.Writer, projectID, location, modelName strin
 		FileURI:  "gs://generativeai-downloads/images/scones.jpg",
 	}
 
-	res, err := model.GenerateContent(ctx, img, genai.Text("describe what is in this picture"))
+	res, err := model.GenerateContent(ctx, img, genai.Text("Describe what is in this picture"))
 	if err != nil {
 		return fmt.Errorf("unable to generate contents: %v", err)
 	}

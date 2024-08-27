@@ -16,6 +16,7 @@ package multimodalvideo
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -31,5 +32,18 @@ func Test_generateMultimodalContent(t *testing.T) {
 	err := generateMultimodalContent(buf, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Errorf("Test_generateMultimodalContent: %v", err.Error())
+	}
+
+	generatedDescription := buf.String()
+	generatedDescriptionLowercase := strings.ToLower(generatedDescription)
+	// We expect these important topics in the video to be correctly covered
+	// in the generated description
+	for _, word := range []string{
+		"animals",
+		"zoo",
+	} {
+		if !strings.Contains(generatedDescriptionLowercase, word) {
+			t.Errorf("expected the word %q in the description of the video", word)
+		}
 	}
 }
