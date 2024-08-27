@@ -32,7 +32,7 @@ func countTokens(w io.Writer, projectID, location, modelName string) error {
 	// modelName := "gemini-1.5-flash-001"
 
 	ctx := context.Background()
-	prompt := genai.Text("why is the sky blue?")
+	prompt := genai.Text("Why is the sky blue?")
 
 	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {
@@ -53,7 +53,9 @@ func countTokens(w io.Writer, projectID, location, modelName string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "Total number of tokens for the prompt: %d\n", resp2.UsageMetadata.PromptTokenCount)
+	fmt.Fprintf(w, "Number of tokens for the prompt: %d\n", resp2.UsageMetadata.PromptTokenCount)
+	fmt.Fprintf(w, "Number of tokens for the candidates: %d\n", resp2.UsageMetadata.CandidatesTokenCount)
+	fmt.Fprintf(w, "Total number of tokens: %d\n", resp2.UsageMetadata.TotalTokenCount)
 
 	return nil
 }
