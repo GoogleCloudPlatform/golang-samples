@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/automl
 
-go 1.19
+go 1.21
 
 require (
 	cloud.google.com/go/automl v1.13.10
