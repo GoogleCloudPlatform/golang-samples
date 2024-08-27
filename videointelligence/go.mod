@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/videointelligence
 
-go 1.19
+go 1.21
 
 require (
 	cloud.google.com/go/videointelligence v1.11.10

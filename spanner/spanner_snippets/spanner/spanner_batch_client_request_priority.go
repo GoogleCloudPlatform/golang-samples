@@ -22,8 +22,8 @@ import (
 	"io"
 
 	"cloud.google.com/go/spanner"
+	sppb "cloud.google.com/go/spanner/apiv1/spannerpb"
 	"google.golang.org/api/iterator"
-	sppb "google.golang.org/genproto/googleapis/spanner/v1"
 )
 
 // readBatchDataRequestPriority reads a database in batch read-only transaction with request priority set
