@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/discoveryengine
 
-go 1.20
+go 1.21
 
 require (
 	cloud.google.com/go/discoveryengine v0.5.0

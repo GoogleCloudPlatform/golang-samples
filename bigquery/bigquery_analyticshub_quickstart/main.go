@@ -25,7 +25,7 @@ import (
 	"log"
 
 	dataexchange "cloud.google.com/go/bigquery/dataexchange/apiv1beta1"
-	dataexchangepb "google.golang.org/genproto/googleapis/cloud/bigquery/dataexchange/v1beta1"
+	"cloud.google.com/go/bigquery/dataexchange/apiv1beta1/dataexchangepb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

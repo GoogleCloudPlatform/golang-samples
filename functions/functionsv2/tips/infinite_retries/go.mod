@@ -17,4 +17,4 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 )
 
-go 1.19
+go 1.21
