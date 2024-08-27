@@ -26,7 +26,7 @@ import (
 
 	// Imports the BigQuery Data Transfer client package.
 	datatransfer "cloud.google.com/go/bigquery/datatransfer/apiv1"
-	datatransferpb "google.golang.org/genproto/googleapis/cloud/bigquery/datatransfer/v1"
+	"cloud.google.com/go/bigquery/datatransfer/apiv1/datatransferpb"
 )
 
 func main() {

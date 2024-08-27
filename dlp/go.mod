@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/dlp
 
-go 1.19
+go 1.21
 
 require (
 	cloud.google.com/go/bigquery v1.62.0

@@ -20,7 +20,7 @@ import (
 	"fmt"
 
 	datatransfer "cloud.google.com/go/bigquery/datatransfer/apiv1"
-	datatransferpb "google.golang.org/genproto/googleapis/cloud/bigquery/datatransfer/v1"
+	"cloud.google.com/go/bigquery/datatransfer/apiv1/datatransferpb"
 )
 
 // deleteScheduledQuery delete a scheduled query based on

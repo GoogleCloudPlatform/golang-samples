@@ -24,7 +24,7 @@ import (
 	"log"
 
 	speech "cloud.google.com/go/speech/apiv2"
-	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v2"
+	"cloud.google.com/go/speech/apiv2/speechpb"
 )
 
 func main() {

@@ -23,7 +23,7 @@ import (
 	"time"
 
 	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
-	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
+	"cloud.google.com/go/spanner/admin/instance/apiv1/instancepb"
 )
 
 // createInstanceConfig creates a custom spanner instance config
