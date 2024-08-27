@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/texttospeech
 
-go 1.19
+go 1.21
 
 require (
 	cloud.google.com/go/texttospeech v1.7.10

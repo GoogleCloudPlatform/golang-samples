@@ -26,15 +26,11 @@ func Test_generateMultimodalContent(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
-	prompt := `
-    	Provide a description of the video.
-    	The description should also contain anything important which people say in the video.
-	`
 	video := "gs://cloud-samples-data/generative-ai/video/pixel8.mp4"
 	location := "us-central1"
 	modelName := "gemini-1.5-flash-001"
 
-	err := generateMultimodalContent(buf, prompt, video, tc.ProjectID, location, modelName)
+	err := generateMultimodalContent(buf, video, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Errorf("Test_generateMultimodalContent: %v", err.Error())
 	}
