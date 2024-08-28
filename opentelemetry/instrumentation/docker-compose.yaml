@@ -6,19 +6,21 @@ services:
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcol:4318
       - OTEL_SERVICE_NAME=otel-quickstart-go
+      - OTEL_GO_X_EXEMPLAR=true
     volumes:
       - logs:/var/log:rw
     depends_on:
       - "otelcol"
   otelcol:
-    image: otel/opentelemetry-collector-contrib:0.85.0
+    image: otel/opentelemetry-collector-contrib:0.105.0
     volumes:
       - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
       - logs:/var/log:ro
     environment:
+      - GOOGLE_CLOUD_QUOTA_PROJECT
       - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT?}
   loadgen:
-    image: golang:1.21
+    image: golang:1.22
     command: ["go", "run", "github.com/rakyll/hey@latest", "-c=2", "-q=1", "http://app:8080/multi"]
     depends_on:
       - "app"

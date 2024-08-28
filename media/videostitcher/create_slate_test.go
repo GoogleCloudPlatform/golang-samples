@@ -16,16 +16,12 @@ package videostitcher
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-
-	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 func TestCreateSlate(t *testing.T) {
@@ -36,7 +32,7 @@ func TestCreateSlate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("getUUID err: %v", err)
 	}
-	slateID := fmt.Sprintf("%s-%s", slateID, uuid)
+	slateID := fmt.Sprintf("%s-%s", slateIDPrefix, uuid)
 	slateName := fmt.Sprintf("projects/%s/locations/%s/slates/%s", tc.ProjectID, location, slateID)
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		if err := createSlate(&buf, tc.ProjectID, slateID, slateURI); err != nil {
@@ -46,29 +42,8 @@ func TestCreateSlate(t *testing.T) {
 			r.Errorf("createSlate got: %v Want to contain: %v", got, slateName)
 		}
 	})
+
 	t.Cleanup(func() {
-		teardownTestCreateSlate(slateName, t)
+		deleteTestSlate(slateName, t)
 	})
-}
-
-func teardownTestCreateSlate(slateName string, t *testing.T) {
-	t.Helper()
-	ctx := context.Background()
-	client, err := stitcher.NewVideoStitcherClient(ctx)
-	if err != nil {
-		t.Errorf("stitcher.NewVideoStitcherClient: %v", err)
-	}
-	defer client.Close()
-
-	req := &stitcherstreampb.DeleteSlateRequest{
-		Name: slateName,
-	}
-	op, err := client.DeleteSlate(ctx, req)
-	if err != nil {
-		t.Errorf("client.DeleteSlate: %v", err)
-	}
-	err = op.Wait(ctx)
-	if err != nil {
-		t.Error(err)
-	}
 }

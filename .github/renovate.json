@@ -1,8 +1,10 @@
 {
   "extends": [
     "config:base",
-    "schedule:weekly",
-    ":disableDependencyDashboard"
+    "schedule:weekly"
+  ],
+  "dependencyDashboardLabels": [
+    "type: process"
   ],
   "semanticCommits": false,
   "postUpdateOptions": [
@@ -29,6 +31,10 @@
       ],
       "enabled": false
     }
-  ]
+  ],
+  "force": {
+    "constraints": {
+      "go": "1.21"
+    }
   }
 }

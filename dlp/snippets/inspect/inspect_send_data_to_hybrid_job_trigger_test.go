@@ -15,7 +15,7 @@ package inspect
 
 import (
 	"bytes"
-	"fmt"
+	"log"
 	"strings"
 	"testing"
 
@@ -26,7 +26,7 @@ func TestInspectDataToHybridJobTrigger(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	var buf bytes.Buffer
 	trigger := jobTriggerForInspectSample
-	fmt.Print("Name:" + trigger)
+	log.Print("Name:" + trigger)
 	if err := inspectDataToHybridJobTrigger(&buf, tc.ProjectID, "My email is test@example.org and my name is Gary.", trigger); err != nil {
 		t.Fatal(err)
 	}

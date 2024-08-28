@@ -17,6 +17,7 @@ package trigger
 import (
 	"context"
 	"fmt"
+	"log"
 	"testing"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
@@ -97,7 +98,7 @@ func createTriggerForTest(t *testing.T, projectID, triggerID, displayName, descr
 	if err != nil {
 		return fmt.Errorf("CreateJobTrigger: %w", err)
 	}
-	fmt.Printf("Successfully created trigger: %v", resp.GetName())
+	log.Printf("Successfully created trigger: %v", resp.GetName())
 	return nil
 }
 
@@ -118,6 +119,6 @@ func cleanUpTrigger(t *testing.T, projectID, triggerID string) error {
 	if err := client.DeleteJobTrigger(ctx, req); err != nil {
 		return fmt.Errorf("DeleteJobTrigger: %w", err)
 	}
-	fmt.Printf("Successfully deleted trigger %v", triggerID)
+	log.Printf("Successfully deleted trigger %v", triggerID)
 	return nil
 }

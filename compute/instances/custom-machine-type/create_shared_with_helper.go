@@ -21,7 +21,7 @@ import (
 	"io"
 
 	compute "cloud.google.com/go/compute/apiv1"
-	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
+	computepb "cloud.google.com/go/compute/apiv1/computepb"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -218,7 +218,7 @@ func createInstanceWithCustomSharedCore(
 					InitializeParams: &computepb.AttachedDiskInitializeParams{
 						DiskSizeGb: proto.Int64(10),
 						SourceImage: proto.String(
-							"projects/debian-cloud/global/images/family/debian-10",
+							"projects/debian-cloud/global/images/family/debian-12",
 						),
 					},
 					AutoDelete: proto.Bool(true),

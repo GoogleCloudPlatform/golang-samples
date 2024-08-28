@@ -194,6 +194,36 @@ func errorIfNot404(t *testing.T, msg string, err error) {
 	}
 }
 
+// deleteStoragePool deletes the specified storage pool in the given project and zone.
+func deleteStoragePool(projectId, zone, storagePoolName string) error {
+	ctx := context.Background()
+	client, err := compute.NewStoragePoolsRESTClient(ctx)
+	if err != nil {
+		return fmt.Errorf("NewStoragePoolsRESTClient: %v", err)
+	}
+	defer client.Close()
+
+	// Create the delete storage pool request
+	req := &computepb.DeleteStoragePoolRequest{
+		Project:     projectId,
+		Zone:        zone,
+		StoragePool: storagePoolName,
+	}
+
+	// Send the delete storage pool request
+	op, err := client.Delete(ctx, req)
+	if err != nil {
+		return fmt.Errorf("Delete storage pool request failed: %v", err)
+	}
+
+	// Wait for the delete storage pool operation to complete
+	if err = op.Wait(ctx); err != nil {
+		return fmt.Errorf("unable to wait for the operation: %w", err)
+	}
+
+	return nil
+}
+
 func TestComputeDisksSnippets(t *testing.T) {
 	ctx := context.Background()
 	var r *rand.Rand = rand.New(
@@ -464,5 +494,193 @@ func TestComputeDisksSnippets(t *testing.T) {
 
 		// Cannot clean up the disk just yet because it must be done after the VM is terminated.
 		// It will be done by deleteInstance function.
+	})
+	t.Run("list disks", func(t *testing.T) {
+		var buf bytes.Buffer
+
+		if err := listDisks(&buf, tc.ProjectID, zone, ""); err != nil {
+			t.Errorf("listDisks got err: %v", err)
+		}
+
+		if got := buf.String(); !strings.Contains(got, diskName) {
+			t.Errorf("listDisks got %q, want it to contain %q", got, diskName)
+		}
+	})
+	t.Run("List disks with a filter", func(t *testing.T) {
+		var buf bytes.Buffer
+
+		filter := fmt.Sprintf("name = %s", diskName)
+		if err := listDisks(&buf, tc.ProjectID, zone, filter); err != nil {
+			t.Errorf("listDisks with filter got err: %v", err)
+		}
+
+		if got := buf.String(); !strings.Contains(got, diskName) {
+			t.Errorf("listDisks with filter %s got %q, want it to contain %q", filter, got, diskName)
+		}
+		buf.Reset()
+
+		notExistentDiskName := diskName + "aaa"
+
+		filter = fmt.Sprintf("name eq %s", notExistentDiskName)
+		if err := listDisks(&buf, tc.ProjectID, zone, filter); err != nil {
+			t.Errorf("listDisks with filter got err: %v", err)
+		}
+
+		if got := buf.String(); strings.Contains(got, notExistentDiskName) {
+			t.Errorf("listDisks with filter %s got %q, want it to NOT contain %q", filter, got, notExistentDiskName)
+		}
+
+	})
+	t.Run("Create Hyperdisk", func(t *testing.T) {
+		instanceRegionalHyperDiskName := fmt.Sprintf("test-hyper-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		disksClient, err := compute.NewDisksRESTClient(ctx)
+		if err != nil {
+			t.Fatalf("NewDisksRESTClient: %v", err)
+		}
+		defer disksClient.Close()
+		var buf bytes.Buffer
+		err = createHyperdisk(&buf, tc.ProjectID, zone, instanceRegionalHyperDiskName)
+		if err != nil {
+			t.Errorf("createHyperdisk got err: %v", err)
+		}
+		defer deleteDisk(&buf, tc.ProjectID, zone, instanceRegionalHyperDiskName)
+		disk, err := disksClient.Get(ctx, &computepb.GetDiskRequest{
+			Project: tc.ProjectID,
+			Zone:    zone,
+			Disk:    instanceRegionalHyperDiskName,
+		})
+		if err != nil {
+			t.Errorf("Get disk got err: %v", err)
+		}
+
+		if disk.GetName() != instanceRegionalHyperDiskName {
+			t.Errorf("Disk name mismatch (-want +got):\n%s / %s", disk.GetName(), instanceRegionalHyperDiskName)
+		}
+		wantDiskType := fmt.Sprintf("zones/%s/diskTypes/hyperdisk-balanced", zone)
+
+		if !strings.Contains(disk.GetType(), wantDiskType) {
+			t.Errorf("Disk type mismatch (-want to contain +got):\n%s / %s", disk.GetType(), wantDiskType)
+		}
+
+	})
+}
+
+func TestCreateDisksStoragePool(t *testing.T) {
+	ctx := context.Background()
+	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
+	tc := testutil.SystemTest(t)
+	capacityProvisioningType := "ADVANCED"
+	zone := "europe-west4-b"
+	diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+	diskSizeGb := int64(50)
+	diskType := fmt.Sprintf("zones/%s/diskTypes/hyperdisk-balanced", zone)
+	storagePoolName := fmt.Sprintf("test-storage-pool-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+	storagePoolType := fmt.Sprintf("projects/%s/zones/%s/storagePoolTypes/hyperdisk-balanced", tc.ProjectID, zone)
+	storagePoolLink := fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/storagePools/%s", tc.ProjectID, zone, storagePoolName)
+	provisionedCapacity := int64(10240)
+	provisionedIops := int64(10000)
+	provisionedThroughput := int64(1024)
+
+	// Create the storage pool
+	var buf bytes.Buffer
+	err := createHyperdiskStoragePool(&buf, tc.ProjectID, zone, storagePoolName, storagePoolType)
+	if err != nil {
+		t.Fatalf("createHyperdiskStoragePool got err: %v", err)
+	}
+	defer func() {
+		if err := deleteStoragePool(tc.ProjectID, zone, storagePoolName); err != nil {
+			t.Errorf("deleteStoragePool got err: %v", err)
+		}
+	}()
+
+	t.Run("CreateHyperdiskStoragePool", func(t *testing.T) {
+		storagePoolsClient, err := compute.NewStoragePoolsRESTClient(ctx)
+		if err != nil {
+			t.Fatalf("NewStoragePoolsRESTClient: %v", err)
+		}
+		defer storagePoolsClient.Close()
+
+		// Verify the storage pool creation
+		storagePool, err := storagePoolsClient.Get(ctx, &computepb.GetStoragePoolRequest{
+			Project:     tc.ProjectID,
+			Zone:        zone,
+			StoragePool: storagePoolName,
+		})
+		if err != nil {
+			t.Errorf("Get storage pool got err: %v", err)
+		}
+
+		if storagePool.GetName() != storagePoolName {
+			t.Errorf("Storage pool name mismatch: got %v, want %v", storagePool.GetName(), storagePoolName)
+		}
+
+		if !strings.Contains(storagePool.GetStoragePoolType(), "hyperdisk-balanced") {
+			t.Errorf("Storage pool type mismatch: got %v, want to contain %v", storagePool.GetStoragePoolType(), "hyperdisk-balanced")
+		}
+
+		if storagePool.GetCapacityProvisioningType() != capacityProvisioningType {
+			t.Errorf("Capacity provisioning type mismatch: got %v, want %v", storagePool.GetCapacityProvisioningType(), capacityProvisioningType)
+		}
+
+		if storagePool.GetPoolProvisionedCapacityGb() != provisionedCapacity {
+			t.Errorf("Provisioned capacity mismatch: got %v, want %v", storagePool.GetPoolProvisionedCapacityGb(), provisionedCapacity)
+		}
+
+		if storagePool.GetPoolProvisionedIops() != provisionedIops {
+			t.Errorf("Provisioned IOPS mismatch: got %v, want %v", storagePool.GetPoolProvisionedIops(), provisionedIops)
+		}
+
+		if storagePool.GetPoolProvisionedThroughput() != provisionedThroughput {
+			t.Errorf("Provisioned throughput mismatch: got %v, want %v", storagePool.GetPoolProvisionedThroughput(), provisionedThroughput)
+		}
+	})
+
+	t.Run("CreateDiskInStoragePool", func(t *testing.T) {
+		disksClient, err := compute.NewDisksRESTClient(ctx)
+		if err != nil {
+			t.Fatalf("NewDisksRESTClient: %v", err)
+		}
+		defer disksClient.Close()
+
+		// Create the disk
+		err = createDiskInStoragePool(&buf, tc.ProjectID, zone, diskName, storagePoolLink, diskType)
+		if err != nil {
+			t.Fatalf("createDiskInStoragePool got err: %v", err)
+		}
+
+		// Verify the disk creation
+		disk, err := disksClient.Get(ctx, &computepb.GetDiskRequest{
+			Project: tc.ProjectID,
+			Zone:    zone,
+			Disk:    diskName,
+		})
+		if err != nil {
+			t.Errorf("Get disk got err: %v", err)
+		}
+
+		if disk.GetName() != diskName {
+			t.Errorf("Disk name mismatch: got %v, want %v", disk.GetName(), diskName)
+		}
+
+		if !strings.Contains(disk.GetType(), "hyperdisk-balanced") {
+			t.Errorf("Disk type mismatch: got %v, want to contain %v", disk.GetType(), "hyperdisk-balanced")
+		}
+
+		if disk.GetSizeGb() != diskSizeGb {
+			t.Errorf("Disk size mismatch: got %v, want %v", disk.GetSizeGb(), diskSizeGb)
+		}
+
+		if disk.GetProvisionedIops() != provisionedIops {
+			t.Errorf("Provisioned IOPS mismatch: got %v, want %v", disk.GetProvisionedIops(), provisionedIops)
+		}
+
+		if disk.GetProvisionedThroughput() != provisionedThroughput {
+			t.Errorf("Provisioned throughput mismatch: got %v, want %v", disk.GetProvisionedThroughput(), provisionedThroughput)
+		}
+
+		// Cleanup the disk
+		if err := deleteDisk(&buf, tc.ProjectID, zone, diskName); err != nil {
+			t.Errorf("deleteDisk got err: %v", err)
+		}
 	})
 }

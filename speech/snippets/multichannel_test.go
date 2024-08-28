@@ -26,7 +26,7 @@ func TestMultichannel(t *testing.T) {
 	testutil.SystemTest(t)
 
 	var buf bytes.Buffer
-	if err := transcribeMultichannel(&buf, "../testdata/commercial_stereo.wav"); err != nil {
+	if err := transcribeMultichannel(&buf); err != nil {
 		t.Fatal(err)
 	}
 

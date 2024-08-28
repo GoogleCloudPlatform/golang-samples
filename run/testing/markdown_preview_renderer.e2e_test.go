@@ -15,7 +15,7 @@
 package cloudruntests
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -55,7 +55,7 @@ func TestRendererService(t *testing.T) {
 		if err != nil {
 			t.Fatalf("service.NewRequest: %q", err)
 		}
-		req.Body = ioutil.NopCloser(strings.NewReader(test.input))
+		req.Body = io.NopCloser(strings.NewReader(test.input))
 
 		resp, err := service.Do(req)
 		if err != nil {
@@ -68,9 +68,9 @@ func TestRendererService(t *testing.T) {
 			t.Errorf("response status: got %d, want %d", got, http.StatusOK)
 		}
 
-		out, err := ioutil.ReadAll(resp.Body)
+		out, err := io.ReadAll(resp.Body)
 		if err != nil {
-			t.Errorf("ioutil.ReadAll: %v", err)
+			t.Errorf("io.ReadAll: %v", err)
 			return
 		}
 

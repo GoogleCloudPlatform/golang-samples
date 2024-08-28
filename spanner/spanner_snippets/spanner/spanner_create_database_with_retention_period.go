@@ -22,7 +22,7 @@ import (
 	"regexp"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
-	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
+	adminpb "cloud.google.com/go/spanner/admin/database/apiv1/databasepb"
 )
 
 func createDatabaseWithRetentionPeriod(ctx context.Context, w io.Writer, db string) error {

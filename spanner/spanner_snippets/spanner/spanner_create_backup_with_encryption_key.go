@@ -24,8 +24,8 @@ import (
 	"time"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
+	adminpb "cloud.google.com/go/spanner/admin/database/apiv1/databasepb"
 	pbt "github.com/golang/protobuf/ptypes/timestamp"
-	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
 func createBackupWithCustomerManagedEncryptionKey(ctx context.Context, w io.Writer, db, backupID, kmsKeyName string) error {

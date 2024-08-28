@@ -16,16 +16,12 @@ package videostitcher
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-
-	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 func TestCreateMediaCDNKey(t *testing.T) {
@@ -44,7 +40,7 @@ func TestCreateMediaCDNKey(t *testing.T) {
 		t.Fatalf("getUUID64 err: %v", err)
 	}
 
-	mediaCDNKeyID := fmt.Sprintf("%s-%s", mediaCDNKeyID, uuid)
+	mediaCDNKeyID := fmt.Sprintf("%s-%s", mediaCDNKeyIDPrefix, uuid)
 	mediaCDNKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, mediaCDNKeyID)
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		if err := createCDNKey(&buf, tc.ProjectID, mediaCDNKeyID, mediaCDNPrivateKey, true); err != nil {
@@ -54,8 +50,9 @@ func TestCreateMediaCDNKey(t *testing.T) {
 			r.Errorf("createCDNKey got: %v Want to contain: %v", got, mediaCDNKeyName)
 		}
 	})
+
 	t.Cleanup(func() {
-		teardownTestCreateCDNKey(mediaCDNKeyName, t)
+		deleteTestCDNKey(mediaCDNKeyName, t)
 	})
 }
 
@@ -75,7 +72,7 @@ func TestCreateCloudCDNKey(t *testing.T) {
 		t.Fatalf("getUUID64 err: %v", err)
 	}
 
-	cloudCDNKeyID := fmt.Sprintf("%s-%s", cloudCDNKeyID, uuid)
+	cloudCDNKeyID := fmt.Sprintf("%s-%s", cloudCDNKeyIDPrefix, uuid)
 	cloudCDNKeyName := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", tc.ProjectID, location, cloudCDNKeyID)
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		if err := createCDNKey(&buf, tc.ProjectID, cloudCDNKeyID, cloudCDNPrivateKey, false); err != nil {
@@ -85,29 +82,8 @@ func TestCreateCloudCDNKey(t *testing.T) {
 			r.Errorf("createCDNKey got: %v Want to contain: %v", got, cloudCDNKeyName)
 		}
 	})
+
 	t.Cleanup(func() {
-		teardownTestCreateCDNKey(cloudCDNKeyName, t)
+		deleteTestCDNKey(cloudCDNKeyName, t)
 	})
-}
-
-func teardownTestCreateCDNKey(testCDNKeyName string, t *testing.T) {
-	t.Helper()
-	ctx := context.Background()
-	client, err := stitcher.NewVideoStitcherClient(ctx)
-	if err != nil {
-		t.Errorf("stitcher.NewVideoStitcherClient: %v", err)
-	}
-	defer client.Close()
-
-	req := &stitcherstreampb.DeleteCdnKeyRequest{
-		Name: testCDNKeyName,
-	}
-	op, err := client.DeleteCdnKey(ctx, req)
-	if err != nil {
-		t.Errorf("client.DeleteCdnKey: %v", err)
-	}
-	err = op.Wait(ctx)
-	if err != nil {
-		t.Error(err)
-	}
 }

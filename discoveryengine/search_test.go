@@ -16,6 +16,7 @@ package search
 import "testing"
 
 func TestSearch(t *testing.T) {
+	t.Skip("See http://github.com/GoogleCloudPlatform/golang-samples/issues/3569")
 	// Customize this for your project
 	projectID := "my-project-id"
 	location := "us-central1"

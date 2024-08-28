@@ -23,21 +23,20 @@ import (
 	"time"
 
 	compute "cloud.google.com/go/compute/apiv1"
+	"cloud.google.com/go/compute/apiv1/computepb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"google.golang.org/api/cloudresourcemanager/v1"
-	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 	"google.golang.org/protobuf/proto"
 )
 
 func TestCreateJobWithTemplate(t *testing.T) {
-	t.Skip("Skipped while investigating https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	t.Parallel()
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	region := "us-central1"
-	jobName := fmt.Sprintf("test-job-go-template-%v-%v", time.Now().Format("2006-12-25"), r.Int())
-	templateName := fmt.Sprintf("test-template-go-batch-%v-%v", time.Now().Format("2006-12-25"), r.Int())
+	jobName := fmt.Sprintf("test-job-go-template-%v-%v", time.Now().Format("2006-01-02"), r.Int())
+	templateName := fmt.Sprintf("test-template-go-batch-%v-%v", time.Now().Format("2006-01-02"), r.Int())
 	buf := &bytes.Buffer{}
 
 	if err := createTemplate(tc.ProjectID, templateName); err != nil {

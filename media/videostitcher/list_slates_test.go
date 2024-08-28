@@ -16,60 +16,13 @@ package videostitcher
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-
-	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
-
-func setupTestListSlates(slateID string, t *testing.T) func() {
-	t.Helper()
-	ctx := context.Background()
-
-	client, err := stitcher.NewVideoStitcherClient(ctx)
-	if err != nil {
-		t.Fatalf("stitcher.NewVideoStitcherClient: %v", err)
-	}
-	// client.Close() is called in the returned function
-
-	tc := testutil.SystemTest(t)
-	req := &stitcherstreampb.CreateSlateRequest{
-		Parent:  fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, location),
-		SlateId: slateID,
-		Slate: &stitcherstreampb.Slate{
-			Uri: slateURI,
-		},
-	}
-	op, err := client.CreateSlate(ctx, req)
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, err = op.Wait(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return func() {
-		req := &stitcherstreampb.DeleteSlateRequest{
-			Name: fmt.Sprintf("projects/%s/locations/%s/slates/%s", tc.ProjectID, location, slateID),
-		}
-		_, err := client.DeleteSlate(ctx, req)
-		if err != nil {
-			t.Error(err)
-		}
-		_, err = op.Wait(ctx)
-		if err != nil {
-			t.Error(err)
-		}
-		client.Close()
-	}
-}
 
 func TestListSlates(t *testing.T) {
 	tc := testutil.SystemTest(t)
@@ -78,9 +31,8 @@ func TestListSlates(t *testing.T) {
 	if err != nil {
 		t.Fatalf("getUUID err: %v", err)
 	}
-	slateID := fmt.Sprintf("%s-%s", slateID, uuid)
-	teardown := setupTestListSlates(slateID, t)
-	t.Cleanup(teardown)
+	slateID := fmt.Sprintf("%s-%s", slateIDPrefix, uuid)
+	createTestSlate(slateID, t)
 
 	slateName := fmt.Sprintf("projects/%s/locations/%s/slates/%s", tc.ProjectID, location, slateID)
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
@@ -90,5 +42,9 @@ func TestListSlates(t *testing.T) {
 		if got := buf.String(); !strings.Contains(got, slateName) {
 			r.Errorf("listSlates got: %v Want to contain: %v", got, slateName)
 		}
+	})
+
+	t.Cleanup(func() {
+		deleteTestSlate(slateName, t)
 	})
 }

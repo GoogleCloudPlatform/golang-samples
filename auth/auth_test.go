@@ -17,6 +17,7 @@ package snippets
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -69,6 +70,18 @@ func TestAuthSnippets(t *testing.T) {
 	}
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Errorf("getIdTokenFromServiceAccount got %q, want %q", got, want)
+	}
+
+	buf.Reset()
+	want = "Generated OAuth2 token"
+	impersonatedServiceAccount := fmt.Sprintf("auth-samples-testing@%s.iam.gserviceaccount.com", tc.ProjectID)
+	scope := "https://www.googleapis.com/auth/cloud-platform"
+
+	if err := getAccessTokenFromImpersonatedCredentials(buf, impersonatedServiceAccount, scope); err != nil {
+		t.Fatalf("getAccessTokenFromImpersonatedCredentials got err: %v", err)
+	}
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("getAccessTokenFromImpersonatedCredentials got %q, want %q", got, want)
 	}
 
 	buf.Reset()

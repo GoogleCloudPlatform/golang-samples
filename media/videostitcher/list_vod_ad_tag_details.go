@@ -20,10 +20,9 @@ import (
 	"fmt"
 	"io"
 
-	"google.golang.org/api/iterator"
-
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
+	"google.golang.org/api/iterator"
 )
 
 // listVodAdTagDetails lists the ad tag details for a video on demand (VOD) session.
@@ -38,7 +37,7 @@ func listVodAdTagDetails(w io.Writer, projectID, sessionID string) error {
 	}
 	defer client.Close()
 
-	req := &stitcherpb.ListVodAdTagDetailsRequest{
+	req := &stitcherstreampb.ListVodAdTagDetailsRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s/vodSessions/%s", projectID, location, sessionID),
 	}
 
