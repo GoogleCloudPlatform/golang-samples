@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"io"
 
+	iam "cloud.google.com/go/iam/apiv1/iampb"
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	iam "google.golang.org/genproto/googleapis/iam/v1"
 )
 
 // testIam demonstrates how to determine if your service user has appropriate

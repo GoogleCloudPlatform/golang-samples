@@ -3,7 +3,6 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/spanner
 require (
 	cloud.google.com/go/spanner v1.64.0
 	google.golang.org/api v0.189.0
-	google.golang.org/genproto v0.0.0-20240723171418-e6d459c13d2a
 )
 
 require (
@@ -29,6 +28,7 @@ require (
 	golang.org/x/crypto v0.25.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
+	google.golang.org/genproto v0.0.0-20240723171418-e6d459c13d2a // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240722135656-d784300faade // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240722135656-d784300faade // indirect
 )

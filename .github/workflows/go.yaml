@@ -19,7 +19,7 @@ jobs:
     - name: Setup Go
       uses: actions/setup-go@v5
       with:
-        go-version: '1.21.X'
+        go-version: '1.21.0'
     - name: Checkout code
       uses: actions/checkout@v2
     - name: Build code
@@ -37,7 +37,7 @@ jobs:
     - name: Setup Go
       uses: actions/setup-go@v5
       with:
-        go-version: '1.21.X'
+        go-version: '1.21.0'
     - name: Checkout code
       uses: actions/checkout@v2
     - name: Install goimports
@@ -64,7 +64,7 @@ jobs:
     - name: Setup Go
       uses: actions/setup-go@v5
       with:
-        go-version: '1.21.X'
+        go-version: '1.21.0'
     - name: Checkout code
       uses: actions/checkout@v2
     - name: go vet
@@ -82,7 +82,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21.X'
+          go-version: '1.21.0'
       - name: Check code
         uses: actions/checkout@v2
       - run: go test -v

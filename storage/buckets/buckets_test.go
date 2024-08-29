@@ -27,9 +27,9 @@ import (
 	"time"
 
 	"cloud.google.com/go/iam"
+	"cloud.google.com/go/iam/apiv1/iampb"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	iampb "google.golang.org/genproto/googleapis/iam/v1"
 )
 
 const (
