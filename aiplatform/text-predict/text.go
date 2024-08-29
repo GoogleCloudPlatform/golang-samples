@@ -28,9 +28,18 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-// textPredict generates text from prompt and configurations provided.
-func textPredict(w io.Writer, prompt, projectID, location, publisher, model string, parameters map[string]interface{}) error {
+// textPredict generates text with certain prompt and configurations.
+func textPredict(w io.Writer, projectID, location, model string) error {
 	ctx := context.Background()
+
+	prompt := "Hello, say something nice."
+	publisher := "google"
+	parameters := map[string]interface{}{
+		"temperature":     0.8,
+		"maxOutputTokens": 256,
+		"topP":            0.4,
+		"topK":            40,
+	}
 
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 
