@@ -21,8 +21,8 @@ import (
 	"io"
 
 	"cloud.google.com/go/iam"
+	"cloud.google.com/go/iam/apiv1/iampb"
 	"cloud.google.com/go/storage"
-	iampb "google.golang.org/genproto/googleapis/iam/v1"
 )
 
 // setBucketPublicIAM makes all objects in a bucket publicly readable.
