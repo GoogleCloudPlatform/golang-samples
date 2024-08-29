@@ -27,10 +27,9 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// generateMultimodalContent shows how to send video to a model, writing the response to the provided io.Writer.
-// video is a Google Cloud Storage path starting with "gs://"
-func generateMultimodalContent(w io.Writer, video, projectID, location, modelName string) error {
-	// video := "gs://cloud-samples-data/generative-ai/video/pixel8.mp4"
+// generateMultimodalContent shows how to send video and text prompts to a model, writing the response to
+// the provided io.Writer.
+func generateMultimodalContent(w io.Writer, projectID, location, modelName string) error {
 	// location := "us-central1"
 	// modelName := "gemini-1.5-flash-001"
 	ctx := context.Background()
@@ -45,13 +44,13 @@ func generateMultimodalContent(w io.Writer, video, projectID, location, modelNam
 
 	// Given a video file URL, prepare video file as genai.Part
 	part := genai.FileData{
-		MIMEType: mime.TypeByExtension(filepath.Ext(video)),
-		FileURI:  video,
+		MIMEType: mime.TypeByExtension(filepath.Ext("pixel8.mp4")),
+		FileURI:  "gs://cloud-samples-data/generative-ai/video/pixel8.mp4",
 	}
 
 	res, err := model.GenerateContent(ctx, part, genai.Text(`
-    	Provide a description of the video.
-    	The description should also contain anything important which people say in the video.
+			Provide a description of the video.
+			The description should also contain anything important which people say in the video.
 	`))
 	if err != nil {
 		return fmt.Errorf("unable to generate contents: %w", err)

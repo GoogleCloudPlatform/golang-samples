@@ -24,11 +24,9 @@ import (
 )
 
 // generateContent generates text from prompt and configurations provided.
-func generateContent(w io.Writer, prompt, projectID, location, modelName string, temperature float32) error {
-	// prompt := "hello, say something mean to me."
+func generateContent(w io.Writer, projectID, location, modelName string) error {
 	// location := "us-central1"
 	// model := "gemini-1.5-flash-001"
-	// temp := float32(0.8)
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
@@ -38,7 +36,7 @@ func generateContent(w io.Writer, prompt, projectID, location, modelName string,
 	defer client.Close()
 
 	model := client.GenerativeModel(modelName)
-	model.SetTemperature(temperature)
+	model.SetTemperature(0.8)
 
 	// configure the safety settings thresholds
 	model.SafetySettings = []*genai.SafetySetting{
@@ -52,7 +50,7 @@ func generateContent(w io.Writer, prompt, projectID, location, modelName string,
 		},
 	}
 
-	res, err := model.GenerateContent(ctx, genai.Text(prompt))
+	res, err := model.GenerateContent(ctx, genai.Text("Hello, say something mean to me."))
 	if err != nil {
 		return fmt.Errorf("unable to generate content: %v", err)
 	}
