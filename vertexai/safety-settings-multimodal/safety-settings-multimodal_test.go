@@ -25,13 +25,11 @@ import (
 func TestGenerateContent(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	prompt := "describe this image."
 	location := "us-central1"
 	model := "gemini-1.5-flash-001"
-	image := "gs://cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg"
 
 	var buf bytes.Buffer
-	if err := generateMultimodalContent(&buf, prompt, image, tc.ProjectID, location, model); err != nil {
+	if err := generateMultimodalContent(&buf, tc.ProjectID, location, model); err != nil {
 		t.Fatal(err)
 	}
 

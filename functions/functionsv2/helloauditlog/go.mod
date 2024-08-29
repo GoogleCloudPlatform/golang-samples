@@ -1,9 +1,9 @@
 module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/helloauditlog
 
-go 1.19
+go 1.21
 
 require (
-	github.com/GoogleCloudPlatform/functions-framework-go v1.8.0
+	github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
 	github.com/cloudevents/sdk-go/v2 v2.15.2
 )
 

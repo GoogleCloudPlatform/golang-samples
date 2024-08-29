@@ -27,9 +27,9 @@ import (
 	"time"
 
 	"cloud.google.com/go/iam"
+	"cloud.google.com/go/iam/apiv1/iampb"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	iampb "google.golang.org/genproto/googleapis/iam/v1"
 )
 
 const (
@@ -763,5 +763,23 @@ func TestCreateBucketHierarchicalNamespace(t *testing.T) {
 	}
 	if got, want := (attrs.HierarchicalNamespace), (&storage.HierarchicalNamespace{Enabled: true}); got == nil || !got.Enabled {
 		t.Errorf("Attrs.HierarchicalNamespace: got %v, want %v", got, want)
+	}
+}
+
+func TestCreateBucketObjectRetention(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	bucketName := testutil.UniqueBucketName(testPrefix)
+	ctx := context.Background()
+
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	buf := new(bytes.Buffer)
+
+	if err := createBucketObjectRetention(buf, tc.ProjectID, bucketName); err != nil {
+		t.Fatalf("createBucketObjectRetention: %v", err)
+	}
+
+	if got, want := buf.String(), "Enabled"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
 	}
 }

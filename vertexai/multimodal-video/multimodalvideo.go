@@ -28,12 +28,8 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// generateMultimodalContent generates a response into w, based upon the prompt
-// and video provided.
-// video is a Google Cloud Storage path starting with "gs://"
-func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, modelName string) error {
-	// prompt := "What is in this video?"
-	// video := "gs://cloud-samples-data/video/animals.mp4"
+// generateMultimodalContent generates a response into w, based upon the prompt and video.
+func generateMultimodalContent(w io.Writer, projectID, location, modelName string) error {
 	// location := "us-central1"
 	// modelName := "gemini-1.5-flash-001"
 	ctx := context.Background()
@@ -49,11 +45,11 @@ func generateMultimodalContent(w io.Writer, prompt, video, projectID, location, 
 
 	// Given a video file URL, prepare video file as genai.Part
 	part := genai.FileData{
-		MIMEType: mime.TypeByExtension(filepath.Ext(video)),
-		FileURI:  video,
+		MIMEType: mime.TypeByExtension(filepath.Ext("animals.mp4")),
+		FileURI:  "gs://cloud-samples-data/video/animals.mp4",
 	}
 
-	res, err := model.GenerateContent(ctx, part, genai.Text(prompt))
+	res, err := model.GenerateContent(ctx, part, genai.Text("What is in this video?"))
 	if err != nil {
 		return fmt.Errorf("unable to generate contents: %w", err)
 	}

@@ -25,13 +25,11 @@ import (
 func TestGenerateContent(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	prompt := "hello, say something mean to me."
 	location := "us-central1"
 	model := "gemini-1.5-flash-001"
-	temp := 0.8
 
 	var buf bytes.Buffer
-	if err := generateContent(&buf, prompt, tc.ProjectID, location, model, float32(temp)); err != nil {
+	if err := generateContent(&buf, tc.ProjectID, location, model); err != nil {
 		t.Fatal(err)
 	}
 
