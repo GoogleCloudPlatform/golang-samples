@@ -25,21 +25,12 @@ import (
 func TestTextPredict(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	prompt := "hello, say something nice."
 	projectID := tc.ProjectID
 	location := "us-central1"
-	publisher := "google"
 	model := "text-bison"
 
-	parameters := map[string]interface{}{
-		"temperature":     0.8,
-		"maxOutputTokens": 256,
-		"topP":            0.4,
-		"topK":            40,
-	}
-
 	var buf bytes.Buffer
-	if err := textPredict(&buf, prompt, projectID, location, publisher, model, parameters); err != nil {
+	if err := textPredict(&buf, projectID, location, model); err != nil {
 		t.Fatal(err)
 	}
 
