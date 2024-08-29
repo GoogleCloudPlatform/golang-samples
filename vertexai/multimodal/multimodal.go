@@ -32,7 +32,6 @@ func generateMultimodalContent(w io.Writer, projectID, location, modelName strin
 	// location := "us-central1"
 	// modelName := "gemini-1.5-flash-001"
 	ctx := context.Background()
-	image := "gs://generativeai-downloads/images/scones.jpg"
 
 	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {
@@ -45,11 +44,11 @@ func generateMultimodalContent(w io.Writer, projectID, location, modelName strin
 
 	// Given an image file URL, prepare image file as genai.Part
 	img := genai.FileData{
-		MIMEType: mime.TypeByExtension(filepath.Ext(image)),
-		FileURI:  image,
+		MIMEType: mime.TypeByExtension(filepath.Ext("scones.jpg")),
+		FileURI:  "gs://generativeai-downloads/images/scones.jpg",
 	}
 
-	res, err := model.GenerateContent(ctx, img, genai.Text("describe what is in this picture"))
+	res, err := model.GenerateContent(ctx, img, genai.Text("Describe what is in this picture"))
 	if err != nil {
 		return fmt.Errorf("unable to generate contents: %v", err)
 	}

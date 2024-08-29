@@ -36,8 +36,7 @@ import (
 // - first, to convert a text into a structured function call request
 // - second, to convert a structured function call response into natural language.
 // Writes output of second call to w.
-func functionCallsBasic(w io.Writer, prompt, projectID, location, modelName string) error {
-	// prompt := "What's the weather like in Boston?"
+func functionCallsBasic(w io.Writer, projectID, location, modelName string) error {
 	// location := "us-central1"
 	// modelName := "gemini-1.5-flash-001"
 	ctx := context.Background()
@@ -70,7 +69,7 @@ func functionCallsBasic(w io.Writer, prompt, projectID, location, modelName stri
 
 	chat := model.StartChat()
 
-	resp, err := chat.SendMessage(ctx, genai.Text(prompt))
+	resp, err := chat.SendMessage(ctx, genai.Text("What's the weather like in Boston?"))
 	if err != nil {
 		return err
 	}
