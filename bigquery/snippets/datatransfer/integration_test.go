@@ -24,10 +24,10 @@ import (
 
 	"cloud.google.com/go/bigquery"
 	datatransfer "cloud.google.com/go/bigquery/datatransfer/apiv1"
+	"cloud.google.com/go/bigquery/datatransfer/apiv1/datatransferpb"
 	"github.com/GoogleCloudPlatform/golang-samples/bigquery/snippets/bqtestutil"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	gax "github.com/googleapis/gax-go/v2"
-	datatransferpb "google.golang.org/genproto/googleapis/cloud/bigquery/datatransfer/v1"
 )
 
 func TestDataTransfer(t *testing.T) {

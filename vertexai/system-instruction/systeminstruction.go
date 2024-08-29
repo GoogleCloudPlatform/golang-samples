@@ -29,13 +29,7 @@ import (
 )
 
 // systemInstruction shows how to provide a system instruction to the generative model.
-func systemInstruction(w io.Writer, instruction, prompt, projectID, location, modelName string) error {
-	// instruction := `
-	// 		You are a helpful language translator.
-	// 		Your mission is to translate text in English to French.`
-	// prompt := `
-	//		User input: I like bagels.
-	//		Answer:`
+func systemInstruction(w io.Writer, projectID, location, modelName string) error {
 	// location := "us-central1"
 	// modelName := "gemini-1.5-flash-001"
 
@@ -50,10 +44,16 @@ func systemInstruction(w io.Writer, instruction, prompt, projectID, location, mo
 	// The System Instruction is set at model creation
 	model := client.GenerativeModel(modelName)
 	model.SystemInstruction = &genai.Content{
-		Parts: []genai.Part{genai.Text(instruction)},
+		Parts: []genai.Part{genai.Text(`
+			You are a helpful language translator.
+			Your mission is to translate text in English to French.
+		`)},
 	}
 
-	res, err := model.GenerateContent(ctx, genai.Text(prompt))
+	res, err := model.GenerateContent(ctx, genai.Text(`
+		User input: I like bagels.
+		Answer:
+	`))
 	if err != nil {
 		return fmt.Errorf("unable to generate contents: %w", err)
 	}

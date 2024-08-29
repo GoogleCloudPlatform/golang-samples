@@ -2,4 +2,4 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/tips/infinite_ret
 
 require cloud.google.com/go/functions v1.16.5
 
-go 1.19
+go 1.21

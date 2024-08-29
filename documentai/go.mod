@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/documentai
 
-go 1.19
+go 1.21
 
 require (
 	cloud.google.com/go/documentai v1.30.4
