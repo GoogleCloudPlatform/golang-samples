@@ -27,12 +27,12 @@ import (
 )
 
 // countTokens returns the number of tokens for this prompt.
-func countTokens(w io.Writer, prompt, projectID, location, modelName string) error {
-	// prompt := "why is the sky blue?"
+func countTokens(w io.Writer, projectID, location, modelName string) error {
 	// location := "us-central1"
 	// modelName := "gemini-1.5-flash-001"
 
 	ctx := context.Background()
+	prompt := genai.Text("Why is the sky blue?")
 
 	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {
@@ -42,12 +42,20 @@ func countTokens(w io.Writer, prompt, projectID, location, modelName string) err
 
 	model := client.GenerativeModel(modelName)
 
-	resp, err := model.CountTokens(ctx, genai.Text(prompt))
+	resp, err := model.CountTokens(ctx, prompt)
 	if err != nil {
 		return err
 	}
 
 	fmt.Fprintf(w, "Number of tokens for the prompt: %d\n", resp.TotalTokens)
+
+	resp2, err := model.GenerateContent(ctx, prompt)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "Number of tokens for the prompt: %d\n", resp2.UsageMetadata.PromptTokenCount)
+	fmt.Fprintf(w, "Number of tokens for the candidates: %d\n", resp2.UsageMetadata.CandidatesTokenCount)
+	fmt.Fprintf(w, "Total number of tokens: %d\n", resp2.UsageMetadata.TotalTokenCount)
 
 	return nil
 }
