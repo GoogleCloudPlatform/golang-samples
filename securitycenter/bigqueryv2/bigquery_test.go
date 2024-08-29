@@ -37,17 +37,13 @@ func orgID(t *testing.T) string {
 	return orgID
 }
 
-func bigQueryDatasetName(t *testing.T) string {
-	bigQueryDatasetName := os.Getenv("SCC_BIGQUERY_DATASET_NAME")
-	if bigQueryDatasetName == "" {
-		t.Fatal("SCC_BIGQUERY_DATASET_NAME not set")
-	}
-	return bigQueryDatasetName
+func createDemoDataset(t *testing.T) string {
+	return "projects/project-a-id/datasets/sampledataset"
 }
 
 func addBigQueryExport(t *testing.T, bigQueryExportID string) error {
 	orgID := orgID(t)
-	bigQueryDatasetName := bigQueryDatasetName(t)
+	bigQueryDatasetName := createDemoDataset(t)
 
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
@@ -70,7 +66,7 @@ func addBigQueryExport(t *testing.T, bigQueryExportID string) error {
 
 	_, err0 := client.CreateBigQueryExport(ctx, req)
 	if err0 != nil {
-		return fmt.Errorf("Failed to create BigQueryConfig: %w", err)
+		return fmt.Errorf("Failed to create BigQueryConfig: %w", err0)
 	}
 	return nil
 }
@@ -99,119 +95,113 @@ func cleanupBigQueryExport(t *testing.T, bigQueryExportID string) error {
 
 func TestListBigQuery(t *testing.T) {
 
-	testutil.Retry(t, 5, 20*time.Second, func(r *testutil.R) {
-		buf := new(bytes.Buffer)
+	buf := new(bytes.Buffer)
 
-		// Create Test BigQueryExport Config
-		rand, err := uuid.NewUUID()
-		if err != nil {
-			t.Fatalf("Issue generating id.")
-			return
-		}
-		configID := "random-bqexport-id-" + rand.String()
+	// Create Test BigQueryExport Config
+	rand, err := uuid.NewUUID()
+	if err != nil {
+		t.Fatalf("Issue generating id.")
+		return
+	}
+	configID := "random-bqexport-id-" + rand.String()
 
-		if err := addBigQueryExport(t, configID); err != nil {
-			t.Fatalf("Could not setup test environment: %v", err)
-			return
-		}
+	if err := addBigQueryExport(t, configID); err != nil {
+		t.Fatalf("Could not setup test environment: %v", err)
+		return
+	}
 
-		parent := fmt.Sprintf("organizations/%s/locations/global", orgID(t))
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID(t))
 
-		// Call List BigQueryExport
-		err = listBigQueryExport(buf, parent)
+	// Call List BigQueryExport
+	err = listBigQueryExport(buf, parent)
 
-		if err != nil {
-			t.Fatalf("listBigQueryExport() had error: %v", err)
-			return
-		}
+	if err != nil {
+		t.Fatalf("listBigQueryExport() had error: %v", err)
+		return
+	}
 
-		got := buf.String()
+	got := buf.String()
 
-		if !strings.Contains(got, configID) {
-			t.Fatalf("listBigQueryConfigs() got: %s want %s", got, configID)
-		}
+	if !strings.Contains(got, configID) {
+		t.Fatalf("listBigQueryConfigs() got: %s want %s", got, configID)
+	}
 
-		// Cleanup
-		cleanupBigQueryExport(t, configID)
-	})
+	// Cleanup
+	cleanupBigQueryExport(t, configID)
 }
 
 func TestGetBigQuery(t *testing.T) {
 
-	testutil.Retry(t, 5, 20*time.Second, func(r *testutil.R) {
-		buf := new(bytes.Buffer)
-		// Create Test BigQueryExport Config
-		rand, err := uuid.NewUUID()
-		if err != nil {
-			t.Fatalf("Issue generating id.")
-			return
-		}
-		configID := "random-bqexport-id-" + rand.String()
+	buf := new(bytes.Buffer)
+	// Create Test BigQueryExport Config
+	rand, err := uuid.NewUUID()
+	if err != nil {
+		t.Fatalf("Issue generating id.")
+		return
+	}
+	configID := "random-bqexport-id-" + rand.String()
 
-		if err := addBigQueryExport(t, configID); err != nil {
-			t.Fatalf("Could not setup test environment: %v", err)
-			return
-		}
+	if err := addBigQueryExport(t, configID); err != nil {
+		t.Fatalf("Could not setup test environment: %v", err)
+		return
+	}
 
-		parent := fmt.Sprintf("organizations/%s/locations/global", orgID(t))
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID(t))
 
-		// Call GetBigQueryExport
-		err = getBigQueryExport(buf, parent, configID)
+	// Call GetBigQueryExport
+	err = getBigQueryExport(buf, parent, configID)
 
-		if err != nil {
-			t.Fatalf("getBigQueryExport() had error: %v", err)
-			return
-		}
+	if err != nil {
+		t.Fatalf("getBigQueryExport() had error: %v", err)
+		return
+	}
 
-		got := buf.String()
+	got := buf.String()
 
-		if !strings.Contains(got, configID) {
-			t.Fatalf("getBigQueryExport() got: %s want %s", got, configID)
-		}
+	if !strings.Contains(got, configID) {
+		t.Fatalf("getBigQueryExport() got: %s want %s", got, configID)
+	}
 
-		// Cleanup
-		cleanupBigQueryExport(t, configID)
-	})
+	// Cleanup
+	cleanupBigQueryExport(t, configID)
 }
 
 func TestDeleteBigQuery(t *testing.T) {
 
-	testutil.Retry(t, 5, 20*time.Second, func(r *testutil.R) {
-		buf := new(bytes.Buffer)
-		// Create Test BigQueryExport Config
-		rand, err := uuid.NewUUID()
-		if err != nil {
-			t.Fatalf("Issue generating id.")
-			return
-		}
-		configID := "random-bqexport-id-" + rand.String()
+	buf := new(bytes.Buffer)
+	// Create Test BigQueryExport Config
+	rand, err := uuid.NewUUID()
+	if err != nil {
+		t.Fatalf("Issue generating id.")
+		return
+	}
+	configID := "random-bqexport-id-" + rand.String()
 
-		if err := addBigQueryExport(t, configID); err != nil {
-			t.Fatalf("Could not setup test environment: %v", err)
-			return
-		}
+	if err := addBigQueryExport(t, configID); err != nil {
+		t.Fatalf("Could not setup test environment: %v", err)
+		return
+	}
 
-		parent := fmt.Sprintf("organizations/%s/locations/global", orgID(t))
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID(t))
 
-		// Call DeleteBigQueryExport
-		err = deleteBigQueryExport(buf, parent, configID)
+	// Call DeleteBigQueryExport
+	err = deleteBigQueryExport(buf, parent, configID)
 
-		if err != nil {
-			t.Fatalf("deleteBigQueryExport() had error: %v", err)
-			return
-		}
+	if err != nil {
+		t.Fatalf("deleteBigQueryExport() had error: %v", err)
+		return
+	}
 
-		got := buf.String()
+	got := buf.String()
 
-		if !strings.Contains(got, configID) {
-			t.Fatalf("deleteBigQueryExport() got: %s want %s", got, configID)
-		}
-	})
+	if !strings.Contains(got, configID) {
+		t.Fatalf("deleteBigQueryExport() got: %s want %s", got, configID)
+	}
 }
 
 func TestUpdateBigQuery(t *testing.T) {
 
-	testutil.Retry(t, 5, 20*time.Second, func(r *testutil.R) {
+	testutil.Retry(t, 3, 10*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
 
 		// Create Test BigQueryExport Config
@@ -250,38 +240,31 @@ func TestUpdateBigQuery(t *testing.T) {
 
 func TestCreateBigQuery(t *testing.T) {
 
-	testutil.Retry(t, 5, 20*time.Second, func(r *testutil.R) {
-		buf := new(bytes.Buffer)
+	buf := new(bytes.Buffer)
 
-		rand, err := uuid.NewUUID()
-		if err != nil {
-			t.Fatalf("Issue generating id.")
-			return
-		}
-		configID := "random-bqexport-id-" + rand.String()
+	rand, err := uuid.NewUUID()
+	if err != nil {
+		t.Fatalf("Issue generating id.")
+		return
+	}
+	configID := "random-bqexport-id-" + rand.String()
 
-		parent := fmt.Sprintf("organizations/%s/locations/global", orgID(t))
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID(t))
 
-		err = createBigQueryExport(buf, parent, configID, bigQueryDatasetName(t))
+	err = createBigQueryExport(buf, parent, configID)
 
-		if err != nil {
-			t.Fatalf("createBigQueryExport() had error: %v", err)
-			return
-		}
+	if err != nil {
+		t.Fatalf("createBigQueryExport() had error: %v", err)
+		return
+	}
 
-		got := buf.String()
+	got := buf.String()
 
-		if !strings.Contains(got, configID) {
-			t.Fatalf("createBigQueryExport() got: %s want %s", got, configID)
-		}
+	if !strings.Contains(got, configID) {
+		t.Fatalf("createBigQueryExport() got: %s want %s", got, configID)
+	}
 
-		// Cleanup
-		cleanupBigQueryExport(t, configID)
+	// Cleanup
+	cleanupBigQueryExport(t, configID)
 
-	})
 }
-
-// func TestMain(m *testing.M) {
-// 	code := m.Run()
-// 	os.Exit(code)
-// }

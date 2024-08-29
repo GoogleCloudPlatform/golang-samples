@@ -27,13 +27,16 @@ import (
 
 // Create export configuration to export findings to a BigQuery dataset.
 // Optionally specify filter to export certain findings only.
-func createBigQueryExport(w io.Writer, parent string, bigQueryExportId string, bigQueryDatasetName string) error {
+func createBigQueryExport(w io.Writer, parent string, bigQueryExportId string) error {
 	// parent: Use any one of the following options:
 	//             - organizations/{organization_id}/locations/{location_id}
 	//             - folders/{folder_id}/locations/{location_id}
 	//             - projects/{project_id}/locations/{location_id}
 	// bigQueryExportId := "random-bqexport-id-" + uuid.New().String()
 	// bigQueryDataSetName := fmt.Sprintf("projects/%s/datasets/%s", "your-google-cloud-project-id", "your-big-query-dataset-id")
+
+	const bigQueryDatasetName = "projects/project-a-id/datasets/sampledataset" // Hard-coded dataset name
+
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
