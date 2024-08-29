@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // multiple-multimodal shows how to generate content from mixed image and text content
-package main
+package multiplemultimodal
 
 // [START generativeaionvertexai_gemini_single_turn_multi_image]
 // [START aiplatform_gemini_single_turn_multi_image]
@@ -20,47 +20,32 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
-	"net/http"
-	"net/url"
-	"os"
-	"strings"
+	"mime"
+	"path/filepath"
 
 	"cloud.google.com/go/vertexai/genai"
 )
 
-func main() {
-	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	location := "us-central1"
-	modelName := "gemini-1.5-flash-001"
-	temperature := 0.4
-
-	if projectID == "" {
-		log.Fatal("require environment variable GOOGLE_CLOUD_PROJECT")
-	}
-
-	// construct this multimodal prompt:
-	// [image of colosseum] city: Rome, Landmark: the Colosseum
-	// [image of forbidden city]  city: Beijing, Landmark: the Forbidden City
-	// [new image]
+// generateMultimodalContent shows how to generate a text from a multimodal prompt using the Gemini model,
+// writing the response to the provided io.Writer.
+func generateMultimodalContent(w io.Writer, projectID, location, modelName string) error {
+	// location := "us-central1"
+	// modelName := "gemini-1.5-flash-001"
+	ctx := context.Background()
 
 	// create prompt image parts
-	// colosseum
-	colosseum, err := partFromImageURL("https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark1.png")
-	if err != nil {
-		log.Fatalf("unable to read image: %v", err)
+	colosseum := genai.FileData{
+		MIMEType: mime.TypeByExtension(filepath.Ext("landmark1.png")),
+		FileURI:  "gs://cloud-samples-data/vertex-ai/llm/prompts/landmark1.png",
 	}
-	// forbidden city
-	forbiddenCity, err := partFromImageURL("https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark2.png")
-	if err != nil {
-		log.Fatalf("unable to read image: %v", err)
+	forbiddenCity := genai.FileData{
+		MIMEType: mime.TypeByExtension(filepath.Ext("landmark2.png")),
+		FileURI:  "gs://cloud-samples-data/vertex-ai/llm/prompts/landmark2.png",
 	}
-	// new image
-	newImage, err := partFromImageURL("https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark3.png")
-	if err != nil {
-		log.Fatalf("unable to read image: %v", err)
+	newImage := genai.FileData{
+		MIMEType: mime.TypeByExtension(filepath.Ext("landmark3.png")),
+		FileURI:  "gs://cloud-samples-data/vertex-ai/llm/prompts/landmark3.png",
 	}
-
 	// create a multimodal (multipart) prompt
 	prompt := []genai.Part{
 		colosseum,
@@ -71,61 +56,21 @@ func main() {
 	}
 
 	// generate the response
-	err = generateMultimodalContent(os.Stdout, prompt, projectID, location, modelName, float32(temperature))
-	if err != nil {
-		log.Fatalf("unable to generate: %v", err)
-	}
-}
-
-// generateMultimodalContent provide a generated response using multimodal input
-func generateMultimodalContent(w io.Writer, parts []genai.Part, projectID, location, modelName string, temperature float32) error {
-	ctx := context.Background()
-
 	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("unable to create client: %w", err)
 	}
 	defer client.Close()
 
 	model := client.GenerativeModel(modelName)
-	model.SetTemperature(temperature)
 
-	res, err := model.GenerateContent(ctx, parts...)
+	res, err := model.GenerateContent(ctx, prompt...)
 	if err != nil {
 		return fmt.Errorf("unable to generate contents: %w", err)
 	}
 
 	fmt.Fprintf(w, "generated response: %s\n", res.Candidates[0].Content.Parts[0])
-
 	return nil
-}
-
-// partFromImageURL create a multimodal prompt part from an image URL
-func partFromImageURL(image string) (genai.Part, error) {
-	var img genai.Blob
-
-	imageURL, err := url.Parse(image)
-	if err != nil {
-		return img, err
-	}
-	res, err := http.Get(image)
-	if err != nil || res.StatusCode != 200 {
-		return img, err
-	}
-	defer res.Body.Close()
-	data, err := io.ReadAll(res.Body)
-	if err != nil {
-		return img, fmt.Errorf("unable to read from http: %w", err)
-	}
-
-	position := strings.LastIndex(imageURL.Path, ".")
-	if position == -1 {
-		return img, fmt.Errorf("couldn't find a period to indicate a file extension")
-	}
-	ext := imageURL.Path[position+1:]
-
-	img = genai.ImageData(ext, data)
-	return img, nil
 }
 
 // [END aiplatform_gemini_single_turn_multi_image]

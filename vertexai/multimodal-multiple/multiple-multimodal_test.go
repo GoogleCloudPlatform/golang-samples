@@ -11,59 +11,26 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package main
+package multiplemultimodal
 
 import (
 	"bytes"
-	"os"
 	"strings"
 	"testing"
 
-	"cloud.google.com/go/vertexai/genai"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestGenerateMultimodalContent(t *testing.T) {
-	t.Skip("TODO(muncus): remove skip")
 	tc := testutil.SystemTest(t)
 
-	projectID := tc.ProjectID
 	location := "us-central1"
-
 	modelName := "gemini-1.5-flash-001"
-	temperature := 0.8
-
-	colosseum, err := partFromImageURL("https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark1.png")
-	if err != nil {
-		t.Fatal(err)
-	}
-	// forbidden city
-	forbiddenCity, err := partFromImageURL("https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark2.png")
-	if err != nil {
-		t.Fatal(err)
-	}
-	// new image
-	newImage, err := partFromImageURL("https://storage.googleapis.com/cloud-samples-data/vertex-ai/llm/prompts/landmark3.png")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// create a multimodal (multipart) prompt
-	prompt := []genai.Part{
-		colosseum,
-		genai.Text("city: Rome, Landmark: the Colosseum "),
-		forbiddenCity,
-		genai.Text("city: Beijing, Landmark: the Forbidden City "),
-		newImage,
-	}
-
-	if projectID == "" {
-		t.Fatal("require environment variable GOOGLE_CLOUD_PROJECT")
-	}
-
 	var buf bytes.Buffer
-	if err := generateMultimodalContent(os.Stdout, prompt, projectID, location, modelName, float32(temperature)); err != nil {
-		t.Fatal(err)
+
+	err := generateMultimodalContent(&buf, tc.ProjectID, location, modelName)
+	if err != nil {
+		t.Errorf("generateMultimodalContent: %v", err)
 	}
 
 	if got := buf.String(); !strings.Contains(got, "generated response") {
