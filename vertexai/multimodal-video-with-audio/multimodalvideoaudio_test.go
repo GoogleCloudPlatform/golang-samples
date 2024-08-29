@@ -26,11 +26,10 @@ func Test_generateMultimodalContent(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
-	video := "gs://cloud-samples-data/generative-ai/video/pixel8.mp4"
 	location := "us-central1"
 	modelName := "gemini-1.5-flash-001"
 
-	err := generateMultimodalContent(buf, video, tc.ProjectID, location, modelName)
+	err := generateMultimodalContent(buf, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Errorf("Test_generateMultimodalContent: %v", err.Error())
 	}
@@ -44,7 +43,7 @@ func Test_generateMultimodalContent(t *testing.T) {
 		"pixel",
 	} {
 		if !strings.Contains(generatedDescriptionLowercase, word) {
-			t.Errorf("expected the word %q in the description of %s", word, video)
+			t.Errorf("expected the word %q in the description of the video", word)
 		}
 	}
 }
