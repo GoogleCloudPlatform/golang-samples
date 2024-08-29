@@ -32,12 +32,21 @@ func TestHelloworldService(t *testing.T) {
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)
 	}
-	defer service.Clean()
+	defer func(service *cloudrunci.Service) {
+		err := service.Clean()
+		if err != nil {
+			t.Fatalf("service.Clean %q: %v", service.Name, err)
+		}
+	}(service)
 
 	resp, err := service.Request("GET", "/")
+	if err != nil {
+		t.Fatalf("request: %v", err)
+	}
+
 	out, err := io.ReadAll(resp.Body)
 	if err != nil {
-		t.Errorf("io.ReadAll: %v", err)
+		t.Fatalf("io.ReadAll: %v", err)
 	}
 
 	if got, want := string(out), "Hello Override!\n"; got != want {

@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/jobs
 
-go 1.19
+go 1.21
 
 require (
 	cloud.google.com/go/talent v1.6.11
