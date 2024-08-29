@@ -7,6 +7,7 @@ require (
 	cloud.google.com/go/iam v1.2.0
 	cloud.google.com/go/pubsub v1.42.0
 	cloud.google.com/go/storage v1.43.0
+	cloud.google.com/go/trace v1.11.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240820230436-761d0ae7aeff
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.24.1
 	github.com/google/go-cmp v0.6.0
@@ -25,7 +26,6 @@ require (
 	cloud.google.com/go/auth v0.9.0 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.4 // indirect
 	cloud.google.com/go/compute/metadata v0.5.0 // indirect
-	cloud.google.com/go/trace v1.11.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.48.1 // indirect
 	github.com/apache/arrow/go/v15 v15.0.2 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
