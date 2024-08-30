@@ -30,9 +30,7 @@ func makeCreateDatabaseWithPropertyGraphRequest(instance string, dbName string) 
 	// The schema defintion for a database with a property graph comprises table
 	// definitions one or more `CREATE PROPERTY GRAPH` statements to define the
 	// property graph(s).
-	// Consult https://cloud.google.com/spanner/docs/reference/standard-sql/graph-schema-statements
-	// for a description of property graph schemas.
-	var schema_statements = []string {
+	var schema_statements = []string{
 		`CREATE TABLE Person (
 			id               INT64 NOT NULL,
 			name             STRING(MAX),
@@ -74,7 +72,7 @@ func makeCreateDatabaseWithPropertyGraphRequest(instance string, dbName string) 
 					SOURCE KEY(id) REFERENCES Account(id)
 					DESTINATION KEY(to_id) REFERENCES Account(id)
 					LABEL Transfers)`,
-		};
+	}
 
 	return &adminpb.CreateDatabaseRequest{
 		Parent:          instance,

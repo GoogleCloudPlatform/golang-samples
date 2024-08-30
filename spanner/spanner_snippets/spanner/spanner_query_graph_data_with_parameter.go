@@ -36,9 +36,7 @@ func queryGraphDataWithParameter(w io.Writer, db string) error {
 
 	// Execute a Spanner query statement comprising a graph query. Graph queries
 	// are characterized by 'MATCH' statements describing node and edge
-	// patterns. Refer to
-	// https://cloud.google.com/spanner/docs/reference/standard-sql/graph-intro
-	// for a description of the graph query language.
+	// patterns.
 	//
 	// This statement finds entities ('Account's) owned by all 'Person's 'b' to
 	// which transfers greater than a specified 'min' have been made by entities
