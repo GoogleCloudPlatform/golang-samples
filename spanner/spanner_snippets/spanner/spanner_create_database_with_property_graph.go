@@ -83,7 +83,7 @@ func makeCreateDatabaseWithPropertyGraphRequest(instance string, dbName string) 
 
 func createDatabaseWithPropertyGraph(ctx context.Context, w io.Writer, dbId string) error {
 	// dbId is of the form:
-	// 	projects/<project>/instances/<instance>/databases/<database>
+	// 	projects/YOUR_PROJECT_ID/instances/YOUR_INSTANCE_ID/databases/YOUR_DATABASE_NAME
 	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(dbId)
 	if matches == nil || len(matches) != 3 {
 		return fmt.Errorf("Invalid database id %s", dbId)
