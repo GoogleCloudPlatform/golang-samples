@@ -29,13 +29,13 @@ import (
 	"github.com/google/uuid"
 )
 
-var orgID = ""
+var projectID = ""
 
 // setup initializes variables in this file with entityNames to
 // use for testing.
 func setup(t *testing.T) string {
-	orgID = "1081635000895"
-	return orgID
+	projectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	return projectID
 }
 
 func createDemoDataset(t *testing.T) string {
@@ -43,7 +43,8 @@ func createDemoDataset(t *testing.T) string {
 }
 
 func addBigQueryExport(t *testing.T, bigQueryExportID string) error {
-	orgID := setup(t)
+	projectID := setup(t)
+
 	bigQueryDatasetName := createDemoDataset(t)
 
 	ctx := context.Background()
@@ -60,7 +61,7 @@ func addBigQueryExport(t *testing.T, bigQueryExportID string) error {
 	}
 
 	req := &securitycenterpb.CreateBigQueryExportRequest{
-		Parent:           fmt.Sprintf("organizations/%s/locations/global", orgID),
+		Parent:           fmt.Sprintf("projects/%s/locations/global", projectID),
 		BigQueryExport:   bigQueryExport,
 		BigQueryExportId: bigQueryExportID,
 	}
@@ -73,7 +74,7 @@ func addBigQueryExport(t *testing.T, bigQueryExportID string) error {
 }
 
 func cleanupBigQueryExport(t *testing.T, bigQueryExportID string) error {
-	orgID := setup(t)
+	projectID := setup(t)
 
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
@@ -84,7 +85,7 @@ func cleanupBigQueryExport(t *testing.T, bigQueryExportID string) error {
 	defer client.Close()
 
 	req := &securitycenterpb.DeleteBigQueryExportRequest{
-		Name: fmt.Sprintf("organizations/%s/locations/global/bigQueryExports/%s", orgID, bigQueryExportID),
+		Name: fmt.Sprintf("projects/%s/locations/global/bigQueryExports/%s", projectID, bigQueryExportID),
 	}
 
 	if err := client.DeleteBigQueryExport(ctx, req); err != nil {
@@ -95,8 +96,8 @@ func cleanupBigQueryExport(t *testing.T, bigQueryExportID string) error {
 }
 
 func TestListBigQuery(t *testing.T) {
+	projectID := setup(t)
 
-	orgID := setup(t)
 	buf := new(bytes.Buffer)
 
 	// Create Test BigQueryExport Config
@@ -112,7 +113,7 @@ func TestListBigQuery(t *testing.T) {
 		return
 	}
 
-	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+	parent := fmt.Sprintf("projects/%s/locations/global", projectID)
 
 	// Call List BigQueryExport
 	err = listBigQueryExport(buf, parent)
@@ -133,8 +134,8 @@ func TestListBigQuery(t *testing.T) {
 }
 
 func TestGetBigQuery(t *testing.T) {
+	projectID := setup(t)
 
-	orgID := setup(t)
 	buf := new(bytes.Buffer)
 	// Create Test BigQueryExport Config
 	rand, err := uuid.NewUUID()
@@ -149,7 +150,7 @@ func TestGetBigQuery(t *testing.T) {
 		return
 	}
 
-	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+	parent := fmt.Sprintf("projects/%s/locations/global", projectID)
 
 	// Call GetBigQueryExport
 	err = getBigQueryExport(buf, parent, configID)
@@ -170,8 +171,8 @@ func TestGetBigQuery(t *testing.T) {
 }
 
 func TestDeleteBigQuery(t *testing.T) {
+	projectID := setup(t)
 
-	orgID := setup(t)
 	buf := new(bytes.Buffer)
 	// Create Test BigQueryExport Config
 	rand, err := uuid.NewUUID()
@@ -186,7 +187,7 @@ func TestDeleteBigQuery(t *testing.T) {
 		return
 	}
 
-	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+	parent := fmt.Sprintf("projects/%s/locations/global", projectID)
 
 	// Call DeleteBigQueryExport
 	err = deleteBigQueryExport(buf, parent, configID)
@@ -204,8 +205,8 @@ func TestDeleteBigQuery(t *testing.T) {
 }
 
 func TestUpdateBigQuery(t *testing.T) {
+	projectID := setup(t)
 
-	orgID := setup(t)
 	testutil.Retry(t, 3, 10*time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
 
@@ -222,7 +223,7 @@ func TestUpdateBigQuery(t *testing.T) {
 			return
 		}
 
-		parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+		parent := fmt.Sprintf("projects/%s/locations/global", projectID)
 
 		// Call UpdateBigQueryExport
 		err = updateBigQueryExport(buf, parent, configID)
@@ -244,8 +245,8 @@ func TestUpdateBigQuery(t *testing.T) {
 }
 
 func TestCreateBigQuery(t *testing.T) {
+	projectID := setup(t)
 
-	orgID := setup(t)
 	buf := new(bytes.Buffer)
 
 	rand, err := uuid.NewUUID()
@@ -255,9 +256,7 @@ func TestCreateBigQuery(t *testing.T) {
 	}
 	configID := "random-bqexport-id-" + rand.String()
 
-	projectID := os.Getenv("SCC_PUBSUB_PROJECT")
-
-	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+	parent := fmt.Sprintf("projects/%s/locations/global", projectID)
 
 	err = createBigQueryExport(buf, parent, configID, projectID)
 
