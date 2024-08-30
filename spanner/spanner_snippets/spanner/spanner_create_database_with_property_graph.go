@@ -30,6 +30,11 @@ func makeCreateDatabaseWithPropertyGraphRequest(instance string, dbName string) 
 	// The schema defintion for a database with a property graph comprises table
 	// definitions one or more `CREATE PROPERTY GRAPH` statements to define the
 	// property graph(s).
+	//
+	// Here, tables are created for 'Person's and 'Account's. The property graph
+	// definition says that these entities form nodes in the graph. Similarly,
+	// there are 'PersonOwnAccount' and 'AccountTransferAccount' relationship
+	// tables defined. The property graph definition maps these to edges in the graph.
 	var schema_statements = []string{
 		`CREATE TABLE Person (
 			id               INT64 NOT NULL,
