@@ -32,6 +32,11 @@ func insertGraphDataWithDml(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
+	// Execute a ReadWriteTransaction to insert values into the 'Account' table
+	// underpinning 'Account' nodes in 'FinGraph'. The function run by ReadWriteTransaction
+	// executes an 'INSERT' SQL DML statement. Graph queries run after this
+	// transaction is committed will observe the effects of the new 'Account's
+	// added to the graph.
 	_, err1 := client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		stmt := spanner.Statement{
 			SQL: `INSERT INTO Account (id, create_time, is_blocked)
@@ -51,6 +56,11 @@ func insertGraphDataWithDml(w io.Writer, db string) error {
 		return err1
 	}
 
+	// Execute a ReadWriteTransaction to insert values into the 'AccountTransferAccount'
+	// table underpinning 'AccountTransferAccount' edges in 'FinGraph'. The function run
+	// by ReadWriteTransaction executes an 'INSERT' SQL DML statement.
+	// Graph queries run after this transaction is committed will observe the effects
+	// of the edges added to the graph.
 	_, err2 := client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		stmt := spanner.Statement{
 			SQL: `INSERT INTO AccountTransferAccount (id, to_id, create_time, amount)

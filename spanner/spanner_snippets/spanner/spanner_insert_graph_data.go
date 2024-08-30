@@ -37,6 +37,8 @@ func insertGraphData(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
+	// Values are inserted into the node and edge tables corresponding to
+	// nodes and edges in 'FinGraph' using Spanner 'Insert' mutations.
 	personColumns := []string{"id", "name", "birthday", "country", "city"}
 	accountColumns := []string{"id", "create_time", "is_blocked", "nick_name"}
 	ownColumns := []string{"id", "account_id", "create_time"}

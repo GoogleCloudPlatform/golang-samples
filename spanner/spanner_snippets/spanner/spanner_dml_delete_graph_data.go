@@ -32,6 +32,11 @@ func deleteGraphDataWithDml(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
+	// Execute a ReadWriteTransaction to update the 'AccountTransferAccount'
+	// table underpinning 'AccountTransferAccount' edges in 'FinGraph'. The
+	// function run by ReadWriteTransaction executes an 'DELETE' SQL DML
+	// statement. This has the effect of deleting the 'AccountTransferAccount'
+	// edge where the source 'id' is 1 and the destination 'id' is 2 from the graph.
 	_, err1 := client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		stmt := spanner.Statement{SQL: `DELETE FROM AccountTransferAccount WHERE id = 1 AND to_id = 2`}
 		rowCount, err := txn.Update(ctx, stmt)
@@ -46,6 +51,11 @@ func deleteGraphDataWithDml(w io.Writer, db string) error {
 		return err1
 	}
 
+	// Execute a ReadWriteTransaction to update the 'Account' table underpinning
+	//'Account' nodes in 'FinGraph'. In 'FinGraph', nodes can only be deleted
+	// after any edges referencing the nodes have been deleted first. The function
+	// run by ReadWriteTransaction executes an 'DELETE' SQL DML statement. This has
+	// the effect of deleting the 'Account' node whose 'id' is 1 from the graph.
 	_, err2 := client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		stmt := spanner.Statement{SQL: `DELETE FROM Account WHERE id = 2`}
 		rowCount, err := txn.Update(ctx, stmt)

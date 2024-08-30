@@ -32,6 +32,11 @@ func updateGraphDataWithDml(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
+	// Execute a ReadWriteTransaction to update the 'Account' table underpinning
+	// 'Account' nodes in 'FinGraph'. The function run by ReadWriteTransaction
+	// executes an 'UPDATE' SQL DML statement. Graph queries run after this
+	// transaction is committed will observe the effects of the update to 'Account'
+	// with 'id' = 2.
 	_, err1 := client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		stmt := spanner.Statement{
 			SQL: `UPDATE Account SET is_blocked = false WHERE id = 2`,
@@ -48,6 +53,12 @@ func updateGraphDataWithDml(w io.Writer, db string) error {
 		return err1
 	}
 
+	// Execute a ReadWriteTransaction to update the 'AccountTransferAccount' table
+	// underpinning 'AccountTransferAccount' edges in 'FinGraph'. The function run
+	// by ReadWriteTransaction executes an 'UPDATE' SQL DML statement.
+	// Graph queries run after this transaction is committed will observe the effects
+	// of the update to 'AccountTransferAccount' where the source of the transfer has
+	// 'id' 1 and the destination has 'id' 2.
 	_, err2 := client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		stmt := spanner.Statement{
 			SQL: `UPDATE AccountTransferAccount SET amount = 300 WHERE id = 1 AND to_id = 2`,

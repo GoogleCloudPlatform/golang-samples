@@ -35,11 +35,24 @@ func queryGraphData(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
+	// Execute a Spanner query statement comprising a graph query. Graph queries
+	// are characterized by 'MATCH' statements describing node and edge
+	// patterns. Refer to
+	// https://cloud.google.com/spanner/docs/reference/standard-sql/graph-intro
+	// for a description of the graph query language.
+	//
+	// This statement finds entities ('Account's) owned by all 'Person's 'b' to
+	// which transfers have been made by entities ('Account's) owned by any
+	// 'Person' 'a' in the graph called 'FinGraph'. It then returns the names of
+	// all such 'Person's 'a' and 'b', and the amount and time of the transfer.
 	stmt := spanner.Statement{SQL: `Graph FinGraph 
 		 MATCH (a:Person)-[o:Owns]->()-[t:Transfers]->()<-[p:Owns]-(b:Person)
 		 RETURN a.name AS sender, b.name AS receiver, t.amount, t.create_time AS transfer_at`}
 	iter := client.Single().Query(ctx, stmt)
 	defer iter.Stop()
+
+	// The results are returned in tabular form. Iterate over the
+	// result rows and print them.
 	for {
 		row, err := iter.Next()
 		if err == iterator.Done {

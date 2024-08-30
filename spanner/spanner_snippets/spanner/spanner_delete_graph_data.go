@@ -31,6 +31,8 @@ func deleteGraphData(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
+	// Apply a series of mutations to tables underpinnign edges and nodes in the
+	// example graph.
 	m := []*spanner.Mutation{
 		// spanner.Key can be used to delete a specific set of rows.
 		// Delete the PersonOwnAccount rows with the key values (1,7) and (2,20).
