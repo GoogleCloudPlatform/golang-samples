@@ -40,7 +40,7 @@ message SampleData {
 
   // The following data types require some encoding to use. See the
   // documentation for the expected data formats:
-  // https://cloud.google.com/bigquery/docs/write-api#data_type_conversion
+  // https://cloud.google.com/bigquery/docs/write-api#data_type_conversions
   optional int32 date_col = 6;
   optional string datetime_col = 7;
   optional string geography_col = 8;
