@@ -99,7 +99,7 @@ func testSecret(tb testing.TB, projectID string) *secretmanagerpb.Secret {
 				},
 			},
 			Labels: map[string]string{
-				"secretmanager": "rocks",
+				"labelkey": "labelvalue",
 			},
 		},
 	})
@@ -402,7 +402,7 @@ func TestDeleteSecretLabel(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got, want := s.Labels, map[string]string{"secretmanager": "rocks"}; reflect.DeepEqual(got, want) {
+	if got, want := s.Labels, map[string]string{}; reflect.DeepEqual(got, want) {
 		t.Errorf("deleteSecretLabel: expected %q to be %q", got, want)
 	}
 }
