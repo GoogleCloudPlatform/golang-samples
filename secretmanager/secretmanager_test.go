@@ -315,13 +315,11 @@ func TestCreateSecretWithLabels(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	secretID := "createSecretWithLabels"
-	labelKey := "labelkey"
-	labelValue := "labelvalue"
 
 	parent := fmt.Sprintf("projects/%s", tc.ProjectID)
 
 	var b bytes.Buffer
-	if err := createSecretWithLabels(&b, parent, secretID, labelKey, labelValue); err != nil {
+	if err := createSecretWithLabels(&b, parent, secretID); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
@@ -388,13 +386,11 @@ func TestDeleteSecret(t *testing.T) {
 func TestDeleteSecretLabel(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	labelKey := "labelkey"
-
 	secret := testSecret(t, tc.ProjectID)
 	defer testCleanupSecret(t, secret.Name)
 
 	var b bytes.Buffer
-	if err := deleteSecretLabel(&b, secret.Name, labelKey); err != nil {
+	if err := deleteSecretLabel(&b, secret.Name); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1202,14 +1198,11 @@ func TestUpdateSecret(t *testing.T) {
 func TestCreateUpdateSecretLabel(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	updatedLabelKey := "labelkey"
-	updatedLabelValue := "updatedlabelvalue"
-
 	secret := testSecret(t, tc.ProjectID)
 	defer testCleanupSecret(t, secret.Name)
 
 	var b bytes.Buffer
-	if err := createUpdateSecretLabel(&b, secret.Name, updatedLabelKey, updatedLabelValue); err != nil {
+	if err := createUpdateSecretLabel(&b, secret.Name); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1219,14 +1212,14 @@ func TestCreateUpdateSecretLabel(t *testing.T) {
 
 	client, ctx := testClient(t)
 
-  s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+    s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
 		Name: secret.Name,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-  if got, want := s.Labels, map[string]string{updatedLabelKey: updatedLabelValue, "labelkey": "updatedlabelvalue"}; !reflect.DeepEqual(got, want) {
+  if got, want := s.Labels, map[string]string{"labelkey": "updatedlabelvalue"}; !reflect.DeepEqual(got, want) {
 		t.Errorf("createUpdateSecretLabel: expected %q to be %q", got, want)
   }
 }

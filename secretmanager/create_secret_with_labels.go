@@ -25,7 +25,7 @@ import (
 )
 
 // createSecretWithLabels creates a new secret with the given name and labels.
-func createSecretWithLabels(w io.Writer, parent, id) error {
+func createSecretWithLabels(w io.Writer, parent, id string) error {
 	// parent := "projects/my-project"
 	// id := "my-secret"
 	

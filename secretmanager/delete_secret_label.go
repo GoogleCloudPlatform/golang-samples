@@ -26,7 +26,7 @@ import (
 )
 
 // deleteSecret updates the metadata about an existing secret and remove an existing label.
-func deleteSecretLabel(w io.Writer, name, labelKey string) error {
+func deleteSecretLabel(w io.Writer, name string) error {
 	// name := "projects/my-project/secrets/my-secret"
 
 	labelKey := "labelkey"
