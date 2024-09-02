@@ -25,11 +25,12 @@ import (
 )
 
 // createSecretWithLabels creates a new secret with the given name and labels.
-func createSecretWithLabels(w io.Writer, parent, id, labelKey, labelValue string) error {
+func createSecretWithLabels(w io.Writer, parent, id) error {
 	// parent := "projects/my-project"
 	// id := "my-secret"
-	// labelKey := "label-key"
-	// labelValue := "label-value"
+	
+	labelKey := "labelkey"
+	labelValue := "labelvalue"
 
 	// Create the client.
 	ctx := context.Background()

@@ -298,12 +298,12 @@ func TestCreateSecret(t *testing.T) {
 	secretID := "createSecret"
 
 	parent := fmt.Sprintf("projects/%s", tc.ProjectID)
-	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
 
 	var b bytes.Buffer
 	if err := createSecret(&b, parent, secretID); err != nil {
 		t.Fatal(err)
 	}
+	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
 
 	if got, want := b.String(), "Created secret:"; !strings.Contains(got, want) {
 		t.Errorf("createSecret: expected %q to contain %q", got, want)
@@ -315,8 +315,8 @@ func TestCreateSecretWithLabels(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	secretID := "createSecretWithLabels"
-	labelKey := "secretmanager"
-	labelValue := "rocks"
+	labelKey := "labelkey"
+	labelValue := "labelvalue"
 
 	parent := fmt.Sprintf("projects/%s", tc.ProjectID)
 
@@ -336,12 +336,11 @@ func TestCreateRegionalSecret(t *testing.T) {
 	secretID := "createRegionalSecret"
 	locationID := testLocation(t)
 
-	defer testCleanupRegionalSecret(t, fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID))
-
 	var b bytes.Buffer
 	if err := regional_secretmanager.CreateRegionalSecret(&b, tc.ProjectID, locationID, secretID); err != nil {
 		t.Fatal(err)
 	}
+	defer testCleanupRegionalSecret(t, fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID))
 
 	if got, want := b.String(), "Created regional secret:"; !strings.Contains(got, want) {
 		t.Errorf("createSecret: expected %q to contain %q", got, want)
@@ -355,12 +354,12 @@ func TestCreateUserManagedReplicationSecret(t *testing.T) {
 	locations := []string{"us-east1", "us-east4", "us-west1"}
 
 	parent := fmt.Sprintf("projects/%s", tc.ProjectID)
-	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
 
 	var b bytes.Buffer
 	if err := createUserManagedReplicationSecret(&b, parent, secretID, locations); err != nil {
 		t.Fatal(err)
 	}
+	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
 
 	if got, want := b.String(), "Created secret with user managed replication:"; !strings.Contains(got, want) {
 		t.Errorf("createUserManagedReplicationSecret: expected %q to contain %q", got, want)
@@ -389,7 +388,7 @@ func TestDeleteSecret(t *testing.T) {
 func TestDeleteSecretLabel(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	labelKey := "secretmanager"
+	labelKey := "labelkey"
 
 	secret := testSecret(t, tc.ProjectID)
 	defer testCleanupSecret(t, secret.Name)
@@ -1203,8 +1202,8 @@ func TestUpdateSecret(t *testing.T) {
 func TestCreateUpdateSecretLabel(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	updatedLabelKey := "gcp"
-	updatedLabelValue := "rock"
+	updatedLabelKey := "labelkey"
+	updatedLabelValue := "updatedlabelvalue"
 
 	secret := testSecret(t, tc.ProjectID)
 	defer testCleanupSecret(t, secret.Name)
@@ -1227,7 +1226,7 @@ func TestCreateUpdateSecretLabel(t *testing.T) {
 		t.Fatal(err)
 	}
 
-  if got, want := s.Labels, map[string]string{updatedLabelKey: updatedLabelValue, "secretmanager": "rocks"}; !reflect.DeepEqual(got, want) {
+  if got, want := s.Labels, map[string]string{updatedLabelKey: updatedLabelValue, "labelkey": "updatedlabelvalue"}; !reflect.DeepEqual(got, want) {
 		t.Errorf("createUpdateSecretLabel: expected %q to be %q", got, want)
   }
 }

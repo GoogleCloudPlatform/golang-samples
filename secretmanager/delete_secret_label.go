@@ -29,6 +29,8 @@ import (
 func deleteSecretLabel(w io.Writer, name, labelKey string) error {
 	// name := "projects/my-project/secrets/my-secret"
 
+	labelKey := "labelkey"
+
 	// Create the client.
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)
