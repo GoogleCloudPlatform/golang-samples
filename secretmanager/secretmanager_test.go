@@ -1089,7 +1089,7 @@ func TestViewSecretLabels(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got, want := s.Labels, map[string]string{"secretmanager": "rocks"}; !reflect.DeepEqual(got, want) {
+	if got, want := s.Labels, map[string]string{"labelkey": "labelvalue"}; !reflect.DeepEqual(got, want) {
 		t.Errorf("viewSecretLabels: expected %q to be %q", got, want)
   }
 }
