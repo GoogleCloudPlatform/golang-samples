@@ -16,8 +16,11 @@ package firestore
 
 import (
 	"bytes"
+	"context"
 	"os"
 	"testing"
+
+	"cloud.google.com/go/firestore"
 )
 
 func TestStoreVectors(t *testing.T) {
@@ -28,5 +31,23 @@ func TestStoreVectors(t *testing.T) {
 	buf := new(bytes.Buffer)
 	if err := storeVectors(buf, projectID); err != nil {
 		t.Errorf("storeVectors: %v", err)
+	}
+
+	// clean up
+	ctx := context.Background()
+	client, err := firestore.NewClient(ctx, projectID)
+	if err != nil {
+		t.Errorf("firestore.NewClient: %v", err)
+	}
+	t.Cleanup(func() { client.Close() })
+	collName := "coffee-beans"
+	docs, err := client.Collection(collName).DocumentRefs(ctx).GetAll()
+	if err != nil {
+		t.Errorf("GetAll: %v", err)
+	}
+	for _, doc := range docs {
+		if _, err := doc.Delete(ctx); err != nil {
+			t.Errorf("Delete: %v", err)
+		}
 	}
 }
