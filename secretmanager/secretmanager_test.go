@@ -310,7 +310,6 @@ func TestCreateSecret(t *testing.T) {
 	}
 }
 
-
 func TestCreateSecretWithLabels(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -326,7 +325,7 @@ func TestCreateSecretWithLabels(t *testing.T) {
 
 	if got, want := b.String(), "Created secret with labels:"; !strings.Contains(got, want) {
 		t.Errorf("createSecretWithLabels: expected %q to contain %q", got, want)
-  }
+	}
 }
 func TestCreateRegionalSecret(t *testing.T) {
 	tc := testutil.SystemTest(t)
@@ -1091,7 +1090,7 @@ func TestViewSecretLabels(t *testing.T) {
 
 	if got, want := s.Labels, map[string]string{"labelkey": "labelvalue"}; !reflect.DeepEqual(got, want) {
 		t.Errorf("viewSecretLabels: expected %q to be %q", got, want)
-  }
+	}
 }
 
 func TestListRegionalSecrets(t *testing.T) {
@@ -1212,16 +1211,16 @@ func TestCreateUpdateSecretLabel(t *testing.T) {
 
 	client, ctx := testClient(t)
 
-    s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+	s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
 		Name: secret.Name,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-  if got, want := s.Labels, map[string]string{"labelkey": "updatedlabelvalue"}; !reflect.DeepEqual(got, want) {
+	if got, want := s.Labels, map[string]string{"labelkey": "updatedlabelvalue"}; !reflect.DeepEqual(got, want) {
 		t.Errorf("createUpdateSecretLabel: expected %q to be %q", got, want)
-  }
+	}
 }
 
 func TestRegionalUpdateSecret(t *testing.T) {

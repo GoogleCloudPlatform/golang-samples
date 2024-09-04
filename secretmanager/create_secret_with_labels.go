@@ -28,7 +28,7 @@ import (
 func createSecretWithLabels(w io.Writer, parent, id string) error {
 	// parent := "projects/my-project"
 	// id := "my-secret"
-	
+
 	labelKey := "labelkey"
 	labelValue := "labelvalue"
 
