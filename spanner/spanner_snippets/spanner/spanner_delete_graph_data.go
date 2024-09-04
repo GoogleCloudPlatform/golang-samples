@@ -31,8 +31,10 @@ func deleteGraphData(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
-	// Apply a series of mutations to tables underpinnign edges and nodes in the
-	// example graph.
+	// Apply a series of mutations to tables underpinning edges and nodes in the
+	// example graph. If there are referential integrity constraints defined
+	// between edges and the nodes they connect, the edge must be deleted
+	// before the nodes that the edge connects are deleted.
 	m := []*spanner.Mutation{
 		// spanner.Key can be used to delete a specific set of rows.
 		// Delete the PersonOwnAccount rows with the key values (1,7) and (2,20).
