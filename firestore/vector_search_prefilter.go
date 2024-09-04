@@ -50,9 +50,9 @@ func vectorSearchPrefilter(w io.Writer, projectID string) error {
 		return err
 	}
 
-	// TODO(developer): Use vector query results.
-	_ = docs
-
+	for _, doc := range docs {
+		fmt.Fprintln(w, doc.Data()["name"])
+	}
 	return nil
 }
 

@@ -16,89 +16,27 @@ package firestore
 
 import (
 	"bytes"
-	"context"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
-
-	"cloud.google.com/go/firestore"
-	apiv1 "cloud.google.com/go/firestore/apiv1/admin"
-	"cloud.google.com/go/firestore/apiv1/admin/adminpb"
 )
 
-func createPrefilterVectorIndexes(t *testing.T, collName string,
-	projectID string, dimension int32, fieldPath string) {
-	dbPath := "projects/" + projectID + "/databases/(default)"
-	ctx := context.Background()
-	client, err := firestore.NewClient(ctx, projectID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	collRef := client.Collection(collName)
-	t.Cleanup(func() { client.Close() })
-
-	// Create admin client
-	adminClient, err := apiv1.NewFirestoreAdminClient(ctx)
-	if err != nil {
-		t.Fatalf("NewFirestoreAdminClient: %v", err)
-	}
-	t.Cleanup(func() { adminClient.Close() })
-
-	indexParent := fmt.Sprintf("%s/collectionGroups/%s", dbPath, collRef.ID)
-
-	// create vector mode indexes
-	req := &adminpb.CreateIndexRequest{
-		Parent: indexParent,
-		Index: &adminpb.Index{
-			QueryScope: adminpb.Index_COLLECTION,
-			Fields: []*adminpb.Index_IndexField{
-				{
-					FieldPath: "color",
-					ValueMode: &adminpb.Index_IndexField_Order_{
-						Order: adminpb.Index_IndexField_ASCENDING,
-					},
-				},
-				{
-					FieldPath: fieldPath,
-					ValueMode: &adminpb.Index_IndexField_VectorConfig_{
-						VectorConfig: &adminpb.Index_IndexField_VectorConfig{
-							Dimension: dimension,
-							Type: &adminpb.Index_IndexField_VectorConfig_Flat{
-								Flat: &adminpb.Index_IndexField_VectorConfig_FlatIndex{},
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-	op, createErr := adminClient.CreateIndex(ctx, req)
-	if createErr != nil {
-		if strings.Contains(createErr.Error(), "index already exists") {
-			return
-		}
-		t.Fatalf("CreateIndex: %v", createErr)
-	}
-
-	createdIndex, waitErr := op.Wait(ctx)
-	if waitErr != nil {
-		t.Fatalf("op.Wait: %v", waitErr)
-	}
-	t.Cleanup(func() { deleteIndex(t, createdIndex.Name) })
-}
 func TestVectorSearchPrefilter(t *testing.T) {
 	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
 	if projectID == "" {
 		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
 	}
 
-	collName := "coffee-beans"
-	createCoffeeBeans(t, projectID, collName)
-	createPrefilterVectorIndexes(t, collName, projectID, 3, "embedding_field")
-
 	buf := new(bytes.Buffer)
 	if err := vectorSearchPrefilter(buf, projectID); err != nil {
-		t.Errorf("vectorSearchBasic: %v", err)
+		t.Errorf("vectorSearchPrefilter: %v", err)
+	}
+
+	// Compare console outputs
+	got := buf.String()
+	want := "Sleepy coffee beans\n" +
+		"Kahawa coffee beans\n"
+	if !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
