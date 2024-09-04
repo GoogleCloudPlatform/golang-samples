@@ -34,7 +34,7 @@ var orgID = ""
 // setup initializes variables in this file with entityNames to
 // use for testing.
 func setup(t *testing.T) string {
-	orgID = os.Getenv("GCLOUD_ORGANIZATION")
+	orgID = "1081635000895"
 	return orgID
 }
 
@@ -258,7 +258,7 @@ func TestCreateBigQuery(t *testing.T) {
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
-	projectID := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	projectID := os.Getenv("SCC_PUBSUB_PROJECT")
 	err = createBigQueryExport(buf, parent, configID, projectID)
 
 	if err != nil {
