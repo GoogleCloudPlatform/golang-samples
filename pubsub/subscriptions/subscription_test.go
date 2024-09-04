@@ -29,7 +29,10 @@ import (
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/pstest"
 	"cloud.google.com/go/storage"
+	trace "cloud.google.com/go/trace/apiv1"
+	"cloud.google.com/go/trace/apiv1/tracepb"
 	"google.golang.org/api/iterator"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -984,6 +987,73 @@ func TestOptimisticSubscribe(t *testing.T) {
 
 		sub := client.Subscription(optSubID)
 		sub.Delete(ctx)
+	})
+}
+
+func TestSubscribeOpenTelemetryTracing(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+	ctx := context.Background()
+
+	// Use the pstest fake with emulator settings.
+	srv := pstest.NewServer()
+	t.Setenv("PUBSUB_EMULATOR_HOST", srv.Addr)
+	client := setup(t)
+
+	otelTopicID := topicID + "-otel"
+	otelSubID := subID + "-otel"
+
+	topic, err := client.CreateTopic(ctx, otelTopicID)
+	if err != nil {
+		t.Fatalf("failed to create topic: %v", err)
+	}
+	defer topic.Delete(ctx)
+
+	if err := create(buf, tc.ProjectID, otelSubID, topic); err != nil {
+		t.Fatalf("failed to create a topic: %v", err)
+	}
+	defer client.Subscription(otelSubID).Delete(ctx)
+
+	if err := publishMsgs(ctx, topic, 1); err != nil {
+		t.Fatalf("failed to publish setup message: %v", err)
+	}
+
+	if err := subscribeOpenTelemetryTracing(buf, tc.ProjectID, otelSubID, 1.0); err != nil {
+		t.Fatalf("failed to subscribe message with otel tracing: %v", err)
+	}
+	got := buf.String()
+	want := "Received 1 message"
+	if !strings.Contains(got, want) {
+		t.Fatalf("expected 1 message, got: %s", got)
+	}
+
+	traceClient, err := trace.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("trace client instantiation: %v", err)
+	}
+
+	testutil.Retry(t, 3, time.Second, func(r *testutil.R) {
+		// Wait some time for the spans to show up in Cloud Trace.
+		time.Sleep(5 * time.Second)
+		iter := traceClient.ListTraces(ctx, &tracepb.ListTracesRequest{
+			ProjectId: tc.ProjectID,
+			Filter:    fmt.Sprintf("+messaging.destination.name:%v", otelSubID),
+		})
+		numTrace := 0
+		for {
+			_, err := iter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				r.Errorf("got err in iter.Next: %v", err)
+			}
+			numTrace++
+		}
+		// Three traces are created from subscribe side: subscribe, ack, modack spans.
+		if want := 3; numTrace != want {
+			r.Errorf("got %d traces, want %d", numTrace, want)
+		}
 	})
 }
 
