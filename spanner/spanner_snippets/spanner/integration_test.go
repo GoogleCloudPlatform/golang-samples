@@ -1136,6 +1136,50 @@ func TestProtoColumnSample(t *testing.T) {
 	assertContains(t, out, "2 singer_id:2")
 }
 
+func TestGraphSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	_, dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+	out := runSampleWithContext(
+		ctx, t, createDatabaseWithPropertyGraph, dbName,
+		"failed to create a Spanner database with a property graph")
+	assertContains(t, out, fmt.Sprintf("Created database [%s]", dbName))
+
+	out = runSample(t, insertGraphData, dbName, "")
+
+	out = runSample(t, insertGraphDataWithDml, dbName, "")
+	assertContains(t, out, "2 Account record(s) inserted")
+	assertContains(t, out, "2 AccountTransferAccount record(s) inserted")
+
+	out = runSample(t, queryGraphData, dbName, "")
+	assertContains(t, out, "Dana Alex 500.000000 2020-10-04T16:55:05Z")
+	assertContains(t, out, "Lee Dana 300.000000 2020-09-25T02:36:14Z")
+	assertContains(t, out, "Alex Lee 300.000000 2020-08-29T15:28:58Z")
+	assertContains(t, out, "Alex Lee 100.000000 2020-10-04T16:55:05Z")
+	assertContains(t, out, "Dana Lee 200.000000 2020-10-17T03:59:40Z")
+
+	out = runSample(t, queryGraphDataWithParameter, dbName, "")
+	assertContains(t, out, "Dana Alex 500.000000 2020-10-04T16:55:05Z")
+
+	out = runSample(t, updateGraphDataWithDml, dbName, "")
+	assertContains(t, out, "1 Account record(s) updated.")
+	assertContains(t, out, "1 AccountTransferAccount record(s) updated.")
+
+	out = runSample(t, updateGraphDataWithGraphQueryInDml, dbName, "")
+	assertContains(t, out, "2 Account record(s) updated.")
+
+	out = runSample(t, deleteGraphDataWithDml, dbName, "")
+	assertContains(t, out, "1 AccountTransferAccount record(s) deleted.")
+	assertContains(t, out, "1 Account record(s) deleted.")
+
+	out = runSample(t, deleteGraphData, dbName, "")
+}
+
 func maybeCreateKey(projectId, locationId, keyRingId, keyId string) error {
 	client, err := kms.NewKeyManagementClient(context.Background())
 	if err != nil {
