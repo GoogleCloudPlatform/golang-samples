@@ -577,6 +577,7 @@ func TestCreateDisksStoragePool(t *testing.T) {
 	storagePoolName := fmt.Sprintf("test-storage-pool-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	storagePoolType := fmt.Sprintf("projects/%s/zones/%s/storagePoolTypes/hyperdisk-balanced", tc.ProjectID, zone)
 	storagePoolLink := fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/storagePools/%s", tc.ProjectID, zone, storagePoolName)
+	performanceProvisioningType := "ADVANCED"
 	provisionedCapacity := int64(10240)
 	provisionedIops := int64(10000)
 	provisionedThroughput := int64(1024)
@@ -632,6 +633,10 @@ func TestCreateDisksStoragePool(t *testing.T) {
 
 		if storagePool.GetPoolProvisionedThroughput() != provisionedThroughput {
 			t.Errorf("Provisioned throughput mismatch: got %v, want %v", storagePool.GetPoolProvisionedThroughput(), provisionedThroughput)
+		}
+
+		if storagePool.GetPerformanceProvisioningType() != performanceProvisioningType {
+			t.Errorf("Performance provisioning type mismatch: got %v, want %v", storagePool.GetPerformanceProvisioningType(), performanceProvisioningType)
 		}
 	})
 
