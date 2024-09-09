@@ -42,13 +42,14 @@ func createHyperdiskStoragePool(w io.Writer, projectId, zone, storagePoolName, s
 
 	// Create the storage pool resource
 	resource := &computepb.StoragePool{
-		Name:                      proto.String(storagePoolName),
-		Zone:                      proto.String(zone),
-		StoragePoolType:           proto.String(storagePoolType),
-		CapacityProvisioningType:  proto.String("advanced"),
-		PoolProvisionedCapacityGb: proto.Int64(10240),
-		PoolProvisionedIops:       proto.Int64(10000),
-		PoolProvisionedThroughput: proto.Int64(1024),
+		Name:                        proto.String(storagePoolName),
+		Zone:                        proto.String(zone),
+		StoragePoolType:             proto.String(storagePoolType),
+		CapacityProvisioningType:    proto.String("advanced"),
+		PerformanceProvisioningType: proto.String("advanced"),
+		PoolProvisionedCapacityGb:   proto.Int64(10240),
+		PoolProvisionedIops:         proto.Int64(10000),
+		PoolProvisionedThroughput:   proto.Int64(1024),
 	}
 
 	// Create the insert storage pool request
