@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,20 +16,27 @@ package firestore
 
 import (
 	"bytes"
+	"os"
 	"strings"
 	"testing"
 )
 
-func TestQueryFilterOr(t *testing.T) {
-	var buf bytes.Buffer
-	err := queryFilterOr(&buf, projectID)
-	if err != nil {
-		t.Fatal(err)
+func TestVectorSearchPrefilter(t *testing.T) {
+	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
+	if projectID == "" {
+		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
 	}
 
-	want := "ghopper"
+	buf := new(bytes.Buffer)
+	if err := vectorSearchPrefilter(buf, projectID); err != nil {
+		t.Errorf("vectorSearchPrefilter: %v", err)
+	}
+
+	// Compare console outputs
 	got := buf.String()
+	want := "Sleepy coffee beans\n" +
+		"Kahawa coffee beans\n"
 	if !strings.Contains(got, want) {
-		t.Errorf("Wanted: %s; got: %s", want, got)
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
