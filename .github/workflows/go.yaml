@@ -42,7 +42,7 @@ jobs:
       uses: actions/checkout@v2
     # Higher versions of goimports cannot handle Go <= 1.21
     - name: Install goimports
-      run: go install golang.org/x/tools/cmd/goimports@0.22.0
+      run: go install golang.org/x/tools/cmd/goimports@v0.22.0
     - run: goimports -w .
     - name: Run go mod tidy on all modules
       run: find . -name go.mod -execdir go mod tidy \;
