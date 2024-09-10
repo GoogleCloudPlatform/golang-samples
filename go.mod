@@ -15,6 +15,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/h2non/filetype v1.1.3
 	golang.org/x/oauth2 v0.21.0
+	golang.org/x/tools v0.22.0
 	google.golang.org/api v0.189.0
 	google.golang.org/protobuf v1.34.2
 	gopkg.in/yaml.v2 v2.4.0
