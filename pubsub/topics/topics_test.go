@@ -371,3 +371,14 @@ func TestPublishOpenTelemetryTracing(t *testing.T) {
 		}
 	})
 }
+
+func TestPublishWithCompression(t *testing.T) {
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+	client.CreateTopic(ctx, topicID)
+	buf := new(bytes.Buffer)
+	if err := publishWithCompression(buf, tc.ProjectID, topicID); err != nil {
+		t.Errorf("failed to publish message: %v", err)
+	}
+}
