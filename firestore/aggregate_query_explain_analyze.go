@@ -34,7 +34,7 @@ func aggregationQueryExplainAnalyze(w io.Writer, projectID string) error {
 	}
 	defer client.Close()
 
-	// Build the query. Set explain options with analzye = true to get back the
+	// Set explain options with analzye = true to get back the
 	// query stats, plan info, and query results
 	query := client.Collection("cities").WithRunOptions(firestore.ExplainOptions{Analyze: true})
 

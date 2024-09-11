@@ -33,7 +33,6 @@ func aggregationQueryExplain(w io.Writer, projectID string) error {
 	}
 	defer client.Close()
 
-	// Build the query
 	// Set the explain options to get back *only* the plan summary
 	query := client.Collection("cities").WithRunOptions(firestore.ExplainOptions{})
 
