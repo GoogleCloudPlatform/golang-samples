@@ -33,7 +33,6 @@ func queryExplainAnalyze(w io.Writer, projectID string) error {
 	}
 	defer client.Close()
 
-	// Build the query
 	query := client.Collection("cities")
 
 	// Set explain options with analyze = true to get full

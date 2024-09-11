@@ -33,7 +33,6 @@ func queryExplain(w io.Writer, projectID string) error {
 	}
 	defer client.Close()
 
-	// Build the query
 	query := client.Collection("cities")
 
 	// Set the explain options to get back *only* the metrics from the planning stages.
