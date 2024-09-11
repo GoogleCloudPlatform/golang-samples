@@ -29,7 +29,8 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func createTemplate(ctx context.Context, project, templateName string) error {
+func createTemplate(project, templateName string) error {
+	ctx := context.Background()
 	client, err := compute.NewInstanceTemplatesRESTClient(ctx)
 	if err != nil {
 		return err
@@ -64,7 +65,8 @@ func createTemplate(ctx context.Context, project, templateName string) error {
 	return op.Wait(ctx)
 }
 
-func getTemplate(ctx context.Context, project, templateName string) (*computepb.InstanceTemplate, error) {
+func getTemplate(project, templateName string) (*computepb.InstanceTemplate, error) {
+	ctx := context.Background()
 	client, err := compute.NewInstanceTemplatesRESTClient(ctx)
 	if err != nil {
 		return nil, err
@@ -77,7 +79,8 @@ func getTemplate(ctx context.Context, project, templateName string) (*computepb.
 	return client.Get(ctx, req)
 }
 
-func deleteTemplate(ctx context.Context, project, templateName string) error {
+func deleteTemplate(project, templateName string) error {
+	ctx := context.Background()
 	client, err := compute.NewInstanceTemplatesRESTClient(ctx)
 	if err != nil {
 		return err
@@ -104,15 +107,14 @@ func TestReservations(t *testing.T) {
 	templateName := fmt.Sprintf("test-template-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 
 	var buf bytes.Buffer
-	ctx := context.Background()
 
-	err := createTemplate(ctx, tc.ProjectID, templateName)
+	err := createTemplate(tc.ProjectID, templateName)
 	if err != nil {
 		t.Errorf("createTemplate got err: %v", err)
 	}
-	defer deleteTemplate(ctx, tc.ProjectID, templateName)
+	defer deleteTemplate(tc.ProjectID, templateName)
 
-	sourceTemplate, err := getTemplate(ctx, tc.ProjectID, templateName)
+	sourceTemplate, err := getTemplate(tc.ProjectID, templateName)
 	if err != nil {
 		t.Errorf("getTemplate got err: %v", err)
 	}
