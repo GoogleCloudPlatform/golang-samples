@@ -3,7 +3,11 @@ module github.com/GoogleCloudPlatform/golang-samples/firestore
 go 1.21
 
 require (
+<<<<<<< feature/fs-query-profiling
 	cloud.google.com/go/firestore v1.17.0
+=======
+	cloud.google.com/go/firestore v1.16.0
+>>>>>>> main
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
 	google.golang.org/api v0.194.0
 	google.golang.org/grpc v1.66.0
