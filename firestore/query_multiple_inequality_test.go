@@ -17,6 +17,7 @@ package firestore
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -26,21 +27,12 @@ import (
 	"cloud.google.com/go/firestore/apiv1/admin/adminpb"
 )
 
-func TestMultipleInequalitiesQuery(t *testing.T) {
-	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
-	if projectID == "" {
-		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
-	}
-
+func setupClientAndCities(t *testing.T, projectID string) (*firestore.Client, func()) {
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() {
-		client.Close()
-	})
-
 	cities := []City{
 		{
 			Name:       "San Francisco",
@@ -98,15 +90,31 @@ func TestMultipleInequalitiesQuery(t *testing.T) {
 		refs = append(refs, ref)
 	}
 	bw.End()
-	t.Cleanup(func() {
+
+	return client, func() {
 		bw = client.BulkWriter(ctx)
 		for _, r := range refs {
 			if _, err := bw.Delete(r); err != nil {
+				fmt.Printf("Delete err: %+v", err)
 				t.Fatal(err)
 			}
 		}
 		bw.End()
-	})
+		client.Close()
+	}
+}
+
+func TestMultipleInequalitiesQuery(t *testing.T) {
+	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
+	if projectID == "" {
+		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
+	}
+
+	colName := "cities"
+
+	ctx := context.Background()
+	_, cleanup := setupClientAndCities(t, projectID)
+	t.Cleanup(cleanup)
 
 	// Create admin client
 	adminClient, err := apiv1.NewFirestoreAdminClient(ctx)
