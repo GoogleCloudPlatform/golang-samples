@@ -26,7 +26,6 @@ import (
 func vectorSearchDistanceResultField(w io.Writer, projectID string) error {
 	ctx := context.Background()
 
-	// Create client
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("firestore.NewClient: %w", err)
