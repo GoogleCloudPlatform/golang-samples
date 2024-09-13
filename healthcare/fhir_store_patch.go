@@ -48,6 +48,8 @@ func patchFHIRStore(w io.Writer, projectID, location, datasetID, fhirStoreID, to
 	patchRequest := storesService.Patch(name, fhirStore).UpdateMask("notificationConfigs")
 
 	if _, err := patchRequest.Do(); err != nil {
+		return fmt.Errorf("Patch: %w", err)
+	}
 
 	fmt.Fprintf(w, "Patched FHIR store %s with Pub/sub topic %s\n", datasetID, topicName)
 
