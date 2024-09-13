@@ -36,13 +36,18 @@ func patchFHIRStore(w io.Writer, projectID, location, datasetID, fhirStoreID, to
 
 	name := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/fhirStores/%s", projectID, location, datasetID, fhirStoreID)
 
+	// topicName format is "projects/*/locations/*/topics/*"
 	notificationConfig := &healthcare.FhirNotificationConfig{
-		PubsubTopic: topicName, // format is "projects/*/locations/*/topics/*"
+		PubsubTopic: topicName,
 	}
 
-	if _, err := storesService.Patch(name, &healthcare.FhirStore{NotificationConfigs: []*healthcare.FhirNotificationConfig{notificationConfig}}).UpdateMask("notificationConfigs").Do(); err != nil {
-		return fmt.Errorf("Patch: %w", err)
+	fhirStore := &healthcare.FhirStore{
+		NotificationConfigs: []*healthcare.FhirNotificationConfig{notificationConfig},
 	}
+
+	patchRequest := storesService.Patch(name, fhirStore).UpdateMask("notificationConfigs")
+
+	if _, err := patchRequest.Do(); err != nil {
 
 	fmt.Fprintf(w, "Patched FHIR store %s with Pub/sub topic %s\n", datasetID, topicName)
 
