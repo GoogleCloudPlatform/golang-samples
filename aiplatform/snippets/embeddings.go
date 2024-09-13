@@ -19,7 +19,7 @@ package snippets
 import (
 	"context"
 	"fmt"
-	"regexp"
+	"io"
 
 	aiplatform "cloud.google.com/go/aiplatform/apiv1"
 	"cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
@@ -28,40 +28,37 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-func embedTexts(
-	project, location string, texts []string) ([][]float32, error) {
+// embedTexts shows how embeddings are set for text-embedding-preview-0409 model
+func embedTexts(w io.Writer, project, location string) error {
+	// location := "us-central1"
 	ctx := context.Background()
 
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
+	dimensionality := 5
 	model := "text-embedding-004"
-	task := "QUESTION_ANSWERING"
-	customOutputDimensionality := 5
+	texts := []string{"banana muffins? ", "banana bread? banana muffins?"}
 
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer client.Close()
 
-	match := regexp.MustCompile(`^(\w+-\w+)`).FindStringSubmatch(apiEndpoint)
-	if match != nil {
-		location = match[1]
-	}
 	endpoint := fmt.Sprintf("projects/%s/locations/%s/publishers/google/models/%s", project, location, model)
 	instances := make([]*structpb.Value, len(texts))
 	for i, text := range texts {
 		instances[i] = structpb.NewStructValue(&structpb.Struct{
 			Fields: map[string]*structpb.Value{
 				"content":   structpb.NewStringValue(text),
-				"task_type": structpb.NewStringValue(task),
+				"task_type": structpb.NewStringValue("QUESTION_ANSWERING"),
 			},
 		})
 	}
-	outputDimensionality := structpb.NewNullValue()
-	outputDimensionality = structpb.NewNumberValue(float64(customOutputDimensionality))
 
 	params := structpb.NewStructValue(&structpb.Struct{
-		Fields: map[string]*structpb.Value{"outputDimensionality": outputDimensionality},
+		Fields: map[string]*structpb.Value{
+			"outputDimensionality": structpb.NewNumberValue(float64(dimensionality)),
+		},
 	})
 
 	req := &aiplatformpb.PredictRequest{
@@ -71,7 +68,7 @@ func embedTexts(
 	}
 	resp, err := client.Predict(ctx, req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	embeddings := make([][]float32, len(resp.Predictions))
 	for i, prediction := range resp.Predictions {
@@ -81,7 +78,9 @@ func embedTexts(
 			embeddings[i][j] = float32(value.GetNumberValue())
 		}
 	}
-	return embeddings, nil
+
+	fmt.Fprintf(w, "Dimensionality: %d. Embeddings length: %d", len(embeddings[0]), len(embeddings))
+	return nil
 }
 
 // [END aiplatform_text_embeddings]

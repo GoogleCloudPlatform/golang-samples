@@ -27,8 +27,8 @@ import (
 	"strings"
 
 	spanner "cloud.google.com/go/spanner/apiv1"
+	sppb "cloud.google.com/go/spanner/apiv1/spannerpb"
 	gax "github.com/googleapis/gax-go/v2"
-	sppb "google.golang.org/genproto/googleapis/spanner/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 

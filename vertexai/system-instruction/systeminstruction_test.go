@@ -25,17 +25,11 @@ import (
 func Test_systemInstruction(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	instruction := `
-			You are a helpful language translator.
-			Your mission is to translate text in English to French.`
-	prompt := `
-			User input: I like bagels.
-    		Answer:`
 	location := "us-central1"
 	modelName := "gemini-1.5-flash-001"
 
 	var buf bytes.Buffer
-	err := systemInstruction(&buf, instruction, prompt, tc.ProjectID, location, modelName)
+	err := systemInstruction(&buf, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Fatalf("Test_systemInstruction: %v", err.Error())
 	}

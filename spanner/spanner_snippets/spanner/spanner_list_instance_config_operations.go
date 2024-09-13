@@ -25,7 +25,7 @@ import (
 	"google.golang.org/api/iterator"
 
 	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
-	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
+	"cloud.google.com/go/spanner/admin/instance/apiv1/instancepb"
 )
 
 // listInstanceConfigOperations lists all the custom instance config operations
