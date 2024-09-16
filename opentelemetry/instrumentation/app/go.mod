@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/opentelemetry/instrumentati
 
 go 1.21.0
 
-toolchain go1.23.0
-
 require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
 	github.com/stretchr/testify v1.9.0
