@@ -36,6 +36,7 @@ func vectorSearchBasic(w io.Writer, projectID string) error {
 	collection := client.Collection("coffee-beans")
 
 	// Requires a vector index
+	// https://firebase.google.com/docs/firestore/vector-search#create_and_manage_vector_indexes
 	vectorQuery := collection.FindNearest("embedding_field",
 		[]float32{3.0, 1.0, 2.0},
 		5,
