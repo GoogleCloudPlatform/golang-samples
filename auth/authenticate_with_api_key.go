@@ -28,7 +28,7 @@ import (
 // authenticateWithAPIKey authenticates with an API key for Google Language
 // service.
 func authenticateWithAPIKey(w io.Writer, apiKey string) error {
-	// apiKey := "your_api_key"
+	// apiKey := "api-key-string"
 
 	ctx := context.Background()
 

@@ -32,7 +32,6 @@ func TestAuthSnippets(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	audience := "https://example.com"
-	apiKey := ""
 
 	want := "Listed all storage buckets."
 
@@ -52,16 +51,6 @@ func TestAuthSnippets(t *testing.T) {
 	}
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Errorf("authenticateImplicitWithAdc got %q, want %q", got, want)
-	}
-
-	want = "Successfully authenticated using the API key."
-	buf.Reset()
-
-	if err := authenticateWithAPIKey(buf, apiKey); err != nil {
-		t.Fatalf("authenticateImplicitWithAdc got err: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("authenticateWithAPIKey got %q, want %q", got, want)
 	}
 
 	want = "Generated ID token."
@@ -118,5 +107,20 @@ func TestAuthSnippets(t *testing.T) {
 	}
 	if got := buf.String(); !strings.Contains(got, want) {
 		t.Errorf("verifyGoogleIdToken got %q, want %q", got, want)
+	}
+}
+
+func TestAuthenticateWithAPIKey(t *testing.T) {
+	apiKey := os.Getenv("GOLANG_SAMPLES_API_KEY")
+	if apiKey == "" {
+		t.Skip("GOLANG_SAMPLES_API_KEY is unset. Skipping.")
+	}
+	buf := &bytes.Buffer{}
+	if err := authenticateWithAPIKey(buf, apiKey); err != nil {
+		t.Fatalf("authenticateWithAPIKey got err: %v", err)
+	}
+	want := "Successfully authenticated using the API key."
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("authenticateWithAPIKey got %q, want %q", got, want)
 	}
 }
