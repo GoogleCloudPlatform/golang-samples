@@ -23,24 +23,16 @@ import (
 	"log"
 	"os"
 
-	"golang.org/x/oauth2/google"
 	talent "google.golang.org/api/jobs/v3"
 )
 
 func main() {
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	parent := fmt.Sprintf("projects/%s", projectID)
-
-	// Authorize the client using Application Default Credentials.
-	// See https://g.co/dv/identity/protocols/application-default-credentials
 	ctx := context.Background()
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	// Create the jobs service client.
-	ctsService, err := talent.New(client)
+	ctsService, err := talent.NewService(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}

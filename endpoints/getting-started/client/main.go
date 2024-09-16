@@ -16,37 +16,32 @@
 package main
 
 import (
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/pem"
-	"errors"
+	"context"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"time"
 
-	"golang.org/x/oauth2/google"
-	"golang.org/x/oauth2/jws"
+	"cloud.google.com/go/auth/credentials"
 )
 
 var (
-	url                 = flag.String("url", "", "The request url. Required.")
-	audience            = flag.String("audience", "", "The audience for the JWT. equired")
-	serviceAccountFile  = flag.String("service-account-file", "", "Path to service account JSON file. Required.")
-	serviceAccountEmail = flag.String("service-account-email", "", "Path email associated with the service account. Required.")
+	url                = flag.String("url", "", "The request url. Required.")
+	audience           = flag.String("audience", "", "The audience for the JWT. equired")
+	serviceAccountFile = flag.String("service-account-file", "", "Path to service account JSON file. Required.")
 )
 
 func main() {
 	flag.Parse()
 
-	if *audience == "" || *url == "" || *serviceAccountFile == "" || *serviceAccountEmail == "" {
+	if *audience == "" || *url == "" || *serviceAccountFile == "" {
 		fmt.Println("requires: --url, --audience, --service-account-file, --service-account-email")
 		os.Exit(1)
 	}
-	jwt, err := generateJWT(*serviceAccountFile, *serviceAccountEmail, *audience, 3600)
+	jwt, err := generateJWT(*serviceAccountFile, *audience)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,49 +55,22 @@ func main() {
 // [START endpoints_generate_jwt_sa]
 
 // generateJWT creates a signed JSON Web Token using a Google API Service Account.
-func generateJWT(saKeyfile, saEmail, audience string, expiryLength int64) (string, error) {
-	now := time.Now().Unix()
-
-	// Build the JWT payload.
-	jwt := &jws.ClaimSet{
-		Iat: now,
-		// expires after 'expiryLength' seconds.
-		Exp: now + expiryLength,
-		// Iss must match 'issuer' in the security configuration in your
-		// swagger spec (e.g. service account email). It can be any string.
-		Iss: saEmail,
-		// Aud must be either your Endpoints service name, or match the value
-		// specified as the 'x-google-audience' in the OpenAPI document.
-		Aud: audience,
-		// Sub and Email should match the service account's email address.
-		Sub:           saEmail,
-		PrivateClaims: map[string]interface{}{"email": saEmail},
-	}
-	jwsHeader := &jws.Header{
-		Algorithm: "RS256",
-		Typ:       "JWT",
+func generateJWT(saKeyfile, audience string) (string, error) {
+	creds, err := credentials.DetectDefault(&credentials.DetectOptions{
+		CredentialsFile:  saKeyfile,
+		Audience:         audience,
+		UseSelfSignedJWT: true,
+	})
+	if err != nil {
+		return "", err
 	}
 
-	// Extract the RSA private key from the service account keyfile.
-	sa, err := ioutil.ReadFile(saKeyfile)
+	ctx := context.Background()
+	tok, err := creds.Token(ctx)
 	if err != nil {
-		return "", fmt.Errorf("Could not read service account file: %w", err)
+		return "", err
 	}
-	conf, err := google.JWTConfigFromJSON(sa)
-	if err != nil {
-		return "", fmt.Errorf("Could not parse service account JSON: %w", err)
-	}
-	block, _ := pem.Decode(conf.PrivateKey)
-	parsedKey, err := x509.ParsePKCS8PrivateKey(block.Bytes)
-	if err != nil {
-		return "", fmt.Errorf("private key parse error: %w", err)
-	}
-	rsaKey, ok := parsedKey.(*rsa.PrivateKey)
-	// Sign the JWT with the service account's private key.
-	if !ok {
-		return "", errors.New("private key failed rsa.PrivateKey type assertion")
-	}
-	return jws.Encode(jwsHeader, jwt, rsaKey)
+	return tok.Value, nil
 }
 
 // [END endpoints_generate_jwt_sa]
@@ -127,7 +95,7 @@ func makeJWTRequest(signedJWT, url string) (string, error) {
 		return "", fmt.Errorf("HTTP request failed: %w", err)
 	}
 	defer response.Body.Close()
-	responseData, err := ioutil.ReadAll(response.Body)
+	responseData, err := io.ReadAll(response.Body)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse HTTP response: %w", err)
 	}

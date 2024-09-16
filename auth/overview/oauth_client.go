@@ -20,9 +20,8 @@ import (
 	"fmt"
 	"os"
 
+	"cloud.google.com/go/auth"
 	"cloud.google.com/go/pubsub"
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 )
 
@@ -36,28 +35,36 @@ func oauthClient() error {
 	if redirectURL == "" {
 		redirectURL = "your redirect url"
 	}
-	config := &oauth2.Config{
+	state := "state"
+	opts := &auth.Options3LO{
 		ClientID:     "your-client-id",
 		ClientSecret: "your-client-secret",
 		RedirectURL:  redirectURL,
 		Scopes:       []string{"email", "profile"},
-		Endpoint:     google.Endpoint,
+		AuthURL:      "https://accounts.google.com/o/oauth2/auth",
+		TokenURL:     "https://oauth2.googleapis.com/token",
+		AuthStyle:    auth.StyleInParams,
+		AuthHandlerOpts: &auth.AuthorizationHandlerOptions{
+			State: state,
+			Handler: func(authCodeURL string) (string, string, error) {
+				// Dummy authorization flow to read auth code from stdin.
+				fmt.Printf("Follow the link in your browser to obtain auth code: %s", authCodeURL)
+				var code string
+				fmt.Scanln(&code)
+				return code, state, nil
+			},
+		},
 	}
-
-	// Dummy authorization flow to read auth code from stdin.
-	authURL := config.AuthCodeURL("your state")
-	fmt.Printf("Follow the link in your browser to obtain auth code: %s", authURL)
-
-	// Read the authentication code from the command line
-	var code string
-	fmt.Scanln(&code)
 
 	// Exchange auth code for OAuth token.
-	token, err := config.Exchange(ctx, code)
+	tp, err := auth.New3LOTokenProvider(opts)
 	if err != nil {
-		return fmt.Errorf("config.Exchange: %w", err)
+		return fmt.Errorf("auth.New3LOTokenProvider: %w", err)
 	}
-	client, err := pubsub.NewClient(ctx, "your-project-id", option.WithTokenSource(config.TokenSource(ctx, token)))
+	creds := auth.NewCredentials(&auth.CredentialsOptions{
+		TokenProvider: tp,
+	})
+	client, err := pubsub.NewClient(ctx, "your-project-id", option.WithAuthCredentials(creds))
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}

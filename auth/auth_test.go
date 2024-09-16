@@ -22,8 +22,8 @@ import (
 	"strings"
 	"testing"
 
+	"cloud.google.com/go/auth/credentials"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/api/idtoken"
 	"google.golang.org/api/option"
 )
@@ -87,12 +87,12 @@ func TestAuthSnippets(t *testing.T) {
 	buf.Reset()
 	want = "ID token verified."
 
-	credentials, err := google.FindDefaultCredentials(ctx)
+	credentials, err := credentials.DetectDefault(nil)
 	if err != nil {
 		t.Fatalf("failed to generate default credentials: %v", err)
 	}
 
-	ts, err := idtoken.NewTokenSource(ctx, audience, option.WithCredentials(credentials))
+	ts, err := idtoken.NewTokenSource(ctx, audience, option.WithAuthCredentials(credentials))
 	if err != nil {
 		t.Fatalf("failed to create NewTokenSource: %v", err)
 	}

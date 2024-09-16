@@ -20,31 +20,35 @@ package downscopedoverview
 // [START auth_downscoping_initialize_downscoped_cred]
 
 import (
-	"context"
 	"fmt"
 
-	"golang.org/x/oauth2/google"
-	"golang.org/x/oauth2/google/downscope"
+	"cloud.google.com/go/auth/credentials"
+	"cloud.google.com/go/auth/credentials/downscope"
 )
 
-// initializeCredentials will generate a downscoped token using the provided Access Boundary Rules.
+// initializeCredentials will generate a downscoped token using the provided
+// Access Boundary Rules.
 func initializeCredentials(accessBoundary []downscope.AccessBoundaryRule) error {
-	ctx := context.Background()
-
-	// You must provide the "https://www.googleapis.com/auth/cloud-platform" scope.
-	// This Source can be initialized in multiple ways; the following example uses
-	// Application Default Credentials.
-	rootSource, err := google.DefaultTokenSource(ctx, "https://www.googleapis.com/auth/cloud-platform")
+	// You must provide the "https://www.googleapis.com/auth/cloud-platform"
+	// scope. This credential can be initialized in multiple ways; the following
+	// example uses Application Default Credentials.
+	rootCreds, err := credentials.DetectDefault(&credentials.DetectOptions{
+		Scopes: []string{"https://www.googleapis.com/auth/cloud-platform"},
+	})
 	if err != nil {
-		return fmt.Errorf("failed to generate rootSource: %w", err)
+		return fmt.Errorf("failed to generate rootCreds: %w", err)
 	}
 
-	// downscope.NewTokenSource constructs the token source with the configuration provided.
-	dts, err := downscope.NewTokenSource(ctx, downscope.DownscopingConfig{RootSource: rootSource, Rules: accessBoundary})
+	// downscope.NewCredentials constructs the credentials with the
+	// configuration provided.
+	downscopedCreds, err := downscope.NewCredentials(&downscope.Options{
+		Credentials: rootCreds,
+		Rules:       accessBoundary,
+	})
 	if err != nil {
-		return fmt.Errorf("failed to generate downscoped token source: %w", err)
+		return fmt.Errorf("failed to generate downscoped credentials: %w", err)
 	}
-	_ = dts
+	_ = downscopedCreds
 	// You can now use dts to access Google Storage resources.
 	return nil
 }

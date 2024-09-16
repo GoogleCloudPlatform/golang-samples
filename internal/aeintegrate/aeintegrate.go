@@ -54,8 +54,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"golang.org/x/oauth2/google"
-
 	appengine "google.golang.org/api/appengine/v1"
 
 	"gopkg.in/yaml.v2"
@@ -291,11 +289,9 @@ func (p *App) readService() error {
 
 // initAdminService populates p.adminService and checks that the user is authenticated and project ID is valid.
 func (p *App) initAdminService() error {
-	c, err := google.DefaultClient(context.Background(), appengine.CloudPlatformScope)
-	if err != nil {
-		return err
-	}
-	if p.adminService, err = appengine.New(c); err != nil {
+	ctx := context.Background()
+	var err error
+	if p.adminService, err = appengine.NewService(ctx); err != nil {
 		return err
 	}
 	if err := p.validate(); err != nil {

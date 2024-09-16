@@ -20,34 +20,24 @@ import (
 	"fmt"
 	"io"
 
-	"golang.org/x/oauth2/google"
-	"google.golang.org/api/idtoken"
-	"google.golang.org/api/option"
+	"cloud.google.com/go/auth/credentials/idtoken"
 )
 
 // getIdTokenFromMetadataServer uses the Google Cloud metadata server environment
 // to create an identity token and add it to the HTTP request as part of an Authorization header.
 func getIdTokenFromMetadataServer(w io.Writer, url string) error {
 	// url := "http://www.example.com"
-
 	ctx := context.Background()
-
-	// Construct the GoogleCredentials object which obtains the default configuration from your
-	// working environment.
-	credentials, err := google.FindDefaultCredentials(ctx)
+	creds, err := idtoken.NewCredentials(&idtoken.Options{
+		Audience: url,
+	})
 	if err != nil {
-		return fmt.Errorf("failed to generate default credentials: %w", err)
+		return fmt.Errorf("failed to create NewCredentials: %w", err)
 	}
 
-	ts, err := idtoken.NewTokenSource(ctx, url, option.WithCredentials(credentials))
-	if err != nil {
-		return fmt.Errorf("failed to create NewTokenSource: %w", err)
-	}
-
-	// Get the ID token.
-	// Once you've obtained the ID token, you can use it to make an authenticated call
-	// to the target audience.
-	_, err = ts.Token()
+	// Get the ID token. Once you've obtained the ID token, you can use it to
+	// make an authenticated call to the target audience.
+	_, err = creds.Token(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to receive token: %w", err)
 	}

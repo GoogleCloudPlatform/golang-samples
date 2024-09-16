@@ -22,10 +22,10 @@ import (
 	"testing"
 	"time"
 
+	"cloud.google.com/go/auth/credentials/downscope"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
-	"golang.org/x/oauth2/google/downscope"
 )
 
 func TestInitializeCredentials(t *testing.T) {

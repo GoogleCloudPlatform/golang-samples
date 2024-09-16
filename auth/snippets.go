@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"log"
 
+	"cloud.google.com/go/auth/credentials"
 	"cloud.google.com/go/storage"
-	"golang.org/x/oauth2/google"
 	cloudkms "google.golang.org/api/cloudkms/v1"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
@@ -30,7 +30,7 @@ import (
 // [START auth_cloud_implicit]
 
 // implicit uses Application Default Credentials to authenticate.
-func implicit() {
+func implicit() error {
 	ctx := context.Background()
 
 	// For API packages whose import path is starting with "cloud.google.com/go",
@@ -38,7 +38,7 @@ func implicit() {
 	// provided, the client library will look for credentials in the environment.
 	storageClient, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer storageClient.Close()
 
@@ -49,7 +49,7 @@ func implicit() {
 			break
 		}
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		fmt.Println(bucketAttrs.Name)
 	}
@@ -58,10 +58,11 @@ func implicit() {
 	// such as google.golang.org/api/cloudkms/v1, use NewService to create the client.
 	kmsService, err := cloudkms.NewService(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	_ = kmsService
+	return nil
 }
 
 // [END auth_cloud_implicit]
@@ -69,11 +70,11 @@ func implicit() {
 // [START auth_cloud_explicit]
 
 // explicit reads credentials from the specified path.
-func explicit(jsonPath, projectID string) {
+func explicit(jsonPath, projectID string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx, option.WithCredentialsFile(jsonPath))
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer client.Close()
 	fmt.Println("Buckets:")
@@ -84,10 +85,11 @@ func explicit(jsonPath, projectID string) {
 			break
 		}
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		fmt.Println(battrs.Name)
 	}
+	return nil
 }
 
 // [END auth_cloud_explicit]
@@ -100,16 +102,18 @@ func explicit(jsonPath, projectID string) {
 // It is very uncommon to need to explicitly get the default credentials in Go.
 // Most of the time, client libraries can use Application Default Credentials
 // without having to pass the credentials in directly. See implicit above.
-func explicitDefault(projectID string) {
+func explicitDefault(projectID string) error {
 	ctx := context.Background()
 
-	creds, err := google.FindDefaultCredentials(ctx, storage.ScopeReadOnly)
+	creds, err := credentials.DetectDefault(&credentials.DetectOptions{
+		Scopes: []string{storage.ScopeReadOnly},
+	})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	client, err := storage.NewClient(ctx, option.WithCredentials(creds))
+	client, err := storage.NewClient(ctx, option.WithAuthCredentials(creds))
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer client.Close()
 	fmt.Println("Buckets:")
@@ -124,6 +128,7 @@ func explicitDefault(projectID string) {
 		}
 		fmt.Println(battrs.Name)
 	}
+	return nil
 }
 
 // [END auth_cloud_explicit_compute_engine]

@@ -18,21 +18,13 @@ package listinstances
 import (
 	"context"
 
-	"golang.org/x/oauth2/google"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
 func ListInstances(projectId string) ([]*sqladmin.DatabaseInstance, error) {
 	ctx := context.Background()
-
-	// Create an http.Client that uses Application Default Credentials.
-	hc, err := google.DefaultClient(ctx, sqladmin.SqlserviceAdminScope)
-	if err != nil {
-		return nil, err
-	}
-
 	// Create the Google Cloud SQL service.
-	service, err := sqladmin.New(hc)
+	service, err := sqladmin.NewService(ctx)
 	if err != nil {
 		return nil, err
 	}

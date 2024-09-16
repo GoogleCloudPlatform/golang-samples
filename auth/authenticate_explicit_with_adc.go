@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"io"
 
+	"cloud.google.com/go/auth/credentials"
 	"cloud.google.com/go/storage"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
@@ -31,28 +31,33 @@ import (
 func authenticateExplicitWithAdc(w io.Writer) error {
 	ctx := context.Background()
 
-	// Construct the Google credentials object which obtains the default configuration from your
+	// Construct Credentials which obtains the default configuration from your
 	// working environment.
-	// google.FindDefaultCredentials() will give you ComputeEngineCredentials
-	// if you are on a GCE (or other metadata server supported environments).
-	credentials, err := google.FindDefaultCredentials(ctx, "https://www.googleapis.com/auth/cloud-platform")
+	credentials, err := credentials.DetectDefault(&credentials.DetectOptions{
+		Scopes: []string{"https://www.googleapis.com/auth/cloud-platform"},
+	})
 	if err != nil {
 		return fmt.Errorf("failed to generate default credentials: %w", err)
 	}
-	// If you are authenticating to a Cloud API, you can let the library include the default scope,
-	// https://www.googleapis.com/auth/cloud-platform, because IAM is used to provide fine-grained
-	// permissions for Cloud.
-	// For more information on scopes to use,
-	// see: https://developers.google.com/identity/protocols/oauth2/scopes
+	// If you are authenticating to a Cloud API, you can let the library include
+	// the default scope, https://www.googleapis.com/auth/cloud-platform,
+	// because IAM is used to provide fine-grained permissions for Cloud. For
+	// more information on scopes to use, see:
+	// https://developers.google.com/identity/protocols/oauth2/scopes
 
 	// Construct the Storage client.
-	client, err := storage.NewClient(ctx, option.WithCredentials(credentials))
+	client, err := storage.NewClient(ctx, option.WithAuthCredentials(credentials))
 	if err != nil {
 		return fmt.Errorf("NewClient: %w", err)
 	}
 	defer client.Close()
 
-	it := client.Buckets(ctx, credentials.ProjectID)
+	projID, err := credentials.ProjectID(ctx)
+	if err != nil {
+		return fmt.Errorf("ProjectID: %w", err)
+	}
+
+	it := client.Buckets(ctx, projID)
 	for {
 		bucketAttrs, err := it.Next()
 		if err == iterator.Done {

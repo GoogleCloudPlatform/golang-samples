@@ -15,11 +15,11 @@
 package main
 
 import (
-	"context"
 	"log"
 	"time"
 
-	"golang.org/x/oauth2/google"
+	"cloud.google.com/go/auth/credentials"
+	"cloud.google.com/go/auth/httptransport"
 
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/remote_api"
@@ -28,13 +28,15 @@ import (
 func main() {
 	const host = "<your-app-id>.appspot.com"
 
-	ctx := context.Background()
-
-	hc, err := google.DefaultClient(ctx,
-		"https://www.googleapis.com/auth/appengine.apis",
-		"https://www.googleapis.com/auth/userinfo.email",
-		"https://www.googleapis.com/auth/cloud-platform",
-	)
+	hc, err := httptransport.NewClient(&httptransport.Options{
+		DetectOpts: &credentials.DetectOptions{
+			Scopes: []string{
+				"https://www.googleapis.com/auth/appengine.apis",
+				"https://www.googleapis.com/auth/userinfo.email",
+				"https://www.googleapis.com/auth/cloud-platform",
+			},
+		},
+	})
 	if err != nil {
 		log.Fatal(err)
 	}

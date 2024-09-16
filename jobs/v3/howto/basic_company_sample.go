@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"io"
 
-	"golang.org/x/oauth2/google"
 	talent "google.golang.org/api/jobs/v3"
 )
 
@@ -29,12 +28,8 @@ import (
 func createCompany(w io.Writer, projectID string, companyToCreate *talent.Company) (*talent.Company, error) {
 	ctx := context.Background()
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}
@@ -59,12 +54,8 @@ func createCompany(w io.Writer, projectID string, companyToCreate *talent.Compan
 func getCompany(w io.Writer, name string) (*talent.Company, error) {
 	ctx := context.Background()
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}
@@ -86,13 +77,8 @@ func getCompany(w io.Writer, name string) (*talent.Company, error) {
 // updateCompany update a company with all fields.
 func updateCompany(w io.Writer, name string, companyToUpdate *talent.Company) (*talent.Company, error) {
 	ctx := context.Background()
-
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}
@@ -117,12 +103,8 @@ func updateCompany(w io.Writer, name string, companyToUpdate *talent.Company) (*
 func updateCompanyWithMask(w io.Writer, name string, mask string, companyToUpdate *talent.Company) (*talent.Company, error) {
 	ctx := context.Background()
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}
@@ -147,12 +129,8 @@ func updateCompanyWithMask(w io.Writer, name string, mask string, companyToUpdat
 func deleteCompany(w io.Writer, name string) error {
 	ctx := context.Background()
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return fmt.Errorf("talent.New: %w", err)
 	}
@@ -172,12 +150,8 @@ func deleteCompany(w io.Writer, name string) error {
 func listCompanies(w io.Writer, projectID string) (*talent.ListCompaniesResponse, error) {
 	ctx := context.Background()
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}

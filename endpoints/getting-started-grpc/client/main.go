@@ -40,7 +40,7 @@ import (
 	"io/ioutil"
 	"log"
 
-	"golang.org/x/oauth2/google"
+	"cloud.google.com/go/auth/credentials"
 	"google.golang.org/grpc"
 	pb "google.golang.org/grpc/examples/helloworld/helloworld"
 	"google.golang.org/grpc/metadata"
@@ -66,6 +66,7 @@ func main() {
 	}
 	defer conn.Close()
 	c := pb.NewGreeterClient(conn)
+	ctx := context.Background()
 
 	if *keyfile != "" {
 		log.Printf("Authenticating using Google service account key in %s", *keyfile)
@@ -74,21 +75,23 @@ func main() {
 			log.Fatalf("Unable to read service account key file %s: %v", *keyfile, err)
 		}
 
-		tokenSource, err := google.JWTAccessTokenSourceFromJSON(keyBytes, *audience)
+		creds, err := credentials.DetectDefault(&credentials.DetectOptions{
+			Audience:        *audience,
+			CredentialsJSON: keyBytes,
+		})
 		if err != nil {
 			log.Fatalf("Error building JWT access token source: %v", err)
 		}
-		jwt, err := tokenSource.Token()
+		tok, err := creds.Token(ctx)
 		if err != nil {
 			log.Fatalf("Unable to generate JWT token: %v", err)
 		}
-		*token = jwt.AccessToken
+		*token = tok.Value
 		// NOTE: the generated JWT token has a 1h TTL.
 		// Make sure to refresh the token before it expires by calling TokenSource.Token() for each outgoing requests.
 		// Calls to this particular implementation of TokenSource.Token() are cheap.
 	}
 
-	ctx := context.Background()
 	if *key != "" {
 		log.Printf("Using API key: %s", *key)
 		ctx = metadata.AppendToOutgoingContext(ctx, "x-api-key", *key)

@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/api/iam/v1"
 )
 
@@ -60,11 +59,8 @@ func TestQuickstart(t *testing.T) {
 
 // createServiceAccount creates a service account.
 func createServiceAccount(projectID, name, displayName string) *iam.ServiceAccount {
-	client, err := google.DefaultClient(context.Background(), iam.CloudPlatformScope)
-	if err != nil {
-		log.Fatalf("google.DefaultClient: %v", err)
-	}
-	service, err := iam.New(client)
+	ctx := context.Background()
+	service, err := iam.NewService(ctx)
 	if err != nil {
 		log.Fatalf("iam.New: %v", err)
 	}
@@ -84,11 +80,8 @@ func createServiceAccount(projectID, name, displayName string) *iam.ServiceAccou
 
 // deleteServiceAccount deletes a service account.
 func deleteServiceAccount(email string) {
-	client, err := google.DefaultClient(context.Background(), iam.CloudPlatformScope)
-	if err != nil {
-		log.Fatalf("google.DefaultClient: %v", err)
-	}
-	service, err := iam.New(client)
+	ctx := context.Background()
+	service, err := iam.NewService(ctx)
 	if err != nil {
 		log.Fatalf("iam.New: %v", err)
 	}

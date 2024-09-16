@@ -20,7 +20,6 @@ import (
 	"io"
 	"time"
 
-	"golang.org/x/oauth2/google"
 	talent "google.golang.org/api/jobs/v3"
 )
 
@@ -62,12 +61,8 @@ func constructJobWithCustomAttributes(companyName string, jobTitle string) *tale
 func filterOnStringValueCustomAttribute(w io.Writer, projectID string) (*talent.SearchJobsResponse, error) {
 	ctx := context.Background()
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}
@@ -111,12 +106,8 @@ func filterOnStringValueCustomAttribute(w io.Writer, projectID string) (*talent.
 func filterOnLongValueCustomAttribute(w io.Writer, projectID string) (*talent.SearchJobsResponse, error) {
 	ctx := context.Background()
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}
@@ -160,12 +151,8 @@ func filterOnLongValueCustomAttribute(w io.Writer, projectID string) (*talent.Se
 func filterOnMultiCustomAttributes(w io.Writer, projectID string) (*talent.SearchJobsResponse, error) {
 	ctx := context.Background()
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}
