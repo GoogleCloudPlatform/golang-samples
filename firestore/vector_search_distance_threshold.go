@@ -23,10 +23,9 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-func vectorSearchBasic(w io.Writer, projectID string) error {
+func vectorSearchDistanceThreshold(w io.Writer, projectID string) error {
 	ctx := context.Background()
 
-	// Create client
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("firestore.NewClient: %w", err)
@@ -39,9 +38,11 @@ func vectorSearchBasic(w io.Writer, projectID string) error {
 	// https://firebase.google.com/docs/firestore/vector-search#create_and_manage_vector_indexes
 	vectorQuery := collection.FindNearest("embedding_field",
 		[]float32{3.0, 1.0, 2.0},
-		5,
+		10,
 		firestore.DistanceMeasureEuclidean,
-		nil)
+		&firestore.FindNearestOptions{
+			DistanceThreshold: firestore.Ptr[float64](4.5),
+		})
 
 	docs, err := vectorQuery.Documents(ctx).GetAll()
 	if err != nil {
