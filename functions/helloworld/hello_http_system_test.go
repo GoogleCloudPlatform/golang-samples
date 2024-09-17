@@ -34,7 +34,7 @@ import (
 	"time"
 )
 
-const RuntimeVersion = "go113"
+const RuntimeVersion = "go121"
 
 func TestMain(m *testing.M) {
 	// Only run end-to-end tests when configured to do so.

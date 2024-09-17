@@ -87,7 +87,9 @@ func TestAuthSnippets(t *testing.T) {
 	buf.Reset()
 	want = "ID token verified."
 
-	credentials, err := credentials.DetectDefault(nil)
+	credentials, err := credentials.DetectDefault(&credentials.DetectOptions{
+		Scopes: []string{"https://www.googleapis.com/auth/cloud-platform"},
+	})
 	if err != nil {
 		t.Fatalf("failed to generate default credentials: %v", err)
 	}
