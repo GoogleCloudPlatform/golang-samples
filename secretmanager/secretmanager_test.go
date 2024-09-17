@@ -1373,3 +1373,47 @@ func TestUpdateRegionalSecretWithAlias(t *testing.T) {
 		t.Errorf("updateRegionalSecret: expected %q to be %q", got, want)
 	}
 }
+
+func testSecret2(tb testing.TB, projectID string) *secretmanagerpb.Secret {
+	tb.Helper()
+
+	secretID := "PERMANENT_BATCH_TESTING"
+
+	client, ctx := testClient(tb)
+	secret, err := client.CreateSecret(ctx, &secretmanagerpb.CreateSecretRequest{
+		Parent:   fmt.Sprintf("projects/%s", projectID),
+		SecretId: secretID,
+		Secret: &secretmanagerpb.Secret{
+			Replication: &secretmanagerpb.Replication{
+				Replication: &secretmanagerpb.Replication_Automatic_{
+					Automatic: &secretmanagerpb.Replication_Automatic{},
+				},
+			},
+		},
+	})
+	if err != nil {
+		tb.Fatalf("testSecret: failed to create secret: %v", err)
+	}
+
+	payload := []byte("my super secret data")
+
+	// Build the request.
+	req := &secretmanagerpb.AddSecretVersionRequest{
+		Parent: fmt.Sprintf("projects/%s/secrets/%s", projectID, secretID),
+		Payload: &secretmanagerpb.SecretPayload{
+			Data: payload,
+		},
+	}
+
+	_, err = client.AddSecretVersion(ctx, req)
+	if err != nil {
+		tb.Errorf("Error occured: %v", err)
+	}
+
+	return secret
+}
+
+func TestAccessSecretVersion2(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	_ = testSecret2(t, tc.ProjectID)
+}
