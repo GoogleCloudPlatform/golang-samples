@@ -14,7 +14,7 @@
 
 package firestore
 
-// [START firestore_vector_search_basic]
+// [START firestore_vector_search_distance_result_field]
 import (
 	"context"
 	"fmt"
@@ -23,10 +23,9 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-func vectorSearchBasic(w io.Writer, projectID string) error {
+func vectorSearchDistanceResultField(w io.Writer, projectID string) error {
 	ctx := context.Background()
 
-	// Create client
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("firestore.NewClient: %w", err)
@@ -39,9 +38,11 @@ func vectorSearchBasic(w io.Writer, projectID string) error {
 	// https://firebase.google.com/docs/firestore/vector-search#create_and_manage_vector_indexes
 	vectorQuery := collection.FindNearest("embedding_field",
 		[]float32{3.0, 1.0, 2.0},
-		5,
+		10,
 		firestore.DistanceMeasureEuclidean,
-		nil)
+		&firestore.FindNearestOptions{
+			DistanceResultField: "vector_distance",
+		})
 
 	docs, err := vectorQuery.Documents(ctx).GetAll()
 	if err != nil {
@@ -50,9 +51,9 @@ func vectorSearchBasic(w io.Writer, projectID string) error {
 	}
 
 	for _, doc := range docs {
-		fmt.Fprintln(w, doc.Data()["name"])
+		fmt.Fprintf(w, "%v, Distance: %v\n", doc.Data()["name"], doc.Data()["vector_distance"])
 	}
 	return nil
 }
 
-// [END firestore_vector_search_basic]
+// [END firestore_vector_search_distance_result_field]
