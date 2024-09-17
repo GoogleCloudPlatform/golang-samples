@@ -35,15 +35,19 @@ func updateInstance(w io.Writer, projectID, instanceID string) error {
 	}
 	defer instanceAdmin.Close()
 
-	op, err := instanceAdmin.UpdateInstance(ctx, &instancepb.UpdateInstanceRequest{
+	req := &instancepb.UpdateInstanceRequest{
 		Instance: &instancepb.Instance{
-			Name:    fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID),
+			Name: fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID),
+			// The edition selected for this instance.
+			// Different editions provide different capabilities at different price points.
+			// For more information, see https://cloud.google.com/spanner/docs/editions-overview.
 			Edition: instancepb.Instance_ENTERPRISE,
 		},
 		FieldMask: &field_mask.FieldMask{
 			Paths: []string{"edition"},
 		},
-	})
+	}
+	op, err := instanceAdmin.UpdateInstance(ctx, req)
 	if err != nil {
 		return fmt.Errorf("could not update instance %s: %w", fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID), err)
 	}
@@ -52,6 +56,7 @@ func updateInstance(w io.Writer, projectID, instanceID string) error {
 	if err != nil {
 		return fmt.Errorf("waiting for instance update to finish failed: %w", err)
 	}
+
 	fmt.Fprintf(w, "Updated instance [%s]\n", instanceID)
 	return nil
 }
