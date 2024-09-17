@@ -124,9 +124,21 @@ func TestCreateInstances(t *testing.T) {
 	_ = testutil.SystemTest(t)
 	t.Parallel()
 
-	runCreateInstanceSample(t, createInstance)
+	runCreateAndUpdateInstanceSample(t, createInstance, updateInstance)
 	runCreateInstanceSample(t, createInstanceWithProcessingUnits)
 	runCreateInstanceSample(t, createInstanceWithAutoscalingConfig)
+}
+
+func runCreateAndUpdateInstanceSample(t *testing.T, createFunc, updateFunc instanceSampleFunc) {
+	projectID := getSampleProjectId(t)
+	instanceID := fmt.Sprintf("go-sample-test-%s", uuid.New().String()[:8])
+	out := runInstanceSample(t, createFunc, projectID, instanceID, "failed to create an instance")
+	assertContains(t, out, fmt.Sprintf("Created instance [%s]", instanceID))
+	out = runInstanceSample(t, updateFunc, projectID, instanceID, "failed to update an instance")
+	assertContains(t, out, fmt.Sprintf("Updated instance [%s]", instanceID))
+	if err := cleanupInstance(projectID, instanceID); err != nil {
+		t.Logf("cleanupInstance error: %s", err)
+	}
 }
 
 func runCreateInstanceSample(t *testing.T, f instanceSampleFunc) {
