@@ -33,7 +33,7 @@ func getIdTokenFromImpersonatedCredentials(w io.Writer, scope, targetAudience, i
 	// impersonatedServiceAccount := "name@project.service.gserviceaccount.com"
 	ctx := context.Background()
 
-	// Construct Credentials which obtains the default configuration from your
+	// Construct credentials which obtains the default configuration from your
 	// working environment.
 	creds, err := credentials.DetectDefault(&credentials.DetectOptions{
 		Scopes: []string{scope},
