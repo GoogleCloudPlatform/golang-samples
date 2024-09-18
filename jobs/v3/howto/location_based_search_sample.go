@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"io"
 
-	"golang.org/x/oauth2/google"
 	talent "google.golang.org/api/jobs/v3"
 )
 
@@ -29,12 +28,8 @@ import (
 func basicLocationSearch(w io.Writer, projectID, companyName, location string, distance float64) (*talent.SearchJobsResponse, error) {
 	ctx := context.Background()
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}
@@ -91,12 +86,8 @@ func basicLocationSearch(w io.Writer, projectID, companyName, location string, d
 func cityLocationSearch(w io.Writer, projectID, companyName, location string) (*talent.SearchJobsResponse, error) {
 	ctx := context.Background()
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}
@@ -154,12 +145,8 @@ func cityLocationSearch(w io.Writer, projectID, companyName, location string) (*
 func broadeningLocationSearch(w io.Writer, projectID, companyName, location string) (*talent.SearchJobsResponse, error) {
 	ctx := context.Background()
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}
@@ -217,12 +204,8 @@ func broadeningLocationSearch(w io.Writer, projectID, companyName, location stri
 func keywordLocationSearch(w io.Writer, projectID, companyName, location string, distance float64, keyword string) (*talent.SearchJobsResponse, error) {
 	ctx := context.Background()
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}
@@ -280,12 +263,8 @@ func keywordLocationSearch(w io.Writer, projectID, companyName, location string,
 func multiLocationsSearch(w io.Writer, projectID, companyName, location, location2 string, distance float64) (*talent.SearchJobsResponse, error) {
 	ctx := context.Background()
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}

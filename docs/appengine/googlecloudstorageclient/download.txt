@@ -1,9 +1,0 @@
-// [START GOPATH_setup]
-mkdir -p $HOME/go
-export GOPATH=$HOME/go
-// [END GOPATH_setup]
-// [START Go_install]
-go get -u golang.org/x/oauth2
-go get -u cloud.google.com/go/storage
-go get -u google.golang.org/appengine/...
-// [END Go_install]

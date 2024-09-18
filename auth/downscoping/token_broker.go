@@ -20,14 +20,14 @@ import (
 	"context"
 	"fmt"
 
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
-	"golang.org/x/oauth2/google/downscope"
+	"cloud.google.com/go/auth/credentials"
+	"cloud.google.com/go/auth/credentials/downscope"
 )
 
 // createDownscopedToken would be run on the token broker in order to generate
-// a downscoped access token that only grants access to objects whose name begins with prefix.
-// The token broker would then pass the newly created token to the requesting token consumer for use.
+// a downscoped access token that only grants access to objects whose name
+// begins with prefix. The token broker would then pass the newly created token
+// to the requesting token consumer for use.
 func createDownscopedToken(bucketName string, prefix string) error {
 	// bucketName := "foo"
 	// prefix := "profile-picture-"
@@ -50,23 +50,29 @@ func createDownscopedToken(bucketName string, prefix string) error {
 		},
 	}
 
-	// This Source can be initialized in multiple ways; the following example uses
-	// Application Default Credentials.
-	var rootSource oauth2.TokenSource
-
-	// You must provide the "https://www.googleapis.com/auth/cloud-platform" scope.
-	rootSource, err := google.DefaultTokenSource(ctx, "https://www.googleapis.com/auth/cloud-platform")
+	// This credential can be initialized in multiple ways; the following example
+	// uses Application Default Credentials. You must provide the
+	// "https://www.googleapis.com/auth/cloud-platform" scope.
+	creds, err := credentials.DetectDefault(&credentials.DetectOptions{
+		Scopes: []string{
+			"https://www.googleapis.com/auth/cloud-platform",
+		},
+	})
 	if err != nil {
-		return fmt.Errorf("failed to generate rootSource: %w", err)
+		return fmt.Errorf("failed to generate creds: %w", err)
 	}
 
-	// downscope.NewTokenSource constructs the token source with the configuration provided.
-	dts, err := downscope.NewTokenSource(ctx, downscope.DownscopingConfig{RootSource: rootSource, Rules: accessBoundary})
+	// downscope.NewCredentials constructs the credential with the configuration
+	// provided.
+	downscopedCreds, err := downscope.NewCredentials(&downscope.Options{
+		Credentials: creds,
+		Rules:       accessBoundary,
+	})
 	if err != nil {
-		return fmt.Errorf("failed to generate downscoped token source: %w", err)
+		return fmt.Errorf("failed to generate downscoped credentials: %w", err)
 	}
-	// Token() uses the previously declared TokenSource to generate a downscoped token.
-	tok, err := dts.Token()
+	// Token uses the previously declared Credentials to generate a downscoped token.
+	tok, err := downscopedCreds.Token(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to generate token: %w", err)
 	}

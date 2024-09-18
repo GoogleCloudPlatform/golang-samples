@@ -22,44 +22,48 @@ import (
 	"io"
 	"io/ioutil"
 
-	"golang.org/x/oauth2/google"
-	"golang.org/x/oauth2/google/downscope"
+	"cloud.google.com/go/auth"
+	"cloud.google.com/go/auth/credentials"
+	"cloud.google.com/go/auth/credentials/downscope"
 
 	"cloud.google.com/go/storage"
-	"golang.org/x/oauth2"
 	"google.golang.org/api/option"
 )
 
-// A token consumer should define their own tokenSource. In the Token() method,
-// it should send a query to a token broker requesting a downscoped token.
-// The token broker holds the root credential that is used to generate the
-// downscoped token.
-type localTokenSource struct {
-	ctx        context.Context
+// A token consumer should define their own auth.Credentials . In the `Token`
+// method, it should send a query to a token broker requesting a downscoped
+// token. The token broker holds the root credential that is used to generate
+// the downscoped token.
+type localTokenProvider struct {
 	bucketName string
 	brokerURL  string
 }
 
-func (lts localTokenSource) Token() (*oauth2.Token, error) {
-	var remoteToken *oauth2.Token
-	// Usually you would now retrieve remoteToken, an oauth2.Token, from token broker.
-	// This snippet performs the same functionality locally.
+func (lts localTokenProvider) Token(ctx context.Context) (*auth.Token, error) {
+	var remoteToken *auth.Token
+	// Usually you would now retrieve remoteToken, an auth.Token, from token
+	// broker. This snippet performs the same functionality locally.
 	accessBoundary := []downscope.AccessBoundaryRule{
 		{
 			AvailableResource:    "//storage.googleapis.com/projects/_/buckets/" + lts.bucketName,
 			AvailablePermissions: []string{"inRole:roles/storage.objectViewer"},
 		},
 	}
-	rootSource, err := google.DefaultTokenSource(lts.ctx, "https://www.googleapis.com/auth/cloud-platform")
+	creds, err := credentials.DetectDefault(&credentials.DetectOptions{
+		Scopes: []string{"https://www.googleapis.com/auth/cloud-platform"},
+	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate rootSource: %w", err)
+		return nil, fmt.Errorf("failed to generate creds: %w", err)
 	}
-	dts, err := downscope.NewTokenSource(lts.ctx, downscope.DownscopingConfig{RootSource: rootSource, Rules: accessBoundary})
+	downscopedCreds, err := downscope.NewCredentials(&downscope.Options{
+		Credentials: creds,
+		Rules:       accessBoundary,
+	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate downscoped token source: %w", err)
+		return nil, fmt.Errorf("failed to generate downscoped credentials: %w", err)
 	}
-	// Token() uses the previously declared TokenSource to generate a downscoped token.
-	remoteToken, err = dts.Token()
+	// Token uses the previously declared Credentials to generate a downscoped token.
+	remoteToken, err = downscopedCreds.Token(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate token: %w", err)
 	}
@@ -75,16 +79,17 @@ func getObjectContents(output io.Writer, bucketName string, objectName string) e
 
 	ctx := context.Background()
 
-	thisTokenSource := localTokenSource{
-		ctx:        ctx,
+	tokenProvider := localTokenProvider{
 		bucketName: bucketName,
 		brokerURL:  "yourURL.com/internal/broker",
 	}
 
-	// Wrap the TokenSource in an oauth2.ReuseTokenSource to enable automatic refreshing.
-	refreshableTS := oauth2.ReuseTokenSource(nil, thisTokenSource)
 	// You can now use the token source to access Google Cloud Storage resources as follows.
-	storageClient, err := storage.NewClient(ctx, option.WithTokenSource(refreshableTS))
+	storageClient, err := storage.NewClient(ctx, option.WithAuthCredentials(
+		auth.NewCredentials(&auth.CredentialsOptions{
+			TokenProvider: auth.NewCachedTokenProvider(tokenProvider, nil),
+		}),
+	))
 	if err != nil {
 		return fmt.Errorf("failed to create the storage client: %w", err)
 	}

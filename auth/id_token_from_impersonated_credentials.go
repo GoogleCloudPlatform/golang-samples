@@ -20,9 +20,8 @@ import (
 	"fmt"
 	"io"
 
-	"golang.org/x/oauth2/google"
-	"google.golang.org/api/impersonate"
-	"google.golang.org/api/option"
+	"cloud.google.com/go/auth/credentials"
+	"cloud.google.com/go/auth/credentials/impersonate"
 )
 
 // getIdTokenFromImpersonatedCredentials uses a service account (SA1) to impersonate as
@@ -32,17 +31,18 @@ func getIdTokenFromImpersonatedCredentials(w io.Writer, scope, targetAudience, i
 	// scope := "https://www.googleapis.com/auth/cloud-platform"
 	// targetAudience := "http://www.example.com"
 	// impersonatedServiceAccount := "name@project.service.gserviceaccount.com"
-
 	ctx := context.Background()
 
-	// Construct the GoogleCredentials object which obtains the default configuration from your
+	// Construct credentials which obtains the default configuration from your
 	// working environment.
-	credentials, err := google.FindDefaultCredentials(ctx, scope)
+	creds, err := credentials.DetectDefault(&credentials.DetectOptions{
+		Scopes: []string{scope},
+	})
 	if err != nil {
 		return fmt.Errorf("failed to generate default credentials: %w", err)
 	}
 
-	ts, err := impersonate.IDTokenSource(ctx, impersonate.IDTokenConfig{
+	impCreds, err := impersonate.NewIDTokenCredentials(&impersonate.IDTokenOptions{
 		Audience:        targetAudience,
 		TargetPrincipal: impersonatedServiceAccount,
 		IncludeEmail:    true,
@@ -50,16 +50,16 @@ func getIdTokenFromImpersonatedCredentials(w io.Writer, scope, targetAudience, i
 		// For more information, see:
 		// https://cloud.google.com/iam/docs/create-short-lived-credentials-direct#sa-credentials-permissions
 		// Delegates is NOT USED here.
-		Delegates: []string{},
-	}, option.WithCredentials(credentials))
+		Delegates:   []string{},
+		Credentials: creds,
+	})
 	if err != nil {
-		return fmt.Errorf("IDTokenSource error: %w", err)
+		return fmt.Errorf("NewIDTokenCredentials error: %w", err)
 	}
 
-	// Get the ID token.
-	// Once you've obtained the ID token, you can use it to make an authenticated call
-	// to the target audience.
-	_, err = ts.Token()
+	// Get the ID token. Once you've obtained the ID token, you can use it to
+	// make an authenticated call to the target audience.
+	_, err = impCreds.Token(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to receive token: %w", err)
 	}

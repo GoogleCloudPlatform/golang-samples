@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"io"
 
-	"golang.org/x/oauth2/google"
 	talent "google.golang.org/api/jobs/v3"
 )
 
@@ -29,12 +28,8 @@ import (
 func commuteSearch(w io.Writer, projectID, companyName string) (*talent.SearchJobsResponse, error) {
 	ctx := context.Background()
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}

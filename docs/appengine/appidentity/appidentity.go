@@ -17,25 +17,16 @@ package sample
 // [START gae_go_app_identity]
 import (
 	"context"
-	"net/http"
 
-	"google.golang.org/appengine/urlfetch"
-
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
 	urlshortener "google.golang.org/api/urlshortener/v1"
 )
 
 // shortenURL returns a short URL which redirects to the provided url,
 // using Google's urlshortener API.
 func shortenURL(ctx context.Context, url string) (string, error) {
-	transport := &oauth2.Transport{
-		Source: google.AppEngineTokenSource(ctx, urlshortener.UrlshortenerScope),
-		Base:   &urlfetch.Transport{Context: ctx},
-	}
-	client := &http.Client{Transport: transport}
-
-	svc, err := urlshortener.New(client)
+	// Application Default Credentials automatically detect credentials from the
+	// App Engine environment
+	svc, err := urlshortener.NewService(ctx)
 	if err != nil {
 		return "", err
 	}

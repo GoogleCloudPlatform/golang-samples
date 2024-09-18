@@ -21,13 +21,12 @@ import (
 	"io"
 	"time"
 
-	"golang.org/x/oauth2/google"
-	"google.golang.org/api/impersonate"
-	"google.golang.org/api/option"
+	"cloud.google.com/go/auth/credentials"
+	"cloud.google.com/go/auth/credentials/impersonate"
 )
 
 // getAccessTokenFromImpersonatedCredentials uses a service account (SA1) to impersonate
-// another service account (SA2) and obtain OAuth2 token for the impersonated account.
+// another service account (SA2) and obtain a token for the impersonated account.
 // To obtain a token for SA2, SA1 should have the "roles/iam.serviceAccountTokenCreator" permission on SA2.
 func getAccessTokenFromImpersonatedCredentials(w io.Writer, impersonatedServiceAccount, scope string) error {
 	// impersonatedServiceAccount := "name@project.service.gserviceaccount.com"
@@ -35,15 +34,17 @@ func getAccessTokenFromImpersonatedCredentials(w io.Writer, impersonatedServiceA
 
 	ctx := context.Background()
 
-	// Construct the GoogleCredentials object which obtains the default configuration from your
-	// working environment.
-	credentials, err := google.FindDefaultCredentials(ctx, scope)
+	// Construct the Credentials object which obtains the default configuration
+	// from your working environment.
+	creds, err := credentials.DetectDefault(&credentials.DetectOptions{
+		Scopes: []string{scope},
+	})
 	if err != nil {
 		fmt.Fprintf(w, "failed to generate default credentials: %v", err)
 		return fmt.Errorf("failed to generate default credentials: %w", err)
 	}
 
-	ts, err := impersonate.CredentialsTokenSource(ctx, impersonate.CredentialsConfig{
+	impCreds, err := impersonate.NewCredentials(&impersonate.CredentialsOptions{
 		TargetPrincipal: impersonatedServiceAccount,
 		Scopes:          []string{scope},
 		Lifetime:        300 * time.Second,
@@ -51,21 +52,22 @@ func getAccessTokenFromImpersonatedCredentials(w io.Writer, impersonatedServiceA
 		// For more information, see:
 		// https://cloud.google.com/iam/docs/create-short-lived-credentials-direct#sa-credentials-permissions
 		// Delegates is NOT USED here.
-		Delegates: []string{},
-	}, option.WithCredentials(credentials))
+		Delegates:   []string{},
+		Credentials: creds,
+	})
 	if err != nil {
-		fmt.Fprintf(w, "CredentialsTokenSource error: %v", err)
-		return fmt.Errorf("CredentialsTokenSource error: %w", err)
+		fmt.Fprintf(w, "NewCredentials error: %v", err)
+		return fmt.Errorf("NewCredentials error: %w", err)
 	}
 
-	// Get the OAuth2 token.
-	// Once you've obtained the OAuth2 token, you can use it to make an authenticated call.
-	t, err := ts.Token()
+	// Get the token. Once you've obtained the token, you can use it to make a
+	// authenticated call.
+	t, err := impCreds.Token(ctx)
 	if err != nil {
 		fmt.Fprintf(w, "failed to receive token: %v", err)
 		return fmt.Errorf("failed to receive token: %w", err)
 	}
-	fmt.Fprintf(w, "Generated OAuth2 token with length %d.\n", len(t.AccessToken))
+	fmt.Fprintf(w, "Generated OAuth2 token with length %d.\n", len(t.Value))
 
 	return nil
 }

@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"io"
 
-	"golang.org/x/oauth2/google"
 	talent "google.golang.org/api/jobs/v3"
 )
 
@@ -29,13 +28,8 @@ import (
 // on query.
 func jobTitleAutoComplete(w io.Writer, projectID, companyName, query string) (*talent.CompleteQueryResponse, error) {
 	ctx := context.Background()
-
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}
@@ -68,12 +62,8 @@ func defaultAutoComplete(w io.Writer, projectID, companyName, query string) (*ta
 
 	parent := "projects/" + projectID
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}

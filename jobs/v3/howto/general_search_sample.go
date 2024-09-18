@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"io"
 
-	"golang.org/x/oauth2/google"
 	talent "google.golang.org/api/jobs/v3"
 )
 
@@ -29,12 +28,8 @@ import (
 func basicJobSearch(w io.Writer, projectID, companyName, query string) (*talent.SearchJobsResponse, error) {
 	ctx := context.Background()
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}
@@ -84,12 +79,8 @@ func basicJobSearch(w io.Writer, projectID, companyName, query string) (*talent.
 func categoryFilterSearch(w io.Writer, projectID, companyName string, categories []string) (*talent.SearchJobsResponse, error) {
 	ctx := context.Background()
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}
@@ -139,12 +130,8 @@ func categoryFilterSearch(w io.Writer, projectID, companyName string, categories
 func employmentTypesSearch(w io.Writer, projectID, companyName string, employmentTypes []string) (*talent.SearchJobsResponse, error) {
 	ctx := context.Background()
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}
@@ -198,12 +185,8 @@ func employmentTypesSearch(w io.Writer, projectID, companyName string, employmen
 func dateRangeSearch(w io.Writer, projectID, companyName, startTime, endTime string) (*talent.SearchJobsResponse, error) {
 	ctx := context.Background()
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}
@@ -256,12 +239,8 @@ func dateRangeSearch(w io.Writer, projectID, companyName, startTime, endTime str
 func languageCodeSearch(w io.Writer, projectID, companyName string, languageCodes []string) (*talent.SearchJobsResponse, error) {
 	ctx := context.Background()
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}
@@ -311,12 +290,8 @@ func languageCodeSearch(w io.Writer, projectID, companyName string, languageCode
 func companyDisplayNameSearch(w io.Writer, projectID, companyName string, companyDisplayNames []string) (*talent.SearchJobsResponse, error) {
 	ctx := context.Background()
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}
@@ -366,12 +341,8 @@ func companyDisplayNameSearch(w io.Writer, projectID, companyName string, compan
 func compensationSearch(w io.Writer, projectID, companyName string) (*talent.SearchJobsResponse, error) {
 	ctx := context.Background()
 
-	client, err := google.DefaultClient(ctx, talent.CloudPlatformScope)
-	if err != nil {
-		return nil, fmt.Errorf("google.DefaultClient: %w", err)
-	}
 	// Create the jobs service client.
-	service, err := talent.New(client)
+	service, err := talent.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("talent.New: %w", err)
 	}

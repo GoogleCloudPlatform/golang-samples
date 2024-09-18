@@ -16,27 +16,27 @@ package snippets
 
 // [START healthcare_search_resources_post]
 import (
-	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 
-	"golang.org/x/oauth2/google"
+	"cloud.google.com/go/auth/credentials"
+	"cloud.google.com/go/auth/httptransport"
 )
 
 // searchFhirResources uses a POST request to search for FHIR resources in a given FHIR store.
 func searchFHIRResourcesPost(w io.Writer, projectID, location, datasetID, fhirStoreID, resourceType string) error {
-	ctx := context.Background()
-
 	// The Healthcare API endpoint, API version, and request path.
 	name := fmt.Sprintf("https://healthcare.googleapis.com/v1/projects/%s/locations/%s/datasets/%s/fhirStores/%s/fhir/%s/_search", projectID, location, datasetID, fhirStoreID, resourceType)
 
-	// DefaultClient returns an HTTP Client that uses the
-	// DefaultTokenSource (Application Default Credentials)
-	// to obtain authentication credentials.
-	client, err := google.DefaultClient(ctx, "https://www.googleapis.com/auth/cloud-platform")
+	// NewClient returns an HTTP Client that uses the Application Default
+	// Credentials to obtain authentication credentials.
+	client, err := httptransport.NewClient(&httptransport.Options{
+		DetectOpts: &credentials.DetectOptions{
+			Scopes: []string{"https://www.googleapis.com/auth/cloud-platform"},
+		},
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,7 +69,7 @@ func searchFHIRResourcesPost(w io.Writer, projectID, location, datasetID, fhirSt
 
 	defer resp.Body.Close()
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("could not read response: %w", err)
 	}

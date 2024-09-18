@@ -3,13 +3,13 @@ module github.com/GoogleCloudPlatform/golang-samples/docs
 go 1.21
 
 require (
+	cloud.google.com/go/auth v0.7.2
 	cloud.google.com/go/storage v1.43.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
 	github.com/fluent/fluent-logger-golang v1.9.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/mailgun/mailgun-go/v3 v3.6.4
 	github.com/mailjet/mailjet-apiv3-go v0.0.0-20201009050126-c24bc15a9394
-	golang.org/x/oauth2 v0.21.0
 	google.golang.org/api v0.189.0
 	google.golang.org/appengine v1.6.8
 	google.golang.org/appengine/v2 v2.0.6
@@ -18,7 +18,6 @@ require (
 
 require (
 	cloud.google.com/go v0.115.0 // indirect
-	cloud.google.com/go/auth v0.7.2 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.3 // indirect
 	cloud.google.com/go/compute/metadata v0.5.0 // indirect
 	cloud.google.com/go/iam v1.1.10 // indirect
@@ -48,6 +47,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.24.0 // indirect
 	golang.org/x/crypto v0.25.0 // indirect
 	golang.org/x/net v0.27.0 // indirect
+	golang.org/x/oauth2 v0.21.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect

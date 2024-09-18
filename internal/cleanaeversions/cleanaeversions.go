@@ -39,8 +39,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"golang.org/x/oauth2/google"
-
 	appengine "google.golang.org/api/appengine/v1"
 )
 
@@ -76,12 +74,7 @@ func main() {
 	_ = filterRE
 
 	ctx := context.Background()
-	hc, err := google.DefaultClient(ctx, appengine.CloudPlatformScope)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Could not create DefaultClient: %v", err)
-		os.Exit(1)
-	}
-	gae, err = appengine.New(hc)
+	gae, err = appengine.NewService(ctx)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not create App Engine service: %v", err)
 		os.Exit(1)

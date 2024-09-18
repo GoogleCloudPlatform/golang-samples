@@ -7,7 +7,6 @@ require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
 	github.com/gofrs/uuid v3.4.0+incompatible
 	github.com/google/go-cmp v0.6.0
-	golang.org/x/oauth2 v0.21.0
 	google.golang.org/api v0.189.0
 	google.golang.org/genproto v0.0.0-20240723171418-e6d459c13d2a
 )
@@ -36,6 +35,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.24.0 // indirect
 	golang.org/x/crypto v0.25.0 // indirect
 	golang.org/x/net v0.27.0 // indirect
+	golang.org/x/oauth2 v0.21.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect

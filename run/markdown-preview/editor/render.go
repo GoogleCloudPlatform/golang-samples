@@ -23,16 +23,17 @@ import (
 	"net/http"
 	"time"
 
-	"golang.org/x/oauth2"
-	"google.golang.org/api/idtoken"
+	"cloud.google.com/go/auth"
+	"cloud.google.com/go/auth/credentials/idtoken"
+	"cloud.google.com/go/auth/httptransport"
 )
 
 // RenderService represents our upstream render service.
 type RenderService struct {
 	// URL is the render service address.
 	URL string
-	// tokenSource provides an identity token for requests to the Render Service.
-	tokenSource oauth2.TokenSource
+	// creds provides an identity token for requests to the Render Service.
+	creds *auth.Credentials
 }
 
 // NewRequest creates a new HTTP request to the Render service.
@@ -43,23 +44,23 @@ func (s *RenderService) NewRequest(method string) (*http.Request, error) {
 		return nil, fmt.Errorf("http.NewRequest: %w", err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	// Create a TokenSource if none exists.
-	if s.tokenSource == nil {
-		s.tokenSource, err = idtoken.NewTokenSource(ctx, s.URL)
+	// Creates Credentials if none exists.
+	if s.creds == nil {
+		s.creds, err = idtoken.NewCredentials(&idtoken.Options{
+			Audience: s.URL,
+		})
 		if err != nil {
 			return nil, fmt.Errorf("idtoken.NewTokenSource: %w", err)
 		}
 	}
-
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 	// Retrieve an identity token. Will reuse tokens until refresh needed.
-	token, err := s.tokenSource.Token()
+	token, err := s.creds.Token(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("TokenSource.Token: %w", err)
 	}
-	token.SetAuthHeader(req)
+	httptransport.SetAuthHeader(token, req)
 
 	return req, nil
 }

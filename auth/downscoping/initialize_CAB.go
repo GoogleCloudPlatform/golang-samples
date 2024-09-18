@@ -16,9 +16,10 @@ package downscopedoverview
 
 // [START auth_downscoping_rules]
 
-import "golang.org/x/oauth2/google/downscope"
+import "cloud.google.com/go/auth/credentials/downscope"
 
-// constructCAB shows how to initialize a Credential Access Boundary for downscoping tokens.
+// constructCAB shows how to initialize a Credential Access Boundary for
+// downscoped tokens.
 func constructCAB(bucketName string, prefix string) {
 	// bucketName := "foo"
 	// prefix := "profile-picture-"

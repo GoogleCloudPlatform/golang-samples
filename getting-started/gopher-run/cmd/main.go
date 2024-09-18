@@ -25,11 +25,12 @@ import (
 	"net/http"
 	"os"
 
+	"cloud.google.com/go/auth/credentials"
+	"cloud.google.com/go/auth/httptransport"
 	"cloud.google.com/go/firestore"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/gopher-run/generator"
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/gopher-run/leaderboard"
-	"golang.org/x/oauth2/google"
 )
 
 type playData struct {
@@ -69,9 +70,15 @@ func main() {
 }
 
 func (a *app) predictionRequest(w http.ResponseWriter, r *http.Request) {
-	client, err := google.DefaultClient(r.Context(), "https://www.googleapis.com/auth/cloud-platform")
+	client, err := httptransport.NewClient(&httptransport.Options{
+		DetectOpts: &credentials.DetectOptions{
+			Scopes: []string{
+				"https://www.googleapis.com/auth/cloud-platform",
+			},
+		},
+	})
 	if err != nil {
-		log.Printf("DefaultClient: %v", err)
+		log.Printf("NewClient: %v", err)
 	}
 	resp, err := client.Post("https://ml.googleapis.com/v1/projects/"+a.projectID+"/models/playerdata_linear_classification:predict", "application/json", r.Body)
 	if err != nil {
