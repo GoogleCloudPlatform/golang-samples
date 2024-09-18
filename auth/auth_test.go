@@ -112,9 +112,6 @@ func TestAuthSnippets(t *testing.T) {
 
 func TestAuthenticateWithAPIKey(t *testing.T) {
 	apiKey := os.Getenv("GOLANG_SAMPLES_API_KEY")
-	if apiKey == "" {
-		t.Skip("GOLANG_SAMPLES_API_KEY is unset. Skipping.")
-	}
 	buf := &bytes.Buffer{}
 	if err := authenticateWithAPIKey(buf, apiKey); err != nil {
 		t.Fatalf("authenticateWithAPIKey got err: %v", err)
