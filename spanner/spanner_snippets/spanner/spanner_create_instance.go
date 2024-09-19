@@ -42,6 +42,7 @@ func createInstance(w io.Writer, projectID, instanceID string) error {
 			DisplayName: instanceID,
 			NodeCount:   1,
 			Labels:      map[string]string{"cloud_spanner_samples": "true"},
+			Edition:     instancepb.Instance_STANDARD,
 		},
 	})
 	if err != nil {

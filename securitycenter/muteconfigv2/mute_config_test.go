@@ -271,3 +271,16 @@ func TestSetUnmuteFinding(t *testing.T) {
 		t.Errorf("setUnmute got %q, expected %q", got, fmt.Sprintf("Mute value for the finding: %s is %s", fixture.finding1Name, "UNMUTE"))
 	}
 }
+
+func TestBulkMuteFinding(t *testing.T) {
+	testutil.SystemTest(t)
+
+	var buf bytes.Buffer
+	// Bulk mute findings.
+	if err := bulkMute(&buf, fixture.parent, "severity=\"LOW\""); err != nil {
+		t.Errorf("bulkMute had error: %v", err)
+	}
+	if got := buf.String(); !strings.Contains(got, "Bulk mute findings completed successfully") {
+		t.Errorf("bulkMute got %q, expected %q", got, "Bulk mute findings completed successfully")
+	}
+}
