@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_create_backup_schedule]
+// [START spanner_create_incremental_backup_schedule]
 
 import (
 	"context"
@@ -27,48 +27,17 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 )
 
-func createFullBackupSchedule(ctx context.Context, w io.Writer, dbName string, scheduleId string) error {
+func createIncrementalBackupSchedule(w io.Writer, dbName string, scheduleId string) error {
+	ctx := context.Background()
+
 	client, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err
 	}
 	defer client.Close()
 
-	req := databasepb.CreateBackupScheduleRequest{
-		Parent:           dbName,
-		BackupScheduleId: scheduleId,
-		BackupSchedule: &databasepb.BackupSchedule{
-			Spec: &databasepb.BackupScheduleSpec{
-				ScheduleSpec: &databasepb.BackupScheduleSpec_CronSpec{
-					CronSpec: &databasepb.CrontabSpec{
-						Text: "30 12 * * *",
-					},
-				},
-			},
-			RetentionDuration: durationpb.New(24 * time.Hour),
-			EncryptionConfig: &databasepb.CreateBackupEncryptionConfig{
-				EncryptionType: databasepb.CreateBackupEncryptionConfig_USE_DATABASE_ENCRYPTION,
-			},
-			BackupTypeSpec: &databasepb.BackupSchedule_FullBackupSpec{},
-		},
-	}
-
-	res, err := client.CreateBackupSchedule(ctx, &req)
-	if err != nil {
-		return err
-	}
-
-	fmt.Fprintf(w, "Created full backup schedule: %s", res)
-	return nil
-}
-
-func createIncrementalBackupSchedule(ctx context.Context, w io.Writer, dbName string, scheduleId string) error {
-	client, err := database.NewDatabaseAdminClient(ctx)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
-
+	// Create a schedule to create incremental backups daily at 12:30 AM, using
+	// Google-managed encryption, and retained for 24 hours.
 	req := databasepb.CreateBackupScheduleRequest{
 		Parent:           dbName,
 		BackupScheduleId: scheduleId,
@@ -97,4 +66,4 @@ func createIncrementalBackupSchedule(ctx context.Context, w io.Writer, dbName st
 	return nil
 }
 
-// [END spanner_create_backup_schedule]
+// [END spanner_create_incremental_backup_schedule]

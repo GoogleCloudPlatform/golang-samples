@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_update_backup_schedule]
+// [START spanner_create_full_backup_schedule]
 
 import (
 	"context"
@@ -25,10 +25,9 @@ import (
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	"cloud.google.com/go/spanner/admin/database/apiv1/databasepb"
 	"google.golang.org/protobuf/types/known/durationpb"
-	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-func updateBackupSchedule(w io.Writer, dbName string, scheduleId string) error {
+func createFullBackupSchedule(w io.Writer, dbName string, scheduleId string) error {
 	ctx := context.Background()
 
 	client, err := database.NewDatabaseAdminClient(ctx)
@@ -37,39 +36,34 @@ func updateBackupSchedule(w io.Writer, dbName string, scheduleId string) error {
 	}
 	defer client.Close()
 
-	// Update a schedule to create backups daily at 3:45 PM, using the database's
-	// encryption config, and retained for 48 hours.
-	req := databasepb.UpdateBackupScheduleRequest{
+	// Create a schedule to create full backups daily at 12:30 AM, using the
+	// database's encryption config, and retained for 24 hours.
+	req := databasepb.CreateBackupScheduleRequest{
+		Parent:           dbName,
+		BackupScheduleId: scheduleId,
 		BackupSchedule: &databasepb.BackupSchedule{
-			Name: fmt.Sprintf("%s/backupSchedules/%s", dbName, scheduleId),
 			Spec: &databasepb.BackupScheduleSpec{
 				ScheduleSpec: &databasepb.BackupScheduleSpec_CronSpec{
 					CronSpec: &databasepb.CrontabSpec{
-						Text: "45 15 * * *",
+						Text: "30 12 * * *",
 					},
 				},
 			},
-			RetentionDuration: durationpb.New(48 * time.Hour),
+			RetentionDuration: durationpb.New(24 * time.Hour),
 			EncryptionConfig: &databasepb.CreateBackupEncryptionConfig{
 				EncryptionType: databasepb.CreateBackupEncryptionConfig_USE_DATABASE_ENCRYPTION,
 			},
-		},
-		UpdateMask: &fieldmaskpb.FieldMask{
-			Paths: []string{
-				"spec.cron_spec.text",
-				"retention_duration",
-				"encryption_config",
-			},
+			BackupTypeSpec: &databasepb.BackupSchedule_FullBackupSpec{},
 		},
 	}
 
-	res, err := client.UpdateBackupSchedule(ctx, &req)
+	res, err := client.CreateBackupSchedule(ctx, &req)
 	if err != nil {
 		return err
 	}
 
-	fmt.Fprintf(w, "Updated backup schedule: %s", res)
+	fmt.Fprintf(w, "Created full backup schedule: %s", res)
 	return nil
 }
 
-// [END spanner_update_backup_schedule]
+// [END spanner_create_full_backup_schedule]

@@ -25,7 +25,9 @@ import (
 	"cloud.google.com/go/spanner/admin/database/apiv1/databasepb"
 )
 
-func deleteBackupSchedule(ctx context.Context, w io.Writer, dbName string, scheduleId string) error {
+func deleteBackupSchedule(w io.Writer, dbName string, scheduleId string) error {
+	ctx := context.Background()
+
 	client, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err

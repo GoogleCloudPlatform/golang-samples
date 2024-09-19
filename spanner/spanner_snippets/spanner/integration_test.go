@@ -47,7 +47,7 @@ type sampleFuncWithContext func(ctx context.Context, w io.Writer, dbName string)
 type instanceSampleFunc func(w io.Writer, projectID, instanceID string) error
 type backupSampleFunc func(ctx context.Context, w io.Writer, dbName, backupID string) error
 type backupSampleFuncWithoutContext func(w io.Writer, dbName, backupID string) error
-type backupScheduleSampleFunc func(ctx context.Context, w io.Writer, dbName string, scheduleId string) error
+type backupScheduleSampleFunc func(w io.Writer, dbName string, scheduleId string) error
 type createBackupSampleFunc func(ctx context.Context, w io.Writer, dbName, backupID string, versionTime time.Time) error
 type instancePartitionSampleFunc func(w io.Writer, projectID, instanceID, instancePartitionID string) error
 
@@ -499,30 +499,27 @@ func TestBackupScheduleSample(t *testing.T) {
 	// Set up the database for testing backup schedule operations.
 	mustRunSample(t, createDatabase, dbName, "failed to create a database")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
-	defer cancel()
-
 	var out string
-	out = runBackupScheduleSample(ctx, t, createFullBackupSchedule, dbName, "full-backup-schedule", "failed to create full backup schedule")
+	out = runBackupScheduleSample(t, createFullBackupSchedule, dbName, "full-backup-schedule", "failed to create full backup schedule")
 	assertContains(t, out, "Created full backup schedule")
 	assertContains(t, out, fmt.Sprintf("%s/backupSchedules/%s", dbName, "full-backup-schedule"))
 
-	out = runBackupScheduleSample(ctx, t, createIncrementalBackupSchedule, dbName, "incremental-backup-schedule", "failed to create incremental backup schedule")
+	out = runBackupScheduleSample(t, createIncrementalBackupSchedule, dbName, "incremental-backup-schedule", "failed to create incremental backup schedule")
 	assertContains(t, out, "Created incremental backup schedule")
 	assertContains(t, out, fmt.Sprintf("%s/backupSchedules/%s", dbName, "incremental-backup-schedule"))
 
-	out = runSampleWithContext(ctx, t, listBackupSchedules, dbName, "failed to list backup schedule")
+	out = runSample(t, listBackupSchedules, dbName, "failed to list backup schedule")
 	assertContains(t, out, fmt.Sprintf("%s/backupSchedules/%s", dbName, "full-backup-schedule"))
 	assertContains(t, out, fmt.Sprintf("%s/backupSchedules/%s", dbName, "incremental-backup-schedule"))
 
-	out = runBackupScheduleSample(ctx, t, getBackupSchedule, dbName, "full-backup-schedule", "failed to get backup schedule")
+	out = runBackupScheduleSample(t, getBackupSchedule, dbName, "full-backup-schedule", "failed to get backup schedule")
 	assertContains(t, out, fmt.Sprintf("%s/backupSchedules/%s", dbName, "full-backup-schedule"))
 
-	out = runBackupScheduleSample(ctx, t, updateBackupSchedule, dbName, "full-backup-schedule", "failed to update backup schedule")
+	out = runBackupScheduleSample(t, updateBackupSchedule, dbName, "full-backup-schedule", "failed to update backup schedule")
 	assertContains(t, out, "Updated backup schedule")
 	assertContains(t, out, fmt.Sprintf("%s/backupSchedules/%s", dbName, "full-backup-schedule"))
 
-	out = runBackupScheduleSample(ctx, t, deleteBackupSchedule, dbName, "full-backup-schedule", "failed to delete backup schedule")
+	out = runBackupScheduleSample(t, deleteBackupSchedule, dbName, "full-backup-schedule", "failed to delete backup schedule")
 	assertContains(t, out, "Deleted backup schedule")
 }
 
@@ -1322,9 +1319,9 @@ func runBackupSampleWithRetry(ctx context.Context, t *testing.T, f backupSampleF
 	return b.String()
 }
 
-func runBackupScheduleSample(ctx context.Context, t *testing.T, f backupScheduleSampleFunc, dbName string, scheduleId string, errMsg string) string {
+func runBackupScheduleSample(t *testing.T, f backupScheduleSampleFunc, dbName string, scheduleId string, errMsg string) string {
 	var b bytes.Buffer
-	if err := f(ctx, &b, dbName, scheduleId); err != nil {
+	if err := f(&b, dbName, scheduleId); err != nil {
 		t.Errorf("%s: %v", errMsg, err)
 	}
 	return b.String()

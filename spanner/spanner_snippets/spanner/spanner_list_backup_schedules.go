@@ -26,7 +26,9 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func listBackupSchedules(ctx context.Context, w io.Writer, dbName string) error {
+func listBackupSchedules(w io.Writer, dbName string) error {
+	ctx := context.Background()
+
 	client, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err
