@@ -5,16 +5,16 @@
 # https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners#codeowners-syntax
 
 
-# The go-samples-reviewers team is the default owner for anything not
-# explicitly taken by someone else. The cloud-samples-reviewer team is
-# a default samples owner.
+# The go-samples-reviewers team is the default owner for anything not explicitly taken by someone else.
+# The cloud-samples-reviewer team is a default samples owner.
+# The cloud-samples-infra team is a repository & testing owner.
 *                                     @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers
-/*                                    @GoogleCloudPlatform/go-samples-reviewers
-/.github/                             @GoogleCloudPlatform/go-samples-reviewers
-/docs/                                @GoogleCloudPlatform/go-samples-reviewers
+/*                                    @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra
+/.github/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra
+/docs/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra
 /getting-started/                     @GoogleCloudPlatform/go-samples-reviewers
-/internal/                            @GoogleCloudPlatform/go-samples-reviewers
-/testing/                             @GoogleCloudPlatform/go-samples-reviewers
+/internal/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra
+/testing/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra
 
 # CNDB, Storage, and Infra-DB
 /bigtable/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
