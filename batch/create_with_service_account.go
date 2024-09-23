@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START batch_create_custom_serive_account]
+// [START batch_create_custom_service_account]
 import (
 	"context"
 	"fmt"
@@ -107,4 +107,4 @@ func createJobWithSA(w io.Writer, projectID, region, jobName, serviceAccountEmai
 	return nil
 }
 
-// [END batch_create_custom_serive_account]
+// [END batch_create_custom_service_account]
