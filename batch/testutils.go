@@ -45,7 +45,11 @@ func jobSucceeded(projectID, region, jobName string) (bool, error) {
 			return true, nil
 		}
 		if response.GetStatus().State == batchpb.JobStatus_FAILED {
-			return false, nil
+			var events []string
+			for _, event := range response.GetStatus().GetStatusEvents() {
+				events = append(events, event.GetDescription())
+			}
+			return false, fmt.Errorf("events of the job: %v", events)
 		}
 		time.Sleep(2 * time.Second)
 	}
