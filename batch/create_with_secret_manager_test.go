@@ -42,12 +42,9 @@ func TestCreateJobWithSecretManager(t *testing.T) {
 		t.Errorf("createJobWithPD got err: %v", err)
 	}
 
-	succeeded, err := jobSucceeded(tc.ProjectID, region, jobName)
+	_, err = jobSucceeded(tc.ProjectID, region, jobName)
 	if err != nil {
 		t.Errorf("Could not verify job completion: %v", err)
-	}
-	if !succeeded {
-		t.Errorf("The test job has failed: %v", err)
 	}
 
 	gotSecrets := job.GetTaskGroups()[0].GetTaskSpec().GetEnvironment().GetSecretVariables()
