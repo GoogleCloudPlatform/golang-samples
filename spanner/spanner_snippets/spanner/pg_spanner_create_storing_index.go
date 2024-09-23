@@ -22,7 +22,7 @@ import (
 	"io"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
-	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
+	adminpb "cloud.google.com/go/spanner/admin/database/apiv1/databasepb"
 )
 
 // pgAddStoringIndex shows how to create 'STORING' indexes on a Spanner

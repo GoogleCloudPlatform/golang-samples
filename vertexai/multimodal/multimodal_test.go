@@ -16,6 +16,7 @@ package multimodal
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -25,13 +26,24 @@ func Test_generateMultimodalContent(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
-	prompt := "describe what is in this picture"
-	image := "gs://generativeai-downloads/images/scones.jpg"
 	location := "us-central1"
 	modelName := "gemini-1.5-flash-001"
 
-	err := generateMultimodalContent(buf, prompt, image, tc.ProjectID, location, modelName)
+	err := generateMultimodalContent(buf, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Errorf("Test_generateMultimodalContent: %v", err.Error())
+	}
+
+	generatedDescription := buf.String()
+	generatedDescriptionLowercase := strings.ToLower(generatedDescription)
+	// We expect these important topics in the video to be correctly covered
+	// in the generated description
+	for _, word := range []string{
+		"scones",
+		"blueberry",
+	} {
+		if !strings.Contains(generatedDescriptionLowercase, word) {
+			t.Errorf("expected the word %q in the description of the video", word)
+		}
 	}
 }

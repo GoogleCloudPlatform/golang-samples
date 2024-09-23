@@ -22,7 +22,7 @@ import (
 	"io"
 
 	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
-	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
+	"cloud.google.com/go/spanner/admin/instance/apiv1/instancepb"
 )
 
 // deleteInstanceConfig deletes the custom spanner instance config

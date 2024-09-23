@@ -109,3 +109,15 @@ func TestAuthSnippets(t *testing.T) {
 		t.Errorf("verifyGoogleIdToken got %q, want %q", got, want)
 	}
 }
+
+func TestAuthenticateWithAPIKey(t *testing.T) {
+	apiKey := os.Getenv("GOLANG_SAMPLES_API_KEY")
+	buf := &bytes.Buffer{}
+	if err := authenticateWithAPIKey(buf, apiKey); err != nil {
+		t.Fatalf("authenticateWithAPIKey got err: %v", err)
+	}
+	want := "Successfully authenticated using the API key."
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("authenticateWithAPIKey got %q, want %q", got, want)
+	}
+}

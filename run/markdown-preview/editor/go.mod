@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/run/markdown-preview/editor
 
-go 1.19
+go 1.21
 
 require (
 	golang.org/x/oauth2 v0.21.0

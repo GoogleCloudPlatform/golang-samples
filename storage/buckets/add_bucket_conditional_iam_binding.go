@@ -21,8 +21,8 @@ import (
 	"io"
 	"time"
 
+	"cloud.google.com/go/iam/apiv1/iampb"
 	"cloud.google.com/go/storage"
-	iampb "google.golang.org/genproto/googleapis/iam/v1"
 	"google.golang.org/genproto/googleapis/type/expr"
 )
 

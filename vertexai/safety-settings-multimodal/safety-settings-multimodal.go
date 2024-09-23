@@ -26,13 +26,10 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// generateMultimodalContent generates a response into w, based upon the prompt
-// and image provided.
-func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, modelName string) error {
-	// prompt := "describe this image."
+// generateMultimodalContent generates a response into w, based upon the  provided image.
+func generateMultimodalContent(w io.Writer, projectID, location, modelName string) error {
 	// location := "us-central1"
 	// model := "gemini-1.5-flash-001"
-	// image := "gs://cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
@@ -57,11 +54,11 @@ func generateMultimodalContent(w io.Writer, prompt, image, projectID, location, 
 
 	// Given an image file URL, prepare image file as genai.Part
 	img := genai.FileData{
-		MIMEType: mime.TypeByExtension(filepath.Ext(image)),
-		FileURI:  image,
+		MIMEType: mime.TypeByExtension(filepath.Ext("320px-Felis_catus-cat_on_snow.jpg")),
+		FileURI:  "gs://cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg",
 	}
 
-	res, err := model.GenerateContent(ctx, img, genai.Text(prompt))
+	res, err := model.GenerateContent(ctx, img, genai.Text("describe this image."))
 	if err != nil {
 		return fmt.Errorf("unable to generate contents: %w", err)
 	}
