@@ -104,7 +104,7 @@ func testSecret(tb testing.TB, projectID string) *secretmanagerpb.Secret {
 		},
 	})
 	if err != nil {
-		tb.Fatalf("testSecret: failed to create secret: %v", err)
+		tb.Fatalf("testSecret: failed to create secret:%v", err)
 	}
 
 	return secret
