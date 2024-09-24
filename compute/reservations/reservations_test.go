@@ -98,6 +98,26 @@ func deleteTemplate(project, templateName string) error {
 	return op.Wait(ctx)
 }
 
+func deleteInstance(project, zone, instance string) error {
+	ctx := context.Background()
+	client, err := compute.NewInstancesRESTClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	req := &computepb.DeleteInstanceRequest{
+		Instance: instance,
+		Project:  project,
+		Zone:     zone,
+	}
+	op, err := client.Delete(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	return op.Wait(ctx)
+}
+
 func TestReservations(t *testing.T) {
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
@@ -196,6 +216,68 @@ func TestReservations(t *testing.T) {
 		}
 		buf.Reset()
 
+		if err := deleteReservation(&buf, tc.ProjectID, zone, reservationName); err != nil {
+			t.Errorf("deleteReservation got err: %v", err)
+		}
+	})
+}
+
+func TestConsumeReservations(t *testing.T) {
+	var r *rand.Rand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+	tc := testutil.SystemTest(t)
+	zone := "europe-west2-b"
+	templateName := fmt.Sprintf("test-template-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+	instanceName := fmt.Sprintf("test-instance-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+
+	var buf bytes.Buffer
+
+	err := createTemplate(tc.ProjectID, templateName)
+	if err != nil {
+		t.Errorf("createTemplate got err: %v", err)
+	}
+	defer deleteTemplate(tc.ProjectID, templateName)
+
+	sourceTemplate, err := getTemplate(tc.ProjectID, templateName)
+	if err != nil {
+		t.Errorf("getTemplate got err: %v", err)
+	}
+
+	t.Run("Consume any reservation", func(t *testing.T) {
+		reservationName := fmt.Sprintf("test-reservation-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		if err = createConsumableReservation(&buf, tc.ProjectID, zone, reservationName, *sourceTemplate.SelfLink); err != nil {
+			t.Errorf("createConsumableReservation got err: %v", err)
+		}
+
+		ctx := context.Background()
+		reservationsClient, err := compute.NewReservationsRESTClient(ctx)
+		if err != nil {
+			t.Errorf("reservationsClient got err: %v", err)
+		}
+		req := &computepb.GetReservationRequest{
+			Project:     tc.ProjectID,
+			Zone:        zone,
+			Reservation: reservationName,
+		}
+		res, err := reservationsClient.Get(ctx, req)
+		inUseBefore := res.GetSpecificReservation().GetInUseCount()
+		if inUseBefore != 0 {
+			t.Error("reservation was consumed beforehand")
+		}
+
+		if err = consumeAnyReservation(&buf, tc.ProjectID, zone, instanceName); err != nil {
+			t.Errorf("consumeAnyReservation got err: %v", err)
+		}
+
+		res2, err := reservationsClient.Get(ctx, req)
+		inUseAfter := res2.GetSpecificReservation().GetInUseCount()
+		if inUseAfter != 1 {
+			t.Errorf("Reservation wasn't consumed. Expected 1, got %d", inUseAfter)
+		}
+
+		if err = deleteInstance(tc.ProjectID, zone, instanceName); err != nil {
+			t.Errorf("deleteInstance got err: %v", err)
+		}
 		if err := deleteReservation(&buf, tc.ProjectID, zone, reservationName); err != nil {
 			t.Errorf("deleteReservation got err: %v", err)
 		}
