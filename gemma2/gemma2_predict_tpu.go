@@ -26,11 +26,6 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-type PredictClientInterface interface {
-	Close() error
-	Predict(ctx context.Context, req *aiplatformpb.PredictRequest, opts ...gax.CallOption) (*aiplatformpb.PredictResponse, error)
-}
-
 // predictTPU demonstrates how to run interference on a Gemma2 model deployed to a Vertex AI endpoint with TPU accelerators.
 func predictTPU(w io.Writer, client PredictClientInterface, projectID, location, endpointID string) error {
 	ctx := context.Background()
@@ -53,6 +48,7 @@ func predictTPU(w io.Writer, client PredictClientInterface, projectID, location,
 	}
 
 	// Encapsulate the prompt in a correct format for TPUs.
+	// Example format: [{'prompt': 'Why is the sky blue?', 'temperature': 0.9}]
 	promptValue, err := structpb.NewValue(map[string]interface{}{
 		"prompt":     prompt,
 		"parameters": parameters,
@@ -80,3 +76,8 @@ func predictTPU(w io.Writer, client PredictClientInterface, projectID, location,
 }
 
 // [END generativeaionvertexai_gemma2_predict_tpu]
+
+type PredictClientInterface interface {
+	Close() error
+	Predict(ctx context.Context, req *aiplatformpb.PredictRequest, opts ...gax.CallOption) (*aiplatformpb.PredictResponse, error)
+}

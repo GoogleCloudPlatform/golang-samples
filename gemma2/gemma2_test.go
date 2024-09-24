@@ -22,7 +22,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestPredictGPU(t *testing.T) {
+func TestPredictGemma2(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	projectID := tc.ProjectID
@@ -32,9 +32,7 @@ func TestPredictGPU(t *testing.T) {
 	t.Run("GPU predict", func(t *testing.T) {
 		buf.Reset()
 		// Mock ID used to check if GPU was called
-		endpointID := "123456789"
-		location := "us-east4"
-		if err := predictGPU(&buf, client, projectID, location, endpointID); err != nil {
+		if err := predictGPU(&buf, client, projectID, GPUEndpointRegion, GPUEndpointID); err != nil {
 			t.Fatal(err)
 		}
 
@@ -46,9 +44,7 @@ func TestPredictGPU(t *testing.T) {
 	t.Run("TPU predict", func(t *testing.T) {
 		buf.Reset()
 		// Mock ID used to check if TPU was called
-		endpointID := "123456789"
-		location := "us-west1"
-		if err := predictTPU(&buf, client, projectID, location, endpointID); err != nil {
+		if err := predictTPU(&buf, client, projectID, TPUEndpointRegion, TPUEndpointID); err != nil {
 			t.Fatal(err)
 		}
 

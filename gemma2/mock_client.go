@@ -16,10 +16,19 @@ package snippets
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
 	gax "github.com/googleapis/gax-go/v2"
 	"google.golang.org/protobuf/types/known/structpb"
+)
+
+const (
+	GPUEndpointID     = "123456789"
+	GPUEndpointRegion = "us-east1"
+	TPUEndpointID     = "987654321"
+	TPUEndpointRegion = "us-west1"
 )
 
 type PredictionsClient struct{}
@@ -42,6 +51,32 @@ func (client PredictionsClient) Predict(ctx context.Context, req *aiplatformpb.P
 	`
 	response := &aiplatformpb.PredictResponse{
 		Predictions: []*structpb.Value{structpb.NewStringValue(mockedResponse)},
+	}
+
+	instance := req.Instances[0].GetStructValue()
+	if ok := strings.Contains(req.Endpoint, fmt.Sprintf("locations/%s/endpoints/%s", GPUEndpointRegion, GPUEndpointID)); ok {
+		if err := instance.Fields["inputs"].GetStringValue(); err == "" {
+			return nil, fmt.Errorf("invalid request")
+		}
+	} else if ok := strings.Contains(req.Endpoint, fmt.Sprintf("locations/%s/endpoints/%s", TPUEndpointRegion, TPUEndpointID)); ok {
+		if err := instance.Fields["prompt"].GetStringValue(); err == "" {
+			return nil, fmt.Errorf("invalid request")
+		}
+	}
+
+	params := req.Instances[0].GetStructValue().Fields["parameters"].GetStructValue()
+
+	if err := params.Fields["temperature"].GetNumberValue(); err == 0 {
+		return nil, fmt.Errorf("invalid request")
+	}
+	if err := params.Fields["maxOutputTokens"].GetNumberValue(); err == 0 {
+		return nil, fmt.Errorf("invalid request")
+	}
+	if err := params.Fields["topP"].GetNumberValue(); err == 0 {
+		return nil, fmt.Errorf("invalid request")
+	}
+	if err := params.Fields["topK"].GetNumberValue(); err == 0 {
+		return nil, fmt.Errorf("invalid request")
 	}
 	return response, nil
 }
