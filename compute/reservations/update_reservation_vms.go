@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START compute_reservation_get]
+// [START compute_reservation_vms_update]
 import (
 	"context"
 	"fmt"
@@ -22,35 +22,42 @@ import (
 
 	compute "cloud.google.com/go/compute/apiv1"
 	computepb "cloud.google.com/go/compute/apiv1/computepb"
+	"google.golang.org/protobuf/proto"
 )
 
-// Get certain reservation for given project and zone
-func getReservation(w io.Writer, projectID, zone, reservationName string) (*computepb.Reservation, error) {
+// Update reservation's number of allocated resources
+func updateReservationVMS(w io.Writer, projectID, zone, reservationName string, numberOfVMs int64) error {
 	// projectID := "your_project_id"
 	// zone := "us-west3-a"
 	// reservationName := "your_reservation_name"
+	// numberOfVMs := 5
 
 	ctx := context.Background()
 	reservationsClient, err := compute.NewReservationsRESTClient(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer reservationsClient.Close()
 
-	req := &computepb.GetReservationRequest{
+	req := &computepb.ResizeReservationRequest{
 		Project:     projectID,
 		Reservation: reservationName,
-		Zone:        zone,
+		ReservationsResizeRequestResource: &computepb.ReservationsResizeRequest{
+			SpecificSkuCount: proto.Int64(numberOfVMs),
+		},
+		Zone: zone,
 	}
 
-	reservation, err := reservationsClient.Get(ctx, req)
+	op, err := reservationsClient.Resize(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("unable to delete reservation: %w", err)
+		return fmt.Errorf("unable to create reservation: %w", err)
 	}
 
-	fmt.Fprintf(w, "Reservation: %s\n", reservation.GetName())
+	if err = op.Wait(ctx); err != nil {
+		return fmt.Errorf("unable to wait for the operation: %w", err)
+	}
 
-	return reservation, nil
+	return nil
 }
 
-// [END compute_reservation_get]
+// [END compute_reservation_vms_update]
