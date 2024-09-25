@@ -38,6 +38,7 @@ func createBaseReservation(w io.Writer, projectID, zone, reservationName string)
 	}
 	defer reservationsClient.Close()
 
+	// Creating reservation based on direct properties
 	req := &computepb.InsertReservationRequest{
 		Project: projectID,
 		ReservationResource: &computepb.Reservation{
@@ -45,20 +46,26 @@ func createBaseReservation(w io.Writer, projectID, zone, reservationName string)
 			Zone: proto.String(zone),
 			SpecificReservation: &computepb.AllocationSpecificSKUReservation{
 				Count: proto.Int64(2),
+				// Properties, which allows customising instances
 				InstanceProperties: &computepb.AllocationSpecificSKUAllocationReservedInstanceProperties{
+					// Attaching GPUs to the reserved VMs
+					// Read more: https://cloud.google.com/compute/docs/gpus#n1-gpus
 					GuestAccelerators: []*computepb.AcceleratorConfig{
 						{
 							AcceleratorCount: proto.Int32(1),
 							AcceleratorType:  proto.String("nvidia-tesla-t4"),
 						},
 					},
+					// Including local SSD disks
 					LocalSsds: []*computepb.AllocationSpecificSKUAllocationAllocatedInstancePropertiesReservedDisk{
 						{
 							DiskSizeGb: proto.Int64(375),
 							Interface:  proto.String("NVME"),
 						},
 					},
-					MachineType:    proto.String("n1-standard-2"),
+					MachineType: proto.String("n1-standard-2"),
+					// Specifying minimum CPU platform
+					// Read more: https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform
 					MinCpuPlatform: proto.String("Intel Skylake"),
 				},
 			},
