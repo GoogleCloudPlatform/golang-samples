@@ -103,22 +103,22 @@ func TestReservations(t *testing.T) {
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	zone := "europe-west2-b"
-	reservationName := fmt.Sprintf("test-reservation-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	templateName := fmt.Sprintf("test-template-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 
 	var buf bytes.Buffer
+	err := createTemplate(tc.ProjectID, templateName)
+	if err != nil {
+		t.Errorf("createTemplate got err: %v", err)
+	}
+	defer deleteTemplate(tc.ProjectID, templateName)
 
-	t.Run("Reservation CRUD", func(t *testing.T) {
-		err := createTemplate(tc.ProjectID, templateName)
-		if err != nil {
-			t.Errorf("createTemplate got err: %v", err)
-		}
-		defer deleteTemplate(tc.ProjectID, templateName)
+	sourceTemplate, err := getTemplate(tc.ProjectID, templateName)
+	if err != nil {
+		t.Errorf("getTemplate got err: %v", err)
+	}
 
-		sourceTemplate, err := getTemplate(tc.ProjectID, templateName)
-		if err != nil {
-			t.Errorf("getTemplate got err: %v", err)
-		}
+	t.Run("Test basics", func(t *testing.T) {
+		reservationName := fmt.Sprintf("test-reservation-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 
 		want := "Reservation created"
 		if err := createReservation(&buf, tc.ProjectID, zone, reservationName, *sourceTemplate.SelfLink); err != nil {
@@ -130,7 +130,7 @@ func TestReservations(t *testing.T) {
 		buf.Reset()
 
 		want = fmt.Sprintf("Reservation: %s", reservationName)
-		if err := getReservation(&buf, tc.ProjectID, zone, reservationName); err != nil {
+		if _, err := getReservation(&buf, tc.ProjectID, zone, reservationName); err != nil {
 			t.Errorf("getReservation got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, want) {
@@ -156,27 +156,61 @@ func TestReservations(t *testing.T) {
 		}
 	})
 
+	t.Run("Test update VMs", func(t *testing.T) {
+		reservationName := fmt.Sprintf("test-reservation-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+
+		if err := createReservation(&buf, tc.ProjectID, zone, reservationName, *sourceTemplate.SelfLink); err != nil {
+			t.Fatalf("createReservation got err: %v", err)
+		}
+		buf.Reset()
+
+		numberOfVMs := int64(5)
+		if err := updateReservationVMS(&buf, tc.ProjectID, zone, reservationName, numberOfVMs); err != nil {
+			t.Errorf("updateReservationVMS got err: %v", err)
+		}
+
+		reservation, err := getReservation(&buf, tc.ProjectID, zone, reservationName)
+		if err != nil {
+			t.Errorf("getReservation got err: %v", err)
+		}
+		count := reservation.GetSpecificReservation().GetCount()
+		if count != numberOfVMs {
+			t.Errorf("reservation wasn't updated got: %d want: %d", count, numberOfVMs)
+		}
+
+		if err := deleteReservation(&buf, tc.ProjectID, zone, reservationName); err != nil {
+			t.Errorf("deleteReservation got err: %v", err)
+		}
+	})
+
+	t.Run("Test without template", func(t *testing.T) {
+		reservationName := fmt.Sprintf("test-reservation-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+
+		want := "Reservation created"
+		if err := createBaseReservation(&buf, tc.ProjectID, zone, reservationName); err != nil {
+			t.Fatalf("createBaseReservation got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("createBaseReservation got %s, want %s", got, want)
+		}
+		buf.Reset()
+
+		if err := deleteReservation(&buf, tc.ProjectID, zone, reservationName); err != nil {
+			t.Errorf("deleteReservation got err: %v", err)
+		}
+	})
+
 	t.Run("Shared reservation CRUD", func(t *testing.T) {
+		reservationName := fmt.Sprintf("test-reservation-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 		baseProjectID := tc.ProjectID
 		// This test require 2 projects, therefore one of them is mocked.
 		// If you want to make a real test, please adjust projectID accordingly and uncomment reservationsClient creation.
 		// Make sure that base project has proper permissions to share reservations.
 		// See: https://cloud.google.com/compute/docs/instances/reservations-shared#shared_reservation_constraint
 		destinationProjectID := "some-project"
-		err := createTemplate(baseProjectID, templateName)
-		if err != nil {
-			t.Errorf("createTemplate got err: %v", err)
-		}
-		defer deleteTemplate(baseProjectID, templateName)
-
-		sourceTemplate, err := getTemplate(baseProjectID, templateName)
-		if err != nil {
-			t.Errorf("getTemplate got err: %v", err)
-		}
+		ctx := context.Background()
 
 		want := "Reservation created"
-
-		ctx := context.Background()
 
 		// Uncomment line below if you want to run the test without mocks
 		// reservationsClient, err := compute.NewReservationsRESTClient(ctx)
