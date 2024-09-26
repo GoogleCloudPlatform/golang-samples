@@ -282,4 +282,44 @@ func TestConsumeReservations(t *testing.T) {
 			t.Errorf("deleteReservation got err: %v", err)
 		}
 	})
+
+	t.Run("Consume specific reservation", func(t *testing.T) {
+		reservationName := fmt.Sprintf("test-reservation-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		if err = createSpecificConsumableReservation(&buf, tc.ProjectID, zone, reservationName, *sourceTemplate.SelfLink); err != nil {
+			t.Errorf("createConsumableReservation got err: %v", err)
+		}
+
+		ctx := context.Background()
+		reservationsClient, err := compute.NewReservationsRESTClient(ctx)
+		if err != nil {
+			t.Errorf("reservationsClient got err: %v", err)
+		}
+		req := &computepb.GetReservationRequest{
+			Project:     tc.ProjectID,
+			Zone:        zone,
+			Reservation: reservationName,
+		}
+		res, err := reservationsClient.Get(ctx, req)
+		inUseBefore := res.GetSpecificReservation().GetInUseCount()
+		if inUseBefore != 0 {
+			t.Error("reservation was consumed beforehand")
+		}
+
+		if err = consumeSpecificReservation(&buf, tc.ProjectID, zone, instanceName, reservationName); err != nil {
+			t.Errorf("consumeAnyReservation got err: %v", err)
+		}
+
+		res2, err := reservationsClient.Get(ctx, req)
+		inUseAfter := res2.GetSpecificReservation().GetInUseCount()
+		if inUseAfter != 1 {
+			t.Errorf("Reservation wasn't consumed. Expected 1, got %d", inUseAfter)
+		}
+
+		if err = deleteInstance(tc.ProjectID, zone, instanceName); err != nil {
+			t.Errorf("deleteInstance got err: %v", err)
+		}
+		if err := deleteReservation(&buf, tc.ProjectID, zone, reservationName); err != nil {
+			t.Errorf("deleteReservation got err: %v", err)
+		}
+	})
 }
