@@ -94,7 +94,7 @@ func (p *Project) Expired() bool {
 	return time.Now().After(p.LeaseExpiry)
 }
 
-func init() {
+func startup() {
 	// set version info from embedded details.
 	if bi, ok := debug.ReadBuildInfo(); ok {
 		packagename := bi.Main.Path
@@ -112,6 +112,7 @@ func init() {
 }
 
 func main() {
+	startup()
 	flag.Parse()
 	if err := submain(); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
