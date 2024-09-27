@@ -17,7 +17,7 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -86,7 +86,7 @@ func TestHelloPubSub(t *testing.T) {
 			t.Errorf("HelloPubSub(%q) invalid input, status code (%q)", test.data, code)
 		}
 
-		out, err := ioutil.ReadAll(r)
+		out, err := io.ReadAll(r)
 		if err != nil {
 			t.Fatalf("ReadAll: %v", err)
 		}
