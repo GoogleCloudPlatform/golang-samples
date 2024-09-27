@@ -86,8 +86,7 @@ func TestHelloPubSub(t *testing.T) {
 			t.Errorf("HelloPubSub(%q) invalid input, status code (%q)", test.data, code)
 		}
 
-		out, err := io.ReadAll(r.Body)
-		defer r.Body.Close()
+		out, err := io.ReadAll(r)
 		if err != nil {
 			t.Fatalf("ReadAll: %v", err)
 		}
