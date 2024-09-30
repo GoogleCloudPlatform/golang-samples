@@ -7,7 +7,7 @@ require (
 	cloud.google.com/go/pubsub v1.40.0
 	cloud.google.com/go/storage v1.43.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	github.com/aws/aws-sdk-go v1.55.1
+	github.com/aws/aws-sdk-go v1.55.5
 	github.com/googleapis/gax-go/v2 v2.13.0
 	google.golang.org/api v0.189.0
 	google.golang.org/genproto v0.0.0-20240723171418-e6d459c13d2a
