@@ -61,8 +61,8 @@ func createJobWithPD(w io.Writer, projectID, jobName, pdName string) error {
 
 	taskSpec := &batchpb.TaskSpec{
 		ComputeResource: &batchpb.ComputeResource{
-			// CpuMilli is milliseconds per cpu-second. This means the task requires 2 whole CPUs.
-			CpuMilli:  2000,
+			// CpuMilli is milliseconds per cpu-second. This means the task requires 1 CPU.
+			CpuMilli:  1000,
 			MemoryMib: 16,
 		},
 		MaxRunDuration: &durationpb.Duration{
