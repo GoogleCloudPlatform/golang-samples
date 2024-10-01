@@ -34,6 +34,7 @@ func TestCreateInstanceTemplatesSnippets(t *testing.T) {
 	var seededRand *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
+	region := "eu-central2"
 	zone := "europe-central2-b"
 	instanceName := "test-instance-" + fmt.Sprint(seededRand.Int())
 	templateName1 := "test-template-" + fmt.Sprint(seededRand.Int())
@@ -208,36 +209,50 @@ func TestCreateInstanceTemplatesSnippets(t *testing.T) {
 		t.Errorf("unable to wait for the operation: %v", err)
 	}
 
-	t.Run("regional template", func(t *testing.T) {
+	t.Run("create regional template", func(t *testing.T) {
 		buf.Reset()
 		templateName := fmt.Sprintf("test-template-%d", seededRand.Int())
-		region := "eu-central1"
 		err := createRegionalTemplate(buf, tc.ProjectID, templateName, region)
 		if err != nil {
 			t.Errorf("createRegionalTemplate failed: %v", err)
 		}
+		defer deleteRegionalTemplate(buf, tc.ProjectID, templateName, region)
 
-		expectedResult := "Instance template created"
+		expectedResult = "Instance template created"
 		if got := buf.String(); !strings.Contains(got, expectedResult) {
 			t.Errorf("createRegionalTemplate got %q, want %q", got, expectedResult)
 		}
+	})
+
+	t.Run("get regional template", func(t *testing.T) {
+		buf.Reset()
+		templateName := fmt.Sprintf("test-template-%d", seededRand.Int())
+		err := createRegionalTemplate(buf, tc.ProjectID, templateName, region)
+		if err != nil {
+			t.Errorf("createRegionalTemplate failed: %v", err)
+		}
+		defer deleteRegionalTemplate(buf, tc.ProjectID, templateName, region)
 
 		template, err := getRegionalTemplate(tc.ProjectID, templateName, region)
 		if err != nil {
 			t.Errorf("getRegionalTemplate got err: %v", err)
 		}
-
 		got := template.GetName()
 		if got != templateName {
 			t.Errorf("template.GetName() got %q, want %q", got, templateName)
 		}
 		buf.Reset()
+	})
 
-		err = deleteRegionalTemplate(buf, tc.ProjectID, templateName, region)
+	t.Run("delete regional template", func(t *testing.T) {
+		buf.Reset()
+		templateName := fmt.Sprintf("test-template-%d", seededRand.Int())
+		err := createRegionalTemplate(buf, tc.ProjectID, templateName, region)
 		if err != nil {
-			t.Errorf("deleteRegionalTemplate failed: %v", err)
+			t.Errorf("createRegionalTemplate failed: %v", err)
 		}
 
+		err = deleteRegionalTemplate(buf, tc.ProjectID, templateName, region)
 		expectedResult = "Instance template deleted"
 		if got := buf.String(); !strings.Contains(got, expectedResult) {
 			t.Errorf("deleteRegionalTemplate got %q, want %q", got, expectedResult)
