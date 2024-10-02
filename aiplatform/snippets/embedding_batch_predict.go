@@ -25,6 +25,7 @@ import (
 	"google.golang.org/api/option"
 )
 
+// embedBatchPredict generates embeddings from text using batch processing.
 func embedBatchPredict(w io.Writer, projectID, location, name, outputURI string, inputURIs []string) error {
 	// inputURI := []string{"gs://cloud-samples-data/generative-ai/embeddings/embeddings_input.jsonl"}
 	// outputURI: existing template path. Following formats are allowed:
