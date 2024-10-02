@@ -5,6 +5,7 @@ go 1.21
 require (
 	cloud.google.com/go/vertexai v0.12.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	google.golang.org/protobuf v1.34.1
 )
 
 require (
@@ -43,5 +44,4 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20240604185151-ef581f913117 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240604185151-ef581f913117 // indirect
 	google.golang.org/grpc v1.64.1 // indirect
-	google.golang.org/protobuf v1.34.1 // indirect
 )
