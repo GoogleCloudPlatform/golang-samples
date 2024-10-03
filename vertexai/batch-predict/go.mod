@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/vertexai/batch-predict
 
-go 1.22.3
+go 1.21
 
 require (
 	cloud.google.com/go/aiplatform v1.68.0
