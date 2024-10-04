@@ -23,9 +23,9 @@ import (
 )
 
 // MarkDone marks the task done with the given ID.
-func MarkDone(projectID string, taskID int64) error {
+func MarkDone(projectID string, databaseID string, taskID int64) error {
 	ctx := context.Background()
-	client, err := datastore.NewClient(ctx, projectID)
+	client, err := datastore.NewClientWithDatabase(ctx, projectID, databaseID)
 	if err != nil {
 		log.Fatalf("Could not create datastore client: %v", err)
 	}

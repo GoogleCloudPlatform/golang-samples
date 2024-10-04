@@ -23,9 +23,10 @@ import (
 )
 
 // ListTasks returns all the tasks in ascending order of creation time.
-func ListTasks(projectID string) ([]*Task, error) {
+func ListTasks(projectID string, databaseID string) ([]*Task, error) {
 	ctx := context.Background()
-	client, err := datastore.NewClient(ctx, projectID)
+	//client, err := datastore.NewClient(ctx, projectID)
+	client, err := datastore.NewClientWithDatabase(ctx, projectID, databaseID)
 	if err != nil {
 		log.Fatalf("Could not create datastore client: %v", err)
 	}

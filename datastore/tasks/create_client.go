@@ -22,9 +22,9 @@ import (
 	"cloud.google.com/go/datastore"
 )
 
-func createClient(projectID string) (*datastore.Client, error) {
+func createClient(projectID string, databaseID string) (*datastore.Client, error) {
 	ctx := context.Background()
-	client, err := datastore.NewClient(ctx, projectID)
+	client, err := datastore.NewClientWithDatabase(ctx, projectID, databaseID)
 	if err != nil {
 		log.Fatalf("Could not create datastore client: %v", err)
 	}

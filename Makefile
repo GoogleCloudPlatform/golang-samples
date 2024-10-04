@@ -23,6 +23,8 @@ test: check-env
 	go install gotest.tools/gotestsum@latest
 	cd ${dir}
 	gotestsum --rerun-fails=3 --packages="./..." --junitfile sponge_log.xml -f standard-verbose -- --timeout 60m
+	# FIX: when the above command failed, run gotestsum without installing
+	# go run gotest.tools/gotestsum@latest --rerun-fails=3 --packages="./..." --junitfile sponge_log.xml -f standard-verbose -- --timeout 60m
 
 lint:
 	cd ${dir}
