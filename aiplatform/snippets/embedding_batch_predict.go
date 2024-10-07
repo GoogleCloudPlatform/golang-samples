@@ -36,35 +36,39 @@ func embedBatchPredict(w io.Writer, projectID, location, name, outputURI string,
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	// Pretrained model
 	model := "publishers/google/models/textembedding-gecko"
+	inputConfig := &aiplatformpb.BatchPredictionJob_InputConfig{
+		Source: &aiplatformpb.BatchPredictionJob_InputConfig_GcsSource{
+			GcsSource: &aiplatformpb.GcsSource{
+				Uris: inputURIs,
+			},
+		},
+		// List of supported formarts: https://cloud.google.com/vertex-ai/docs/reference/rpc/google.cloud.aiplatform.v1#model
+		InstancesFormat: "jsonl",
+	}
+
+	outputConfig := &aiplatformpb.BatchPredictionJob_OutputConfig{
+		Destination: &aiplatformpb.BatchPredictionJob_OutputConfig_GcsDestination{
+			GcsDestination: &aiplatformpb.GcsDestination{
+				OutputUriPrefix: outputURI,
+			},
+		},
+		// List of supported formarts: https://cloud.google.com/vertex-ai/docs/reference/rpc/google.cloud.aiplatform.v1#model
+		PredictionsFormat: "jsonl",
+	}
 
 	client, err := aiplatform.NewJobClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	req := &aiplatformpb.CreateBatchPredictionJobRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 		BatchPredictionJob: &aiplatformpb.BatchPredictionJob{
-			DisplayName: name,
-			Model:       model,
-			InputConfig: &aiplatformpb.BatchPredictionJob_InputConfig{
-				Source: &aiplatformpb.BatchPredictionJob_InputConfig_GcsSource{
-					GcsSource: &aiplatformpb.GcsSource{
-						Uris: inputURIs,
-					},
-				},
-				// List of supported formarts: https://cloud.google.com/vertex-ai/docs/reference/rpc/google.cloud.aiplatform.v1#model
-				InstancesFormat: "jsonl",
-			},
-			OutputConfig: &aiplatformpb.BatchPredictionJob_OutputConfig{
-				Destination: &aiplatformpb.BatchPredictionJob_OutputConfig_GcsDestination{
-					GcsDestination: &aiplatformpb.GcsDestination{
-						OutputUriPrefix: outputURI,
-					},
-				},
-				// List of supported formarts: https://cloud.google.com/vertex-ai/docs/reference/rpc/google.cloud.aiplatform.v1#model
-				PredictionsFormat: "jsonl",
-			},
+			DisplayName:  name,
+			Model:        model,
+			InputConfig:  inputConfig,
+			OutputConfig: outputConfig,
 		},
 	}
 
