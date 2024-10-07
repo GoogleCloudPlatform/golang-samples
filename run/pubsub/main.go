@@ -19,7 +19,7 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -58,9 +58,10 @@ type PubSubMessage struct {
 // HelloPubSub receives and processes a Pub/Sub push message.
 func HelloPubSub(w http.ResponseWriter, r *http.Request) {
 	var m PubSubMessage
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
+	defer r.Body.Close()
 	if err != nil {
-		log.Printf("ioutil.ReadAll: %v", err)
+		log.Printf("io.ReadAll: %v", err)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}

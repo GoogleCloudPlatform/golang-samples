@@ -103,7 +103,6 @@ func TestReservations(t *testing.T) {
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	zone := "europe-west2-b"
-	reservationName := fmt.Sprintf("test-reservation-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	templateName := fmt.Sprintf("test-template-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 
 	var buf bytes.Buffer
@@ -119,38 +118,86 @@ func TestReservations(t *testing.T) {
 		t.Errorf("getTemplate got err: %v", err)
 	}
 
-	want := "Reservation created"
-	if err := createReservation(&buf, tc.ProjectID, zone, reservationName, *sourceTemplate.SelfLink); err != nil {
-		t.Errorf("createReservation got err: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("createReservation got %s, want %s", got, want)
-	}
-	buf.Reset()
+	t.Run("Test basics", func(t *testing.T) {
+		reservationName := fmt.Sprintf("test-reservation-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 
-	want = fmt.Sprintf("Reservation: %s", reservationName)
-	if err := getReservation(&buf, tc.ProjectID, zone, reservationName); err != nil {
-		t.Errorf("getReservation got err: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("getReservation got %s, want %s", got, want)
-	}
-	buf.Reset()
+		want := "Reservation created"
+		if err := createReservation(&buf, tc.ProjectID, zone, reservationName, *sourceTemplate.SelfLink); err != nil {
+			t.Errorf("createReservation got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("createReservation got %s, want %s", got, want)
+		}
+		buf.Reset()
 
-	want = fmt.Sprintf("- %s %d", reservationName, 2)
-	if err := listReservations(&buf, tc.ProjectID, zone); err != nil {
-		t.Errorf("listReservations got err: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("listReservations got %s, want %s", got, want)
-	}
-	buf.Reset()
+		want = fmt.Sprintf("Reservation: %s", reservationName)
+		if _, err := getReservation(&buf, tc.ProjectID, zone, reservationName); err != nil {
+			t.Errorf("getReservation got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("getReservation got %s, want %s", got, want)
+		}
+		buf.Reset()
 
-	want = "Reservation deleted"
-	if err := deleteReservation(&buf, tc.ProjectID, zone, reservationName); err != nil {
-		t.Errorf("deleteReservation got err: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("deleteReservation got %s, want %s", got, want)
-	}
+		want = fmt.Sprintf("- %s %d", reservationName, 2)
+		if err := listReservations(&buf, tc.ProjectID, zone); err != nil {
+			t.Errorf("listReservations got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("listReservations got %s, want %s", got, want)
+		}
+		buf.Reset()
+
+		want = "Reservation deleted"
+		if err := deleteReservation(&buf, tc.ProjectID, zone, reservationName); err != nil {
+			t.Errorf("deleteReservation got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("deleteReservation got %s, want %s", got, want)
+		}
+	})
+
+	t.Run("Test update VMs", func(t *testing.T) {
+		reservationName := fmt.Sprintf("test-reservation-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+
+		if err := createReservation(&buf, tc.ProjectID, zone, reservationName, *sourceTemplate.SelfLink); err != nil {
+			t.Fatalf("createReservation got err: %v", err)
+		}
+		buf.Reset()
+
+		numberOfVMs := int64(5)
+		if err := updateReservationVMS(&buf, tc.ProjectID, zone, reservationName, numberOfVMs); err != nil {
+			t.Errorf("updateReservationVMS got err: %v", err)
+		}
+
+		reservation, err := getReservation(&buf, tc.ProjectID, zone, reservationName)
+		if err != nil {
+			t.Errorf("getReservation got err: %v", err)
+		}
+		count := reservation.GetSpecificReservation().GetCount()
+		if count != numberOfVMs {
+			t.Errorf("reservation wasn't updated got: %d want: %d", count, numberOfVMs)
+		}
+
+		if err := deleteReservation(&buf, tc.ProjectID, zone, reservationName); err != nil {
+			t.Errorf("deleteReservation got err: %v", err)
+		}
+	})
+
+	t.Run("Test without template", func(t *testing.T) {
+		reservationName := fmt.Sprintf("test-reservation-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+
+		want := "Reservation created"
+		if err := createBaseReservation(&buf, tc.ProjectID, zone, reservationName); err != nil {
+			t.Fatalf("createBaseReservation got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("createBaseReservation got %s, want %s", got, want)
+		}
+		buf.Reset()
+
+		if err := deleteReservation(&buf, tc.ProjectID, zone, reservationName); err != nil {
+			t.Errorf("deleteReservation got err: %v", err)
+		}
+	})
 }
