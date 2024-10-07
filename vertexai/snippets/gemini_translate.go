@@ -36,6 +36,8 @@ func geminiTranslate(w io.Writer, project, location string) error {
 	if err != nil {
 		return fmt.Errorf("error creating client: %w", err)
 	}
+	defer client.Close()
+
 	model := client.GenerativeModel(modelName)
 
 	model.GenerationConfig = genai.GenerationConfig{
