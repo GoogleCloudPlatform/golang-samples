@@ -22,8 +22,7 @@ may be made at any time without warning.
 
 ## Contributing changes
 
-Entirely new samples are not accepted. Bug fixes are welcome, either as pull
-requests or as GitHub issues.
+Interested in contributing a new sample? Please open an issue describing the intended sample. Additionally, bug fixes are welcome, either as pull requests or as GitHub issues.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute.
 
