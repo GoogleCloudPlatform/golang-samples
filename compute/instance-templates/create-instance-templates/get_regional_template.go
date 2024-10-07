@@ -14,43 +14,35 @@
 
 package snippets
 
-// [START compute_reservation_get]
+// [START compute_regional_template_get]
 import (
 	"context"
 	"fmt"
-	"io"
 
 	compute "cloud.google.com/go/compute/apiv1"
 	computepb "cloud.google.com/go/compute/apiv1/computepb"
 )
 
-// Get certain reservation for given project and zone
-func getReservation(w io.Writer, projectID, zone, reservationName string) (*computepb.Reservation, error) {
+// getRegionalTemplate retrieves a regional instance template
+func getRegionalTemplate(projectID, templateName, region string) (*computepb.InstanceTemplate, error) {
 	// projectID := "your_project_id"
-	// zone := "us-west3-a"
-	// reservationName := "your_reservation_name"
+	// templateName := "your_template_name"
+	// region := "us-east1"
 
 	ctx := context.Background()
-	reservationsClient, err := compute.NewReservationsRESTClient(ctx)
+	instanceTemplatesClient, err := compute.NewRegionInstanceTemplatesRESTClient(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("NewRegionInstanceTemplatesRESTClient: %w", err)
 	}
-	defer reservationsClient.Close()
+	defer instanceTemplatesClient.Close()
 
-	req := &computepb.GetReservationRequest{
-		Project:     projectID,
-		Reservation: reservationName,
-		Zone:        zone,
-	}
-
-	reservation, err := reservationsClient.Get(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("unable to delete reservation: %w", err)
+	req := &computepb.GetRegionInstanceTemplateRequest{
+		Project:          projectID,
+		InstanceTemplate: templateName,
+		Region:           region,
 	}
 
-	fmt.Fprintf(w, "Reservation: %s\n", reservation.GetName())
-
-	return reservation, nil
+	return instanceTemplatesClient.Get(ctx, req)
 }
 
-// [END compute_reservation_get]
+// [END compute_regional_template_get]
