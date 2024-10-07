@@ -16,10 +16,13 @@ package snippets
 
 import (
 	"bytes"
+	"context"
 	"strings"
 	"testing"
 
+	"cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/googleapis/gax-go/v2"
 )
 
 func TestPredictGemma2(t *testing.T) {
@@ -52,4 +55,9 @@ func TestPredictGemma2(t *testing.T) {
 			t.Error("generated text content not found in response")
 		}
 	})
+}
+
+type PredictClientInterface interface {
+	Close() error
+	Predict(ctx context.Context, req *aiplatformpb.PredictRequest, opts ...gax.CallOption) (*aiplatformpb.PredictResponse, error)
 }

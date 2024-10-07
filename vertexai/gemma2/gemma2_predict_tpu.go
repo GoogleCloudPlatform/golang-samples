@@ -21,16 +21,15 @@ import (
 	"io"
 
 	"cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
-	"github.com/googleapis/gax-go/v2"
 
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
 // predictTPU demonstrates how to run interference on a Gemma2 model deployed to a Vertex AI endpoint with TPU accelerators.
-func predictTPU(w io.Writer, client PredictClientInterface, projectID, location, endpointID string) error {
+func predictTPU(w io.Writer, client PredictionsClient, projectID, location, endpointID string) error {
 	ctx := context.Background()
 
-	// Note: client can be initialised in the following way:
+	// Note: client can be initialized in the following way:
 	// apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	// client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
 	// if err != nil {
@@ -76,8 +75,3 @@ func predictTPU(w io.Writer, client PredictClientInterface, projectID, location,
 }
 
 // [END generativeaionvertexai_gemma2_predict_tpu]
-
-type PredictClientInterface interface {
-	Close() error
-	Predict(ctx context.Context, req *aiplatformpb.PredictRequest, opts ...gax.CallOption) (*aiplatformpb.PredictResponse, error)
-}

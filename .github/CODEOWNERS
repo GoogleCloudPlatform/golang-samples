@@ -30,7 +30,6 @@
 /auth/                                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/dee-infra @GoogleCloudPlatform/googleapis-auth
 /batch/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/dee-infra
 /compute/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/dee-infra
-/gemma2                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/dee-infra
 /iam/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/dee-infra
 /iap/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/dee-infra
 /kms/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/dee-infra
