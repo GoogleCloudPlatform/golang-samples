@@ -5,7 +5,7 @@ go 1.21
 require (
 	cloud.google.com/go/bigquery v1.62.0
 	cloud.google.com/go/iam v1.2.1
-	cloud.google.com/go/pubsub v1.43.1-0.20241008174302-1a116759ce0d
+	cloud.google.com/go/pubsub v1.44.0
 	cloud.google.com/go/storage v1.43.0
 	cloud.google.com/go/trace v1.11.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240820230436-761d0ae7aeff
