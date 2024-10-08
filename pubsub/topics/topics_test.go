@@ -297,7 +297,7 @@ func TestDelete(t *testing.T) {
 	}
 }
 
-func TestTopicKinesis(t *testing.T) {
+func TestTopicKinesisIngestion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
 
@@ -313,6 +313,19 @@ func TestTopicKinesis(t *testing.T) {
 	// test updateTopicType
 	if err := updateTopicType(buf, tc.ProjectID, topicID); err != nil {
 		t.Fatalf("failed to update a topic type to kinesis ingestion: %v", err)
+	}
+}
+
+func TestTopicCloudStorageIngestion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	srv := pstest.NewServer()
+	t.Setenv("PUBSUB_EMULATOR_HOST", srv.Addr)
+
+	// Test creating a cloud storage ingestion topic with Text input format.
+	if err := createTopicWithCloudStorageIngestion(buf, tc.ProjectID, topicID, "fake-bucket", "**.txt", "2006-01-02T15:04:05Z"); err != nil {
+		t.Fatalf("failed to create a topic with kinesis ingestion: %v", err)
 	}
 }
 
