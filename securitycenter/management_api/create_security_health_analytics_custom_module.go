@@ -42,32 +42,35 @@ func CreateSecurityHealthAnalyticsCustomModule(w io.Writer, parent string, custo
 
 	// Define the custom module configuration
 	customModule := &securitycenterpb.SecurityHealthAnalyticsCustomModule{
-		Name: fmt.Sprintf("%s/securityHealthAnalyticsCustomModules/%s", parent, customModuleID),
-		DisplayName: "Custom Module for testing",
-		EnablementState: securitycenterpb.SecurityHealthAnalyticsCustomModule_ENABLED,
 		CustomConfig: &securitycenterpb.CustomConfig{
-			Predicate: &exprpb.Expr{
-				Expression:  "resource.type == \"gce_instance\" && severity == \"HIGH\"",
-				Title:       "GCE Instance High Severity",
-				Description: "Custom module to detect high severity issues on GCE instances.",
-			},
-			Description: "A custom module for detecting high severity issues on GCE instances.",
-			Severity:    securitycenterpb.CustomConfig_CRITICAL,
-			ResourceSelector: &securitycenterpb.CustomConfig_ResourceSelector{
-				ResourceTypes: []string{"CryptoKey"},
-			},
-			Recommendation: "Ensure proper security configurations on GCE instances.",
 			CustomOutput: &securitycenterpb.CustomConfig_CustomOutputSpec{
 				Properties: []*securitycenterpb.CustomConfig_CustomOutputSpec_Property{
 					{
 						Name: "example_property",
 						ValueExpression: &exprpb.Expr{
-							Expression: "resource.name",
+							Description: "The name of the instance",
+							Expression:  "resource.name",
+							Location:    "global",
+							Title:       "Instance Name",
 						},
 					},
 				},
 			},
+			Description: "A custom module for detecting high severity issues on GCE instances.",
+			Predicate: &exprpb.Expr{
+				Expression:  "resource.type == \"gce_instance\" && severity == \"HIGH\"",
+				Title:       "GCE Instance High Severity",
+				Description: "Custom module to detect high severity issues on GCE instances.",
+			},
+			Recommendation: "Ensure proper security configurations on GCE instances.",
+			ResourceSelector: &securitycenterpb.CustomConfig_ResourceSelector{
+				ResourceTypes: []string{"cloudkms.googleapis.com/CryptoKey"},
+			},
+			Severity:    securitycenterpb.CustomConfig_CRITICAL,
 		},
+		DisplayName: "custom_module_for_testing",
+		EnablementState: securitycenterpb.SecurityHealthAnalyticsCustomModule_ENABLED,
+		Name: fmt.Sprintf("%s/securityHealthAnalyticsCustomModules/%s", parent, customModuleID),
 	}
 
 	req := &securitycenterpb.CreateSecurityHealthAnalyticsCustomModuleRequest{
