@@ -40,6 +40,7 @@ func vectorSearchBasic(w io.Writer, projectID string) error {
 	vectorQuery := collection.FindNearest("embedding_field",
 		[]float32{3.0, 1.0, 2.0},
 		5,
+		// More info: https://firebase.google.com/docs/firestore/vector-search#vector_distances
 		firestore.DistanceMeasureEuclidean,
 		nil)
 
