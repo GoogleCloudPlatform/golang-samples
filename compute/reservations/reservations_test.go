@@ -118,6 +118,43 @@ func deleteInstance(project, zone, instance string) error {
 	return op.Wait(ctx)
 }
 
+func createSpecificConsumableReservation(projectID, zone, reservationName, sourceTemplate string) error {
+	ctx := context.Background()
+	reservationsClient, err := compute.NewReservationsRESTClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer reservationsClient.Close()
+
+	req := &computepb.InsertReservationRequest{
+		Project: projectID,
+		ReservationResource: &computepb.Reservation{
+			Name: proto.String(reservationName),
+			Zone: proto.String(zone),
+			SpecificReservation: &computepb.AllocationSpecificSKUReservation{
+				Count: proto.Int64(2),
+				InstanceProperties: &computepb.AllocationSpecificSKUAllocationReservedInstanceProperties{
+					MachineType:    proto.String("n2-standard-32"),
+					MinCpuPlatform: proto.String("Intel Cascade Lake"),
+				},
+			},
+			SpecificReservationRequired: proto.Bool(true),
+		},
+		Zone: zone,
+	}
+
+	op, err := reservationsClient.Insert(ctx, req)
+	if err != nil {
+		return fmt.Errorf("unable to create reservation: %w", err)
+	}
+
+	if err = op.Wait(ctx); err != nil {
+		return fmt.Errorf("unable to wait for the operation: %w", err)
+	}
+
+	return nil
+}
+
 func TestReservations(t *testing.T) {
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
@@ -245,7 +282,7 @@ func TestConsumeReservations(t *testing.T) {
 
 	t.Run("Consume any reservation", func(t *testing.T) {
 		reservationName := fmt.Sprintf("test-reservation-%v-%v", time.Now().Format("01-02-2006"), r.Int())
-		if err = createConsumableReservation(&buf, tc.ProjectID, zone, reservationName, *sourceTemplate.SelfLink); err != nil {
+		if err = createReservation(&buf, tc.ProjectID, zone, reservationName, *sourceTemplate.SelfLink); err != nil {
 			t.Errorf("createConsumableReservation got err: %v", err)
 		}
 
@@ -254,12 +291,18 @@ func TestConsumeReservations(t *testing.T) {
 		if err != nil {
 			t.Errorf("reservationsClient got err: %v", err)
 		}
+		defer reservationsClient.Close()
+
 		req := &computepb.GetReservationRequest{
 			Project:     tc.ProjectID,
 			Zone:        zone,
 			Reservation: reservationName,
 		}
 		res, err := reservationsClient.Get(ctx, req)
+		if err != nil {
+			t.Errorf("get reservation got err: %v", err)
+		}
+
 		inUseBefore := res.GetSpecificReservation().GetInUseCount()
 		if inUseBefore != 0 {
 			t.Error("reservation was consumed beforehand")
@@ -270,6 +313,10 @@ func TestConsumeReservations(t *testing.T) {
 		}
 
 		res2, err := reservationsClient.Get(ctx, req)
+		if err != nil {
+			t.Errorf("get reservation got err: %v", err)
+		}
+
 		inUseAfter := res2.GetSpecificReservation().GetInUseCount()
 		if inUseAfter != 1 {
 			t.Errorf("Reservation wasn't consumed. Expected 1, got %d", inUseAfter)
@@ -285,7 +332,7 @@ func TestConsumeReservations(t *testing.T) {
 
 	t.Run("Consume specific reservation", func(t *testing.T) {
 		reservationName := fmt.Sprintf("test-reservation-%v-%v", time.Now().Format("01-02-2006"), r.Int())
-		if err = createSpecificConsumableReservation(&buf, tc.ProjectID, zone, reservationName, *sourceTemplate.SelfLink); err != nil {
+		if err = createSpecificConsumableReservation(tc.ProjectID, zone, reservationName, *sourceTemplate.SelfLink); err != nil {
 			t.Errorf("createConsumableReservation got err: %v", err)
 		}
 
@@ -294,12 +341,18 @@ func TestConsumeReservations(t *testing.T) {
 		if err != nil {
 			t.Errorf("reservationsClient got err: %v", err)
 		}
+		defer reservationsClient.Close()
+
 		req := &computepb.GetReservationRequest{
 			Project:     tc.ProjectID,
 			Zone:        zone,
 			Reservation: reservationName,
 		}
 		res, err := reservationsClient.Get(ctx, req)
+		if err != nil {
+			t.Errorf("get reservation got err: %v", err)
+		}
+
 		inUseBefore := res.GetSpecificReservation().GetInUseCount()
 		if inUseBefore != 0 {
 			t.Error("reservation was consumed beforehand")
@@ -310,6 +363,10 @@ func TestConsumeReservations(t *testing.T) {
 		}
 
 		res2, err := reservationsClient.Get(ctx, req)
+		if err != nil {
+			t.Errorf("get reservation got err: %v", err)
+		}
+
 		inUseAfter := res2.GetSpecificReservation().GetInUseCount()
 		if inUseAfter != 1 {
 			t.Errorf("Reservation wasn't consumed. Expected 1, got %d", inUseAfter)

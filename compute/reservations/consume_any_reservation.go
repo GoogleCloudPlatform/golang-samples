@@ -25,54 +25,12 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// Creates the reservation from given template in particular zone
-func createConsumableReservation(w io.Writer, projectID, zone, reservationName, sourceTemplate string) error {
+// consumeAnyReservation creates instance, consuming any available reservation
+func consumeAnyReservation(w io.Writer, projectID, zone, instanceName string) error {
 	// projectID := "your_project_id"
 	// zone := "us-west3-a"
-	// reservationName := "your_reservation_name"
-	// sourceTemplate: existing template path. Following formats are allowed:
-	//  	- projects/{project_id}/global/instanceTemplates/{template_name}
-	//  	- projects/{project_id}/regions/{region}/instanceTemplates/{template_name}
-	//  	- https://www.googleapis.com/compute/v1/projects/{project_id}/global/instanceTemplates/instanceTemplate
-	//  	- https://www.googleapis.com/compute/v1/projects/{project_id}/regions/{region}/instanceTemplates/instanceTemplate
+	// instanceName := "your_instance_name"
 
-	ctx := context.Background()
-	reservationsClient, err := compute.NewReservationsRESTClient(ctx)
-	if err != nil {
-		return err
-	}
-	defer reservationsClient.Close()
-
-	req := &computepb.InsertReservationRequest{
-		Project: projectID,
-		ReservationResource: &computepb.Reservation{
-			Name: proto.String(reservationName),
-			Zone: proto.String(zone),
-			SpecificReservation: &computepb.AllocationSpecificSKUReservation{
-				Count: proto.Int64(2),
-				InstanceProperties: &computepb.AllocationSpecificSKUAllocationReservedInstanceProperties{
-					MachineType:    proto.String("n2-standard-32"),
-					MinCpuPlatform: proto.String("Intel Cascade Lake"),
-				},
-			},
-		},
-		Zone: zone,
-	}
-
-	op, err := reservationsClient.Insert(ctx, req)
-	if err != nil {
-		return fmt.Errorf("unable to create reservation: %w", err)
-	}
-
-	if err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("unable to wait for the operation: %w", err)
-	}
-
-	fmt.Fprintf(w, "Reservation created\n")
-	return nil
-}
-
-func consumeAnyReservation(w io.Writer, projectID, zone, instanceName string) error {
 	ctx := context.Background()
 	machineType := fmt.Sprintf("zones/%s/machineTypes/%s", zone, "n2-standard-32")
 	sourceImage := "projects/debian-cloud/global/images/family/debian-12"
@@ -106,6 +64,7 @@ func consumeAnyReservation(w io.Writer, projectID, zone, instanceName string) er
 					Name: proto.String("global/networks/default"),
 				},
 			},
+			// specifies that any matching reservation should be consumed
 			ReservationAffinity: &computepb.ReservationAffinity{
 				ConsumeReservationType: proto.String("ANY_RESERVATION"),
 			},
@@ -120,6 +79,7 @@ func consumeAnyReservation(w io.Writer, projectID, zone, instanceName string) er
 	if err = op.Wait(ctx); err != nil {
 		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
+	fmt.Fprintf(w, "Instance created from reservation\n")
 
 	return nil
 }
