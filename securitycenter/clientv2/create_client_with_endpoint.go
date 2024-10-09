@@ -30,9 +30,9 @@ func createClientWithEndpoint(repLocation string) error {
 	ctx := context.Background()
 	client, err := securitycenter.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %w", err)
+		return err
 	}
-	defer client.Close() // Closing the client safely cleans up background resources.
+	defer client.Close()
 
 	// Assemble the regional endpoint URL using provided location.
 	repEndpoint := fmt.Sprintf("securitycenter.%s.rep.googleapis.com:443", repLocation)
@@ -40,9 +40,9 @@ func createClientWithEndpoint(repLocation string) error {
 	repCtx := context.Background()
 	repClient, err := securitycenter.NewClient(repCtx, option.WithEndpoint(repEndpoint))
 	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %w", err)
+		return err
 	}
-	defer repClient.Close() // Closing the client safely cleans up background resources.
+	defer repClient.Close()
 
 	return nil
 }
