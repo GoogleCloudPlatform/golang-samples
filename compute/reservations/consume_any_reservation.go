@@ -26,14 +26,17 @@ import (
 )
 
 // consumeAnyReservation creates instance, consuming any available reservation
-func consumeAnyReservation(w io.Writer, projectID, zone, instanceName string) error {
+func consumeAnyReservation(w io.Writer, projectID, zone, instanceName, sourceTemplate string) error {
 	// projectID := "your_project_id"
 	// zone := "us-west3-a"
 	// instanceName := "your_instance_name"
+	// sourceTemplate: existing template path. Following formats are allowed:
+	//  	- projects/{project_id}/global/instanceTemplates/{template_name}
+	//  	- projects/{project_id}/regions/{region}/instanceTemplates/{template_name}
+	//  	- https://www.googleapis.com/compute/v1/projects/{project_id}/global/instanceTemplates/instanceTemplate
+	//  	- https://www.googleapis.com/compute/v1/projects/{project_id}/regions/{region}/instanceTemplates/instanceTemplate
 
 	ctx := context.Background()
-	machineType := fmt.Sprintf("zones/%s/machineTypes/%s", zone, "n2-standard-32")
-	sourceImage := "projects/debian-cloud/global/images/family/debian-12"
 
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {
@@ -42,28 +45,11 @@ func consumeAnyReservation(w io.Writer, projectID, zone, instanceName string) er
 	defer instancesClient.Close()
 
 	req := &computepb.InsertInstanceRequest{
-		Project: projectID,
-		Zone:    zone,
+		Project:                projectID,
+		Zone:                   zone,
+		SourceInstanceTemplate: proto.String(sourceTemplate),
 		InstanceResource: &computepb.Instance{
-			Disks: []*computepb.AttachedDisk{
-				{
-					InitializeParams: &computepb.AttachedDiskInitializeParams{
-						DiskSizeGb:  proto.Int64(10),
-						SourceImage: proto.String(sourceImage),
-					},
-					AutoDelete: proto.Bool(true),
-					Boot:       proto.Bool(true),
-					Type:       proto.String(computepb.AttachedDisk_PERSISTENT.String()),
-				},
-			},
-			MachineType:    proto.String(machineType),
-			MinCpuPlatform: proto.String("Intel Cascade Lake"),
-			Name:           proto.String(instanceName),
-			NetworkInterfaces: []*computepb.NetworkInterface{
-				{
-					Name: proto.String("global/networks/default"),
-				},
-			},
+			Name: proto.String(instanceName),
 			// specifies that any matching reservation should be consumed
 			ReservationAffinity: &computepb.ReservationAffinity{
 				ConsumeReservationType: proto.String("ANY_RESERVATION"),

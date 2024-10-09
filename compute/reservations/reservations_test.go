@@ -118,7 +118,7 @@ func deleteInstance(project, zone, instance string) error {
 	return op.Wait(ctx)
 }
 
-func createSpecificConsumableReservation(projectID, zone, reservationName, sourceTemplate string) error {
+func createSpecificConsumableReservation(projectID, zone, reservationName string) error {
 	ctx := context.Background()
 	reservationsClient, err := compute.NewReservationsRESTClient(ctx)
 	if err != nil {
@@ -308,7 +308,7 @@ func TestConsumeReservations(t *testing.T) {
 			t.Error("reservation was consumed beforehand")
 		}
 
-		if err = consumeAnyReservation(&buf, tc.ProjectID, zone, instanceName); err != nil {
+		if err = consumeAnyReservation(&buf, tc.ProjectID, zone, instanceName, *sourceTemplate.SelfLink); err != nil {
 			t.Errorf("consumeAnyReservation got err: %v", err)
 		}
 
@@ -332,7 +332,7 @@ func TestConsumeReservations(t *testing.T) {
 
 	t.Run("Consume specific reservation", func(t *testing.T) {
 		reservationName := fmt.Sprintf("test-reservation-%v-%v", time.Now().Format("01-02-2006"), r.Int())
-		if err = createSpecificConsumableReservation(tc.ProjectID, zone, reservationName, *sourceTemplate.SelfLink); err != nil {
+		if err = createSpecificConsumableReservation(tc.ProjectID, zone, reservationName); err != nil {
 			t.Errorf("createConsumableReservation got err: %v", err)
 		}
 
