@@ -22,11 +22,11 @@ import (
 	"testing"
 	// "time"
 
-	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	securitycenterpb "cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
+	securitycenter "cloud.google.com/go/securitycentermanagement/apiv1"
+	securitycenterpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
 	"github.com/google/uuid"
 	// "github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	exprpb "google.golang.org/genproto/googleapis/type/expr"
+	// exprpb "google.golang.org/genproto/googleapis/type/expr"
 )
 
 var orgID = ""
@@ -37,51 +37,50 @@ func setup(t *testing.T) string {
 	return orgID
 }
 
-func addCustomModule(t *testing.T, customModuleID string) error {
-	orgID := setup(t)
+// func addCustomModule(t *testing.T, customModuleID string) error {
+// 	orgID := setup(t)
 	
-	fmt.Printf("Custom Module ID: %v\n", customModuleID)
+// 	fmt.Printf("Custom Module ID: %v\n", customModuleID)
 
-	ctx := context.Background()	
-	client, err := securitycenter.NewClient(ctx)
+// 	ctx := context.Background()	
+// 	client, err := securitycenter.NewClient(ctx)
 	
-	fmt.Println("Error from client:", err)
+// 	fmt.Println("Error from client:", err)
 
-	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %w", err)
-	}
-	defer client.Close()
+// 	if err != nil {
+// 		return fmt.Errorf("securitycenter.NewClient: %w", err)
+// 	}
+// 	defer client.Close()
 
-	customModule := &securitycenterpb.SecurityHealthAnalyticsCustomModule{
-		// DisplayName: "CustomModule for testing",
-		// EnablementState: securitycenterpb.SecurityHealthAnalyticsCustomModule_ENABLED,
-		DisplayName: "CustomModule for testing",
-        EnablementState: securitycenterpb.SecurityHealthAnalyticsCustomModule_ENABLED,
-        CustomConfig: &securitycenterpb.CustomConfig{
-            Predicate: &exprpb.Expr{
-                Expression: "resource.type == \"gce_instance\"",
-            },
-            ResourceSelector: &securitycenterpb.CustomConfig_ResourceSelector{
-                ResourceTypes: []string{"gce_instance"},
-            },
-            Severity:     securitycenterpb.CustomConfig_CRITICAL,
-            Description:  "Detect high severity issues on GCE instances.",
-            Recommendation: "Ensure proper configurations for GCE instances.",
-        },
-	}
+// 	customModule := &securitycenterpb.SecurityHealthAnalyticsCustomModule{
+// 		// DisplayName: "CustomModule for testing",
+// 		// EnablementState: securitycenterpb.SecurityHealthAnalyticsCustomModule_ENABLED,
+// 		DisplayName: "CustomModule for testing",
+//         EnablementState: securitycenterpb.SecurityHealthAnalyticsCustomModule_ENABLED,
+//         CustomConfig: &securitycenterpb.CustomConfig{
+//             Predicate: &exprpb.Expr{
+//                 Expression: "resource.type == \"gce_instance\"",
+//             },
+//             ResourceSelector: &securitycenterpb.CustomConfig_ResourceSelector{
+//                 ResourceTypes: []string{"gce_instance"},
+//             },
+//             Severity:     securitycenterpb.CustomConfig_CRITICAL,
+//             Description:  "Detect high severity issues on GCE instances.",
+//             Recommendation: "Ensure proper configurations for GCE instances.",
+//         },
+// 	}
 
-	req := &securitycenterpb.CreateSecurityHealthAnalyticsCustomModuleRequest{
-		Parent:                      fmt.Sprintf("organizations/%s/locations/global", orgID),
-		SecurityHealthAnalyticsCustomModule: customModule,
-		// SecurityHealthAnalyticsCustomModuleId: customModuleID,
-	}
+// 	req := &securitycenterpb.CreateSecurityHealthAnalyticsCustomModuleRequest{
+// 		Parent:                      fmt.Sprintf("organizations/%s/locations/global", orgID),
+// 		SecurityHealthAnalyticsCustomModule: customModule,
+// 	}
 
-	_, err0 := client.CreateSecurityHealthAnalyticsCustomModule(ctx, req)
-	if err0 != nil {
-		return fmt.Errorf("Failed to create CustomModule: %w", err0)
-	}
-	return nil
-}
+// 	_, err0 := client.CreateSecurityHealthAnalyticsCustomModule(ctx, req)
+// 	if err0 != nil {
+// 		return fmt.Errorf("Failed to create CustomModule: %w", err0)
+// 	}
+// 	return nil
+// }
 
 func cleanupCustomModule(t *testing.T, customModuleID string) error {
 	orgID := setup(t)
@@ -105,36 +104,36 @@ func cleanupCustomModule(t *testing.T, customModuleID string) error {
 }
 
 // TestCreateCustomModule verifies the Create functionality
-//  func TestCreateCustomModule(t *testing.T) {
-// 	orgID := setup(t)
+ func TestCreateCustomModule(t *testing.T) {
+	orgID := setup(t)
 
-// 	buf := new(bytes.Buffer)
+	buf := new(bytes.Buffer)
 
-// 	rand, err := uuid.NewUUID()
-// 	if err != nil {
-// 		t.Fatalf("Issue generating id.")
-// 		return
-// 	}
-// 	fullOrgIdPath := fmt.Sprintf("organizations/%s/locations/global", orgID)
-// 	customModuleID := "random-custommodule-id-" + rand.String()
+	rand, err := uuid.NewUUID()
+	if err != nil {
+		t.Fatalf("Issue generating id.")
+		return
+	}
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)	
+	customModuleID := "custommodule_id_" + rand.String()
 
-// 	// Call Create
-// 	err = createCustomModule(buf, fullOrgIdPath, customModuleID)
+	// Call Create
+	err = CreateSecurityHealthAnalyticsCustomModule(buf, parent, customModuleID)
 
-// 	if err != nil {
-// 		t.Fatalf("createCustomModule() had error: %v", err)
-// 		return
-// 	}
+	if err != nil {
+		t.Fatalf("createCustomModule() had error: %v", err)
+		return
+	}
 
-// 	got := buf.String()
+	got := buf.String()
 
-// 	if !strings.Contains(got, customModuleID) {
-// 		t.Fatalf("createCustomModule() got: %s want %s", got, customModuleID)
-// 	}
+	if !strings.Contains(got, customModuleID) {
+		t.Fatalf("createCustomModule() got: %s want %s", got, customModuleID)
+	}
 
-// 	// Cleanup
-// 	cleanupCustomModule(t, customModuleID)
-// }
+	// Cleanup
+	// cleanupCustomModule(t, customModuleID)
+}
 
 // TestGetCustomModule verifies the Get functionality
 func TestGetCustomModule(t *testing.T) {
@@ -149,12 +148,12 @@ func TestGetCustomModule(t *testing.T) {
 		return
 	}
 	// cusModID := "random-custommodule-id-" + rand.String()
-	customModuleID := "5710655855565963562"
+	customModuleID := "10829723016802655264"
 
-	if err := addCustomModule(t, customModuleID); err != nil {
-		t.Fatalf("Could not setup test environment: %v", err)
-		return
-	}
+	// if err := addCustomModule(t, customModuleID); err != nil {
+	// 	t.Fatalf("Could not setup test environment: %v", err)
+	// 	return
+	// }
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
@@ -174,5 +173,5 @@ func TestGetCustomModule(t *testing.T) {
 	}
 
 	// Cleanup
-	cleanupCustomModule(t, customModuleID)
+	// cleanupCustomModule(t, customModuleID)
 }

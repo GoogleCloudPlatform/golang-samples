@@ -21,13 +21,13 @@ import (
 	"fmt"
 	"io"
 
-	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	securitycenterpb "cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
+	securitycenter "cloud.google.com/go/securitycentermanagement/apiv1"
+	securitycenterpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
 	exprpb "google.golang.org/genproto/googleapis/type/expr"
 )
 
 // CreateSecurityHealthAnalyticsCustomModule creates a custom module for Security Health Analytics.
-func CreateSecurityHealthAnalyticsCustomModule(w io.Writer, parent string, customModuleID string, displayName string) error {
+func CreateSecurityHealthAnalyticsCustomModule(w io.Writer, parent string, customModuleID string) error {
 	// parent: Use any one of the following options:
 	// - organizations/{organization_id}/locations/{location_id}
 	// - folders/{folder_id}/locations/{location_id}
@@ -42,27 +42,37 @@ func CreateSecurityHealthAnalyticsCustomModule(w io.Writer, parent string, custo
 
 	// Define the custom module configuration
 	customModule := &securitycenterpb.SecurityHealthAnalyticsCustomModule{
-		DisplayName: displayName,
+		Name: fmt.Sprintf("%s/securityHealthAnalyticsCustomModules/%s", parent, customModuleID),
+		DisplayName: "Custom Module for testing",
 		EnablementState: securitycenterpb.SecurityHealthAnalyticsCustomModule_ENABLED,
 		CustomConfig: &securitycenterpb.CustomConfig{
 			Predicate: &exprpb.Expr{
-			// 	Expression: "resource.type == \"gce_instance\" && severity == \"HIGH\"",
-			// 	Title:      "GCE Instance High Severity",
-			// 	Description: "A custom module for detecting high severity issues on GCE instances.",
+				Expression:  "resource.type == \"gce_instance\" && severity == \"HIGH\"",
+				Title:       "GCE Instance High Severity",
+				Description: "Custom module to detect high severity issues on GCE instances.",
 			},
-			// Description: "A custom module for detecting high severity issues on GCE instances.",
-			Severity: securitycenterpb.CustomConfig_CRITICAL,
+			Description: "A custom module for detecting high severity issues on GCE instances.",
+			Severity:    securitycenterpb.CustomConfig_CRITICAL,
 			ResourceSelector: &securitycenterpb.CustomConfig_ResourceSelector{
-				ResourceTypes: []string{"gce_instance"},
+				ResourceTypes: []string{"CryptoKey"},
 			},
 			Recommendation: "Ensure proper security configurations on GCE instances.",
+			CustomOutput: &securitycenterpb.CustomConfig_CustomOutputSpec{
+				Properties: []*securitycenterpb.CustomConfig_CustomOutputSpec_Property{
+					{
+						Name: "example_property",
+						ValueExpression: &exprpb.Expr{
+							Expression: "resource.name",
+						},
+					},
+				},
+			},
 		},
 	}
 
 	req := &securitycenterpb.CreateSecurityHealthAnalyticsCustomModuleRequest{
 		Parent:                    parent,
 		SecurityHealthAnalyticsCustomModule: customModule,
-		// CustomModuleId: customModuleID,
 	}
 
 	module, err := client.CreateSecurityHealthAnalyticsCustomModule(ctx, req)

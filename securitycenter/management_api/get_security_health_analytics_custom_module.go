@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"io"
 
-	securitycenter "cloud.google.com/go/securitycenter/apiv1"
-	securitycenterpb "cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
+	securitycenter "cloud.google.com/go/securitycentermanagement/apiv1"
+	securitycenterpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
 )
 
 // GetSecurityHealthAnalyticsCustomModule retrieves a specific custom module by its name.
