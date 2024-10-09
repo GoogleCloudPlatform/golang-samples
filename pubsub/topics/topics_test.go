@@ -325,7 +325,7 @@ func TestTopicCloudStorageIngestion(t *testing.T) {
 
 	// Test creating a cloud storage ingestion topic with Text input format.
 	if err := createTopicWithCloudStorageIngestion(buf, tc.ProjectID, topicID, "fake-bucket", "**.txt", "2006-01-02T15:04:05Z"); err != nil {
-		t.Fatalf("failed to create a topic with kinesis ingestion: %v", err)
+		t.Fatalf("failed to create a topic with cloud storage ingestion: %v", err)
 	}
 }
 
