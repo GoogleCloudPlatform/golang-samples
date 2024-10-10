@@ -33,9 +33,9 @@ type Task struct {
 
 // AddTask adds a task with the given description to the datastore,
 // returning the key of the newly created entity.
-func AddTask(projectID string, desc string) (*datastore.Key, error) {
+func AddTask(projectID string, databaseID string, desc string) (*datastore.Key, error) {
 	ctx := context.Background()
-	client, err := datastore.NewClient(ctx, projectID)
+	client, err := datastore.NewClientWithDatabase(ctx, projectID, databaseID)
 	if err != nil {
 		log.Fatalf("Could not create datastore client: %v", err)
 	}
@@ -46,5 +46,4 @@ func AddTask(projectID string, desc string) (*datastore.Key, error) {
 	}
 	key := datastore.IncompleteKey("Task", nil)
 	return client.Put(ctx, key, task)
-
 }

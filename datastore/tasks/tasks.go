@@ -32,7 +32,11 @@ func main() {
 	if projID == "" {
 		log.Fatal(`You need to set the environment variable "DATASTORE_PROJECT_ID"`)
 	}
-	client, err := createClient(projID)
+	databaseID := os.Getenv("DATASTORE_DB_ID")
+	if databaseID == "" {
+		log.Println(`WARNING: No environment variable set for "DATASTORE_DB_ID", (default) will be used`)
+	}
+	client, err := createClient(projID, databaseID)
 	if err != nil {
 		log.Fatalf("Could not create datastore client: %v", err)
 	}
@@ -56,7 +60,7 @@ func main() {
 				usage()
 				break
 			}
-			key, err := AddTask(projID, args)
+			key, err := AddTask(projID, databaseID, args)
 			if err != nil {
 				log.Printf("Failed to create task: %v", err)
 				break
@@ -69,14 +73,14 @@ func main() {
 				usage()
 				break
 			}
-			if err := MarkDone(projID, n); err != nil {
+			if err := MarkDone(projID, databaseID, n); err != nil {
 				log.Printf("Failed to mark task done: %v", err)
 				break
 			}
 			fmt.Printf("Task %d marked done\n", n)
 
 		case "list":
-			tasks, err := ListTasks(projID)
+			tasks, err := ListTasks(projID, databaseID)
 			if err != nil {
 				log.Printf("Failed to fetch task list: %v", err)
 				break
@@ -89,7 +93,7 @@ func main() {
 				usage()
 				break
 			}
-			if err := DeleteTask(projID, n); err != nil {
+			if err := DeleteTask(projID, databaseID, n); err != nil {
 				log.Printf("Failed to delete task: %v", err)
 				break
 			}
