@@ -20,17 +20,9 @@ import (
 	"fmt"
 	"io"
 
-	compute "cloud.google.com/go/compute/apiv1"
 	computepb "cloud.google.com/go/compute/apiv1/computepb"
-	gax "github.com/googleapis/gax-go/v2"
 	"google.golang.org/protobuf/proto"
 )
-
-type ClientInterface interface {
-	Close() error
-	Delete(context.Context, *computepb.DeleteReservationRequest, ...gax.CallOption) (*compute.Operation, error)
-	Insert(context.Context, *computepb.InsertReservationRequest, ...gax.CallOption) (*compute.Operation, error)
-}
 
 // Creates shared reservation from given template in particular zone
 func createSharedReservation(w io.Writer, client ClientInterface, projectID, baseProjectId, zone, reservationName, sourceTemplate string) error {

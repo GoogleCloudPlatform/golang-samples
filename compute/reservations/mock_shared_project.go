@@ -24,6 +24,12 @@ import (
 	gax "github.com/googleapis/gax-go/v2"
 )
 
+type ClientInterface interface {
+	Close() error
+	Delete(context.Context, *computepb.DeleteReservationRequest, ...gax.CallOption) (*compute.Operation, error)
+	Insert(context.Context, *computepb.InsertReservationRequest, ...gax.CallOption) (*compute.Operation, error)
+}
+
 type ReservationsClient struct{}
 
 func (client ReservationsClient) Close() error {
