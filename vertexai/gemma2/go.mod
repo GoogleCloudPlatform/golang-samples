@@ -4,9 +4,9 @@ go 1.21
 
 require (
 	cloud.google.com/go/aiplatform v1.68.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240918200157-a00ca430a14b
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20241010204954-4eee98495a14
 	github.com/googleapis/gax-go/v2 v2.13.0
-	google.golang.org/protobuf v1.34.2
+	google.golang.org/protobuf v1.35.1
 )
 
 require (
