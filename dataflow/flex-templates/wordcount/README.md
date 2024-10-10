@@ -58,7 +58,7 @@ rather than the machine being used to write the template. For more information, 
 We will compile the Go binary to execute on a linux-amd64 architecture used by Dataflow workers. 
 
 ```
-GOOS=linux GOARCH=amd64 go build -o wordcount .
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o wordcount .
 ```
 
 ### Building a container image
