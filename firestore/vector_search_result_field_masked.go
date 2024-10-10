@@ -14,7 +14,7 @@
 
 package firestore
 
-// [START firestore_vector_search_distance_result_field]
+// [START firestore_vector_search_distance_result_field_masked]
 import (
 	"context"
 	"fmt"
@@ -57,4 +57,4 @@ func vectorSearchDistanceResultFieldMasked(w io.Writer, projectID string) error 
 	return nil
 }
 
-// [END firestore_vector_search_distance_result_field]
+// [END firestore_vector_search_distance_result_field_masked]
