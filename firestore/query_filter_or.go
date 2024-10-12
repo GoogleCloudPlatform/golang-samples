@@ -51,7 +51,7 @@ func queryFilterOr(w io.Writer, projectId string) error {
 	}
 
 	orQuery := client.Collection("users").WhereEntity(orFilter)
-	it := orQuery.Documents(ctx)
+	it, err := orQuery.Documents(ctx)
 	if err != nil {
 		return err
 	}
