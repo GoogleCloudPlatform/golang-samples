@@ -310,7 +310,7 @@ func TestReservations(t *testing.T) {
 			t.Errorf("unable to delete reservation: %v", err)
 		}
 	})
-  
+
 	t.Run("Test create from exisiting VM", func(t *testing.T) {
 		reservationName := fmt.Sprintf("test-reservation-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 		existingVM := fmt.Sprintf("test-instance-%v-%v", time.Now().Format("01-02-2006"), r.Int())
