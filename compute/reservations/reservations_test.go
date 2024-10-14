@@ -280,7 +280,7 @@ func TestReservations(t *testing.T) {
 			t.Errorf("unable to delete reservation: %v", err)
 		}
 	})
-  
+
 	t.Run("Create instance without consuming reservation", func(t *testing.T) {
 		reservationName := fmt.Sprintf("test-reservation-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 		instanceName := fmt.Sprintf("test-instance-%v-%v", time.Now().Format("01-02-2006"), r.Int())
