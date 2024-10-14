@@ -26,14 +26,13 @@ import (
 )
 
 // createRegionalSecretWithAnnotations creates a new secret with the given name and annotations.
-func CreateRegionalSecretWithAnnotations(w io.Writer, projectId, locationId, id string) error {
+func CreateRegionalSecretWithAnnotations(w io.Writer, projectId, locationId, secretId string) error {
 	// parent := "projects/my-project"
 	// id := "my-secret"
 
 	annotationKey := "annotationkey"
 	annotationValue := "annotationvalue"
 
-	// Create the client.
 	ctx := context.Background()
 
 	//Endpoint to send the request to regional server
@@ -49,7 +48,7 @@ func CreateRegionalSecretWithAnnotations(w io.Writer, projectId, locationId, id 
 	// Build the request.
 	req := &secretmanagerpb.CreateSecretRequest{
 		Parent:   parent,
-		SecretId: id,
+		SecretId: secretId,
 		Secret: &secretmanagerpb.Secret{
 			Annotations: map[string]string{
 				annotationKey: annotationValue,
@@ -57,7 +56,6 @@ func CreateRegionalSecretWithAnnotations(w io.Writer, projectId, locationId, id 
 		},
 	}
 
-	// Call the API.
 	result, err := client.CreateSecret(ctx, req)
 	if err != nil {
 		return fmt.Errorf("failed to create secret: %w", err)

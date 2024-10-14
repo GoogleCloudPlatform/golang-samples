@@ -26,10 +26,9 @@ import (
 )
 
 // viewRegionalSecretAnnotations gets annotations with the given secret.
-func ViewRegionalSecretAnnotations(w io.Writer, projectId, locationId, id string) error {
+func ViewRegionalSecretAnnotations(w io.Writer, projectId, locationId, secretId string) error {
 	// name := "projects/my-project/secrets/my-secret"
 
-	// Create the client.
 	ctx := context.Background()
 
 	//Endpoint to send the request to regional server
@@ -40,14 +39,13 @@ func ViewRegionalSecretAnnotations(w io.Writer, projectId, locationId, id string
 	}
 	defer client.Close()
 
-	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, id)
+	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
 
 	// Build the request.
 	req := &secretmanagerpb.GetSecretRequest{
 		Name: name,
 	}
 
-	// Call the API.
 	result, err := client.GetSecret(ctx, req)
 	if err != nil {
 		return fmt.Errorf("failed to get secret: %w", err)

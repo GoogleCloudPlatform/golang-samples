@@ -27,13 +27,12 @@ import (
 
 // editSecretAnnotation updates the annotations about an existing secret.
 // If the annotation key exists, it updates the annotation, otherwise it creates a new one.
-func editSecretAnnotation(w io.Writer, name string) error {
+func editSecretAnnotation(w io.Writer, secretName string) error {
 	// name := "projects/my-project/secrets/my-secret"
 
 	annotationKey := "annotationkey"
 	annotationValue := "updatedannotationvalue"
 
-	// Create the client.
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)
 	if err != nil {
@@ -43,10 +42,9 @@ func editSecretAnnotation(w io.Writer, name string) error {
 
 	// Build the request to get the secret.
 	req := &secretmanagerpb.GetSecretRequest{
-		Name: name,
+		Name: secretName,
 	}
 
-	// Call the API.
 	result, err := client.GetSecret(ctx, req)
 	if err != nil {
 		return fmt.Errorf("failed to get secret: %w", err)
@@ -59,7 +57,7 @@ func editSecretAnnotation(w io.Writer, name string) error {
 	// Build the request to update the secret.
 	update_req := &secretmanagerpb.UpdateSecretRequest{
 		Secret: &secretmanagerpb.Secret{
-			Name:        name,
+			Name:        secretName,
 			Annotations: annotations,
 		},
 		UpdateMask: &field_mask.FieldMask{
@@ -67,7 +65,6 @@ func editSecretAnnotation(w io.Writer, name string) error {
 		},
 	}
 
-	// Call the API.
 	update_result, err := client.UpdateSecret(ctx, update_req)
 	if err != nil {
 		return fmt.Errorf("failed to update secret: %w", err)

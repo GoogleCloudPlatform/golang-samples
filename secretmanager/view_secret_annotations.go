@@ -25,10 +25,9 @@ import (
 )
 
 // viewSecretAnnotations gets annotations with the given secret.
-func viewSecretAnnotations(w io.Writer, name string) error {
+func viewSecretAnnotations(w io.Writer, secretName string) error {
 	// name := "projects/my-project/secrets/my-secret"
 
-	// Create the client.
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)
 	if err != nil {
@@ -38,10 +37,9 @@ func viewSecretAnnotations(w io.Writer, name string) error {
 
 	// Build the request.
 	req := &secretmanagerpb.GetSecretRequest{
-		Name: name,
+		Name: secretName,
 	}
 
-	// Call the API.
 	result, err := client.GetSecret(ctx, req)
 	if err != nil {
 		return fmt.Errorf("failed to get secret: %w", err)

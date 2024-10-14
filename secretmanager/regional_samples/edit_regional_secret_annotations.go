@@ -28,13 +28,12 @@ import (
 
 // editRegionalSecretAnnotations updates the annotations about an existing secret.
 // If the annotation key exists, it updates the annotation, otherwise it creates a new one.
-func EditRegionalSecretAnnotation(w io.Writer, projectId, locationId, id string) error {
+func EditRegionalSecretAnnotation(w io.Writer, projectId, locationId, secretId string) error {
 	// name := "projects/my-project/secrets/my-secret"
 
 	annotationKey := "annotationkey"
 	annotationValue := "updatedannotationvalue"
 
-	// Create the client.
 	ctx := context.Background()
 
 	//Endpoint to send the request to regional server
@@ -45,14 +44,13 @@ func EditRegionalSecretAnnotation(w io.Writer, projectId, locationId, id string)
 	}
 	defer client.Close()
 
-	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, id)
+	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
 
 	// Build the request to get the secret.
 	req := &secretmanagerpb.GetSecretRequest{
 		Name: name,
 	}
 
-	// Call the API.
 	result, err := client.GetSecret(ctx, req)
 	if err != nil {
 		return fmt.Errorf("failed to get secret: %w", err)
