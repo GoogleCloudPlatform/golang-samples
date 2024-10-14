@@ -14,7 +14,7 @@
 
 package management_api
 
-// [START securitycenter_management_api_get_security_health_analytics_custom_module]
+// [START securitycenter_management_api_update_security_health_analytics_custom_module]
 
 import (
 	"context"
@@ -23,15 +23,16 @@ import (
 
 	securitycentermanagement "cloud.google.com/go/securitycentermanagement/apiv1"
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
+	iterator "google.golang.org/api/iterator"
 )
 
-// GetSecurityHealthAnalyticsCustomModule retrieves a specific custom module by its name.
-func getSecurityHealthAnalyticsCustomModule(w io.Writer, parent string, customModuleID string) error {
+// ListSecurityHealthAnalyticsCustomModule creates a custom module for Security Health Analytics.
+func listSecurityHealthAnalyticsCustomModule(w io.Writer, parent string) error {
 	// parent: Use any one of the following options:
-	//             - organizations/{organization_id}/locations/{location_id}
-	//             - folders/{folder_id}/locations/{location_id}
-	//             - projects/{project_id}/locations/{location_id}
-	// customModuleID := "your-module-id"
+	// - organizations/{organization_id}/locations/{location_id}
+	// - folders/{folder_id}/locations/{location_id}
+	// - projects/{project_id}/locations/{location_id}
+
 	ctx := context.Background()
 	client, err := securitycentermanagement.NewClient(ctx)
 	if err != nil {
@@ -39,17 +40,23 @@ func getSecurityHealthAnalyticsCustomModule(w io.Writer, parent string, customMo
 	}
 	defer client.Close()
 
-	req := &securitycentermanagementpb.GetSecurityHealthAnalyticsCustomModuleRequest{
-		Name: fmt.Sprintf("%s/securityHealthAnalyticsCustomModules/%s", parent, customModuleID),
+	req := &securitycentermanagementpb.ListSecurityHealthAnalyticsCustomModulesRequest{
+		Parent: parent,
 	}
 
-	module, err := client.GetSecurityHealthAnalyticsCustomModule(ctx, req)
-	if err != nil {
-		return fmt.Errorf("Failed to get SecurityHealthAnalyticsCustomModule: %w", err)
+	// List all security health analytics custom modules present in the resource.
+	it := client.ListSecurityHealthAnalyticsCustomModules(ctx, req)
+	for {
+		resp, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("it.Next: %w", err)
+		}
+		fmt.Fprintf(w, "Custom Module Name: %s, ", resp.Name)
 	}
-
-	fmt.Fprintf(w, "Retrieved SecurityHealthAnalyticsCustomModule: %s\n", module.Name)
 	return nil
 }
 
-// [END securitycenter_management_api_get_security_health_analytics_custom_module]
+// [END securitycenter_management_api_update_security_health_analytics_custom_module]

@@ -14,40 +14,40 @@
 
 package management_api
 
-// [START securitycenter_management_api_create_security_health_custom_module]
+// [START securitycenter_management_api_create_security_health_analytics_custom_module]
 
 import (
 	"context"
 	"fmt"
 	"io"
 
-	securitycenter "cloud.google.com/go/securitycentermanagement/apiv1"
-	securitycenterpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
-	exprpb "google.golang.org/genproto/googleapis/type/expr"
+	securitycentermanagement "cloud.google.com/go/securitycentermanagement/apiv1"
+	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
+	expr "google.golang.org/genproto/googleapis/type/expr"
 )
 
 // CreateSecurityHealthAnalyticsCustomModule creates a custom module for Security Health Analytics.
-func CreateSecurityHealthAnalyticsCustomModule(w io.Writer, parent string, customModuleID string) error {
+func createSecurityHealthAnalyticsCustomModule(w io.Writer, parent string) error {
 	// parent: Use any one of the following options:
 	// - organizations/{organization_id}/locations/{location_id}
 	// - folders/{folder_id}/locations/{location_id}
 	// - projects/{project_id}/locations/{location_id}
 
 	ctx := context.Background()
-	client, err := securitycenter.NewClient(ctx)
+	client, err := securitycentermanagement.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("securitycenter.NewClient: %w", err)
+		return fmt.Errorf("securitycentermanagement.NewClient: %w", err)
 	}
 	defer client.Close()
 
 	// Define the custom module configuration
-	customModule := &securitycenterpb.SecurityHealthAnalyticsCustomModule{
-		CustomConfig: &securitycenterpb.CustomConfig{
-			CustomOutput: &securitycenterpb.CustomConfig_CustomOutputSpec{
-				Properties: []*securitycenterpb.CustomConfig_CustomOutputSpec_Property{
+	customModule := &securitycentermanagementpb.SecurityHealthAnalyticsCustomModule{
+		CustomConfig: &securitycentermanagementpb.CustomConfig{
+			CustomOutput: &securitycentermanagementpb.CustomConfig_CustomOutputSpec{
+				Properties: []*securitycentermanagementpb.CustomConfig_CustomOutputSpec_Property{
 					{
 						Name: "example_property",
-						ValueExpression: &exprpb.Expr{
+						ValueExpression: &expr.Expr{
 							Description: "The name of the instance",
 							Expression:  "resource.name",
 							Location:    "global",
@@ -56,24 +56,23 @@ func CreateSecurityHealthAnalyticsCustomModule(w io.Writer, parent string, custo
 					},
 				},
 			},
-			Description: "A custom module for detecting high severity issues on GCE instances.",
-			Predicate: &exprpb.Expr{
-				Expression:  "resource.type == \"gce_instance\" && severity == \"HIGH\"",
+			Description: "Sample custom module for testing purpose. Please do not delete.", //Replace with the desired description.
+			Predicate: &expr.Expr{
+				Expression:  "has(resource.rotationPeriod) && (resource.rotationPeriod > duration('2592000s'))",
 				Title:       "GCE Instance High Severity",
 				Description: "Custom module to detect high severity issues on GCE instances.",
 			},
 			Recommendation: "Ensure proper security configurations on GCE instances.",
-			ResourceSelector: &securitycenterpb.CustomConfig_ResourceSelector{
+			ResourceSelector: &securitycentermanagementpb.CustomConfig_ResourceSelector{
 				ResourceTypes: []string{"cloudkms.googleapis.com/CryptoKey"},
 			},
-			Severity:    securitycenterpb.CustomConfig_CRITICAL,
+			Severity:    securitycentermanagementpb.CustomConfig_CRITICAL,
 		},
-		DisplayName: "custom_module_for_testing",
-		EnablementState: securitycenterpb.SecurityHealthAnalyticsCustomModule_ENABLED,
-		Name: fmt.Sprintf("%s/securityHealthAnalyticsCustomModules/%s", parent, customModuleID),
+		DisplayName: "go_sample_custom_module", //Replace with desired Display Name.
+		EnablementState: securitycentermanagementpb.SecurityHealthAnalyticsCustomModule_ENABLED,
 	}
 
-	req := &securitycenterpb.CreateSecurityHealthAnalyticsCustomModuleRequest{
+	req := &securitycentermanagementpb.CreateSecurityHealthAnalyticsCustomModuleRequest{
 		Parent:                    parent,
 		SecurityHealthAnalyticsCustomModule: customModule,
 	}
@@ -87,4 +86,4 @@ func CreateSecurityHealthAnalyticsCustomModule(w io.Writer, parent string, custo
 	return nil
 }
 
-// [END securitycenter_management_api_create_security_health_custom_module]
+// [END securitycenter_management_api_create_security_health_analytics_custom_module]
