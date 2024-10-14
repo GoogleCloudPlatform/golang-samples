@@ -163,7 +163,6 @@ func TestReservations(t *testing.T) {
 	templateName := fmt.Sprintf("test-template-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 
 	var buf bytes.Buffer
-
 	err := createTemplate(tc.ProjectID, templateName)
 	if err != nil {
 		t.Errorf("createTemplate got err: %v", err)
@@ -255,6 +254,46 @@ func TestReservations(t *testing.T) {
 
 		if err := deleteReservation(&buf, tc.ProjectID, zone, reservationName); err != nil {
 			t.Errorf("deleteReservation got err: %v", err)
+		}
+	})
+
+	t.Run("Shared reservation CRUD", func(t *testing.T) {
+		reservationName := fmt.Sprintf("test-reservation-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		baseProjectID := tc.ProjectID
+		// This test require 2 projects, therefore one of them is mocked.
+		// If you want to make a real test, please adjust projectID accordingly and uncomment reservationsClient creation.
+		// Make sure that base project has proper permissions to share reservations.
+		// See: https://cloud.google.com/compute/docs/instances/reservations-shared#shared_reservation_constraint
+		destinationProjectID := "some-project"
+		ctx := context.Background()
+
+		want := "Reservation created"
+
+		// Uncomment line below if you want to run the test without mocks
+		// reservationsClient, err := compute.NewReservationsRESTClient(ctx)
+		reservationsClient := ReservationsClient{}
+		if err != nil {
+			t.Errorf("Couldn't create reservationsClient, err: %v", err)
+		}
+		defer reservationsClient.Close()
+
+		if err := createSharedReservation(&buf, reservationsClient, destinationProjectID, baseProjectID, zone, reservationName, *sourceTemplate.SelfLink); err != nil {
+			t.Errorf("createSharedReservation got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("createSharedReservation got %s, want %s", got, want)
+		}
+		buf.Reset()
+
+		req := &computepb.DeleteReservationRequest{
+			Project:     baseProjectID,
+			Reservation: reservationName,
+			Zone:        zone,
+		}
+
+		_, err = reservationsClient.Delete(ctx, req)
+		if err != nil {
+			t.Errorf("unable to delete reservation: %v", err)
 		}
 	})
 }
