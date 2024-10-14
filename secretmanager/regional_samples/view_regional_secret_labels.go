@@ -27,8 +27,8 @@ import (
 
 // getSecret gets information about the given secret. This only returns metadata
 // about the secret container, not any secret material.
-func ViewRegionalSecretLabels(w io.Writer, projectId, locationId, id string) error {
-	// name := "projects/my-project/locations/my-location/secrets/my-secret"
+func ViewRegionalSecretLabels(w io.Writer, projectId, locationId, secretId string) error {
+	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
 
 	// Create the client.
 	ctx := context.Background()
@@ -39,8 +39,6 @@ func ViewRegionalSecretLabels(w io.Writer, projectId, locationId, id string) err
 		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
 	defer client.Close()
-
-	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, id)
 
 	// Build the request.
 	req := &secretmanagerpb.GetSecretRequest{

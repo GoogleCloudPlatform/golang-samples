@@ -26,9 +26,8 @@ import (
 )
 
 // createSecretWithLabels creates a new secret with the given name and labels.
-func CreateRegionalSecretWithLabels(w io.Writer, projectId, locationId, id string) error {
-	// parent := "projects/my-project/locations/my-location"
-	// id := "my-secret"
+func CreateRegionalSecretWithLabels(w io.Writer, projectId, locationId, secretId string) error {
+	parent := fmt.Sprintf("projects/%s/locations/%s", projectId, locationId)
 
 	labelKey := "labelkey"
 	labelValue := "labelvalue"
@@ -43,12 +42,10 @@ func CreateRegionalSecretWithLabels(w io.Writer, projectId, locationId, id strin
 	}
 	defer client.Close()
 
-	parent := fmt.Sprintf("projects/%s/locations/%s", projectId, locationId)
-
 	// Build the request.
 	req := &secretmanagerpb.CreateSecretRequest{
 		Parent:   parent,
-		SecretId: id,
+		SecretId: secretId,
 		Secret: &secretmanagerpb.Secret{
 			Labels: map[string]string{
 				labelKey: labelValue,

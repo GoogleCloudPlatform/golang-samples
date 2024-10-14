@@ -27,8 +27,8 @@ import (
 )
 
 // deleteSecret updates the metadata about an existing secret and remove an existing label.
-func DeleteRegionalSecretLabel(w io.Writer, projectId, locationId, id string) error {
-	// name := "projects/my-project/locations/my-location/secrets/my-secret"
+func DeleteRegionalSecretLabel(w io.Writer, projectId, locationId, secretId string) error {
+	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
 
 	labelKey := "labelkey"
 
@@ -41,8 +41,6 @@ func DeleteRegionalSecretLabel(w io.Writer, projectId, locationId, id string) er
 		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
 	defer client.Close()
-
-	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, id)
 
 	// Build the request to get the secret.
 	req := &secretmanagerpb.GetSecretRequest{
@@ -57,6 +55,7 @@ func DeleteRegionalSecretLabel(w io.Writer, projectId, locationId, id string) er
 
 	labels := result.Labels
 
+	// Delete the label in the map and update the secret with patch request
 	delete(labels, labelKey)
 
 	// Build the request to update the secret.

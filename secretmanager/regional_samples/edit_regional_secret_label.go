@@ -26,10 +26,10 @@ import (
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-// createUpdateSecretLabel updates the labels about an existing secret.
+// editSecretLabel updates the labels about an existing secret.
 // If the label key exists, it updates the label, otherwise it creates a new one.
-func CreateUpdateRegionalSecretLabel(w io.Writer, projectId, locationId, id string) error {
-	// name := "projects/my-project/locations/my-location/secrets/my-secret"
+func EditRegionalSecretLabel(w io.Writer, projectId, locationId, secretId string) error {
+	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
 
 	labelKey := "labelkey"
 	labelValue := "updatedlabelvalue"
@@ -43,8 +43,6 @@ func CreateUpdateRegionalSecretLabel(w io.Writer, projectId, locationId, id stri
 		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
 	defer client.Close()
-
-	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, id)
 
 	// Build the request to get the secret.
 	req := &secretmanagerpb.GetSecretRequest{
@@ -67,6 +65,8 @@ func CreateUpdateRegionalSecretLabel(w io.Writer, projectId, locationId, id stri
 			Name:   name,
 			Labels: labels,
 		},
+		// To only update labels in the patch request, we add
+		// update mask in the request
 		UpdateMask: &field_mask.FieldMask{
 			Paths: []string{"labels"},
 		},

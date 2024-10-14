@@ -1297,7 +1297,7 @@ func TestCreateUpdateSecretLabel(t *testing.T) {
 	}
 }
 
-func TestCreateUpdateRegionalSecretLabel(t *testing.T) {
+func TestEditRegionalSecretLabel(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	secret, secretID := testRegionalSecret(t, tc.ProjectID)
@@ -1306,7 +1306,7 @@ func TestCreateUpdateRegionalSecretLabel(t *testing.T) {
 	locationID := testLocation(t)
 
 	var b bytes.Buffer
-	if err := regional_secretmanager.CreateUpdateRegionalSecretLabel(&b, tc.ProjectID, locationID, secretID); err != nil {
+	if err := regional_secretmanager.EditRegionalSecretLabel(&b, tc.ProjectID, locationID, secretID); err != nil {
 		t.Fatal(err)
 	}
 
