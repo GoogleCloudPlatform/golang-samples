@@ -14,7 +14,7 @@
 
 package firestore
 
-// [START firestore_vector_search_basic]
+// [START firestore_vector_search_distance_threshold]
 import (
 	"context"
 	"fmt"
@@ -56,4 +56,4 @@ func vectorSearchDistanceThreshold(w io.Writer, projectID string) error {
 	return nil
 }
 
-// [END firestore_vector_search_basic]
+// [END firestore_vector_search_distance_threshold]

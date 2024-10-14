@@ -54,6 +54,7 @@ func batchTextPredict(w io.Writer, projectID, location, name, outputURI string, 
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	req := &aiplatformpb.CreateBatchPredictionJobRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
