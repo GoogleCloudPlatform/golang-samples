@@ -366,7 +366,7 @@ func TestCreateRegionalSecretWithAnnotations(t *testing.T) {
 	}
 	defer testCleanupRegionalSecret(t, fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID))
 
-	if got, want := b.String(), "Created secret with annotations::"; !strings.Contains(got, want) {
+	if got, want := b.String(), "Created secret with annotations:"; !strings.Contains(got, want) {
 		t.Errorf("createSecret: expected %q to contain %q", got, want)
 	}
 }
