@@ -26,7 +26,7 @@ import (
 	iterator "google.golang.org/api/iterator"
 )
 
-// ListSecurityHealthAnalyticsCustomModule creates a custom module for Security Health Analytics.
+// listSecurityHealthAnalyticsCustomModule creates a custom module for Security Health Analytics.
 func listSecurityHealthAnalyticsCustomModule(w io.Writer, parent string) error {
 	// parent: Use any one of the following options:
 	// - organizations/{organization_id}/locations/{location_id}

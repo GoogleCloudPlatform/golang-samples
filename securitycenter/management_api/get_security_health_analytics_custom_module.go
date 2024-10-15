@@ -25,7 +25,7 @@ import (
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
 )
 
-// GetSecurityHealthAnalyticsCustomModule retrieves a specific custom module by its name.
+// getSecurityHealthAnalyticsCustomModule retrieves a specific custom module by its name.
 func getSecurityHealthAnalyticsCustomModule(w io.Writer, parent string, customModuleID string) error {
 	// parent: Use any one of the following options:
 	//             - organizations/{organization_id}/locations/{location_id}
