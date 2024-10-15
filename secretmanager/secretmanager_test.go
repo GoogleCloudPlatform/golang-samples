@@ -102,7 +102,7 @@ func testSecret(tb testing.TB, projectID string) *secretmanagerpb.Secret {
 				"labelkey": "labelvalue",
 			},
 			Annotations: map[string]string{
-				"annotationkey": "annotationvalie",
+				"annotationkey": "annotationvalue",
 			},
 		},
 	})
@@ -366,7 +366,7 @@ func TestCreateRegionalSecretWithAnnotations(t *testing.T) {
 	}
 	defer testCleanupRegionalSecret(t, fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID))
 
-	if got, want := b.String(), "Created regional secret with annotations::"; !strings.Contains(got, want) {
+	if got, want := b.String(), "Created secret with annotations::"; !strings.Contains(got, want) {
 		t.Errorf("createSecret: expected %q to contain %q", got, want)
 	}
 }
@@ -1349,7 +1349,7 @@ func TestEditSecretAnnotations(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got, want := s.Annotations, map[string]string{"annotationkey": "annotationvalue"}; !reflect.DeepEqual(got, want) {
+	if got, want := s.Annotations, map[string]string{"annotationkey": "updatedannotationvalue"}; !reflect.DeepEqual(got, want) {
 		t.Errorf("editSecretAnnotation: expected %q to be %q", got, want)
 	}
 }
