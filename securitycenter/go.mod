@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/iam v1.2.0
 	cloud.google.com/go/pubsub v1.42.0
 	cloud.google.com/go/securitycenter v1.35.0
+	cloud.google.com/go/securitycentermanagement v1.1.1
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
 	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
@@ -20,7 +21,6 @@ require (
 	cloud.google.com/go/auth/oauth2adapt v0.2.4 // indirect
 	cloud.google.com/go/compute/metadata v0.5.0 // indirect
 	cloud.google.com/go/longrunning v0.6.0 // indirect
-	cloud.google.com/go/securitycentermanagement v1.1.1 // indirect
 	cloud.google.com/go/storage v1.43.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
