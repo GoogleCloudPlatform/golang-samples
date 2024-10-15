@@ -14,7 +14,7 @@
 
 package management_api
 
-// [START securitycenter_management_api_update_security_health_analytics_custom_module]
+// [START securitycenter_management_api_list_security_health_analytics_custom_module]
 
 import (
 	"context"
@@ -59,4 +59,4 @@ func listSecurityHealthAnalyticsCustomModule(w io.Writer, parent string) error {
 	return nil
 }
 
-// [END securitycenter_management_api_update_security_health_analytics_custom_module]
+// [END securitycenter_management_api_list_security_health_analytics_custom_module]

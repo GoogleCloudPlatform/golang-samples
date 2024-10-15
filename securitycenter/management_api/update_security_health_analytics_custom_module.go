@@ -42,7 +42,7 @@ func updateSecurityHealthAnalyticsCustomModule(w io.Writer, parent string, custo
 
 	// Define the custom module configuration
 	customModule := &securitycentermanagementpb.SecurityHealthAnalyticsCustomModule{
-		Name: fmt.Sprintf("%s/securityHealthAnalyticsCustomModules/%s", parent, customModuleID),
+		Name:            fmt.Sprintf("%s/securityHealthAnalyticsCustomModules/%s", parent, customModuleID),
 		EnablementState: securitycentermanagementpb.SecurityHealthAnalyticsCustomModule_DISABLED,
 	}
 

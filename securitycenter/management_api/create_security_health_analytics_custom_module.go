@@ -66,14 +66,14 @@ func createSecurityHealthAnalyticsCustomModule(w io.Writer, parent string) error
 			ResourceSelector: &securitycentermanagementpb.CustomConfig_ResourceSelector{
 				ResourceTypes: []string{"cloudkms.googleapis.com/CryptoKey"},
 			},
-			Severity:    securitycentermanagementpb.CustomConfig_CRITICAL,
+			Severity: securitycentermanagementpb.CustomConfig_CRITICAL,
 		},
-		DisplayName: "go_sample_custom_module", //Replace with desired Display Name.
+		DisplayName:     "go_sample_custom_module", //Replace with desired Display Name.
 		EnablementState: securitycentermanagementpb.SecurityHealthAnalyticsCustomModule_ENABLED,
 	}
 
 	req := &securitycentermanagementpb.CreateSecurityHealthAnalyticsCustomModuleRequest{
-		Parent:                    parent,
+		Parent:                              parent,
 		SecurityHealthAnalyticsCustomModule: customModule,
 	}
 
