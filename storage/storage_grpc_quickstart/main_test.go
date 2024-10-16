@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	testPrefix      = "test-gcs-grpc-team"
+	testPrefix      = "storage-grpc-quickstart-test"
 	bucketExpiryAge = time.Hour * 24
 )
 
