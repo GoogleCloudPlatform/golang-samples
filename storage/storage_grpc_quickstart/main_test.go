@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	testPrefix      = "storage-grpc-quickstart-test"
+	testPrefix      = "test-gcs-grpc-team"
 	bucketExpiryAge = time.Hour * 24
 )
 
@@ -59,6 +59,11 @@ func TestGRPCQuickstart(t *testing.T) {
 		t.Errorf("stdout: %v", string(stdOut[:]))
 		t.Errorf("stderr: %v", string(stdErr[:]))
 		t.Errorf("execution failed: %v", err)
+	}
+
+	strStdErr := string(stdErr[:])
+	if got, want := strStdErr, "Failed to enable client metrics"; strings.Contains(got, want) {
+		t.Errorf("got output: %q, want to contain: %q", got, want)
 	}
 
 	if got, want := string(stdOut[:]), fmt.Sprintf("Bucket %v", bucketName); !strings.Contains(got, want) {
