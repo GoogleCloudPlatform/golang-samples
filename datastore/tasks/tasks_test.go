@@ -27,14 +27,15 @@ import (
 )
 
 var client *datastore.Client
+var databaseID = ""
 
 func TestMain(m *testing.M) {
 	ctx := context.Background()
 	if tc, ok := testutil.ContextMain(m); ok {
 		var err error
-		client, err = datastore.NewClient(ctx, tc.ProjectID)
+		client, err = datastore.NewClientWithDatabase(ctx, tc.ProjectID, databaseID)
 		if err != nil {
-			log.Fatalf("datastore.NewClient: %v", err)
+			log.Fatalf("datastore.NewClientWithDatabase: %v", err)
 		}
 		defer client.Close()
 	}
@@ -50,16 +51,16 @@ func TestAddMarkDelete(t *testing.T) {
 
 	desc := makeDesc()
 
-	k, err := AddTask(tc.ProjectID, desc)
+	k, err := AddTask(tc.ProjectID, databaseID, desc)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := MarkDone(tc.ProjectID, k.ID); err != nil {
+	if err := MarkDone(tc.ProjectID, databaseID, k.ID); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := DeleteTask(tc.ProjectID, k.ID); err != nil {
+	if err := DeleteTask(tc.ProjectID, databaseID, k.ID); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -71,12 +72,12 @@ func TestList(t *testing.T) {
 
 	desc := makeDesc()
 
-	k, err := AddTask(tc.ProjectID, desc)
+	k, err := AddTask(tc.ProjectID, databaseID, desc)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	foundTask, err := listAndGetTask(tc.ProjectID, desc)
+	foundTask, err := listAndGetTask(tc.ProjectID, databaseID, desc)
 	if err != nil {
 		t.Error(err)
 	}
@@ -84,11 +85,11 @@ func TestList(t *testing.T) {
 		t.Errorf("k.ID: got %d, want %d", got, want)
 	}
 
-	if err := MarkDone(tc.ProjectID, foundTask.id); err != nil {
+	if err := MarkDone(tc.ProjectID, databaseID, foundTask.id); err != nil {
 		t.Fatal(err)
 	}
 
-	foundTask, err = listAndGetTask(tc.ProjectID, desc)
+	foundTask, err = listAndGetTask(tc.ProjectID, databaseID, desc)
 	if err != nil {
 		t.Error(err)
 	}
@@ -96,14 +97,14 @@ func TestList(t *testing.T) {
 		t.Error("foundTask.Done: got false, want true")
 	}
 
-	if err := DeleteTask(tc.ProjectID, foundTask.id); err != nil {
+	if err := DeleteTask(tc.ProjectID, databaseID, foundTask.id); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func listAndGetTask(projectID string, desc string) (*Task, error) {
+func listAndGetTask(projectID string, databaseID string, desc string) (*Task, error) {
 
-	tasks, err := ListTasks(projectID)
+	tasks, err := ListTasks(projectID, databaseID)
 	if err != nil {
 		return nil, err
 	}
