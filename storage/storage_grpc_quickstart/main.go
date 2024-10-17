@@ -44,7 +44,7 @@ func main() {
 	defer client.Close()
 
 	// Creates the new bucket.
-	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	if err := client.Bucket(*bucketName).Create(ctx, *projectID, nil); err != nil {
 		log.Fatalf("Failed to create bucket: %v", err)

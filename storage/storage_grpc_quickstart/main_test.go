@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -39,7 +38,6 @@ func TestGRPCQuickstart(t *testing.T) {
 	if !m.Built() {
 		t.Fatalf("failed to build app")
 	}
-	os.Setenv("GOOGLE_CLOUD_DISABLE_DIRECT_PATH", "true")
 	ctx := context.Background()
 	client, err := storage.NewGRPCClient(ctx)
 	if err != nil {
