@@ -91,4 +91,58 @@ func TestTPU(t *testing.T) {
 			t.Errorf("deleteTpuNode got %q, want %q", got, expectedResult)
 		}
 	})
+
+	t.Run("List TPUs", func(t *testing.T) {
+		buf.Reset()
+		nodeName := "test-" + fmt.Sprint(seededRand.Int())
+		nodeFullName := resourceName + nodeName
+
+		err := createTPUNode(&buf, tc.ProjectID, location, nodeName)
+		if err != nil {
+			t.Errorf("failed to create node: %v", err)
+		}
+		defer deleteTPUNode(&buf, tc.ProjectID, location, nodeName)
+
+		err = listTPUNodes(&buf, tc.ProjectID, location)
+		if err != nil {
+			t.Errorf("failed to get list of nodes: %v", err)
+		}
+
+		expectedResult := fmt.Sprintf("- %s", nodeFullName)
+		if got := buf.String(); !strings.Contains(got, expectedResult) {
+			t.Errorf("listTPUNodes got %q, want %q", got, expectedResult)
+		}
+	})
+
+	t.Run("Start stop TPUs", func(t *testing.T) {
+		buf.Reset()
+		nodeName := "test-" + fmt.Sprint(seededRand.Int())
+		nodeFullName := resourceName + nodeName
+
+		err := createTPUNode(&buf, tc.ProjectID, location, nodeName)
+		if err != nil {
+			t.Errorf("failed to create node: %v", err)
+		}
+		defer deleteTPUNode(&buf, tc.ProjectID, location, nodeName)
+
+		err = stopTPUNode(&buf, nodeFullName)
+		if err != nil {
+			t.Errorf("failed to stop the node: %v", err)
+		}
+
+		expectedResult := fmt.Sprintf("Node %s is stopped", nodeFullName)
+		if got := buf.String(); !strings.Contains(got, expectedResult) {
+			t.Errorf("stopTPUNode got %q, want %q", got, expectedResult)
+		}
+
+		err = startTPUNode(&buf, nodeFullName)
+		if err != nil {
+			t.Errorf("failed to start the node: %v", err)
+		}
+
+		expectedResult = fmt.Sprintf("Node %s is started", nodeFullName)
+		if got := buf.String(); !strings.Contains(got, expectedResult) {
+			t.Errorf("startTPUNode got %q, want %q", got, expectedResult)
+		}
+	})
 }
