@@ -43,3 +43,23 @@ func (client ReservationsClient) Insert(context.Context, *computepb.InsertReserv
 func (client ReservationsClient) Delete(context.Context, *computepb.DeleteReservationRequest, ...gax.CallOption) (*compute.Operation, error) {
 	return nil, nil
 }
+
+type InstanceClientInterface interface {
+	Close() error
+	Delete(context.Context, *computepb.DeleteInstanceRequest, ...gax.CallOption) (*compute.Operation, error)
+	Insert(context.Context, *computepb.InsertInstanceRequest, ...gax.CallOption) (*compute.Operation, error)
+}
+
+type InstanceClient struct{}
+
+func (client InstanceClient) Close() error {
+	return nil
+}
+
+func (client InstanceClient) Insert(context.Context, *computepb.InsertInstanceRequest, ...gax.CallOption) (*compute.Operation, error) {
+	return nil, nil
+}
+
+func (client InstanceClient) Delete(context.Context, *computepb.DeleteInstanceRequest, ...gax.CallOption) (*compute.Operation, error) {
+	return nil, nil
+}

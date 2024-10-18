@@ -139,6 +139,47 @@ func deleteInstanceTemplate(project, templateName string) error {
 	return op.Wait(ctx)
 }
 
+func createSpecificSharedReservation(client ClientInterface, projectID, baseProjectId, zone, reservationName string) error {
+	ctx := context.Background()
+
+	shareSettings := map[string]*computepb.ShareSettingsProjectConfig{
+		projectID: {ProjectId: proto.String(projectID)},
+	}
+
+	req := &computepb.InsertReservationRequest{
+		Project: baseProjectId,
+		ReservationResource: &computepb.Reservation{
+			Name: proto.String(reservationName),
+			Zone: proto.String(zone),
+			SpecificReservation: &computepb.AllocationSpecificSKUReservation{
+				Count: proto.Int64(2),
+				InstanceProperties: &computepb.AllocationSpecificSKUAllocationReservedInstanceProperties{
+					MachineType:    proto.String("n2-standard-32"),
+					MinCpuPlatform: proto.String("Intel Cascade Lake"),
+				},
+			},
+			ShareSettings: &computepb.ShareSettings{
+				ProjectMap: shareSettings,
+				ShareType:  proto.String("SPECIFIC_PROJECTS"),
+			},
+			SpecificReservationRequired: proto.Bool(true),
+		},
+		Zone: zone,
+	}
+
+	op, err := client.Insert(ctx, req)
+	if err != nil {
+		return fmt.Errorf("unable to create reservation: %w", err)
+	}
+
+	if op != nil {
+		if err = op.Wait(ctx); err != nil {
+			return fmt.Errorf("unable to wait for the operation: %w", err)
+		}
+	}
+	return nil
+}
+
 func TestReservations(t *testing.T) {
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
@@ -373,6 +414,79 @@ func TestReservations(t *testing.T) {
 		}
 		if err := deleteReservation(&buf, tc.ProjectID, zone, reservationName); err != nil {
 			t.Errorf("deleteReservation got err: %v", err)
+		}
+	})
+}
+
+func TestConsumeReservations(t *testing.T) {
+	var r *rand.Rand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+	tc := testutil.SystemTest(t)
+	zone := "europe-west2-b"
+	instanceName := fmt.Sprintf("test-instance-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+
+	var buf bytes.Buffer
+
+	t.Run("Consume sprecific shared reservation", func(t *testing.T) {
+		reservationName := fmt.Sprintf("test-reservation-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		baseProjectID := tc.ProjectID
+		// This test require 2 projects, therefore one of them is mocked.
+		// If you want to make a real test, please adjust destinationProjectID accordingly and uncomment reservationsClient creation.
+		// Make sure that project has proper permissions to share reservations.
+		// See: https://cloud.google.com/compute/docs/instances/reservations-shared#shared_reservation_constraint
+		destinationProjectID := "softserve-shared"
+		ctx := context.Background()
+
+		reservationsClient := ReservationsClient{}
+		// Uncomment lines below if you want to run the test without mocks
+		//
+		// reservationsClient, err := compute.NewReservationsRESTClient(ctx)
+		// if err != nil {
+		// 	t.Errorf("Couldn't create reservationsClient, err: %v", err)
+		// }
+		// defer reservationsClient.Close()
+
+		if err := createSpecificSharedReservation(reservationsClient, baseProjectID, destinationProjectID, zone, reservationName); err != nil {
+			t.Errorf("createSpecificSharedReservation got err: %v", err)
+		}
+
+		instanceClient := InstanceClient{}
+		// Uncomment lines below if you want to run the test without mocks
+		//
+		// instanceClient, err := compute.NewInstancesRESTClient(ctx)
+		// if err != nil {
+		// 	t.Errorf("Couldn't create instanceClient, err: %v", err)
+		// }
+		// defer instanceClient.Close()
+
+		if err := consumeSpecificSharedReservation(&buf, instanceClient, baseProjectID, destinationProjectID, zone, instanceName, reservationName); err != nil {
+			t.Errorf("consumeSpecificSharedReservation got err: %v", err)
+		}
+
+		want := "Instance created from shared reservation"
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("consumeSpecificSharedReservation got %s, want %s", got, want)
+		}
+
+		req := &computepb.DeleteInstanceRequest{
+			Instance: instanceName,
+			Project:  baseProjectID,
+			Zone:     zone,
+		}
+		_, err := instanceClient.Delete(ctx, req)
+		if err != nil {
+			t.Errorf("unable to delete reservation: %v", err)
+		}
+
+		req2 := &computepb.DeleteReservationRequest{
+			Project:     destinationProjectID,
+			Reservation: reservationName,
+			Zone:        zone,
+		}
+
+		_, err = reservationsClient.Delete(ctx, req2)
+		if err != nil {
+			t.Errorf("unable to delete reservation: %v", err)
 		}
 	})
 }
