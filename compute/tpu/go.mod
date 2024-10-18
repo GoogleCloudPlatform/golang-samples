@@ -5,6 +5,7 @@ go 1.21
 require (
 	cloud.google.com/go/tpu v1.7.1
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20241002171418-7c4f707f8e6b
+	google.golang.org/api v0.196.0
 )
 
 require (
@@ -36,7 +37,6 @@ require (
 	golang.org/x/sys v0.25.0 // indirect
 	golang.org/x/text v0.18.0 // indirect
 	golang.org/x/time v0.6.0 // indirect
-	google.golang.org/api v0.196.0 // indirect
 	google.golang.org/genproto v0.0.0-20240930140551-af27646dc61f // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240924160255-9d4c2d233b61 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240924160255-9d4c2d233b61 // indirect
