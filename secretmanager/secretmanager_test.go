@@ -120,6 +120,11 @@ func testRegionalSecret(tb testing.TB, projectID string) (*secretmanagerpb.Secre
 	secret, err := client.CreateSecret(ctx, &secretmanagerpb.CreateSecretRequest{
 		Parent:   fmt.Sprintf("projects/%s/locations/%s", projectID, locationID),
 		SecretId: secretID,
+		Secret: &secretmanagerpb.Secret{
+			Labels: map[string]string{
+				"labelkey": "labelvalue",
+			},
+		},
 	})
 	if err != nil {
 		tb.Fatalf("testSecret: failed to create secret: %v", err)
@@ -327,6 +332,7 @@ func TestCreateSecretWithLabels(t *testing.T) {
 		t.Errorf("createSecretWithLabels: expected %q to contain %q", got, want)
 	}
 }
+
 func TestCreateRegionalSecret(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
