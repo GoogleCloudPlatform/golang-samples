@@ -27,7 +27,7 @@ import (
 
 // getSecret gets information about the given secret. This only returns metadata
 // about the secret container, not any secret material.
-func ViewRegionalSecretLabels(w io.Writer, projectId, locationId, secretId string) error {
+func viewRegionalSecretLabels(w io.Writer, projectId, locationId, secretId string) error {
 	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
 
 	// Create the client.

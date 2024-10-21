@@ -27,7 +27,7 @@ import (
 )
 
 // deleteSecret updates the metadata about an existing secret and remove an existing label.
-func DeleteRegionalSecretLabel(w io.Writer, projectId, locationId, secretId string) error {
+func deleteRegionalSecretLabel(w io.Writer, projectId, locationId, secretId string) error {
 	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
 
 	labelKey := "labelkey"

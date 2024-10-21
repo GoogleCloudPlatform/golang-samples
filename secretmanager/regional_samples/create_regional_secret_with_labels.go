@@ -26,7 +26,7 @@ import (
 )
 
 // createSecretWithLabels creates a new secret with the given name and labels.
-func CreateRegionalSecretWithLabels(w io.Writer, projectId, locationId, secretId string) error {
+func createRegionalSecretWithLabels(w io.Writer, projectId, locationId, secretId string) error {
 	parent := fmt.Sprintf("projects/%s/locations/%s", projectId, locationId)
 
 	labelKey := "labelkey"

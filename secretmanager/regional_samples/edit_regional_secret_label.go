@@ -28,7 +28,7 @@ import (
 
 // editSecretLabel updates the labels about an existing secret.
 // If the label key exists, it updates the label, otherwise it creates a new one.
-func EditRegionalSecretLabel(w io.Writer, projectId, locationId, secretId string) error {
+func editRegionalSecretLabel(w io.Writer, projectId, locationId, secretId string) error {
 	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
 
 	labelKey := "labelkey"
