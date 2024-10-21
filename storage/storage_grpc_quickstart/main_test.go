@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	testPrefix      = "test-gcs-grpc-team"
+	testPrefix      = "golang-grpc-test"
 	bucketExpiryAge = time.Hour * 24
 )
 
