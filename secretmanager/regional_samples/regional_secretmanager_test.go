@@ -82,8 +82,8 @@ func testRegionalSecret(tb testing.TB, projectID string) (*secretmanagerpb.Secre
 		Parent:   fmt.Sprintf("projects/%s/locations/%s", projectID, locationID),
 		SecretId: secretID,
 		Secret: &secretmanagerpb.Secret{
-			Annotations: map[string]string{
-				"annotationkey": "annotationvalue",
+			Labels: map[string]string{
+				"labelkey": "labelvalue",
 			},
 		},
 	})
