@@ -39,7 +39,7 @@ func TestGRPCQuickstart(t *testing.T) {
 		t.Fatalf("failed to build app")
 	}
 	ctx := context.Background()
-	client, err := storage.NewGRPCClient(ctx)
+	client, err := storage.NewGRPCClient(ctx, storage.WithDisabledClientMetrics())
 	if err != nil {
 		t.Fatalf("storage.NewGRPCClient: %v", err)
 	}
