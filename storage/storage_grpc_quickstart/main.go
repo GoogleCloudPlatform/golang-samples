@@ -37,7 +37,7 @@ func main() {
 	flag.Parse()
 
 	// Creates a gRPC enabled client.
-	client, err := storage.NewGRPCClient(ctx)
+	client, err := storage.NewGRPCClient(ctx, storage.WithDisabledClientMetrics())
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
