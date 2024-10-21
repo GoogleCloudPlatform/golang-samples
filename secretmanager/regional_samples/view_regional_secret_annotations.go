@@ -26,7 +26,7 @@ import (
 )
 
 // viewRegionalSecretAnnotations gets annotations with the given secret.
-func ViewRegionalSecretAnnotations(w io.Writer, projectId, locationId, secretId string) error {
+func viewRegionalSecretAnnotations(w io.Writer, projectId, locationId, secretId string) error {
 	// name := "projects/my-project/secrets/my-secret"
 
 	ctx := context.Background()

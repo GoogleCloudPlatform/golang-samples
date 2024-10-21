@@ -26,7 +26,7 @@ import (
 )
 
 // createRegionalSecretWithAnnotations creates a new secret with the given name and annotations.
-func CreateRegionalSecretWithAnnotations(w io.Writer, projectId, locationId, secretId string) error {
+func createRegionalSecretWithAnnotations(w io.Writer, projectId, locationId, secretId string) error {
 	// parent := "projects/my-project"
 	// id := "my-secret"
 

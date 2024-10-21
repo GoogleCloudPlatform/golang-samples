@@ -28,7 +28,7 @@ import (
 
 // editRegionalSecretAnnotations updates the annotations about an existing secret.
 // If the annotation key exists, it updates the annotation, otherwise it creates a new one.
-func EditRegionalSecretAnnotation(w io.Writer, projectId, locationId, secretId string) error {
+func editRegionalSecretAnnotation(w io.Writer, projectId, locationId, secretId string) error {
 	// name := "projects/my-project/secrets/my-secret"
 
 	annotationKey := "annotationkey"
