@@ -60,9 +60,8 @@ func TestGRPCQuickstart(t *testing.T) {
 		t.Errorf("execution failed: %v", err)
 	}
 
-	strStdErr := string(stdErr[:])
-	if got, want := strStdErr, "Failed to enable client metrics"; strings.Contains(got, want) {
-		t.Errorf("got output: %q, want to contain: %q", got, want)
+	if got, notWant := string(stdErr[:]), "Failed to enable client metrics"; strings.Contains(got, notWant) {
+		t.Errorf("got output: %q which should not contain: %q", got, notWant)
 	}
 
 	if got, want := string(stdOut[:]), fmt.Sprintf("Bucket %v", bucketName); !strings.Contains(got, want) {
