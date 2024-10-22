@@ -16,7 +16,7 @@
 
 // Sample storage-quickstart creates a Google Cloud Storage bucket using
 // gRPC API.
-package grpc_example
+package main
 
 import (
 	"context"
