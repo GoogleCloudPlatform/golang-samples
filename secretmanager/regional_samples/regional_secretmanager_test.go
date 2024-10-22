@@ -84,7 +84,7 @@ func testRegionalSecret(tb testing.TB, projectID string) (*secretmanagerpb.Secre
 		Secret: &secretmanagerpb.Secret{
 			Annotations: map[string]string{
 				"annotationkey": "annotationvalue",
-      },
+			},
 			Labels: map[string]string{
 				"labelkey": "labelvalue",
 			},
