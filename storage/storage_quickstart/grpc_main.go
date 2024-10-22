@@ -16,11 +16,10 @@
 
 // Sample storage-quickstart creates a Google Cloud Storage bucket using
 // gRPC API.
-package main
+package grpc_example
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"log"
 	"time"
@@ -31,13 +30,12 @@ import (
 func main() {
 	ctx := context.Background()
 
-	// Expects Google Cloud Platform project ID and Cloud Storage bucket
-	projectID := flag.String("project", "", "Cloud Platform project id")
-	bucketName := flag.String("bucket", "", "Cloud Storage bucket name")
-	flag.Parse()
+	// Use your Google Cloud Platform project ID and Cloud Storage bucket
+	projectID := "project-id"
+	bucketName := "bucket-name"
 
 	// Creates a gRPC enabled client.
-	client, err := storage.NewGRPCClient(ctx, storage.WithDisabledClientMetrics())
+	client, err := storage.NewGRPCClient(ctx)
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
@@ -46,11 +44,11 @@ func main() {
 	// Creates the new bucket.
 	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
 	defer cancel()
-	if err := client.Bucket(*bucketName).Create(ctx, *projectID, nil); err != nil {
+	if err := client.Bucket(bucketName).Create(ctx, projectID, nil); err != nil {
 		log.Fatalf("Failed to create bucket: %v", err)
 	}
 
-	fmt.Printf("Bucket %v created.\n", *bucketName)
+	fmt.Printf("Bucket %v created.\n", bucketName)
 }
 
 // [END storage_grpc_quickstart]
