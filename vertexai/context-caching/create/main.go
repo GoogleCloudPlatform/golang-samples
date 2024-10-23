@@ -82,7 +82,8 @@ func CreateContextCache(w io.Writer, projectID, location, modelName string) (str
 // [END generativeaionvertexai_gemini_create_context_cache]
 
 func main() {
-	res, err := CreateContextCache(os.Stdout, "fluxon-vertex-cookbook", "us-central1", "gemini-1.5-pro-001")
+	// TODO(developer): Update the argument values
+	res, err := CreateContextCache(os.Stdout, "acme-corp-dev", "us-central1", "gemini-1.5-pro-001")
 	fmt.Println("Result:", res)
 	fmt.Println("Error:", err)
 }

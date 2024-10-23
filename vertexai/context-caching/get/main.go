@@ -50,8 +50,9 @@ func GetContextCache(w io.Writer, contentName string, projectID, location string
 func main() {
 	err := GetContextCache(
 		os.Stdout,
-		"projects/194431356823/locations/us-central1/cachedContents/7081928006226149376",
-		"fluxon-vertex-cookbook",
+		// TODO(developer): Update the argument values
+		"projects/[PROJECT_ID]/locations/us-central1/cachedContents/[CACHE_ID]",
+		"acme-corp-dev",
 		"us-central1",
 	)
 	if err != nil {
