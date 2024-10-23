@@ -209,7 +209,7 @@ func TestDeleteCustomModule(t *testing.T) {
 
 	if err != nil {
 		t.Fatalf("deleteSecurityHealthAnalyticsCustomModule() had error: %v", err)
-		return
+    		return
 	}
 
 	got := buf.String()
@@ -218,6 +218,28 @@ func TestDeleteCustomModule(t *testing.T) {
 		t.Fatalf("deleteSecurityHealthAnalyticsCustomModule() got: %s want %s", got, createdCustomModuleID)
 	}
 }
+
+// TestCreateCustomModule verifies the Create functionality
+func TestCreateCustomModule(t *testing.T) {
+	buf := new(bytes.Buffer)
+
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+
+	// Call Create
+	err := createSecurityHealthAnalyticsCustomModule(buf, parent)
+
+	if err != nil {
+		      t.Fatalf("createCustomModule() had error: %v", err)
+		      return
+	}
+
+	got := buf.String()
+
+	if !strings.Contains(got, orgID) {
+		t.Fatalf("createCustomModule() got: %s want %s", got, orgID)
+	}
+}
+
 
 // TestListDescendantCustomModule verifies the List Descendant functionality
 func TestListDescendantCustomModule(t *testing.T) {
@@ -244,6 +266,35 @@ func TestListDescendantCustomModule(t *testing.T) {
 
 	if !strings.Contains(got, orgID) {
 		t.Fatalf("listDescendantSecurityHealthAnalyticsCustomModule() got: %s want %s", got, orgID)
+	}
+}
+
+// TestGetCustomModule verifies the Get functionality
+func TestGetCustomModule(t *testing.T) {
+	buf := new(bytes.Buffer)
+
+	createdCustomModuleID, err := addCustomModule()
+
+	if err != nil {
+		t.Fatalf("Could not setup test environment: %v", err)
+		return
+	}
+
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+
+	// Call Get
+	err = getSecurityHealthAnalyticsCustomModule(buf, parent, createdCustomModuleID)
+
+	if err != nil {
+		t.Fatalf("getSecurityHealthAnalyticsCustomModule() had error: %v", err)
+		return
+	}
+
+	got := buf.String()
+	fmt.Printf("Response: %v\n", got)
+
+	if !strings.Contains(got, orgID) {
+		t.Fatalf("getSecurityHealthAnalyticsCustomModule() got: %s want %s", got, orgID)
 	}
 }
 
@@ -296,6 +347,33 @@ func TestListEffectiveCustomModule(t *testing.T) {
 	}
 }
 
+// TestUpdateCustomModule verifies the Update functionality
+func TestUpdateCustomModule(t *testing.T) {
+	buf := new(bytes.Buffer)
+
+	createdCustomModuleID, err := addCustomModule()
+
+	if err != nil {
+		t.Fatalf("Could not setup test environment: %v", err)
+		return
+	}
+
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+  // Call Update
+	err = updateSecurityHealthAnalyticsCustomModule(buf, parent, createdCustomModuleID)
+
+	if err != nil {
+		t.Fatalf("updateSecurityHealthAnalyticsCustomModule() had error: %v", err)
+		return
+	}
+
+	got := buf.String()
+
+	if !strings.Contains(got, orgID) {
+		t.Fatalf("updateCustomModule() got: %s want %s", got, orgID)
+	}
+}
+
 // TestGetEffectiveCustomModule verifies the Get Effective functionality
 func TestGetEffectiveCustomModule(t *testing.T) {
 	buf := new(bytes.Buffer)
@@ -322,5 +400,33 @@ func TestGetEffectiveCustomModule(t *testing.T) {
 
 	if !strings.Contains(got, orgID) {
 		t.Fatalf("getEffectiveSecurityHealthAnalyticsCustomModule() got: %s want %s", got, orgID)
+	}
+}
+
+// TestListCustomModule verifies the List functionality
+func TestListCustomModule(t *testing.T) {
+	buf := new(bytes.Buffer)
+
+	_, err := addCustomModule()
+
+	if err != nil {
+		t.Fatalf("Could not setup test environment: %v", err)
+		return
+	}
+
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+
+	err = listSecurityHealthAnalyticsCustomModule(buf, parent)
+
+	if err != nil {
+		t.Fatalf("listSecurityHealthAnalyticsCustomModule() had error: %v", err)
+		return
+	}
+
+	got := buf.String()
+	fmt.Printf("Response: %v\n", got)
+
+	if !strings.Contains(got, orgID) {
+		t.Fatalf("listSecurityHealthAnalyticsCustomModule() got: %s want %s", got, orgID)
 	}
 }

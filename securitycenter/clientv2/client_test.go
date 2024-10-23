@@ -1,5 +1,4 @@
-//
-// Copyright 2015 Google Inc.
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,26 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-syntax = "proto3";
+package clientv2
 
-option java_multiple_files = true;
-option java_package = "io.grpc.examples.helloworld";
-option java_outer_classname = "HelloWorldProto";
+import (
+	"os"
+	"testing"
+)
 
-package helloworld;
-
-// The greeting service definition.
-service Greeter {
-  // Sends a greeting
-  rpc SayHello (HelloRequest) returns (HelloReply) {}
+func TestMain(m *testing.M) {
+	code := m.Run()
+	os.Exit(code)
 }
 
-// The request message containing the user's name.
-message HelloRequest {
-  string name = 1;
-}
-
-// The response message containing the greetings
-message HelloReply {
-  string message = 1;
+func TestCreateClientWithEndpoint(t *testing.T) {
+	loc := "me-central2"
+	err := createClientWithEndpoint(loc)
+	if err != nil {
+		t.Errorf("createClientWithEndpoint(%s) had error: %v", loc, err)
+	}
 }
