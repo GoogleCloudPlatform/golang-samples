@@ -209,7 +209,7 @@ func TestDeleteCustomModule(t *testing.T) {
 
 	if err != nil {
 		t.Fatalf("deleteSecurityHealthAnalyticsCustomModule() had error: %v", err)
-    		return
+		return
 	}
 
 	got := buf.String()
@@ -229,8 +229,8 @@ func TestCreateCustomModule(t *testing.T) {
 	err := createSecurityHealthAnalyticsCustomModule(buf, parent)
 
 	if err != nil {
-		      t.Fatalf("createCustomModule() had error: %v", err)
-		      return
+		t.Fatalf("createCustomModule() had error: %v", err)
+		return
 	}
 
 	got := buf.String()
@@ -239,7 +239,6 @@ func TestCreateCustomModule(t *testing.T) {
 		t.Fatalf("createCustomModule() got: %s want %s", got, orgID)
 	}
 }
-
 
 // TestListDescendantCustomModule verifies the List Descendant functionality
 func TestListDescendantCustomModule(t *testing.T) {
@@ -359,7 +358,7 @@ func TestUpdateCustomModule(t *testing.T) {
 	}
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
-  // Call Update
+	// Call Update
 	err = updateSecurityHealthAnalyticsCustomModule(buf, parent, createdCustomModuleID)
 
 	if err != nil {
