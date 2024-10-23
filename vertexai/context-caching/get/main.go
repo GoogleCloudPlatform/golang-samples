@@ -13,23 +13,22 @@
 // limitations under the License.
 
 // contextcaching shows an example of caching the tokens of a mulitple PDF prompt
-package contextcaching
+package get
 
-// [START generativeaionvertexai_gemini_use_context_cache]
+// [START generativeaionvertexai_gemini_get_context_cache]
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
+	"os"
 
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// useContextCache shows how to use an existing cached content, when prompting the model
-// contentName is the ID of the cached content
-func useContextCache(w io.Writer, contentName string, projectID, location, modelName string) error {
+// getContextCache shows how to retrieve the metadata of a cached content
+// contentName is the ID of the cached content to retrieve
+func GetContextCache(w io.Writer, contentName string, projectID, location string) error {
 	// location := "us-central1"
-	// modelName := "gemini-1.5-pro-001"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
@@ -38,22 +37,24 @@ func useContextCache(w io.Writer, contentName string, projectID, location, model
 	}
 	defer client.Close()
 
-	model := client.GenerativeModel(modelName)
-	model.CachedContentName = contentName
-	prompt := genai.Text("What are the papers about?")
-
-	res, err := model.GenerateContent(ctx, prompt)
+	cachedContent, err := client.GetCachedContent(ctx, contentName)
 	if err != nil {
-		return fmt.Errorf("error generating content: %w", err)
+		return fmt.Errorf("GetCachedContent: %w", err)
 	}
-
-	if len(res.Candidates) == 0 ||
-		len(res.Candidates[0].Content.Parts) == 0 {
-		return errors.New("empty response from model")
-	}
-
-	fmt.Fprintf(w, "generated response: %s\n", res.Candidates[0].Content.Parts[0])
+	fmt.Fprintf(w, "Retrieved cached content %q", cachedContent.Name)
 	return nil
 }
 
-// [END generativeaionvertexai_gemini_use_context_cache]
+// [END generativeaionvertexai_gemini_get_context_cache]
+
+func main() {
+	err := GetContextCache(
+		os.Stdout,
+		"projects/194431356823/locations/us-central1/cachedContents/7081928006226149376",
+		"fluxon-vertex-cookbook",
+		"us-central1",
+	)
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+}

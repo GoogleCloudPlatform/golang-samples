@@ -7,6 +7,14 @@ require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
 )
 
+replace (
+  github.com/GoogleCloudPlatform/golang-samples/vertexai/context-caching/create => ./create
+  github.com/GoogleCloudPlatform/golang-samples/vertexai/context-caching/get => ./get
+  github.com/GoogleCloudPlatform/golang-samples/vertexai/context-caching/update => ./update
+  github.com/GoogleCloudPlatform/golang-samples/vertexai/context-caching/delete => ./delete
+  github.com/GoogleCloudPlatform/golang-samples/vertexai/context-caching/use => ./use
+)
+
 require (
 	cloud.google.com/go v0.115.0 // indirect
 	cloud.google.com/go/aiplatform v1.68.0 // indirect

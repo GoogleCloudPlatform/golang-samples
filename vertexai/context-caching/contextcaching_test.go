@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package contextcaching
+package contextcaching_test
 
 import (
 	"bytes"
@@ -23,6 +23,12 @@ import (
 
 	"cloud.google.com/go/vertexai/genai"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+
+	create "github.com/GoogleCloudPlatform/golang-samples/vertexai/context-caching/create"
+	delete "github.com/GoogleCloudPlatform/golang-samples/vertexai/context-caching/delete"
+	get "github.com/GoogleCloudPlatform/golang-samples/vertexai/context-caching/get"
+	update "github.com/GoogleCloudPlatform/golang-samples/vertexai/context-caching/update"
+	use "github.com/GoogleCloudPlatform/golang-samples/vertexai/context-caching/use"
 )
 
 // TestContextCaching tests createContextCache, getContextCache, useContextCache,
@@ -35,21 +41,21 @@ func TestContextCaching(t *testing.T) {
 	modelName := "gemini-1.5-pro-001"
 
 	// 1) Create a cached content. The generated content name will be used in steps 2, 3, 4.
-	contentName, err := createContextCache(buf, tc.ProjectID, location, modelName)
+	contentName, err := create.CreateContextCache(buf, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Fatalf("createContextCache: %v", err.Error())
 	}
 
 	// 2) Retrieve the cached content, by its name.
 	buf.Reset()
-	err = getContextCache(buf, contentName, tc.ProjectID, location)
+	err = get.GetContextCache(buf, contentName, tc.ProjectID, location)
 	if err != nil {
 		t.Errorf("getContextCache: %v", err.Error())
 	}
 
 	// 3) Use the cached content, by calling the model with a prompt
 	buf.Reset()
-	err = useContextCache(buf, contentName, tc.ProjectID, location, modelName)
+	err = use.UseContextCache(buf, contentName, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Errorf("useContextCache: %v", err.Error())
 	}
@@ -60,7 +66,7 @@ func TestContextCaching(t *testing.T) {
 		t.Errorf("readExpiration original value: %v", err.Error())
 	}
 	buf.Reset()
-	err = updateContextCache(buf, contentName, tc.ProjectID, location)
+	err = update.UpdateContextCache(buf, contentName, tc.ProjectID, location)
 	if err != nil {
 		t.Errorf("updateContextCache: %v", err.Error())
 	}
@@ -78,13 +84,13 @@ func TestContextCaching(t *testing.T) {
 
 	// 5) Delete the cached content
 	buf.Reset()
-	err = deleteContextCache(buf, contentName, tc.ProjectID, location)
+	err = delete.DeleteContextCache(buf, contentName, tc.ProjectID, location)
 	if err != nil {
 		t.Errorf("deleteContextCache: %v", err.Error())
 	}
 	// The cached content must not exist anymore
 	buf.Reset()
-	err = getContextCache(buf, contentName, tc.ProjectID, location)
+	err = get.GetContextCache(buf, contentName, tc.ProjectID, location)
 	if err == nil {
 		t.Errorf("No error when retrieving deleted cached content: %s", buf.Bytes())
 	}

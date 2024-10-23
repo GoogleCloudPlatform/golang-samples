@@ -13,20 +13,23 @@
 // limitations under the License.
 
 // contextcaching shows an example of caching the tokens of a mulitple PDF prompt
-package contextcaching
+package update
 
-// [START generativeaionvertexai_gemini_get_context_cache]
+// [START generativeaionvertexai_gemini_update_context_cache]
 import (
 	"context"
 	"fmt"
 	"io"
+	"os"
+	"time"
 
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// getContextCache shows how to retrieve the metadata of a cached content
-// contentName is the ID of the cached content to retrieve
-func getContextCache(w io.Writer, contentName string, projectID, location string) error {
+// updateContextCache shows how to update the expiration time of a cached content, by specifying
+// a new TTL (time-to-live duration)
+// contentName is the ID of the cached content to update
+func UpdateContextCache(w io.Writer, contentName string, projectID, location string) error {
 	// location := "us-central1"
 	ctx := context.Background()
 
@@ -40,8 +43,27 @@ func getContextCache(w io.Writer, contentName string, projectID, location string
 	if err != nil {
 		return fmt.Errorf("GetCachedContent: %w", err)
 	}
-	fmt.Fprintf(w, "Retrieved cached content %q", cachedContent.Name)
-	return nil
+
+	update := &genai.CachedContentToUpdate{
+		Expiration: &genai.ExpireTimeOrTTL{TTL: 2 * time.Hour},
+	}
+
+	_, err = client.UpdateCachedContent(ctx, cachedContent, update)
+	fmt.Fprintf(w, "Updated cached content %q", contentName)
+	return err
 }
 
-// [END generativeaionvertexai_gemini_get_context_cache]
+// [END generativeaionvertexai_gemini_update_context_cache]
+
+
+func main() {
+	err := UpdateContextCache(
+		os.Stdout,
+		"projects/194431356823/locations/us-central1/cachedContents/7081928006226149376",
+		"fluxon-vertex-cookbook",
+		"us-central1",
+	)
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+}

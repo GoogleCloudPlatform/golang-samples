@@ -13,20 +13,21 @@
 // limitations under the License.
 
 // contextcaching shows an example of caching the tokens of a multimodal PDF prompt
-package contextcaching
+package create
 
 // [START generativeaionvertexai_gemini_create_context_cache]
 import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"time"
 
 	"cloud.google.com/go/vertexai/genai"
 )
 
 // createContextCache shows how to create a cached content, and returns its name.
-func createContextCache(w io.Writer, projectID, location, modelName string) (string, error) {
+func CreateContextCache(w io.Writer, projectID, location, modelName string) (string, error) {
 	// location := "us-central1"
 	// modelName := "gemini-1.5-pro-001"
 	ctx := context.Background()
@@ -71,11 +72,18 @@ func createContextCache(w io.Writer, projectID, location, modelName string) (str
 	}
 
 	result, err := client.CreateCachedContent(ctx, content)
+	// client.ListCachedContents()
 	if err != nil {
 		return "", fmt.Errorf("CreateCachedContent: %w", err)
 	}
 	fmt.Fprint(w, result.Name)
 	return result.Name, nil
 }
-
 // [END generativeaionvertexai_gemini_create_context_cache]
+
+func main() {
+	res, err := CreateContextCache(os.Stdout, "fluxon-vertex-cookbook", "us-central1", "gemini-1.5-pro-001")
+	fmt.Println("Result:", res)
+	fmt.Println("Error:", err)
+}
+

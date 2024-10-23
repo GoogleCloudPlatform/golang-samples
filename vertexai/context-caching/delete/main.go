@@ -13,22 +13,21 @@
 // limitations under the License.
 
 // contextcaching shows an example of caching the tokens of a mulitple PDF prompt
-package contextcaching
+package delete
 
-// [START generativeaionvertexai_gemini_update_context_cache]
+// [START generativeaionvertexai_gemini_delete_context_cache]
 import (
 	"context"
 	"fmt"
 	"io"
-	"time"
+	"os"
 
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// updateContextCache shows how to update the expiration time of a cached content, by specifying
-// a new TTL (time-to-live duration)
-// contentName is the ID of the cached content to update
-func updateContextCache(w io.Writer, contentName string, projectID, location string) error {
+// DeleteContextCache shows how to delete a cached content
+// contentName is the ID of the cached content
+func DeleteContextCache(w io.Writer, contentName string, projectID, location string) error {
 	// location := "us-central1"
 	ctx := context.Background()
 
@@ -38,18 +37,23 @@ func updateContextCache(w io.Writer, contentName string, projectID, location str
 	}
 	defer client.Close()
 
-	cachedContent, err := client.GetCachedContent(ctx, contentName)
+	err = client.DeleteCachedContent(ctx, contentName)
 	if err != nil {
-		return fmt.Errorf("GetCachedContent: %w", err)
+		return fmt.Errorf("DeleteCachedContent: %w", err)
 	}
-
-	update := &genai.CachedContentToUpdate{
-		Expiration: &genai.ExpireTimeOrTTL{TTL: 2 * time.Hour},
-	}
-
-	_, err = client.UpdateCachedContent(ctx, cachedContent, update)
-	fmt.Fprintf(w, "Updated cached content %q", contentName)
-	return err
+	fmt.Fprintf(w, "Deleted cached content %q", contentName)
+	return nil
 }
+// [END generativeaionvertexai_gemini_delete_context_cache]
 
-// [END generativeaionvertexai_gemini_update_context_cache]
+func main() {
+	err := DeleteContextCache(
+		os.Stdout,
+		"projects/194431356823/locations/us-central1/cachedContents/7081928006226149376",
+		"fluxon-vertex-cookbook",
+		"us-central1",
+	)
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+}
