@@ -57,7 +57,8 @@ func simulateSecurityHealthAnalyticsCustomModule(w io.Writer, parent string) err
 				},
 			},
 		},
-		Description: "Sample custom module for testing purpose. Please do not delete.", //Replace with the desired description.
+		//Replace with the desired description.
+		Description: "Sample custom module for testing purpose. Please do not delete.",
 		Predicate: &expr.Expr{
 			Expression:  "has(resource.rotationPeriod) && (resource.rotationPeriod > duration('2592000s'))",
 			Title:       "GCE Instance High Severity",

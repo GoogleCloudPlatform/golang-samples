@@ -64,8 +64,7 @@ func extractCustomModuleID(customModuleFullName string) string {
 
 // addCustomModule creates a custom module for testing purposes
 func addCustomModule() (string, error) {
-
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
@@ -118,7 +117,7 @@ func addCustomModule() (string, error) {
 		return "", fmt.Errorf("failed to create SecurityHealthAnalyticsCustomModule: %w", err)
 	}
 
-	fmt.Fprintf(buf, "Created SecurityHealthAnalyticsCustomModule: %s\n", module.Name)
+	fmt.Fprintf(&buf, "Created SecurityHealthAnalyticsCustomModule: %s\n", module.Name)
 
 	customModuleFullName := module.Name
 	customModuleID := extractCustomModuleID(customModuleFullName)
@@ -194,7 +193,7 @@ func cleanupExistingCustomModules(orgID string) error {
 
 // TestDeleteCustomModule verifies the List functionality
 func TestDeleteCustomModule(t *testing.T) {
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
 	createdCustomModuleID, err := addCustomModule()
 
@@ -205,7 +204,7 @@ func TestDeleteCustomModule(t *testing.T) {
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
-	err = deleteSecurityHealthAnalyticsCustomModule(buf, parent, createdCustomModuleID)
+	err = deleteSecurityHealthAnalyticsCustomModule(&buf, parent, createdCustomModuleID)
 
 	if err != nil {
 		t.Fatalf("deleteSecurityHealthAnalyticsCustomModule() had error: %v", err)
@@ -221,12 +220,12 @@ func TestDeleteCustomModule(t *testing.T) {
 
 // TestCreateCustomModule verifies the Create functionality
 func TestCreateCustomModule(t *testing.T) {
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
 	// Call Create
-	err := createSecurityHealthAnalyticsCustomModule(buf, parent)
+	err := createSecurityHealthAnalyticsCustomModule(&buf, parent)
 
 	if err != nil {
 		t.Fatalf("createCustomModule() had error: %v", err)
@@ -242,7 +241,7 @@ func TestCreateCustomModule(t *testing.T) {
 
 // TestListDescendantCustomModule verifies the List Descendant functionality
 func TestListDescendantCustomModule(t *testing.T) {
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
 	_, err := addCustomModule()
 
@@ -253,7 +252,7 @@ func TestListDescendantCustomModule(t *testing.T) {
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
-	err = listDescendantSecurityHealthAnalyticsCustomModule(buf, parent)
+	err = listDescendantSecurityHealthAnalyticsCustomModule(&buf, parent)
 
 	if err != nil {
 		t.Fatalf("listDescendantSecurityHealthAnalyticsCustomModule() had error: %v", err)
@@ -270,7 +269,7 @@ func TestListDescendantCustomModule(t *testing.T) {
 
 // TestGetCustomModule verifies the Get functionality
 func TestGetCustomModule(t *testing.T) {
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
 	createdCustomModuleID, err := addCustomModule()
 
@@ -282,7 +281,7 @@ func TestGetCustomModule(t *testing.T) {
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
 	// Call Get
-	err = getSecurityHealthAnalyticsCustomModule(buf, parent, createdCustomModuleID)
+	err = getSecurityHealthAnalyticsCustomModule(&buf, parent, createdCustomModuleID)
 
 	if err != nil {
 		t.Fatalf("getSecurityHealthAnalyticsCustomModule() had error: %v", err)
@@ -299,12 +298,12 @@ func TestGetCustomModule(t *testing.T) {
 
 // TestSimulateCustomModule verifies the Create functionality
 func TestSimulateCustomModule(t *testing.T) {
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
 	// Call Simulate
-	err := simulateSecurityHealthAnalyticsCustomModule(buf, parent)
+	err := simulateSecurityHealthAnalyticsCustomModule(&buf, parent)
 
 	if err != nil {
 		t.Fatalf("simulateCustomModule() had error: %v", err)
@@ -320,7 +319,7 @@ func TestSimulateCustomModule(t *testing.T) {
 
 // TestListEffectiveCustomModule verifies the List Effective functionality
 func TestListEffectiveCustomModule(t *testing.T) {
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
 	_, err := addCustomModule()
 
@@ -331,7 +330,7 @@ func TestListEffectiveCustomModule(t *testing.T) {
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
-	err = listEffectiveSecurityHealthAnalyticsCustomModule(buf, parent)
+	err = listEffectiveSecurityHealthAnalyticsCustomModule(&buf, parent)
 
 	if err != nil {
 		t.Fatalf("listEffectiveSecurityHealthAnalyticsCustomModule() had error: %v", err)
@@ -348,7 +347,7 @@ func TestListEffectiveCustomModule(t *testing.T) {
 
 // TestUpdateCustomModule verifies the Update functionality
 func TestUpdateCustomModule(t *testing.T) {
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
 	createdCustomModuleID, err := addCustomModule()
 
@@ -359,7 +358,7 @@ func TestUpdateCustomModule(t *testing.T) {
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 	// Call Update
-	err = updateSecurityHealthAnalyticsCustomModule(buf, parent, createdCustomModuleID)
+	err = updateSecurityHealthAnalyticsCustomModule(&buf, parent, createdCustomModuleID)
 
 	if err != nil {
 		t.Fatalf("updateSecurityHealthAnalyticsCustomModule() had error: %v", err)
@@ -375,7 +374,7 @@ func TestUpdateCustomModule(t *testing.T) {
 
 // TestGetEffectiveCustomModule verifies the Get Effective functionality
 func TestGetEffectiveCustomModule(t *testing.T) {
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
 	createdCustomModuleID, err := addCustomModule()
 
@@ -387,7 +386,7 @@ func TestGetEffectiveCustomModule(t *testing.T) {
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
 	// Call Get
-	err = getEffectiveSecurityHealthAnalyticsCustomModule(buf, parent, createdCustomModuleID)
+	err = getEffectiveSecurityHealthAnalyticsCustomModule(&buf, parent, createdCustomModuleID)
 
 	if err != nil {
 		t.Fatalf("getEffectiveSecurityHealthAnalyticsCustomModule() had error: %v", err)
@@ -404,7 +403,7 @@ func TestGetEffectiveCustomModule(t *testing.T) {
 
 // TestListCustomModule verifies the List functionality
 func TestListCustomModule(t *testing.T) {
-	buf := new(bytes.Buffer)
+	var buf bytes.Buffer
 
 	_, err := addCustomModule()
 
@@ -415,7 +414,7 @@ func TestListCustomModule(t *testing.T) {
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
-	err = listSecurityHealthAnalyticsCustomModule(buf, parent)
+	err = listSecurityHealthAnalyticsCustomModule(&buf, parent)
 
 	if err != nil {
 		t.Fatalf("listSecurityHealthAnalyticsCustomModule() had error: %v", err)

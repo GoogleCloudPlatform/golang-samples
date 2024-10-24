@@ -32,6 +32,7 @@ func deleteSecurityHealthAnalyticsCustomModule(w io.Writer, parent string, custo
 	//             - folders/{folder_id}/locations/{location_id}
 	//             - projects/{project_id}/locations/{location_id}
 	// customModuleID := "your-module-id"
+	name := fmt.Sprintf("%s/securityHealthAnalyticsCustomModules/%s", parent, customModuleID)
 	ctx := context.Background()
 	client, err := securitycentermanagement.NewClient(ctx)
 	if err != nil {
@@ -40,7 +41,7 @@ func deleteSecurityHealthAnalyticsCustomModule(w io.Writer, parent string, custo
 	defer client.Close()
 
 	req := &securitycentermanagementpb.DeleteSecurityHealthAnalyticsCustomModuleRequest{
-		Name: fmt.Sprintf("%s/securityHealthAnalyticsCustomModules/%s", parent, customModuleID),
+		Name: name,
 	}
 
 	err = client.DeleteSecurityHealthAnalyticsCustomModule(ctx, req)
