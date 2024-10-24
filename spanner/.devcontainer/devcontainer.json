@@ -1,0 +1,18 @@
+{
+    "name": "Go Dev Container",
+    "build" : {
+      "dockerfile": "Dockerfile",
+      "args" : {
+        "VARIANT": "bullseye",
+        "GOOS": "linux",
+        "GOARCH": "amd64"
+      }
+    },
+    "postCreateCommand": "go mod tidy",
+    "remoteUser": "vscode",
+    // This is to ensure only current folder gets mounted and not the entire repo.
+    // Reference: https://code.visualstudio.com/remote/advancedcontainers/change-default-source-mount
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+    "workspaceFolder": "/workspace"
+  }
+  
