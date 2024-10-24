@@ -76,7 +76,7 @@ func SnippetNewKey_withMultipleParents() {
 
 func SnippetClient_Put() {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 	// [START datastore_entity_with_parent]
 	parentKey := datastore.NameKey("TaskList", "default", nil)
@@ -156,7 +156,7 @@ func Snippet_basicEntity() {
 
 func SnippetClient_Put_upsert() {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 	task := &Task{} // Populated with appropriate data.
 	// [START datastore_upsert]
@@ -169,7 +169,7 @@ func SnippetClient_Put_upsert() {
 
 func SnippetTransaction_insert() {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 	task := Task{} // Populated with appropriate data.
 	// [START datastore_insert]
@@ -190,7 +190,7 @@ func SnippetTransaction_insert() {
 
 func SnippetClient_Get() {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 	// [START datastore_lookup]
 	var task Task
@@ -202,7 +202,7 @@ func SnippetClient_Get() {
 
 func SnippetTransaction_update() {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 	// [START datastore_update]
 	taskKey := datastore.NameKey("Task", "sampleTask", nil)
@@ -226,7 +226,7 @@ func SnippetTransaction_update() {
 
 func SnippetClient_Delete() {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 	// [START datastore_delete]
 	key := datastore.NameKey("Task", "sampletask", nil)
@@ -237,7 +237,7 @@ func SnippetClient_Delete() {
 
 func SnippetClient_PutMulti() {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 	// [START datastore_batch_upsert]
 	tasks := []*Task{
@@ -267,7 +267,7 @@ func SnippetClient_PutMulti() {
 
 func SnippetClient_GetMulti() {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 	// [START datastore_batch_lookup]
 	var taskKeys []*datastore.Key // Populated with incomplete keys.
@@ -279,7 +279,7 @@ func SnippetClient_GetMulti() {
 
 func SnippetClient_DeleteMulti() {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 	var taskKeys []*datastore.Key // Populated with incomplete keys.
 	// [START datastore_batch_delete]
@@ -290,7 +290,7 @@ func SnippetClient_DeleteMulti() {
 
 func SnippetQuery_basic() {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 	// [START datastore_basic_query]
 	query := datastore.NewQuery("Task").
@@ -377,7 +377,7 @@ func SnippetQuery_Ancestor() {
 
 func SnippetQuery_Project() {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 	// [START datastore_projection_query]
 	query := datastore.NewQuery("Task").Project("Priority", "PercentComplete")
@@ -401,7 +401,7 @@ func SnippetQuery_Project() {
 
 func SnippetQuery_KeysOnly() {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 	// [START datastore_keys_only_query]
 	query := datastore.NewQuery("Task").KeysOnly()
@@ -507,7 +507,7 @@ func SnippetQuery_Limit() {
 
 func SnippetIterator_Cursor() {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 	// [START datastore_cursor_paging]
 	// cursorStr is a cursor to start querying at.
@@ -575,7 +575,7 @@ func Snippet_explodingProperties() {
 
 func Snippet_Transaction() {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 	var to, from *datastore.Key
 	// [START datastore_transactional_update]
@@ -608,7 +608,7 @@ func Snippet_Transaction() {
 
 func Snippet_Client_RunInTransaction() {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 	var to, from *datastore.Key
 	// [START datastore_transactional_retry]
@@ -634,7 +634,7 @@ func Snippet_Client_RunInTransaction() {
 
 func SnippetTransaction_getOrCreate() {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 	key := datastore.NameKey("Task", "sampletask", nil)
 	// [START datastore_transactional_get_or_create]
@@ -657,7 +657,7 @@ func SnippetTransaction_getOrCreate() {
 
 func SnippetTransaction_runQuery() {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 	// [START datastore_transactional_single_entity_group_read_only]
 	tx, err := client.NewTransaction(ctx, datastore.ReadOnly)
@@ -719,7 +719,7 @@ func TestMetadaNamespaces(t *testing.T) {
 
 func Snippet_metadataKinds() {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 	// [START datastore_kind_run_query]
 	query := datastore.NewQuery("__kind__").KeysOnly()
@@ -737,7 +737,7 @@ func Snippet_metadataKinds() {
 
 func Snippet_metadataProperties() {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 	// [START datastore_property_run_query]
 	query := datastore.NewQuery("__property__").KeysOnly()
@@ -757,7 +757,7 @@ func Snippet_metadataProperties() {
 
 func Snippet_metadataPropertiesForKind() {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 	// [START datastore_property_by_kind_run_query]
 	kindKey := datastore.NameKey("__kind__", "Task", nil)
@@ -776,7 +776,7 @@ func Snippet_metadataPropertiesForKind() {
 
 func SnippetQuery_RunQueryWithExplain(w io.Writer) {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 
 	// [START datastore_query_explain_entity]
@@ -801,7 +801,7 @@ func SnippetQuery_RunQueryWithExplain(w io.Writer) {
 
 func SnippetQuery_RunQueryWithExplainAnalyze(w io.Writer) {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 
 	// [START datastore_query_explain_analyze_entity]
@@ -847,7 +847,7 @@ func SnippetQuery_RunQueryWithExplainAnalyze(w io.Writer) {
 
 func SnippetQuery_RunAggregationQueryWithExplain(w io.Writer) {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 
 	// [START datastore_query_explain_aggregation]
@@ -872,7 +872,7 @@ func SnippetQuery_RunAggregationQueryWithExplain(w io.Writer) {
 
 func SnippetQuery_RunAggregationQueryWithExplainAnalyze(w io.Writer) {
 	ctx := context.Background()
-	client, _ := datastore.NewClient(ctx, "my-proj")
+	client, _ := datastore.NewClientWithDatabase(ctx, "my-proj", "my-database-id")
 	defer client.Close()
 
 	// [START datastore_query_explain_analyze_aggregation]
