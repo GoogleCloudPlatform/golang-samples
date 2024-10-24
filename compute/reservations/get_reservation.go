@@ -25,7 +25,7 @@ import (
 )
 
 // Get certain reservation for given project and zone
-func getReservation(w io.Writer, projectID, zone, reservationName string) error {
+func getReservation(w io.Writer, projectID, zone, reservationName string) (*computepb.Reservation, error) {
 	// projectID := "your_project_id"
 	// zone := "us-west3-a"
 	// reservationName := "your_reservation_name"
@@ -33,7 +33,7 @@ func getReservation(w io.Writer, projectID, zone, reservationName string) error 
 	ctx := context.Background()
 	reservationsClient, err := compute.NewReservationsRESTClient(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer reservationsClient.Close()
 
@@ -45,12 +45,12 @@ func getReservation(w io.Writer, projectID, zone, reservationName string) error 
 
 	reservation, err := reservationsClient.Get(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to delete reservation: %w", err)
+		return nil, fmt.Errorf("unable to delete reservation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Reservation: %s\n", reservation.GetName())
 
-	return nil
+	return reservation, nil
 }
 
 // [END compute_reservation_get]

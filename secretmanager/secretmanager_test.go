@@ -101,6 +101,9 @@ func testSecret(tb testing.TB, projectID string) *secretmanagerpb.Secret {
 			Labels: map[string]string{
 				"labelkey": "labelvalue",
 			},
+			Annotations: map[string]string{
+				"annotationkey": "annotationvalue",
+			},
 		},
 	})
 	if err != nil {
@@ -120,6 +123,14 @@ func testRegionalSecret(tb testing.TB, projectID string) (*secretmanagerpb.Secre
 	secret, err := client.CreateSecret(ctx, &secretmanagerpb.CreateSecretRequest{
 		Parent:   fmt.Sprintf("projects/%s/locations/%s", projectID, locationID),
 		SecretId: secretID,
+		Secret: &secretmanagerpb.Secret{
+			Annotations: map[string]string{
+				"annotationkey": "annotationvalue",
+			},
+			Labels: map[string]string{
+				"labelkey": "labelvalue",
+			},
+		},
 	})
 	if err != nil {
 		tb.Fatalf("testSecret: failed to create secret: %v", err)
@@ -327,6 +338,25 @@ func TestCreateSecretWithLabels(t *testing.T) {
 		t.Errorf("createSecretWithLabels: expected %q to contain %q", got, want)
 	}
 }
+
+func TestCreateSecretWithAnnotations(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secretID := "createSecretWithAnnotations"
+
+	parent := fmt.Sprintf("projects/%s", tc.ProjectID)
+
+	var b bytes.Buffer
+	if err := createSecretWithAnnotations(&b, parent, secretID); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
+
+	if got, want := b.String(), "Created secret with annotations:"; !strings.Contains(got, want) {
+		t.Errorf("createSecretWithAnnotations: expected %q to contain %q", got, want)
+	}
+}
+
 func TestCreateRegionalSecret(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1093,6 +1123,34 @@ func TestViewSecretLabels(t *testing.T) {
 	}
 }
 
+func TestViewSecretAnnotations(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
+	var b bytes.Buffer
+	if err := viewSecretAnnotations(&b, secret.Name); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Found secret"; !strings.Contains(got, want) {
+		t.Errorf("viewSecretAnnotations: expected %q to contain %q", got, want)
+	}
+
+	client, ctx := testClient(t)
+	s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secret.Name,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := s.Annotations, map[string]string{"annotationkey": "annotationvalue"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("viewSecretAnnotations: expected %q to be %q", got, want)
+	}
+}
+
 func TestListRegionalSecrets(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1220,6 +1278,35 @@ func TestCreateUpdateSecretLabel(t *testing.T) {
 
 	if got, want := s.Labels, map[string]string{"labelkey": "updatedlabelvalue"}; !reflect.DeepEqual(got, want) {
 		t.Errorf("createUpdateSecretLabel: expected %q to be %q", got, want)
+	}
+}
+
+func TestEditSecretAnnotations(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
+	var b bytes.Buffer
+	if err := editSecretAnnotation(&b, secret.Name); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Updated secret"; !strings.Contains(got, want) {
+		t.Errorf("updateSecret: expected %q to contain %q", got, want)
+	}
+
+	client, ctx := testClient(t)
+
+	s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secret.Name,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := s.Annotations, map[string]string{"annotationkey": "updatedannotationvalue"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("editSecretAnnotation: expected %q to be %q", got, want)
 	}
 }
 
