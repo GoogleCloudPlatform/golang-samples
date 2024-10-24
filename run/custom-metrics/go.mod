@@ -4,11 +4,11 @@ go 1.21
 
 require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	go.opentelemetry.io/otel v1.24.0
+	go.opentelemetry.io/otel v1.31.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v0.45.0
-	go.opentelemetry.io/otel/metric v1.24.0
-	go.opentelemetry.io/otel/sdk v1.22.0
-	go.opentelemetry.io/otel/sdk/metric v1.22.0
+	go.opentelemetry.io/otel/metric v1.31.0
+	go.opentelemetry.io/otel/sdk v1.31.0
+	go.opentelemetry.io/otel/sdk/metric v1.31.0
 )
 
 require (
