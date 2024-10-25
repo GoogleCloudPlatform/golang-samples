@@ -66,11 +66,8 @@ var assetURI string
 func TestMain(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
-	// bucketName := testutil.TestBucket(ctx, t, tc.ProjectID, "golang-samples-livestream")
-	// outputURI = "gs://" + bucketName + "/test-output-channel/"
-	outputURI = "gs://" + "nickcookbucket" + "/test-output-channel/"
-	t.Log(ctx)
-
+	bucketName := testutil.TestBucket(ctx, t, tc.ProjectID, "golang-samples-livestream")
+	outputURI = "gs://" + bucketName + "/test-output-channel/"
 	assetURI = "gs://cloud-samples-data/media/ForBiggerEscapes.mp4"
 	cleanStaleAssets(tc)
 }
