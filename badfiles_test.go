@@ -137,6 +137,9 @@ var allowList = []string{
 
 	// Spanner proto data files.
 	"spanner/spanner_snippets/spanner/testdata/protos/descriptors.pb",
+
+	// Spanner Devcontainer files.
+	"spanner/.devcontainer/*",
 }
 
 // Check whether accidental binary files have been checked in.
