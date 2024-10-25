@@ -47,14 +47,21 @@ func TestContextCaching(t *testing.T) {
 		t.Errorf("getContextCache: %v", err.Error())
 	}
 
-	// 3) Use the cached content, by calling the model with a prompt
+	// 3) Retrieve the list of cached contents
+	buf.Reset()
+	err = listContextCaches(buf, tc.ProjectID, location)
+	if err != nil {
+		t.Errorf("listContextCache: %v", err.Error())
+	}
+
+	// 4) Use the cached content, by calling the model with a prompt
 	buf.Reset()
 	err = useContextCache(buf, contentName, tc.ProjectID, location, modelName)
 	if err != nil {
 		t.Errorf("useContextCache: %v", err.Error())
 	}
 
-	// 4) Update the TTL of the cached content
+	// 5) Update the TTL of the cached content
 	exp1, err := readExpiration(contentName, tc.ProjectID, location)
 	if err != nil {
 		t.Errorf("readExpiration original value: %v", err.Error())
@@ -76,7 +83,7 @@ func TestContextCaching(t *testing.T) {
 		t.Errorf("want expiration time at least 1 hour greater than original value %v, got %v (diff=%v)", exp1, exp2, delta)
 	}
 
-	// 5) Delete the cached content
+	// 6) Delete the cached content
 	buf.Reset()
 	err = deleteContextCache(buf, contentName, tc.ProjectID, location)
 	if err != nil {
