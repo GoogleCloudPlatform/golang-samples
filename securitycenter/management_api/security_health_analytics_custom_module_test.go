@@ -19,9 +19,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	securitycentermanagement "cloud.google.com/go/securitycentermanagement/apiv1"
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
@@ -74,6 +76,9 @@ func addCustomModule() (string, error) {
 		return "", fmt.Errorf("securitycentermanagement.NewClient: %w", err)
 	}
 	defer client.Close()
+	// Create unique display name
+	rand.Seed(time.Now().UnixNano())
+	displayName := fmt.Sprintf("go_sample_custom_module_test_%d", rand.Int())
 
 	// Define the custom module configuration
 	customModule := &securitycentermanagementpb.SecurityHealthAnalyticsCustomModule{
@@ -103,7 +108,8 @@ func addCustomModule() (string, error) {
 			},
 			Severity: securitycentermanagementpb.CustomConfig_CRITICAL,
 		},
-		DisplayName:     "go_sample_custom_module_test", // Replace with desired Display Name.
+		// Replace with desired Display Name.
+		DisplayName:     displayName,
 		EnablementState: securitycentermanagementpb.SecurityHealthAnalyticsCustomModule_ENABLED,
 	}
 
