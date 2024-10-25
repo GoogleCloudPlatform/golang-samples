@@ -105,8 +105,15 @@ func createChannel(w io.Writer, projectID, location, channelID, inputID, outputU
 				{
 					FileName:        "manifest.m3u8",
 					Type:            livestreampb.Manifest_HLS,
+					Key:             "manifest_hls",
 					MuxStreams:      []string{"mux_video", "mux_audio"},
 					MaxSegmentCount: 5,
+				},
+			},
+			// Optional, but required for VOD clips
+			RetentionConfig: &livestreampb.RetentionConfig{
+				RetentionWindowDuration: &duration.Duration{
+					Seconds: 86400,
 				},
 			},
 		},

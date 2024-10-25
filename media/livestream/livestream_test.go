@@ -18,6 +18,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -31,6 +33,7 @@ import (
 )
 
 const (
+	deleteChannelClipResponse  = "Deleted channel clip"
 	deleteChannelEventResponse = "Deleted channel event"
 	deleteChannelResponse      = "Deleted channel"
 	deleteInputResponse        = "Deleted input"
@@ -41,6 +44,7 @@ const (
 	inputID                    = "my-go-test-input"
 	backupInputID              = "my-go-test-backup-input"
 	channelID                  = "my-go-test-channel"
+	clipID                     = "my-go-test-channel-clip"
 	eventID                    = "my-go-test-channel-event"
 	assetID                    = "my-go-test-asset"
 	poolID                     = "default" // only 1 pool supported per location
@@ -59,12 +63,15 @@ var assetURI string
 
 // TestMain tests major operations on inputs, channels, channel
 // events, assets, and pools.
-func TestMain(m *testing.M) {
-	tc, _ := testutil.ContextMain(m)
-	bucketName = tc.ProjectID + "-golang-samples-livestream-test"
-	outputURI = "gs://" + bucketName + "/test-output-channel/"
+func TestMain(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+	// bucketName := testutil.TestBucket(ctx, t, tc.ProjectID, "golang-samples-livestream")
+	// outputURI = "gs://" + bucketName + "/test-output-channel/"
+	outputURI = "gs://" + "nickcookbucket" + "/test-output-channel/"
+	t.Log(ctx)
+
 	assetURI = "gs://cloud-samples-data/media/ForBiggerEscapes.mp4"
-	m.Run()
 	cleanStaleAssets(tc)
 }
 
@@ -402,15 +409,14 @@ func TestChannels(t *testing.T) {
 	t.Logf("\nTestChannels() completed\n")
 }
 
-// TestChannelEvents tests event operations on channels. Create, list, and get
-// operations check if the channel event resource name is returned. The delete
+// TestChannelEventsAndClips tests event and clip operations on channels. Create, list, and get
+// operations check if the channel event or channel clip resource name is returned. The delete
 // operation checks for a hard-coded string response.
-func TestChannelEvents(t *testing.T) {
+func TestChannelEventsAndClips(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 
 	// Test setup
-
 	// Stop and delete the default channel if it exists
 	if err := getChannel(buf, tc.ProjectID, location, channelID); err == nil {
 		testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
@@ -436,12 +442,17 @@ func TestChannelEvents(t *testing.T) {
 	}
 
 	// Create a new input.
+	uri := ""
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
 		inputName := fmt.Sprintf("projects/%s/locations/%s/inputs/%s", tc.ProjectID, location, inputID)
 		if err := createInput(buf, tc.ProjectID, location, inputID); err != nil {
 			r.Errorf("createInput got err: %v", err)
 		}
-		if got := buf.String(); !strings.Contains(got, inputName) {
+		got := buf.String()
+		re := regexp.MustCompile(`Uri: (.*)`)
+		match := re.FindStringSubmatch(got)
+		uri = match[1]
+		if !strings.Contains(got, inputName) {
 			r.Errorf("createInput got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, inputName)
 		}
 	})
@@ -469,7 +480,7 @@ func TestChannelEvents(t *testing.T) {
 
 	buf.Reset()
 
-	// Tests
+	// Tests for events
 
 	// Create a new channel event.
 	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
@@ -517,6 +528,64 @@ func TestChannelEvents(t *testing.T) {
 		}
 	})
 
+	// Tests for clips
+	// Send a test stream for the clip.
+	cmd := exec.Command("ffmpeg", "-re", "-f", "lavfi", "-t", "45", "-i",
+		"testsrc=size=1280x720 [out0]; sine=frequency=500 [out1]", "-vcodec",
+		"h264", "-acodec", "aac", "-f", "flv", uri)
+
+	_, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("exec.Command: %v", err)
+	}
+
+	// Create a new channel clip.
+	clipOutputUri := fmt.Sprintf("%sclips", outputURI)
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		clipName := fmt.Sprintf("projects/%s/locations/%s/channels/%s/clips/%s", tc.ProjectID, location, channelID, clipID)
+		if err := createChannelClip(buf, tc.ProjectID, channelID, clipID, clipOutputUri); err != nil {
+			r.Errorf("createChannelClip got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, clipName) {
+			r.Errorf("createChannelClip got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, clipName)
+		}
+	})
+	buf.Reset()
+
+	// List the channel clips for a given channel.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		clipName := fmt.Sprintf("projects/%s/locations/%s/channels/%s/clips/%s", tc.ProjectID, location, channelID, clipID)
+		if err := listChannelClips(buf, tc.ProjectID, channelID); err != nil {
+			r.Errorf("listChannelClips got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, clipName) {
+			r.Errorf("listChannelClips got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, clipName)
+		}
+	})
+	buf.Reset()
+
+	// Get the channel clip.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		clipName := fmt.Sprintf("projects/%s/locations/%s/channels/%s/clips/%s", tc.ProjectID, location, channelID, clipID)
+		if err := getChannelClip(buf, tc.ProjectID, channelID, clipID); err != nil {
+			r.Errorf("getChannelClip got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, clipName) {
+			r.Errorf("getChannelClip got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, clipName)
+		}
+	})
+	buf.Reset()
+
+	// Delete the channel clip.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		if err := deleteChannelClip(buf, tc.ProjectID, channelID, clipID); err != nil {
+			r.Errorf("deleteChannelClip got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, deleteChannelClipResponse) {
+			r.Errorf("deleteChannelClip got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteChannelClipResponse)
+		}
+	})
+
 	// Clean up
 
 	// Stop the channel.
@@ -548,7 +617,7 @@ func TestChannelEvents(t *testing.T) {
 			r.Errorf("deleteInput got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteInputResponse)
 		}
 	})
-	t.Logf("\nTestChannelEvents() completed\n")
+	t.Logf("TestChannelEventsAndClips() completed\n")
 }
 
 // TestAssets tests major operations on assets. Create, list,
