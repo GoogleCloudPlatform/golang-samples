@@ -61,7 +61,8 @@ func createInstanceWithAutoscalingConfig(w io.Writer, projectID, instanceID stri
 					StorageUtilizationPercent:         95,
 				},
 			},
-			Labels: map[string]string{"cloud_spanner_samples": "true"},
+			Labels:  map[string]string{"cloud_spanner_samples": "true"},
+			Edition: instancepb.Instance_ENTERPRISE_PLUS,
 		},
 	})
 	if err != nil {
