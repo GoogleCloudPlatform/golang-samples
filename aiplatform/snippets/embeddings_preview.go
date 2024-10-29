@@ -29,14 +29,14 @@ import (
 
 // Embeds code query with a pre-trained, foundational model by specifying the task type as 'CODE_RETRIEVAL_QUERY'. e.g. 'Retrieve a function that adds two numbers'.
 // Embeds code block with a pre-trained, foundational model by specifying the task type as 'RETRIEVAL_DOCUMENT'. e.g. 'texts := []string{"def func(a, b): return a + b", "def func(a, b): return a - b", "def func(a, b): return (a ** 2 + b ** 2) ** 0.5"}'.
-// embedTextsPreview shows how embeddings are set for text-embedding-preview-0815 model
+// embedTextsPreview shows how embeddings are set for text-embedding-005 model
 func embedTextsPreview(w io.Writer, projectID, location string) error {
 	// location := "us-central1"
 	ctx := context.Background()
 
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	dimensionality := 5
-	model := "text-embedding-preview-0815"
+	model := "text-embedding-005"
 	texts := []string{"banana muffins? ", "banana bread? banana muffins?"}
 
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
