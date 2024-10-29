@@ -106,6 +106,7 @@ func deleteCluster(ctx context.Context, projectID, region, clusterName string) e
 }
 
 func TestQuickstart(t *testing.T) {
+	t.Skip("Skipped until https://github.com/GoogleCloudPlatform/golang-samples/issues/4350 is resolved.")
 	tc := testutil.EndToEndTest(t)
 	m := testutil.BuildMain(t)
 	setup(t, tc.ProjectID)
