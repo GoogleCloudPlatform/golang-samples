@@ -14,9 +14,9 @@
 
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: [ 'build', '--build-arg', 'BASE_IMAGE=golang:${_GO_VERSION}', '-t', 'gcr.io/$PROJECT_ID/${_IMAGE_NAME}', '.' ]
+    args: [ 'build', '--build-arg', 'BASE_IMAGE=golang:${_GO_VERSION}', '-t', 'us-docker.pkg.dev/$PROJECT_ID/kokoro-images/${_IMAGE_NAME}', '.' ]
     waitFor: ['-']
 substitutions:
-  _GO_VERSION: "1.20"
-  _IMAGE_NAME: "go120"
-images: ['gcr.io/$PROJECT_ID/${_IMAGE_NAME}']
+  _GO_VERSION: "1.23"
+  _IMAGE_NAME: "go123"
+images: ['us-docker.pkg.dev/$PROJECT_ID/kokoro-images/${_IMAGE_NAME}']
