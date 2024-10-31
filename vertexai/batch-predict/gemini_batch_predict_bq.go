@@ -32,7 +32,7 @@ import (
 func batchPredictBQ(w io.Writer, projectID, location string, inputURI string, outputURI string) error {
 	// location  := "us-central1"
 	// inputURI  := "bq://storage-samples.generative_ai.batch_requests_for_multimodal_input"
-	// outputURI := "bq://acme-org-dev.gemini_outputs.batch_predict_results"
+	// outputURI := "bq://<cloud-project-name>.<dataset-name>.<table-name>"
 	modelName := "gemini-1.5-pro-002"
 	jobName := "batch-predict-bq-test-001"
 

@@ -32,7 +32,7 @@ import (
 func batchPredictGCS(w io.Writer, projectID, location string, inputURIs []string, outputURI string) error {
 	// location := "us-central1"
 	// inputURIs := []string{"gs://cloud-samples-data/batch/prompt_for_batch_gemini_predict.jsonl"}
-	// outputURI := "gs://acme-org-gen-ai/gemini-outputs/batch-predict/go-test-job-001"
+	// outputURI := "gs://<cloud-bucket-name>/<prefix-name>"
 	modelName := "gemini-1.5-pro-002"
 	jobName := "batch-predict-gcs-test-001"
 
