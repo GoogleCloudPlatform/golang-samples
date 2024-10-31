@@ -100,11 +100,13 @@ func batchPredictBQ(w io.Writer, projectID, location string, inputURI string, ou
 
 		if job.GetEndTime() != nil {
 			fmt.Fprintf(w, "batch predict job finished with state %s\n", job.GetState())
-			return nil
+			break
 		} else {
 			fmt.Fprintf(w, "batch predict job is running... job state is %s\n", job.GetState())
 		}
 	}
+
+	return nil
 }
 
 // [END generativeaionvertexai_batch_predict_gemini_createjob_bigquery]
