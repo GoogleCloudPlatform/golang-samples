@@ -46,6 +46,7 @@ func createInstanceWithProcessingUnits(w io.Writer, projectID, instanceID string
 			DisplayName:     "This is a display name.",
 			ProcessingUnits: 500,
 			Labels:          map[string]string{"cloud_spanner_samples": "true"},
+			Edition:         instancepb.Instance_ENTERPRISE_PLUS,
 		},
 	})
 	if err != nil {
