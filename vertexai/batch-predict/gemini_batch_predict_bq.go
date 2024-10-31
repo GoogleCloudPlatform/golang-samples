@@ -85,8 +85,13 @@ func batchPredictBQ(w io.Writer, projectID, location string, inputURI string, ou
 		return err
 	}
 	fullJobId := job.GetName()
-	fmt.Fprintf(w, "submitted batch predict job %q for model %q\n", fullJobId, job.GetModel())
-	fmt.Fprintf(w, "job state is %s\n", job.GetState())
+	fmt.Fprintf(w, "submitted batch predict job for model %q\n", job.GetModel())
+	fmt.Fprintf(w, "job id: %q\n", fullJobId)
+	fmt.Fprintf(w, "job state: %s\n", job.GetState())
+	// Example response:
+	// submitted batch predict job for model "publishers/google/models/gemini-1.5-pro-002"
+	// job id: "projects/.../locations/.../batchPredictionJobs/1234567890000000000"
+	// job state: JOB_STATE_PENDING
 
 	for {
 		time.Sleep(5 * time.Second)
