@@ -59,10 +59,16 @@ assign_issues_by:
   - "api: iam"
   - "api: kms"
   - "api: privateca"
-  - "api: secretmanager"
-  - "api: securitycenter"
   to:
   - GoogleCloudPlatform/dee-infra
+- labels:
+  - "api: secretmanager"
+  to:
+  - GoogleCloudPlatform/cloud-secrets-team
+- labels:
+  - "api: securitycenter"
+  to:
+  - GoogleCloudPlatform/gcp-security-command-center
 
 assign_prs_by:
 - labels:
@@ -90,7 +96,13 @@ assign_prs_by:
   - "api: iam"
   - "api: kms"
   - "api: privateca"
-  - "api: secretmanager"
-  - "api: securitycenter"
   to:
   - GoogleCloudPlatform/dee-infra
+- labels:
+  - "api: secretmanager"
+  to:
+  - GoogleCloudPlatform/cloud-secrets-team
+- labels:
+  - "api: securitycenter"
+  to:
+  - GoogleCloudPlatform/gcp-security-command-center
