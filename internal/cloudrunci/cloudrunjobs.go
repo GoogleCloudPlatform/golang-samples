@@ -149,7 +149,9 @@ func (j *Job) Build() error {
 		return fmt.Errorf("container image already built")
 	}
 	if j.Image == "" {
-		j.Image = fmt.Sprintf("gcr.io/%s/%s:%s", j.ProjectID, j.Name, runID)
+		ensureDefaultImageRepo(j.ProjectID, j.Region)
+		j.Image = fmt.Sprintf("%s-docker.pkg.dev/%s/%s/%s:%s",
+			j.Region, j.ProjectID, defaultRegistryName, j.Name, runID)
 	}
 
 	if _, err := gcloud(fmt.Sprintf("%s: Building image %s", j.version(), j.Image), j.buildCmd()); err != nil {
