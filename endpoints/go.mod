@@ -8,7 +8,7 @@ require (
 	golang.org/x/net v0.30.0
 	golang.org/x/oauth2 v0.23.0
 	google.golang.org/grpc v1.67.1
-	google.golang.org/grpc/examples 18d218d14d50
+	google.golang.org/grpc/examples 0ec8fd84fdfb
 )
 
 require (
