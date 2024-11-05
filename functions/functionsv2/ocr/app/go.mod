@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/golang-samples/functions/ocr/app
+module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/ocr/app
 
 go 1.21
 

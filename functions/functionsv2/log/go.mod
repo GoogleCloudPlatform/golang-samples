@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/golang-samples/functions/log
+module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/log
 
 go 1.21
 
