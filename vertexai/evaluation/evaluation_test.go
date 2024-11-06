@@ -32,4 +32,10 @@ func TestEvaluation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("getRougeScore: %v", err.Error())
 	}
+
+	buf.Reset()
+	err = evaluateOutput(buf, tc.ProjectID, location)
+	if err != nil {
+		t.Fatalf("evaluateOutput: %v", err.Error())
+	}
 }
