@@ -3,9 +3,9 @@ module github.com/GoogleCloudPlatform/golang-samples/getting-started/sessions
 go 1.21
 
 require (
-	cloud.google.com/go/firestore v1.15.0
+	cloud.google.com/go/firestore v1.17.0
 	github.com/GoogleCloudPlatform/firestore-gorilla-sessions v0.1.0
-	github.com/gorilla/sessions v1.3.0
+	github.com/gorilla/sessions v1.4.0
 )
 
 require (
