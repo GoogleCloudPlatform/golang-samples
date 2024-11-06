@@ -38,4 +38,10 @@ func TestEvaluation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("evaluateOutput: %v", err.Error())
 	}
+
+	buf.Reset()
+	err = pairwiseEvaluation(buf, tc.ProjectID, location)
+	if err != nil {
+		t.Fatalf("pairwiseEvaluation: %v", err.Error())
+	}
 }
