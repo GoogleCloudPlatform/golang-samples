@@ -561,7 +561,52 @@ func TestComputeDisksSnippets(t *testing.T) {
 		if !strings.Contains(disk.GetType(), wantDiskType) {
 			t.Errorf("Disk type mismatch (-want to contain +got):\n%s / %s", disk.GetType(), wantDiskType)
 		}
+	})
 
+	t.Run("createSecondaryDisk", func(t *testing.T) {
+		diskName := fmt.Sprintf("test-secondary-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		zone := "us-east1-b"
+		primaryDiskName := fmt.Sprintf("test-primay-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		primaryZone := "us-central1-a"
+		primaryType := fmt.Sprintf("zones/%s/diskTypes/pd-ssd", primaryZone)
+		diskSizeGb := int64(20)
+		var buf bytes.Buffer
+
+		// Creating primary disk
+		if err := createEmptyDisk(&buf, tc.ProjectID, primaryZone, primaryDiskName, primaryType, diskSizeGb); err != nil {
+			t.Fatalf("createEmptyDisk got err: %v", err)
+		}
+		defer deleteDisk(&buf, tc.ProjectID, primaryZone, primaryDiskName)
+
+		if err := createSecondaryDisk(&buf, tc.ProjectID, zone, diskName, primaryDiskName, primaryZone, diskSizeGb); err != nil {
+			t.Errorf("createSecondaryDisk got err: %v", err)
+		}
+		defer deleteDisk(&buf, tc.ProjectID, zone, diskName)
+
+		// Checking resource
+		disksClient, err := compute.NewDisksRESTClient(ctx)
+		if err != nil {
+			t.Fatalf("NewDisksRESTClient: %v", err)
+		}
+		defer disksClient.Close()
+
+		disk, err := disksClient.Get(ctx, &computepb.GetDiskRequest{
+			Project: tc.ProjectID,
+			Zone:    zone,
+			Disk:    diskName,
+		})
+		if err != nil {
+			t.Errorf("Get disk got err: %v", err)
+		}
+
+		if disk.GetName() != diskName {
+			t.Errorf("Disk name mismatch: got %v, want %v", disk.GetName(), diskName)
+		}
+
+		expected := fmt.Sprintf("projects/%s/zones/%s/disks/%s", tc.ProjectID, primaryZone, primaryDiskName)
+		if !strings.Contains(disk.GetAsyncPrimaryDisk().GetDisk(), expected) {
+			t.Errorf("Primary disk is not set correctly: got %v, want %v", disk.GetAsyncPrimaryDisk().GetDisk(), expected)
+		}
 	})
 }
 
