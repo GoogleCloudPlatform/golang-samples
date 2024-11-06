@@ -45,6 +45,7 @@ const (
 	labelOperationDeleteService = "delete service"
 	labelOperationDeleteImage   = "delete container image"
 	labelOperationGetURL        = "get url"
+	defaultRegistryName         = "cloudrunci"
 )
 
 // Service describes a Cloud Run service
@@ -56,7 +57,7 @@ type Service struct {
 	Dir string
 
 	// The container image name to deploy. If left blank the container will be built
-	// and pushed to gcr.io/[ProjectID]/[Name]:[Revision]
+	// and pushed to gcr.io/[ProjectID]/cloudrunci/[Name]:[Revision]
 	Image string
 
 	// The project to deploy to.
@@ -80,6 +81,9 @@ type Service struct {
 	deployed bool     // Whether the service has been deployed.
 	built    bool     // Whether the container image has been built.
 	url      *url.URL // The url of the deployed service.
+
+	// Location to deploy the Service, and related artifacts
+	Location string
 }
 
 // runID is an identifier that changes between runs.
@@ -93,6 +97,7 @@ func NewService(name, projectID string) *Service {
 		Name:      name,
 		ProjectID: projectID,
 		Platform:  ManagedPlatform{Region: "us-central1"},
+		Location:  "us-central1",
 	}
 }
 
@@ -167,6 +172,16 @@ func (s *Service) Do(req *http.Request, opts ...func(*RetryOptions)) (*http.Resp
 	}
 	// Too many attempts, return the last result.
 	return resp, fmt.Errorf("no acceptable response after %d retries: %w", options.MaxAttempts, lastSeen)
+}
+
+// ImageRepoURL returns the base URL for building docker images
+func (s *Service) ImageRepoURL() string {
+	return fmt.Sprintf("%s-docker.pkg.dev/%s/%s", s.Location, s.ProjectID, defaultRegistryName)
+}
+
+// ensureDefaultImageRepo uses gcloud to create a default Image registry.
+func (s *Service) ensureDefaultImageRepo() error {
+	return ensureDefaultImageRepo(s.ProjectID, s.Location)
 }
 
 // Request issues an HTTP request to the deployed service.
@@ -297,7 +312,11 @@ func (s *Service) Build() error {
 		return fmt.Errorf("container image already built")
 	}
 	if s.Image == "" {
-		s.Image = fmt.Sprintf("gcr.io/%s/%s:%s", s.ProjectID, s.Name, runID)
+		err := s.ensureDefaultImageRepo()
+		if err != nil {
+			return fmt.Errorf("failed to create image repository: %w", err)
+		}
+		s.Image = fmt.Sprintf("%s/%s:%s", s.ImageRepoURL(), s.Name, runID)
 	}
 
 	if out, err := gcloud(s.operationLabel(labelOperationBuild), s.buildCmd()); err != nil {
@@ -490,4 +509,23 @@ func (s *Service) LogEntries(filter string, find string, maxAttempts int) (bool,
 		time.Sleep(15 * time.Second)
 	}
 	return false, nil
+}
+
+// ensureDefaultImageRepo creates a default docker repo in the given project and location
+// if it does not already exist.
+func ensureDefaultImageRepo(project string, location string) error {
+	cmd := exec.Command(gcloudBin,
+		"artifacts", "repositories", "create", defaultRegistryName,
+		"--project",
+		project,
+		"--repository-format=docker",
+		"--location", location)
+	o, err := gcloudWithoutRetry("ensure image repo", cmd)
+	if err == nil {
+		return nil
+	}
+	if strings.Contains(string(o), "ALREADY_EXISTS") {
+		return nil
+	}
+	return err
 }

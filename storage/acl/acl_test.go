@@ -67,9 +67,6 @@ func TestACL(t *testing.T) {
 	if err := removeBucketDefaultOwner(bucket, allAuthenticatedUsers); err != nil {
 		t.Errorf("removeBucketDefaultOwner: %v", err)
 	}
-	if err := removeBucketOwner(bucket, allAuthenticatedUsers); err != nil {
-		t.Errorf("removeBucketOwner: %v", err)
-	}
 	if err := addFileOwner(bucket, object, allAuthenticatedUsers); err != nil {
 		t.Errorf("addFileOwner: %v", err)
 	}

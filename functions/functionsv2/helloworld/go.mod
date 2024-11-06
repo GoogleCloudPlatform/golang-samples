@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/golang-samples/functions/helloworld
+module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/helloworld
 
 go 1.21
 
