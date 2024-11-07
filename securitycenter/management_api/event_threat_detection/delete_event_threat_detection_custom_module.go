@@ -14,7 +14,7 @@
 
 package event_threat_detection
 
-// [START securitycenter_management_api_delete_event_threat_detection_custom_module]
+// [START securitycenter_delete_event_threat_detection_custom_module]
 
 import (
 	"context"
@@ -53,4 +53,4 @@ func deleteEventThreatDetectionCustomModule(w io.Writer, parent string, customMo
 	return nil
 }
 
-// [END securitycenter_management_api_delete_event_threat_detection_custom_module]
+// [END securitycenter_delete_event_threat_detection_custom_module]

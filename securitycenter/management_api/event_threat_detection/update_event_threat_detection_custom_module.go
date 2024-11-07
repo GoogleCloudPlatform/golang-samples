@@ -14,7 +14,7 @@
 
 package event_threat_detection
 
-// [START securitycenter_management_api_update_event_threat_detection_custom_module]
+// [START securitycenter_update_event_threat_detection_custom_module]
 
 import (
 	"context"
@@ -64,4 +64,4 @@ func updateEventThreatDetectionCustomModule(w io.Writer, parent string, customMo
 	return nil
 }
 
-// [END securitycenter_management_api_update_event_threat_detection_custom_module]
+// [END securitycenter_update_event_threat_detection_custom_module]
