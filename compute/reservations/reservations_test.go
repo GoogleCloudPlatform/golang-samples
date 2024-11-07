@@ -101,6 +101,47 @@ func deleteTemplate(project, templateName string) error {
 	return op.Wait(ctx)
 }
 
+func createInstance(projectID, zone, instanceName string) error {
+	ctx := context.Background()
+	instancesClient, err := compute.NewInstancesRESTClient(ctx)
+	if err != nil {
+		return fmt.Errorf("NewInstancesRESTClient: %w", err)
+	}
+	defer instancesClient.Close()
+
+	req := &computepb.InsertInstanceRequest{
+		Project: projectID,
+		Zone:    zone,
+		InstanceResource: &computepb.Instance{
+			Name: proto.String(instanceName),
+			Disks: []*computepb.AttachedDisk{
+				{
+					InitializeParams: &computepb.AttachedDiskInitializeParams{
+						DiskSizeGb:  proto.Int64(375),
+						SourceImage: proto.String("projects/debian-cloud/global/images/family/debian-12"),
+					},
+					Interface:  proto.String("SCSI"),
+					AutoDelete: proto.Bool(true),
+					Boot:       proto.Bool(true),
+				},
+			},
+			MachineType: proto.String(fmt.Sprintf("zones/%s/machineTypes/%s", zone, "n1-standard-1")),
+			NetworkInterfaces: []*computepb.NetworkInterface{
+				{
+					Name: proto.String("global/networks/default"),
+				},
+			},
+		},
+	}
+
+	op, err := instancesClient.Insert(ctx, req)
+	if err != nil {
+		return fmt.Errorf("unable to create instance: %w", err)
+	}
+
+	return op.Wait(ctx)
+}
+
 func deleteInstance(projectID, zone, instance string) error {
 	ctx := context.Background()
 	client, err := compute.NewInstancesRESTClient(ctx)
@@ -432,6 +473,30 @@ func TestReservations(t *testing.T) {
 		if err = deleteTemplate(tc.ProjectID, templateName); err != nil {
 			t.Errorf("deleteTemplate got err: %v", err)
 		}
+		if err := deleteReservation(&buf, tc.ProjectID, zone, reservationName); err != nil {
+			t.Errorf("deleteReservation got err: %v", err)
+		}
+	})
+
+	t.Run("Test create from exisiting VM", func(t *testing.T) {
+		reservationName := fmt.Sprintf("test-reservation-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		existingVM := fmt.Sprintf("test-instance-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+
+		err := createInstance(tc.ProjectID, zone, existingVM)
+		if err != nil {
+			t.Fatalf("createInstance got err: %v", err)
+		}
+		defer deleteInstance(tc.ProjectID, zone, existingVM)
+
+		want := "Reservation created"
+		if err := createReservationFromVM(&buf, tc.ProjectID, zone, reservationName, existingVM); err != nil {
+			t.Errorf("createReservationFromVM got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("createReservationFromVM got %s, want %s", got, want)
+		}
+		buf.Reset()
+
 		if err := deleteReservation(&buf, tc.ProjectID, zone, reservationName); err != nil {
 			t.Errorf("deleteReservation got err: %v", err)
 		}
