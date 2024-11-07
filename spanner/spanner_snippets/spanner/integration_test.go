@@ -126,6 +126,7 @@ func TestCreateInstances(t *testing.T) {
 	t.Parallel()
 
 	runCreateAndUpdateInstanceSample(t, createInstance, updateInstance)
+	runCreateAndUpdateInstanceSample(t, createInstanceWithoutDefaultBackupScheduleType, updateInstanceDefaultBackupScheduleType)
 	runCreateInstanceSample(t, createInstanceWithProcessingUnits)
 	runCreateInstanceSample(t, createInstanceWithAutoscalingConfig)
 }
@@ -1419,7 +1420,8 @@ func createTestInstance(t *testing.T, projectID string, instanceConfigName strin
 					"cloud_spanner_samples_test": "true",
 					"create_time":                fmt.Sprintf("%v", time.Now().Unix()),
 				},
-				Edition: instancepb.Instance_ENTERPRISE_PLUS,
+				Edition:                   instancepb.Instance_ENTERPRISE_PLUS,
+				DefaultBackupScheduleType: instancepb.Instance_AUTOMATIC,
 			},
 		})
 		if err != nil {
