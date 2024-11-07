@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"io"
 
-	aiplatform_v1beta "cloud.google.com/go/aiplatform/apiv1beta1"
-	aiplatformpb_v1beta "cloud.google.com/go/aiplatform/apiv1beta1/aiplatformpb"
+	aiplatform "cloud.google.com/go/aiplatform/apiv1beta1"
+	aiplatformpb "cloud.google.com/go/aiplatform/apiv1beta1/aiplatformpb"
 	"google.golang.org/api/option"
 )
 
@@ -30,7 +30,7 @@ import (
 func getRougeScore(w io.Writer, projectID, location string) error {
 	ctx := context.Background()
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
-	client, err := aiplatform_v1beta.NewEvaluationClient(ctx, option.WithEndpoint(apiEndpoint))
+	client, err := aiplatform.NewEvaluationClient(ctx, option.WithEndpoint(apiEndpoint))
 
 	if err != nil {
 		return fmt.Errorf("unable to create aiplatform client: %w", err)
@@ -50,16 +50,16 @@ and islands. While it harbors an incredible diversity of marine
 life, including endangered species, it faces serious threats from
 climate change, ocean acidification, and coral bleaching.
 `
-	req := aiplatformpb_v1beta.EvaluateInstancesRequest{
+	req := aiplatformpb.EvaluateInstancesRequest{
 		Location: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
-		MetricInputs: &aiplatformpb_v1beta.EvaluateInstancesRequest_RougeInput{
-			RougeInput: &aiplatformpb_v1beta.RougeInput{
+		MetricInputs: &aiplatformpb.EvaluateInstancesRequest_RougeInput{
+			RougeInput: &aiplatformpb.RougeInput{
 				// Check the API reference for the list of supported ROUGE metric types:
 				// https://cloud.google.com/vertex-ai/docs/reference/rpc/google.cloud.aiplatform.v1beta1#rougespec
-				MetricSpec: &aiplatformpb_v1beta.RougeSpec{
+				MetricSpec: &aiplatformpb.RougeSpec{
 					RougeType: "rouge1",
 				},
-				Instances: []*aiplatformpb_v1beta.RougeInstance{
+				Instances: []*aiplatformpb.RougeInstance{
 					{
 						Prediction: &modelResponse,
 						Reference:  &reference,

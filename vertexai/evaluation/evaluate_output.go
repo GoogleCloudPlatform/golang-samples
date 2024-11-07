@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"io"
 
-	aiplatform_v1beta "cloud.google.com/go/aiplatform/apiv1beta1"
-	aiplatformpb_v1beta "cloud.google.com/go/aiplatform/apiv1beta1/aiplatformpb"
+	aiplatform "cloud.google.com/go/aiplatform/apiv1beta1"
+	aiplatformpb "cloud.google.com/go/aiplatform/apiv1beta1/aiplatformpb"
 	"google.golang.org/api/option"
 )
 
@@ -30,7 +30,7 @@ import (
 func evaluateOutput(w io.Writer, projectID, location string) error {
 	ctx := context_pkg.Background()
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
-	client, err := aiplatform_v1beta.NewEvaluationClient(ctx, option.WithEndpoint(apiEndpoint))
+	client, err := aiplatform.NewEvaluationClient(ctx, option.WithEndpoint(apiEndpoint))
 
 	if err != nil {
 		return fmt.Errorf("unable to create aiplatform client: %w", err)
@@ -53,12 +53,12 @@ This initiative is designed to improve efficiency, reduce carbon emissions, and 
 eco-friendly commuting. The city expects that this investment will enhance accessibility
 and usher in a new era of sustainable urban transportation.
 `
-	req := aiplatformpb_v1beta.EvaluateInstancesRequest{
+	req := aiplatformpb.EvaluateInstancesRequest{
 		Location: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
-		MetricInputs: &aiplatformpb_v1beta.EvaluateInstancesRequest_GroundednessInput{
-			GroundednessInput: &aiplatformpb_v1beta.GroundednessInput{
-				MetricSpec: &aiplatformpb_v1beta.GroundednessSpec{},
-				Instance: &aiplatformpb_v1beta.GroundednessInstance{
+		MetricInputs: &aiplatformpb.EvaluateInstancesRequest_GroundednessInput{
+			GroundednessInput: &aiplatformpb.GroundednessInput{
+				MetricSpec: &aiplatformpb.GroundednessSpec{},
+				Instance: &aiplatformpb.GroundednessInstance{
 					Context:    &context,
 					Prediction: &modelResponse,
 				},

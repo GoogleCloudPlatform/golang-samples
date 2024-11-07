@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"io"
 
-	aiplatform_v1beta "cloud.google.com/go/aiplatform/apiv1beta1"
-	aiplatformpb_v1beta "cloud.google.com/go/aiplatform/apiv1beta1/aiplatformpb"
+	aiplatform "cloud.google.com/go/aiplatform/apiv1beta1"
+	aiplatformpb "cloud.google.com/go/aiplatform/apiv1beta1/aiplatformpb"
 	"google.golang.org/api/option"
 )
 
@@ -30,7 +30,7 @@ import (
 func pairwiseEvaluation(w io.Writer, projectID, location string) error {
 	ctx := context_pkg.Background()
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
-	client, err := aiplatform_v1beta.NewEvaluationClient(ctx, option.WithEndpoint(apiEndpoint))
+	client, err := aiplatform.NewEvaluationClient(ctx, option.WithEndpoint(apiEndpoint))
 
 	if err != nil {
 		return fmt.Errorf("unable to create aiplatform client: %w", err)
@@ -60,12 +60,12 @@ by getting people to use less gas. The city thinks these changes will make it ea
 everyone to get where they need to go.
 `
 
-	req := aiplatformpb_v1beta.EvaluateInstancesRequest{
+	req := aiplatformpb.EvaluateInstancesRequest{
 		Location: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
-		MetricInputs: &aiplatformpb_v1beta.EvaluateInstancesRequest_PairwiseSummarizationQualityInput{
-			PairwiseSummarizationQualityInput: &aiplatformpb_v1beta.PairwiseSummarizationQualityInput{
-				MetricSpec: &aiplatformpb_v1beta.PairwiseSummarizationQualitySpec{},
-				Instance: &aiplatformpb_v1beta.PairwiseSummarizationQualityInstance{
+		MetricInputs: &aiplatformpb.EvaluateInstancesRequest_PairwiseSummarizationQualityInput{
+			PairwiseSummarizationQualityInput: &aiplatformpb.PairwiseSummarizationQualityInput{
+				MetricSpec: &aiplatformpb.PairwiseSummarizationQualitySpec{},
+				Instance: &aiplatformpb.PairwiseSummarizationQualityInstance{
 					Context:            &context,
 					Instruction:        &instruction,
 					Prediction:         &candidateResponse,
