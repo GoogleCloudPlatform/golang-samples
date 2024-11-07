@@ -54,6 +54,7 @@ func deleteCluster(projectID string, clusterName, region string) error {
 }
 
 func TestDataproc(t *testing.T) {
+	t.Skip("skipping until https://github.com/GoogleCloudPlatform/golang-samples/issues/4350 is resolved.")
 	tc := testutil.SystemTest(t)
 
 	clusterName := fmt.Sprintf("go-dp-test-%s", uuid.New().String())
