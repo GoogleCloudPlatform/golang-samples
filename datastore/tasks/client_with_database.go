@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // [START datastore_in_query]
-package datastore_snippets
+package main
 
 import (
 	"context"
