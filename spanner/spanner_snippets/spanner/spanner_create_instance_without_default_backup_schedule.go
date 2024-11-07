@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_create_instance_without_default_backup_schedule_type]
+// [START spanner_create_instance_without_default_backup_schedule]
 import (
 	"context"
 	"fmt"
@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/spanner/admin/instance/apiv1/instancepb"
 )
 
-func createInstanceWithoutDefaultBackupScheduleType(w io.Writer, projectID, instanceID string) error {
+func createInstanceWithoutDefaultBackupSchedule(w io.Writer, projectID, instanceID string) error {
 	// projectID := "my-project-id"
 	// instanceID := "my-instance"
 	ctx := context.Background()
@@ -61,4 +61,4 @@ func createInstanceWithoutDefaultBackupScheduleType(w io.Writer, projectID, inst
 	return nil
 }
 
-// [END spanner_create_instance_without_default_backup_schedule_type]
+// [END spanner_create_instance_without_default_backup_schedule]
