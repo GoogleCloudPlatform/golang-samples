@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START datastore_in_query]
+// [START datastore_create_client_with_db]
 package main
 
 import (
@@ -57,3 +57,5 @@ func createClientWithDatabase(w io.Writer, project, databaseID string) error {
 
 	return nil
 }
+
+// [END datastore_create_client_with_db]
