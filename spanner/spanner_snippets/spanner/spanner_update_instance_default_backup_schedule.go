@@ -38,9 +38,7 @@ func updateInstanceDefaultBackupScheduleType(w io.Writer, projectID, instanceID 
 	req := &instancepb.UpdateInstanceRequest{
 		Instance: &instancepb.Instance{
 			Name: fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID),
-			// The edition selected for this instance.
-			// Different editions provide different capabilities at different price points.
-			// For more information, see https://cloud.google.com/spanner/docs/editions-overview.
+			// Controls the default backup behavior for new databases within the instance.
 			DefaultBackupScheduleType: instancepb.Instance_AUTOMATIC,
 		},
 		FieldMask: &field_mask.FieldMask{
