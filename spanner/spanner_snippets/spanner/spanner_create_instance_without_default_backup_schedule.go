@@ -24,6 +24,7 @@ import (
 	"cloud.google.com/go/spanner/admin/instance/apiv1/instancepb"
 )
 
+// This function creates instance with default backup schedule disabled.
 func createInstanceWithoutDefaultBackupSchedule(w io.Writer, projectID, instanceID string) error {
 	// projectID := "my-project-id"
 	// instanceID := "my-instance"
@@ -34,7 +35,9 @@ func createInstanceWithoutDefaultBackupSchedule(w io.Writer, projectID, instance
 	}
 	defer instanceAdmin.Close()
 
-	op, err := instanceAdmin.CreateInstance(ctx, &instancepb.CreateInstanceRequest{
+	// Create an instance without default backup schedule, whicn means no default backup schedule will
+	// be created automatically on creation of a database within the instance.
+	req := instancepb.CreateInstanceRequest{
 		Parent:     fmt.Sprintf("projects/%s", projectID),
 		InstanceId: instanceID,
 		Instance: &instancepb.Instance{
@@ -44,18 +47,21 @@ func createInstanceWithoutDefaultBackupSchedule(w io.Writer, projectID, instance
 			Labels:                    map[string]string{"cloud_spanner_samples": "true"},
 			DefaultBackupScheduleType: instancepb.Instance_NONE,
 		},
-	})
+	}
+
+	op, err := instanceAdmin.CreateInstance(ctx, &req)
 	if err != nil {
 		return fmt.Errorf("could not create instance %s: %w", fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID), err)
 	}
-	// Wait for the instance creation to finish.
-	i, err := op.Wait(ctx)
+	// Wait for the instance creation to finish.  For more information about instances, see
+	// https://cloud.google.com/spanner/docs/instances.
+	instance, err := op.Wait(ctx)
 	if err != nil {
 		return fmt.Errorf("waiting for instance creation to finish failed: %w", err)
 	}
 	// The instance may not be ready to serve yet.
-	if i.State != instancepb.Instance_READY {
-		fmt.Fprintf(w, "instance state is not READY yet. Got state %v\n", i.State)
+	if instance.State != instancepb.Instance_READY {
+		fmt.Fprintf(w, "instance state is not READY yet. Got state %v\n", instance.State)
 	}
 	fmt.Fprintf(w, "Created instance [%s]\n", instanceID)
 	return nil
