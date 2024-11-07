@@ -26,7 +26,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-// pairwiseEvaluation evaluates ...
+// pairwiseEvaluation lets the judge model to compare the responses of two models and pick the better one
 func pairwiseEvaluation(w io.Writer, projectID, location string) error {
 	ctx := context_pkg.Background()
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
