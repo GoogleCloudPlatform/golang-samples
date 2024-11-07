@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package etd
+package event_threat_detection
 
 // [START securitycenter_management_api_create_event_threat_detection_custom_module]
 
@@ -23,7 +23,7 @@ import (
 
 	securitycentermanagement "cloud.google.com/go/securitycentermanagement/apiv1"
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
-	// expr "google.golang.org/genproto/googleapis/type/expr"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 // createEventThreatDetectionCustomModule creates a custom module for Security Health Analytics.
@@ -40,26 +40,34 @@ func createEventThreatDetectionCustomModule(w io.Writer, parent string) error {
 	}
 	defer client.Close()
 
+	// Define the metadata and other config parameters as a map
+	configMap := map[string]interface{}{
+		"metadata": map[string]interface{}{
+			"severity": "MEDIUM",
+			//Replace with the desired description.
+			"description":    "Sample custom module for testing purpose. Please do not delete.",
+			"recommendation": "na",
+		},
+		"ips": []interface{}{"0.0.0.0"},
+	}
+
+	// Convert the map to a Struct
+	configStruct, err := structpb.NewStruct(configMap)
+	if err != nil {
+		return fmt.Errorf("structpb.NewStruct: %w", err)
+	}
+
 	// Define the Event Threat Detection custom module configuration
 	customModule := &securitycentermanagementpb.EventThreatDetectionCustomModule{
-		Config: &securitycentermanagementpb.EventThreatDetectionCustomModule_Config{
-			Metadata: &securitycentermanagementpb.EventThreatDetectionCustomModule_Config_Metadata{
-				//Replace with the desired severity.
-				Severity:      "MEDIUM",
-				//Replace with the desired description.
-				Description:   "Sample custom module for testing purpose. Please do not delete.",
-				Recommendation: "na",
-			},
-			Ips: []string{"0.0.0.0"},
-		},
+		Config: configStruct,
 		//Replace with desired Display Name.
-		DisplayName:    "go_sample_etd_custom_module",
+		DisplayName:     "go_sample_etd_custom_module",
 		EnablementState: securitycentermanagementpb.EventThreatDetectionCustomModule_ENABLED,
-		Type:           securitycentermanagementpb.EventThreatDetectionCustomModule_CONFIGURABLE_BAD_IP,
+		Type:            "CONFIGURABLE_BAD_IP",
 	}
 
 	req := &securitycentermanagementpb.CreateEventThreatDetectionCustomModuleRequest{
-		Parent:                      parent,
+		Parent:                           parent,
 		EventThreatDetectionCustomModule: customModule,
 	}
 

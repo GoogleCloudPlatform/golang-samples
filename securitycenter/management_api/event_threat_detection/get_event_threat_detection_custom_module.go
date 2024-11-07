@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package etd
+package event_threat_detection
 
 // [START securitycenter_management_api_get_event_threat_detection_custom_module]
 
@@ -40,7 +40,7 @@ func getEventThreatDetectionCustomModule(w io.Writer, parent string, customModul
 	defer client.Close()
 
 	req := &securitycentermanagementpb.GetEventThreatDetectionCustomModuleRequest{
-		Name: fmt.Sprintf("%s/securityHealthAnalyticsCustomModules/%s", parent, customModuleID),
+		Name: fmt.Sprintf("%s/eventThreatDetectionCustomModules/%s", parent, customModuleID),
 	}
 
 	module, err := client.GetEventThreatDetectionCustomModule(ctx, req)

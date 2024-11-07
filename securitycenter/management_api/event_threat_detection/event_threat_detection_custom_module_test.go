@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package etd
+package event_threat_detection
 
 import (
 	"bytes"
@@ -28,7 +28,7 @@ import (
 	securitycentermanagement "cloud.google.com/go/securitycentermanagement/apiv1"
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
 	iterator "google.golang.org/api/iterator"
-	// expr "google.golang.org/genproto/googleapis/type/expr"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 var orgID = ""
@@ -80,33 +80,41 @@ func addCustomModule() (string, error) {
 	rand.Seed(time.Now().UnixNano())
 	displayName := fmt.Sprintf("go_sample_etd_custom_module_test_%d", rand.Int())
 
+	// Define the metadata and other config parameters as a map
+	configMap := map[string]interface{}{
+		"metadata": map[string]interface{}{
+			"severity": "MEDIUM",
+			//Replace with the desired description.
+			"description":    "Sample custom module for testing purpose. Please do not delete.",
+			"recommendation": "na",
+		},
+		"ips": []interface{}{"0.0.0.0"},
+	}
+
+	// Convert the map to a Struct
+	configStruct, err := structpb.NewStruct(configMap)
+	if err != nil {
+		return "", fmt.Errorf("structpb.NewStruct: %w", err)
+	}
+
 	// Define the Event Threat Detection custom module configuration
 	customModule := &securitycentermanagementpb.EventThreatDetectionCustomModule{
-		Config: &securitycentermanagementpb.EventThreatDetectionCustomModule_Config{
-			Metadata: &securitycentermanagementpb.EventThreatDetectionCustomModule_Config_Metadata{
-				//Replace with the desired severity.
-				Severity:      "MEDIUM",
-				//Replace with the desired description.
-				Description:   "Sample custom module for testing purpose. Please do not delete.",
-				Recommendation: "na",
-			},
-			Ips: []string{"0.0.0.0"},
-		},
+		Config: configStruct,
 		//Replace with desired Display Name.
-		DisplayName:    displayName,
+		DisplayName:     displayName,
 		EnablementState: securitycentermanagementpb.EventThreatDetectionCustomModule_ENABLED,
-		Type:           securitycentermanagementpb.EventThreatDetectionCustomModule_CONFIGURABLE_BAD_IP,
+		Type:            "CONFIGURABLE_BAD_IP",
 	}
 
 	req := &securitycentermanagementpb.CreateEventThreatDetectionCustomModuleRequest{
-		Parent:                      parent,
+		Parent:                           parent,
 		EventThreatDetectionCustomModule: customModule,
 	}
 
 	module, err := client.CreateEventThreatDetectionCustomModule(ctx, req)
 	if err != nil {
 		return "", fmt.Errorf("failed to create EventThreatDetectionCustomModule: %w", err)
-	}		
+	}
 
 	fmt.Fprintf(&buf, "Created EventThreatDetectionCustomModule: %s\n", module.Name)
 
@@ -204,7 +212,7 @@ func TestCreateEtdCustomModule(t *testing.T) {
 }
 
 // TestGetCustomModule verifies the Get functionality
-func TestGetCustomModule(t *testing.T) {
+func TestGetEtdCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
 	createdCustomModuleID, err := addCustomModule()
@@ -229,5 +237,87 @@ func TestGetCustomModule(t *testing.T) {
 
 	if !strings.Contains(got, orgID) {
 		t.Fatalf("getEventThreatDetectionCustomModule() got: %s want %s", got, orgID)
+	}
+}
+
+// TestUpdateCustomModule verifies the Update functionality
+func TestUpdateEtdCustomModule(t *testing.T) {
+	var buf bytes.Buffer
+
+	createdCustomModuleID, err := addCustomModule()
+
+	if err != nil {
+		t.Fatalf("Could not setup test environment: %v", err)
+		return
+	}
+
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+	// Call Update
+	err = updateEventThreatDetectionCustomModule(&buf, parent, createdCustomModuleID)
+
+	if err != nil {
+		t.Fatalf("updateEventThreatDetectionCustomModule() had error: %v", err)
+		return
+	}
+
+	got := buf.String()
+
+	if !strings.Contains(got, orgID) {
+		t.Fatalf("updateCustomModule() got: %s want %s", got, orgID)
+	}
+}
+
+// TestDeleteCustomModule verifies the List functionality
+func TestDeleteEtdCustomModule(t *testing.T) {
+	var buf bytes.Buffer
+
+	createdCustomModuleID, err := addCustomModule()
+
+	if err != nil {
+		t.Fatalf("Could not setup test environment: %v", err)
+		return
+	}
+
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+
+	err = deleteEventThreatDetectionCustomModule(&buf, parent, createdCustomModuleID)
+
+	if err != nil {
+		t.Fatalf("deleteEventThreatDetectionCustomModule() had error: %v", err)
+		return
+	}
+
+	got := buf.String()
+
+	if !strings.Contains(got, createdCustomModuleID) {
+		t.Fatalf("deleteEventThreatDetectionCustomModule() got: %s want %s", got, createdCustomModuleID)
+	}
+}
+
+// TestListEtdCustomModule verifies the List functionality
+func TestListEtdCustomModule(t *testing.T) {
+	var buf bytes.Buffer
+
+	_, err := addCustomModule()
+
+	if err != nil {
+		t.Fatalf("Could not setup test environment: %v", err)
+		return
+	}
+
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+
+	err = listEventThreatDetectionCustomModule(&buf, parent)
+
+	if err != nil {
+		t.Fatalf("listEventThreatDetectionCustomModule() had error: %v", err)
+		return
+	}
+
+	got := buf.String()
+	fmt.Printf("Response: %v\n", got)
+
+	if !strings.Contains(got, orgID) {
+		t.Fatalf("listEventThreatDetectionCustomModule() got: %s want %s", got, orgID)
 	}
 }
