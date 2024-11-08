@@ -33,7 +33,7 @@ func TestEvaluation(t *testing.T) {
 	}
 
 	buf.Reset()
-	err = evaluateOutput(buf, tc.ProjectID, location)
+	err = evaluateModelResponse(buf, tc.ProjectID, location)
 	if err != nil {
 		t.Fatalf("evaluateOutput: %v", err.Error())
 	}

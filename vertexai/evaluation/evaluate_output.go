@@ -26,9 +26,9 @@ import (
 	"google.golang.org/api/option"
 )
 
-// evaluateOutput evaluates an output of an LLM for groundedness, i.e., how well the model
-// output connects with a verifiable source of information.
-func evaluateOutput(w io.Writer, projectID, location string) error {
+// evaluateModelResponse evaluates the output of an LLM for groundedness, i.e., how well
+// the model response connects with verifiable sources of information
+func evaluateModelResponse(w io.Writer, projectID, location string) error {
 	ctx := context_pkg.Background()
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	client, err := aiplatform.NewEvaluationClient(ctx, option.WithEndpoint(apiEndpoint))
@@ -38,7 +38,14 @@ func evaluateOutput(w io.Writer, projectID, location string) error {
 	}
 	defer client.Close()
 
-	context := `
+	// evaluate the pre-generated model response against the reference (ground truth)
+	responseToEvaluate := `
+The city is undertaking a major project to revamp its public transportation system.
+This initiative is designed to improve efficiency, reduce carbon emissions, and promote
+eco-friendly commuting. The city expects that this investment will enhance accessibility
+and usher in a new era of sustainable urban transportation.
+`
+	reference := `
 As part of a comprehensive initiative to tackle urban congestion and foster
 sustainable urban living, a major city has revealed ambitious plans for an
 extensive overhaul of its public transportation system. The project aims not
@@ -48,20 +55,16 @@ City officials anticipate that this strategic investment will enhance
 accessibility for residents and visitors alike, ushering in a new era of
 efficient, environmentally conscious urban transportation.
 `
-	modelResponse := `
-The city is undertaking a major project to revamp its public transportation system.
-This initiative is designed to improve efficiency, reduce carbon emissions, and promote
-eco-friendly commuting. The city expects that this investment will enhance accessibility
-and usher in a new era of sustainable urban transportation.
-`
 	req := aiplatformpb.EvaluateInstancesRequest{
 		Location: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+		// Check the API reference for a full list of supported metric inputs:
+		// https://cloud.google.com/vertex-ai/docs/reference/rpc/google.cloud.aiplatform.v1beta1#evaluateinstancesrequest
 		MetricInputs: &aiplatformpb.EvaluateInstancesRequest_GroundednessInput{
 			GroundednessInput: &aiplatformpb.GroundednessInput{
 				MetricSpec: &aiplatformpb.GroundednessSpec{},
 				Instance: &aiplatformpb.GroundednessInstance{
-					Context:    &context,
-					Prediction: &modelResponse,
+					Context:    &reference,
+					Prediction: &responseToEvaluate,
 				},
 			},
 		},
