@@ -563,25 +563,15 @@ func TestComputeDisksSnippets(t *testing.T) {
 		}
 	})
 
-	t.Run("createSecondaryDisk", func(t *testing.T) {
-		diskName := fmt.Sprintf("test-secondary-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
-		zone := "us-east1-b"
-		primaryDiskName := fmt.Sprintf("test-primay-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
-		primaryZone := "us-central1-a"
-		primaryType := fmt.Sprintf("zones/%s/diskTypes/pd-ssd", primaryZone)
-		diskSizeGb := int64(20)
-		var buf bytes.Buffer
+	t.Run("create secondary disk", func(t *testing.T) {
+		secondaryDiskName := fmt.Sprintf("test-secondary-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		secondaryZone := "europe-west4-b"
+		diskSizeGb := int64(50)
 
-		// Creating primary disk
-		if err := createEmptyDisk(&buf, tc.ProjectID, primaryZone, primaryDiskName, primaryType, diskSizeGb); err != nil {
-			t.Fatalf("createEmptyDisk got err: %v", err)
-		}
-		defer deleteDisk(&buf, tc.ProjectID, primaryZone, primaryDiskName)
-
-		if err := createSecondaryDisk(&buf, tc.ProjectID, zone, diskName, primaryDiskName, primaryZone, diskSizeGb); err != nil {
+		if err := createSecondaryDisk(&buf, tc.ProjectID, secondaryZone, secondaryDiskName, diskName, zone, diskSizeGb); err != nil {
 			t.Errorf("createSecondaryDisk got err: %v", err)
 		}
-		defer deleteDisk(&buf, tc.ProjectID, zone, diskName)
+		defer deleteDisk(&buf, tc.ProjectID, secondaryZone, secondaryDiskName)
 
 		// Checking resource
 		disksClient, err := compute.NewDisksRESTClient(ctx)
@@ -592,18 +582,18 @@ func TestComputeDisksSnippets(t *testing.T) {
 
 		disk, err := disksClient.Get(ctx, &computepb.GetDiskRequest{
 			Project: tc.ProjectID,
-			Zone:    zone,
-			Disk:    diskName,
+			Zone:    secondaryZone,
+			Disk:    secondaryDiskName,
 		})
 		if err != nil {
 			t.Errorf("Get disk got err: %v", err)
 		}
 
-		if disk.GetName() != diskName {
-			t.Errorf("Disk name mismatch: got %v, want %v", disk.GetName(), diskName)
+		if disk.GetName() != secondaryDiskName {
+			t.Errorf("Disk name mismatch: got %v, want %v", disk.GetName(), secondaryDiskName)
 		}
 
-		expected := fmt.Sprintf("projects/%s/zones/%s/disks/%s", tc.ProjectID, primaryZone, primaryDiskName)
+		expected := fmt.Sprintf("projects/%s/zones/%s/disks/%s", tc.ProjectID, zone, diskName)
 		if !strings.Contains(disk.GetAsyncPrimaryDisk().GetDisk(), expected) {
 			t.Errorf("Primary disk is not set correctly: got %v, want %v", disk.GetAsyncPrimaryDisk().GetDisk(), expected)
 		}

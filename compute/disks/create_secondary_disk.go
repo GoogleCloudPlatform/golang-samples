@@ -34,10 +34,10 @@ func createSecondaryDisk(
 	diskSizeGb int64,
 ) error {
 	// projectID := "your_project_id"
-	// zone := "us-central1-a"
+	// zone := "europe-west4-b"
 	// diskName := "your_disk_name"
 	// primaryDiskName := "your_disk_name2"
-	// primaryDiskZone := "us-east1-b"
+	// primaryDiskZone := "europe-west2-b"
 	// diskSizeGb := 20
 
 	ctx := context.Background()
