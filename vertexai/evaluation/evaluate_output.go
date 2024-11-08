@@ -15,7 +15,7 @@
 // evaluation package shows examples of working with Gen AI Evaluation API
 package evaluation
 
-// [START generativeaionvertexai_evaluation_pointwise]
+// [START generativeaionvertexai_create_evaluation_task]
 import (
 	context_pkg "context"
 	"fmt"
@@ -86,4 +86,4 @@ and usher in a new era of sustainable urban transportation.
 	return nil
 }
 
-// [END generativeaionvertexai_evaluation_pointwise]
+// [END generativeaionvertexai_create_evaluation_task]
