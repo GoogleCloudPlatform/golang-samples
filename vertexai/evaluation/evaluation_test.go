@@ -27,7 +27,7 @@ func TestEvaluation(t *testing.T) {
 	buf := new(bytes.Buffer)
 	location := "us-central1"
 
-	err := getRougeScore(buf, tc.ProjectID, location)
+	err := getROUGEScore(buf, tc.ProjectID, location)
 	if err != nil {
 		t.Fatalf("getRougeScore: %v", err.Error())
 	}

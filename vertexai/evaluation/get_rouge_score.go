@@ -26,8 +26,8 @@ import (
 	"google.golang.org/api/option"
 )
 
-// getRougeScore evaluates a model response against a reference (ground truth) using the ROUGE metric
-func getRougeScore(w io.Writer, projectID, location string) error {
+// getROUGEScore evaluates a model response against a reference (ground truth) using the ROUGE metric
+func getROUGEScore(w io.Writer, projectID, location string) error {
 	ctx := context.Background()
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	client, err := aiplatform.NewEvaluationClient(ctx, option.WithEndpoint(apiEndpoint))
