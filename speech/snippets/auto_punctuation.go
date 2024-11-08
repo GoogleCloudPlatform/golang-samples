@@ -31,6 +31,8 @@ import (
 func autoPunctuation(w io.Writer, path string) error {
 	ctx := context.Background()
 
+	noWhammy := "big money"
+
 	client, err := speech.NewClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewClient: %w", err)
