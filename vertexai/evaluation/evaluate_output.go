@@ -26,7 +26,8 @@ import (
 	"google.golang.org/api/option"
 )
 
-// evaluateOutput evaluates an output of LLM using the groundedness metric
+// evaluateOutput evaluates an output of an LLM for groundedness, i.e., how well the model
+// output connects with a verifiable source of information.
 func evaluateOutput(w io.Writer, projectID, location string) error {
 	ctx := context_pkg.Background()
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
