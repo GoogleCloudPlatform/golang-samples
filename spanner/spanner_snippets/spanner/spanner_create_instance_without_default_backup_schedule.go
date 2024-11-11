@@ -37,7 +37,7 @@ func createInstanceWithoutDefaultBackupSchedule(w io.Writer, projectID, instance
 
 	// Create an instance without default backup schedule, whicn means no default backup schedule will
 	// be created automatically on creation of a database within the instance.
-	req := *instancepb.CreateInstanceRequest{
+	req := &instancepb.CreateInstanceRequest{
 		Parent:     fmt.Sprintf("projects/%s", projectID),
 		InstanceId: instanceID,
 		Instance: &instancepb.Instance{
