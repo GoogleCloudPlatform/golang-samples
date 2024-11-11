@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/spanner/admin/instance/apiv1/instancepb"
 )
 
-// This function creates instance with default backup schedule disabled.
+// createInstanceWithoutDefaultBackupSchedule creates instance with default backup schedule disabled.
 func createInstanceWithoutDefaultBackupSchedule(w io.Writer, projectID, instanceID string) error {
 	// projectID := "my-project-id"
 	// instanceID := "my-instance"
@@ -37,7 +37,7 @@ func createInstanceWithoutDefaultBackupSchedule(w io.Writer, projectID, instance
 
 	// Create an instance without default backup schedule, whicn means no default backup schedule will
 	// be created automatically on creation of a database within the instance.
-	req := instancepb.CreateInstanceRequest{
+	req := *instancepb.CreateInstanceRequest{
 		Parent:     fmt.Sprintf("projects/%s", projectID),
 		InstanceId: instanceID,
 		Instance: &instancepb.Instance{
@@ -49,7 +49,7 @@ func createInstanceWithoutDefaultBackupSchedule(w io.Writer, projectID, instance
 		},
 	}
 
-	op, err := instanceAdmin.CreateInstance(ctx, &req)
+	op, err := instanceAdmin.CreateInstance(ctx, req)
 	if err != nil {
 		return fmt.Errorf("could not create instance %s: %w", fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID), err)
 	}
