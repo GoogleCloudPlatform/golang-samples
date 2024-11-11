@@ -25,8 +25,8 @@ import (
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-// This function updates instance default backup schedule type to AUTOMATIC.  This means a default
-// backup schedule will be created automatically on creation of a database within the instance.
+// updateInstanceDefaultBackupScheduleType updates instance default backup schedule type to AUTOMATIC.
+// This means a default backup schedule will be created automatically on creation of a database within the instance.
 func updateInstanceDefaultBackupScheduleType(w io.Writer, projectID, instanceID string) error {
 	// projectID := "my-project-id"
 	// instanceID := "my-instance"
