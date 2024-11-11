@@ -150,6 +150,8 @@ export PATH="$PATH:/tmp/google-cloud-sdk/bin";
 ./testing/kokoro/configure_gcloud.bash;
 
 # fetch secrets used by storagetransfer tests
+set +x
+
 export STS_AWS_SECRET=`gcloud secrets versions access latest --project cloud-devrel-kokoro-resources --secret=go-storagetransfer-aws`
 export AWS_ACCESS_KEY_ID=`S="$STS_AWS_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["AccessKeyId"]);'`
 export AWS_SECRET_ACCESS_KEY=`S="$STS_AWS_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["SecretAccessKey"]);'`
@@ -158,7 +160,7 @@ export AZURE_STORAGE_ACCOUNT=`S="$STS_AZURE_SECRET" python3 -c 'import json,sys,
 export AZURE_CONNECTION_STRING=`S="$STS_AZURE_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["ConnectionString"]);'`
 export AZURE_SAS_TOKEN=`S="$STS_AZURE_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["SAS"]);'`
 
-
+set -x
 
 if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]] || [[ $CHANGED_DIRS =~ "run" ]] && [[ -n $GOLANG_SAMPLES_GO_VET ]]; then
   echo "This test run will run end-to-end tests.";

@@ -33,7 +33,7 @@ func updateTopic(w io.Writer, projectID, region, clusterID, topicID string, part
 	// clusterID := "my-cluster"
 	// topicID := "my-topic"
 	// partitionCount := 20
-	// configs := "{'min.insync.replicas':'1'}"
+	// configs := map[string]string{"min.insync.replicas":"1"}
 	ctx := context.Background()
 	client, err := managedkafka.NewClient(ctx, opts...)
 	if err != nil {
