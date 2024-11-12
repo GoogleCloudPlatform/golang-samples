@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START datastore_create_client_with_db]
 package main
 
+// [START datastore_create_client_with_db]
 import (
 	"context"
 	"fmt"
