@@ -33,7 +33,7 @@ func updateConsumerGroup(w io.Writer, projectID, region, clusterID, consumerGrou
 	// clusterID := "my-cluster"
 	// consumerGroupID := "my-consumer-group"
 	// topicPath := "my-topic-path"
-	// partitionOffsets := {1: 10, 2: 20, 3: 30}
+	// partitionOffsets := map[int32]int64{1: 10, 2: 20, 3: 30}
 	ctx := context.Background()
 	client, err := managedkafka.NewClient(ctx, opts...)
 	if err != nil {

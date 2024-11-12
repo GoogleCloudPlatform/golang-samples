@@ -147,6 +147,7 @@ use (
 	./vertexai/chat
 	./vertexai/context-caching
 	./vertexai/controlled-generation
+	./vertexai/evaluation
 	./vertexai/function-calling
 	./vertexai/gemma2
 	./vertexai/multimodal
