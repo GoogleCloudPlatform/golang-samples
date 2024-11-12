@@ -38,8 +38,9 @@ func ProcessImage(ctx context.Context, cloudevent event.Event) error {
 		return fmt.Errorf("ProcessImage: %w", err)
 	}
 
+	unmarshalOptions := protojson.UnmarshalOptions{DiscardUnknown: true}
 	var data storagedata.StorageObjectData
-	if err := protojson.Unmarshal(cloudevent.Data(), &data); err != nil {
+	if err := unmarshalOptions.Unmarshal(cloudevent.Data(), &data); err != nil {
 		return fmt.Errorf("protojson.Unmarshal: Failed to parse CloudEvent data: %w", err)
 	}
 	if data.GetBucket() == "" {

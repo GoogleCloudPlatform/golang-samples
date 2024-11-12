@@ -69,8 +69,9 @@ func blurOffensiveImages(ctx context.Context, e cloudevents.Event) error {
 		return errors.New("environment variable BLURRED_BUCKET_NAME must be set")
 	}
 
+	unmarshalOptions := protojson.UnmarshalOptions{DiscardUnknown: true}
 	var gcsEvent storagedata.StorageObjectData
-	if err := protojson.Unmarshal(e.Data(), &gcsEvent); err != nil {
+	if err := unmarshalOptions.Unmarshal(e.Data(), &gcsEvent); err != nil {
 		return fmt.Errorf("protojson.Unmarshal: failed to decode event data: %w", err)
 	}
 	img := vision.NewImageFromURI(fmt.Sprintf("gs://%s/%s", gcsEvent.GetBucket(), gcsEvent.GetName()))

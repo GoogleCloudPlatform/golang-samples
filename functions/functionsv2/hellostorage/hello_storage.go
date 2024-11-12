@@ -37,8 +37,9 @@ func helloStorage(ctx context.Context, e event.Event) error {
 	log.Printf("Event ID: %s", e.ID())
 	log.Printf("Event Type: %s", e.Type())
 
+	unmarshalOptions := protojson.UnmarshalOptions{DiscardUnknown: true}
 	var data storagedata.StorageObjectData
-	if err := protojson.Unmarshal(e.Data(), &data); err != nil {
+	if err := unmarshalOptions.Unmarshal(e.Data(), &data); err != nil {
 		return fmt.Errorf("protojson.Unmarshal: %w", err)
 	}
 
