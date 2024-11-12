@@ -24,17 +24,8 @@ import (
 )
 
 // createClientWithEndpoint creates a Security Command Center client for a
-// regional endpoint, along with another client for the default endpoint.
+// regional endpoint.
 func createClientWithEndpoint(repLocation string) error {
-	// Instantiate client for default endpoint. Use this client to access resources that
-	// aren't subject to data residency controls.
-	ctx := context.Background()
-	client, err := securitycenter.NewClient(ctx)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
-
 	// Assemble the regional endpoint URL using provided location.
 	repEndpoint := fmt.Sprintf("securitycenter.%s.rep.googleapis.com:443", repLocation)
 	// Instantiate client for regional endpoint. Use this client to access resources that
