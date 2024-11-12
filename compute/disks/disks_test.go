@@ -669,7 +669,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 		secondaryDiskName := fmt.Sprintf("test-secondary-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 		secondaryRegion := "europe-west4"
 		secondaryReplicaZones := []string{"europe-west4-a", "europe-west4-b"}
-		diskSizeGb := int64(50)
+		diskSizeGb := int64(200)
 
 		if err := createRegionalDisk(&buf, tc.ProjectID, region, replicaZones, primaryDiskName, diskType, diskSizeGb); err != nil {
 			t.Errorf("createRegionalDisk got err: %v", err)
