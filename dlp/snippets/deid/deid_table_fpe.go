@@ -32,7 +32,7 @@ func deidentifyTableFPE(w io.Writer, projectID string, kmsKeyName, wrappedAESKey
 	   + "keyRings/YOUR_KEYRING_NAME/"
 	   + "cryptoKeys/YOUR_KEY_NAME"
 	*/
-	// wrappedAESKey := "YOUR_ENCRYPTED_AES_256_KEY"git
+	// wrappedAESKey := "YOUR_ENCRYPTED_AES_256_KEY"
 
 	// define your table.
 	row1 := &dlppb.Table_Row{
