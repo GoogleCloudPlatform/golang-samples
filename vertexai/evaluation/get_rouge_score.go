@@ -28,6 +28,7 @@ import (
 
 // getROUGEScore evaluates a model response against a reference (ground truth) using the ROUGE metric
 func getROUGEScore(w io.Writer, projectID, location string) error {
+	// location  := "us-central1"
 	ctx := context.Background()
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	client, err := aiplatform.NewEvaluationClient(ctx, option.WithEndpoint(apiEndpoint))
