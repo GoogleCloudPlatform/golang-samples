@@ -712,6 +712,35 @@ func TestComputeDisksSnippets(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("disk replication", func(t *testing.T) {
+		secondaryDiskName := fmt.Sprintf("test-secondary-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		secondaryZone := "europe-west4-b"
+		diskSizeGb := int64(50)
+
+		if err := createSecondaryDisk(&buf, tc.ProjectID, secondaryZone, secondaryDiskName, diskName, zone, diskSizeGb); err != nil {
+			t.Errorf("createSecondaryDisk got err: %v", err)
+		}
+		defer deleteDisk(&buf, tc.ProjectID, secondaryZone, secondaryDiskName)
+
+		if err := startReplication(&buf, tc.ProjectID, secondaryZone, secondaryDiskName, diskName, zone); err != nil {
+			t.Errorf("startReplication got err: %v", err)
+		}
+
+		want := "Replication started"
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("startReplication got %q, want %q", got, want)
+		}
+		buf.Reset()
+
+		if err := stopReplication(&buf, tc.ProjectID, diskName, zone); err != nil {
+			t.Errorf("stopReplication got err: %v", err)
+		}
+		want = "Replication stopped"
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("stopReplication got %q, want %q", got, want)
+		}
+	})
 }
 
 func TestCreateDisksStoragePool(t *testing.T) {
