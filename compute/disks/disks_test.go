@@ -561,7 +561,185 @@ func TestComputeDisksSnippets(t *testing.T) {
 		if !strings.Contains(disk.GetType(), wantDiskType) {
 			t.Errorf("Disk type mismatch (-want to contain +got):\n%s / %s", disk.GetType(), wantDiskType)
 		}
+	})
 
+	t.Run("create secondary disk", func(t *testing.T) {
+		secondaryDiskName := fmt.Sprintf("test-secondary-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		secondaryZone := "europe-west4-b"
+		diskSizeGb := int64(50)
+
+		if err := createSecondaryDisk(&buf, tc.ProjectID, secondaryZone, secondaryDiskName, diskName, zone, diskSizeGb); err != nil {
+			t.Errorf("createSecondaryDisk got err: %v", err)
+		}
+		defer deleteDisk(&buf, tc.ProjectID, secondaryZone, secondaryDiskName)
+
+		// Checking resource
+		disksClient, err := compute.NewDisksRESTClient(ctx)
+		if err != nil {
+			t.Fatalf("NewDisksRESTClient: %v", err)
+		}
+		defer disksClient.Close()
+
+		disk, err := disksClient.Get(ctx, &computepb.GetDiskRequest{
+			Project: tc.ProjectID,
+			Zone:    secondaryZone,
+			Disk:    secondaryDiskName,
+		})
+		if err != nil {
+			t.Errorf("Get disk got err: %v", err)
+		}
+
+		if disk.GetName() != secondaryDiskName {
+			t.Errorf("Disk name mismatch: got %v, want %v", disk.GetName(), secondaryDiskName)
+		}
+
+		expected := fmt.Sprintf("projects/%s/zones/%s/disks/%s", tc.ProjectID, zone, diskName)
+		if !strings.Contains(disk.GetAsyncPrimaryDisk().GetDisk(), expected) {
+			t.Errorf("Primary disk is not set correctly: got %v, want %v", disk.GetAsyncPrimaryDisk().GetDisk(), expected)
+		}
+	})
+
+	t.Run("create custom secondary disk", func(t *testing.T) {
+		secondaryDiskName := fmt.Sprintf("test-secondary-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		secondaryZone := "europe-west4-b"
+		diskSizeGb := int64(50)
+
+		if err := createCustomSecondaryDisk(&buf, tc.ProjectID, secondaryZone, secondaryDiskName, diskName, zone, diskSizeGb); err != nil {
+			t.Errorf("createCustomSecondaryDisk got err: %v", err)
+		}
+		defer deleteDisk(&buf, tc.ProjectID, secondaryZone, secondaryDiskName)
+
+		// Checking resource
+		disksClient, err := compute.NewDisksRESTClient(ctx)
+		if err != nil {
+			t.Fatalf("NewDisksRESTClient: %v", err)
+		}
+		defer disksClient.Close()
+
+		disk, err := disksClient.Get(ctx, &computepb.GetDiskRequest{
+			Project: tc.ProjectID,
+			Zone:    secondaryZone,
+			Disk:    secondaryDiskName,
+		})
+		if err != nil {
+			t.Errorf("Get disk got err: %v", err)
+		}
+
+		if disk.GetName() != secondaryDiskName {
+			t.Errorf("Disk name mismatch: got %v, want %v", disk.GetName(), secondaryDiskName)
+		}
+
+		expected := fmt.Sprintf("projects/%s/zones/%s/disks/%s", tc.ProjectID, zone, diskName)
+		if !strings.Contains(disk.GetAsyncPrimaryDisk().GetDisk(), expected) {
+			t.Errorf("Primary disk is not correctly set: got %v, want %v", disk.GetAsyncPrimaryDisk().GetDisk(), expected)
+		}
+
+		expectedFeatures := map[string]bool{
+			"UEFI_COMPATIBLE": false,
+			"GVNIC":           false,
+			"MULTI_IP_SUBNET": false,
+		}
+		for _, feature := range disk.GetGuestOsFeatures() {
+			name := feature.GetType()
+			if _, ok := expectedFeatures[name]; ok {
+				expectedFeatures[name] = true
+			}
+		}
+		for key, value := range expectedFeatures {
+			if !value {
+				t.Errorf("feature %v wasn't found in GetGuestOsFeatures", key)
+			}
+		}
+
+		expectedLabel := "secondary-disk-for-replication"
+		labelFound := false
+		for key := range disk.GetLabels() {
+			if key == expectedLabel {
+				labelFound = true
+				break
+			}
+		}
+		if !labelFound {
+			t.Errorf("Label %v wasn't properly set", expectedLabel)
+		}
+	})
+
+	t.Run("create regional secondary disk", func(t *testing.T) {
+		primaryDiskName := fmt.Sprintf("test-regional-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		secondaryDiskName := fmt.Sprintf("test-secondary-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		secondaryRegion := "europe-west4"
+		secondaryReplicaZones := []string{"europe-west4-a", "europe-west4-b"}
+		diskSizeGb := int64(200)
+
+		if err := createRegionalDisk(&buf, tc.ProjectID, region, replicaZones, primaryDiskName, diskType, diskSizeGb); err != nil {
+			t.Errorf("createRegionalDisk got err: %v", err)
+		}
+		defer deleteRegionalDisk(&buf, tc.ProjectID, region, primaryDiskName)
+
+		if err := createRegionalSecondaryDisk(&buf, tc.ProjectID, secondaryRegion, secondaryDiskName, primaryDiskName, region, secondaryReplicaZones, diskSizeGb); err != nil {
+			t.Errorf("createRegionalSecondaryDisk got err: %v", err)
+		}
+		defer deleteDisk(&buf, tc.ProjectID, secondaryRegion, secondaryDiskName)
+
+		// Checking resource
+		disksClient, err := compute.NewRegionDisksRESTClient(ctx)
+		if err != nil {
+			t.Fatalf("NewDisksRESTClient: %v", err)
+		}
+		defer disksClient.Close()
+
+		disk, err := disksClient.Get(ctx, &computepb.GetRegionDiskRequest{
+			Project: tc.ProjectID,
+			Region:  secondaryRegion,
+			Disk:    secondaryDiskName,
+		})
+		if err != nil {
+			t.Errorf("Get disk got err: %v", err)
+		}
+
+		if disk.GetName() != secondaryDiskName {
+			t.Errorf("Disk name mismatch: got %v, want %v", disk.GetName(), secondaryDiskName)
+		}
+
+		expected := fmt.Sprintf("projects/%s/regions/%s/disks/%s", tc.ProjectID, region, primaryDiskName)
+		if !strings.Contains(disk.GetAsyncPrimaryDisk().GetDisk(), expected) {
+			t.Errorf("Primary disk is not properly set: got %v, want %v", disk.GetAsyncPrimaryDisk().GetDisk(), expected)
+		}
+
+		for i, replica := range disk.GetReplicaZones() {
+			if !strings.Contains(replica, secondaryReplicaZones[i]) {
+				t.Errorf("Replica zone is not properly set: got %v, want %v", replica, secondaryReplicaZones[i])
+			}
+		}
+	})
+
+	t.Run("disk replication", func(t *testing.T) {
+		secondaryDiskName := fmt.Sprintf("test-secondary-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		secondaryZone := "europe-west4-b"
+		diskSizeGb := int64(50)
+
+		if err := createSecondaryDisk(&buf, tc.ProjectID, secondaryZone, secondaryDiskName, diskName, zone, diskSizeGb); err != nil {
+			t.Errorf("createSecondaryDisk got err: %v", err)
+		}
+		defer deleteDisk(&buf, tc.ProjectID, secondaryZone, secondaryDiskName)
+
+		if err := startReplication(&buf, tc.ProjectID, secondaryZone, secondaryDiskName, diskName, zone); err != nil {
+			t.Errorf("startReplication got err: %v", err)
+		}
+
+		want := "Replication started"
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("startReplication got %q, want %q", got, want)
+		}
+		buf.Reset()
+
+		if err := stopReplication(&buf, tc.ProjectID, diskName, zone); err != nil {
+			t.Errorf("stopReplication got err: %v", err)
+		}
+		want = "Replication stopped"
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("stopReplication got %q, want %q", got, want)
+		}
 	})
 }
 
