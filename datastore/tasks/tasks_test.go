@@ -15,6 +15,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"log"
@@ -97,6 +98,18 @@ func TestList(t *testing.T) {
 	}
 
 	if err := DeleteTask(tc.ProjectID, foundTask.id); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestCreateClientWithDatabase(t *testing.T) {
+	test := testutil.SystemTest(t)
+	projectID := test.ProjectID
+	databaseName := "customdb"
+
+	var buf bytes.Buffer
+	err := createClientWithDatabase(&buf, projectID, databaseName)
+	if err != nil {
 		t.Fatal(err)
 	}
 }
