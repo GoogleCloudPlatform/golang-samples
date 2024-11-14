@@ -29,6 +29,8 @@ import (
 )
 
 func autoPunctuation(w io.Writer, path string) error {
+	panic("autoPunctuation")
+	
 	ctx := context.Background()
 
 	client, err := speech.NewClient(ctx)
