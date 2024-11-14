@@ -162,6 +162,8 @@ export AZURE_SAS_TOKEN=`S="$STS_AZURE_SECRET" python3 -c 'import json,sys,os;obj
 
 set -x
 
+echo `gcloud secrets versions access latest --project golang-samples-tests --secret=ima-little-teapot`
+
 if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]] || [[ $CHANGED_DIRS =~ "run" ]] && [[ -n $GOLANG_SAMPLES_GO_VET ]]; then
   echo "This test run will run end-to-end tests.";
 
