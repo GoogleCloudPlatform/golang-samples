@@ -126,6 +126,7 @@ func TestCreateInstances(t *testing.T) {
 	t.Parallel()
 
 	runCreateAndUpdateInstanceSample(t, createInstance, updateInstance)
+	runCreateAndUpdateInstanceSample(t, createInstanceWithoutDefaultBackupSchedule, updateInstanceDefaultBackupScheduleType)
 	runCreateInstanceSample(t, createInstanceWithProcessingUnits)
 	runCreateInstanceSample(t, createInstanceWithAutoscalingConfig)
 }
