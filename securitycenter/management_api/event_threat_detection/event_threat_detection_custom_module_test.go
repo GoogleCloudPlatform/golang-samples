@@ -350,8 +350,8 @@ func TestListEffectiveEtdCustomModule(t *testing.T) {
 	}
 }
 
-// TestGetEffectiveCustomModule verifies the Get functionality
-func TestGetEffectiveCustomModule(t *testing.T) {
+// TestGetEffectiveEtdCustomModule verifies the Get functionality
+func TestGetEffectiveEtdCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
 	createdCustomModuleID, err := addCustomModule()

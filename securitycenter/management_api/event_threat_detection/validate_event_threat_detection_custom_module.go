@@ -23,7 +23,6 @@ import (
 
 	securitycentermanagement "cloud.google.com/go/securitycentermanagement/apiv1"
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
-	// "google.golang.org/protobuf/types/known/structpb"
 )
 
 // validateEventThreatDetectionCustomModule validates a custom module for Event Threat Detection.
@@ -53,7 +52,8 @@ func validateEventThreatDetectionCustomModule(w io.Writer, parent string) error 
 
 	req := &securitycentermanagementpb.ValidateEventThreatDetectionCustomModuleRequest{
 		Parent:  parent,
-		RawText: rawText, // Use raw JSON as a string for validation
+		// Use raw JSON as a string for validation
+		RawText: rawText,
 		Type:    "CONFIGURABLE_BAD_IP",
 	}
 
