@@ -51,7 +51,7 @@ func validateEventThreatDetectionCustomModule(w io.Writer, parent string) error 
 }`
 
 	req := &securitycentermanagementpb.ValidateEventThreatDetectionCustomModuleRequest{
-		Parent:  parent,
+		Parent: parent,
 		// Use raw JSON as a string for validation
 		RawText: rawText,
 		Type:    "CONFIGURABLE_BAD_IP",
