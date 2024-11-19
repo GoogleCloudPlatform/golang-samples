@@ -867,3 +867,34 @@ func TestCreateDisksStoragePool(t *testing.T) {
 		}
 	})
 }
+
+func TestConsistencyGroup(t *testing.T) {
+	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
+	tc := testutil.SystemTest(t)
+	region := "europe-west4"
+	var buf bytes.Buffer
+
+	t.Run("Create consistency group", func(t *testing.T) {
+		groupName := fmt.Sprintf("test-group-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		buf.Reset()
+		if err := createConsistencyGroup(&buf, tc.ProjectID, region, groupName); err != nil {
+			t.Errorf("createConsistencyGroup got err: %v", err)
+		}
+
+		want := "Group created"
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("createConsistencyGroup got %q, want %q", got, want)
+		}
+
+		buf.Reset()
+
+		if err := deleteConsistencyGroup(&buf, tc.ProjectID, region, groupName); err != nil {
+			t.Errorf("deleteConsistencyGroup got err: %v", err)
+		}
+
+		want = "Group deleted"
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("deleteConsistencyGroup got %q, want %q", got, want)
+		}
+	})
+}
