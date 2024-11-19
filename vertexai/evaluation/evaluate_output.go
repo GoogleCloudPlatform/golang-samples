@@ -29,7 +29,7 @@ import (
 // evaluateModelResponse evaluates the output of an LLM for groundedness, i.e., how well
 // the model response connects with verifiable sources of information
 func evaluateModelResponse(w io.Writer, projectID, location string) error {
-	// location  := "us-central1"
+	// location = "us-central1"
 	ctx := context_pkg.Background()
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	client, err := aiplatform.NewEvaluationClient(ctx, option.WithEndpoint(apiEndpoint))

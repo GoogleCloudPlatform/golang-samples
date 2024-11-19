@@ -28,7 +28,7 @@ import (
 
 // pairwiseEvaluation lets the judge model to compare the responses of two models and pick the better one
 func pairwiseEvaluation(w io.Writer, projectID, location string) error {
-	// location  := "us-central1"
+	// location = "us-central1"
 	ctx := context_pkg.Background()
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	client, err := aiplatform.NewEvaluationClient(ctx, option.WithEndpoint(apiEndpoint))
