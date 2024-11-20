@@ -18,6 +18,7 @@ package embeddings
 // [START generativeaionvertexai_multimodal_embedding_video]
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"time"
@@ -25,6 +26,7 @@ import (
 	aiplatform "cloud.google.com/go/aiplatform/apiv1beta1"
 	aiplatformpb "cloud.google.com/go/aiplatform/apiv1beta1/aiplatformpb"
 	"google.golang.org/api/option"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
@@ -48,64 +50,62 @@ func generateForVideo(w io.Writer, project, location string) ([]float32, error) 
 	endpoint := fmt.Sprintf("projects/%s/locations/%s/publishers/google/models/%s", project, location, model)
 
 	// This is the input to the model's prediction call. The schema of any single instance
-	// will be specified by the endpoint's deployed model:
+	// may be specified by the endpoint's deployed model, e.g.:
 	// https://storage.googleapis.com/google-cloud-aiplatform/schema/predict/instance/vision_embedding_model_1.0.0.yaml
-	instances := []*structpb.Value{
-		structpb.NewStructValue(&structpb.Struct{
-			Fields: map[string]*structpb.Value{
-				// Video input can be provided either as a Google Cloud Storage URI or as base64-encoded
-				// bytes using the "bytesBase64Encoded" field
-				"video": structpb.NewStructValue(&structpb.Struct{
-					Fields: map[string]*structpb.Value{
-						"gcsUri": structpb.NewStringValue("gs://cloud-samples-data/vertex-ai-vision/highway_vehicles.mp4"),
-						"videoSegmentConfig": structpb.NewStructValue(&structpb.Struct{
-							Fields: map[string]*structpb.Value{
-								"startOffsetSec": structpb.NewNumberValue(1),
-								"endOffsetSec":   structpb.NewNumberValue(5),
-							},
-						}),
-					},
-				}),
+	instances, err := structpb.NewValue(map[string]any{
+		"video": map[string]any{
+			"gcsUri": "gs://cloud-samples-data/vertex-ai-vision/highway_vehicles.mp4",
+			"videoSegmentConfig": map[string]any{
+				"startOffsetSec": 1,
+				"endOffsetSec":   5,
 			},
-		}),
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to construct request payload: %v", err)
 	}
 
 	req := &aiplatformpb.PredictRequest{
 		Endpoint:  endpoint,
-		Instances: instances,
+		Instances: []*structpb.Value{instances},
 	}
-
 	resp, err := client.Predict(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate embeddings: %v", err)
 	}
-	// The list of response predictions contains one prediction per input instance.
-	// In this case, we sent only one input instance, so we access its prediction at
-	// index 0. Check the response schema of the model for more details:
-	// https://storage.googleapis.com/google-cloud-aiplatform/schema/predict/prediction/vision_embedding_model_1.0.0.yaml
-	instanceEmbeddings := resp.GetPredictions()[0].GetStructValue().GetFields()
-	videoEmbeddingsList := instanceEmbeddings["videoEmbeddings"].GetListValue().GetValues()
-	// The list of "videoEmbeddings" contains one embedding per processed video interval.
-	// In this case, our entire video input should be processed as one interval, so we
-	// access it at index 0
-	segmentData := videoEmbeddingsList[0].GetStructValue().GetFields()
 
-	// By default, an embedding request returns a 1408-dimensional vector of float values
-	videoEmbedding := make([]float32, 1408)
-	for i, v := range segmentData["embedding"].GetListValue().GetValues() {
-		videoEmbedding[i] = float32(v.GetNumberValue())
+	// The response's "predictions" is a list of calculated embeddings, one per each input instance.
+	// In this case, we sent only one input instance, so we access its embeddings at index 0
+	instanceEmbeddingsJson, err := protojson.Marshal(resp.GetPredictions()[0])
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode protobuf response to json: %v", err)
 	}
-	videoSegment := fmt.Sprintf(
-		"seconds: %.f-%.f",
-		segmentData["startOffsetSec"].GetNumberValue(),
-		segmentData["endOffsetSec"].GetNumberValue(),
-	)
+	// Check the response schema of the model:
+	// https://storage.googleapis.com/google-cloud-aiplatform/schema/predict/prediction/vision_embedding_model_1.0.0.yaml
+	var instanceEmbeddings struct {
+		VideoEmbeddings []struct {
+			Embedding      []float32 `json:"embedding"`
+			StartOffsetSec float64   `json:"startOffsetSec"`
+			EndOffsetSec   float64   `json:"endOffsetSec"`
+		} `json:"videoEmbeddings"`
+	}
+	if err := json.Unmarshal(instanceEmbeddingsJson, &instanceEmbeddings); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal json: %v", err)
+	}
 
-	fmt.Fprintf(w, "Video embedding (%s; length=%d): %v\n", videoSegment, len(videoEmbedding), videoEmbedding)
+	// The list of "videoEmbeddings" contains one embedding per processed video interval.
+	// In our case, the video input fit into one interval, so we access it at index 0
+	videoEmbedding := instanceEmbeddings.VideoEmbeddings[0]
+	fmt.Fprintf(w, "Video embedding (seconds: %.f-%.f; length=%d): %v\n",
+		videoEmbedding.StartOffsetSec,
+		videoEmbedding.EndOffsetSec,
+		len(videoEmbedding.Embedding),
+		videoEmbedding.Embedding,
+	)
 	// Example response:
 	// Video embedding (seconds: 1-5; length=1408): [-0.016427778 0.032878537 -0.030755188 ... ]
 
-	return videoEmbedding, nil
+	return videoEmbedding.Embedding, nil
 }
 
 // [END generativeaionvertexai_multimodal_embedding_video]

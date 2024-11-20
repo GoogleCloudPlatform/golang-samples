@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/aiplatform v1.69.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20241115184038-424e8c898d67
 	google.golang.org/api v0.203.0
-	google.golang.org/protobuf v1.35.1
+	google.golang.org/protobuf v1.35.2
 )
 
 require (
