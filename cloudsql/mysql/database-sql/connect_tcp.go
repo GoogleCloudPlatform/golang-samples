@@ -23,7 +23,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -66,7 +65,7 @@ func connectTCPSocket() (*sql.DB, error) {
 			dbKey  = mustGetenv("DB_KEY")  // e.g. '/path/to/my/client-key.pem'
 		)
 		pool := x509.NewCertPool()
-		pem, err := ioutil.ReadFile(dbRootCert)
+		pem, err := os.ReadFile(dbRootCert)
 		if err != nil {
 			return nil, err
 		}
