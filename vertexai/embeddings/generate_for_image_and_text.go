@@ -30,7 +30,7 @@ import (
 )
 
 // generateForTextAndImage shows how use the multimodal model to generate embeddings for
-// text and image inputs
+// text and image inputs.
 func generateForTextAndImage(w io.Writer, project, location string) ([][]float32, error) {
 	// location = "us-central1"
 	ctx := context.Background()
