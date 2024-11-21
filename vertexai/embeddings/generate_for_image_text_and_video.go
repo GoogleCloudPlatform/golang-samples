@@ -82,7 +82,7 @@ func generateForImageTextAndVideo(w io.Writer, project, location string) error {
 	if err != nil {
 		return fmt.Errorf("failed to convert protobuf value to JSON: %w", err)
 	}
-	// Check the response schema of the model:
+	// For response schema, see:
 	// https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/multimodal-embeddings-api#response-body
 	var instanceEmbeddings struct {
 		ImageEmbeddings []float32 `json:"imageEmbedding"`
