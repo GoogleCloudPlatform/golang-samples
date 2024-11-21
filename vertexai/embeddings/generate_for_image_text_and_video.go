@@ -31,7 +31,7 @@ import (
 )
 
 // generateForImageTextAndVideo shows how use the multimodal model to generate embeddings for
-// text and image data
+// text and image data.
 func generateForImageTextAndVideo(w io.Writer, project, location string) ([][]float32, error) {
 	// location = "us-central1"
 
