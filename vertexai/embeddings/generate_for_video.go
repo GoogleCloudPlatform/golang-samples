@@ -42,7 +42,7 @@ func generateForVideo(w io.Writer, project, location string) ([]float32, error) 
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to construct API client: %v", err)
 	}
 	defer client.Close()
 
@@ -67,18 +67,16 @@ func generateForVideo(w io.Writer, project, location string) ([]float32, error) 
 
 	req := &aiplatformpb.PredictRequest{
 		Endpoint:  endpoint,
-		Instances: []*structpb.Value{instances},
+		Instances: []*structpb.Value{instances},  // The model supports only 1 instance per request
 	}
 	resp, err := client.Predict(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate embeddings: %v", err)
 	}
 
-	// The response's "predictions" is a list of calculated embeddings, one per each input instance.
-	// In this case, we sent only one input instance, so we access its embeddings at index 0
 	instanceEmbeddingsJson, err := protojson.Marshal(resp.GetPredictions()[0])
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode protobuf response to json: %v", err)
+		return nil, fmt.Errorf("failed to convert protobuf value to JSON: %v", err)
 	}
 	// Check the response schema of the model:
 	// https://storage.googleapis.com/google-cloud-aiplatform/schema/predict/prediction/vision_embedding_model_1.0.0.yaml
@@ -92,10 +90,9 @@ func generateForVideo(w io.Writer, project, location string) ([]float32, error) 
 	if err := json.Unmarshal(instanceEmbeddingsJson, &instanceEmbeddings); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal json: %v", err)
 	}
-
-	// The list of "videoEmbeddings" contains one embedding per processed video interval.
-	// In our case, the video input fit into one interval, so we access it at index 0
+	// Get the embedding for our single video interval (videoEmbeddings has one entry per interval)
 	videoEmbedding := instanceEmbeddings.VideoEmbeddings[0]
+
 	fmt.Fprintf(w, "Video embedding (seconds: %.f-%.f; length=%d): %v\n",
 		videoEmbedding.StartOffsetSec,
 		videoEmbedding.EndOffsetSec,
