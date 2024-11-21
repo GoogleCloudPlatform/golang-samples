@@ -36,7 +36,7 @@ func generateForImageTextAndVideo(w io.Writer, project, location string) error {
 	// location = "us-central1"
 
 	// The default context timeout may be not enough to process a video input
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
@@ -49,9 +49,8 @@ func generateForImageTextAndVideo(w io.Writer, project, location string) error {
 	model := "multimodalembedding@001"
 	endpoint := fmt.Sprintf("projects/%s/locations/%s/publishers/google/models/%s", project, location, model)
 
-	// This is the input to the model's prediction call. The schema of any single instance
-	// will be specified by the endpoint's deployed model:
-	// https://storage.googleapis.com/google-cloud-aiplatform/schema/predict/instance/vision_embedding_model_1.0.0.yaml
+	// This is the input to the model's prediction call. For schema, see:
+	// https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/multimodal-embeddings-api#request_body
 	instance, err := structpb.NewValue(map[string]any{
 		"text": "Domestic cats in natural conditions",
 		"image": map[string]any{

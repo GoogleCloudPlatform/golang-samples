@@ -43,9 +43,8 @@ func generateWithLowerDimension(w io.Writer, project, location string) error {
 	model := "multimodalembedding@001"
 	endpoint := fmt.Sprintf("projects/%s/locations/%s/publishers/google/models/%s", project, location, model)
 
-	// This is the input to the model's prediction call. The schema of any single instance
-	// will be specified by the endpoint's deployed model:
-	// https://storage.googleapis.com/google-cloud-aiplatform/schema/predict/instance/vision_embedding_model_1.0.0.yaml
+	// This is the input to the model's prediction call. For schema, see:
+	// https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/multimodal-embeddings-api#request_body
 	instance, err := structpb.NewValue(map[string]any{
 		"image": map[string]any{
 			// Image input can be provided either as a Google Cloud Storage URI or as
