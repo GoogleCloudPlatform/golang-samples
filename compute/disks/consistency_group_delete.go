@@ -27,7 +27,7 @@ import (
 // deleteConsistencyGroup deletes consistency group for a project in a given region.
 func deleteConsistencyGroup(w io.Writer, projectID, region, groupName string) error {
 	// projectID := "your_project_id"
-	// region := "europe-west-4"
+	// region := "europe-west4"
 	// groupName := "your_group_name"
 
 	ctx := context.Background()

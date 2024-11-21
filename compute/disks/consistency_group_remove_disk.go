@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START compute_consistency_group_create]
+// [START compute_consistency_group_remove_disk]
 import (
 	"context"
 	"fmt"
@@ -22,43 +22,45 @@ import (
 
 	compute "cloud.google.com/go/compute/apiv1"
 	computepb "cloud.google.com/go/compute/apiv1/computepb"
-	"google.golang.org/protobuf/proto"
 )
 
-// createConsistencyGroup creates a new consistency group for a project in a given region.
-func createConsistencyGroup(w io.Writer, projectID, region, groupName string) error {
+// removeDiskConsistencyGroup removes a disk from consistency group for a project in a given region.
+func removeDiskConsistencyGroup(w io.Writer, projectID, region, groupName, diskName string) error {
 	// projectID := "your_project_id"
 	// region := "europe-west4"
+	// diskName := "your_disk_name"
 	// groupName := "your_group_name"
 
 	ctx := context.Background()
-	disksClient, err := compute.NewResourcePoliciesRESTClient(ctx)
+	disksClient, err := compute.NewRegionDisksRESTClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewResourcePoliciesRESTClient: %w", err)
 	}
 	defer disksClient.Close()
 
-	req := &computepb.InsertResourcePolicyRequest{
+	consistencyGroupUrl := fmt.Sprintf("projects/%s/regions/%s/resourcePolicies/%s", projectID, region, groupName)
+
+	req := &computepb.RemoveResourcePoliciesRegionDiskRequest{
 		Project: projectID,
-		ResourcePolicyResource: &computepb.ResourcePolicy{
-			Name:                       proto.String(groupName),
-			DiskConsistencyGroupPolicy: &computepb.ResourcePolicyDiskConsistencyGroupPolicy{},
+		Disk:    diskName,
+		RegionDisksRemoveResourcePoliciesRequestResource: &computepb.RegionDisksRemoveResourcePoliciesRequest{
+			ResourcePolicies: []string{consistencyGroupUrl},
 		},
 		Region: region,
 	}
 
-	op, err := disksClient.Insert(ctx, req)
+	op, err := disksClient.RemoveResourcePolicies(ctx, req)
 	if err != nil {
-		return fmt.Errorf("unable to create group: %w", err)
+		return fmt.Errorf("unable to remove disk: %w", err)
 	}
 
 	if err = op.Wait(ctx); err != nil {
 		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
-	fmt.Fprintf(w, "Group created\n")
+	fmt.Fprintf(w, "Disk removed\n")
 
 	return nil
 }
 
-// [END compute_consistency_group_create]
+// [END compute_consistency_group_remove_disk]

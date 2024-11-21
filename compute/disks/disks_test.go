@@ -872,6 +872,7 @@ func TestConsistencyGroup(t *testing.T) {
 	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	region := "europe-west4"
+	zone := "europe-west4-a"
 	var buf bytes.Buffer
 
 	t.Run("Create consistency group", func(t *testing.T) {
@@ -885,7 +886,6 @@ func TestConsistencyGroup(t *testing.T) {
 		if got := buf.String(); !strings.Contains(got, want) {
 			t.Errorf("createConsistencyGroup got %q, want %q", got, want)
 		}
-
 		buf.Reset()
 
 		if err := deleteConsistencyGroup(&buf, tc.ProjectID, region, groupName); err != nil {
@@ -895,6 +895,43 @@ func TestConsistencyGroup(t *testing.T) {
 		want = "Group deleted"
 		if got := buf.String(); !strings.Contains(got, want) {
 			t.Errorf("deleteConsistencyGroup got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("Disk attachments to consistency group", func(t *testing.T) {
+		diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		diskType := fmt.Sprintf("zones/%s/diskTypes/pd-ssd", zone)
+		groupName := fmt.Sprintf("test-group-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		replicaZones := []string{"europe-west4-a", "europe-west4-b"}
+
+		if err := createRegionalDisk(&buf, tc.ProjectID, region, replicaZones, diskName, diskType, 20); err != nil {
+			t.Errorf("createRegionalDisk got err: %v", err)
+		}
+		defer deleteRegionalDisk(&buf, tc.ProjectID, region, diskName)
+
+		if err := createConsistencyGroup(&buf, tc.ProjectID, region, groupName); err != nil {
+			t.Errorf("createConsistencyGroup got err: %v", err)
+		}
+		defer deleteConsistencyGroup(&buf, tc.ProjectID, region, groupName)
+
+		buf.Reset()
+		want := "Disk added"
+
+		if err := addDiskConsistencyGroup(&buf, tc.ProjectID, region, groupName, diskName); err != nil {
+			t.Errorf("addDiskConsistencyGroup got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("addDiskConsistencyGroup got %q, want %q", got, want)
+		}
+
+		buf.Reset()
+		want = "Disk removed"
+
+		if err := removeDiskConsistencyGroup(&buf, tc.ProjectID, region, groupName, diskName); err != nil {
+			t.Errorf("removeDiskConsistencyGroup got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("removeDiskConsistencyGroup got %q, want %q", got, want)
 		}
 	})
 }
