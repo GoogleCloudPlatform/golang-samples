@@ -30,8 +30,7 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-// generateForVideo shows how to use the multimodal model to generate embeddings for
-// video input
+// generateForVideo shows how to use the multimodal model to generate embeddings for video input
 func generateForVideo(w io.Writer, project, location string) ([]float32, error) {
 	// location = "us-central1"
 
@@ -54,6 +53,8 @@ func generateForVideo(w io.Writer, project, location string) ([]float32, error) 
 	// https://storage.googleapis.com/google-cloud-aiplatform/schema/predict/instance/vision_embedding_model_1.0.0.yaml
 	instances, err := structpb.NewValue(map[string]any{
 		"video": map[string]any{
+			// Video input can be provided either as a Google Cloud Storage URI or as base64-encoded
+			// bytes using the "bytesBase64Encoded" field
 			"gcsUri": "gs://cloud-samples-data/vertex-ai-vision/highway_vehicles.mp4",
 			"videoSegmentConfig": map[string]any{
 				"startOffsetSec": 1,
@@ -67,7 +68,7 @@ func generateForVideo(w io.Writer, project, location string) ([]float32, error) 
 
 	req := &aiplatformpb.PredictRequest{
 		Endpoint:  endpoint,
-		Instances: []*structpb.Value{instances},  // The model supports only 1 instance per request
+		Instances: []*structpb.Value{instances}, // The model supports only 1 instance per request
 	}
 	resp, err := client.Predict(ctx, req)
 	if err != nil {
@@ -90,7 +91,8 @@ func generateForVideo(w io.Writer, project, location string) ([]float32, error) 
 	if err := json.Unmarshal(instanceEmbeddingsJson, &instanceEmbeddings); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal json: %v", err)
 	}
-	// Get the embedding for our single video interval (videoEmbeddings has one entry per interval)
+	// Get the embedding for our single video segment (`.videoEmbeddings` object has one entry per
+	// each processed segment)
 	videoEmbedding := instanceEmbeddings.VideoEmbeddings[0]
 
 	fmt.Fprintf(w, "Video embedding (seconds: %.f-%.f; length=%d): %v\n",

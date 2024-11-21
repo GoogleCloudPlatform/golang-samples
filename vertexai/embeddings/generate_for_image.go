@@ -29,8 +29,7 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-// generateForImage shows how to use the multimodal model to generate embeddings for
-// image input
+// generateForImage shows how to use the multimodal model to generate embeddings for image input
 func generateForImage(w io.Writer, project, location string) ([]float32, error) {
 	// location = "us-central1"
 	ctx := context.Background()
@@ -60,7 +59,7 @@ func generateForImage(w io.Writer, project, location string) ([]float32, error) 
 
 	req := &aiplatformpb.PredictRequest{
 		Endpoint:  endpoint,
-		Instances: []*structpb.Value{instance},  // The model supports only 1 instance per request
+		Instances: []*structpb.Value{instance}, // The model supports only 1 instance per request
 	}
 
 	resp, err := client.Predict(ctx, req)

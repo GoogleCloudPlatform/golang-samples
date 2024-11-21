@@ -18,24 +18,26 @@ package embeddings
 // [START generativeaionvertexai_multimodal_embedding_image_and_text]
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 
 	aiplatform "cloud.google.com/go/aiplatform/apiv1beta1"
 	aiplatformpb "cloud.google.com/go/aiplatform/apiv1beta1/aiplatformpb"
 	"google.golang.org/api/option"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
 // generateForTextAndImage shows how use the multimodal model to generate embeddings for
-// text and image data
+// text and image inputs
 func generateForTextAndImage(w io.Writer, project, location string) ([][]float32, error) {
 	// location = "us-central1"
 	ctx := context.Background()
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to construct API client: %v", err)
 	}
 	defer client.Close()
 
@@ -45,44 +47,44 @@ func generateForTextAndImage(w io.Writer, project, location string) ([][]float32
 	// This is the input to the model's prediction call. The schema of any single instance
 	// will be specified by the endpoint's deployed model:
 	// https://storage.googleapis.com/google-cloud-aiplatform/schema/predict/instance/vision_embedding_model_1.0.0.yaml
-	instances := []*structpb.Value{
-		structpb.NewStructValue(&structpb.Struct{
-			Fields: map[string]*structpb.Value{
-				"text": structpb.NewStringValue("Colosseum"),
-				// Image input can be provided either as a Google Cloud Storage URI or as base64-encoded
-				// bytes using the "bytesBase64Encoded" field
-				"image": structpb.NewStructValue(&structpb.Struct{
-					Fields: map[string]*structpb.Value{
-						"gcsUri": structpb.NewStringValue("gs://cloud-samples-data/vertex-ai/llm/prompts/landmark1.png"),
-					},
-				}),
-			},
-		}),
+	instance, err := structpb.NewValue(map[string]any{
+		"image": map[string]any{
+			// Image input can be provided either as a Google Cloud Storage URI or as
+			// base64-encoded bytes using the "bytesBase64Encoded" field
+			"gcsUri": "gs://cloud-samples-data/vertex-ai/llm/prompts/landmark1.png",
+		},
+		"text": "Colosseum",
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to construct request payload: %v", err)
 	}
 
 	req := &aiplatformpb.PredictRequest{
 		Endpoint:  endpoint,
-		Instances: instances,
+		Instances: []*structpb.Value{instance}, // The model supports only 1 instance per request
 	}
 
 	resp, err := client.Predict(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate embeddings: %v", err)
 	}
-	// The list of response predictions contains one prediction per input instance.
-	// In this case, we sent only one input instance, so we access its prediction at
-	// index 0.
-	instanceEmbeddings := resp.GetPredictions()[0].GetStructValue().GetFields()
-	// By default, an embedding request returns a 1408-dimensional vector of float values
-	textEmbedding := make([]float32, 1408)
-	for i, v := range instanceEmbeddings["textEmbedding"].GetListValue().GetValues() {
-		textEmbedding[i] = float32(v.GetNumberValue())
+
+	instanceEmbeddingsJson, err := protojson.Marshal(resp.GetPredictions()[0])
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert protobuf value to JSON: %v", err)
+	}
+	// Check the response schema of the model:
+	// https://storage.googleapis.com/google-cloud-aiplatform/schema/predict/prediction/vision_embedding_model_1.0.0.yaml
+	var instanceEmbeddings struct {
+		ImageEmbeddings []float32 `json:"imageEmbedding"`
+		TextEmbeddings  []float32 `json:"textEmbedding"`
+	}
+	if err := json.Unmarshal(instanceEmbeddingsJson, &instanceEmbeddings); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal JSON: %v", err)
 	}
 
-	imageEmbedding := make([]float32, 1408)
-	for i, v := range instanceEmbeddings["imageEmbedding"].GetListValue().GetValues() {
-		imageEmbedding[i] = float32(v.GetNumberValue())
-	}
+	imageEmbedding := instanceEmbeddings.ImageEmbeddings
+	textEmbedding := instanceEmbeddings.TextEmbeddings
 
 	fmt.Fprintf(w, "Text embedding (length=%d): %v\n", len(textEmbedding), textEmbedding)
 	fmt.Fprintf(w, "Image embedding (length=%d): %v\n", len(imageEmbedding), imageEmbedding)
