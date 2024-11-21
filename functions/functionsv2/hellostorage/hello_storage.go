@@ -43,7 +43,7 @@ func helloStorage(ctx context.Context, e event.Event) error {
 
 	// Unmarshal() returns an unexported error.
 	// Parse the error string to determine whether there is an unknown field.
-	if strings.Contains(err.Error(), "unknown field") {
+	if err != nil && strings.Contains(err.Error(), "unknown field") {
 		log.Println(err.Error())
 		options := protojson.UnmarshalOptions{
 			DiscardUnknown: true,
