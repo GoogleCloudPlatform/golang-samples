@@ -31,7 +31,7 @@ import (
 )
 
 // generateForVideo shows how to use the multimodal model to generate embeddings for video input.
-func generateForVideo(w io.Writer, project, location string) ([]float32, error) {
+func generateForVideo(w io.Writer, project, location string) error {
 	// location = "us-central1"
 
 	// The default context timeout may be not enough to process a video input
@@ -41,7 +41,7 @@ func generateForVideo(w io.Writer, project, location string) ([]float32, error) 
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {
-		return nil, fmt.Errorf("failed to construct API client: %w", err)
+		return fmt.Errorf("failed to construct API client: %w", err)
 	}
 	defer client.Close()
 
@@ -63,22 +63,22 @@ func generateForVideo(w io.Writer, project, location string) ([]float32, error) 
 		},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to construct request payload: %w", err)
+		return fmt.Errorf("failed to construct request payload: %w", err)
 	}
 
 	req := &aiplatformpb.PredictRequest{
-		Endpoint:  endpoint,
+		Endpoint: endpoint,
 		// The model supports only 1 instance per request
 		Instances: []*structpb.Value{instances},
 	}
 	resp, err := client.Predict(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate embeddings: %w", err)
+		return fmt.Errorf("failed to generate embeddings: %w", err)
 	}
 
 	instanceEmbeddingsJson, err := protojson.Marshal(resp.GetPredictions()[0])
 	if err != nil {
-		return nil, fmt.Errorf("failed to convert protobuf value to JSON: %w", err)
+		return fmt.Errorf("failed to convert protobuf value to JSON: %w", err)
 	}
 	// Check the response schema of the model:
 	// https://storage.googleapis.com/google-cloud-aiplatform/schema/predict/prediction/vision_embedding_model_1.0.0.yaml
@@ -90,7 +90,7 @@ func generateForVideo(w io.Writer, project, location string) ([]float32, error) 
 		} `json:"videoEmbeddings"`
 	}
 	if err := json.Unmarshal(instanceEmbeddingsJson, &instanceEmbeddings); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal json: %w", err)
+		return fmt.Errorf("failed to unmarshal json: %w", err)
 	}
 	// Get the embedding for our single video segment (`.videoEmbeddings` object has one entry per
 	// each processed segment)
@@ -105,7 +105,7 @@ func generateForVideo(w io.Writer, project, location string) ([]float32, error) 
 	// Example response:
 	// Video embedding (seconds: 1-5; length=1408): [-0.016427778 0.032878537 -0.030755188 ... ]
 
-	return videoEmbedding.Embedding, nil
+	return nil
 }
 
 // [END generativeaionvertexai_multimodal_embedding_video]

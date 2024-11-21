@@ -30,13 +30,13 @@ import (
 )
 
 // generateWithLowerDimension shows how to generate lower-dimensional embeddings for text and image inputs.
-func generateWithLowerDimension(w io.Writer, project, location string) ([][]float32, error) {
+func generateWithLowerDimension(w io.Writer, project, location string) error {
 	// location = "us-central1"
 	ctx := context.Background()
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {
-		return nil, fmt.Errorf("failed to construct API client: %w", err)
+		return fmt.Errorf("failed to construct API client: %w", err)
 	}
 	defer client.Close()
 
@@ -55,7 +55,7 @@ func generateWithLowerDimension(w io.Writer, project, location string) ([][]floa
 		"text": "Colosseum",
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to construct request payload: %w", err)
+		return fmt.Errorf("failed to construct request payload: %w", err)
 	}
 
 	// TODO(developer): Try different dimenions: 128, 256, 512, 1408
@@ -64,11 +64,11 @@ func generateWithLowerDimension(w io.Writer, project, location string) ([][]floa
 		"dimension": outputDimensionality,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to construct request params: %w", err)
+		return fmt.Errorf("failed to construct request params: %w", err)
 	}
 
 	req := &aiplatformpb.PredictRequest{
-		Endpoint:   endpoint,
+		Endpoint: endpoint,
 		// The model supports only 1 instance per request
 		Instances:  []*structpb.Value{instance},
 		Parameters: params,
@@ -76,12 +76,12 @@ func generateWithLowerDimension(w io.Writer, project, location string) ([][]floa
 
 	resp, err := client.Predict(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate embeddings: %w", err)
+		return fmt.Errorf("failed to generate embeddings: %w", err)
 	}
 
 	instanceEmbeddingsJson, err := protojson.Marshal(resp.GetPredictions()[0])
 	if err != nil {
-		return nil, fmt.Errorf("failed to convert protobuf value to JSON: %w", err)
+		return fmt.Errorf("failed to convert protobuf value to JSON: %w", err)
 	}
 	// Check the response schema of the model:
 	// https://storage.googleapis.com/google-cloud-aiplatform/schema/predict/prediction/vision_embedding_model_1.0.0.yaml
@@ -90,7 +90,7 @@ func generateWithLowerDimension(w io.Writer, project, location string) ([][]floa
 		TextEmbeddings  []float32 `json:"textEmbedding"`
 	}
 	if err := json.Unmarshal(instanceEmbeddingsJson, &instanceEmbeddings); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal JSON: %w", err)
+		return fmt.Errorf("failed to unmarshal JSON: %w", err)
 	}
 
 	imageEmbedding := instanceEmbeddings.ImageEmbeddings
@@ -102,7 +102,7 @@ func generateWithLowerDimension(w io.Writer, project, location string) ([][]floa
 	// Text Embedding (length=128): [0.27469793 -0.14625867 0.022280363 ... ]
 	// Image Embedding (length=128): [0.06225733 -0.040650766 0.02604402 ... ]
 
-	return [][]float32{textEmbedding, imageEmbedding}, nil
+	return nil
 }
 
 // [END generativeaionvertexai_embeddings_specify_lower_dimension]

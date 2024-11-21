@@ -16,6 +16,7 @@ package embeddings
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -29,91 +30,86 @@ func TestEmbeddings(t *testing.T) {
 
 	t.Run("generate embeddings with lower dimension", func(t *testing.T) {
 		buf.Reset()
-		res, err := generateWithLowerDimension(&buf, tc.ProjectID, location)
+		err := generateWithLowerDimension(&buf, tc.ProjectID, location)
 		if err != nil {
 			t.Fatalf("generateWithLowerDimension failed: %v", err)
 		}
 
-		if res == nil {
-			t.Error("received empty response")
+		expectedOutputs := []string{
+			"Text embedding (length=128): [",
+			"Image embedding (length=128): [",
 		}
-
-		expEmbeddingLen := 128
-		for _, embedding := range res {
-			if len(embedding) != expEmbeddingLen {
-				t.Errorf("expected an embedding of len %d, got len %d", expEmbeddingLen, len(embedding))
+		actOutput := buf.String()
+		for _, exp := range expectedOutputs {
+			if !strings.Contains(actOutput, exp) {
+				t.Errorf("expected output to contain text %q, got: %q", exp, actOutput)
 			}
 		}
 	})
 
 	t.Run("generate embeddings for image and text", func(t *testing.T) {
 		buf.Reset()
-		res, err := generateForTextAndImage(&buf, tc.ProjectID, location)
+		err := generateForTextAndImage(&buf, tc.ProjectID, location)
 		if err != nil {
 			t.Fatalf("generateForImageAndText failed: %v", err)
 		}
 
-		if res == nil {
-			t.Error("received empty response")
+		expectedOutputs := []string{
+			"Text embedding (length=1408): [",
+			"Image embedding (length=1408): [",
 		}
-
-		expEmbeddingLen := 1408
-		for _, embedding := range res {
-			if len(embedding) != expEmbeddingLen {
-				t.Errorf("expected an embedding of len %d, got len %d", expEmbeddingLen, len(embedding))
+		actOutput := buf.String()
+		for _, exp := range expectedOutputs {
+			if !strings.Contains(actOutput, exp) {
+				t.Errorf("expected output to contain text %q, got: %q", exp, actOutput)
 			}
 		}
 	})
 
 	t.Run("generate embedding for image", func(t *testing.T) {
 		buf.Reset()
-		res, err := generateForImage(&buf, tc.ProjectID, location)
+		err := generateForImage(&buf, tc.ProjectID, location)
 		if err != nil {
 			t.Fatalf("generateForImage failed: %v", err)
 		}
 
-		if res == nil {
-			t.Error("received empty response")
-		}
-
-		expEmbeddingLen := 1408
-		if len(res) != expEmbeddingLen {
-			t.Errorf("expected an embedding of len %d, got len %d", expEmbeddingLen, len(res))
+		expOutput := "Image embedding (length=1408): ["
+		actOutput := buf.String()
+		if !strings.Contains(actOutput, expOutput) {
+			t.Errorf("expected output to contain text %q, got: %q", expOutput, actOutput)
 		}
 	})
 
 	t.Run("generate embedding for video", func(t *testing.T) {
 		buf.Reset()
-		res, err := generateForVideo(&buf, tc.ProjectID, location)
+		err := generateForVideo(&buf, tc.ProjectID, location)
 		if err != nil {
 			t.Fatalf("generateForVideo failed: %v", err)
 		}
 
-		if res == nil {
-			t.Error("received empty response")
-		}
-
-		expEmbeddingLen := 1408
-		if len(res) != expEmbeddingLen {
-			t.Errorf("expected an embedding of len %d, got len %d", expEmbeddingLen, len(res))
+		expOutput := "Video embedding (seconds: 1-5; length=1408): ["
+		actOutput := buf.String()
+		if !strings.Contains(actOutput, expOutput) {
+			t.Errorf("expected output to contain text %q, got: %q", expOutput, actOutput)
 		}
 	})
 
 	t.Run("generate embeddings for image text and video", func(t *testing.T) {
 		buf.Reset()
-		res, err := generateForImageTextAndVideo(&buf, tc.ProjectID, location)
+		err := generateForImageTextAndVideo(&buf, tc.ProjectID, location)
 		if err != nil {
 			t.Fatalf("generateForImageTextAndVideo failed: %v", err)
 		}
 
-		if res == nil {
-			t.Error("received empty response")
+		expectedOutputs := []string{
+			"Text embedding (length=1408): [",
+			"Image embedding (length=1408): [",
+			"Video embedding (length=1408): [",
 		}
-
-		expEmbeddingLen := 1408
-		for _, embedding := range res {
-			if len(embedding) != expEmbeddingLen {
-				t.Errorf("expected an embedding of len %d, got len %d", expEmbeddingLen, len(embedding))
+		actOutput := buf.String()
+		for _, exp := range expectedOutputs {
+			if !strings.Contains(actOutput, exp) {
+				t.Errorf("expected output to contain text %q, got: %q", exp, actOutput)
 			}
 		}
 	})

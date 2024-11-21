@@ -31,13 +31,13 @@ import (
 
 // generateForTextAndImage shows how use the multimodal model to generate embeddings for
 // text and image inputs.
-func generateForTextAndImage(w io.Writer, project, location string) ([][]float32, error) {
+func generateForTextAndImage(w io.Writer, project, location string) error {
 	// location = "us-central1"
 	ctx := context.Background()
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {
-		return nil, fmt.Errorf("failed to construct API client: %w", err)
+		return fmt.Errorf("failed to construct API client: %w", err)
 	}
 	defer client.Close()
 
@@ -56,23 +56,23 @@ func generateForTextAndImage(w io.Writer, project, location string) ([][]float32
 		"text": "Colosseum",
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to construct request payload: %w", err)
+		return fmt.Errorf("failed to construct request payload: %w", err)
 	}
 
 	req := &aiplatformpb.PredictRequest{
-		Endpoint:  endpoint,
+		Endpoint: endpoint,
 		// The model supports only 1 instance per request
 		Instances: []*structpb.Value{instance},
 	}
 
 	resp, err := client.Predict(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate embeddings: %w", err)
+		return fmt.Errorf("failed to generate embeddings: %w", err)
 	}
 
 	instanceEmbeddingsJson, err := protojson.Marshal(resp.GetPredictions()[0])
 	if err != nil {
-		return nil, fmt.Errorf("failed to convert protobuf value to JSON: %w", err)
+		return fmt.Errorf("failed to convert protobuf value to JSON: %w", err)
 	}
 	// Check the response schema of the model:
 	// https://storage.googleapis.com/google-cloud-aiplatform/schema/predict/prediction/vision_embedding_model_1.0.0.yaml
@@ -81,7 +81,7 @@ func generateForTextAndImage(w io.Writer, project, location string) ([][]float32
 		TextEmbeddings  []float32 `json:"textEmbedding"`
 	}
 	if err := json.Unmarshal(instanceEmbeddingsJson, &instanceEmbeddings); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal JSON: %w", err)
+		return fmt.Errorf("failed to unmarshal JSON: %w", err)
 	}
 
 	imageEmbedding := instanceEmbeddings.ImageEmbeddings
@@ -93,7 +93,7 @@ func generateForTextAndImage(w io.Writer, project, location string) ([][]float32
 	// Text embedding (length=1408): [0.0023026613 0.027898183 -0.011858357 ... ]
 	// Image embedding (length=1408): [-0.012314269 0.07271844 0.00020170923 ... ]
 
-	return [][]float32{textEmbedding, imageEmbedding}, nil
+	return nil
 }
 
 // [END generativeaionvertexai_multimodal_embedding_image_and_text]
