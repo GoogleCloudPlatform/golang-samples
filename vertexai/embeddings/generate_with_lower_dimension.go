@@ -29,7 +29,7 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-// generateWithLowerDimension shows how to generate lower-dimensional embeddings for text and image inputs
+// generateWithLowerDimension shows how to generate lower-dimensional embeddings for text and image inputs.
 func generateWithLowerDimension(w io.Writer, project, location string) ([][]float32, error) {
 	// location = "us-central1"
 	ctx := context.Background()
