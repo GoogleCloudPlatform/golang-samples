@@ -36,7 +36,7 @@ func generateWithLowerDimension(w io.Writer, project, location string) ([][]floa
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {
-		return nil, fmt.Errorf("failed to construct API client: %v", err)
+		return nil, fmt.Errorf("failed to construct API client: %w", err)
 	}
 	defer client.Close()
 
@@ -55,7 +55,7 @@ func generateWithLowerDimension(w io.Writer, project, location string) ([][]floa
 		"text": "Colosseum",
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to construct request payload: %v", err)
+		return nil, fmt.Errorf("failed to construct request payload: %w", err)
 	}
 
 	// TODO(developer): Try different dimenions: 128, 256, 512, 1408
@@ -64,23 +64,24 @@ func generateWithLowerDimension(w io.Writer, project, location string) ([][]floa
 		"dimension": outputDimensionality,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to construct request params: %v", err)
+		return nil, fmt.Errorf("failed to construct request params: %w", err)
 	}
 
 	req := &aiplatformpb.PredictRequest{
 		Endpoint:   endpoint,
-		Instances:  []*structpb.Value{instance}, // The model supports only 1 instance per request
+		// The model supports only 1 instance per request
+		Instances:  []*structpb.Value{instance},
 		Parameters: params,
 	}
 
 	resp, err := client.Predict(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate embeddings: %v", err)
+		return nil, fmt.Errorf("failed to generate embeddings: %w", err)
 	}
 
 	instanceEmbeddingsJson, err := protojson.Marshal(resp.GetPredictions()[0])
 	if err != nil {
-		return nil, fmt.Errorf("failed to convert protobuf value to JSON: %v", err)
+		return nil, fmt.Errorf("failed to convert protobuf value to JSON: %w", err)
 	}
 	// Check the response schema of the model:
 	// https://storage.googleapis.com/google-cloud-aiplatform/schema/predict/prediction/vision_embedding_model_1.0.0.yaml
@@ -89,7 +90,7 @@ func generateWithLowerDimension(w io.Writer, project, location string) ([][]floa
 		TextEmbeddings  []float32 `json:"textEmbedding"`
 	}
 	if err := json.Unmarshal(instanceEmbeddingsJson, &instanceEmbeddings); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal JSON: %v", err)
+		return nil, fmt.Errorf("failed to unmarshal JSON: %w", err)
 	}
 
 	imageEmbedding := instanceEmbeddings.ImageEmbeddings
