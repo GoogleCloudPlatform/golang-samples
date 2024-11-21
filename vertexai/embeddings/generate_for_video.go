@@ -80,8 +80,8 @@ func generateForVideo(w io.Writer, project, location string) error {
 	if err != nil {
 		return fmt.Errorf("failed to convert protobuf value to JSON: %w", err)
 	}
-	// Check the response schema of the model:
-	// https://storage.googleapis.com/google-cloud-aiplatform/schema/predict/prediction/vision_embedding_model_1.0.0.yaml
+	// For response schema, see:
+	// https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/multimodal-embeddings-api#response-body
 	var instanceEmbeddings struct {
 		VideoEmbeddings []struct {
 			Embedding      []float32 `json:"embedding"`
