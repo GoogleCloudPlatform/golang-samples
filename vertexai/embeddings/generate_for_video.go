@@ -30,7 +30,7 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-// generateForVideo shows how to use the multimodal model to generate embeddings for video input
+// generateForVideo shows how to use the multimodal model to generate embeddings for video input.
 func generateForVideo(w io.Writer, project, location string) ([]float32, error) {
 	// location = "us-central1"
 
