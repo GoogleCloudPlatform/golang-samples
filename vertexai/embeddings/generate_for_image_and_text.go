@@ -15,7 +15,7 @@
 // Package embeddings shows examples of working with multimodal embeddings in Vertex AI
 package embeddings
 
-// [START generativeaionvertexai_multimodal_embedding_image_and_text]
+// [START generativeaionvertexai_multimodal_embedding_image]
 import (
 	"context"
 	"encoding/json"
@@ -95,4 +95,4 @@ func generateForTextAndImage(w io.Writer, project, location string) error {
 	return nil
 }
 
-// [END generativeaionvertexai_multimodal_embedding_image_and_text]
+// [END generativeaionvertexai_multimodal_embedding_image]

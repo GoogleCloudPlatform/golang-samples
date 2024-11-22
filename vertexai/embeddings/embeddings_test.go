@@ -66,20 +66,6 @@ func TestEmbeddings(t *testing.T) {
 		}
 	})
 
-	t.Run("generate embedding for image", func(t *testing.T) {
-		buf.Reset()
-		err := generateForImage(&buf, tc.ProjectID, location)
-		if err != nil {
-			t.Fatalf("generateForImage failed: %v", err)
-		}
-
-		expOutput := "Image embedding (length=1408): ["
-		actOutput := buf.String()
-		if !strings.Contains(actOutput, expOutput) {
-			t.Errorf("expected output to contain text %q, got: %q", expOutput, actOutput)
-		}
-	})
-
 	t.Run("generate embedding for video", func(t *testing.T) {
 		buf.Reset()
 		err := generateForVideo(&buf, tc.ProjectID, location)
