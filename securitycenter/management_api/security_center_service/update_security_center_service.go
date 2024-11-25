@@ -21,7 +21,6 @@ import (
 
 	securitycentermanagement "cloud.google.com/go/securitycentermanagement/apiv1"
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
-	// "google.golang.org/protobuf/types/field_maskpb"
 	fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
