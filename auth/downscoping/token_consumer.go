@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/google/downscope"
@@ -96,7 +95,7 @@ func getObjectContents(output io.Writer, bucketName string, objectName string) e
 		return fmt.Errorf("failed to retrieve the object: %w", err)
 	}
 	defer rc.Close()
-	data, err := ioutil.ReadAll(rc)
+	data, err := io.ReadAll(rc)
 	if err != nil {
 		return fmt.Errorf("could not read the object's contents: %w", err)
 	}
