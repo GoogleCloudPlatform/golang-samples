@@ -14,6 +14,8 @@
 
 package security_center_service
 
+// [START securitycenter_update_security_center_service]
+
 import (
 	"context"
 	"fmt"
@@ -63,3 +65,5 @@ func updateSecurityCenterService(w io.Writer, parent string, serviceID string) e
 	fmt.Fprintf(w, "Updated SecurityCenterService: %s with new enablement state: %v\n", updatedService.Name, updatedService.IntendedEnablementState)
 	return nil
 }
+
+// [END securitycenter_update_security_center_service]
