@@ -25,6 +25,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -68,22 +69,23 @@ type Message struct {
 func KGSearch(w http.ResponseWriter, r *http.Request) {
 	setup(r.Context())
 
-	bodyBytes, err := ioutil.ReadAll(r.Body)
+	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Fatalf("Couldn't read request body: %v", err)
 	}
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+	r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
 	if r.Method != "POST" {
-		http.Error(w, "Only POST requests are accepted", 405)
+		http.Error(w, "Only POST requests are accepted", http.StatusMethodNotAllowed)
+
 	}
 	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Couldn't parse form", 400)
+		http.Error(w, "Couldn't parse form", http.StatusBadRequest)
 		log.Fatalf("ParseForm: %v", err)
 	}
 
 	// Reset r.Body as ParseForm depletes it by reading the io.ReadCloser.
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+	r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 	result, err := verifyWebHook(r, slackSecret)
 	if err != nil {
 		log.Fatalf("verifyWebhook: %v", err)
