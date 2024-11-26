@@ -14,7 +14,7 @@
 
 package event_threat_detection
 
-// [START securitycenter_delete_event_threat_detection_custom_module]
+// [START securitycenter_get_effective_event_threat_detection_custom_module]
 
 import (
 	"context"
@@ -25,14 +25,13 @@ import (
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
 )
 
-// deleteEventThreatDetectionCustomModule deletes a specific custom module by its name.
-func deleteEventThreatDetectionCustomModule(w io.Writer, parent string, customModuleID string) error {
+// getEffectiveEventThreatDetectionCustomModule retrieves a specific custom module by its name.
+func getEffectiveEventThreatDetectionCustomModule(w io.Writer, parent string, customModuleID string) error {
 	// parent: Use any one of the following options:
 	//             - organizations/{organization_id}/locations/{location_id}
 	//             - folders/{folder_id}/locations/{location_id}
 	//             - projects/{project_id}/locations/{location_id}
 	// customModuleID := "your-module-id"
-	name := fmt.Sprintf("%s/eventThreatDetectionCustomModules/%s", parent, customModuleID)
 	ctx := context.Background()
 	client, err := securitycentermanagement.NewClient(ctx)
 	if err != nil {
@@ -40,17 +39,17 @@ func deleteEventThreatDetectionCustomModule(w io.Writer, parent string, customMo
 	}
 	defer client.Close()
 
-	req := &securitycentermanagementpb.DeleteEventThreatDetectionCustomModuleRequest{
-		Name: name,
+	req := &securitycentermanagementpb.GetEffectiveEventThreatDetectionCustomModuleRequest{
+		Name: fmt.Sprintf("%s/effectiveEventThreatDetectionCustomModules/%s", parent, customModuleID),
 	}
 
-	err = client.DeleteEventThreatDetectionCustomModule(ctx, req)
+	module, err := client.GetEffectiveEventThreatDetectionCustomModule(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Failed to delete EventThreatDetectionCustomModule: %w", err)
+		return fmt.Errorf("Failed to get EffectiveEventThreatDetectionCustomModule: %w", err)
 	}
 
-	fmt.Fprintf(w, "Deleted EventThreatDetectionCustomModule Successfully: %s\n", customModuleID)
+	fmt.Fprintf(w, "Retrieved EffectiveEventThreatDetectionCustomModule: %s\n", module.Name)
 	return nil
 }
 
-// [END securitycenter_delete_event_threat_detection_custom_module]
+// [END securitycenter_get_effective_event_threat_detection_custom_module]
