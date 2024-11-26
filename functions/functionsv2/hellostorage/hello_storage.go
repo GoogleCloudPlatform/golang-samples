@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"github.com/cloudevents/sdk-go/v2/event"
@@ -38,7 +39,18 @@ func helloStorage(ctx context.Context, e event.Event) error {
 	log.Printf("Event Type: %s", e.Type())
 
 	var data storagedata.StorageObjectData
-	if err := protojson.Unmarshal(e.Data(), &data); err != nil {
+	err := protojson.Unmarshal(e.Data(), &data)
+
+	// Unmarshal() returns an unexported error.
+	// Parse the error string to determine whether there is an unknown field.
+	if err != nil && strings.Contains(err.Error(), "unknown field") {
+		log.Println(err.Error())
+		options := protojson.UnmarshalOptions{
+			DiscardUnknown: true,
+		}
+		err = options.Unmarshal(e.Data(), &data)
+	}
+	if err != nil {
 		return fmt.Errorf("protojson.Unmarshal: %w", err)
 	}
 
