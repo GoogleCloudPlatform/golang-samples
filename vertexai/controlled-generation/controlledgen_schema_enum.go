@@ -25,7 +25,7 @@ import (
 )
 
 // controlledGenerationResponseSchemaEnum demonstrates how to constrain model responses
-// to a predefined set of enum values for genre classification
+// to a predefined set of enum values for genre classification.
 func controlledGenerationResponseSchemaEnum(w io.Writer, projectID, location, modelName string) error {
 	// location = "us-central1"
 	// modelName = "gemini-1.5-pro-001"
