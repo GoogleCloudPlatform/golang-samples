@@ -14,7 +14,7 @@
 
 package event_threat_detection
 
-// [START securitycenter_update_event_threat_detection_custom_module]
+// [START securitycenter_validate_event_threat_detection_custom_module]
 
 import (
 	"context"
@@ -23,11 +23,10 @@ import (
 
 	securitycentermanagement "cloud.google.com/go/securitycentermanagement/apiv1"
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
-	fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// updateEventThreatDetectionCustomModule updates a custom module for Event Threat Detection.
-func updateEventThreatDetectionCustomModule(w io.Writer, parent string, customModuleID string) error {
+// validateEventThreatDetectionCustomModule validates a custom module for Event Threat Detection.
+func validateEventThreatDetectionCustomModule(w io.Writer, parent string) error {
 	// parent: Use any one of the following options:
 	// - organizations/{organization_id}/locations/{location_id}
 	// - folders/{folder_id}/locations/{location_id}
@@ -40,28 +39,41 @@ func updateEventThreatDetectionCustomModule(w io.Writer, parent string, customMo
 	}
 	defer client.Close()
 
-	// Define the custom module configuration
-	customModule := &securitycentermanagementpb.EventThreatDetectionCustomModule{
-		Name:            fmt.Sprintf("%s/eventThreatDetectionCustomModules/%s", parent, customModuleID),
-		EnablementState: securitycentermanagementpb.EventThreatDetectionCustomModule_DISABLED,
-	}
-
-	req := &securitycentermanagementpb.UpdateEventThreatDetectionCustomModuleRequest{
-		UpdateMask: &fieldmaskpb.FieldMask{
-			Paths: []string{
-				"enablement_state",
-			},
+	// Define the raw JSON configuration for the Event Threat Detection custom module
+	rawText := `{
+	"ips": ["192.0.2.1"],
+	"metadata": {
+		"properties": {
+			"someProperty": "someValue"
 		},
-		EventThreatDetectionCustomModule: customModule,
+		"severity": "MEDIUM"
+	}
+}`
+
+	req := &securitycentermanagementpb.ValidateEventThreatDetectionCustomModuleRequest{
+		Parent: parent,
+		// Use raw JSON as a string for validation
+		RawText: rawText,
+		Type:    "CONFIGURABLE_BAD_IP",
 	}
 
-	module, err := client.UpdateEventThreatDetectionCustomModule(ctx, req)
+	// Perform validation
+	resp, err := client.ValidateEventThreatDetectionCustomModule(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to update EventThreatDetectionCustomModule: %w", err)
+		return fmt.Errorf("failed to validate EventThreatDetectionCustomModule: %w", err)
 	}
 
-	fmt.Fprintf(w, "Updated EventThreatDetectionCustomModule: %s\n", module.Name)
+	// Handle the response and output validation results
+	if len(resp.Errors) > 0 {
+		fmt.Fprintln(w, "Validation errors:")
+		for _, e := range resp.Errors {
+			fmt.Fprintf(w, "Field: %s, Description: %s\n", e.FieldPath, e.Description)
+		}
+	} else {
+		fmt.Fprintln(w, "Validation successful: No errors found.")
+	}
+
 	return nil
 }
 
-// [END securitycenter_update_event_threat_detection_custom_module]
+// [END securitycenter_validate_event_threat_detection_custom_module]
