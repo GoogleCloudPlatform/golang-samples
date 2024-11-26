@@ -39,7 +39,6 @@ func controlledGenerationResponseSchemaEnum(w io.Writer, projectID, location, mo
 	model := client.GenerativeModel(modelName)
 
 	model.GenerationConfig.ResponseMIMEType = "text/x.enum"
-
 	model.GenerationConfig.ResponseSchema = &genai.Schema{
 		Type: genai.TypeString,
 		Enum: []string{"drama", "comedy", "documentary"},
