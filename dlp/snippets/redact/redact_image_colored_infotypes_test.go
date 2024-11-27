@@ -57,7 +57,7 @@ func TestRedactImageFileColoredInfoTypes(t *testing.T) {
 		t.Errorf("redactImageFileColoredInfoTypes got %q, want %q", got, want)
 	}
 
-	if want := "ioutil.ReadFile: open testdata/image.jpg: The system cannot find the path specified."; strings.Contains(got, want) {
+	if want := "os.ReadFile: open testdata/image.jpg: The system cannot find the path specified."; strings.Contains(got, want) {
 		t.Errorf("redactImageFileColoredInfoTypes got %q, want %q", got, want)
 	}
 

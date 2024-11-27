@@ -26,7 +26,7 @@ import (
 	iterator "google.golang.org/api/iterator"
 )
 
-// listEventThreatDetectionCustomModule creates a custom module for Security Health Analytics.
+// listEventThreatDetectionCustomModule lists all custom modules for Event Threat Detection.
 func listEventThreatDetectionCustomModule(w io.Writer, parent string) error {
 	// parent: Use any one of the following options:
 	// - organizations/{organization_id}/locations/{location_id}
@@ -44,7 +44,7 @@ func listEventThreatDetectionCustomModule(w io.Writer, parent string) error {
 		Parent: parent,
 	}
 
-	// List all security health analytics custom modules present in the resource.
+	// List all Event Threat Detection custom modules present in the resource.
 	it := client.ListEventThreatDetectionCustomModules(ctx, req)
 	for {
 		resp, err := it.Next()
