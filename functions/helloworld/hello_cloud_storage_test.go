@@ -17,7 +17,7 @@ package helloworld
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -47,7 +47,7 @@ func TestHelloGCS(t *testing.T) {
 	log.SetOutput(os.Stderr)
 	log.SetFlags(originalFlags)
 
-	out, err := ioutil.ReadAll(r)
+	out, err := io.ReadAll(r)
 	if err != nil {
 		t.Fatalf("ReadAll: %v", err)
 	}
