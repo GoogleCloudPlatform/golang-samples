@@ -63,7 +63,7 @@ func fhirExecuteBundle(w io.Writer, projectID, location, datasetID, fhirStoreID 
 	call.Header().Set("Content-Type", "application/fhir+json;charset=utf-8")
 	resp, err := call.Do()
 	if err != nil {
-		return fmt.Errorf("ExecuteBundle: %w", err)
+		return fmt.Errorf("executeBundle: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -73,7 +73,7 @@ func fhirExecuteBundle(w io.Writer, projectID, location, datasetID, fhirStoreID 
 	}
 
 	if resp.StatusCode > 299 {
-		return fmt.Errorf("Create: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
+		return fmt.Errorf("create: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
 	}
 	fmt.Fprintf(w, "%s", respBytes)
 
