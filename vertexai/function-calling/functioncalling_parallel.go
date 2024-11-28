@@ -104,6 +104,7 @@ func parallelFunctionCalling(w io.Writer, projectID, location, modelName string)
 		"temperature":      "36",
 		"temperature_unit": "F",
 		"description":      "Cold and cloudy",
+		"humidity":         "N/A",
 	})
 	if err != nil {
 		return fmt.Errorf("failed to marshal function response to JSON: %w", err)
