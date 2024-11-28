@@ -88,7 +88,7 @@ func parallelFunctionCalling(w io.Writer, projectID, location, modelName string)
 
 	// Use synthetic data to simulate responses from the external API.
 	// In a real application, this would come from an actual weather API.
-	mockAPIResp_1, err := json.Marshal(map[string]string{
+	mockAPIResp1, err := json.Marshal(map[string]string{
 		"location":         "New Delhi",
 		"temperature":      "42",
 		"temperature_unit": "C",
@@ -99,7 +99,7 @@ func parallelFunctionCalling(w io.Writer, projectID, location, modelName string)
 		return fmt.Errorf("failed to marshal function response to JSON: %w", err)
 	}
 
-	mockAPIResp_2, err := json.Marshal(map[string]string{
+	mockAPIResp2, err := json.Marshal(map[string]string{
 		"location":         "San Francisco",
 		"temperature":      "36",
 		"temperature_unit": "F",
@@ -111,21 +111,21 @@ func parallelFunctionCalling(w io.Writer, projectID, location, modelName string)
 
 	// Note, that the function calls don't have to be chained. We can obtain both responses in parallel
 	// and return them to Gemini at once.
-	funcResp_1 := &genai.FunctionResponse{
+	funcResp1 := &genai.FunctionResponse{
 		Name: funcName,
 		Response: map[string]any{
-			"content": mockAPIResp_1,
+			"content": mockAPIResp1,
 		},
 	}
-	funcResp_2 := &genai.FunctionResponse{
+	funcResp2 := &genai.FunctionResponse{
 		Name: funcName,
 		Response: map[string]any{
-			"content": mockAPIResp_2,
+			"content": mockAPIResp2,
 		},
 	}
 
 	// Return both API responses to the model allowing it to complete its response.
-	resp, err = model.GenerateContent(ctx, prompt, funcResp_1, funcResp_2)
+	resp, err = model.GenerateContent(ctx, prompt, funcResp1, funcResp2)
 	if err != nil {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
