@@ -86,19 +86,19 @@ func parallelFunctionCalling(w io.Writer, projectID, location, modelName string)
 		// The model suggests to call the function "getCurrentWeather" with args: map[location:San Francisco]
 	}
 
-	// Use synthetic data to simulate a response from the external API.
+	// Use synthetic data to simulate responses from the external API.
 	// In a real application, this would come from an actual weather API.
 	mockAPIResp_1, err := json.Marshal(map[string]string{
 		"location":         "New Delhi",
 		"temperature":      "42",
 		"temperature_unit": "C",
-		"description":      "Warm and humid",
+		"description":      "Hot and humid",
 		"humidity":         "65",
 	})
 	if err != nil {
 		return fmt.Errorf("failed to marshal function response to JSON: %w", err)
 	}
-	// 2
+
 	mockAPIResp_2, err := json.Marshal(map[string]string{
 		"location":         "San Francisco",
 		"temperature":      "36",
@@ -109,6 +109,8 @@ func parallelFunctionCalling(w io.Writer, projectID, location, modelName string)
 		return fmt.Errorf("failed to marshal function response to JSON: %w", err)
 	}
 
+	// Note, that the function calls don't have to be chained. We can obtain both responses in parallel
+	// and return them to Gemini at once.
 	funcResp_1 := &genai.FunctionResponse{
 		Name: funcName,
 		Response: map[string]any{
@@ -133,7 +135,7 @@ func parallelFunctionCalling(w io.Writer, projectID, location, modelName string)
 
 	fmt.Fprintln(w, resp.Candidates[0].Content.Parts[0])
 	// Example response:
-	// The weather in New Delhi is warm and humid with a humidity of 65 and a temperature of 42°C. The weather in San Francisco ...
+	// The weather in New Delhi is hot and humid with a humidity of 65 and a temperature of 42°C. The weather in San Francisco ...
 
 	return nil
 }
