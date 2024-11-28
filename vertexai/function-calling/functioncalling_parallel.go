@@ -27,8 +27,8 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// parallelFunctionCalling demonstrates the concept of parallel function calling, when the model
-// determines that it requires two or more function calls in order to complete its response.
+// parallelFunctionCalling shows how to execute multiple function calls in parallel
+// and return their results to the model for generating a complete response.
 func parallelFunctionCalling(w io.Writer, projectID, location, modelName string) error {
 	// location = "us-central1"
 	// modelName = "gemini-1.5-flash-002"
