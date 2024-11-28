@@ -79,6 +79,7 @@ func parallelFunctionCalling(w io.Writer, projectID, location, modelName string)
 		return errors.New("got no function call suggestions from model")
 	}
 
+	// In a production environment, consider adding validations for function names and arguments.
 	for _, fnCall := range resp.Candidates[0].FunctionCalls() {
 		fmt.Fprintf(w, "The model suggests to call the function %q with args: %v\n", fnCall.Name, fnCall.Args)
 		// Example response:
