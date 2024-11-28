@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Function calling allows to improve the model response with the use of external
-// APIs and functions.
+// Function calling allows the model to improve its responses with the use of external
+// data sources.
 package functioncalling
 
 // [START generativeaionvertexai_function_calling_generate_parallel_calls]
