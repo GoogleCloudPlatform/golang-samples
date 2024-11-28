@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	healthcare "google.golang.org/api/healthcare/v1"
 )
@@ -39,18 +38,18 @@ func getFHIRMetadata(w io.Writer, projectID, location, datasetID, fhirStoreID st
 
 	resp, err := fhirService.Capabilities(name).Do()
 	if err != nil {
-		return fmt.Errorf("Capabilities: %w", err)
+		return fmt.Errorf("fhirService.Capabilities: %w", err)
 	}
 
 	defer resp.Body.Close()
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("could not read response: %w", err)
 	}
 
 	if resp.StatusCode > 299 {
-		return fmt.Errorf("Capabilities: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
+		return fmt.Errorf("fhirService.Capabilities: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
 	}
 	fmt.Fprintf(w, "%s", respBytes)
 	return nil
