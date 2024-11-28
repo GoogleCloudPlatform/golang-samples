@@ -992,7 +992,7 @@ func TestConsistencyGroup(t *testing.T) {
 		}
 	})
 
-	t.Run("Disk attachments to consistency group", func(t *testing.T) {
+	t.Run("Clone disks in consistency group", func(t *testing.T) {
 		diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 		diskType := fmt.Sprintf("zones/%s/diskTypes/pd-ssd", zone)
 		groupName := fmt.Sprintf("test-group-%v-%v", time.Now().Format("01-02-2006"), r.Int())

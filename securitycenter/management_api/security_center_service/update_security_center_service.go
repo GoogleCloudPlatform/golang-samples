@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package event_threat_detection
+package security_center_service
 
-// [START securitycenter_update_event_threat_detection_custom_module]
+// [START securitycenter_update_security_center_service]
 
 import (
 	"context"
@@ -26,13 +26,12 @@ import (
 	fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// updateEventThreatDetectionCustomModule updates a custom module for Event Threat Detection.
-func updateEventThreatDetectionCustomModule(w io.Writer, parent string, customModuleID string) error {
+// updateSecurityCenterService updates a Security Center service configuration.
+func updateSecurityCenterService(w io.Writer, parent string, serviceID string) error {
 	// parent: Use any one of the following options:
 	// - organizations/{organization_id}/locations/{location_id}
 	// - folders/{folder_id}/locations/{location_id}
 	// - projects/{project_id}/locations/{location_id}
-
 	ctx := context.Background()
 	client, err := securitycentermanagement.NewClient(ctx)
 	if err != nil {
@@ -40,28 +39,31 @@ func updateEventThreatDetectionCustomModule(w io.Writer, parent string, customMo
 	}
 	defer client.Close()
 
-	// Define the custom module configuration
-	customModule := &securitycentermanagementpb.EventThreatDetectionCustomModule{
-		Name:            fmt.Sprintf("%s/eventThreatDetectionCustomModules/%s", parent, customModuleID),
-		EnablementState: securitycentermanagementpb.EventThreatDetectionCustomModule_DISABLED,
+	// Prepare the updated Security Center service object.
+	service := &securitycentermanagementpb.SecurityCenterService{
+		Name:                    fmt.Sprintf("%s/securityCenterServices/%s", parent, serviceID),
+		IntendedEnablementState: securitycentermanagementpb.SecurityCenterService_ENABLED,
 	}
 
-	req := &securitycentermanagementpb.UpdateEventThreatDetectionCustomModuleRequest{
-		UpdateMask: &fieldmaskpb.FieldMask{
-			Paths: []string{
-				"enablement_state",
-			},
-		},
-		EventThreatDetectionCustomModule: customModule,
+	// Specify which fields to update using a FieldMask.
+	updateMask := &fieldmaskpb.FieldMask{
+		Paths: []string{"intended_enablement_state"},
 	}
 
-	module, err := client.UpdateEventThreatDetectionCustomModule(ctx, req)
+	// Create the update request.
+	req := &securitycentermanagementpb.UpdateSecurityCenterServiceRequest{
+		SecurityCenterService: service,
+		UpdateMask:            updateMask,
+	}
+
+	// Execute the update request.
+	updatedService, err := client.UpdateSecurityCenterService(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to update EventThreatDetectionCustomModule: %w", err)
+		return fmt.Errorf("failed to update SecurityCenterService: %w", err)
 	}
 
-	fmt.Fprintf(w, "Updated EventThreatDetectionCustomModule: %s\n", module.Name)
+	fmt.Fprintf(w, "Updated SecurityCenterService: %s with new enablement state: %v\n", updatedService.Name, updatedService.IntendedEnablementState)
 	return nil
 }
 
-// [END securitycenter_update_event_threat_detection_custom_module]
+// [END securitycenter_update_security_center_service]
