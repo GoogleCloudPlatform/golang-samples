@@ -20,7 +20,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 
 	healthcare "google.golang.org/api/healthcare/v1"
 )
@@ -29,9 +29,9 @@ import (
 func dicomWebStoreInstance(w io.Writer, projectID, location, datasetID, dicomStoreID, dicomWebPath, dicomFile string) error {
 	ctx := context.Background()
 
-	dicomData, err := ioutil.ReadFile(dicomFile)
+	dicomData, err := os.ReadFile(dicomFile)
 	if err != nil {
-		return fmt.Errorf("ReadFile: %w", err)
+		return fmt.Errorf("os.ReadFile: %w", err)
 	}
 
 	healthcareService, err := healthcare.NewService(ctx)
@@ -51,7 +51,7 @@ func dicomWebStoreInstance(w io.Writer, projectID, location, datasetID, dicomSto
 	}
 	defer resp.Body.Close()
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("could not read response: %w", err)
 	}
