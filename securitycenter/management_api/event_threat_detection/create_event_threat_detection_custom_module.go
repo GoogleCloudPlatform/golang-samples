@@ -26,7 +26,7 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-// createEventThreatDetectionCustomModule creates a custom module for Security Health Analytics.
+// createEventThreatDetectionCustomModule creates a custom module for Event Threat Detection.
 func createEventThreatDetectionCustomModule(w io.Writer, parent string) error {
 	// parent: Use any one of the following options:
 	// - organizations/{organization_id}/locations/{location_id}
