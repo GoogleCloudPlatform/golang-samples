@@ -22,7 +22,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -127,7 +127,7 @@ func makeJWTRequest(signedJWT, url string) (string, error) {
 		return "", fmt.Errorf("HTTP request failed: %w", err)
 	}
 	defer response.Body.Close()
-	responseData, err := ioutil.ReadAll(response.Body)
+	responseData, err := io.ReadAll(response.Body)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
