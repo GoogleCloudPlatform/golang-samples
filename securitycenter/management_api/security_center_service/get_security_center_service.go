@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package event_threat_detection
+package security_center_service
 
-// [START securitycenter_delete_event_threat_detection_custom_module]
+// [START securitycenter_get_security_center_service]
 
 import (
 	"context"
@@ -25,14 +25,15 @@ import (
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
 )
 
-// deleteEventThreatDetectionCustomModule deletes a specific custom module by its name.
-func deleteEventThreatDetectionCustomModule(w io.Writer, parent string, customModuleID string) error {
+// getSecurityCenterService retrieves a specific Security Center service by its name.
+func getSecurityCenterService(w io.Writer, parent string, service string) error {
 	// parent: Use any one of the following options:
 	//             - organizations/{organization_id}/locations/{location_id}
 	//             - folders/{folder_id}/locations/{location_id}
 	//             - projects/{project_id}/locations/{location_id}
-	// customModuleID := "your-module-id"
-	name := fmt.Sprintf("%s/eventThreatDetectionCustomModules/%s", parent, customModuleID)
+	// Replace `{service}` with one of the valid values:
+	// container-threat-detection, event-threat-detection, security-health-analytics, vm-threat-detection, web-security-scanner
+	// service := "security-center-service-name"
 	ctx := context.Background()
 	client, err := securitycentermanagement.NewClient(ctx)
 	if err != nil {
@@ -40,17 +41,17 @@ func deleteEventThreatDetectionCustomModule(w io.Writer, parent string, customMo
 	}
 	defer client.Close()
 
-	req := &securitycentermanagementpb.DeleteEventThreatDetectionCustomModuleRequest{
-		Name: name,
+	req := &securitycentermanagementpb.GetSecurityCenterServiceRequest{
+		Name: fmt.Sprintf("%s/securityCenterServices/%s", parent, service),
 	}
 
-	err = client.DeleteEventThreatDetectionCustomModule(ctx, req)
+	response, err := client.GetSecurityCenterService(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Failed to delete EventThreatDetectionCustomModule: %w", err)
+		return fmt.Errorf("Failed to get SecurityCenterService: %w", err)
 	}
 
-	fmt.Fprintf(w, "Deleted EventThreatDetectionCustomModule Successfully: %s\n", customModuleID)
+	fmt.Fprintf(w, "Retrieved SecurityCenterService: %s\n", response.Name)
 	return nil
 }
 
-// [END securitycenter_delete_event_threat_detection_custom_module]
+// [END securitycenter_get_security_center_service]

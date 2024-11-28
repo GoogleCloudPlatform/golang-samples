@@ -23,7 +23,7 @@ package helloworld
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -114,16 +114,17 @@ func TestHelloHTTPSystem(t *testing.T) {
 	for _, test := range tests {
 		req := &http.Request{
 			Method: http.MethodPost,
-			Body:   ioutil.NopCloser(strings.NewReader(test.body)),
+			Body:   io.NopCloser(strings.NewReader(test.body)),
 			URL:    testURL,
 		}
 		resp, err := client.Do(req)
 		if err != nil {
 			t.Fatalf("HelloHTTP http.Get: %v", err)
 		}
-		body, err := ioutil.ReadAll(resp.Body)
+
+		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			t.Fatalf("HelloHTTP ioutil.ReadAll: %v", err)
+			t.Fatalf("HelloHTTP io.ReadAll: %v", err)
 		}
 		if got := string(body); got != test.want {
 			t.Errorf("HelloHTTP(%q) = %q, want %q", test.body, got, test.want)

@@ -19,7 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
@@ -59,9 +59,9 @@ func redactImage(w io.Writer, projectID string, infoTypeNames []string, bytesTyp
 	}
 
 	// Read the input file.
-	b, err := ioutil.ReadFile(inputPath)
+	b, err := os.ReadFile(inputPath)
 	if err != nil {
-		return fmt.Errorf("ioutil.ReadFile: %w", err)
+		return fmt.Errorf("os.ReadFile: %w", err)
 	}
 
 	// Create a configured request.
@@ -84,8 +84,8 @@ func redactImage(w io.Writer, projectID string, infoTypeNames []string, bytesTyp
 		return fmt.Errorf("RedactImage: %w", err)
 	}
 	// Write the output file.
-	if err := ioutil.WriteFile(outputPath, resp.GetRedactedImage(), 0644); err != nil {
-		return fmt.Errorf("ioutil.WriteFile: %w", err)
+	if err := os.WriteFile(outputPath, resp.GetRedactedImage(), 0644); err != nil {
+		return fmt.Errorf("os.WriteFile: %w", err)
 	}
 	fmt.Fprintf(w, "Wrote output to %s", outputPath)
 	return nil
