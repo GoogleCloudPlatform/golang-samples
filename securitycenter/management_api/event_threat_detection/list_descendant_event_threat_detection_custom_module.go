@@ -14,7 +14,7 @@
 
 package event_threat_detection
 
-// [START securitycenter_delete_event_threat_detection_custom_module]
+// [START securitycenter_list_descendant_event_threat_detection_custom_module]
 
 import (
 	"context"
@@ -23,16 +23,16 @@ import (
 
 	securitycentermanagement "cloud.google.com/go/securitycentermanagement/apiv1"
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
+	iterator "google.golang.org/api/iterator"
 )
 
-// deleteEventThreatDetectionCustomModule deletes a specific custom module by its name.
-func deleteEventThreatDetectionCustomModule(w io.Writer, parent string, customModuleID string) error {
+// listDescendantEventThreatDetectionCustomModule lists descendant custom modules for Event Threat Detection.
+func listDescendantEventThreatDetectionCustomModule(w io.Writer, parent string) error {
 	// parent: Use any one of the following options:
-	//             - organizations/{organization_id}/locations/{location_id}
-	//             - folders/{folder_id}/locations/{location_id}
-	//             - projects/{project_id}/locations/{location_id}
-	// customModuleID := "your-module-id"
-	name := fmt.Sprintf("%s/eventThreatDetectionCustomModules/%s", parent, customModuleID)
+	// - organizations/{organization_id}/locations/{location_id}
+	// - folders/{folder_id}/locations/{location_id}
+	// - projects/{project_id}/locations/{location_id}
+
 	ctx := context.Background()
 	client, err := securitycentermanagement.NewClient(ctx)
 	if err != nil {
@@ -40,17 +40,23 @@ func deleteEventThreatDetectionCustomModule(w io.Writer, parent string, customMo
 	}
 	defer client.Close()
 
-	req := &securitycentermanagementpb.DeleteEventThreatDetectionCustomModuleRequest{
-		Name: name,
+	req := &securitycentermanagementpb.ListDescendantEventThreatDetectionCustomModulesRequest{
+		Parent: parent,
 	}
 
-	err = client.DeleteEventThreatDetectionCustomModule(ctx, req)
-	if err != nil {
-		return fmt.Errorf("Failed to delete EventThreatDetectionCustomModule: %w", err)
+	// List all Descendant Event Threat Detection custom modules present in the resource.
+	it := client.ListDescendantEventThreatDetectionCustomModules(ctx, req)
+	for {
+		resp, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("it.Next: %w", err)
+		}
+		fmt.Fprintf(w, "Custom Module Name: %s,\n", resp.Name)
 	}
-
-	fmt.Fprintf(w, "Deleted EventThreatDetectionCustomModule Successfully: %s\n", customModuleID)
 	return nil
 }
 
-// [END securitycenter_delete_event_threat_detection_custom_module]
+// [END securitycenter_list_descendant_event_threat_detection_custom_module]
