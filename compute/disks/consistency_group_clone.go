@@ -25,7 +25,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// cloneConsistencyGroup clons all disks in consistency group for a project in a given region.
+// cloneConsistencyGroup clones all disks in consistency group for a project in a given region.
 func cloneConsistencyGroup(w io.Writer, projectID, region, groupName string) error {
 	// projectID := "your_project_id"
 	// region := "europe-west4"
