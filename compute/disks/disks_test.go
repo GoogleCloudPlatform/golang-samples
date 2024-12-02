@@ -1050,7 +1050,7 @@ func TestConsistencyGroup(t *testing.T) {
 			t.Errorf("cloneConsistencyGroup got err: %v", err)
 		}
 
-		want = "Group clonned"
+		want = "Group cloned"
 		if got := buf.String(); !strings.Contains(got, want) {
 			t.Errorf("cloneConsistencyGroup got %q, want %q", got, want)
 		}
