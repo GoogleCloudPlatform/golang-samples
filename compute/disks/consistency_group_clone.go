@@ -57,7 +57,7 @@ func cloneConsistencyGroup(w io.Writer, projectID, region, groupName string) err
 		return fmt.Errorf("unable to wait for the operation: %w", err)
 	}
 
-	fmt.Fprintf(w, "Group clonned\n")
+	fmt.Fprintf(w, "Group cloned\n")
 
 	return nil
 }
