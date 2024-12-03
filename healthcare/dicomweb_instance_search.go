@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	healthcare "google.golang.org/api/healthcare/v1"
 )
@@ -48,7 +47,7 @@ func dicomWebSearchInstances(w io.Writer, projectID, location, datasetID, dicomS
 
 	defer resp.Body.Close()
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("ioutil.ReadAll: %w", err)
 	}
