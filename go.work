@@ -104,7 +104,6 @@ use (
 	./media
 	./memorystore
 	./monitoring
-	./opencensus
 	./opentelemetry/instrumentation/app
 	./opentelemetry/trace
 	./privateca
