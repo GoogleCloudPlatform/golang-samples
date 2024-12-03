@@ -35,7 +35,7 @@ import (
 func generateForImageTextAndVideo(w io.Writer, project, location string) error {
 	// location = "us-central1"
 
-	// The default context timeout may be not enough to process a video input
+	// The default context timeout may be not enough to process a video input.
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
@@ -55,7 +55,7 @@ func generateForImageTextAndVideo(w io.Writer, project, location string) error {
 		"text": "Domestic cats in natural conditions",
 		"image": map[string]any{
 			// Image and video inputs can be provided either as a Google Cloud Storage URI or as
-			// base64-encoded bytes using the "bytesBase64Encoded" field
+			// base64-encoded bytes using the "bytesBase64Encoded" field.
 			"gcsUri": "gs://cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg",
 		},
 		"video": map[string]any{
@@ -68,7 +68,7 @@ func generateForImageTextAndVideo(w io.Writer, project, location string) error {
 
 	req := &aiplatformpb.PredictRequest{
 		Endpoint: endpoint,
-		// The model supports only 1 instance per request
+		// The model supports only 1 instance per request.
 		Instances: []*structpb.Value{instance},
 	}
 
@@ -99,7 +99,7 @@ func generateForImageTextAndVideo(w io.Writer, project, location string) error {
 	imageEmbedding := instanceEmbeddings.ImageEmbeddings
 	textEmbedding := instanceEmbeddings.TextEmbeddings
 	// Get the embedding for our single video segment (`.videoEmbeddings` object has one entry per
-	// each processed segment)
+	// each processed segment).
 	videoEmbedding := instanceEmbeddings.VideoEmbeddings[0].Embedding
 
 	fmt.Fprintf(w, "Image embedding (length=%d): %v\n", len(imageEmbedding), imageEmbedding)

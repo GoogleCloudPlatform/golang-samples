@@ -49,7 +49,7 @@ func generateForTextAndImage(w io.Writer, project, location string) error {
 	instance, err := structpb.NewValue(map[string]any{
 		"image": map[string]any{
 			// Image input can be provided either as a Google Cloud Storage URI or as
-			// base64-encoded bytes using the "bytesBase64Encoded" field
+			// base64-encoded bytes using the "bytesBase64Encoded" field.
 			"gcsUri": "gs://cloud-samples-data/vertex-ai/llm/prompts/landmark1.png",
 		},
 		"text": "Colosseum",
@@ -60,7 +60,7 @@ func generateForTextAndImage(w io.Writer, project, location string) error {
 
 	req := &aiplatformpb.PredictRequest{
 		Endpoint: endpoint,
-		// The model supports only 1 instance per request
+		// The model supports only 1 instance per request.
 		Instances: []*structpb.Value{instance},
 	}
 
