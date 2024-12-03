@@ -24,7 +24,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"time"
 
 	healthcare "google.golang.org/api/healthcare/v1beta1"
@@ -86,7 +85,7 @@ func ConditionalPatchFHIRResource(w io.Writer, projectID, location, datasetID, f
 
 	defer resp.Body.Close()
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("could not read response: %w", err)
 	}
