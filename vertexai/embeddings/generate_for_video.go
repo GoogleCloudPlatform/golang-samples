@@ -34,7 +34,7 @@ import (
 func generateForVideo(w io.Writer, project, location string) error {
 	// location = "us-central1"
 
-	// The default context timeout may be not enough to process a video input
+	// The default context timeout may be not enough to process a video input.
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
@@ -53,7 +53,7 @@ func generateForVideo(w io.Writer, project, location string) error {
 	instances, err := structpb.NewValue(map[string]any{
 		"video": map[string]any{
 			// Video input can be provided either as a Google Cloud Storage URI or as base64-encoded
-			// bytes using the "bytesBase64Encoded" field
+			// bytes using the "bytesBase64Encoded" field.
 			"gcsUri": "gs://cloud-samples-data/vertex-ai-vision/highway_vehicles.mp4",
 			"videoSegmentConfig": map[string]any{
 				"startOffsetSec": 1,
@@ -67,7 +67,7 @@ func generateForVideo(w io.Writer, project, location string) error {
 
 	req := &aiplatformpb.PredictRequest{
 		Endpoint: endpoint,
-		// The model supports only 1 instance per request
+		// The model supports only 1 instance per request.
 		Instances: []*structpb.Value{instances},
 	}
 	resp, err := client.Predict(ctx, req)
@@ -92,7 +92,7 @@ func generateForVideo(w io.Writer, project, location string) error {
 		return fmt.Errorf("failed to unmarshal json: %w", err)
 	}
 	// Get the embedding for our single video segment (`.videoEmbeddings` object has one entry per
-	// each processed segment)
+	// each processed segment).
 	videoEmbedding := instanceEmbeddings.VideoEmbeddings[0]
 
 	fmt.Fprintf(w, "Video embedding (seconds: %.f-%.f; length=%d): %v\n",
