@@ -101,7 +101,7 @@ func MakeUpperCase(ctx context.Context, e event.Event) error {
 	log.Printf("Replacing value: %q -> %q", originalStringValue, newValue)
 
 	newDocumentEntry := map[string]string{"original": newValue}
-	_, err := client.Collection(collection).Doc(doc).Set(ctx, newDocumentEntry)
+	_, err = client.Collection(collection).Doc(doc).Set(ctx, newDocumentEntry)
 	if err != nil {
 		return fmt.Errorf("Set: %w", err)
 	}
