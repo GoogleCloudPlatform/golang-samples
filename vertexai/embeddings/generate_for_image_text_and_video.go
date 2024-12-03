@@ -30,8 +30,8 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-// generateForImageTextAndVideo shows how use the multimodal model to generate embeddings for
-// text and image data.
+// generateForImageTextAndVideo shows how to use the multimodal model to generate embeddings for
+// image, text and video data.
 func generateForImageTextAndVideo(w io.Writer, project, location string) error {
 	// location = "us-central1"
 
