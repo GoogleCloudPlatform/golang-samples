@@ -30,7 +30,7 @@ import (
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"github.com/cloudevents/sdk-go/v2/event"
 	"github.com/googleapis/google-cloudevents-go/cloud/firestoredata"
-	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 // set the GOOGLE_CLOUD_PROJECT environment variable when deploying.
@@ -65,7 +65,15 @@ func init() {
 // the `original` value of the document to upper case.
 func MakeUpperCase(ctx context.Context, e event.Event) error {
 	var data firestoredata.DocumentEventData
-	if err := proto.Unmarshal(e.Data(), &data); err != nil {
+
+	// If you omit `DiscardUnknown`, protojson.Unmarshal returns an error
+	// when encountering a new or unknown field.
+	options := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+	}
+	err := options.Unmarshal(e.Data(), &data)
+
+	if err != nil {
 		return fmt.Errorf("proto.Unmarshal: %w", err)
 	}
 
