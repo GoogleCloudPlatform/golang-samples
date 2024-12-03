@@ -20,7 +20,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -41,7 +40,7 @@ func SynthesizeTextFile(w io.Writer, textFile, outputFile string) error {
 	}
 	defer client.Close()
 
-	text, err := ioutil.ReadFile(textFile)
+	text, err := os.ReadFile(textFile)
 	if err != nil {
 		return err
 	}
@@ -66,7 +65,7 @@ func SynthesizeTextFile(w io.Writer, textFile, outputFile string) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(outputFile, resp.AudioContent, 0644)
+	err = os.WriteFile(outputFile, resp.AudioContent, 0644)
 	if err != nil {
 		return err
 	}
@@ -95,7 +94,7 @@ func SynthesizeSSMLFile(w io.Writer, ssmlFile, outputFile string) error {
 	}
 	defer client.Close()
 
-	ssml, err := ioutil.ReadFile(ssmlFile)
+	ssml, err := os.ReadFile(ssmlFile)
 	if err != nil {
 		return err
 	}
@@ -120,7 +119,7 @@ func SynthesizeSSMLFile(w io.Writer, ssmlFile, outputFile string) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(outputFile, resp.AudioContent, 0644)
+	err = os.WriteFile(outputFile, resp.AudioContent, 0644)
 	if err != nil {
 		return err
 	}
