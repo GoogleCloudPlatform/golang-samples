@@ -24,7 +24,7 @@ import (
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"github.com/cloudevents/sdk-go/v2/event"
 	"github.com/googleapis/google-cloudevents-go/cloud/firestoredata"
-	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
 
 func init() {
@@ -37,7 +37,7 @@ func HelloFirestore(ctx context.Context, event event.Event) error {
 
 	// If you omit `DiscardUnknown`, protojson.Unmarshal returns an error
 	// when encountering a new or unknown field.
-	options := protojson.UnmarshalOptions{
+	options := proto.UnmarshalOptions{
 		DiscardUnknown: true,
 	}
 	err := options.Unmarshal(event.Data(), &data)
