@@ -9,7 +9,6 @@ require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
 	github.com/golang/protobuf v1.5.4
 	go.opencensus.io v0.24.0
-	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 	google.golang.org/genproto/googleapis/api v0.0.0-20240723171418-e6d459c13d2a
 	google.golang.org/protobuf v1.34.2
 )
