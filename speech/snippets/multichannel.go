@@ -22,7 +22,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
 )
 
 // [START speech_transcribe_multichannel_beta]
@@ -37,7 +36,7 @@ func transcribeMultichannel(w io.Writer) error {
 	}
 	defer client.Close()
 
-	data, err := os.ReadFile("../testdata/commercial_stereo.wav")
+	data, err := io.ReadFile("../testdata/commercial_stereo.wav")
 	if err != nil {
 		return fmt.Errorf("ReadFile: %w", err)
 	}
