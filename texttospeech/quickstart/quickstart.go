@@ -20,8 +20,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 
 	texttospeech "cloud.google.com/go/texttospeech/apiv1"
 	"cloud.google.com/go/texttospeech/apiv1/texttospeechpb"
@@ -63,7 +63,7 @@ func main() {
 
 	// The resp's AudioContent is binary.
 	filename := "output.mp3"
-	err = ioutil.WriteFile(filename, resp.AudioContent, 0644)
+	err = os.WriteFile(filename, resp.AudioContent, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
