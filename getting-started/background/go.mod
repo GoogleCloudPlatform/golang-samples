@@ -3,11 +3,11 @@ module github.com/GoogleCloudPlatform/golang-samples/getting-started/background
 go 1.21
 
 require (
-	cloud.google.com/go/firestore v1.15.0
-	cloud.google.com/go/pubsub v1.40.0
-	cloud.google.com/go/translate v1.10.6
-	golang.org/x/text v0.16.0
-	google.golang.org/grpc v1.65.0
+	cloud.google.com/go/firestore v1.17.0
+	cloud.google.com/go/pubsub v1.45.2
+	cloud.google.com/go/translate v1.12.2
+	golang.org/x/text v0.21.0
+	google.golang.org/grpc v1.68.0
 )
 
 require (

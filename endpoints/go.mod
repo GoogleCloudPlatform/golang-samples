@@ -5,10 +5,10 @@ go 1.21
 require (
 	github.com/golang/protobuf v1.5.4
 	github.com/gorilla/mux v1.8.1
-	golang.org/x/net v0.27.0
-	golang.org/x/oauth2 v0.21.0
-	google.golang.org/grpc v1.65.0
-	google.golang.org/grpc/examples v0.0.0-20240723201342-aae9e64cf3ad
+	golang.org/x/net v0.31.0
+	golang.org/x/oauth2 v0.24.0
+	google.golang.org/grpc v1.68.0
+	google.golang.org/grpc/examples 5565631455d3
 )
 
 require (

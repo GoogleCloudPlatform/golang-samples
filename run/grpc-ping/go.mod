@@ -4,8 +4,8 @@ go 1.21
 
 require (
 	github.com/golang/protobuf v1.5.4
-	google.golang.org/api v0.189.0
-	google.golang.org/grpc v1.65.0
+	google.golang.org/api v0.210.0
+	google.golang.org/grpc v1.68.0
 )
 
 require (

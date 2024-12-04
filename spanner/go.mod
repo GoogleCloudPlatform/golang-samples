@@ -4,20 +4,20 @@ go 1.21
 
 require (
 	cloud.google.com/go v0.116.0
-	cloud.google.com/go/iam v1.2.1
-	cloud.google.com/go/kms v1.20.0
-	cloud.google.com/go/longrunning v0.6.1
-	cloud.google.com/go/spanner v1.71.0
+	cloud.google.com/go/iam v1.2.2
+	cloud.google.com/go/kms v1.20.1
+	cloud.google.com/go/longrunning v0.6.3
+	cloud.google.com/go/spanner v1.73.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.14
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	github.com/GoogleCloudPlatform/golang-samples c7855b2f0589
 	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
-	github.com/googleapis/gax-go/v2 v2.13.0
+	github.com/googleapis/gax-go/v2 v2.14.0
 	go.opencensus.io v0.24.0
-	google.golang.org/api v0.203.0
-	google.golang.org/genproto v0.0.0-20241015192408-796eee8c2d53
-	google.golang.org/grpc v1.67.1
-	google.golang.org/protobuf v1.35.1
+	google.golang.org/api v0.210.0
+	google.golang.org/genproto 19429a94021a
+	google.golang.org/grpc v1.68.0
+	google.golang.org/protobuf v1.35.2
 )
 
 require (

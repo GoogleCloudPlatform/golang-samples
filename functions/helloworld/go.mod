@@ -3,8 +3,8 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/helloworld
 go 1.21
 
 require (
-	cloud.google.com/go/functions v1.16.5
-	github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
+	cloud.google.com/go/functions v1.19.2
+	github.com/GoogleCloudPlatform/functions-framework-go v1.9.0
 )
 
 require (

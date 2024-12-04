@@ -4,9 +4,9 @@ go 1.21
 
 require (
 	cloud.google.com/go/firestore v1.17.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	google.golang.org/api v0.196.0
-	google.golang.org/grpc v1.66.0
+	github.com/GoogleCloudPlatform/golang-samples c7855b2f0589
+	google.golang.org/api v0.210.0
+	google.golang.org/grpc v1.68.0
 )
 
 require (

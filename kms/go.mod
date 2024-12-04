@@ -3,14 +3,14 @@ module github.com/GoogleCloudPlatform/golang-samples/kms
 go 1.21
 
 require (
-	cloud.google.com/go/kms v1.18.3
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	cloud.google.com/go/kms v1.20.1
+	github.com/GoogleCloudPlatform/golang-samples c7855b2f0589
 	github.com/gofrs/uuid v3.4.0+incompatible
 	github.com/google/tink/go v1.7.0
-	google.golang.org/api v0.189.0
-	google.golang.org/genproto v0.0.0-20240723171418-e6d459c13d2a
-	google.golang.org/grpc v1.65.0
-	google.golang.org/protobuf v1.34.2
+	google.golang.org/api v0.210.0
+	google.golang.org/genproto 19429a94021a
+	google.golang.org/grpc v1.68.0
+	google.golang.org/protobuf v1.35.2
 )
 
 require (
@@ -50,7 +50,7 @@ require (
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
 	github.com/lestrrat-go/httprc v1.0.5 // indirect
 	github.com/lestrrat-go/iter v1.0.2 // indirect
-	github.com/lestrrat-go/jwx/v2 v2.1.0
+	github.com/lestrrat-go/jwx/v2 v2.1.3
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/crypto v0.25.0 // indirect
