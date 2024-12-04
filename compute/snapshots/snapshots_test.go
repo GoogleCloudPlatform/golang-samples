@@ -214,3 +214,50 @@ func TestComputeSnapshotsSnippets(t *testing.T) {
 		}
 	})
 }
+
+func TestComputeSnapshotScheduleSnippets(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	region := "europe-central2"
+	var buf bytes.Buffer
+
+	t.Run("create, list and delete disk snapshot schedule", func(t *testing.T) {
+		var r *rand.Rand = rand.New(
+			rand.NewSource(time.Now().UnixNano()))
+		scheduleName := fmt.Sprintf("test-schedule-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		want := "Snapshot schedule created"
+
+		if err := createSnapshotSchedule(&buf, tc.ProjectID, scheduleName, region); err != nil {
+			t.Fatalf("createSnapshotSchedule got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("createSnapshotSchedule got %q, want %q", got, want)
+		}
+
+		buf.Reset()
+		want = fmt.Sprintf("Found snapshot schedule: %s", scheduleName)
+		if err := getSnapshotSchedule(&buf, tc.ProjectID, scheduleName, region); err != nil {
+			t.Errorf("getSnapshotSchedule got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("getSnapshotSchedule got %q, want %q", got, want)
+		}
+
+		buf.Reset()
+		want = "Snapshot schedule changed"
+		if err := editSnapshotSchedule(&buf, tc.ProjectID, scheduleName, region); err != nil {
+			t.Errorf("editSnapshotSchedule got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("editSnapshotSchedule got %q, want %q", got, want)
+		}
+
+		buf.Reset()
+		want = "Snapshot schedule deleted"
+		if err := deleteSnapshotSchedule(&buf, tc.ProjectID, scheduleName, region); err != nil {
+			t.Errorf("deleteSnapshotSchedule got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("deleteSnapshotSchedule got %q, want %q", got, want)
+		}
+	})
+}
