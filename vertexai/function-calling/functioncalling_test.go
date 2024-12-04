@@ -22,21 +22,28 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func Test_functionCallsBasic(t *testing.T) {
+func Test_functionCalling(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	var buf bytes.Buffer
 	location := "us-central1"
-	modelName := "gemini-1.5-flash-001"
+	modelName := "gemini-1.5-flash-002"
 
-	err := functionCallsBasic(&buf, tc.ProjectID, location, modelName)
+	err := functionCalling(&buf, tc.ProjectID, location, modelName)
 	if err != nil {
-		t.Errorf("Test_functionCalls: %v", err.Error())
+		t.Errorf("functionCalling failed: %v", err.Error())
 	}
 
-	content := buf.String()
-	if !strings.Contains(content, "Boston") {
-		t.Errorf("expected the word %v in the content", "Boston")
+	funcOut := buf.String()
+
+	expOut := `The model suggests to call the function "getCurrentWeather" with args: map[location:Boston]`
+	if !strings.Contains(funcOut, expOut) {
+		t.Errorf("expected output to contain text %q, got: %q", expOut, funcOut)
+	}
+
+	expOut = "weather in Boston"
+	if !strings.Contains(funcOut, expOut) {
+		t.Errorf("expected output to contain text %q, got: %q", expOut, funcOut)
 	}
 }
 

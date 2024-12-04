@@ -19,7 +19,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -76,7 +76,8 @@ func (s *RenderService) Render(in []byte) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("RenderService.NewRequest: %w", err)
 	}
-	req.Body = ioutil.NopCloser(bytes.NewReader(in))
+
+	req.Body = io.NopCloser(bytes.NewReader(in))
 	defer req.Body.Close()
 
 	resp, err := renderClient.Do(req)
@@ -84,7 +85,7 @@ func (s *RenderService) Render(in []byte) ([]byte, error) {
 		return nil, fmt.Errorf("http.Client.Do: %w", err)
 	}
 
-	out, err := ioutil.ReadAll(resp.Body)
+	out, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("ioutil.ReadAll: %w", err)
 	}
