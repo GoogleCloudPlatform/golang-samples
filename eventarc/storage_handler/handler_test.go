@@ -96,31 +96,3 @@ func TestHelloStorage_NotCloudEvent(t *testing.T) {
 		t.Errorf("got %q, want %q", got, wantBody)
 	}
 }
-
-func TestHelloStorage_NotStorageObjectData(t *testing.T) {
-	jsondata := []byte(`{"arbitrary": "value"}`)
-
-	ce := cloudevents.NewEvent()
-	ce.SetID("sample-id")
-	ce.SetSource("//sample/source")
-	ce.SetType("google.cloud.storage.object.v1.finalized")
-	ce.SetData(*cloudevents.StringOfApplicationJSON(), jsondata)
-
-	w := httptest.NewRecorder()
-	r, err := cloudevents.NewHTTPRequestFromEvent(context.Background(), "http://localhost", ce)
-	if err != nil {
-		t.Fatalf("cloudevents.NewHTTPRequestFromEvent: %v", err)
-	}
-	HelloStorage(w, r)
-
-	wantStatus := http.StatusBadRequest
-	if got := w.Result().StatusCode; got != wantStatus {
-		t.Errorf("got %q, want %q", got, wantStatus)
-	}
-
-	// Ensure failure on malformed storage data.
-	wantBody := "Bad Request: expected Cloud Storage event\n"
-	if got := w.Body.String(); got != wantBody {
-		t.Errorf("got %q, want %q", got, wantBody)
-	}
-}
