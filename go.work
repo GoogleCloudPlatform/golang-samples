@@ -104,7 +104,6 @@ use (
 	./media
 	./memorystore
 	./monitoring
-	./opencensus
 	./opentelemetry/instrumentation/app
 	./opentelemetry/trace
 	./privateca
@@ -147,6 +146,7 @@ use (
 	./vertexai/chat
 	./vertexai/context-caching
 	./vertexai/controlled-generation
+	./vertexai/embeddings
 	./vertexai/evaluation
 	./vertexai/function-calling
 	./vertexai/gemma2
