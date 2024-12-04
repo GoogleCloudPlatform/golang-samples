@@ -39,7 +39,15 @@ func ProcessImage(ctx context.Context, cloudevent event.Event) error {
 	}
 
 	var data storagedata.StorageObjectData
-	if err := protojson.Unmarshal(cloudevent.Data(), &data); err != nil {
+
+	// If you omit `DiscardUnknown`, then protojson.Unmarshal returns an error
+	// when encountering a new or unknown field.
+	options := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+	}
+
+	err := options.Unmarshal(cloudevent.Data(), &data)
+	if err != nil {
 		return fmt.Errorf("protojson.Unmarshal: Failed to parse CloudEvent data: %w", err)
 	}
 	if data.GetBucket() == "" {
