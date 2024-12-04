@@ -59,3 +59,30 @@ func Test_functionCallsChat(t *testing.T) {
 		t.Errorf("Test_functionCallsChat: %v", err.Error())
 	}
 }
+
+func Test_parallelFunctionCalling(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	var buf bytes.Buffer
+	location := "us-central1"
+	modelName := "gemini-1.5-flash-002"
+
+	err := parallelFunctionCalling(&buf, tc.ProjectID, location, modelName)
+	if err != nil {
+		t.Errorf("parallelFunctionCalling failed: %v", err.Error())
+	}
+
+	funcOut := buf.String()
+	testCases := []string{
+		`The model suggests to call the function "getCurrentWeather" with args: map[location:New Delhi]`,
+		`The model suggests to call the function "getCurrentWeather" with args: map[location:San Francisco]`,
+		"weather in New Delhi",
+		"weather in San Francisco",
+	}
+
+	for _, expOut := range testCases {
+		if !strings.Contains(funcOut, expOut) {
+			t.Errorf("expected output to contain text %q, got: %q", expOut, funcOut)
+		}
+	}
+}
