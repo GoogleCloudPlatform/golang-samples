@@ -21,7 +21,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"html"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
@@ -36,7 +36,7 @@ func ParseXML(w http.ResponseWriter, r *http.Request) {
 	var d struct {
 		Name string
 	}
-	b, err := ioutil.ReadAll(r.Body)
+	b, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Could not read request", http.StatusBadRequest)
 	}
