@@ -36,7 +36,7 @@ func transcribeMultichannel(w io.Writer) error {
 	}
 	defer client.Close()
 
-	data, err := io.ReadFile("../testdata/commercial_stereo.wav")
+	data, err := io.ReadAll("../testdata/commercial_stereo.wav")
 	if err != nil {
 		return fmt.Errorf("ReadFile: %w", err)
 	}
