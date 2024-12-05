@@ -130,20 +130,13 @@ func SynthesizeSSMLFile(w io.Writer, ssmlFile, outputFile string) error {
 // [END tts_synthesize_ssml_file]
 
 func main() {
-	textFile := flag.String("text", "",
-		"The text file from which to synthesize speech.")
 	ssmlFile := flag.String("ssml", "",
 		"The ssml file string from which to synthesize speech.")
 	outputFile := flag.String("output-file", "output.mp3",
 		"The name of the output file.")
 	flag.Parse()
 
-	if *textFile != "" {
-		err := SynthesizeTextFile(os.Stdout, *textFile, *outputFile)
-		if err != nil {
-			log.Fatal(err)
-		}
-	} else if *ssmlFile != "" {
+	if *ssmlFile != "" {
 		err := SynthesizeSSMLFile(os.Stdout, *ssmlFile, *outputFile)
 		if err != nil {
 			log.Fatal(err)
