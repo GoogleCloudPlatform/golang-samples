@@ -955,6 +955,51 @@ func TestConsistencyGroup(t *testing.T) {
 		}
 	})
 
+	t.Run("List of disks in consistency group", func(t *testing.T) {
+		diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		diskType := fmt.Sprintf("zones/%s/diskTypes/pd-ssd", zone)
+		groupName := fmt.Sprintf("test-group-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		replicaZones := []string{"europe-west4-a", "europe-west4-b"}
+
+		if err := createRegionalDisk(&buf, tc.ProjectID, region, replicaZones, diskName, diskType, 20); err != nil {
+			t.Errorf("createRegionalDisk got err: %v", err)
+		}
+		defer deleteRegionalDisk(&buf, tc.ProjectID, region, diskName)
+
+		if err := createConsistencyGroup(&buf, tc.ProjectID, region, groupName); err != nil {
+			t.Errorf("createConsistencyGroup got err: %v", err)
+		}
+		defer deleteConsistencyGroup(&buf, tc.ProjectID, region, groupName)
+
+		buf.Reset()
+		want := "Disk added"
+
+		if err := addDiskConsistencyGroup(&buf, tc.ProjectID, region, groupName, diskName); err != nil {
+			t.Errorf("addDiskConsistencyGroup got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("addDiskConsistencyGroup got %q, want %q", got, want)
+		}
+
+		want = fmt.Sprintf("- %s", diskName)
+		if err := listConsistencyGroup(&buf, tc.ProjectID, region, groupName); err != nil {
+			t.Errorf("listConsistencyGroup got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("listConsistencyGroup got %q, want %q", got, want)
+		}
+
+		buf.Reset()
+		want = "Disk removed"
+
+		if err := removeDiskConsistencyGroup(&buf, tc.ProjectID, region, groupName, diskName); err != nil {
+			t.Errorf("removeDiskConsistencyGroup got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("removeDiskConsistencyGroup got %q, want %q", got, want)
+		}
+	})
+
 	t.Run("Disk attachments to consistency group", func(t *testing.T) {
 		diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 		diskType := fmt.Sprintf("zones/%s/diskTypes/pd-ssd", zone)
