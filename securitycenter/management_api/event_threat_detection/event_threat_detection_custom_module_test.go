@@ -76,9 +76,12 @@ func addCustomModule() (string, error) {
 		return "", fmt.Errorf("securitycentermanagement.NewClient: %w", err)
 	}
 	defer client.Close()
-	// Create unique display name
+	// Seed the random number generator
 	rand.Seed(time.Now().UnixNano())
-	displayName := fmt.Sprintf("go_sample_etd_custom_module_test_%d", rand.Int())
+	// Generate a unique suffix
+	uniqueSuffix := fmt.Sprintf("%d-%d", time.Now().Unix(), rand.Intn(1000))
+	// Create unique display name
+	displayName := fmt.Sprintf("go_sample_etd_custom_module_test_%s", uniqueSuffix)
 
 	// Define the metadata and other config parameters as a map
 	configMap := map[string]interface{}{
@@ -194,10 +197,17 @@ func cleanupExistingCustomModules(orgID string) error {
 func TestCreateEtdCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
+	_, err := addCustomModule()
+
+	if err != nil {
+		t.Fatalf("Could not setup test environment: %v", err)
+		return
+	}
+
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
 	// Call Create
-	err := createEventThreatDetectionCustomModule(&buf, parent)
+	err = createEventThreatDetectionCustomModule(&buf, parent)
 
 	if err != nil {
 		t.Fatalf("createCustomModule() had error: %v", err)

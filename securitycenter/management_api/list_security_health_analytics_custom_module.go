@@ -54,7 +54,7 @@ func listSecurityHealthAnalyticsCustomModule(w io.Writer, parent string) error {
 		if err != nil {
 			return fmt.Errorf("it.Next: %w", err)
 		}
-		fmt.Fprintf(w, "Custom Module Name: %s, ", resp.Name)
+		fmt.Fprintf(w, "Custom Module Name: %s,\n", resp.Name)
 	}
 	return nil
 }
