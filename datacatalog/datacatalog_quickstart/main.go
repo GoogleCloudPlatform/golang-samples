@@ -186,7 +186,7 @@ func convertBigQueryResourceRepresentation(table string) (string, error) {
 	return fmt.Sprintf("//bigquery.googleapis.com/projects/%s/datasets/%s/tables/%s", parts[0], parts[1], parts[2]), nil
 }
 
-// LookupEntry provides a simply retry wrapper around the LookupEntry RPC.
+// LookupEntry provides a simple retry wrapper around the LookupEntry RPC.
 //
 // There's a potential propagation delay from when an entity is created until it appears in data catalog,
 // so we wrap the lookup in a retry with a short context deadline to avoid unnecessary waiting for datacatalog
