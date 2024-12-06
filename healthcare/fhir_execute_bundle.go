@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	healthcare "google.golang.org/api/healthcare/v1"
 )
@@ -64,17 +63,17 @@ func fhirExecuteBundle(w io.Writer, projectID, location, datasetID, fhirStoreID 
 	call.Header().Set("Content-Type", "application/fhir+json;charset=utf-8")
 	resp, err := call.Do()
 	if err != nil {
-		return fmt.Errorf("ExecuteBundle: %w", err)
+		return fmt.Errorf("executeBundle: %w", err)
 	}
 	defer resp.Body.Close()
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("could not read response: %w", err)
 	}
 
 	if resp.StatusCode > 299 {
-		return fmt.Errorf("Create: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
+		return fmt.Errorf("create: status %d %s: %s", resp.StatusCode, resp.Status, respBytes)
 	}
 	fmt.Fprintf(w, "%s", respBytes)
 
