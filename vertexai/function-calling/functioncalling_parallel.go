@@ -16,7 +16,7 @@
 // data sources.
 package functioncalling
 
-// [START generativeaionvertexai_gemini_function_calling]
+// [START generativeaionvertexai_function_calling_generate_parallel_calls]
 import (
 	"context"
 	"encoding/json"
@@ -27,10 +27,9 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// functionCalling demonstrates how to submit a prompt and a function declaration to the model,
-// allowing it to suggest a call to the function to fetch external data. Returning this data
-// to the model enables it to generate a text response that incorporates the data.
-func functionCalling(w io.Writer, projectID, location, modelName string) error {
+// parallelFunctionCalling shows how to execute multiple function calls in parallel
+// and return their results to the model for generating a complete response.
+func parallelFunctionCalling(w io.Writer, projectID, location, modelName string) error {
 	// location = "us-central1"
 	// modelName = "gemini-1.5-flash-002"
 	ctx := context.Background()
@@ -52,8 +51,10 @@ func functionCalling(w io.Writer, projectID, location, modelName string) error {
 			Type: genai.TypeObject,
 			Properties: map[string]*genai.Schema{
 				"location": {
-					Type:        genai.TypeString,
-					Description: "location",
+					Type: genai.TypeString,
+					Description: "The location for which to get the weather. " +
+						"It can be a city name, a city name and state, or a zip code. " +
+						"Examples: 'San Francisco', 'San Francisco, CA', '95616', etc.",
 				},
 			},
 			Required: []string{"location"},
@@ -66,7 +67,7 @@ func functionCalling(w io.Writer, projectID, location, modelName string) error {
 		},
 	}
 
-	prompt := genai.Text("What's the weather like in Boston?")
+	prompt := genai.Text("Get weather details in New Delhi and San Francisco?")
 	resp, err := model.GenerateContent(ctx, prompt)
 
 	if err != nil {
@@ -82,31 +83,51 @@ func functionCalling(w io.Writer, projectID, location, modelName string) error {
 	for _, fnCall := range resp.Candidates[0].FunctionCalls() {
 		fmt.Fprintf(w, "The model suggests to call the function %q with args: %v\n", fnCall.Name, fnCall.Args)
 		// Example response:
-		// The model suggests to call the function "getCurrentWeather" with args: map[location:Boston]
+		// The model suggests to call the function "getCurrentWeather" with args: map[location:New Delhi]
+		// The model suggests to call the function "getCurrentWeather" with args: map[location:San Francisco]
 	}
-	// Use synthetic data to simulate a response from the external API.
+
+	// Use synthetic data to simulate responses from the external API.
 	// In a real application, this would come from an actual weather API.
-	mockAPIResp, err := json.Marshal(map[string]string{
-		"location":         "Boston",
-		"temperature":      "38",
-		"temperature_unit": "F",
-		"description":      "Cold and cloudy",
+	mockAPIResp1, err := json.Marshal(map[string]string{
+		"location":         "New Delhi",
+		"temperature":      "42",
+		"temperature_unit": "C",
+		"description":      "Hot and humid",
 		"humidity":         "65",
-		"wind":             `{"speed": "10", "direction": "NW"}`,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to marshal function response to JSON: %w", err)
 	}
 
-	funcResp := &genai.FunctionResponse{
+	mockAPIResp2, err := json.Marshal(map[string]string{
+		"location":         "San Francisco",
+		"temperature":      "36",
+		"temperature_unit": "F",
+		"description":      "Cold and cloudy",
+		"humidity":         "N/A",
+	})
+	if err != nil {
+		return fmt.Errorf("failed to marshal function response to JSON: %w", err)
+	}
+
+	// Note, that the function calls don't have to be chained. We can obtain both responses in parallel
+	// and return them to Gemini at once.
+	funcResp1 := &genai.FunctionResponse{
 		Name: funcName,
 		Response: map[string]any{
-			"content": mockAPIResp,
+			"content": mockAPIResp1,
+		},
+	}
+	funcResp2 := &genai.FunctionResponse{
+		Name: funcName,
+		Response: map[string]any{
+			"content": mockAPIResp2,
 		},
 	}
 
-	// Return the API response to the model allowing it to complete its response.
-	resp, err = model.GenerateContent(ctx, prompt, funcResp)
+	// Return both API responses to the model allowing it to complete its response.
+	resp, err = model.GenerateContent(ctx, prompt, funcResp1, funcResp2)
 	if err != nil {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
@@ -116,9 +137,9 @@ func functionCalling(w io.Writer, projectID, location, modelName string) error {
 
 	fmt.Fprintln(w, resp.Candidates[0].Content.Parts[0])
 	// Example response:
-	// The weather in Boston is cold and cloudy, with a humidity of 65% and a temperature of 38°F. ...
+	// The weather in New Delhi is hot and humid with a humidity of 65 and a temperature of 42°C. The weather in San Francisco ...
 
 	return nil
 }
 
-// [END generativeaionvertexai_gemini_function_calling]
+// [END generativeaionvertexai_function_calling_generate_parallel_calls]
