@@ -29,6 +29,7 @@ import (
 
 	datacatalog "cloud.google.com/go/datacatalog/apiv1"
 	"cloud.google.com/go/datacatalog/apiv1/datacatalogpb"
+	"github.com/googleapis/gax-go/v2"
 )
 
 func main() {
@@ -60,13 +61,13 @@ func main() {
 	}
 
 	// Lookup the entry metadata for the BQ table resource.
-	entry, err := client.LookupEntry(ctx, &datacatalogpb.LookupEntryRequest{
+	entry, err := LookupEntry(ctx, client, &datacatalogpb.LookupEntryRequest{
 		TargetName: &datacatalogpb.LookupEntryRequest_LinkedResource{
 			LinkedResource: resource,
 		},
 	})
 	if err != nil {
-		log.Fatalf("client.LookupEntry: %v", err)
+		log.Fatalf("LookupEntry: %v", err)
 	}
 	fmt.Printf("Successfully looked up table entry: %s\n", entry.GetName())
 
@@ -183,6 +184,36 @@ func convertBigQueryResourceRepresentation(table string) (string, error) {
 		return "", fmt.Errorf("specified table string is not in expected project.dataset.table format: %s", table)
 	}
 	return fmt.Sprintf("//bigquery.googleapis.com/projects/%s/datasets/%s/tables/%s", parts[0], parts[1], parts[2]), nil
+}
+
+// LookupEntry provides a simply retry wrapper around the LookupEntry RPC.
+//
+// There's a potential propagation delay from when an entity is created until it appears in data catalog,
+// so we wrap the lookup in a retry with a short context deadline to avoid unnecessary waiting for datacatalog
+// to pick up new resources.
+func LookupEntry(ctx context.Context, client *datacatalog.Client, req *datacatalogpb.LookupEntryRequest) (*datacatalogpb.Entry, error) {
+
+	cCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	// gax provides a basic backoff implementation for retries.
+	bo := gax.Backoff{
+		Initial: time.Second,
+	}
+
+	var entry *datacatalogpb.Entry
+	var err error
+
+	for {
+		entry, err = client.LookupEntry(cCtx, req)
+		if err != nil {
+			if err = gax.Sleep(cCtx, bo.Pause()); err != nil {
+				return nil, err
+			}
+			continue
+		}
+		return entry, err
+	}
 }
 
 // [END data_catalog_quickstart]
