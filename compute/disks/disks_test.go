@@ -224,6 +224,63 @@ func deleteStoragePool(projectId, zone, storagePoolName string) error {
 	return nil
 }
 
+func startReplicationRegional(projectID, region, diskName, primaryDiskName, primaryRegion string) error {
+	ctx := context.Background()
+	disksClient, err := compute.NewRegionDisksRESTClient(ctx)
+	if err != nil {
+		return fmt.Errorf("NewDisksRESTClient: %w", err)
+	}
+	defer disksClient.Close()
+
+	secondaryFullDiskName := fmt.Sprintf("projects/%s/regions/%s/disks/%s", projectID, region, diskName)
+
+	req := &computepb.StartAsyncReplicationRegionDiskRequest{
+		Project: projectID,
+		Region:  primaryRegion,
+		Disk:    primaryDiskName,
+		RegionDisksStartAsyncReplicationRequestResource: &computepb.RegionDisksStartAsyncReplicationRequest{
+			AsyncSecondaryDisk: &secondaryFullDiskName,
+		},
+	}
+
+	op, err := disksClient.StartAsyncReplication(ctx, req)
+	if err != nil {
+		return fmt.Errorf("unable to start replication: %w", err)
+	}
+
+	if err = op.Wait(ctx); err != nil {
+		return fmt.Errorf("unable to wait for the operation: %w", err)
+	}
+
+	return nil
+}
+
+func stopReplicationRegional(projectID, primaryDiskName, primaryRegion string) error {
+	ctx := context.Background()
+	disksClient, err := compute.NewRegionDisksRESTClient(ctx)
+	if err != nil {
+		return fmt.Errorf("NewDisksRESTClient: %w", err)
+	}
+	defer disksClient.Close()
+
+	req := &computepb.StopAsyncReplicationRegionDiskRequest{
+		Project: projectID,
+		Region:  primaryRegion,
+		Disk:    primaryDiskName,
+	}
+
+	op, err := disksClient.StopAsyncReplication(ctx, req)
+	if err != nil {
+		return fmt.Errorf("unable to stop replication: %w", err)
+	}
+
+	if err = op.Wait(ctx); err != nil {
+		return fmt.Errorf("unable to wait for the operation: %w", err)
+	}
+
+	return nil
+}
+
 func TestComputeDisksSnippets(t *testing.T) {
 	ctx := context.Background()
 	var r *rand.Rand = rand.New(
@@ -864,6 +921,235 @@ func TestCreateDisksStoragePool(t *testing.T) {
 		// Cleanup the disk
 		if err := deleteDisk(&buf, tc.ProjectID, zone, diskName); err != nil {
 			t.Errorf("deleteDisk got err: %v", err)
+		}
+	})
+}
+
+func TestConsistencyGroup(t *testing.T) {
+	var r = rand.New(rand.NewSource(time.Now().UnixNano()))
+	tc := testutil.SystemTest(t)
+	region := "europe-west4"
+	zone := "europe-west4-a"
+	var buf bytes.Buffer
+
+	t.Run("Create consistency group", func(t *testing.T) {
+		groupName := fmt.Sprintf("test-group-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		buf.Reset()
+		if err := createConsistencyGroup(&buf, tc.ProjectID, region, groupName); err != nil {
+			t.Errorf("createConsistencyGroup got err: %v", err)
+		}
+
+		want := "Group created"
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("createConsistencyGroup got %q, want %q", got, want)
+		}
+		buf.Reset()
+
+		if err := deleteConsistencyGroup(&buf, tc.ProjectID, region, groupName); err != nil {
+			t.Errorf("deleteConsistencyGroup got err: %v", err)
+		}
+
+		want = "Group deleted"
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("deleteConsistencyGroup got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("List of disks in consistency group", func(t *testing.T) {
+		diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		diskType := fmt.Sprintf("zones/%s/diskTypes/pd-ssd", zone)
+		groupName := fmt.Sprintf("test-group-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		replicaZones := []string{"europe-west4-a", "europe-west4-b"}
+
+		if err := createRegionalDisk(&buf, tc.ProjectID, region, replicaZones, diskName, diskType, 20); err != nil {
+			t.Errorf("createRegionalDisk got err: %v", err)
+		}
+		defer deleteRegionalDisk(&buf, tc.ProjectID, region, diskName)
+
+		if err := createConsistencyGroup(&buf, tc.ProjectID, region, groupName); err != nil {
+			t.Errorf("createConsistencyGroup got err: %v", err)
+		}
+		defer deleteConsistencyGroup(&buf, tc.ProjectID, region, groupName)
+
+		buf.Reset()
+		want := "Disk added"
+
+		if err := addDiskConsistencyGroup(&buf, tc.ProjectID, region, groupName, diskName); err != nil {
+			t.Errorf("addDiskConsistencyGroup got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("addDiskConsistencyGroup got %q, want %q", got, want)
+		}
+
+		want = fmt.Sprintf("- %s", diskName)
+		if err := listConsistencyGroup(&buf, tc.ProjectID, region, groupName); err != nil {
+			t.Errorf("listConsistencyGroup got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("listConsistencyGroup got %q, want %q", got, want)
+		}
+
+		buf.Reset()
+		want = "Disk removed"
+
+		if err := removeDiskConsistencyGroup(&buf, tc.ProjectID, region, groupName, diskName); err != nil {
+			t.Errorf("removeDiskConsistencyGroup got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("removeDiskConsistencyGroup got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("Disk attachments to consistency group", func(t *testing.T) {
+		diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		diskType := fmt.Sprintf("zones/%s/diskTypes/pd-ssd", zone)
+		groupName := fmt.Sprintf("test-group-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		replicaZones := []string{"europe-west4-a", "europe-west4-b"}
+
+		if err := createRegionalDisk(&buf, tc.ProjectID, region, replicaZones, diskName, diskType, 20); err != nil {
+			t.Errorf("createRegionalDisk got err: %v", err)
+		}
+		defer deleteRegionalDisk(&buf, tc.ProjectID, region, diskName)
+
+		if err := createConsistencyGroup(&buf, tc.ProjectID, region, groupName); err != nil {
+			t.Errorf("createConsistencyGroup got err: %v", err)
+		}
+		defer deleteConsistencyGroup(&buf, tc.ProjectID, region, groupName)
+
+		buf.Reset()
+		want := "Disk added"
+
+		if err := addDiskConsistencyGroup(&buf, tc.ProjectID, region, groupName, diskName); err != nil {
+			t.Errorf("addDiskConsistencyGroup got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("addDiskConsistencyGroup got %q, want %q", got, want)
+		}
+
+		buf.Reset()
+		want = "Disk removed"
+
+		if err := removeDiskConsistencyGroup(&buf, tc.ProjectID, region, groupName, diskName); err != nil {
+			t.Errorf("removeDiskConsistencyGroup got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("removeDiskConsistencyGroup got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("Clone disks in consistency group", func(t *testing.T) {
+		diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		diskType := fmt.Sprintf("zones/%s/diskTypes/pd-ssd", zone)
+		groupName := fmt.Sprintf("test-group-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		secondaryGroupName := fmt.Sprintf("test-secondary-group-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		replicaZones := []string{"europe-west4-a", "europe-west4-b"}
+		secondaryDiskName := fmt.Sprintf("test-secondary-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		secondaryRegion := "europe-west2"
+		secondaryReplicaZones := []string{"europe-west2-a", "europe-west2-b"}
+		diskSizeGb := int64(200)
+
+		if err := createConsistencyGroup(&buf, tc.ProjectID, secondaryRegion, secondaryGroupName); err != nil {
+			t.Errorf("createConsistencyGroup got err: %v", err)
+		}
+		defer deleteConsistencyGroup(&buf, tc.ProjectID, secondaryRegion, secondaryGroupName)
+
+		if err := createConsistencyGroup(&buf, tc.ProjectID, region, groupName); err != nil {
+			t.Errorf("createConsistencyGroup got err: %v", err)
+		}
+		defer deleteConsistencyGroup(&buf, tc.ProjectID, region, groupName)
+
+		if err := createRegionalDisk(&buf, tc.ProjectID, region, replicaZones, diskName, diskType, diskSizeGb); err != nil {
+			t.Errorf("createRegionalDisk got err: %v", err)
+		}
+		defer deleteRegionalDisk(&buf, tc.ProjectID, region, diskName)
+
+		if err := createRegionalSecondaryDisk(&buf, tc.ProjectID, secondaryRegion, secondaryDiskName, diskName, region, secondaryReplicaZones, diskSizeGb); err != nil {
+			t.Errorf("createRegionalSecondaryDisk got err: %v", err)
+		}
+		defer deleteRegionalDisk(&buf, tc.ProjectID, secondaryRegion, secondaryDiskName)
+
+		buf.Reset()
+		want := "Disk added"
+
+		if err := addDiskConsistencyGroup(&buf, tc.ProjectID, secondaryRegion, secondaryGroupName, secondaryDiskName); err != nil {
+			t.Errorf("addDiskConsistencyGroup got err: %v", err)
+		}
+		defer removeDiskConsistencyGroup(&buf, tc.ProjectID, secondaryRegion, secondaryGroupName, secondaryDiskName)
+
+		if err := addDiskConsistencyGroup(&buf, tc.ProjectID, region, groupName, diskName); err != nil {
+			t.Errorf("addDiskConsistencyGroup got err: %v", err)
+		}
+		defer removeDiskConsistencyGroup(&buf, tc.ProjectID, region, groupName, diskName)
+
+		if err := startReplicationRegional(tc.ProjectID, secondaryRegion, secondaryDiskName, diskName, region); err != nil {
+			t.Errorf("startReplicationRegional got err: %v", err)
+		}
+		defer stopReplicationRegional(tc.ProjectID, diskName, region)
+		time.Sleep(60 * time.Second)
+
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("addDiskConsistencyGroup got %q, want %q", got, want)
+		}
+
+		if err := cloneConsistencyGroup(&buf, tc.ProjectID, secondaryRegion, secondaryGroupName); err != nil {
+			t.Errorf("cloneConsistencyGroup got err: %v", err)
+		}
+
+		want = "Group cloned"
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("cloneConsistencyGroup got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("Stop replication consistency group", func(t *testing.T) {
+		diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		diskType := fmt.Sprintf("zones/%s/diskTypes/pd-ssd", zone)
+		groupName := fmt.Sprintf("test-group-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		replicaZones := []string{"europe-west4-a", "europe-west4-b"}
+		secondaryDiskName := fmt.Sprintf("test-secondary-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		secondaryRegion := "europe-west2"
+		secondaryReplicaZones := []string{"europe-west2-a", "europe-west2-b"}
+		diskSizeGb := int64(200)
+
+		if err := createConsistencyGroup(&buf, tc.ProjectID, region, groupName); err != nil {
+			t.Errorf("createConsistencyGroup got err: %v", err)
+		}
+		defer deleteConsistencyGroup(&buf, tc.ProjectID, region, groupName)
+
+		if err := createRegionalDisk(&buf, tc.ProjectID, region, replicaZones, diskName, diskType, diskSizeGb); err != nil {
+			t.Errorf("createRegionalDisk got err: %v", err)
+		}
+		defer deleteRegionalDisk(&buf, tc.ProjectID, region, diskName)
+
+		if err := createRegionalSecondaryDisk(&buf, tc.ProjectID, secondaryRegion, secondaryDiskName, diskName, region, secondaryReplicaZones, diskSizeGb); err != nil {
+			t.Errorf("createRegionalSecondaryDisk got err: %v", err)
+		}
+		defer deleteRegionalDisk(&buf, tc.ProjectID, secondaryRegion, secondaryDiskName)
+
+		buf.Reset()
+		want := "Disk added"
+
+		if err := addDiskConsistencyGroup(&buf, tc.ProjectID, region, groupName, diskName); err != nil {
+			t.Errorf("addDiskConsistencyGroup got err: %v", err)
+		}
+		defer removeDiskConsistencyGroup(&buf, tc.ProjectID, region, groupName, diskName)
+
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("addDiskConsistencyGroup got %q, want %q", got, want)
+		}
+
+		if err := startReplicationRegional(tc.ProjectID, secondaryRegion, secondaryDiskName, diskName, region); err != nil {
+			t.Errorf("startReplicationRegional got err: %v", err)
+		}
+		time.Sleep(60 * time.Second)
+
+		if err := stopReplicationConsistencyGroup(&buf, tc.ProjectID, region, groupName); err != nil {
+			t.Errorf("stopReplicationConsistencyGroup got err: %v", err)
+		}
+
+		want = "Group stopped replicating"
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("stopReplicationConsistencyGroup got %q, want %q", got, want)
 		}
 	})
 }

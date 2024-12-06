@@ -76,9 +76,12 @@ func addCustomModule() (string, error) {
 		return "", fmt.Errorf("securitycentermanagement.NewClient: %w", err)
 	}
 	defer client.Close()
-	// Create unique display name
+	// Seed the random number generator
 	rand.Seed(time.Now().UnixNano())
-	displayName := fmt.Sprintf("go_sample_etd_custom_module_test_%d", rand.Int())
+	// Generate a unique suffix
+	uniqueSuffix := fmt.Sprintf("%d-%d", time.Now().Unix(), rand.Intn(1000))
+	// Create unique display name
+	displayName := fmt.Sprintf("go_sample_etd_custom_module_test_%s", uniqueSuffix)
 
 	// Define the metadata and other config parameters as a map
 	configMap := map[string]interface{}{
@@ -194,10 +197,17 @@ func cleanupExistingCustomModules(orgID string) error {
 func TestCreateEtdCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
+	_, err := addCustomModule()
+
+	if err != nil {
+		t.Fatalf("Could not setup test environment: %v", err)
+		return
+	}
+
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
 	// Call Create
-	err := createEventThreatDetectionCustomModule(&buf, parent)
+	err = createEventThreatDetectionCustomModule(&buf, parent)
 
 	if err != nil {
 		t.Fatalf("createCustomModule() had error: %v", err)
@@ -319,5 +329,121 @@ func TestListEtdCustomModule(t *testing.T) {
 
 	if !strings.Contains(got, orgID) {
 		t.Fatalf("listEventThreatDetectionCustomModule() got: %s want %s", got, orgID)
+	}
+}
+
+// TestListEffectiveEtdCustomModule verifies the List functionality
+func TestListEffectiveEtdCustomModule(t *testing.T) {
+	var buf bytes.Buffer
+
+	_, err := addCustomModule()
+
+	if err != nil {
+		t.Fatalf("Could not setup test environment: %v", err)
+		return
+	}
+
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+
+	err = listEffectiveEventThreatDetectionCustomModule(&buf, parent)
+
+	if err != nil {
+		t.Fatalf("listEffectiveEventThreatDetectionCustomModule() had error: %v", err)
+		return
+	}
+
+	got := buf.String()
+	fmt.Printf("Response: %v\n", got)
+
+	if !strings.Contains(got, orgID) {
+		t.Fatalf("listEffectiveEventThreatDetectionCustomModule() got: %s want %s", got, orgID)
+	}
+}
+
+// TestGetEffectiveEtdCustomModule verifies the Get functionality
+func TestGetEffectiveEtdCustomModule(t *testing.T) {
+	var buf bytes.Buffer
+
+	createdCustomModuleID, err := addCustomModule()
+
+	if err != nil {
+		t.Fatalf("Could not setup test environment: %v", err)
+		return
+	}
+
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+
+	// Call Get
+	err = getEffectiveEventThreatDetectionCustomModule(&buf, parent, createdCustomModuleID)
+
+	if err != nil {
+		t.Fatalf("getEffectiveEventThreatDetectionCustomModule() had error: %v", err)
+		return
+	}
+
+	got := buf.String()
+	fmt.Printf("Response: %v\n", got)
+
+	if !strings.Contains(got, orgID) {
+		t.Fatalf("getEffectiveEventThreatDetectionCustomModule() got: %s want %s", got, orgID)
+	}
+}
+
+// TestListDescendantEtdCustomModule verifies the List functionality
+func TestListDescendantEtdCustomModule(t *testing.T) {
+	var buf bytes.Buffer
+
+	_, err := addCustomModule()
+
+	if err != nil {
+		t.Fatalf("Could not setup test environment: %v", err)
+		return
+	}
+
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+
+	err = listDescendantEventThreatDetectionCustomModule(&buf, parent)
+
+	if err != nil {
+		t.Fatalf("listDescendantEventThreatDetectionCustomModule() had error: %v", err)
+		return
+	}
+
+	got := buf.String()
+	fmt.Printf("Response: %v\n", got)
+
+	if !strings.Contains(got, orgID) {
+		t.Fatalf("listDescendantEventThreatDetectionCustomModule() got: %s want %s", got, orgID)
+	}
+}
+
+// TestValidateEtdCustomModule verifies the List functionality
+func TestValidateEtdCustomModule(t *testing.T) {
+	var buf bytes.Buffer
+
+	_, err := addCustomModule()
+
+	if err != nil {
+		t.Fatalf("Could not setup test environment: %v", err)
+		return
+	}
+
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+
+	err = validateEventThreatDetectionCustomModule(&buf, parent)
+
+	if err != nil {
+		t.Fatalf("validateEventThreatDetectionCustomModule() had error: %v", err)
+		return
+	}
+
+	got := buf.String()
+	fmt.Printf("Response: %v\n", got)
+
+	// Check that the response indicates successful validation
+	expectedMessage := "Validation successful: No errors found."
+
+	if !strings.Contains(got, expectedMessage) {
+		t.Fatalf("validateEventThreatDetectionCustomModule() got: %s want %s", got, expectedMessage)
 	}
 }

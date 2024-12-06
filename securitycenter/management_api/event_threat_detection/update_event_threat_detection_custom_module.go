@@ -26,7 +26,7 @@ import (
 	fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// updateEventThreatDetectionCustomModule creates a custom module for Security Health Analytics.
+// updateEventThreatDetectionCustomModule updates a custom module for Event Threat Detection.
 func updateEventThreatDetectionCustomModule(w io.Writer, parent string, customModuleID string) error {
 	// parent: Use any one of the following options:
 	// - organizations/{organization_id}/locations/{location_id}

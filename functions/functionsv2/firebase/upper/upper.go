@@ -65,7 +65,15 @@ func init() {
 // the `original` value of the document to upper case.
 func MakeUpperCase(ctx context.Context, e event.Event) error {
 	var data firestoredata.DocumentEventData
-	if err := proto.Unmarshal(e.Data(), &data); err != nil {
+
+	// If you omit `DiscardUnknown`, protojson.Unmarshal returns an error
+	// when encountering a new or unknown field.
+	options := proto.UnmarshalOptions{
+		DiscardUnknown: true,
+	}
+	err := options.Unmarshal(e.Data(), &data)
+
+	if err != nil {
 		return fmt.Errorf("proto.Unmarshal: %w", err)
 	}
 
@@ -93,7 +101,7 @@ func MakeUpperCase(ctx context.Context, e event.Event) error {
 	log.Printf("Replacing value: %q -> %q", originalStringValue, newValue)
 
 	newDocumentEntry := map[string]string{"original": newValue}
-	_, err := client.Collection(collection).Doc(doc).Set(ctx, newDocumentEntry)
+	_, err = client.Collection(collection).Doc(doc).Set(ctx, newDocumentEntry)
 	if err != nil {
 		return fmt.Errorf("Set: %w", err)
 	}

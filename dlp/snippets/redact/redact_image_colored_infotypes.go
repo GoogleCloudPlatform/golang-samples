@@ -18,7 +18,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
@@ -44,7 +44,7 @@ func redactImageFileColoredInfoTypes(w io.Writer, projectID, inputPath, outputPa
 	defer client.Close()
 
 	// read the image file
-	fileBytes, err := ioutil.ReadFile(inputPath)
+	fileBytes, err := os.ReadFile(inputPath)
 	if err != nil {
 		return err
 	}
@@ -115,7 +115,7 @@ func redactImageFileColoredInfoTypes(w io.Writer, projectID, inputPath, outputPa
 	}
 
 	// Write the output file.
-	if err := ioutil.WriteFile(outputPath, resp.GetRedactedImage(), 0644); err != nil {
+	if err := os.WriteFile(outputPath, resp.GetRedactedImage(), 0644); err != nil {
 		return err
 	}
 

@@ -76,9 +76,12 @@ func addCustomModule() (string, error) {
 		return "", fmt.Errorf("securitycentermanagement.NewClient: %w", err)
 	}
 	defer client.Close()
-	// Create unique display name
+	// Seed the random number generator
 	rand.Seed(time.Now().UnixNano())
-	displayName := fmt.Sprintf("go_sample_custom_module_test_%d", rand.Int())
+	// Generate a unique suffix
+	uniqueSuffix := fmt.Sprintf("%d_%d", time.Now().Unix(), rand.Intn(1000))
+	// Create unique display name
+	displayName := fmt.Sprintf("go_sample_sha_custom_module_test_%s", uniqueSuffix)
 
 	// Define the custom module configuration
 	customModule := &securitycentermanagementpb.SecurityHealthAnalyticsCustomModule{
@@ -181,8 +184,8 @@ func cleanupExistingCustomModules(orgID string) error {
 			return fmt.Errorf("failed to list CustomModules: %w", err)
 		}
 
-		// Check if the custom module name starts with 'go_sample_custom_module'
-		if strings.HasPrefix(module.DisplayName, "go_sample_custom_module") {
+		// Check if the custom module name starts with 'go_sample_sha_custom'
+		if strings.HasPrefix(module.DisplayName, "go_sample_sha_custom") {
 
 			customModuleID := extractCustomModuleID(module.Name)
 			// Delete the custom module
