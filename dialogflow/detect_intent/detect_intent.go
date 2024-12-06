@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -83,7 +82,7 @@ func DetectIntentAudio(projectID, sessionID, audioFile, languageCode string) (st
 
 	queryAudioInput := dialogflowpb.QueryInput_AudioConfig{AudioConfig: &audioConfig}
 
-	audioBytes, err := ioutil.ReadFile(audioFile)
+	audioBytes, err := os.ReadFile(audioFile)
 	if err != nil {
 		return "", err
 	}
