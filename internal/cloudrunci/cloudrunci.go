@@ -171,6 +171,9 @@ func (s *Service) Do(req *http.Request, opts ...func(*RetryOptions)) (*http.Resp
 		time.Sleep(options.Delay)
 	}
 	// Too many attempts, return the last result.
+	if lastSeen == nil {
+		return resp, fmt.Errorf("no acceptable response after %d retries", options.MaxAttempts)
+	}
 	return resp, fmt.Errorf("no acceptable response after %d retries: %w", options.MaxAttempts, lastSeen)
 }
 
