@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	healthcare "google.golang.org/api/healthcare/v1"
 )
@@ -46,7 +45,7 @@ func getFHIRResource(w io.Writer, projectID, location, datasetID, fhirStoreID, r
 
 	defer resp.Body.Close()
 
-	respBytes, err := ioutil.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("could not read response: %w", err)
 	}
