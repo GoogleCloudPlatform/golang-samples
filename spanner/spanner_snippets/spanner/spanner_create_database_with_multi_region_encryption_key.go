@@ -20,24 +20,20 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"regexp"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	adminpb "cloud.google.com/go/spanner/admin/database/apiv1/databasepb"
 )
 
-func createDatabaseWithCustomerManagedMultiRegionEncryptionKey(ctx context.Context, w io.Writer, db string, kmsKeyNames []string) error {
-	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
+// createDatabaseWithCustomerManagedMultiRegionEncryptionKey creates a new database with tables using a Customer Managed Multi-Region Encryption Key.
+func createDatabaseWithCustomerManagedMultiRegionEncryptionKey(ctx context.Context, w io.Writer, projectID, instanceID, databaseID string, kmsKeyNames []string) error {
+	// projectID = `my-project`
+	// instanceID = `my-instance`
+	// databaseID = `my-database`
 	// kmsKeyNames := []string{"projects/my-project/locations/locations/<location1>/keyRings/<keyRing>/cryptoKeys/<keyId>",
 	//	 "projects/my-project/locations/locations/<location2>/keyRings/<keyRing>/cryptoKeys/<keyId>",
 	//	 "projects/my-project/locations/locations/<location3>/keyRings/<keyRing>/cryptoKeys/<keyId>",
 	// }
-	matches := regexp.MustCompile("^(.+)/databases/(.+)$").FindStringSubmatch(db)
-	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("createDatabaseWithCustomerManagedMultiRegionEncryptionKey: invalid database id %q", db)
-	}
-	instanceName := matches[1]
-	databaseId := matches[2]
 
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
@@ -47,8 +43,8 @@ func createDatabaseWithCustomerManagedMultiRegionEncryptionKey(ctx context.Conte
 
 	// Create a database with tables using a Customer Managed Multi-Region Encryption Key
 	req := adminpb.CreateDatabaseRequest{
-		Parent:          instanceName,
-		CreateStatement: "CREATE DATABASE `" + databaseId + "`",
+		Parent:          fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID),
+		CreateStatement: "CREATE DATABASE `" + databaseID + "`",
 		ExtraStatements: []string{
 			`CREATE TABLE Singers (
 				SingerId   INT64 NOT NULL,

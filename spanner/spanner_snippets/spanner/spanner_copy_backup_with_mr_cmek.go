@@ -57,7 +57,8 @@ func copyBackupWithMultiRegionEncryptionKey(w io.Writer, instancePath string, co
 		SourceBackup: sourceBackupPath,
 		ExpireTime:   &pbt.Timestamp{Seconds: expireTime.Unix(), Nanos: int32(expireTime.Nanosecond())},
 		EncryptionConfig: &adminpb.CopyBackupEncryptionConfig{
-			KmsKeyNames: kmsKeyNames,
+			EncryptionType: adminpb.CopyBackupEncryptionConfig_CUSTOMER_MANAGED_ENCRYPTION,
+			KmsKeyNames:    kmsKeyNames,
 		},
 	}
 

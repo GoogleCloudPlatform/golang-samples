@@ -622,10 +622,14 @@ func TestCustomerManagedMultiRegionEncryptionKeys(t *testing.T) {
 	instName, dbName, cleanup := initTestWithConfig(t, randomID(), "nam3")
 	defer cleanup()
 
+	projectID, instanceID, databaseID, err := parseDatabaseName(dbName)
+	if err != nil {
+		t.Errorf("failed to parse database name: %v", err)
+	}
 	var b bytes.Buffer
 	var kmsKeyNames []string
 	keyRingId := "spanner-test-keyring"
-	keyId := "spanner-test-key"
+	keyId := "spanner-test-cmek"
 	for _, locationId := range []string{"us-central1", "us-east1", "us-east4"} {
 		// Create an encryption key if it does not already exist.
 		if err := maybeCreateKey(tc.ProjectID, locationId, keyRingId, keyId); err != nil {
@@ -644,7 +648,7 @@ func TestCustomerManagedMultiRegionEncryptionKeys(t *testing.T) {
 	defer cancel()
 
 	// Create an encrypted database. The database is automatically deleted by the cleanup function.
-	if err := createDatabaseWithCustomerManagedMultiRegionEncryptionKey(ctx, &b, dbName, kmsKeyNames); err != nil {
+	if err := createDatabaseWithCustomerManagedMultiRegionEncryptionKey(ctx, &b, projectID, instanceID, databaseID, kmsKeyNames); err != nil {
 		t.Errorf("failed to create database with customer managed multi-region encryption keys: %v", err)
 	}
 	out := b.String()
@@ -654,7 +658,7 @@ func TestCustomerManagedMultiRegionEncryptionKeys(t *testing.T) {
 	// Try to create a backup of the encrypted database and delete it after the test.
 	backupId := fmt.Sprintf("enc-backup-%s", randomID())
 	b.Reset()
-	if err := createBackupWithCustomerManagedMultiRegionEncryptionKey(ctx, &b, dbName, backupId, kmsKeyNames); err != nil {
+	if err := createBackupWithCustomerManagedMultiRegionEncryptionKey(ctx, &b, projectID, instanceID, databaseID, backupId, kmsKeyNames); err != nil {
 		t.Errorf("failed to create backup with customer managed multi-region encryption keys: %v", err)
 	}
 	out = b.String()
@@ -669,18 +673,18 @@ func TestCustomerManagedMultiRegionEncryptionKeys(t *testing.T) {
 		t.Errorf("failed to copy backup with customer managed multi-region encryption keys: %v", err)
 	}
 	out = b.String()
-	assertContains(t, out, fmt.Sprintf("backups/%s", backupId))
+	assertContains(t, out, fmt.Sprintf("backups/%s", copyBackupId))
 	assertContains(t, out, "multi-region encryption keys\n")
 	t.Logf("copy backup operation took: %v\n", time.Since(startTime))
 
 	// Try to restore the encrypted database and delete the restored database after the test.
-	restoredName := fmt.Sprintf("%s/databases/rest-enc-%s", instName, randomID())
+	restoredName := fmt.Sprintf("rest-enc-%s", randomID())
 	restoreFunc := func(ctx context.Context, w io.Writer, dbName, backupID string) error {
-		return restoreBackupWithCustomerManagedMultiRegionEncryptionKey(ctx, w, dbName, backupId, kmsKeyNames)
+		return restoreBackupWithCustomerManagedMultiRegionEncryptionKey(ctx, w, instName, dbName, backupId, kmsKeyNames)
 	}
 	out = runBackupSampleWithRetry(ctx, t, restoreFunc, restoredName, backupId, "failed to restore database with customer managed multi-region encryption keys", 10)
 	assertContains(t, out, fmt.Sprintf("Database %s restored", dbName))
-	assertContains(t, out, fmt.Sprintf("using multi-region encryption key %s", kmsKeyNames))
+	assertContains(t, out, "using multi-region encryption keys")
 	t.Logf("restore backup operation took: %v\n", time.Since(startTime))
 }
 

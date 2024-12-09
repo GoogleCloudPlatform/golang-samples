@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"regexp"
 	"time"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
@@ -28,18 +27,16 @@ import (
 	pbt "github.com/golang/protobuf/ptypes/timestamp"
 )
 
-func createBackupWithCustomerManagedMultiRegionEncryptionKey(ctx context.Context, w io.Writer, db, backupID string, kmsKeyNames []string) error {
-	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
+// createBackupWithCustomerManagedMultiRegionEncryptionKey creates a backup for a database using a Customer Managed Multi-Region Encryption Key.
+func createBackupWithCustomerManagedMultiRegionEncryptionKey(ctx context.Context, w io.Writer, projectID, instanceID, databaseID, backupID string, kmsKeyNames []string) error {
+	// projectID = `my-project`
+	// instanceID = `my-instance`
+	// databaseID = `my-database`
 	// backupID = `my-backup-id`
 	// kmsKeyNames := []string{"projects/my-project/locations/locations/<location1>/keyRings/<keyRing>/cryptoKeys/<keyId>",
 	//	 "projects/my-project/locations/locations/<location2>/keyRings/<keyRing>/cryptoKeys/<keyId>",
 	//	 "projects/my-project/locations/locations/<location3>/keyRings/<keyRing>/cryptoKeys/<keyId>",
 	// }
-	matches := regexp.MustCompile("^(.+)/databases/(.+)$").FindStringSubmatch(db)
-	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("createBackupWithCustomerManagedMultiRegionEncryptionKey: invalid database id %q", db)
-	}
-	instanceName := matches[1]
 
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
@@ -50,10 +47,10 @@ func createBackupWithCustomerManagedMultiRegionEncryptionKey(ctx context.Context
 	expireTime := time.Now().AddDate(0, 0, 14)
 	// Create a backup for a database using a Customer Managed Encryption Key
 	req := adminpb.CreateBackupRequest{
-		Parent:   instanceName,
+		Parent:   fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID),
 		BackupId: backupID,
 		Backup: &adminpb.Backup{
-			Database:   db,
+			Database:   fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceID, databaseID),
 			ExpireTime: &pbt.Timestamp{Seconds: expireTime.Unix(), Nanos: int32(expireTime.Nanosecond())},
 		},
 		EncryptionConfig: &adminpb.CreateBackupEncryptionConfig{
