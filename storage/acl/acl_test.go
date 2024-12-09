@@ -52,9 +52,6 @@ func TestACL(t *testing.T) {
 	}
 
 	// Run all the tests.
-	if err := addBucketOwner(bucket, allAuthenticatedUsers); err != nil {
-		t.Errorf("addBucketOwner: %v", err)
-	}
 	if err := addBucketDefaultOwner(bucket, allAuthenticatedUsers); err != nil {
 		t.Errorf("addBucketDefaultOwner: %v", err)
 	}
