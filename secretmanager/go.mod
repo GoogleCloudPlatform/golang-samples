@@ -3,12 +3,12 @@ module github.com/GoogleCloudPlatform/golang-samples/secretmanager
 go 1.21
 
 require (
-	cloud.google.com/go/secretmanager v1.14.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	cloud.google.com/go/secretmanager v1.14.2
+	github.com/GoogleCloudPlatform/golang-samples b53c071fb697
 	github.com/gofrs/uuid v3.4.0+incompatible
-	google.golang.org/api v0.195.0
-	google.golang.org/genproto v0.0.0-20240827150818-7e3bb234dfed
-	google.golang.org/grpc v1.66.0
+	google.golang.org/api v0.210.0
+	google.golang.org/genproto e6fa225c2576
+	google.golang.org/grpc v1.68.1
 )
 
 require (

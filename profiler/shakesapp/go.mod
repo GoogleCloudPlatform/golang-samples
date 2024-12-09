@@ -4,10 +4,10 @@ go 1.21
 
 require (
 	cloud.google.com/go/profiler v0.4.1
-	cloud.google.com/go/storage v1.43.0
+	cloud.google.com/go/storage v1.48.0
 	github.com/golang/protobuf v1.5.4
-	google.golang.org/api v0.189.0
-	google.golang.org/grpc v1.65.0
+	google.golang.org/api v0.210.0
+	google.golang.org/grpc v1.68.1
 )
 
 require (
