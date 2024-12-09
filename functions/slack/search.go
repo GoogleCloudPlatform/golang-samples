@@ -25,7 +25,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"strconv"
@@ -68,14 +68,14 @@ type Message struct {
 func KGSearch(w http.ResponseWriter, r *http.Request) {
 	setup(r.Context())
 
-	bodyBytes, err := ioutil.ReadAll(r.Body)
+	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Fatalf("Couldn't read request body: %v", err)
 	}
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+	r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
 	if r.Method != "POST" {
-		http.Error(w, "Only POST requests are accepted", 405)
+		http.Error(w, "Only POST requests are accepted", http.StatusMethodNotAllowed)
 	}
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Couldn't parse form", 400)
@@ -83,7 +83,7 @@ func KGSearch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Reset r.Body as ParseForm depletes it by reading the io.ReadCloser.
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+	r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 	result, err := verifyWebHook(r, slackSecret)
 	if err != nil {
 		log.Fatalf("verifyWebhook: %v", err)
@@ -111,7 +111,7 @@ func KGSearch(w http.ResponseWriter, r *http.Request) {
 func makeSearchRequest(query string) (*Message, error) {
 	res, err := entitiesService.Search().Query(query).Limit(1).Do()
 	if err != nil {
-		return nil, fmt.Errorf("Do: %w", err)
+		return nil, fmt.Errorf("do: %w", err)
 	}
 	return formatSlackMessage(query, res)
 }
@@ -140,13 +140,13 @@ func verifyWebHook(r *http.Request, slackSigningSecret string) (bool, error) {
 		return false, fmt.Errorf("either timeStamp or signature headers were blank")
 	}
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		return false, fmt.Errorf("ioutil.ReadAll(%v): %w", r.Body, err)
+		return false, fmt.Errorf("io.ReadAll(%v): %w", r.Body, err)
 	}
 
 	// Reset the body so other calls won't fail.
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+	r.Body = io.NopCloser(bytes.NewBuffer(body))
 
 	baseString := fmt.Sprintf("%s:%s:%s", version, timeStamp, body)
 

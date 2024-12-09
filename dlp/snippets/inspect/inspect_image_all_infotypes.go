@@ -18,7 +18,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
@@ -43,7 +43,7 @@ func inspectImageFileAllInfoTypes(w io.Writer, projectID, inputPath string) erro
 	defer client.Close()
 
 	// read the image file
-	data, err := ioutil.ReadFile(inputPath)
+	data, err := os.ReadFile(inputPath)
 	if err != nil {
 		return err
 	}
