@@ -219,6 +219,7 @@ func TestComputeSnapshotScheduleSnippets(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	region := "europe-central2"
 	var buf bytes.Buffer
+	ctx := context.Background()
 
 	t.Run("create, list and delete disk snapshot schedule", func(t *testing.T) {
 		var r *rand.Rand = rand.New(
@@ -258,6 +259,40 @@ func TestComputeSnapshotScheduleSnippets(t *testing.T) {
 		}
 		if got := buf.String(); !strings.Contains(got, want) {
 			t.Errorf("deleteSnapshotSchedule got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("Attach and remove snapshot schedule from a disk", func(t *testing.T) {
+		var r *rand.Rand = rand.New(
+			rand.NewSource(time.Now().UnixNano()))
+		scheduleName := fmt.Sprintf("test-schedule-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+
+		if err := createSnapshotSchedule(&buf, tc.ProjectID, scheduleName, region); err != nil {
+			t.Errorf("createSnapshotSchedule got err: %v", err)
+		}
+		defer deleteSnapshotSchedule(&buf, tc.ProjectID, scheduleName, region)
+
+		err := createRegionDisk(ctx, tc.ProjectID, region, diskName)
+		if err != nil {
+			t.Fatalf("createRegionDisk got err: %v", err)
+		}
+		defer deleteRegionDisk(ctx, tc.ProjectID, region, diskName)
+
+		want := "Snapshot schedule attached"
+		if err := attachSnapshotSchedule(&buf, tc.ProjectID, scheduleName, diskName, region); err != nil {
+			t.Errorf("attachSnapshotSchedule got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("attachSnapshotSchedule got %q, want %q", got, want)
+		}
+
+		want = "Snapshot schedule removed"
+		if err := removeSnapshotSchedule(&buf, tc.ProjectID, scheduleName, diskName, region); err != nil {
+			t.Errorf("removeSnapshotSchedule got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("removeSnapshotSchedule got %q, want %q", got, want)
 		}
 	})
 }
