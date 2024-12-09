@@ -18,7 +18,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
@@ -43,10 +43,10 @@ func redactImageFileAllInfoTypes(w io.Writer, projectID, inputPath, outputPath s
 	// Closing the client safely cleans up background resources.
 	defer client.Close()
 
-	// read the image file.
-	fileBytes, err := ioutil.ReadFile(inputPath)
+	// Read the image file.
+	fileBytes, err := os.ReadFile(inputPath)
 	if err != nil {
-		fmt.Fprintf(w, "ioutil.ReadFile: %v", err)
+		fmt.Fprintf(w, "os.ReadFile: %v", err)
 		return err
 	}
 
@@ -70,7 +70,7 @@ func redactImageFileAllInfoTypes(w io.Writer, projectID, inputPath, outputPath s
 	}
 
 	// Write the output file.
-	if err := ioutil.WriteFile(outputPath, resp.GetRedactedImage(), 0644); err != nil {
+	if err := os.WriteFile(outputPath, resp.GetRedactedImage(), 0644); err != nil {
 		return err
 	}
 	fmt.Fprintf(w, "Wrote output to %s", outputPath)
