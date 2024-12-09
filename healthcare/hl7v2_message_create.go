@@ -20,7 +20,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 
 	healthcare "google.golang.org/api/healthcare/v1"
 )
@@ -29,7 +29,7 @@ import (
 func createHL7V2Message(w io.Writer, projectID, location, datasetID, hl7V2StoreID, messageFile string) error {
 	ctx := context.Background()
 
-	hl7v2message, err := ioutil.ReadFile(messageFile)
+	hl7v2message, err := os.ReadFile(messageFile)
 	if err != nil {
 		return fmt.Errorf("ReadFile: %w", err)
 	}
@@ -49,7 +49,7 @@ func createHL7V2Message(w io.Writer, projectID, location, datasetID, hl7V2StoreI
 	parent := fmt.Sprintf("projects/%s/locations/%s/datasets/%s/hl7V2Stores/%s", projectID, location, datasetID, hl7V2StoreID)
 	resp, err := messagesService.Create(parent, req).Do()
 	if err != nil {
-		return fmt.Errorf("Create: %w", err)
+		return fmt.Errorf("messagesService.Create: %w", err)
 	}
 
 	fmt.Fprintf(w, "Created HL7V2 message: %q\n", resp.Name)
