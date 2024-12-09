@@ -220,7 +220,7 @@ func TestComputeSnapshotScheduleSnippets(t *testing.T) {
 	region := "europe-central2"
 	var buf bytes.Buffer
 
-	t.Run("create, list and delete disk snapshot schedule", func(t *testing.T) {
+	t.Run("create, get and delete disk snapshot schedule", func(t *testing.T) {
 		var r *rand.Rand = rand.New(
 			rand.NewSource(time.Now().UnixNano()))
 		scheduleName := fmt.Sprintf("test-schedule-%v-%v", time.Now().Format("01-02-2006"), r.Int())
@@ -258,6 +258,38 @@ func TestComputeSnapshotScheduleSnippets(t *testing.T) {
 		}
 		if got := buf.String(); !strings.Contains(got, want) {
 			t.Errorf("deleteSnapshotSchedule got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("list snapshot schedules with filter", func(t *testing.T) {
+		var r *rand.Rand = rand.New(
+			rand.NewSource(time.Now().UnixNano()))
+		scheduleName := fmt.Sprintf("test-schedule-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		filterScheduleName := "filtered-schedule"
+		filter := fmt.Sprintf("name = %s", filterScheduleName)
+
+		if err := createSnapshotSchedule(&buf, tc.ProjectID, scheduleName, region); err != nil {
+			t.Fatalf("createSnapshotSchedule got err: %v", err)
+		}
+		if err := createSnapshotSchedule(&buf, tc.ProjectID, filterScheduleName, region); err != nil {
+			t.Errorf("createSnapshotSchedule got err: %v", err)
+		}
+
+		buf.Reset()
+		if err := listSnapshotSchedule(&buf, tc.ProjectID, region, filter); err != nil {
+			t.Errorf("listSnapshotSchedule got err: %v", err)
+		}
+		if got := buf.String(); strings.Contains(got, scheduleName) {
+			t.Errorf("listSnapshotSchedule got %q, which had to be filtered out", scheduleName)
+		} else if !strings.Contains(got, filterScheduleName) {
+			t.Errorf("listSnapshotSchedule didn't get %q, which is expected after filtering", filterScheduleName)
+		}
+
+		if err := deleteSnapshotSchedule(&buf, tc.ProjectID, scheduleName, region); err != nil {
+			t.Errorf("deleteSnapshotSchedule got err: %v", err)
+		}
+		if err := deleteSnapshotSchedule(&buf, tc.ProjectID, filterScheduleName, region); err != nil {
+			t.Errorf("deleteSnapshotSchedule got err: %v", err)
 		}
 	})
 }
