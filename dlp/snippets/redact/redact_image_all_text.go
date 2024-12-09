@@ -18,7 +18,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
@@ -43,7 +43,7 @@ func redactImageFileAllText(w io.Writer, projectID, inputPath, outputPath string
 	defer client.Close()
 
 	// read the image file
-	fileBytes, err := ioutil.ReadFile(inputPath)
+	fileBytes, err := os.ReadFile(inputPath)
 	if err != nil {
 		return err
 	}
@@ -78,7 +78,7 @@ func redactImageFileAllText(w io.Writer, projectID, inputPath, outputPath string
 	}
 
 	// Write the output file.
-	if err := ioutil.WriteFile(outputPath, resp.GetRedactedImage(), 0644); err != nil {
+	if err := os.WriteFile(outputPath, resp.GetRedactedImage(), 0644); err != nil {
 		return err
 	}
 	fmt.Fprintf(w, "Wrote output to %s", outputPath)
