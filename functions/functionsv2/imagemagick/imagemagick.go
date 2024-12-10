@@ -70,7 +70,15 @@ func blurOffensiveImages(ctx context.Context, e cloudevents.Event) error {
 	}
 
 	var gcsEvent storagedata.StorageObjectData
-	if err := protojson.Unmarshal(e.Data(), &gcsEvent); err != nil {
+
+	// If you omit `DiscardUnknown`, protojson.Unmarshal returns an error
+	// when encountering a new or unknown field.
+	options := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+	}
+
+	err := options.Unmarshal(e.Data(), &gcsEvent)
+	if err != nil {
 		return fmt.Errorf("protojson.Unmarshal: failed to decode event data: %w", err)
 	}
 	img := vision.NewImageFromURI(fmt.Sprintf("gs://%s/%s", gcsEvent.GetBucket(), gcsEvent.GetName()))
