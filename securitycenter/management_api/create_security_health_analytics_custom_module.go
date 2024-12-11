@@ -20,6 +20,8 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"math/rand"
+	"time"
 
 	securitycentermanagement "cloud.google.com/go/securitycentermanagement/apiv1"
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
@@ -39,6 +41,13 @@ func createSecurityHealthAnalyticsCustomModule(w io.Writer, parent string) error
 		return fmt.Errorf("securitycentermanagement.NewClient: %w", err)
 	}
 	defer client.Close()
+
+	// Seed the random number generator
+	rand.Seed(time.Now().UnixNano())
+	// Generate a unique suffix
+	uniqueSuffix := fmt.Sprintf("%d_%d", time.Now().Unix(), rand.Intn(1000))
+	// Create unique display name
+	displayName := fmt.Sprintf("go_sample_sha_custom_module_%s", uniqueSuffix)
 
 	// Define the custom module configuration
 	customModule := &securitycentermanagementpb.SecurityHealthAnalyticsCustomModule{
@@ -68,7 +77,8 @@ func createSecurityHealthAnalyticsCustomModule(w io.Writer, parent string) error
 			},
 			Severity: securitycentermanagementpb.CustomConfig_CRITICAL,
 		},
-		DisplayName:     "go_sample_custom_module", //Replace with desired Display Name.
+		//Replace with desired Display Name.
+		DisplayName:     displayName,
 		EnablementState: securitycentermanagementpb.SecurityHealthAnalyticsCustomModule_ENABLED,
 	}
 

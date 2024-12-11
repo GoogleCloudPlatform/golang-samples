@@ -21,7 +21,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"regexp"
 
@@ -95,7 +94,7 @@ func submitJob(w io.Writer, projectID, region, clusterName string) error {
 
 	defer reader.Close()
 
-	body, err := ioutil.ReadAll(reader)
+	body, err := io.ReadAll(reader)
 	if err != nil {
 		return fmt.Errorf("could not read output from Dataproc Job: %w", err)
 	}
