@@ -19,12 +19,12 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 
 	"cloud.google.com/go/pubsub"
 )
 
-// commitAvroSchema commits a new avro schema revision to an existing schema.
+// commitAvroSchema commits a new Avro schema revision to an existing schema.
 func commitAvroSchema(w io.Writer, projectID, schemaID, avscFile string) error {
 	// projectID := "my-project-id"
 	// schemaID := "my-schema-id"
@@ -37,7 +37,7 @@ func commitAvroSchema(w io.Writer, projectID, schemaID, avscFile string) error {
 	defer client.Close()
 
 	// Read an Avro schema file formatted in JSON as a byte slice.
-	avscSource, err := ioutil.ReadFile(avscFile)
+	avscSource, err := os.ReadFile(avscFile)
 	if err != nil {
 		return fmt.Errorf("error reading from file: %s", avscFile)
 	}

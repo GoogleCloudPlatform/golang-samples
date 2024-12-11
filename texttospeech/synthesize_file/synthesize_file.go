@@ -27,54 +27,6 @@ import (
 	"cloud.google.com/go/texttospeech/apiv1/texttospeechpb"
 )
 
-// [START tts_synthesize_text_file]
-
-// SynthesizeTextFile synthesizes the text in textFile and saves the output to
-// outputFile.
-func SynthesizeTextFile(w io.Writer, textFile, outputFile string) error {
-	ctx := context.Background()
-
-	client, err := texttospeech.NewClient(ctx)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
-
-	text, err := os.ReadFile(textFile)
-	if err != nil {
-		return err
-	}
-
-	req := texttospeechpb.SynthesizeSpeechRequest{
-		Input: &texttospeechpb.SynthesisInput{
-			InputSource: &texttospeechpb.SynthesisInput_Text{Text: string(text)},
-		},
-		// Note: the voice can also be specified by name.
-		// Names of voices can be retrieved with client.ListVoices().
-		Voice: &texttospeechpb.VoiceSelectionParams{
-			LanguageCode: "en-US",
-			SsmlGender:   texttospeechpb.SsmlVoiceGender_FEMALE,
-		},
-		AudioConfig: &texttospeechpb.AudioConfig{
-			AudioEncoding: texttospeechpb.AudioEncoding_MP3,
-		},
-	}
-
-	resp, err := client.SynthesizeSpeech(ctx, &req)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(outputFile, resp.AudioContent, 0644)
-	if err != nil {
-		return err
-	}
-	fmt.Fprintf(w, "Audio content written to file: %v\n", outputFile)
-	return nil
-}
-
-// [END tts_synthesize_text_file]
-
 // [START tts_synthesize_ssml_file]
 
 // SynthesizeSSMLFile synthesizes the SSML contents in ssmlFile and saves the
@@ -130,20 +82,13 @@ func SynthesizeSSMLFile(w io.Writer, ssmlFile, outputFile string) error {
 // [END tts_synthesize_ssml_file]
 
 func main() {
-	textFile := flag.String("text", "",
-		"The text file from which to synthesize speech.")
 	ssmlFile := flag.String("ssml", "",
 		"The ssml file string from which to synthesize speech.")
 	outputFile := flag.String("output-file", "output.mp3",
 		"The name of the output file.")
 	flag.Parse()
 
-	if *textFile != "" {
-		err := SynthesizeTextFile(os.Stdout, *textFile, *outputFile)
-		if err != nil {
-			log.Fatal(err)
-		}
-	} else if *ssmlFile != "" {
+	if *ssmlFile != "" {
 		err := SynthesizeSSMLFile(os.Stdout, *ssmlFile, *outputFile)
 		if err != nil {
 			log.Fatal(err)

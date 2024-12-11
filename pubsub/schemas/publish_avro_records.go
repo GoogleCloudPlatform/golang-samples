@@ -37,7 +37,7 @@ func publishAvroRecords(w io.Writer, projectID, topicID, avscFile string) error 
 
 	avroSource, err := os.ReadFile(avscFile)
 	if err != nil {
-		return fmt.Errorf("ioutil.ReadFile err: %w", err)
+		return fmt.Errorf("os.ReadFile err: %w", err)
 	}
 	codec, err := goavro.NewCodec(string(avroSource))
 	if err != nil {
