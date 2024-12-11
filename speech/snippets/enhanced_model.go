@@ -18,7 +18,7 @@ package snippets
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	// [START imports]
@@ -40,7 +40,7 @@ func enhancedModel(w io.Writer) error {
 	}
 	defer client.Close()
 
-	data, err := ioutil.ReadFile("../testdata/commercial_mono.wav")
+	data, err := os.ReadFile("../testdata/commercial_mono.wav")
 	if err != nil {
 		return fmt.Errorf("ReadFile: %w", err)
 	}
@@ -59,7 +59,7 @@ func enhancedModel(w io.Writer) error {
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("Recognize: %w", err)
+		return fmt.Errorf("client.Recognize: %w", err)
 	}
 
 	for i, result := range resp.Results {
