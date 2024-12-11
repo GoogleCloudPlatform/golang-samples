@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 package livestream
 
-// [START livestream_create_input]
+// [START livestream_delete_channel_clip]
 import (
 	"context"
 	"fmt"
@@ -24,12 +24,12 @@ import (
 	"cloud.google.com/go/video/livestream/apiv1/livestreampb"
 )
 
-// createInput creates an input endpoint. You send an input video stream to this
-// endpoint.
-func createInput(w io.Writer, projectID, location, inputID string) error {
+// deleteChannelClip deletes a previously-created channel clip.
+func deleteChannelClip(w io.Writer, projectID, channelID, clipID string) error {
 	// projectID := "my-project-id"
-	// location := "us-central1"
-	// inputID := "my-input"
+	// channelID := "my-channel"
+	// clipID := "my-channel-clip"
+	location := "us-central1"
 	ctx := context.Background()
 	client, err := livestream.NewClient(ctx)
 	if err != nil {
@@ -37,26 +37,21 @@ func createInput(w io.Writer, projectID, location, inputID string) error {
 	}
 	defer client.Close()
 
-	req := &livestreampb.CreateInputRequest{
-		Parent:  fmt.Sprintf("projects/%s/locations/%s", projectID, location),
-		InputId: inputID,
-		Input: &livestreampb.Input{
-			Type: livestreampb.Input_RTMP_PUSH,
-		},
-	}
-	// Creates the input.
-	op, err := client.CreateInput(ctx, req)
-	if err != nil {
-		return fmt.Errorf("CreateInput: %w", err)
-	}
-	response, err := op.Wait(ctx)
-	if err != nil {
-		return fmt.Errorf("Wait: %w", err)
+	req := &livestreampb.DeleteClipRequest{
+		Name: fmt.Sprintf("projects/%s/locations/%s/channels/%s/clips/%s", projectID, location, channelID, clipID),
 	}
 
-	fmt.Fprintf(w, "Input: %v", response.Name)
-	fmt.Fprintf(w, "Uri: %v", response.GetUri())
+	op, err := client.DeleteClip(ctx, req)
+	if err != nil {
+		return fmt.Errorf("DeleteClip: %w", err)
+	}
+	err = op.Wait(ctx)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintf(w, "Deleted channel clip")
 	return nil
 }
 
-// [END livestream_create_input]
+// [END livestream_delete_channel_clip]
