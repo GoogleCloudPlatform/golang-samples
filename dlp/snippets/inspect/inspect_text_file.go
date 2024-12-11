@@ -19,7 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
@@ -39,7 +39,7 @@ func inspectTextFile(w io.Writer, projectID, filePath string) error {
 	defer client.Close() // Closing the client safely cleans up background resources.
 
 	// Gather the resources for the request.
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return err
 	}
