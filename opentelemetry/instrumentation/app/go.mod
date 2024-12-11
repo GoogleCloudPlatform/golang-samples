@@ -3,12 +3,12 @@ module github.com/GoogleCloudPlatform/golang-samples/opentelemetry/instrumentati
 go 1.21.0
 
 require (
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	github.com/stretchr/testify v1.9.0
-	go.opentelemetry.io/collector/pdata v1.12.0
-	go.opentelemetry.io/contrib/exporters/autoexport v0.53.0
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.53.0
-	go.opentelemetry.io/contrib/propagators/autoprop v0.53.0
+	github.com/GoogleCloudPlatform/golang-samples b53c071fb697
+	github.com/stretchr/testify v1.10.0
+	go.opentelemetry.io/collector/pdata v1.21.0
+	go.opentelemetry.io/contrib/exporters/autoexport v0.57.0
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.57.0
+	go.opentelemetry.io/contrib/propagators/autoprop v0.57.0
 	go.opentelemetry.io/otel v1.28.0
 	go.opentelemetry.io/otel/metric v1.28.0
 	go.opentelemetry.io/otel/sdk v1.28.0
