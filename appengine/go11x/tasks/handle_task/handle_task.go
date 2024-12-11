@@ -19,7 +19,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -68,7 +68,7 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 	queueName := r.Header.Get("X-Appengine-Queuename")
 
 	// Extract the request body for further task details.
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("ReadAll: %v", err)
 		http.Error(w, "Internal Error", http.StatusInternalServerError)
