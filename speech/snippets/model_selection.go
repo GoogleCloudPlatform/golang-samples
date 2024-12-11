@@ -18,7 +18,7 @@ package snippets
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	// [START imports]
@@ -40,7 +40,7 @@ func modelSelection(w io.Writer) error {
 	}
 	defer client.Close()
 
-	data, err := ioutil.ReadFile("../testdata/Google_Gnome.wav")
+	data, err := os.ReadFile("../testdata/Google_Gnome.wav")
 	if err != nil {
 		return fmt.Errorf("ReadFile: %w", err)
 	}
@@ -59,7 +59,7 @@ func modelSelection(w io.Writer) error {
 
 	resp, err := client.Recognize(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Recognize: %w", err)
+		return fmt.Errorf("recognize: %w", err)
 	}
 
 	for i, result := range resp.Results {
