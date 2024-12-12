@@ -19,9 +19,9 @@ package tips
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 )
@@ -35,10 +35,10 @@ func init() {
 // Functions Framework Buildpack.
 // See https://github.com/GoogleCloudPlatform/buildpacks/blob/56eaad4dfe6c7bd0ecc4a175de030d2cfab9ae1c/cmd/go/functions_framework/main.go#L38.
 func ListFiles(w http.ResponseWriter, r *http.Request) {
-	files, err := ioutil.ReadDir("./serverless_function_source_code")
+	files, err := os.ReadDir("./serverless_function_source_code")
 	if err != nil {
 		http.Error(w, "Unable to read files", http.StatusInternalServerError)
-		log.Printf("ioutil.ListFiles: %v", err)
+		log.Printf("ListFiles: %v", err)
 		return
 	}
 	fmt.Fprintln(w, "Files:")

@@ -22,7 +22,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -84,13 +84,13 @@ func generateJWT(saKeyfile, saEmail, audience string, expiryLength int64) (strin
 	}
 
 	// Extract the RSA private key from the service account keyfile.
-	sa, err := ioutil.ReadFile(saKeyfile)
+	sa, err := os.ReadFile(saKeyfile)
 	if err != nil {
-		return "", fmt.Errorf("Could not read service account file: %w", err)
+		return "", fmt.Errorf("could not read service account file: %w", err)
 	}
 	conf, err := google.JWTConfigFromJSON(sa)
 	if err != nil {
-		return "", fmt.Errorf("Could not parse service account JSON: %w", err)
+		return "", fmt.Errorf("could not parse service account JSON: %w", err)
 	}
 	block, _ := pem.Decode(conf.PrivateKey)
 	parsedKey, err := x509.ParsePKCS8PrivateKey(block.Bytes)
@@ -127,7 +127,7 @@ func makeJWTRequest(signedJWT, url string) (string, error) {
 		return "", fmt.Errorf("HTTP request failed: %w", err)
 	}
 	defer response.Body.Close()
-	responseData, err := ioutil.ReadAll(response.Body)
+	responseData, err := io.ReadAll(response.Body)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse HTTP response: %w", err)
 	}

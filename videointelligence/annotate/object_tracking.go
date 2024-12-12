@@ -21,7 +21,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 
 	video "cloud.google.com/go/videointelligence/apiv1"
 	videopb "cloud.google.com/go/videointelligence/apiv1/videointelligencepb"
@@ -41,7 +41,7 @@ func objectTracking(w io.Writer, filename string) error {
 	}
 	defer client.Close()
 
-	fileBytes, err := ioutil.ReadFile(filename)
+	fileBytes, err := os.ReadFile(filename)
 	if err != nil {
 		return err
 	}

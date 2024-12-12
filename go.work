@@ -80,7 +80,6 @@ use (
 	./functions/slack
 	./functions/spanner
 	./functions/tips
-	./functions/tips/contexttip
 	./functions/tips/infinite_retries
 	./functions/typed/greeting
 	./getting-started

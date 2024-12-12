@@ -21,7 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 
@@ -50,14 +50,14 @@ func HelloContentType(w http.ResponseWriter, r *http.Request) {
 			name = d.Name
 		}
 	case "application/octet-stream":
-		body, err := ioutil.ReadAll(r.Body)
+		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			log.Printf("error parsing application/octet-stream: %v", err)
 		} else {
 			name = string(body)
 		}
 	case "text/plain":
-		body, err := ioutil.ReadAll(r.Body)
+		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			log.Printf("error parsing text/plain: %v", err)
 		} else {

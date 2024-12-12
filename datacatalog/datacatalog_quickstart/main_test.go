@@ -45,11 +45,6 @@ func TestApp(t *testing.T) {
 		t.Fatalf("couldn't setup BQ test resources: %v", err)
 	}
 
-	// Due to propagation delay, we introduce a small pause between resource creation and running
-	// the datacatalog quickstart to avoid test flakes.  In reality, you're more likely to have persistent
-	// resources, but we create everything from scratch every invocation when testing.
-	time.Sleep(2 * time.Second)
-
 	stdOut, stdErr, err := m.Run(nil, 30*time.Second, fmt.Sprintf("--project_id=%s", tc.ProjectID), fmt.Sprintf("--table=%s", table))
 	if err != nil {
 		t.Errorf("execution failed: %v", err)
