@@ -150,6 +150,8 @@ func TestMultipleInequalitiesQuery(t *testing.T) {
 			Fields:     adminPbIndexFields,
 		},
 	}
+	var createdIndex *adminpb.Index
+	var waitErr error
 	op, createErr := adminClient.CreateIndex(ctx, req)
 	if createErr != nil {
 		s, ok := status.FromError(createErr)
@@ -157,17 +159,16 @@ func TestMultipleInequalitiesQuery(t *testing.T) {
 			// Fail the test only if the index does not already exist
 			t.Fatalf("CreateIndex: %v", createErr)
 		}
-	}
-	var createdIndex *adminpb.Index
-	var waitErr error
-	if op != nil {
+	} else {
 		createdIndex, waitErr = op.Wait(ctx)
 		if waitErr != nil {
 			t.Fatalf("CreateIndex failed. Wait: %v", waitErr)
 		}
 	}
-	_ = createdIndex
 	t.Cleanup(func() {
+		if createdIndex == nil {
+			return
+		}
 		if err = adminClient.DeleteIndex(ctx, &adminpb.DeleteIndexRequest{
 			Name: createdIndex.Name,
 		}); err != nil {
