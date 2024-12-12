@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Function calling allows to improve the model response with the use of external
-// APIs and functions.
+// Function calling allows the model to improve its responses with the use of external
+// data sources.
 package functioncalling
 
 // [START generativeaionvertexai_gemini_function_calling]
@@ -78,6 +78,7 @@ func functionCalling(w io.Writer, projectID, location, modelName string) error {
 		return errors.New("got no function call suggestions from model")
 	}
 
+	// In a production environment, consider adding validations for function names and arguments.
 	for _, fnCall := range resp.Candidates[0].FunctionCalls() {
 		fmt.Fprintf(w, "The model suggests to call the function %q with args: %v\n", fnCall.Name, fnCall.Args)
 		// Example response:
