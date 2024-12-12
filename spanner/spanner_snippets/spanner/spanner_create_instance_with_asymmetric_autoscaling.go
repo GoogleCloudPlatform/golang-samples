@@ -109,4 +109,4 @@ func createInstanceWithAsymmetricAutoscalingConfig(w io.Writer, projectID, insta
 	return nil
 }
 
-// [END spanner_create_instance_with_autoscaling_config]
+// [END spanner_create_instance_with_asymmetric_autoscaling]
