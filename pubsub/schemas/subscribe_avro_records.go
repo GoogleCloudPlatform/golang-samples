@@ -39,7 +39,7 @@ func subscribeWithAvroSchema(w io.Writer, projectID, subID, avscFile string) err
 
 	avroSchema, err := os.ReadFile(avscFile)
 	if err != nil {
-		return fmt.Errorf("ioutil.ReadFile err: %w", err)
+		return fmt.Errorf("os.ReadFile err: %w", err)
 	}
 	codec, err := goavro.NewCodec(string(avroSchema))
 	if err != nil {
