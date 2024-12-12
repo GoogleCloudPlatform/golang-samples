@@ -26,6 +26,8 @@ import (
 	"cloud.google.com/go/firestore"
 	apiv1 "cloud.google.com/go/firestore/apiv1/admin"
 	"cloud.google.com/go/firestore/apiv1/admin/adminpb"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"google.golang.org/api/iterator"
 )
 
 var projectID string
@@ -87,6 +89,9 @@ func vectorSearchSetup() func() {
 	vectorFieldDimension := int32(3)
 
 	cleanups := []func(){}
+
+	// Delete existing documents
+	deleteTestCollection(projectID, vectorCollName)
 
 	// Create documents
 	cleanupDocs := createCoffeeBeans(projectID, vectorCollName)
@@ -249,10 +254,41 @@ func createCoffeeBeans(projectID string, collName string) func() {
 
 	return func() {
 		for _, ref := range docRefs {
-			_, err := ref.Delete(ctx)
-			if err != nil {
-				log.Printf("An error has occurred: %s", err)
-			}
+			testutil.RetryWithoutTest(5, 5*time.Second, func(r *testutil.R) {
+				_, err := ref.Delete(ctx)
+				if err != nil {
+					log.Printf("An error has occurred: %s", err)
+					r.Fail()
+				}
+			})
 		}
+	}
+}
+
+func deleteTestCollection(projectID, collName string) {
+	ctx := context.Background()
+	client, err := firestore.NewClient(ctx, projectID)
+	if err != nil {
+		log.Fatalf("Failed to create client: %v", err)
+	}
+	defer client.Close()
+
+	// Delete all documents in the collName collection.
+	iter := client.Collection(collName).Documents(ctx)
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatalf("Failed to iterate: %v", err)
+		}
+		testutil.RetryWithoutTest(5, 5*time.Second, func(r *testutil.R) {
+			_, err = doc.Ref.Delete(ctx)
+			if err != nil {
+				log.Fatalf("Failed to delete document: %v", err)
+				r.Fail()
+			}
+		})
 	}
 }
