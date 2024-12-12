@@ -257,7 +257,7 @@ func createCoffeeBeans(projectID string, collName string) func() {
 			testutil.RetryWithoutTest(5, 5*time.Second, func(r *testutil.R) {
 				_, err := ref.Delete(ctx)
 				if err != nil {
-					log.Printf("An error has occurred: %s", err)
+					log.Printf("Error deleting document %v: %s", ref, err)
 					r.Fail()
 				}
 			})
@@ -286,7 +286,7 @@ func deleteTestCollection(projectID, collName string) {
 		testutil.RetryWithoutTest(5, 5*time.Second, func(r *testutil.R) {
 			_, err = doc.Ref.Delete(ctx)
 			if err != nil {
-				log.Fatalf("Failed to delete document: %v", err)
+				log.Printf("Error deleting document %v: %s", doc.Ref, err)
 				r.Fail()
 			}
 		})
