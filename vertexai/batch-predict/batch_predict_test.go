@@ -65,4 +65,27 @@ func TestBatchPredict(t *testing.T) {
 			t.Errorf("job name doesn't match. Got: %s, want: %s", output, name)
 		}
 	})
+
+	t.Run("gemini batch predict gcs", func(t *testing.T) {
+		buf.Reset()
+		inputURIs := []string{"gs://cloud-samples-data/batch/prompt_for_batch_gemini_predict.jsonl"}
+		err := batchPredictGCS(&buf, tc.ProjectID, location, inputURIs, outputURI)
+		if err != nil {
+			t.Error(err)
+		}
+	})
+
+	t.Run("gemini batch predict bq", func(t *testing.T) {
+		buf.Reset()
+		inputURI := "bq://storage-samples.generative_ai.batch_requests_for_multimodal_input"
+		outputURI := fmt.Sprintf(
+			"bq://storage-samples.generative_ai.batch_predict_outputs_go-%v-%v",
+			time.Now().Format("2006-01-02-15-04"),
+			r.Int(),
+		)
+		err := batchPredictBQ(&buf, tc.ProjectID, location, inputURI, outputURI)
+		if err != nil {
+			t.Error(err)
+		}
+	})
 }

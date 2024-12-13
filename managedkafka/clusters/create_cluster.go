@@ -30,7 +30,7 @@ func createCluster(w io.Writer, projectID, region, clusterID, subnet string, cpu
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// clusterID := "my-cluster"
-	// subnet := "my-subnet"
+	// subnet := "projects/my-project-id/regions/us-central1/subnetworks/default"
 	// cpu := 3
 	// memoryBytes := 3221225472
 	ctx := context.Background()
