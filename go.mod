@@ -1,6 +1,8 @@
 module github.com/GoogleCloudPlatform/golang-samples
 
-go 1.21
+go 1.22.0
+
+toolchain go1.23.4
 
 require (
 	cloud.google.com/go/batch v1.11.1
@@ -42,7 +44,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.29.0 // indirect
 	go.opentelemetry.io/otel/trace v1.29.0 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/net v0.30.0 // indirect
+	golang.org/x/net v0.32.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
