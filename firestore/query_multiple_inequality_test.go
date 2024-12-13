@@ -25,6 +25,8 @@ import (
 	"cloud.google.com/go/firestore"
 	apiv1 "cloud.google.com/go/firestore/apiv1/admin"
 	"cloud.google.com/go/firestore/apiv1/admin/adminpb"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func setupClientAndCities(t *testing.T, projectID string) (*firestore.Client, func()) {
@@ -148,15 +150,25 @@ func TestMultipleInequalitiesQuery(t *testing.T) {
 			Fields:     adminPbIndexFields,
 		},
 	}
+	var createdIndex *adminpb.Index
+	var waitErr error
 	op, createErr := adminClient.CreateIndex(ctx, req)
 	if createErr != nil {
-		t.Fatalf("CreateIndex: %v", createErr)
-	}
-	createdIndex, waitErr := op.Wait(ctx)
-	if waitErr != nil {
-		t.Fatalf("CreateIndexes failed. Wait: %v", waitErr)
+		s, ok := status.FromError(createErr)
+		if !ok || s.Code() != codes.AlreadyExists {
+			// Fail the test only if the index does not already exist
+			t.Fatalf("CreateIndex: %v", createErr)
+		}
+	} else {
+		createdIndex, waitErr = op.Wait(ctx)
+		if waitErr != nil {
+			t.Fatalf("CreateIndex failed. Wait: %v", waitErr)
+		}
 	}
 	t.Cleanup(func() {
+		if createdIndex == nil {
+			return
+		}
 		if err = adminClient.DeleteIndex(ctx, &adminpb.DeleteIndexRequest{
 			Name: createdIndex.Name,
 		}); err != nil {
