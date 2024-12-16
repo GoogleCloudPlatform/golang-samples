@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"fmt"
 	"math/rand"
+	"strings"
 	"testing"
 	"time"
 
@@ -38,6 +39,9 @@ func TestCreateJobWithCustomNetwork(t *testing.T) {
 
 	if err != nil {
 		t.Errorf("createJobWithCustomNetwork got err: %v", err)
+	}
+	if got := buf.String(); !strings.Contains(got, "Job created") {
+		t.Errorf("createJobWithCustomNetwork got %q, expected %q", got, "Job created")
 	}
 
 	expectedNetwork := fmt.Sprintf("projects/%s/global/networks/%s", tc.ProjectID, networkName)
