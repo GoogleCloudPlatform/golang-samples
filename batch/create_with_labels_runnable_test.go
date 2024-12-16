@@ -25,7 +25,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestCreateJobWithNFS(t *testing.T) {
+func TestCreateJobWithLabelsRunnable(t *testing.T) {
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
