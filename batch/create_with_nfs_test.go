@@ -47,7 +47,7 @@ func TestCreateJobWithNFS(t *testing.T) {
 	}
 
 	volume := job.GetTaskGroups()[0].GetTaskSpec().GetVolumes()[0]
-	if volume.GetNfs().GetRemotePath() != nfsIpAddress || volume.GetNfs().GetServer() != nfsIpAddress || volume.GetMountPath() != mountPath {
+	if volume.GetNfs().GetRemotePath() != nfsPath || volume.GetNfs().GetServer() != nfsIpAddress || volume.GetMountPath() != mountPath {
 		t.Errorf("volume wasn't set")
 	}
 
