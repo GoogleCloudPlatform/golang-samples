@@ -25,7 +25,7 @@ import (
 	durationpb "google.golang.org/protobuf/types/known/durationpb"
 )
 
-// Creates and runs a job with custom network
+// createJobWithCustomNetwork creates and runs a job with custom network
 func createJobWithCustomNetwork(w io.Writer, projectID, region, jobName, networkName, subnetworkName string) (*batchpb.Job, error) {
 	ctx := context.Background()
 	batchClient, err := batch.NewClient(ctx)
@@ -37,6 +37,7 @@ func createJobWithCustomNetwork(w io.Writer, projectID, region, jobName, network
 	runn := &batchpb.Runnable{
 		Executable: &batchpb.Runnable_Script_{
 			Script: &batchpb.Runnable_Script{
+				// Example command to run executable
 				Command: &batchpb.Runnable_Script_Text{
 					Text: "echo Hello world from script 1 for task ${BATCH_TASK_INDEX}",
 				},

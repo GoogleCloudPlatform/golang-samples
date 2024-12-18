@@ -26,8 +26,7 @@ import (
 )
 
 func TestCreateJobWithCustomNetwork(t *testing.T) {
-	var r *rand.Rand = rand.New(
-		rand.NewSource(time.Now().UnixNano()))
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	jobName := fmt.Sprintf("test-job-go-%v-%v", time.Now().Format("2006-01-02"), r.Int())
 	region := "us-central1"

@@ -26,8 +26,7 @@ import (
 )
 
 func TestCreateJobWithCustomJobLabels(t *testing.T) {
-	var r *rand.Rand = rand.New(
-		rand.NewSource(time.Now().UnixNano()))
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	jobName := fmt.Sprintf("test-job-go-%v-%v", time.Now().Format("2006-01-02"), r.Int())
 	region := "us-central1"
@@ -37,7 +36,7 @@ func TestCreateJobWithCustomJobLabels(t *testing.T) {
 	job, err := createJobWithCustomJobLabels(buf, tc.ProjectID, region, jobName)
 
 	if err != nil {
-		t.Errorf("createJobWithCustomJobLabels got err: %v", err)
+		t.Fatalf("createJobWithCustomJobLabels got err: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, "Job created") {
 		t.Errorf("createJobWithCustomJobLabels got %q, expected %q", got, "Job created")
