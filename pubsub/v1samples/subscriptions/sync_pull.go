@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_subscriber_sync_pull]
+// [START pubsub_old_version_subscriber_sync_pull]
 import (
 	"context"
 	"fmt"
@@ -63,4 +63,4 @@ func pullMsgsSync(w io.Writer, projectID, subID string) error {
 	return nil
 }
 
-// [END pubsub_subscriber_sync_pull]
+// [END pubsub_old_version_subscriber_sync_pull]

@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_create_bigquery_subscription]
+// [START pubsub_old_version_create_bigquery_subscription]
 import (
 	"context"
 	"fmt"
@@ -51,4 +51,4 @@ func createBigQuerySubscription(w io.Writer, projectID, subID string, topic *pub
 	return nil
 }
 
-// [END pubsub_create_bigquery_subscription]
+// [END pubsub_old_version_create_bigquery_subscription]

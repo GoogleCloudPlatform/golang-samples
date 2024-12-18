@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_dead_letter_remove]
+// [START pubsub_old_version_dead_letter_remove]
 import (
 	"context"
 	"fmt"
@@ -44,4 +44,4 @@ func removeDeadLetterTopic(w io.Writer, projectID, subID string) error {
 	return nil
 }
 
-// [END pubsub_dead_letter_remove]
+// [END pubsub_old_version_dead_letter_remove]

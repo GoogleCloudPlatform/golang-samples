@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_subscriber_exactly_once]
+// [START pubsub_old_version_subscriber_exactly_once]
 import (
 	"context"
 	"fmt"
@@ -84,4 +84,4 @@ func receiveMessagesWithExactlyOnceDeliveryEnabled(w io.Writer, projectID, subID
 	return nil
 }
 
-// [END pubsub_subscriber_exactly_once]
+// [END pubsub_old_version_subscriber_exactly_once]

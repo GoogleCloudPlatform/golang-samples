@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_create_subscription_with_filter]
+// [START pubsub_old_version_create_subscription_with_filter]
 import (
 	"context"
 	"fmt"
@@ -47,4 +47,4 @@ func createWithFilter(w io.Writer, projectID, subID, filter string, topic *pubsu
 	return nil
 }
 
-// [END pubsub_create_subscription_with_filter]
+// [END pubsub_old_version_create_subscription_with_filter]

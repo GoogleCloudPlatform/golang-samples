@@ -14,7 +14,7 @@
 
 package schema
 
-// [START pubsub_get_schema_revision]
+// [START pubsub_old_version_get_schema_revision]
 import (
 	"context"
 	"fmt"
@@ -41,4 +41,4 @@ func getSchemaRevision(w io.Writer, projectID, schemaID string) error {
 	return nil
 }
 
-// [END pubsub_get_schema_revision]
+// [END pubsub_old_version_get_schema_revision]

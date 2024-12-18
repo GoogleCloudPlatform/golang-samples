@@ -14,7 +14,7 @@
 
 package schema
 
-// [START pubsub_commit_avro_schema]
+// [START pubsub_old_version_commit_avro_schema]
 import (
 	"context"
 	"fmt"
@@ -55,4 +55,4 @@ func commitAvroSchema(w io.Writer, projectID, schemaID, avscFile string) error {
 	return nil
 }
 
-// [END pubsub_commit_avro_schema]
+// [END pubsub_old_version_commit_avro_schema]

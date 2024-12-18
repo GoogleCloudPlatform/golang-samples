@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_resume_publish_with_ordering_keys]
+// [START pubsub_old_version_resume_publish_with_ordering_keys]
 import (
 	"context"
 	"fmt"
@@ -61,4 +61,4 @@ func resumePublishWithOrderingKey(w io.Writer, projectID, topicID string) {
 	fmt.Fprint(w, "Published a message with ordering key successfully\n")
 }
 
-// [END pubsub_resume_publish_with_ordering_keys]
+// [END pubsub_old_version_resume_publish_with_ordering_keys]

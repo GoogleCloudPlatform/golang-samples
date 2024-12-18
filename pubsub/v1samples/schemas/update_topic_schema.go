@@ -14,7 +14,7 @@
 
 package schema
 
-// [START pubsub_update_topic_schema]
+// [START pubsub_old_version_update_topic_schema]
 import (
 	"context"
 	"fmt"
@@ -53,4 +53,4 @@ func updateTopicSchema(w io.Writer, projectID, topicID, firstRevisionID, lastRev
 	return nil
 }
 
-// [END pubsub_update_topic_schema]
+// [END pubsub_old_version_update_topic_schema]

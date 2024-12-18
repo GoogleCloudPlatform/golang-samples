@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_publisher_flow_control]
+// [START pubsub_old_version_publisher_flow_control]
 import (
 	"context"
 	"fmt"
@@ -76,4 +76,4 @@ func publishWithFlowControlSettings(w io.Writer, projectID, topicID string) erro
 	return nil
 }
 
-// [END pubsub_publisher_flow_control]
+// [END pubsub_old_version_publisher_flow_control]

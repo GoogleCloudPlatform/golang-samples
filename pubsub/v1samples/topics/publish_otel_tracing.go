@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_publish_otel_tracing]
+// [START pubsub_old_version_publish_otel_tracing]
 import (
 	"context"
 	"fmt"
@@ -84,4 +84,4 @@ func publishOpenTelemetryTracing(w io.Writer, projectID, topicID string, samplin
 	return nil
 }
 
-// [END pubsub_publish_otel_tracing]
+// [END pubsub_old_version_publish_otel_tracing]

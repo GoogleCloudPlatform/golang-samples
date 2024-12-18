@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_publisher_batch_settings]
+// [START pubsub_old_version_publisher_batch_settings]
 import (
 	"context"
 	"fmt"
@@ -65,4 +65,4 @@ func publishWithSettings(w io.Writer, projectID, topicID string) error {
 	return nil
 }
 
-// [END pubsub_publisher_batch_settings]
+// [END pubsub_old_version_publisher_batch_settings]

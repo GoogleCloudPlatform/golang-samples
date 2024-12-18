@@ -14,7 +14,7 @@
 
 package schema
 
-// [START pubsub_delete_schema]
+// [START pubsub_old_version_delete_schema]
 import (
 	"context"
 	"fmt"
@@ -40,4 +40,4 @@ func deleteSchema(w io.Writer, projectID, schemaID string) error {
 	return nil
 }
 
-// [END pubsub_delete_schema]
+// [END pubsub_old_version_delete_schema]

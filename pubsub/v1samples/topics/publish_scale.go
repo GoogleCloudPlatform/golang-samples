@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_publish_with_error_handler]
+// [START pubsub_old_version_publish_with_error_handler]
 import (
 	"context"
 	"fmt"
@@ -69,4 +69,4 @@ func publishThatScales(w io.Writer, projectID, topicID string, n int) error {
 	return nil
 }
 
-// [END pubsub_publish_with_error_handler]
+// [END pubsub_old_version_publish_with_error_handler]

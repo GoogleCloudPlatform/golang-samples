@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_get_subscription_policy]
+// [START pubsub_old_version_get_subscription_policy]
 import (
 	"context"
 	"fmt"
@@ -44,4 +44,4 @@ func policy(w io.Writer, projectID, subID string) (*iam.Policy, error) {
 	return policy, nil
 }
 
-// [END pubsub_get_subscription_policy]
+// [END pubsub_old_version_get_subscription_policy]

@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_subscriber_error_listener]
+// [START pubsub_old_version_subscriber_error_listener]
 import (
 	"context"
 	"fmt"
@@ -45,4 +45,4 @@ func pullMsgsError(w io.Writer, projectID, subID string) error {
 	return nil
 }
 
-// [END pubsub_subscriber_error_listener]
+// [END pubsub_old_version_subscriber_error_listener]

@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_set_topic_policy]
+// [START pubsub_old_version_set_topic_policy]
 import (
 	"context"
 	"fmt"
@@ -51,4 +51,4 @@ func addUsers(projectID, topicID string) error {
 	return nil
 }
 
-// [END pubsub_set_topic_policy]
+// [END pubsub_old_version_set_topic_policy]

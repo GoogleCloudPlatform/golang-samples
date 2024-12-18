@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_publisher_retry_settings]
+// [START pubsub_old_version_publisher_retry_settings]
 import (
 	"context"
 	"fmt"
@@ -75,4 +75,4 @@ func publishWithRetrySettings(w io.Writer, projectID, topicID, msg string) error
 	return nil
 }
 
-// [END pubsub_publisher_retry_settings]
+// [END pubsub_old_version_publisher_retry_settings]

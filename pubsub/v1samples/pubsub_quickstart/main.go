@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START pubsub_quickstart_create_topic]
+// [START pubsub_old_version_quickstart_create_topic]
 
 // Sample pubsub-quickstart creates a Google Cloud Pub/Sub topic.
 package main
@@ -50,4 +50,4 @@ func main() {
 	fmt.Printf("Topic %v created.\n", topic)
 }
 
-// [END pubsub_quickstart_create_topic]
+// [END pubsub_old_version_quickstart_create_topic]

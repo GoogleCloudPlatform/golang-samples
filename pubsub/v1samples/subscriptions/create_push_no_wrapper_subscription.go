@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_create_unwrapped_push_subscription]
+// [START pubsub_old_version_create_unwrapped_push_subscription]
 import (
 	"context"
 	"fmt"
@@ -56,4 +56,4 @@ func createPushNoWrapperSubscription(w io.Writer, projectID, subID string, topic
 	return nil
 }
 
-// [END pubsub_create_unwrapped_push_subscription]
+// [END pubsub_old_version_create_unwrapped_push_subscription]

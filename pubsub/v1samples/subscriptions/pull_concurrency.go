@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_subscriber_concurrency_control]
+// [START pubsub_old_version_subscriber_concurrency_control]
 import (
 	"context"
 	"fmt"
@@ -69,4 +69,4 @@ func pullMsgsConcurrencyControl(w io.Writer, projectID, subID string) error {
 	return nil
 }
 
-// [END pubsub_subscriber_concurrency_control]
+// [END pubsub_old_version_subscriber_concurrency_control]

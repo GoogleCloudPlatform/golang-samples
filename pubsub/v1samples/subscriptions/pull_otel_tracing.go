@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_subscribe_otel_tracing]
+// [START pubsub_old_version_subscribe_otel_tracing]
 import (
 	"context"
 	"fmt"
@@ -95,4 +95,4 @@ func subscribeOpenTelemetryTracing(w io.Writer, projectID, subID string, sampleR
 	return nil
 }
 
-// [END pubsub_subscribe_otel_tracing]
+// [END pubsub_old_version_subscribe_otel_tracing]

@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_enable_subscription_ordering]
+// [START pubsub_old_version_enable_subscription_ordering]
 import (
 	"context"
 	"fmt"
@@ -48,4 +48,4 @@ func createWithOrdering(w io.Writer, projectID, subID string, topic *pubsub.Topi
 	return nil
 }
 
-// [END pubsub_enable_subscription_ordering]
+// [END pubsub_old_version_enable_subscription_ordering]

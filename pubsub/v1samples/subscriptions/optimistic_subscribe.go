@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_optimistic_subscribe]
+// [START pubsub_old_version_optimistic_subscribe]
 import (
 	"context"
 	"errors"
@@ -80,4 +80,4 @@ func optimisticSubscribe(w io.Writer, projectID, topicID, subID string) error {
 	return nil
 }
 
-// [END pubsub_optimistic_subscribe]
+// [END pubsub_old_version_optimistic_subscribe]

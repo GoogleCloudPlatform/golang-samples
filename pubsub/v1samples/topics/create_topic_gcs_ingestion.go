@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_create_topic_with_cloud_storage_ingestion]
+// [START pubsub_old_version_create_topic_with_cloud_storage_ingestion]
 import (
 	"context"
 	"fmt"
@@ -64,4 +64,4 @@ func createTopicWithCloudStorageIngestion(w io.Writer, projectID, topicID, bucke
 	return nil
 }
 
-// [END pubsub_create_topic_with_cloud_storage_ingestion]
+// [END pubsub_old_version_create_topic_with_cloud_storage_ingestion]

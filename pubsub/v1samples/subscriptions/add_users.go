@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_set_subscription_policy]
+// [START pubsub_old_version_set_subscription_policy]
 import (
 	"context"
 	"fmt"
@@ -52,4 +52,4 @@ func addUsers(projectID, subID string) error {
 	return nil
 }
 
-// [END pubsub_set_subscription_policy]
+// [END pubsub_old_version_set_subscription_policy]

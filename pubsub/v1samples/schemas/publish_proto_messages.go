@@ -14,7 +14,7 @@
 
 package schema
 
-// [START pubsub_publish_proto_messages]
+// [START pubsub_old_version_publish_proto_messages]
 import (
 	"context"
 	"fmt"
@@ -75,4 +75,4 @@ func publishProtoMessages(w io.Writer, projectID, topicID string) error {
 	return nil
 }
 
-// [END pubsub_publish_proto_messages]
+// [END pubsub_old_version_publish_proto_messages]

@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_quickstart_publisher]
+// [START pubsub_old_version_quickstart_publisher]
 import (
 	"context"
 	"fmt"
@@ -48,4 +48,4 @@ func publish(w io.Writer, projectID, topicID, msg string) error {
 	return nil
 }
 
-// [END pubsub_quickstart_publisher]
+// [END pubsub_old_version_quickstart_publisher]

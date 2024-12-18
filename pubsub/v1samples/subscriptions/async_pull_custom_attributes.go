@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_subscriber_async_pull_custom_attributes]
+// [START pubsub_old_version_subscriber_async_pull_custom_attributes]
 import (
 	"context"
 	"fmt"
@@ -58,4 +58,4 @@ func pullMsgsCustomAttributes(w io.Writer, projectID, subID string) error {
 	return nil
 }
 
-// [END pubsub_subscriber_async_pull_custom_attributes]
+// [END pubsub_old_version_subscriber_async_pull_custom_attributes]

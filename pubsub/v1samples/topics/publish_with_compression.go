@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_publisher_with_compression]
+// [START pubsub_old_version_publisher_with_compression]
 import (
 	"context"
 	"fmt"
@@ -52,4 +52,4 @@ func publishWithCompression(w io.Writer, projectID, topicID string) error {
 	return nil
 }
 
-// [END pubsub_publisher_with_compression]
+// [END pubsub_old_version_publisher_with_compression]

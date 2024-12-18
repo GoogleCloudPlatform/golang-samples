@@ -14,7 +14,7 @@
 
 package schema
 
-// [START pubsub_subscribe_avro_records_with_revisions]
+// [START pubsub_old_version_subscribe_avro_records_with_revisions]
 import (
 	"context"
 	"fmt"
@@ -111,4 +111,4 @@ func subscribeWithAvroSchemaRevisions(w io.Writer, projectID, subID, avscFile st
 	return nil
 }
 
-// [END pubsub_subscribe_avro_records_with_revisions]
+// [END pubsub_old_version_subscribe_avro_records_with_revisions]

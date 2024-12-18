@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_delete_subscription]
+// [START pubsub_old_version_delete_subscription]
 import (
 	"context"
 	"fmt"
@@ -41,4 +41,4 @@ func delete(w io.Writer, projectID, subID string) error {
 	return nil
 }
 
-// [END pubsub_delete_subscription]
+// [END pubsub_old_version_delete_subscription]

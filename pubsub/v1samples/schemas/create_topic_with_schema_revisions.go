@@ -14,7 +14,7 @@
 
 package schema
 
-// [START pubsub_create_topic_with_schema_revisions]
+// [START pubsub_old_version_create_topic_with_schema_revisions]
 import (
 	"context"
 	"fmt"
@@ -52,4 +52,4 @@ func createTopicWithSchemaRevisions(w io.Writer, projectID, topicID, schemaID, f
 	return nil
 }
 
-// [END pubsub_create_topic_with_schema_revisions]
+// [END pubsub_old_version_create_topic_with_schema_revisions]

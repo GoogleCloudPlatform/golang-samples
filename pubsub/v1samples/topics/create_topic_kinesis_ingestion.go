@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_create_topic_with_kinesis_ingestion]
+// [START pubsub_old_version_create_topic_with_kinesis_ingestion]
 import (
 	"context"
 	"fmt"
@@ -56,4 +56,4 @@ func createTopicWithKinesisIngestion(w io.Writer, projectID, topicID string) err
 	return nil
 }
 
-// [END pubsub_create_topic_with_kinesis_ingestion]
+// [END pubsub_old_version_create_topic_with_kinesis_ingestion]

@@ -14,7 +14,7 @@
 
 package schema
 
-// [START pubsub_create_proto_schema]
+// [START pubsub_old_version_create_proto_schema]
 import (
 	"context"
 	"fmt"
@@ -53,4 +53,4 @@ func createProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error
 	return nil
 }
 
-// [END pubsub_create_proto_schema]
+// [END pubsub_old_version_create_proto_schema]

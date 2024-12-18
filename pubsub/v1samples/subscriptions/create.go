@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_create_pull_subscription]
+// [START pubsub_old_version_create_pull_subscription]
 import (
 	"context"
 	"fmt"
@@ -46,4 +46,4 @@ func create(w io.Writer, projectID, subID string, topic *pubsub.Topic) error {
 	return nil
 }
 
-// [END pubsub_create_pull_subscription]
+// [END pubsub_old_version_create_pull_subscription]

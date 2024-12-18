@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_publish_with_ordering_keys]
+// [START pubsub_old_version_publish_with_ordering_keys]
 import (
 	"context"
 	"fmt"
@@ -99,4 +99,4 @@ func publishWithOrderingKey(w io.Writer, projectID, topicID string) {
 	fmt.Fprint(w, "Published 4 messages with ordering keys successfully\n")
 }
 
-// [END pubsub_publish_with_ordering_keys]
+// [END pubsub_old_version_publish_with_ordering_keys]

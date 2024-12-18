@@ -14,7 +14,7 @@
 
 package schema
 
-// [START pubsub_list_schemas]
+// [START pubsub_old_version_list_schemas]
 import (
 	"context"
 	"fmt"
@@ -52,4 +52,4 @@ func listSchemas(w io.Writer, projectID string) ([]*pubsub.SchemaConfig, error) 
 	return schemas, nil
 }
 
-// [END pubsub_list_schemas]
+// [END pubsub_old_version_list_schemas]

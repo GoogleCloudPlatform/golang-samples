@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_get_topic_policy]
+// [START pubsub_old_version_get_topic_policy]
 import (
 	"context"
 	"fmt"
@@ -44,4 +44,4 @@ func policy(w io.Writer, projectID, topicID string) (*iam.Policy, error) {
 	return policy, nil
 }
 
-// [END pubsub_get_topic_policy]
+// [END pubsub_old_version_get_topic_policy]

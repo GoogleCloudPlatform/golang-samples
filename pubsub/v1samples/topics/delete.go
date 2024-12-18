@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_delete_topic]
+// [START pubsub_old_version_delete_topic]
 import (
 	"context"
 	"fmt"
@@ -41,4 +41,4 @@ func delete(w io.Writer, projectID, topicID string) error {
 	return nil
 }
 
-// [END pubsub_delete_topic]
+// [END pubsub_old_version_delete_topic]

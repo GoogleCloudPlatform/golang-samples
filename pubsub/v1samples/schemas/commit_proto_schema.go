@@ -14,7 +14,7 @@
 
 package schema
 
-// [START pubsub_commit_proto_schema]
+// [START pubsub_old_version_commit_proto_schema]
 import (
 	"context"
 	"fmt"
@@ -55,4 +55,4 @@ func commitProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error
 	return nil
 }
 
-// [END pubsub_commit_proto_schema]
+// [END pubsub_old_version_commit_proto_schema]

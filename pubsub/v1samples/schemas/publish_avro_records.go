@@ -14,7 +14,7 @@
 
 package schema
 
-// [START pubsub_publish_avro_records]
+// [START pubsub_old_version_publish_avro_records]
 import (
 	"context"
 	"fmt"
@@ -80,4 +80,4 @@ func publishAvroRecords(w io.Writer, projectID, topicID, avscFile string) error 
 	return nil
 }
 
-// [END pubsub_publish_avro_records]
+// [END pubsub_old_version_publish_avro_records]

@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_detach_subscription]
+// [START pubsub_old_version_detach_subscription]
 import (
 	"context"
 	"fmt"
@@ -48,4 +48,4 @@ func detachSubscription(w io.Writer, projectID, subName string) error {
 	return nil
 }
 
-// [END pubsub_detach_subscription]
+// [END pubsub_old_version_detach_subscription]

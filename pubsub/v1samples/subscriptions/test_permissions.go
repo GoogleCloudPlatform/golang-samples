@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_test_subscription_permissions]
+// [START pubsub_old_version_test_subscription_permissions]
 import (
 	"context"
 	"fmt"
@@ -43,6 +43,6 @@ func testPermissions(w io.Writer, projectID, subID string) ([]string, error) {
 	for _, perm := range perms {
 		fmt.Fprintf(w, "Allowed: %v\n", perm)
 	}
-	// [END pubsub_test_subscription_permissions]
+	// [END pubsub_old_version_test_subscription_permissions]
 	return perms, nil
 }

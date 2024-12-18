@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_update_push_configuration]
+// [START pubsub_old_version_update_push_configuration]
 import (
 	"context"
 	"fmt"
@@ -44,4 +44,4 @@ func updateEndpoint(w io.Writer, projectID, subID string, endpoint string) error
 	return nil
 }
 
-// [END pubsub_update_push_configuration]
+// [END pubsub_old_version_update_push_configuration]

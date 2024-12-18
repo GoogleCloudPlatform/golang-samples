@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_publish_custom_attributes]
+// [START pubsub_old_version_publish_custom_attributes]
 import (
 	"context"
 	"fmt"
@@ -51,4 +51,4 @@ func publishCustomAttributes(w io.Writer, projectID, topicID string) error {
 	return nil
 }
 
-// [END pubsub_publish_custom_attributes]
+// [END pubsub_old_version_publish_custom_attributes]

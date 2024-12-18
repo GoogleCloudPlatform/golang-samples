@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_list_topics]
+// [START pubsub_old_version_list_topics]
 import (
 	"context"
 	"fmt"
@@ -49,4 +49,4 @@ func list(projectID string) ([]*pubsub.Topic, error) {
 	return topics, nil
 }
 
-// [END pubsub_list_topics]
+// [END pubsub_old_version_list_topics]

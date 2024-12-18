@@ -14,7 +14,7 @@
 
 package schema
 
-// [START pubsub_rollback_schema]
+// [START pubsub_old_version_rollback_schema]
 import (
 	"context"
 	"fmt"
@@ -43,4 +43,4 @@ func rollbackSchema(w io.Writer, projectID, schemaID, revisionID string) error {
 	return nil
 }
 
-// [END pubsub_rollback_schema]
+// [END pubsub_old_version_rollback_schema]

@@ -14,8 +14,8 @@
 
 package subscriptions
 
-// [START pubsub_subscriber_async_pull]
-// [START pubsub_quickstart_subscriber]
+// [START pubsub_old_version_subscriber_async_pull]
+// [START pubsub_old_version_quickstart_subscriber]
 import (
 	"context"
 	"fmt"
@@ -58,5 +58,5 @@ func pullMsgs(w io.Writer, projectID, subID string) error {
 	return nil
 }
 
-// [END pubsub_subscriber_async_pull]
-// [END pubsub_quickstart_subscriber]
+// [END pubsub_old_version_subscriber_async_pull]
+// [END pubsub_old_version_quickstart_subscriber]

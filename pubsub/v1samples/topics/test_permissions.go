@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_test_topic_permissions]
+// [START pubsub_old_version_test_topic_permissions]
 import (
 	"context"
 	"fmt"
@@ -46,4 +46,4 @@ func testPermissions(w io.Writer, projectID, topicID string) ([]string, error) {
 	return perms, nil
 }
 
-// [END pubsub_test_topic_permissions]
+// [END pubsub_old_version_test_topic_permissions]

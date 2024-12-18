@@ -14,7 +14,7 @@
 
 package schema
 
-// [START pubsub_subscribe_proto_messages]
+// [START pubsub_old_version_subscribe_proto_messages]
 import (
 	"context"
 	"fmt"
@@ -76,4 +76,4 @@ func subscribeWithProtoSchema(w io.Writer, projectID, subID, protoFile string) e
 	return nil
 }
 
-// [END pubsub_subscribe_proto_messages]
+// [END pubsub_old_version_subscribe_proto_messages]

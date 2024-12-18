@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_publisher_concurrency_control]
+// [START pubsub_old_version_publisher_concurrency_control]
 import (
 	"context"
 	"fmt"
@@ -48,4 +48,4 @@ func publishSingleGoroutine(w io.Writer, projectID, topicID, msg string) error {
 	return nil
 }
 
-// [END pubsub_publisher_concurrency_control]
+// [END pubsub_old_version_publisher_concurrency_control]

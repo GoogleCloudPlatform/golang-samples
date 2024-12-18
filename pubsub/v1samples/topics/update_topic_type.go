@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_update_topic_type]
+// [START pubsub_old_version_update_topic_type]
 import (
 	"context"
 	"fmt"
@@ -57,4 +57,4 @@ func updateTopicType(w io.Writer, projectID, topicID string) error {
 	return nil
 }
 
-// [END pubsub_update_topic_type]
+// [END pubsub_old_version_update_topic_type]

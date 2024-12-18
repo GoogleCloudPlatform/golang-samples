@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_create_topic]
+// [START pubsub_old_version_create_topic]
 import (
 	"context"
 	"fmt"
@@ -41,4 +41,4 @@ func create(w io.Writer, projectID, topicID string) error {
 	return nil
 }
 
-// [END pubsub_create_topic]
+// [END pubsub_old_version_create_topic]

@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_create_subscription_with_exactly_once_delivery]
+// [START pubsub_old_version_create_subscription_with_exactly_once_delivery]
 import (
 	"context"
 	"fmt"
@@ -45,4 +45,4 @@ func createSubscriptionWithExactlyOnceDelivery(w io.Writer, projectID, subID str
 	return nil
 }
 
-// [END pubsub_create_subscription_with_exactly_once_delivery]
+// [END pubsub_old_version_create_subscription_with_exactly_once_delivery]
