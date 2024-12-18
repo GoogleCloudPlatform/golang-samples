@@ -25,7 +25,7 @@ import (
 	durationpb "google.golang.org/protobuf/types/known/durationpb"
 )
 
-// Creates and runs a job with custom labels for policy.
+// createJobWithCustomPolicyLabels creates and runs a job with custom labels for policy.
 func createJobWithCustomPolicyLabels(w io.Writer, projectID, region, jobName string) (*batchpb.Job, error) {
 	ctx := context.Background()
 	batchClient, err := batch.NewClient(ctx)
@@ -37,6 +37,7 @@ func createJobWithCustomPolicyLabels(w io.Writer, projectID, region, jobName str
 	runn := &batchpb.Runnable{
 		Executable: &batchpb.Runnable_Script_{
 			Script: &batchpb.Runnable_Script{
+				// Example command to run executable
 				Command: &batchpb.Runnable_Script_Text{
 					Text: "echo Hello world from script 1 for task ${BATCH_TASK_INDEX}",
 				},
@@ -84,7 +85,7 @@ func createJobWithCustomPolicyLabels(w io.Writer, projectID, region, jobName str
 		Labels: labels,
 	}
 
-	// We use Cloud Logging as it's an out of the box available option
+	// Use Cloud Logging as it's an out-of-the-box available option.
 	logsPolicy := &batchpb.LogsPolicy{
 		Destination: batchpb.LogsPolicy_CLOUD_LOGGING,
 	}
@@ -102,13 +103,13 @@ func createJobWithCustomPolicyLabels(w io.Writer, projectID, region, jobName str
 		Job:    job,
 	}
 
-	created_job, err := batchClient.CreateJob(ctx, request)
+	createdJob, err := batchClient.CreateJob(ctx, request)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create job: %w", err)
 	}
 
-	fmt.Fprintf(w, "Job created: %v\n", created_job)
-	return created_job, nil
+	fmt.Fprintf(w, "Job created: %v\n", createdJob)
+	return createdJob, nil
 }
 
 // [END batch_labels_allocation]
