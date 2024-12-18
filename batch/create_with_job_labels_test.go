@@ -44,7 +44,7 @@ func TestCreateJobWithCustomJobLabels(t *testing.T) {
 	}
 
 	labels := job.GetLabels()
-	if labels["env"] != "dev" || labels["type"] != "single command" {
+	if labels["env"] != "dev" || labels["type"] != "single_command" {
 		t.Errorf("labels weren't set")
 	}
 

@@ -82,10 +82,11 @@ func createJobWithCustomJobLabels(w io.Writer, projectID, region, jobName string
 		Destination: batchpb.LogsPolicy_CLOUD_LOGGING,
 	}
 
-	// Setting some labels for job
+	// Setting some labels for job. Labels have some restrictions
+	// Read more: https://cloud.google.com/compute/docs/labeling-resources#restrictions
 	labels := map[string]string{
 		"env":  "dev",
-		"type": "single command",
+		"type": "single_command",
 	}
 
 	job := &batchpb.Job{
