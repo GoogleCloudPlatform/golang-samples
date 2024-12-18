@@ -25,7 +25,7 @@ import (
 	durationpb "google.golang.org/protobuf/types/known/durationpb"
 )
 
-// Creates and runs a job with status events that mounts a Network File System (NFS).
+// createJobWithNFS creates and runs a job with status events that mounts a Network File System (NFS).
 func createJobWithNFS(w io.Writer, projectID, region, jobName, remotePath, server, mountPath string) (*batchpb.Job, error) {
 	ctx := context.Background()
 	batchClient, err := batch.NewClient(ctx)
@@ -37,6 +37,7 @@ func createJobWithNFS(w io.Writer, projectID, region, jobName, remotePath, serve
 	runn := &batchpb.Runnable{
 		Executable: &batchpb.Runnable_Script_{
 			Script: &batchpb.Runnable_Script{
+				// Example command to run executable
 				Command: &batchpb.Runnable_Script_Text{
 					Text: "echo Hello world from script 1 for task ${BATCH_TASK_INDEX}",
 				},
@@ -89,7 +90,7 @@ func createJobWithNFS(w io.Writer, projectID, region, jobName, remotePath, serve
 		}},
 	}
 
-	// We use Cloud Logging as it's an out of the box available option
+	// Use Cloud Logging as it's an out-of-the-box available option.
 	logsPolicy := &batchpb.LogsPolicy{
 		Destination: batchpb.LogsPolicy_CLOUD_LOGGING,
 	}
@@ -107,13 +108,13 @@ func createJobWithNFS(w io.Writer, projectID, region, jobName, remotePath, serve
 		Job:    job,
 	}
 
-	created_job, err := batchClient.CreateJob(ctx, request)
+	createdJob, err := batchClient.CreateJob(ctx, request)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create job: %w", err)
 	}
 
-	fmt.Fprintf(w, "Job created: %v\n", created_job)
-	return created_job, nil
+	fmt.Fprintf(w, "Job created: %v\n", createdJob)
+	return createdJob, nil
 }
 
 // [END batch_create_nfs_job]
