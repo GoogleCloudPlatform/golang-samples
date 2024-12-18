@@ -9,11 +9,11 @@ require (
 	go.opentelemetry.io/contrib/exporters/autoexport v0.53.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.53.0
 	go.opentelemetry.io/contrib/propagators/autoprop v0.53.0
-	go.opentelemetry.io/otel v1.28.0
-	go.opentelemetry.io/otel/metric v1.28.0
-	go.opentelemetry.io/otel/sdk v1.28.0
-	go.opentelemetry.io/otel/sdk/metric v1.28.0
-	go.opentelemetry.io/otel/trace v1.28.0
+	go.opentelemetry.io/otel v1.32.0
+	go.opentelemetry.io/otel/metric v1.32.0
+	go.opentelemetry.io/otel/sdk v1.32.0
+	go.opentelemetry.io/otel/sdk/metric v1.32.0
+	go.opentelemetry.io/otel/trace v1.32.0
 )
 
 require (
