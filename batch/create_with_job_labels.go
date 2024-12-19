@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START batch_create_custom_network]
+// [START batch_labels_job]
 import (
 	"context"
 	"fmt"
@@ -25,8 +25,8 @@ import (
 	durationpb "google.golang.org/protobuf/types/known/durationpb"
 )
 
-// createJobWithCustomNetwork creates and runs a job with custom network
-func createJobWithCustomNetwork(w io.Writer, projectID, region, jobName, networkName, subnetworkName string) (*batchpb.Job, error) {
+// createJobWithCustomJobLabels creates and runs a job with custom labels for job.
+func createJobWithCustomJobLabels(w io.Writer, projectID, region, jobName string) (*batchpb.Job, error) {
 	ctx := context.Background()
 	batchClient, err := batch.NewClient(ctx)
 	if err != nil {
@@ -76,21 +76,18 @@ func createJobWithCustomNetwork(w io.Writer, projectID, region, jobName, network
 				},
 			},
 		}},
-		Network: &batchpb.AllocationPolicy_NetworkPolicy{
-			NetworkInterfaces: []*batchpb.AllocationPolicy_NetworkInterface{
-				{
-					// Set the network to the specified network name within the project
-					Network: fmt.Sprintf("projects/%s/global/networks/%s", projectID, networkName),
-					// Set the subnetwork to the specified subnetwork within the region
-					Subnetwork: fmt.Sprintf("projects/%s/regions/%s/subnetworks/%s", projectID, region, subnetworkName),
-				},
-			},
-		},
 	}
 
-	// We use Cloud Logging as it's an out of the box available option
+	// Use Cloud Logging as it's an out-of-the-box available option.
 	logsPolicy := &batchpb.LogsPolicy{
 		Destination: batchpb.LogsPolicy_CLOUD_LOGGING,
+	}
+
+	// Setting some labels for job. Labels have some restrictions
+	// Read more: https://cloud.google.com/compute/docs/labeling-resources#restrictions
+	labels := map[string]string{
+		"env":  "dev",
+		"type": "single_command",
 	}
 
 	job := &batchpb.Job{
@@ -98,6 +95,7 @@ func createJobWithCustomNetwork(w io.Writer, projectID, region, jobName, network
 		TaskGroups:       taskGroups,
 		AllocationPolicy: allocationPolicy,
 		LogsPolicy:       logsPolicy,
+		Labels:           labels,
 	}
 
 	request := &batchpb.CreateJobRequest{
@@ -106,13 +104,13 @@ func createJobWithCustomNetwork(w io.Writer, projectID, region, jobName, network
 		Job:    job,
 	}
 
-	created_job, err := batchClient.CreateJob(ctx, request)
+	createdJob, err := batchClient.CreateJob(ctx, request)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create job: %w", err)
 	}
 
-	fmt.Fprintf(w, "Job created: %v\n", created_job)
-	return created_job, nil
+	fmt.Fprintf(w, "Job created: %v\n", createdJob)
+	return createdJob, nil
 }
 
-// [END batch_create_custom_network]
+// [END batch_labels_job]
