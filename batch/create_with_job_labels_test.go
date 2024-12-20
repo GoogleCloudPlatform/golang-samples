@@ -25,30 +25,26 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestCreateJobWithCustomNetwork(t *testing.T) {
+func TestCreateJobWithCustomJobLabels(t *testing.T) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	jobName := fmt.Sprintf("test-job-go-%v-%v", time.Now().Format("2006-01-02"), r.Int())
 	region := "us-central1"
-	networkName, subnetworkName := "default", "default"
 
 	buf := &bytes.Buffer{}
 
-	job, err := createJobWithCustomNetwork(buf, tc.ProjectID, region, jobName, networkName, subnetworkName)
+	job, err := createJobWithCustomJobLabels(buf, tc.ProjectID, region, jobName)
 
 	if err != nil {
-		t.Errorf("createJobWithCustomNetwork got err: %v", err)
+		t.Fatalf("createJobWithCustomJobLabels got err: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, "Job created") {
-		t.Errorf("createJobWithCustomNetwork got %q, expected %q", got, "Job created")
+		t.Errorf("createJobWithCustomJobLabels got %q, expected %q", got, "Job created")
 	}
 
-	expectedNetwork := fmt.Sprintf("projects/%s/global/networks/%s", tc.ProjectID, networkName)
-	expectedSubnetwork := fmt.Sprintf("projects/%s/regions/%s/subnetworks/%s", tc.ProjectID, region, subnetworkName)
-
-	interfaces := job.GetAllocationPolicy().GetNetwork().GetNetworkInterfaces()
-	if interfaces[0].GetNetwork() != expectedNetwork || interfaces[0].GetSubnetwork() != expectedSubnetwork {
-		t.Errorf("Network wasn't set")
+	labels := job.GetLabels()
+	if labels["env"] != "dev" || labels["type"] != "single_command" {
+		t.Errorf("labels weren't set")
 	}
 
 	if err := deleteJob(buf, tc.ProjectID, region, jobName); err != nil {
