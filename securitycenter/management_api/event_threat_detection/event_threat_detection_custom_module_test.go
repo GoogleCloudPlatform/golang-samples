@@ -19,9 +19,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"math/rand"
 	"os"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -33,6 +35,7 @@ import (
 
 var orgID = ""
 var createdCustomModuleID = ""
+var mu sync.Mutex
 
 func TestMain(m *testing.M) {
 	orgID = os.Getenv("GCLOUD_ORGANIZATION")
@@ -42,8 +45,9 @@ func TestMain(m *testing.M) {
 	}
 
 	// Perform cleanup before running tests
-	err := cleanupExistingCustomModules(orgID)
-	if err != nil {
+	if err := retryOperation(func() error {
+		return cleanupExistingCustomModules(orgID)
+	}, 5, 2*time.Second); err != nil {
 		log.Fatalf("Error cleaning up existing custom modules: %v", err)
 	}
 
@@ -54,14 +58,81 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-// extractCustomModuleID extracts the custom module ID from the full name
-func extractCustomModuleID(customModuleFullName string) string {
-	trimmedFullName := strings.TrimSpace(customModuleFullName)
-	parts := strings.Split(trimmedFullName, "/")
-	if len(parts) > 0 {
-		return parts[len(parts)-1]
+func retryOperation(operation func() error, retries int, baseDelay time.Duration) error {
+	for i := 0; i <= retries; i++ {
+		err := operation()
+		if err == nil {
+			return nil
+		}
+		if i < retries {
+			delay := time.Duration(math.Pow(2, float64(i))) * baseDelay
+			time.Sleep(delay)
+		}
 	}
-	return ""
+	return fmt.Errorf("operation failed after %d retries", retries)
+}
+
+func cleanupExistingCustomModules(orgID string) error {
+	ctx := context.Background()
+	client, err := securitycentermanagement.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("securitycentermanagement.NewClient: %w", err)
+	}
+	defer client.Close()
+
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+
+	// List all existing custom modules
+	req := &securitycentermanagementpb.ListEventThreatDetectionCustomModulesRequest{
+		Parent: parent,
+	}
+
+	it := client.ListEventThreatDetectionCustomModules(ctx, req)
+	for {
+		module, err := it.Next()
+
+		if err == iterator.Done {
+			break
+		}
+
+		if err != nil {
+			return fmt.Errorf("failed to list CustomModules: %w", err)
+		}
+
+		// Check if the custom module name starts with 'go_sample_etd_custom'
+		if strings.HasPrefix(module.DisplayName, "go_sample_etd_custom") {
+
+			customModuleID := extractCustomModuleID(module.Name)
+			// Delete the custom module
+			err := cleanupCustomModule(customModuleID)
+			if err != nil {
+				return fmt.Errorf("failed to delete existing CustomModule: %w", err)
+			}
+			fmt.Printf("Deleted existing CustomModule: %s\n", module.Name)
+		}
+	}
+
+	return nil
+}
+
+func cleanupCustomModule(customModuleID string) error {
+
+	ctx := context.Background()
+	client, err := securitycentermanagement.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("securitycentermanagement.NewClient: %w", err)
+	}
+	defer client.Close()
+
+	req := &securitycentermanagementpb.DeleteEventThreatDetectionCustomModuleRequest{
+		Name: fmt.Sprintf("organizations/%s/locations/global/eventThreatDetectionCustomModules/%s", orgID, customModuleID),
+	}
+
+	if err := client.DeleteEventThreatDetectionCustomModule(ctx, req); err != nil {
+		return fmt.Errorf("failed to delete CustomModule: %w", err)
+	}
+
+	return nil
 }
 
 // addCustomModule creates a custom module for testing purposes
@@ -130,84 +201,24 @@ func addCustomModule() (string, error) {
 	return createdCustomModuleID, nil
 }
 
-func cleanupCustomModule(customModuleID string) error {
-
-	ctx := context.Background()
-	client, err := securitycentermanagement.NewClient(ctx)
-	if err != nil {
-		return fmt.Errorf("securitycentermanagement.NewClient: %w", err)
+// extractCustomModuleID extracts the custom module ID from the full name
+func extractCustomModuleID(customModuleFullName string) string {
+	trimmedFullName := strings.TrimSpace(customModuleFullName)
+	parts := strings.Split(trimmedFullName, "/")
+	if len(parts) > 0 {
+		return parts[len(parts)-1]
 	}
-	defer client.Close()
-
-	req := &securitycentermanagementpb.DeleteEventThreatDetectionCustomModuleRequest{
-		Name: fmt.Sprintf("organizations/%s/locations/global/eventThreatDetectionCustomModules/%s", orgID, customModuleID),
-	}
-
-	if err := client.DeleteEventThreatDetectionCustomModule(ctx, req); err != nil {
-		return fmt.Errorf("failed to delete CustomModule: %w", err)
-	}
-
-	return nil
-}
-
-func cleanupExistingCustomModules(orgID string) error {
-	ctx := context.Background()
-	client, err := securitycentermanagement.NewClient(ctx)
-	if err != nil {
-		return fmt.Errorf("securitycentermanagement.NewClient: %w", err)
-	}
-	defer client.Close()
-
-	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
-
-	// List all existing custom modules
-	req := &securitycentermanagementpb.ListEventThreatDetectionCustomModulesRequest{
-		Parent: parent,
-	}
-
-	it := client.ListEventThreatDetectionCustomModules(ctx, req)
-	for {
-		module, err := it.Next()
-
-		if err == iterator.Done {
-			break
-		}
-
-		if err != nil {
-			return fmt.Errorf("failed to list CustomModules: %w", err)
-		}
-
-		// Check if the custom module name starts with 'go_sample_etd_custom'
-		if strings.HasPrefix(module.DisplayName, "go_sample_etd_custom") {
-
-			customModuleID := extractCustomModuleID(module.Name)
-			// Delete the custom module
-			err := cleanupCustomModule(customModuleID)
-			if err != nil {
-				return fmt.Errorf("failed to delete existing CustomModule: %w", err)
-			}
-			fmt.Printf("Deleted existing CustomModule: %s\n", module.Name)
-		}
-	}
-
-	return nil
+	return ""
 }
 
 // TestCreateEtdCustomModule verifies the Create functionality
 func TestCreateEtdCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
-	_, err := addCustomModule()
-
-	if err != nil {
-		t.Fatalf("Could not setup test environment: %v", err)
-		return
-	}
-
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
 	// Call Create
-	err = createEventThreatDetectionCustomModule(&buf, parent)
+	err := createEventThreatDetectionCustomModule(&buf, parent)
 
 	if err != nil {
 		t.Fatalf("createCustomModule() had error: %v", err)
@@ -225,10 +236,13 @@ func TestCreateEtdCustomModule(t *testing.T) {
 func TestGetEtdCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
+	mu.Lock()
+	defer mu.Unlock()
+
 	createdCustomModuleID, err := addCustomModule()
 
 	if err != nil {
-		t.Fatalf("Could not setup test environment: %v", err)
+		t.Fatalf("Could not setup test environment at TestGetEtdCustomModule: %v", err)
 		return
 	}
 
@@ -254,10 +268,13 @@ func TestGetEtdCustomModule(t *testing.T) {
 func TestUpdateEtdCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
+	mu.Lock()
+	defer mu.Unlock()
+
 	createdCustomModuleID, err := addCustomModule()
 
 	if err != nil {
-		t.Fatalf("Could not setup test environment: %v", err)
+		t.Fatalf("Could not setup test environment at TestUpdateEtdCustomModule: %v", err)
 		return
 	}
 
@@ -281,10 +298,13 @@ func TestUpdateEtdCustomModule(t *testing.T) {
 func TestDeleteEtdCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
+	mu.Lock()
+	defer mu.Unlock()
+
 	createdCustomModuleID, err := addCustomModule()
 
 	if err != nil {
-		t.Fatalf("Could not setup test environment: %v", err)
+		t.Fatalf("Could not setup test environment at TestDeleteEtdCustomModule: %v", err)
 		return
 	}
 
@@ -308,10 +328,13 @@ func TestDeleteEtdCustomModule(t *testing.T) {
 func TestListEtdCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
+	mu.Lock()
+	defer mu.Unlock()
+
 	_, err := addCustomModule()
 
 	if err != nil {
-		t.Fatalf("Could not setup test environment: %v", err)
+		t.Fatalf("Could not setup test environment at TestListEtdCustomModule: %v", err)
 		return
 	}
 
@@ -336,10 +359,13 @@ func TestListEtdCustomModule(t *testing.T) {
 func TestListEffectiveEtdCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
+	mu.Lock()
+	defer mu.Unlock()
+
 	_, err := addCustomModule()
 
 	if err != nil {
-		t.Fatalf("Could not setup test environment: %v", err)
+		t.Fatalf("Could not setup test environment at TestListEffectiveEtdCustomModule: %v", err)
 		return
 	}
 
@@ -364,10 +390,13 @@ func TestListEffectiveEtdCustomModule(t *testing.T) {
 func TestGetEffectiveEtdCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
+	mu.Lock()
+	defer mu.Unlock()
+
 	createdCustomModuleID, err := addCustomModule()
 
 	if err != nil {
-		t.Fatalf("Could not setup test environment: %v", err)
+		t.Fatalf("Could not setup test environment at TestGetEffectiveEtdCustomModule: %v", err)
 		return
 	}
 
@@ -393,10 +422,13 @@ func TestGetEffectiveEtdCustomModule(t *testing.T) {
 func TestListDescendantEtdCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
+	mu.Lock()
+	defer mu.Unlock()
+
 	_, err := addCustomModule()
 
 	if err != nil {
-		t.Fatalf("Could not setup test environment: %v", err)
+		t.Fatalf("Could not setup test environment at TestListDescendantEtdCustomModule: %v", err)
 		return
 	}
 
@@ -421,10 +453,13 @@ func TestListDescendantEtdCustomModule(t *testing.T) {
 func TestValidateEtdCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
+	mu.Lock()
+	defer mu.Unlock()
+
 	_, err := addCustomModule()
 
 	if err != nil {
-		t.Fatalf("Could not setup test environment: %v", err)
+		t.Fatalf("Could not setup test environment at TestValidateEtdCustomModule: %v", err)
 		return
 	}
 
