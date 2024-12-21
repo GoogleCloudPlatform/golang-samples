@@ -21,6 +21,7 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"time"
 
 	"testing"
 
@@ -32,6 +33,7 @@ import (
 	"google.golang.org/api/option"
 	grpccodes "google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 func testLocation(tb testing.TB) string {
@@ -311,7 +313,7 @@ func TestCreateSecret(t *testing.T) {
 	parent := fmt.Sprintf("projects/%s", tc.ProjectID)
 
 	var b bytes.Buffer
-	if err := createSecret(&b, parent, secretID); err != nil {
+	if _, err := createSecret(&b, parent, secretID, nil); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
@@ -319,6 +321,32 @@ func TestCreateSecret(t *testing.T) {
 	if got, want := b.String(), "Created secret:"; !strings.Contains(got, want) {
 		t.Errorf("createSecret: expected %q to contain %q", got, want)
 	}
+}
+
+func TestCreateSecretWithTTL(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secretID := "createSecret"
+
+	parent := fmt.Sprintf("projects/%s", tc.ProjectID)
+
+	ttl := time.Second * 70
+
+	var b bytes.Buffer
+	secret, err := createSecret(&b, parent, secretID, &secretmanagerpb.Secret_Ttl{Ttl: durationpb.New(ttl)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
+
+	if got, want := b.String(), "Created secret:"; !strings.Contains(got, want) {
+		t.Errorf("createSecretWithTTL: expected %q to contain %q", got, want)
+	}
+
+	if got, want := reflect.TypeOf(secret.Expiration), reflect.TypeOf(&secretmanagerpb.Secret_ExpireTime{}); got != want {
+		t.Errorf("createSecretWithTTL: expected %q to be equal type %q", got, want)
+	}
+
 }
 
 func TestCreateSecretWithLabels(t *testing.T) {
