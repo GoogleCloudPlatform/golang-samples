@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START compute_instance_attach_regional_disk_force]
+// [START compute_instance_create_replicated_boot_disk]
 import (
 	"context"
 	"fmt"
@@ -89,4 +89,4 @@ func createReplicatedBootDisk(
 	return nil
 }
 
-// [END compute_instance_attach_regional_disk_force]
+// [END compute_instance_create_replicated_boot_disk]
