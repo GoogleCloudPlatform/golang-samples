@@ -38,13 +38,13 @@ spec:
       labels:
         app: esp-echo
     spec:
-      # [START endpoints_secret_1]
+      # [START endpoints_secret_1_go]
       volumes:
         - name: service-account-creds
           secret:
             secretName: service-account-creds
-      # [END endpoints_secret_1]
-      # [START endpoints_service]
+      # [END endpoints_secret_1_go]
+      # [START endpoints_service_go]
       containers:
         - name: esp
           image: gcr.io/endpoints-release/endpoints-runtime:1
@@ -55,15 +55,15 @@ spec:
             "--rollout_strategy", "managed",
             "--service_account_key", "/etc/nginx/creds/service-account-creds.json",
           ]
-      # [END endpoints_service]
+      # [END endpoints_service_go]
           ports:
             - containerPort: 8080
-          # [START endpoints_secret_2]
+          # [START endpoints_secret_2_go]
           volumeMounts:
             - mountPath: /etc/nginx/creds
               name: service-account-creds
               readOnly: true
-          # [END endpoints_secret_2]
+          # [END endpoints_secret_2_go]
         - name: echo
           image: gcr.io/endpoints-release/echo:latest
           ports:
