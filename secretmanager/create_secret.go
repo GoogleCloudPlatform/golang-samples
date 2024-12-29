@@ -27,7 +27,7 @@ import (
 // createSecret creates a new secret with the given name. A secret is a logical
 // wrapper around a collection of secret versions. Secret versions hold the
 // actual secret material.
-func createSecret(w io.Writer, parent, id string) error {
+func createSecret(w io.Writer, parent, id string, ttl *secretmanagerpb.Secret_Ttl) (*secretmanagerpb.Secret, error) {
 	// parent := "projects/my-project"
 	// id := "my-secret"
 
@@ -35,7 +35,7 @@ func createSecret(w io.Writer, parent, id string) error {
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to create secretmanager client: %w", err)
+		return nil, fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
 	defer client.Close()
 
@@ -49,16 +49,17 @@ func createSecret(w io.Writer, parent, id string) error {
 					Automatic: &secretmanagerpb.Replication_Automatic{},
 				},
 			},
+			Expiration: ttl,
 		},
 	}
 
 	// Call the API.
 	result, err := client.CreateSecret(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to create secret: %w", err)
+		return nil, fmt.Errorf("failed to create secret: %w", err)
 	}
 	fmt.Fprintf(w, "Created secret: %s\n", result.Name)
-	return nil
+	return result, nil
 }
 
 // [END secretmanager_create_secret]
