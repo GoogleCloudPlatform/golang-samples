@@ -27,7 +27,7 @@ func handlerWithSpanContext(handler slog.Handler) *spanContextLogHandler {
 	return &spanContextLogHandler{Handler: handler}
 }
 
-// spanContextLogHandler is an slog.Handler which adds attributes from the
+// spanContextLogHandler is a slog.Handler which adds attributes from the
 // span context.
 type spanContextLogHandler struct {
 	slog.Handler

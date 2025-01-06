@@ -25,30 +25,29 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestCreateJobWithCustomNetwork(t *testing.T) {
+func TestCreateJobWithNFS(t *testing.T) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	jobName := fmt.Sprintf("test-job-go-%v-%v", time.Now().Format("2006-01-02"), r.Int())
 	region := "us-central1"
-	networkName, subnetworkName := "default", "default"
+	nfsPath := "/mnt/nfs"
+	nfsIpAddress := "0.0.0.0"
+	mountPath := "/vol1"
 
 	buf := &bytes.Buffer{}
 
-	job, err := createJobWithCustomNetwork(buf, tc.ProjectID, region, jobName, networkName, subnetworkName)
+	job, err := createJobWithNFS(buf, tc.ProjectID, region, jobName, nfsPath, nfsIpAddress, mountPath)
 
 	if err != nil {
-		t.Errorf("createJobWithCustomNetwork got err: %v", err)
+		t.Fatalf("createJobWithNFS got err: %v", err)
 	}
 	if got := buf.String(); !strings.Contains(got, "Job created") {
-		t.Errorf("createJobWithCustomNetwork got %q, expected %q", got, "Job created")
+		t.Errorf("createJobWithNFS got %q, expected %q", got, "Job created")
 	}
 
-	expectedNetwork := fmt.Sprintf("projects/%s/global/networks/%s", tc.ProjectID, networkName)
-	expectedSubnetwork := fmt.Sprintf("projects/%s/regions/%s/subnetworks/%s", tc.ProjectID, region, subnetworkName)
-
-	interfaces := job.GetAllocationPolicy().GetNetwork().GetNetworkInterfaces()
-	if interfaces[0].GetNetwork() != expectedNetwork || interfaces[0].GetSubnetwork() != expectedSubnetwork {
-		t.Errorf("Network wasn't set")
+	volume := job.GetTaskGroups()[0].GetTaskSpec().GetVolumes()[0]
+	if volume.GetNfs().GetRemotePath() != nfsPath || volume.GetNfs().GetServer() != nfsIpAddress || volume.GetMountPath() != mountPath {
+		t.Errorf("volume wasn't set")
 	}
 
 	if err := deleteJob(buf, tc.ProjectID, region, jobName); err != nil {
