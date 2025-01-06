@@ -36,10 +36,10 @@ import (
 
 const (
 	schemaPrefix     = "test-schema-"
-	avroFilePath     = "./resources/us-states.avsc"
-	protoFilePath    = "./resources/us-states.proto"
-	avroRevFilePath  = "./resources/us-states-plus.avsc"
-	protoRevFilePath = "./resources/us-states-plus.proto"
+	avroFilePath     = "../../schemas/resources/us-states.avsc"
+	protoFilePath    = "../../schemas/resources/us-states.proto"
+	avroRevFilePath  = "../../schemas/resources/us-states-plus.avsc"
+	protoRevFilePath = "../../schemas/resources/us-states-plus.proto"
 
 	topicPrefix = "test-topic-"
 	subPrefix   = "test-sub-"
