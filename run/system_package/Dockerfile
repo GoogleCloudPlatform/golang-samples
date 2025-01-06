@@ -36,11 +36,9 @@ RUN go build -v -o server
 FROM ubuntu
 
 # [START cloudrun_system_package_ubuntu]
-# [START run_system_package_ubuntu]
 RUN apt-get update -y && apt-get install -y \
   graphviz \
   && apt-get clean
-# [END run_system_package_ubuntu]
 # [END cloudrun_system_package_ubuntu]
 
 # Copy the binary to the production image from the builder stage.
