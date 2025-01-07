@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math"
 	"math/rand"
 	"os"
 	"strings"
@@ -45,9 +44,8 @@ func TestMain(m *testing.M) {
 	}
 
 	// Perform cleanup before running tests
-	if err := retryOperation(func() error {
-		return cleanupExistingCustomModules(orgID)
-	}, 5, 2*time.Second); err != nil {
+	err := cleanupExistingCustomModules(orgID)
+	if err != nil {
 		log.Fatalf("Error cleaning up existing custom modules: %v", err)
 	}
 
@@ -56,20 +54,6 @@ func TestMain(m *testing.M) {
 
 	// Exit with the appropriate code
 	os.Exit(code)
-}
-
-func retryOperation(operation func() error, retries int, baseDelay time.Duration) error {
-	for i := 0; i <= retries; i++ {
-		err := operation()
-		if err == nil {
-			return nil
-		}
-		if i < retries {
-			delay := time.Duration(math.Pow(2, float64(i))) * baseDelay
-			time.Sleep(delay)
-		}
-	}
-	return fmt.Errorf("operation failed after %d retries", retries)
 }
 
 func cleanupExistingCustomModules(orgID string) error {
