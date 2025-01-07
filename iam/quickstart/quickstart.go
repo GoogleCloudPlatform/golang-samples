@@ -30,8 +30,9 @@ import (
 func main() {
 	// TODO: Add your project ID
 	projectID := flag.String("project_id", "", "Cloud Project ID")
-	// TODO: Add the ID of your member in the form "user:member@example.com"
-	member := flag.String("member_id", "", "Your member ID")
+	// TODO: Add the ID of your principal.
+	// For examples, see https://cloud.google.com/iam/docs/principal-identifiers
+	member := flag.String("member_id", "", "Your principal ID")
 	flag.Parse()
 
 	// The role to be granted
@@ -44,10 +45,10 @@ func main() {
 		log.Fatalf("cloudresourcemanager.NewService: %v", err)
 	}
 
-	// Grants your member the "Log writer" role for your project
+	// Grants your principal the "Log writer" role for your project
 	addBinding(crmService, *projectID, *member, role)
 
-	// Gets the project's policy and prints all members with the "Log Writer" role
+	// Gets the project's policy and prints all principals with the "Log Writer" role
 	policy := getPolicy(crmService, *projectID)
 	// Find the policy binding for role. Only one binding can have the role.
 	var binding *cloudresourcemanager.Binding
@@ -65,7 +66,7 @@ func main() {
 
 }
 
-// addBinding adds the member to the project's IAM policy
+// addBinding adds the principal to the project's IAM policy
 func addBinding(crmService *cloudresourcemanager.Service, projectID, member, role string) {
 
 	policy := getPolicy(crmService, projectID)
@@ -80,7 +81,7 @@ func addBinding(crmService *cloudresourcemanager.Service, projectID, member, rol
 	}
 
 	if binding != nil {
-		// If the binding exists, adds the member to the binding
+		// If the binding exists, adds the principal to the binding
 		binding.Members = append(binding.Members, member)
 	} else {
 		// If the binding does not exist, adds a new binding to the policy
@@ -95,7 +96,7 @@ func addBinding(crmService *cloudresourcemanager.Service, projectID, member, rol
 
 }
 
-// removeMember removes the member from the project's IAM policy
+// removeMember removes the principal from the project's IAM policy
 func removeMember(crmService *cloudresourcemanager.Service, projectID, member, role string) {
 
 	policy := getPolicy(crmService, projectID)
@@ -114,12 +115,12 @@ func removeMember(crmService *cloudresourcemanager.Service, projectID, member, r
 	// Order doesn't matter for bindings or members, so to remove, move the last item
 	// into the removed spot and shrink the slice.
 	if len(binding.Members) == 1 {
-		// If the member is the only member in the binding, removes the binding
+		// If the principal is the only member in the binding, removes the binding
 		last := len(policy.Bindings) - 1
 		policy.Bindings[bindingIndex] = policy.Bindings[last]
 		policy.Bindings = policy.Bindings[:last]
 	} else {
-		// If there is more than one member in the binding, removes the member
+		// If there is more than one member in the binding, removes the principal
 		var memberIndex int
 		for i, mm := range binding.Members {
 			if mm == member {
