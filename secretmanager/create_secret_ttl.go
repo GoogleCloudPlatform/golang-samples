@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,22 +14,24 @@
 
 package secretmanager
 
-// [START secretmanager_create_secret]
+// [START secretmanager_create_secret_with_ttl]
 import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
-// createSecret creates a new secret with the given name. A secret is a logical
-// wrapper around a collection of secret versions. Secret versions hold the
-// actual secret material.
-func createSecret(w io.Writer, parent, id string) error {
+// createSecretWithTTL creates a new secret with the given name and ttl.
+func createSecretWithTTL(w io.Writer, parent, id string, d time.Duration) error {
 	// parent := "projects/my-project"
 	// id := "my-secret"
+
+	expiration := &secretmanagerpb.Secret_Ttl{Ttl: durationpb.New(d)}
 
 	// Create the client.
 	ctx := context.Background()
@@ -49,6 +51,7 @@ func createSecret(w io.Writer, parent, id string) error {
 					Automatic: &secretmanagerpb.Replication_Automatic{},
 				},
 			},
+			Expiration: expiration,
 		},
 	}
 
@@ -57,8 +60,8 @@ func createSecret(w io.Writer, parent, id string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create secret: %w", err)
 	}
-	fmt.Fprintf(w, "Created secret: %s\n", result.Name)
+	fmt.Fprintf(w, "Created secret with ttl: %s\n", result.Name)
 	return nil
 }
 
-// [END secretmanager_create_secret]
+// [END secretmanager_create_secret_with_ttl]
