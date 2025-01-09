@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-# Use the offical golang image to create a binary.
+# Use the official go image to create a binary.
 # This is based on Debian and sets the GOPATH to /go.
 # https://hub.docker.com/_/golang
 FROM golang:1.21-bookworm as builder
