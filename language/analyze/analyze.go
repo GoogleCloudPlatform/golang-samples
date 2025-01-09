@@ -26,10 +26,8 @@ import (
 	"github.com/golang/protobuf/proto"
 
 	// [START language_imports]
-	// [START imports]
 	language "cloud.google.com/go/language/apiv1"
 	"cloud.google.com/go/language/apiv1/languagepb"
-	// [END imports]
 	// [END language_imports]
 )
 
