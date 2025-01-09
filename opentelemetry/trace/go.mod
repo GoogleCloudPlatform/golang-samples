@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/trace v1.10.10
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.24.1
-	go.opentelemetry.io/contrib/detectors/gcp v1.28.0
+	go.opentelemetry.io/contrib/detectors/gcp v1.33.0
 	go.opentelemetry.io/otel v1.28.0
 	go.opentelemetry.io/otel/sdk v1.28.0
 	google.golang.org/api v0.189.0
