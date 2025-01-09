@@ -21,6 +21,7 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"time"
 
 	"testing"
 
@@ -318,6 +319,26 @@ func TestCreateSecret(t *testing.T) {
 
 	if got, want := b.String(), "Created secret:"; !strings.Contains(got, want) {
 		t.Errorf("createSecret: expected %q to contain %q", got, want)
+	}
+}
+
+func TestCreateSecretWithTTL(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secretID := "createSecretTTL"
+
+	parent := fmt.Sprintf("projects/%s", tc.ProjectID)
+
+	duration := time.Second * 70
+
+	var b bytes.Buffer
+	if err := createSecretWithTTL(&b, parent, secretID, duration); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
+
+	if got, want := b.String(), "Created secret with ttl:"; !strings.Contains(got, want) {
+		t.Errorf("createSecretWithTTL: expected %q to contain %q", got, want)
 	}
 }
 
