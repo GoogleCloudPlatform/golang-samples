@@ -22,12 +22,10 @@ import (
 	"strings"
 
 	// [START speech_transcribe_model_selection_imports]
-	// [START imports]
 	"context"
 
 	speech "cloud.google.com/go/speech/apiv1"
 	"cloud.google.com/go/speech/apiv1/speechpb"
-	// [END imports]
 	// [END speech_transcribe_model_selection_imports]
 )
 

@@ -25,10 +25,10 @@ import (
 
 	"github.com/golang/protobuf/proto"
 
-	// [START imports]
+	// [START language_imports]
 	language "cloud.google.com/go/language/apiv1"
 	"cloud.google.com/go/language/apiv1/languagepb"
-	// [END imports]
+	// [END language_imports]
 )
 
 func main() {
