@@ -266,11 +266,4 @@ else
   done
 fi
 
-# If we're running system tests, send the test log to Flaky Bot.
-# See https://github.com/googleapis/repo-automation-bots/tree/main/packages/flakybot.
-if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
-  chmod +x "$KOKORO_GFILE_DIR"/linux_amd64/flakybot
-  "$KOKORO_GFILE_DIR"/linux_amd64/flakybot
-fi
-
 exit $exit_code
