@@ -147,7 +147,6 @@ func cityLocationSearch(w io.Writer, projectID, companyName, location string) (*
 // [END job_city_location_search]
 
 // [START job_broadening_location_search]
-// [START broadening_location_search]
 
 // broadeningLocationSearch searches for jobs with a broadening area of given
 // location.
@@ -207,7 +206,6 @@ func broadeningLocationSearch(w io.Writer, projectID, companyName, location stri
 	return resp, nil
 }
 
-// [END broadening_location_search]
 // [END job_broadening_location_search]
 
 // [START job_keyword_location_search]
