@@ -15,6 +15,7 @@
 // Package gcsdemo is an example App Engine app using the Google Cloud Storage API.
 package gcsdemo
 
+//[START gae_storage_imports]
 //[START imports]
 import (
 	"bytes"
@@ -33,6 +34,7 @@ import (
 )
 
 //[END imports]
+//[END gae_storage_imports]
 
 func init() {
 	http.HandleFunc("/", handler)
@@ -67,6 +69,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//[START gae_storage_get_default_bucket]
 	//[START get_default_bucket]
 	// Use `dev_appserver.py --default_gcs_bucket_name GCS_BUCKET_NAME`
 	// when running locally.
@@ -75,6 +78,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		log.Errorf(ctx, "failed to get default GCS bucket name: %v", err)
 	}
 	//[END get_default_bucket]
+	//[END gae_storage_get_default_bucket]
 
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -126,6 +130,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// [START gae_storage_write]
 // [START write]
 // createFile creates a file in Google Cloud Storage.
 func (d *demo) createFile(fileName string) {
@@ -154,7 +159,9 @@ func (d *demo) createFile(fileName string) {
 }
 
 //[END write]
+//[END gae_storage_write]
 
+// [START gae_storage_read]
 // [START read]
 // readFile reads the named file in Google Cloud Storage.
 func (d *demo) readFile(fileName string) {
@@ -181,7 +188,9 @@ func (d *demo) readFile(fileName string) {
 }
 
 //[END read]
+//[END gae_storage_read]
 
+// [START gae_storage_copy]
 // [START copy]
 // copyFile copies a file in Google Cloud Storage.
 func (d *demo) copyFile(fileName string) {
@@ -199,6 +208,7 @@ func (d *demo) copyFile(fileName string) {
 }
 
 //[END copy]
+//[END gae_storage_copy]
 
 func (d *demo) dumpStats(obj *storage.ObjectAttrs) {
 	fmt.Fprintf(d.w, "(filename: /%v/%v, ", obj.Bucket, obj.Name)
@@ -239,6 +249,7 @@ func (d *demo) createListFiles() {
 	}
 }
 
+// [START gae_storage_list_bucket]
 // [START list_bucket]
 // listBucket lists the contents of a bucket in Google Cloud Storage.
 func (d *demo) listBucket() {
@@ -260,6 +271,7 @@ func (d *demo) listBucket() {
 }
 
 //[END list_bucket]
+//[END gae_storage_list_bucket]
 
 func (d *demo) listDir(name, indent string) {
 	query := &storage.Query{Prefix: name, Delimiter: "/"}
