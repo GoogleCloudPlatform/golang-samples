@@ -36,7 +36,7 @@ func NewConn(host string, insecure bool) (*grpc.ClientConn, error) {
 		opts = append(opts, grpc.WithInsecure())
 	} else {
 		// Note: On the Windows platform, use of x509.SystemCertPool() requires
-		// go version 1.18 or higher.
+		// Go version 1.18 or higher.
 		systemRoots, err := x509.SystemCertPool()
 		if err != nil {
 			return nil, err
