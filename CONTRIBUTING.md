@@ -91,7 +91,7 @@ The top level directory should be the product the sample is for (e.g.
 Sub-directories can be used to keep different groups of samples for the product
 separate.
 
-The package name should match the directory name, as is standard go practice.
+The package name should match the directory name, as is standard Go practice.
 
 Files should be named after the sample in them (e.g. `hello.go`). No need to
 include the product name or "sample" in the filename.
