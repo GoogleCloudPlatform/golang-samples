@@ -85,7 +85,6 @@ func basicLocationSearch(w io.Writer, projectID, companyName, location string, d
 // [END job_basic_location_search]
 
 // [START job_city_location_search]
-// [START city_location_search]
 
 // cityLocationSearch searches for jobs in the same city of given location.
 func cityLocationSearch(w io.Writer, projectID, companyName, location string) (*talent.SearchJobsResponse, error) {
@@ -143,11 +142,9 @@ func cityLocationSearch(w io.Writer, projectID, companyName, location string) (*
 	return resp, nil
 }
 
-// [END city_location_search]
 // [END job_city_location_search]
 
 // [START job_broadening_location_search]
-// [START broadening_location_search]
 
 // broadeningLocationSearch searches for jobs with a broadening area of given
 // location.
@@ -207,7 +204,6 @@ func broadeningLocationSearch(w io.Writer, projectID, companyName, location stri
 	return resp, nil
 }
 
-// [END broadening_location_search]
 // [END job_broadening_location_search]
 
 // [START job_keyword_location_search]

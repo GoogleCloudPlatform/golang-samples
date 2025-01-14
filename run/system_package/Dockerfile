@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Use the offical Golang image to create a build artifact.
+# Use the offical Go image to create a build artifact.
 # https://hub.docker.com/_/golang
 FROM golang:1.21-bookworm as builder
 
@@ -36,11 +36,9 @@ RUN go build -v -o server
 FROM ubuntu
 
 # [START cloudrun_system_package_ubuntu]
-# [START run_system_package_ubuntu]
 RUN apt-get update -y && apt-get install -y \
   graphviz \
   && apt-get clean
-# [END run_system_package_ubuntu]
 # [END cloudrun_system_package_ubuntu]
 
 # Copy the binary to the production image from the builder stage.
