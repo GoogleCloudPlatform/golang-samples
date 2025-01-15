@@ -1065,7 +1065,7 @@ func TestConsistencyGroup(t *testing.T) {
 			t.Errorf("createRegionalDisk got err: %v", err)
 		}
 		defer deleteRegionalDisk(&buf, tc.ProjectID, region, diskName)
-		
+
 		if err := createConsistencyGroup(&buf, tc.ProjectID, region, groupName); err != nil {
 			t.Errorf("createConsistencyGroup got err: %v", err)
 		}
