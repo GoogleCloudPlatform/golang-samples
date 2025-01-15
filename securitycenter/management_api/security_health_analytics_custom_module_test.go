@@ -19,20 +19,26 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math/rand"
 	"os"
+	"regexp"
 	"strings"
+	"sync"
 	"testing"
-	"time"
 
 	securitycentermanagement "cloud.google.com/go/securitycentermanagement/apiv1"
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
-	iterator "google.golang.org/api/iterator"
+	"github.com/google/uuid"
 	expr "google.golang.org/genproto/googleapis/type/expr"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 )
 
 var orgID = ""
 var createdCustomModuleID = ""
+var (
+	createdModules []string
+	mu             sync.Mutex
+)
 
 func TestMain(m *testing.M) {
 	orgID = os.Getenv("GCLOUD_ORGANIZATION")
@@ -41,17 +47,95 @@ func TestMain(m *testing.M) {
 		log.Fatalf("GCLOUD_ORGANIZATION environment variable is not set.")
 	}
 
-	// Perform cleanup before running tests
-	err := cleanupExistingCustomModules(orgID)
-	if err != nil {
-		log.Fatalf("Error cleaning up existing custom modules: %v", err)
-	}
-
 	// Run the tests
 	code := m.Run()
 
 	// Exit with the appropriate code
 	os.Exit(code)
+}
+
+// AddModuleToCleanup registers a module for cleanup.
+func AddModuleToCleanup(moduleID string) {
+	mu.Lock()
+	defer mu.Unlock()
+	createdModules = append(createdModules, moduleID)
+}
+
+// PrintAllCreatedModules prints all created custom modules.
+func PrintAllCreatedModules() {
+	mu.Lock()
+	defer mu.Unlock()
+
+	if len(createdModules) == 0 {
+		fmt.Println("No custom modules were created.")
+	} else {
+		fmt.Println("Created Custom Modules:")
+		for _, module := range createdModules {
+			fmt.Println(module)
+		}
+	}
+}
+
+// CleanupCreatedModules deletes all created custom modules.
+func CleanupCreatedModules() {
+	mu.Lock()
+	defer mu.Unlock()
+
+	if len(createdModules) == 0 {
+		fmt.Println("No custom modules to clean up.")
+		return
+	}
+
+	ctx := context.Background()
+	client, err := securitycentermanagement.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("Failed to create SecurityCenter client: %v", err)
+	}
+	defer client.Close()
+
+	for len(createdModules) > 0 {
+		moduleID := createdModules[0]
+		if !CustomModuleExists(moduleID) {
+			fmt.Printf("Module not found (already deleted): %s\n", moduleID)
+			createdModules = createdModules[1:]
+			continue
+		}
+		err := client.DeleteSecurityHealthAnalyticsCustomModule(ctx, &securitycentermanagementpb.DeleteSecurityHealthAnalyticsCustomModuleRequest{
+			Name: fmt.Sprintf("organizations/%s/locations/global/securityHealthAnalyticsCustomModules/%s", orgID, moduleID),
+		})
+
+		if err != nil {
+			fmt.Printf("Failed to delete module %s: %v\n", moduleID, err)
+			return
+		}
+		fmt.Printf("Deleted custom module: %s\n", moduleID)
+		createdModules = createdModules[1:]
+	}
+}
+
+// CustomModuleExists checks if a module exists.
+func CustomModuleExists(moduleID string) bool {
+	ctx := context.Background()
+	client, err := securitycentermanagement.NewClient(ctx)
+	_, err = client.GetSecurityHealthAnalyticsCustomModule(ctx, &securitycentermanagementpb.GetSecurityHealthAnalyticsCustomModuleRequest{
+		Name: fmt.Sprintf("organizations/%s/locations/global/securityHealthAnalyticsCustomModules/%s", orgID, moduleID),
+	})
+	if err != nil {
+		if grpc.Code(err) == codes.NotFound {
+			return false
+		}
+		log.Printf("Error checking module existence: %v", err)
+	}
+	return true
+}
+
+// CleanupAfterTests is a helper for test cleanup.
+func CleanupAfterTests(t *testing.T) {
+	t.Cleanup(func() {
+		PrintAllCreatedModules()
+		fmt.Println("Cleaning up created custom modules...")
+		CleanupCreatedModules()
+	})
 }
 
 // extractCustomModuleID extracts the custom module ID from the full name
@@ -76,10 +160,12 @@ func addCustomModule() (string, error) {
 		return "", fmt.Errorf("securitycentermanagement.NewClient: %w", err)
 	}
 	defer client.Close()
-	// Seed the random number generator
-	rand.Seed(time.Now().UnixNano())
-	// Generate a unique suffix
-	uniqueSuffix := fmt.Sprintf("%d_%d", time.Now().Unix(), rand.Intn(1000))
+	uniqueSuffix := uuid.New().String()
+
+	// Remove invalid characters (anything that isn't alphanumeric or an underscore)
+	re := regexp.MustCompile(`[^a-zA-Z0-9_]`)
+	uniqueSuffix = re.ReplaceAllString(uniqueSuffix, "_")
+
 	// Create unique display name
 	displayName := fmt.Sprintf("go_sample_sha_custom_module_test_%s", uniqueSuffix)
 
@@ -137,74 +223,14 @@ func addCustomModule() (string, error) {
 	return createdCustomModuleID, nil
 }
 
-func cleanupCustomModule(customModuleID string) error {
-
-	ctx := context.Background()
-	client, err := securitycentermanagement.NewClient(ctx)
-	if err != nil {
-		return fmt.Errorf("securitycentermanagement.NewClient: %w", err)
-	}
-	defer client.Close()
-
-	req := &securitycentermanagementpb.DeleteSecurityHealthAnalyticsCustomModuleRequest{
-		Name: fmt.Sprintf("organizations/%s/locations/global/securityHealthAnalyticsCustomModules/%s", orgID, customModuleID),
-	}
-
-	if err := client.DeleteSecurityHealthAnalyticsCustomModule(ctx, req); err != nil {
-		return fmt.Errorf("failed to delete CustomModule: %w", err)
-	}
-
-	return nil
-}
-
-func cleanupExistingCustomModules(orgID string) error {
-	ctx := context.Background()
-	client, err := securitycentermanagement.NewClient(ctx)
-	if err != nil {
-		return fmt.Errorf("securitycentermanagement.NewClient: %w", err)
-	}
-	defer client.Close()
-
-	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
-
-	// List all existing custom modules
-	req := &securitycentermanagementpb.ListSecurityHealthAnalyticsCustomModulesRequest{
-		Parent: parent,
-	}
-
-	it := client.ListSecurityHealthAnalyticsCustomModules(ctx, req)
-	for {
-		module, err := it.Next()
-
-		if err == iterator.Done {
-			break
-		}
-
-		if err != nil {
-			return fmt.Errorf("failed to list CustomModules: %w", err)
-		}
-
-		// Check if the custom module name starts with 'go_sample_sha_custom'
-		if strings.HasPrefix(module.DisplayName, "go_sample_sha_custom") {
-
-			customModuleID := extractCustomModuleID(module.Name)
-			// Delete the custom module
-			err := cleanupCustomModule(customModuleID)
-			if err != nil {
-				return fmt.Errorf("failed to delete existing CustomModule: %w", err)
-			}
-			fmt.Printf("Deleted existing CustomModule: %s\n", module.Name)
-		}
-	}
-
-	return nil
-}
-
 // TestDeleteCustomModule verifies the List functionality
 func TestDeleteCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
+	CleanupAfterTests(t)
+
 	createdCustomModuleID, err := addCustomModule()
+	AddModuleToCleanup(createdCustomModuleID)
 
 	if err != nil {
 		t.Fatalf("Could not setup test environment: %v", err)
@@ -230,6 +256,9 @@ func TestDeleteCustomModule(t *testing.T) {
 // TestCreateCustomModule verifies the Create functionality
 func TestCreateCustomModule(t *testing.T) {
 	var buf bytes.Buffer
+	var createModulePath = ""
+
+	CleanupAfterTests(t)
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
@@ -242,6 +271,14 @@ func TestCreateCustomModule(t *testing.T) {
 	}
 
 	got := buf.String()
+	fmt.Printf("Response: %v\n", got)
+
+	parts := strings.Split(got, ":")
+	if len(parts) > 0 {
+		createModulePath = parts[len(parts)-1]
+	}
+
+	AddModuleToCleanup(extractCustomModuleID(createModulePath))
 
 	if !strings.Contains(got, orgID) {
 		t.Fatalf("createCustomModule() got: %s want %s", got, orgID)
@@ -252,7 +289,10 @@ func TestCreateCustomModule(t *testing.T) {
 func TestListDescendantCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
-	_, err := addCustomModule()
+	CleanupAfterTests(t)
+
+	createdCustomModuleID, err := addCustomModule()
+	AddModuleToCleanup(createdCustomModuleID)
 
 	if err != nil {
 		t.Fatalf("Could not setup test environment: %v", err)
@@ -280,7 +320,10 @@ func TestListDescendantCustomModule(t *testing.T) {
 func TestGetCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
+	CleanupAfterTests(t)
+
 	createdCustomModuleID, err := addCustomModule()
+	AddModuleToCleanup(createdCustomModuleID)
 
 	if err != nil {
 		t.Fatalf("Could not setup test environment: %v", err)
@@ -330,7 +373,10 @@ func TestSimulateCustomModule(t *testing.T) {
 func TestListEffectiveCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
-	_, err := addCustomModule()
+	CleanupAfterTests(t)
+
+	createdCustomModuleID, err := addCustomModule()
+	AddModuleToCleanup(createdCustomModuleID)
 
 	if err != nil {
 		t.Fatalf("Could not setup test environment: %v", err)
@@ -358,7 +404,10 @@ func TestListEffectiveCustomModule(t *testing.T) {
 func TestUpdateCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
+	CleanupAfterTests(t)
+
 	createdCustomModuleID, err := addCustomModule()
+	AddModuleToCleanup(createdCustomModuleID)
 
 	if err != nil {
 		t.Fatalf("Could not setup test environment: %v", err)
@@ -385,7 +434,10 @@ func TestUpdateCustomModule(t *testing.T) {
 func TestGetEffectiveCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
+	CleanupAfterTests(t)
+
 	createdCustomModuleID, err := addCustomModule()
+	AddModuleToCleanup(createdCustomModuleID)
 
 	if err != nil {
 		t.Fatalf("Could not setup test environment: %v", err)
@@ -414,7 +466,10 @@ func TestGetEffectiveCustomModule(t *testing.T) {
 func TestListCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
-	_, err := addCustomModule()
+	CleanupAfterTests(t)
+
+	createdCustomModuleID, err := addCustomModule()
+	AddModuleToCleanup(createdCustomModuleID)
 
 	if err != nil {
 		t.Fatalf("Could not setup test environment: %v", err)
