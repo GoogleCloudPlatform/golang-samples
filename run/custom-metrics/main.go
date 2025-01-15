@@ -59,7 +59,7 @@ func setupCounter(ctx context.Context) func(context.Context) error {
 	r, err := resource.Merge(
 		resource.Default(),
 		resource.NewWithAttributes(
-			semconv.SchemaURL,
+			resource.Default().SchemaURL(),
 			semconv.ServiceName(serviceName),
 		),
 	)
