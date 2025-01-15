@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START compute_consistency_group_list]
+// [START compute_consistency_group_list_disks_regional]
 import (
 	"context"
 	"fmt"
@@ -26,19 +26,21 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// listConsistencyGroup get list of disks in consistency group for a project in a given region.
-func listConsistencyGroup(w io.Writer, projectID, region, groupName string) error {
+// listRegionalConsistencyGroup get list of disks in consistency group for a project in a given region.
+func listRegionalConsistencyGroup(w io.Writer, projectID, region, groupName string) error {
 	// projectID := "your_project_id"
 	// region := "europe-west4"
 	// groupName := "your_group_name"
 
 	ctx := context.Background()
+	// To check for zonal disks in consistency group use compute.NewDisksRESTClient
 	disksClient, err := compute.NewRegionDisksRESTClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewResourcePoliciesRESTClient: %w", err)
 	}
 	defer disksClient.Close()
 
+	// If using zonal disk client, use computepb.ListDisksRequest
 	req := &computepb.ListRegionDisksRequest{
 		Project: projectID,
 		Region:  region,
