@@ -14,6 +14,7 @@
 
 package sample
 
+// [START gae_creating_namespaces_on_a_per_user_basis]
 // [START creating_namespaces_on_a_per_user_basis]
 import (
 	"context"
@@ -32,3 +33,4 @@ func namespace(ctx context.Context) context.Context {
 }
 
 // [END creating_namespaces_on_a_per_user_basis]
+// [END gae_creating_namespaces_on_a_per_user_basis]
