@@ -26,7 +26,7 @@ import (
 	"go.opentelemetry.io/otel/metric"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
-	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
 
 var counter metric.Int64Counter
@@ -56,6 +56,7 @@ func setupCounter(ctx context.Context) func(context.Context) error {
 	if serviceName == "" {
 		serviceName = "sample-cloud-run-app"
 	}
+
 	r, err := resource.Merge(
 		resource.Default(),
 		resource.NewWithAttributes(
@@ -63,6 +64,7 @@ func setupCounter(ctx context.Context) func(context.Context) error {
 			semconv.ServiceName(serviceName),
 		),
 	)
+
 	if err != nil {
 		log.Fatalf("Error creating resource: %v", err)
 	}
