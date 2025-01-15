@@ -26,7 +26,7 @@ import (
 	"go.opentelemetry.io/otel/metric"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
-	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
 
 var counter metric.Int64Counter
@@ -48,7 +48,7 @@ func main() {
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	counter.Add(context.Background(), 100)
-	fmt.Fprintln(w, "Incremented sidecar_sample_counter metric!")
+	fmt.Fprintln(w, "Incremented sidecar_sample_counter_total metric!")
 }
 
 func setupCounter(ctx context.Context) func(context.Context) error {
@@ -60,7 +60,7 @@ func setupCounter(ctx context.Context) func(context.Context) error {
 	r, err := resource.Merge(
 		resource.Default(),
 		resource.NewWithAttributes(
-			resource.Default().SchemaURL(),
+			semconv.SchemaURL,
 			semconv.ServiceName(serviceName),
 		),
 	)
