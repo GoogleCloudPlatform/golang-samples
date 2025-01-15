@@ -1,3 +1,3 @@
 module github.com/GoogleCloudPlatform/golang-samples/run/sigterm-handler
 
-go 1.19
+go 1.21

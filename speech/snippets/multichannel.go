@@ -22,13 +22,13 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 )
 
 // [START speech_transcribe_multichannel_beta]
 
 // transcribeMultichannel generates a transcript from a multichannel speech file and tags the speech from each channel.
-func transcribeMultichannel(w io.Writer, path string) error {
+func transcribeMultichannel(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := speech.NewClient(ctx)
@@ -37,7 +37,7 @@ func transcribeMultichannel(w io.Writer, path string) error {
 	}
 	defer client.Close()
 
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile("../testdata/commercial_stereo.wav")
 	if err != nil {
 		return fmt.Errorf("ReadFile: %w", err)
 	}

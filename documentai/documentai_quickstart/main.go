@@ -20,7 +20,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	documentai "cloud.google.com/go/documentai/apiv1"
 	"cloud.google.com/go/documentai/apiv1/documentaipb"
@@ -46,9 +46,9 @@ func main() {
 	defer client.Close()
 
 	// Open local file.
-	data, err := ioutil.ReadFile(*filePath)
+	data, err := os.ReadFile(*filePath)
 	if err != nil {
-		fmt.Println(fmt.Errorf("ioutil.ReadFile: %w", err))
+		fmt.Println(fmt.Errorf("os.ReadFile: %w", err))
 	}
 
 	req := &documentaipb.ProcessRequest{

@@ -32,27 +32,39 @@ go version
 date
 
 cd "${1:-github/golang-samples}"
+PROJECT_ROOT=$(pwd)
 
 export GO111MODULE=on # Always use modules.
 export GOPROXY=https://proxy.golang.org
 TIMEOUT=60m
+export GOLANG_SAMPLES_E2E_TEST=""
 
 # Also see trampoline.sh - system_tests.sh is only run for PRs when there are
 # significant changes.
-SIGNIFICANT_CHANGES=$(git --no-pager diff --name-only main..HEAD | grep -Ev '(\.md$|^\.github)' || true)
+# allow files to be owned by a different user than our current uid.
+# Kokoro runs a double-nested container, and UIDs may not match.
+git config --global --add safe.directory $(pwd)
+# Allow $GIT_CHANGES to be set in the env, enabling local testing of the change detection below.
+GIT_CHANGES=${GIT_CHANGES:-$(git --no-pager diff --name-only main..HEAD)}
+if [[ -z $GIT_CHANGES && $KOKORO_JOB_NAME != *"system-tests"* ]]; then
+  echo "No diffs detected. This is unexpected - check above for additional error messages."
+  exit 2
+fi
+SIGNIFICANT_CHANGES=$(echo $GIT_CHANGES | grep -Ev '(\.md$|^\.github)' || true )
 # CHANGED_DIRS is the list of significant top-level directories that changed,
 # but weren't deleted by the current PR.
 # CHANGED_DIRS will be empty when run on main.
 CHANGED_DIRS=$(echo "$SIGNIFICANT_CHANGES" | tr ' ' '\n' | grep "/" | cut -d/ -f1 | sort -u | tr '\n' ' ' | xargs --no-run-if-empty ls -d 2>/dev/null || true)
+GO_CHANGED_PKGS=$(echo "$SIGNIFICANT_CHANGES" | tr ' ' '\n' | grep "/" | tr '\n' ' ' | xargs --no-run-if-empty dirname | xargs --no-run-if-empty ls -d 2>/dev/null || true)
 
 # List all modules in changed directories.
 # If running on main will collect all modules in the repo, including the root module.
 # shellcheck disable=SC2086
-GO_CHANGED_MODULES="$(find ${CHANGED_DIRS:-.} -name go.mod)"
-# If we didn't find any modules, use the root module.
-GO_CHANGED_MODULES=${GO_CHANGED_MODULES:-./go.mod}
-# Exclude the root module, if present, from the list of sub-modules.
-GO_CHANGED_SUBMODULES=${GO_CHANGED_MODULES#./go.mod}
+GO_CHANGED_MODULES="$(find ${GO_CHANGED_PKGS:-.} -name go.mod | xargs --no-run-if-empty dirname)"
+# # If we didn't find any modules, use the root module.
+# GO_CHANGED_MODULES=${GO_CHANGED_MODULES:-./go.mod}
+# # Exclude the root module, if present, from the list of sub-modules.
+# GO_CHANGED_SUBMODULES=${GO_CHANGED_MODULES#./go.mod}
 
 # Override to determine if all go tests should be run.
 # Does not include static analysis checks.
@@ -98,16 +110,11 @@ export GOLANG_SAMPLES_BIGTABLE_PROJECT=golang-samples-tests
 export GOLANG_SAMPLES_BIGTABLE_INSTANCE=testing-instance
 
 export GOLANG_SAMPLES_FIRESTORE_PROJECT=golang-samples-fire-0
+# This flag is added to avoid protobuf conflicts while running tests for profiler.
+# TODO: Remove this after https://github.com/googleapis/google-cloud-go/issues/9207 is resolved.
+export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn
 
 set -x
-
-export STS_AWS_SECRET=`gcloud secrets versions access latest --project cloud-devrel-kokoro-resources --secret=go-storagetransfer-aws`
-export AWS_ACCESS_KEY_ID=`S="$STS_AWS_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["AccessKeyId"]);'`
-export AWS_SECRET_ACCESS_KEY=`S="$STS_AWS_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["SecretAccessKey"]);'`
-export STS_AZURE_SECRET=`gcloud secrets versions access latest --project cloud-devrel-kokoro-resources --secret=go-storagetransfer-azure`
-export AZURE_STORAGE_ACCOUNT=`S="$STS_AZURE_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["StorageAccount"]);'`
-export AZURE_CONNECTION_STRING=`S="$STS_AZURE_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["ConnectionString"]);'`
-export AZURE_SAS_TOKEN=`S="$STS_AZURE_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["SAS"]);'`
 
 # Set application credentials before using gimmeproj so it has access.
 # This is changed to a project-specific credential after a project is leased.
@@ -132,6 +139,7 @@ set +x
 # allow the service account project and GOOGLE_CLOUD_PROJECT to be different.
 export GOOGLE_APPLICATION_CREDENTIALS=$KOKORO_KEYSTORE_DIR/71386_kokoro-$GOLANG_SAMPLES_PROJECT_ID
 export GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL=kokoro-$GOLANG_SAMPLES_PROJECT_ID@$GOLANG_SAMPLES_PROJECT_ID.iam.gserviceaccount.com
+export GOOGLE_API_GO_EXPERIMENTAL_ENABLE_NEW_AUTH_LIB="true"
 
 set -x
 
@@ -139,11 +147,20 @@ pwd
 date
 
 export PATH="$PATH:/tmp/google-cloud-sdk/bin";
-if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]] || [[ $CHANGED_DIRS =~ "run" ]]; then
-  ./testing/kokoro/configure_gcloud.bash;
-fi
+./testing/kokoro/configure_gcloud.bash;
 
+# fetch secrets used by storagetransfer tests
+set +x
 
+export STS_AWS_SECRET=`gcloud secrets versions access latest --project cloud-devrel-kokoro-resources --secret=go-storagetransfer-aws`
+export AWS_ACCESS_KEY_ID=`S="$STS_AWS_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["AccessKeyId"]);'`
+export AWS_SECRET_ACCESS_KEY=`S="$STS_AWS_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["SecretAccessKey"]);'`
+export STS_AZURE_SECRET=`gcloud secrets versions access latest --project cloud-devrel-kokoro-resources --secret=go-storagetransfer-azure`
+export AZURE_STORAGE_ACCOUNT=`S="$STS_AZURE_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["StorageAccount"]);'`
+export AZURE_CONNECTION_STRING=`S="$STS_AZURE_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["ConnectionString"]);'`
+export AZURE_SAS_TOKEN=`S="$STS_AZURE_SECRET" python3 -c 'import json,sys,os;obj=json.loads(os.getenv("S"));print (obj["SAS"]);'`
+
+set -x
 
 if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]] || [[ $CHANGED_DIRS =~ "run" ]] && [[ -n $GOLANG_SAMPLES_GO_VET ]]; then
   echo "This test run will run end-to-end tests.";
@@ -191,11 +208,13 @@ runTests() {
   fi
 
   set +x
-  echo "Running 'go test' in '$(pwd)'..."
+  test_dir=$(realpath --relative-to $PROJECT_ROOT $(pwd))
+  echo "Running 'go test' in '${test_dir}'..."
   set -x
-  2>&1 go test -timeout $TIMEOUT -v "${1:-./...}" | tee sponge_log.log
-  cat sponge_log.log | /go/bin/go-junit-report -set-exit-code > sponge_log.xml
+  pushd $PROJECT_ROOT
+  GOOGLE_SAMPLES_PROJECT=${GOLANG_SAMPLES_PROJECT_ID} make test dir=${test_dir}
   exit_code=$((exit_code + $?))
+  popd
   set +x
 }
 
@@ -224,8 +243,8 @@ elif [[ -z "${CHANGED_DIRS// }" ]]; then
   runTests .
 else
   runTests . # Always run root tests.
-  echo "Running tests in modified directories: $CHANGED_DIRS"
-  for d in $CHANGED_DIRS; do
+  echo "Running tests in modified directories: $GO_CHANGED_PKGS"
+  for d in $GO_CHANGED_PKGS; do
     mods=$(find "$d" -name go.mod)
     # If there are no modules, just run the tests directly.
     if [[ -z "$mods" ]]; then
@@ -245,13 +264,6 @@ else
       fi
     fi
   done
-fi
-
-# If we're running system tests, send the test log to Flaky Bot.
-# See https://github.com/googleapis/repo-automation-bots/tree/main/packages/flakybot.
-if [[ $KOKORO_BUILD_ARTIFACTS_SUBDIR = *"system-tests"* ]]; then
-  chmod +x "$KOKORO_GFILE_DIR"/linux_amd64/flakybot
-  "$KOKORO_GFILE_DIR"/linux_amd64/flakybot
 fi
 
 exit $exit_code

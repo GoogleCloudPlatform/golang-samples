@@ -24,8 +24,8 @@ import (
 	"time"
 
 	compute "cloud.google.com/go/compute/apiv1"
+	computepb "cloud.google.com/go/compute/apiv1/computepb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -34,13 +34,14 @@ func TestCreateInstanceTemplatesSnippets(t *testing.T) {
 	var seededRand *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
+	region := "eu-central2"
 	zone := "europe-central2-b"
 	instanceName := "test-instance-" + fmt.Sprint(seededRand.Int())
 	templateName1 := "test-template-" + fmt.Sprint(seededRand.Int())
 	templateName2 := "test-template-" + fmt.Sprint(seededRand.Int())
 	templateName3 := "test-template-" + fmt.Sprint(seededRand.Int())
 	machineType := "n1-standard-1"
-	sourceImage := "projects/debian-cloud/global/images/family/debian-10"
+	sourceImage := "projects/debian-cloud/global/images/family/debian-12"
 	networkName := "global/networks/default-compute"
 	subnetworkName := "regions/asia-east1/subnetworks/default-compute"
 
@@ -207,4 +208,54 @@ func TestCreateInstanceTemplatesSnippets(t *testing.T) {
 	if err = op.Wait(ctx); err != nil {
 		t.Errorf("unable to wait for the operation: %v", err)
 	}
+
+	t.Run("create regional template", func(t *testing.T) {
+		buf.Reset()
+		templateName := fmt.Sprintf("test-template-%d", seededRand.Int())
+		err := createRegionalTemplate(buf, tc.ProjectID, templateName, region)
+		if err != nil {
+			t.Errorf("createRegionalTemplate failed: %v", err)
+		}
+		defer deleteRegionalTemplate(buf, tc.ProjectID, templateName, region)
+
+		expectedResult = "Instance template created"
+		if got := buf.String(); !strings.Contains(got, expectedResult) {
+			t.Errorf("createRegionalTemplate got %q, want %q", got, expectedResult)
+		}
+	})
+
+	t.Run("get regional template", func(t *testing.T) {
+		buf.Reset()
+		templateName := fmt.Sprintf("test-template-%d", seededRand.Int())
+		err := createRegionalTemplate(buf, tc.ProjectID, templateName, region)
+		if err != nil {
+			t.Errorf("createRegionalTemplate failed: %v", err)
+		}
+		defer deleteRegionalTemplate(buf, tc.ProjectID, templateName, region)
+
+		template, err := getRegionalTemplate(tc.ProjectID, templateName, region)
+		if err != nil {
+			t.Errorf("getRegionalTemplate got err: %v", err)
+		}
+		got := template.GetName()
+		if got != templateName {
+			t.Errorf("template.GetName() got %q, want %q", got, templateName)
+		}
+		buf.Reset()
+	})
+
+	t.Run("delete regional template", func(t *testing.T) {
+		buf.Reset()
+		templateName := fmt.Sprintf("test-template-%d", seededRand.Int())
+		err := createRegionalTemplate(buf, tc.ProjectID, templateName, region)
+		if err != nil {
+			t.Errorf("createRegionalTemplate failed: %v", err)
+		}
+
+		err = deleteRegionalTemplate(buf, tc.ProjectID, templateName, region)
+		expectedResult = "Instance template deleted"
+		if got := buf.String(); !strings.Contains(got, expectedResult) {
+			t.Errorf("deleteRegionalTemplate got %q, want %q", got, expectedResult)
+		}
+	})
 }

@@ -22,7 +22,7 @@ import (
 	"strings"
 
 	datacatalog "cloud.google.com/go/datacatalog/apiv1beta1"
-	iampb "google.golang.org/genproto/googleapis/iam/v1"
+	"cloud.google.com/go/iam/apiv1/iampb"
 )
 
 // testIAMPermissions demonstrates a caller probing what permissions they hold on a given taxonomy

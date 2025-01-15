@@ -22,7 +22,7 @@ import (
 
 	iam "cloud.google.com/go/iam/apiv2"
 
-	iampb "google.golang.org/genproto/googleapis/iam/v2"
+	"cloud.google.com/go/iam/apiv2/iampb"
 	"google.golang.org/genproto/googleapis/type/expr"
 )
 

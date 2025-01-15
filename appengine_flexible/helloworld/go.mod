@@ -1,3 +1,3 @@
-module helloworld
+module github.com/GoogleCloudPlatform/appengine_flexible/helloworld
 
-go 1.18
+go 1.21

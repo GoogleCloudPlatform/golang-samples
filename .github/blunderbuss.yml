@@ -1,9 +1,12 @@
 assign_issues_by:
 - labels:
+  - 'api: routeoptimization'
+  to:
+  - bshi
+- labels:
   - "api: asset"
   to:
   - GoogleCloudPlatform/cloud-asset-analysis-team
-  - GoogleCloudPlatform/cloud-asset-platform-team
 - labels:
   - 'api: bigtable'
   - 'api: datastore'
@@ -44,7 +47,7 @@ assign_issues_by:
 - labels:
   - 'api: cloudsql'
   to:
-  - GoogleCloudPlatform/infra-db-dpes
+  - GoogleCloudPlatform/cloud-sql-connectors
 - labels:
   - 'api: dlp'
   to:
@@ -56,17 +59,22 @@ assign_issues_by:
   - "api: iam"
   - "api: kms"
   - "api: privateca"
-  - "api: secretmanager"
-  - "api: securitycenter"
   to:
   - GoogleCloudPlatform/dee-infra
+- labels:
+  - "api: secretmanager"
+  to:
+  - GoogleCloudPlatform/cloud-secrets-team
+- labels:
+  - "api: securitycenter"
+  to:
+  - GoogleCloudPlatform/gcp-security-command-center
 
 assign_prs_by:
 - labels:
   - "api: asset"
   to:
   - GoogleCloudPlatform/cloud-asset-analysis-team
-  - GoogleCloudPlatform/cloud-asset-platform-team
 - labels:
   - 'api: bigtable'
   - 'api: datastore'
@@ -76,7 +84,7 @@ assign_prs_by:
 - labels:
   - 'api: cloudsql'
   to:
-  - GoogleCloudPlatform/infra-db-dpes
+  - GoogleCloudPlatform/cloud-sql-connectors
 - labels:
   - 'api: dlp'
   to:
@@ -88,7 +96,13 @@ assign_prs_by:
   - "api: iam"
   - "api: kms"
   - "api: privateca"
-  - "api: secretmanager"
-  - "api: securitycenter"
   to:
   - GoogleCloudPlatform/dee-infra
+- labels:
+  - "api: secretmanager"
+  to:
+  - GoogleCloudPlatform/cloud-secrets-team
+- labels:
+  - "api: securitycenter"
+  to:
+  - GoogleCloudPlatform/gcp-security-command-center

@@ -16,7 +16,7 @@ package samples
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -30,13 +30,13 @@ func TestAdmin(t *testing.T) {
 	// See https://cloud.google.com/datastore/docs/export-import-entities#permissions for full details
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
-	client, err := clientCreate(ioutil.Discard)
+	client, err := clientCreate(io.Discard)
 	if err != nil {
 		t.Fatalf("clientCreate: %v", err)
 	}
 	defer client.Close()
 
-	indices, err := indexList(ioutil.Discard, tc.ProjectID)
+	indices, err := indexList(io.Discard, tc.ProjectID)
 	if err != nil {
 		t.Fatalf("indexList: %v", err)
 	}
@@ -45,7 +45,7 @@ func TestAdmin(t *testing.T) {
 	}
 	want := indices[0].IndexId
 	// Get the first index from the list of indexes.
-	got, err := indexGet(ioutil.Discard, tc.ProjectID, want)
+	got, err := indexGet(io.Discard, tc.ProjectID, want)
 	if err != nil {
 		t.Fatalf("indexGet: %v", err)
 	}
@@ -53,14 +53,13 @@ func TestAdmin(t *testing.T) {
 		t.Fatalf("Unexpected indexID: got %v, want %v", got.IndexId, want)
 	}
 	// Create bucket for Export/Import entities.
-	bucketName := tc.ProjectID + "-storage-bucket-test"
-	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
+	bucketName := testutil.TestBucket(ctx, t, tc.ProjectID, "datastore-admin")
 
-	resp, err := entitiesExport(ioutil.Discard, tc.ProjectID, "gs://"+bucketName)
+	resp, err := entitiesExport(io.Discard, tc.ProjectID, "gs://"+bucketName)
 	if err != nil {
 		t.Fatalf("entitiesExport: %v", err)
 	}
-	if err := entitiesImport(ioutil.Discard, tc.ProjectID, resp.OutputUrl); err != nil {
+	if err := entitiesImport(io.Discard, tc.ProjectID, resp.OutputUrl); err != nil {
 		t.Fatalf("entitiesImport: %v", err)
 	}
 }

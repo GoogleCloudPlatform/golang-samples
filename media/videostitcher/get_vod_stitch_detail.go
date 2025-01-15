@@ -22,7 +22,7 @@ import (
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 // getVodStitchDetail gets the specified stitch detail for a video on demand (VOD) session.
@@ -38,7 +38,7 @@ func getVodStitchDetail(w io.Writer, projectID, sessionID, stitchDetailID string
 	}
 	defer client.Close()
 
-	req := &stitcherpb.GetVodStitchDetailRequest{
+	req := &stitcherstreampb.GetVodStitchDetailRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/vodSessions/%s/vodStitchDetails/%s", projectID, location, sessionID, stitchDetailID),
 	}
 	// Gets the stitch detail.

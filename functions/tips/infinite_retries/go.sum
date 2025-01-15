@@ -1,3 +1,4 @@
-cloud.google.com/go/functions v1.14.0 h1:nhhVBBXH6RAkxROnvPZibzOu7BWkN6uh354PXqNzJrg=
-cloud.google.com/go/functions v1.14.0/go.mod h1:8Ner7FZHTwbPHoD9nDKnQqWf52Ibz9u9EESdt6jd0Ao=
-github.com/google/go-cmp v0.5.9 h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=
+cloud.google.com/go/functions v1.16.5 h1:BXxmOz/z5yr+Nf+yKerctpDcv22LOjmyhwcIp/f6qLI=
+cloud.google.com/go/functions v1.16.5/go.mod h1:ds5f+dyMN4kCkTWTLpQl8wMi0sLRuJWrQaWr5eFlUnQ=
+github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
+github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=

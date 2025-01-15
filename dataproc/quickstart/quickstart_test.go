@@ -49,15 +49,15 @@ func setup(t *testing.T, projectID string) {
 	uuid := uuid.New().String()
 
 	clusterName = "go-qs-test-" + uuid
-	bktName = "go-dataproc-qs-test-" + uuid
 	jobFilePath = fmt.Sprintf("gs://%s/%s", bktName, jobFName)
 
 	sc, err := storage.NewClient(ctx)
 	if err != nil {
 		t.Errorf("storage.NewClient: %v", err)
 	}
+	t.Cleanup(func() { sc.Close() })
 
-	testutil.CleanBucket(ctx, t, projectID, bktName)
+	bktName = testutil.CreateTestBucket(ctx, t, sc, projectID, "go-dataproc-qs-test")
 	bkt := sc.Bucket(bktName)
 
 	obj := bkt.Object(jobFName)
@@ -81,19 +81,6 @@ func setup(t *testing.T, projectID string) {
 
 func teardown(t *testing.T, projectID string) {
 	ctx := context.Background()
-
-	sc, err := storage.NewClient(ctx)
-	if err != nil {
-		t.Errorf("storage.NewClient: %v", err)
-	}
-
-	if err := sc.Bucket(bktName).Object(jobFName).Delete(ctx); err != nil {
-		t.Errorf("Error deleting object: %v", err)
-	}
-
-	if err := sc.Bucket(bktName).Delete(ctx); err != nil {
-		t.Errorf("Error deleting bucket: %v", err)
-	}
 
 	// Post-hoc cleanup, ignore errors.
 	deleteCluster(ctx, projectID, region, clusterName)
@@ -119,6 +106,7 @@ func deleteCluster(ctx context.Context, projectID, region, clusterName string) e
 }
 
 func TestQuickstart(t *testing.T) {
+	t.Skip("Skipped until https://github.com/GoogleCloudPlatform/golang-samples/issues/4350 is resolved.")
 	tc := testutil.EndToEndTest(t)
 	m := testutil.BuildMain(t)
 	setup(t, tc.ProjectID)

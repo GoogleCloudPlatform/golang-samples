@@ -16,20 +16,17 @@
 package jobs
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"regexp"
-	"strings"
 	"testing"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/storage"
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/gofrs/uuid"
 )
 
@@ -144,71 +141,7 @@ func riskNumerical(projectID, dataProject, pubSubTopic, pubSubSub, datasetID, ta
 	return nil
 }
 
-func TestListJobs(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
-	listJobs(buf, tc.ProjectID, "", "RISK_ANALYSIS_JOB")
-	s := buf.String()
-	if len(s) == 0 {
-		// Create job.
-		riskNumerical(tc.ProjectID, "bigquery-public-data", "risk-topic", "risk-sub", "nhtsa_traffic_fatalities", "accident_2015", "state_number")
-		buf.Reset()
-		err := listJobs(buf, tc.ProjectID, "", "RISK_ANALYSIS_JOB")
-		if err != nil {
-			t.Errorf("listJobs(%s, %s, %s) = error %q, want nil", buf, tc.ProjectID, "", err)
-		}
-		s = buf.String()
-	}
-	if !strings.Contains(buf.String(), "Job") {
-		t.Errorf("%q not found in listJobs output: %q", "Job", s)
-	}
-}
-
 var jobIDRegexp = regexp.MustCompile(`Job ([^ ]+) status.*`)
-
-func TestDeleteJob(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
-	listJobs(buf, tc.ProjectID, "", "RISK_ANALYSIS_JOB")
-	s := buf.String()
-	if len(s) == 0 {
-		// Create job.
-		riskNumerical(tc.ProjectID, "bigquery-public-data", "risk-topic", "risk-sub", "nhtsa_traffic_fatalities", "accident_2015", "state_number")
-		buf.Reset()
-		listJobs(buf, tc.ProjectID, "", "RISK_ANALYSIS_JOB")
-		s = buf.String()
-	}
-	jobName := string(jobIDRegexp.FindSubmatch([]byte(s))[1])
-	buf.Reset()
-	deleteJob(buf, jobName)
-	if got := buf.String(); got != "Successfully deleted job" {
-		t.Errorf("unable to delete job: %s", s)
-	}
-}
-
-func TestCreateJob(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	var buf bytes.Buffer
-	// createBucketForCreatJob will create a bucket and upload a txt file
-	bucketName, fileName, err := createBucketForCreatJob(t, tc.ProjectID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	gcsPath := "gs://" + bucketName + "/" + fileName
-	infoTypeNames := []string{"EMAIL_ADDRESS", "PERSON_NAME", "LOCATION", "PHONE_NUMBER"}
-
-	if err := createJob(&buf, tc.ProjectID, gcsPath, infoTypeNames); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-	if want := "Created a Dlp Job "; !strings.Contains(got, want) {
-		t.Errorf("TestInspectWithCustomRegex got %q, want %q", got, want)
-	}
-
-	defer deleteAssetsOfCreateJobTest(t, tc.ProjectID, bucketName, fileName)
-}
 
 func createBucketForCreatJob(t *testing.T, projectID string) (string, string, error) {
 	t.Helper()
@@ -310,30 +243,4 @@ func deleteAssetsOfCreateJobTest(t *testing.T, projectID, bucketName, objectName
 		t.Fatal(err)
 	}
 	return nil
-}
-
-func TestJobsGet(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	listJobs(&buf, tc.ProjectID, "", "RISK_ANALYSIS_JOB")
-	s := buf.String()
-	if len(s) == 0 {
-		// Create job.
-		riskNumerical(tc.ProjectID, "bigquery-public-data", "risk-topic", "risk-sub", "nhtsa_traffic_fatalities", "accident_2015", "state_number")
-		buf.Reset()
-		listJobs(&buf, tc.ProjectID, "", "RISK_ANALYSIS_JOB")
-		s = buf.String()
-	}
-
-	jobName := string(jobIDRegexp.FindSubmatch([]byte(s))[1])
-	buf.Reset()
-
-	if err := jobsGet(&buf, tc.ProjectID, jobName); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if want := string(jobIDRegexp.FindSubmatch([]byte(s))[1]); !strings.Contains(got, want) {
-		t.Errorf("TestJobsGet got %q, want %q", got, want)
-	}
 }

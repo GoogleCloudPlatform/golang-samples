@@ -24,8 +24,8 @@ import (
 	"time"
 
 	iam "cloud.google.com/go/iam/apiv2"
+	"cloud.google.com/go/iam/apiv2/iampb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	iampb "google.golang.org/genproto/googleapis/iam/v2"
 )
 
 func TestDenyPolicySnippets(t *testing.T) {

@@ -35,7 +35,7 @@ func createDownscopedToken(bucketName string, prefix string) error {
 	ctx := context.Background()
 	// A condition can optionally be provided to further restrict access permissions.
 	condition := downscope.AvailabilityCondition{
-		Expression:  "resource.name.startsWith('projects/_/buckets/" + bucketName + "/objects/" + prefix + "'",
+		Expression:  "resource.name.startsWith('projects/_/buckets/" + bucketName + "/objects/" + prefix + "')",
 		Title:       prefix + " Only",
 		Description: "Restricts a token to only be able to access objects that start with `" + prefix + "`",
 	}

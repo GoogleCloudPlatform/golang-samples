@@ -11,12 +11,13 @@ See [`CONTRIBUTING.md`](/CONTRIBUTING.md),
 When new Go versions are released, we should build and push new versions of
 these containers.
 
-Edit `testing/docker/cloudbuild.yaml` to use the new version, then locally in the
-`testing/docker` directory, run:
+Go language version and resulting image name are controlled by the cloud build
+substitutions `_GO_VERSION` and `_IMAGE_NAME` respectively. The command below
+will build Go 1.21 and push the resulting image to
+`gcr.io/golang-samples-tests/go121`
 
 ```
-gcloud builds submit \
-    --timeout 1h \  
+gcloud builds submit . \
     --project=golang-samples-tests \
-    --config=cloudbuild.yaml .
+    --substitutions "_GO_VERSION=1.21,_IMAGE_NAME=go121"
 ```

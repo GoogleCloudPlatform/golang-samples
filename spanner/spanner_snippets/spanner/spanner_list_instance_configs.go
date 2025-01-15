@@ -21,8 +21,8 @@ import (
 	"io"
 
 	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
+	"cloud.google.com/go/spanner/admin/instance/apiv1/instancepb"
 	"google.golang.org/api/iterator"
-	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
 )
 
 // istInstanceConfigs gets available leader options for all instances

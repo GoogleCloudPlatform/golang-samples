@@ -24,7 +24,7 @@ import (
 	talent "google.golang.org/api/jobs/v3"
 )
 
-// [START custom_attribute_job]
+// [START job_custom_attribute_job]
 
 // constructJobWithCustomAttributes constructs a job with custom attributes.
 func constructJobWithCustomAttributes(companyName string, jobTitle string) *talent.Job {
@@ -53,9 +53,9 @@ func constructJobWithCustomAttributes(companyName string, jobTitle string) *tale
 	return job
 }
 
-// [END custom_attribute_job]
+// [END job_custom_attribute_job]
 
-// [START custom_attribute_filter_string_value]
+// [START job_custom_attribute_filter_string_value]
 
 // filterOnStringValueCustomAttribute searches for jobs on a string value custom
 // atrribute.
@@ -102,9 +102,9 @@ func filterOnStringValueCustomAttribute(w io.Writer, projectID string) (*talent.
 	return resp, nil
 }
 
-// [END custom_attribute_filter_string_value]
+// [END job_custom_attribute_filter_string_value]
 
-// [START custom_attribute_filter_long_value]
+// [START job_custom_attribute_filter_long_value]
 
 // filterOnLongValueCustomAttribute searches for jobs on a long value custom
 // atrribute.
@@ -151,9 +151,9 @@ func filterOnLongValueCustomAttribute(w io.Writer, projectID string) (*talent.Se
 	return resp, nil
 }
 
-// [END custom_attribute_filter_long_value]
+// [END job_custom_attribute_filter_long_value]
 
-// [START custom_attribute_filter_multi_attributes]
+// [START job_custom_attribute_filter_multi_attributes]
 
 // filterOnLongValueCustomAttribute searches for jobs on multiple custom
 // atrributes.
@@ -200,4 +200,4 @@ func filterOnMultiCustomAttributes(w io.Writer, projectID string) (*talent.Searc
 	return resp, nil
 }
 
-// [END custom_attribute_filter_multi_attributes]
+// [END job_custom_attribute_filter_multi_attributes]

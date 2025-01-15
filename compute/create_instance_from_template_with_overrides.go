@@ -21,7 +21,8 @@ import (
 	"io"
 
 	compute "cloud.google.com/go/compute/apiv1"
-	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
+	computepb "cloud.google.com/go/compute/apiv1/computepb"
+
 	"google.golang.org/protobuf/proto"
 )
 
@@ -32,7 +33,7 @@ func createInstanceFromTemplateWithOverrides(w io.Writer, projectID, zone, insta
 	// instanceName := "your_instance_name"
 	// instanceTemplateName := "your_instance_template_name"
 	// machineType := "n1-standard-2"
-	// newDiskSourceImage := "projects/debian-cloud/global/images/family/debian-10"
+	// newDiskSourceImage := "projects/debian-cloud/global/images/family/debian-12"
 
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
@@ -45,7 +46,7 @@ func createInstanceFromTemplateWithOverrides(w io.Writer, projectID, zone, insta
 	if err != nil {
 		return fmt.Errorf("NewInstanceTemplatesRESTClient: %w", err)
 	}
-	defer instancesClient.Close()
+	defer intanceTemplatesClient.Close()
 
 	// Retrieve an instance template by name.
 	reqGetTemplate := &computepb.GetInstanceTemplateRequest{
@@ -57,8 +58,6 @@ func createInstanceFromTemplateWithOverrides(w io.Writer, projectID, zone, insta
 	if err != nil {
 		return fmt.Errorf("unable to get intance template: %w", err)
 	}
-
-	fmt.Printf("%s", "asdfadf")
 
 	for _, disk := range instanceTemplate.Properties.Disks {
 		diskType := disk.InitializeParams.GetDiskType()

@@ -24,7 +24,7 @@ import (
 	talent "google.golang.org/api/jobs/v3"
 )
 
-// [START featured_job]
+// [START job_featured_job]
 
 // constructFeaturedJob constructs a job as featured/promoted one.
 func constructFeaturedJob(companyName string, jobTitle string) *talent.Job {
@@ -43,9 +43,9 @@ func constructFeaturedJob(companyName string, jobTitle string) *talent.Job {
 	return job
 }
 
-// [END featured_job]
+// [END job_featured_job]
 
-// [START search_featured_job]
+// [START job_search_featured_job]
 
 // searchFeaturedJobs searches for jobs with query.
 func searchFeaturedJobs(w io.Writer, projectID, companyName, query string) (*talent.SearchJobsResponse, error) {
@@ -99,4 +99,4 @@ func searchFeaturedJobs(w io.Writer, projectID, companyName, query string) (*tal
 	return resp, nil
 }
 
-// [END search_featured_job]
+// [END job_search_featured_job]

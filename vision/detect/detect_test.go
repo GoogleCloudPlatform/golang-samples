@@ -17,7 +17,6 @@ package main
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"strings"
 	"testing"
@@ -94,10 +93,10 @@ func TestDetectAsyncDocument(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Cleanup(func() { client.Close() })
 
-	bucketName := fmt.Sprintf("%s-vision", tc.ProjectID)
+	bucketName := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, "vision")
 	bucket := client.Bucket(bucketName)
-	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
 
 	var buf bytes.Buffer
 	gcsSourceURI := "gs://python-docs-samples-tests/HodgeConj.pdf"

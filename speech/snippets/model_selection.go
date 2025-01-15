@@ -18,20 +18,20 @@ package snippets
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 	"strings"
 
-	// [START imports]
+	// [START speech_transcribe_model_selection_imports]
 	"context"
 
 	speech "cloud.google.com/go/speech/apiv1"
 	"cloud.google.com/go/speech/apiv1/speechpb"
-	// [END imports]
+	// [END speech_transcribe_model_selection_imports]
 )
 
 // [START speech_transcribe_model_selection]
 
-func modelSelection(w io.Writer, path string) error {
+func modelSelection(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := speech.NewClient(ctx)
@@ -40,8 +40,7 @@ func modelSelection(w io.Writer, path string) error {
 	}
 	defer client.Close()
 
-	// path = "../testdata/Google_Gnome.wav"
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile("../testdata/Google_Gnome.wav")
 	if err != nil {
 		return fmt.Errorf("ReadFile: %w", err)
 	}
@@ -60,7 +59,7 @@ func modelSelection(w io.Writer, path string) error {
 
 	resp, err := client.Recognize(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Recognize: %w", err)
+		return fmt.Errorf("recognize: %w", err)
 	}
 
 	for i, result := range resp.Results {

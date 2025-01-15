@@ -40,17 +40,37 @@ func riskNumerical(w io.Writer, projectID, dataProject, pubSubTopic, pubSubSub, 
 	if err != nil {
 		return fmt.Errorf("dlp.NewClient: %w", err)
 	}
+
 	// Create a PubSub Client used to listen for when the inspect job finishes.
 	pubsubClient, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("Error creating PubSub client: %w", err)
+		return err
 	}
 	defer pubsubClient.Close()
 
 	// Create a PubSub subscription we can use to listen for messages.
-	s, err := setupPubSub(projectID, pubSubTopic, pubSubSub)
+	// Create the Topic if it doesn't exist.
+	t := pubsubClient.Topic(pubSubTopic)
+	topicExists, err := t.Exists(ctx)
 	if err != nil {
-		return fmt.Errorf("setupPubSub: %w", err)
+		return err
+	}
+	if !topicExists {
+		if t, err = pubsubClient.CreateTopic(ctx, pubSubTopic); err != nil {
+			return err
+		}
+	}
+
+	// Create the Subscription if it doesn't exist.
+	s := pubsubClient.Subscription(pubSubSub)
+	subExists, err := s.Exists(ctx)
+	if err != nil {
+		return err
+	}
+	if !subExists {
+		if s, err = pubsubClient.CreateSubscription(ctx, pubSubSub, pubsub.SubscriptionConfig{Topic: t}); err != nil {
+			return err
+		}
 	}
 
 	// topic is the PubSub topic string where messages should be sent.

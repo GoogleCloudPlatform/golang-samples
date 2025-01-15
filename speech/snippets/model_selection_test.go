@@ -26,7 +26,7 @@ func TestModelSelection(t *testing.T) {
 	testutil.SystemTest(t)
 
 	var buf bytes.Buffer
-	err := modelSelection(&buf, "../testdata/Google_Gnome.wav")
+	err := modelSelection(&buf)
 	if err != nil {
 		t.Fatal(err)
 	}

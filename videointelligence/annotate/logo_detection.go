@@ -20,7 +20,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 	"time"
 
 	video "cloud.google.com/go/videointelligence/apiv1"
@@ -44,9 +44,9 @@ func logoDetection(w io.Writer, filename string) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*180)
 	defer cancel()
 
-	fileBytes, err := ioutil.ReadFile(filename)
+	fileBytes, err := os.ReadFile(filename)
 	if err != nil {
-		return fmt.Errorf("ioutil.ReadFile: %w", err)
+		return fmt.Errorf("os.ReadFile: %w", err)
 	}
 
 	op, err := client.AnnotateVideo(ctx, &videopb.AnnotateVideoRequest{

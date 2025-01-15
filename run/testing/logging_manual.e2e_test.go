@@ -15,10 +15,8 @@
 package cloudruntests
 
 import (
-	"fmt"
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -40,13 +38,12 @@ func TestLoggingManualService(t *testing.T) {
 		t.Fatalf("service.NewRequest: %v", err)
 	}
 
-	client := http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
+	resp, err := service.Do(req)
 	if err != nil {
-		t.Fatalf("client.Do: %v", err)
+		t.Fatalf("service.Do: %v", err)
 	}
 	defer resp.Body.Close()
-	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
+	t.Logf("client.Do: %s %s\n", req.Method, req.URL)
 
 	if got := resp.StatusCode; got != http.StatusOK {
 		t.Errorf("response status: got %d, want %d", got, http.StatusOK)

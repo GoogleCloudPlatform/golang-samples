@@ -45,12 +45,16 @@ func createSlate(w io.Writer, projectID, slateID, slateURI string) error {
 		},
 	}
 	// Creates the slate.
-	response, err := client.CreateSlate(ctx, req)
+	op, err := client.CreateSlate(ctx, req)
 	if err != nil {
 		return fmt.Errorf("client.CreateSlate: %w", err)
 	}
+	response, err := op.Wait(ctx)
+	if err != nil {
+		return err
+	}
 
-	fmt.Fprintf(w, "Slate: %v", response.Name)
+	fmt.Fprintf(w, "Slate: %v", response.GetName())
 	return nil
 }
 

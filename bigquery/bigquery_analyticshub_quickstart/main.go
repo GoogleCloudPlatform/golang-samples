@@ -24,8 +24,8 @@ import (
 	"fmt"
 	"log"
 
-	dataexchange "cloud.google.com/go/bigquery/dataexchange/apiv1beta1"
-	dataexchangepb "google.golang.org/genproto/googleapis/cloud/bigquery/dataexchange/v1beta1"
+	analyticshub "cloud.google.com/go/bigquery/analyticshub/apiv1"
+	"cloud.google.com/go/bigquery/analyticshub/apiv1/analyticshubpb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -52,15 +52,15 @@ func main() {
 
 	// Instantiate the client.
 	ctx := context.Background()
-	dataExchClient, err := dataexchange.NewAnalyticsHubClient(ctx)
+	ahubClient, err := analyticshub.NewClient(ctx)
 	if err != nil {
 		log.Fatalf("NewClient: %v", err)
 	}
-	defer dataExchClient.Close()
+	defer ahubClient.Close()
 
 	// Then, create the data exchange (or return information about one already bearing the example name), and
 	// print information about it.
-	exchange, err := createOrGetDataExchange(ctx, dataExchClient, *projectID, *location, *exchangeID)
+	exchange, err := createOrGetDataExchange(ctx, ahubClient, *projectID, *location, *exchangeID)
 	if err != nil {
 		log.Fatalf("failed to get information about the exchange: %v", err)
 	}
@@ -71,7 +71,7 @@ func main() {
 	}
 
 	// Finally, create a listing within the data exchange and print information about it.
-	listing, err := createListing(ctx, dataExchClient, *projectID, *location, *exchangeID, *listingID, *exampleDatasetSource)
+	listing, err := createListing(ctx, ahubClient, *projectID, *location, *exchangeID, *listingID, *exampleDatasetSource)
 	if err != nil {
 		log.Fatalf("failed to create the listing within the exchange: %v", err)
 	}
@@ -82,7 +82,7 @@ func main() {
 	}
 	fmt.Printf("Listing State: %s\n", listing.GetState().String())
 	if source := listing.GetSource(); source != nil {
-		if dsSource, ok := source.(*dataexchangepb.Listing_BigqueryDataset); ok && dsSource.BigqueryDataset != nil {
+		if dsSource, ok := source.(*analyticshubpb.Listing_BigqueryDataset); ok && dsSource.BigqueryDataset != nil {
 			if dataset := dsSource.BigqueryDataset.GetDataset(); dataset != "" {
 				fmt.Printf("Source is a bigquery dataset: %s", dataset)
 			}
@@ -91,7 +91,7 @@ func main() {
 	// Optionally, delete the data exchange at the end of the quickstart to clean up the resources used.
 	if *delete {
 		fmt.Printf("\n\n")
-		if err := deleteDataExchange(ctx, dataExchClient, *projectID, *location, *exchangeID); err != nil {
+		if err := deleteDataExchange(ctx, ahubClient, *projectID, *location, *exchangeID); err != nil {
 			log.Fatalf("failed to delete exchange: %v", err)
 		}
 		fmt.Printf("Exchange projects/%s/locations/%s/dataExchanges/%s was deleted.\n", *projectID, *location, *exchangeID)
@@ -101,11 +101,11 @@ func main() {
 
 // createOrGetDataExchange creates an example data exchange, or returns information about the exchange already bearing
 // the example identifier.
-func createOrGetDataExchange(ctx context.Context, client *dataexchange.AnalyticsHubClient, projectID, location, exchangeID string) (*dataexchangepb.DataExchange, error) {
-	req := &dataexchangepb.CreateDataExchangeRequest{
+func createOrGetDataExchange(ctx context.Context, client *analyticshub.Client, projectID, location, exchangeID string) (*analyticshubpb.DataExchange, error) {
+	req := &analyticshubpb.CreateDataExchangeRequest{
 		Parent:         fmt.Sprintf("projects/%s/locations/%s", projectID, location),
 		DataExchangeId: exchangeID,
-		DataExchange: &dataexchangepb.DataExchange{
+		DataExchange: &analyticshubpb.DataExchange{
 			DisplayName:    "Example Data Exchange",
 			Description:    "Exchange created as part of an API quickstart",
 			PrimaryContact: "",
@@ -118,7 +118,7 @@ func createOrGetDataExchange(ctx context.Context, client *dataexchange.Analytics
 		// We'll handle one specific error case specially, the case of the exchange already existing.  In this instance,
 		// we'll issue a second request to fetch the exchange information for the already present exchange and return it.
 		if code := status.Code(err); code == codes.AlreadyExists {
-			getReq := &dataexchangepb.GetDataExchangeRequest{
+			getReq := &analyticshubpb.GetDataExchangeRequest{
 				Name: fmt.Sprintf("projects/%s/locations/%s/dataExchanges/%s", projectID, location, exchangeID),
 			}
 			resp, err = client.GetDataExchange(ctx, getReq)
@@ -134,18 +134,18 @@ func createOrGetDataExchange(ctx context.Context, client *dataexchange.Analytics
 }
 
 // createListing creates an example listing within the specified exchange using the provided source dataset.
-func createListing(ctx context.Context, client *dataexchange.AnalyticsHubClient, projectID, location, exchangeID, listingID, sourceDataset string) (*dataexchangepb.Listing, error) {
-	req := &dataexchangepb.CreateListingRequest{
+func createListing(ctx context.Context, client *analyticshub.Client, projectID, location, exchangeID, listingID, sourceDataset string) (*analyticshubpb.Listing, error) {
+	req := &analyticshubpb.CreateListingRequest{
 		Parent:    fmt.Sprintf("projects/%s/locations/%s/dataExchanges/%s", projectID, location, exchangeID),
 		ListingId: listingID,
-		Listing: &dataexchangepb.Listing{
+		Listing: &analyticshubpb.Listing{
 			DisplayName: "Example Exchange Listing",
 			Description: "Example listing created as part of an API quickstart",
-			Categories: []dataexchangepb.Listing_Category{
-				dataexchangepb.Listing_CATEGORY_OTHERS,
+			Categories: []analyticshubpb.Listing_Category{
+				analyticshubpb.Listing_CATEGORY_OTHERS,
 			},
-			Source: &dataexchangepb.Listing_BigqueryDataset{
-				BigqueryDataset: &dataexchangepb.Listing_BigQueryDatasetSource{
+			Source: &analyticshubpb.Listing_BigqueryDataset{
+				BigqueryDataset: &analyticshubpb.Listing_BigQueryDatasetSource{
 					Dataset: sourceDataset,
 				},
 			},
@@ -155,8 +155,8 @@ func createListing(ctx context.Context, client *dataexchange.AnalyticsHubClient,
 }
 
 // deleteDataExchange deletes a data exchange.
-func deleteDataExchange(ctx context.Context, client *dataexchange.AnalyticsHubClient, projectID, location, exchangeID string) error {
-	req := &dataexchangepb.DeleteDataExchangeRequest{
+func deleteDataExchange(ctx context.Context, client *analyticshub.Client, projectID, location, exchangeID string) error {
+	req := &analyticshubpb.DeleteDataExchangeRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/dataExchanges/%s", projectID, location, exchangeID),
 	}
 	return client.DeleteDataExchange(ctx, req)

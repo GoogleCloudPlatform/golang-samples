@@ -64,7 +64,7 @@ func updateMuteRule(w io.Writer, muteConfigName string) error {
 
 	response, err := client.UpdateMuteConfig(ctx, req)
 	if err != nil {
-		return fmt.Errorf("mute rule update failed! %v", err)
+		return fmt.Errorf("mute rule update failed! %w", err)
 	}
 	fmt.Fprintf(w, "Mute rule updated %s", response.Name)
 	return nil

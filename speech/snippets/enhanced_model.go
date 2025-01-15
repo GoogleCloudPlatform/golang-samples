@@ -18,7 +18,7 @@ package snippets
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	// [START imports]
@@ -31,7 +31,7 @@ import (
 
 // [START speech_transcribe_enhanced_model]
 
-func enhancedModel(w io.Writer, path string) error {
+func enhancedModel(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := speech.NewClient(ctx)
@@ -40,8 +40,7 @@ func enhancedModel(w io.Writer, path string) error {
 	}
 	defer client.Close()
 
-	// path = "../testdata/commercial_mono.wav"
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile("../testdata/commercial_mono.wav")
 	if err != nil {
 		return fmt.Errorf("ReadFile: %w", err)
 	}
@@ -60,7 +59,7 @@ func enhancedModel(w io.Writer, path string) error {
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("Recognize: %w", err)
+		return fmt.Errorf("client.Recognize: %w", err)
 	}
 
 	for i, result := range resp.Results {

@@ -24,7 +24,9 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"log"
 	"os"
+	"runtime/debug"
 	"time"
 
 	ds "cloud.google.com/go/datastore"
@@ -33,10 +35,13 @@ import (
 var (
 	metaProject = flag.String("project", "", "Meta-project that manages the pool.")
 	format      = flag.String("output", "", "Output format for selected operations. Options include: list")
+	waitTime    = flag.Duration("timeout", 30*time.Minute, "maximum wait time for leasing a project")
 	datastore   *ds.Client
 
-	version   = "dev"
-	buildDate = "unknown"
+	version       = "dev"
+	buildSource   = "unknown"
+	buildDate     = "unknown"
+	ErrNoProjects = errors.New("could not find a free project")
 )
 
 type Pool struct {
@@ -89,7 +94,25 @@ func (p *Project) Expired() bool {
 	return time.Now().After(p.LeaseExpiry)
 }
 
+func startup() {
+	// set version info from embedded details.
+	if bi, ok := debug.ReadBuildInfo(); ok {
+		packagename := bi.Main.Path
+		for _, s := range bi.Settings {
+			switch s.Key {
+			case "vcs":
+				buildSource = fmt.Sprintf("%s://%s", s.Value, packagename)
+			case "vcs.revision":
+				version = s.Value
+			case "vcs.time":
+				buildDate = s.Value
+			}
+		}
+	}
+}
+
 func main() {
+	startup()
 	flag.Parse()
 	if err := submain(); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
@@ -117,7 +140,7 @@ Administrative commands:
 `)
 
 	if flag.Arg(0) == "version" {
-		fmt.Printf("gimmeproj %s; built at %s\n", version, buildDate)
+		fmt.Printf("gimmeproj %s@%s; built at %s\n", buildSource, version, buildDate)
 		return nil
 	}
 
@@ -142,7 +165,21 @@ Administrative commands:
 		fmt.Fprintln(os.Stderr, usage.Error())
 		return nil
 	case "lease":
-		return lease(ctx, flag.Arg(1))
+		// When leasing, keep trying until we reach our configured timeout
+		ctx, cancel := context.WithTimeout(ctx, *waitTime)
+		defer cancel()
+		for ctx.Err() == nil {
+			err := lease(ctx, flag.Arg(1))
+			if err == nil {
+				return err
+			} else if errors.Is(err, ErrNoProjects) {
+				log.Printf("Temporary error: %v\n", err)
+				time.Sleep(30 * time.Second)
+			} else {
+				return err
+			}
+		}
+		return ctx.Err()
 	case "pool-add":
 		return addToPool(ctx, flag.Arg(1))
 	case "pool-rm":
@@ -199,7 +236,7 @@ func lease(ctx context.Context, duration string) error {
 		var ok bool
 		proj, ok = pool.Lease(d)
 		if !ok {
-			return errors.New("Could not find a free project. Try again soon.")
+			return ErrNoProjects
 		}
 		return nil
 	})
@@ -238,7 +275,7 @@ func status(ctx context.Context) error {
 		for _, proj := range pool.Projects {
 			exp := ""
 			if !proj.Expired() {
-				secs := proj.LeaseExpiry.Sub(time.Now()) / time.Second * time.Second
+				secs := time.Until(proj.LeaseExpiry)
 				exp = secs.String()
 			}
 			switch *format {

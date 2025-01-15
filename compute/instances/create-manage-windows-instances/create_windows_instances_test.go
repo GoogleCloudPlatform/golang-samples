@@ -24,8 +24,8 @@ import (
 	"time"
 
 	compute "cloud.google.com/go/compute/apiv1"
+	computepb "cloud.google.com/go/compute/apiv1/computepb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 )
 
 func deleteInstance(ctx context.Context, projectId, zone, instanceName string) error {
@@ -59,7 +59,7 @@ func TestComputeCreateWindowsInstancesSnippets(t *testing.T) {
 	machineType := "n1-standard-1"
 	networkLink := "global/networks/default"
 	subnetworkLink := "regions/europe-central2/subnetworks/default"
-	sourceImageFamily := "windows-2012-r2"
+	sourceImageFamily := "windows-2022"
 	want := "Instance created"
 
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)

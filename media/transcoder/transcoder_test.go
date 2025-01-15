@@ -43,7 +43,6 @@ const (
 	testCaptionsFileName     = "captions.srt"
 	testSubtitlesFileName1   = "subtitles-en.srt"
 	testSubtitlesFileName2   = "subtitles-es.srt"
-	preset                   = "preset/web-hd"
 	smallSpriteSheetFileName = "small-sprite-sheet0000000000.jpeg"
 	largeSpriteSheetFileName = "large-sprite-sheet0000000000.jpeg"
 )
@@ -62,7 +61,7 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
-	bucketName := tc.ProjectID + "-golang-samples-transcoder-test"
+	bucketName := testutil.TestBucket(ctx, t, tc.ProjectID, "golang-samples-transcoder")
 	inputURI := "gs://" + bucketName + "/" + testBucketDirName + testVideoFileName
 	inputConcatURI := "gs://" + bucketName + "/" + testBucketDirName + testConcatFileName
 	inputOverlayImageURI := "gs://" + bucketName + "/" + testBucketDirName + testOverlayImageFileName
@@ -70,6 +69,7 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 	inputSubtitles1URI := "gs://" + bucketName + "/" + testBucketDirName + testSubtitlesFileName1
 	inputSubtitles2URI := "gs://" + bucketName + "/" + testBucketDirName + testSubtitlesFileName2
 	outputURIForPreset := "gs://" + bucketName + "/test-output-preset/"
+	outputURIForPresetBatchMode := "gs://" + bucketName + "/test-output-preset-batch-mode/"
 	outputURIForTemplate := "gs://" + bucketName + "/test-output-template/"
 	outputURIForAdHoc := "gs://" + bucketName + "/test-output-adhoc/"
 	outputURIForStaticOverlay := "gs://" + bucketName + "/test-output-static-overlay/"
@@ -95,10 +95,12 @@ func TestJobTemplatesAndJobs(t *testing.T) {
 
 	testJobTemplates(t, projectNumber)
 	t.Logf("\ntestJobTemplates() completed\n")
-	writeTestGCSFiles(t, tc.ProjectID, bucketName)
+	writeTestGCSFiles(t, bucketName)
 	t.Logf("\nwriteTestGCSFiles() completed\n")
 	testJobFromPreset(t, projectNumber, inputURI, outputURIForPreset)
 	t.Logf("\ntestJobFromPreset() completed\n")
+	testJobFromPresetBatchMode(t, projectNumber, inputURI, outputURIForPresetBatchMode)
+	t.Logf("\ntestJobFromPresetBatchMode() completed\n")
 	testJobFromTemplate(t, projectNumber, inputURI, outputURIForTemplate)
 	t.Logf("\ntestJobFromTemplate() completed\n")
 	testJobFromAdHoc(t, projectNumber, inputURI, outputURIForAdHoc)
@@ -189,10 +191,8 @@ func testJobTemplates(t *testing.T, projectNumber string) {
 	})
 }
 
-func writeTestGCSFiles(t *testing.T, projectID string, bucketName string) {
+func writeTestGCSFiles(t *testing.T, bucketName string) {
 	t.Helper()
-	ctx := context.Background()
-	testutil.CleanBucket(ctx, t, projectID, bucketName)
 	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testVideoFileName)
 	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testOverlayImageFileName)
 	writeTestGCSFile(t, bucketName, testBucketName, testBucketDirName+testConcatFileName)
@@ -260,13 +260,87 @@ func testJobFromPreset(t *testing.T, projectNumber string, inputURI string, outp
 
 	// Create the job.
 	jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/", projectNumber, location)
-	if err := createJobFromPreset(buf, tc.ProjectID, location, inputURI, outputURIForPreset, preset); err != nil {
+	if err := createJobFromPreset(buf, tc.ProjectID, location, inputURI, outputURIForPreset); err != nil {
 		t.Errorf("createJobFromPreset got err: %v", err)
 	}
 	got := buf.String()
 
 	if !strings.Contains(got, jobName) {
 		t.Errorf("createJobFromPreset got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
+	}
+	strSlice := strings.Split(got, "/")
+	jobID = strSlice[len(strSlice)-1]
+	buf.Reset()
+
+	// Get the job by job ID.
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/%s", projectNumber, location, jobID)
+		if err := getJob(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("getJob got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, jobName) {
+			r.Errorf("getJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
+		}
+	})
+	buf.Reset()
+
+	// Get the job state, which should be succeeded. If the job is still running on the last attempt, pass the test.
+	testutil.Retry(t, 3, 30*time.Second, func(r *testutil.R) {
+		if err := getJobState(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("getJobState got err: %v", err)
+		}
+		got := buf.String()
+
+		if r.Attempt == 3 {
+			if !strings.Contains(got, jobSucceededState) && !strings.Contains(got, jobRunningState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v or %v\n----\n", got, jobSucceededState, jobRunningState)
+			}
+		} else {
+			if !strings.Contains(got, jobSucceededState) {
+				r.Errorf("getJobState got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobSucceededState)
+			}
+		}
+	})
+
+	// List the jobs for a given location.
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/%s", projectNumber, location, jobID)
+		if err := listJobs(buf, tc.ProjectID, location); err != nil {
+			r.Errorf("listJobs got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, jobName) {
+			r.Errorf("listJobs got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
+		}
+	})
+
+	// Delete the job.
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		if err := deleteJob(buf, tc.ProjectID, location, jobID); err != nil {
+			r.Errorf("deleteJob got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, deleteJobReponse) {
+			r.Errorf("deleteJob got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteJobReponse)
+		}
+	})
+}
+
+// testJobFromPresetBatchMode tests major operations on a job created from a
+// preset in batch mode. It will wait until the job successfully completes as
+// part of the test.
+func testJobFromPresetBatchMode(t *testing.T, projectNumber string, inputURI string, outputURIForPresetBatchMode string) {
+	tc := testutil.SystemTest(t)
+	buf := &bytes.Buffer{}
+	jobID := ""
+
+	// Create the job.
+	jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/", projectNumber, location)
+	if err := createJobFromPresetBatchMode(buf, tc.ProjectID, location, inputURI, outputURIForPresetBatchMode); err != nil {
+		t.Errorf("createJobFromPresetBatchMode got err: %v", err)
+	}
+	got := buf.String()
+
+	if !strings.Contains(got, jobName) {
+		t.Errorf("createJobFromPresetBatchMode got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, jobName)
 	}
 	strSlice := strings.Split(got, "/")
 	jobID = strSlice[len(strSlice)-1]

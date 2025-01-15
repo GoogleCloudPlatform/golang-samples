@@ -27,8 +27,8 @@ import (
 	"log"
 
 	reservation "cloud.google.com/go/bigquery/reservation/apiv1"
+	"cloud.google.com/go/bigquery/reservation/apiv1/reservationpb"
 	"google.golang.org/api/iterator"
-	reservationpb "google.golang.org/genproto/googleapis/cloud/bigquery/reservation/v1"
 )
 
 func main() {

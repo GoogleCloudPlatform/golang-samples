@@ -24,8 +24,8 @@ import (
 	"time"
 
 	compute "cloud.google.com/go/compute/apiv1"
+	computepb "cloud.google.com/go/compute/apiv1/computepb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -72,6 +72,74 @@ func deleteDisk(ctx context.Context, projectId, zone, diskName string) error {
 	return op.Wait(ctx)
 }
 
+func getDisk(ctx context.Context, projectID, diskName, zone string) (*computepb.Disk, error) {
+	diskClient, err := compute.NewDisksRESTClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer diskClient.Close()
+
+	req := &computepb.GetDiskRequest{
+		Project: projectID,
+		Disk:    diskName,
+		Zone:    zone,
+	}
+	disk, err := diskClient.Get(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return disk, nil
+}
+
+func createSnapshot(
+	ctx context.Context,
+	projectID, snapshotName string,
+	disk *computepb.Disk,
+	locations *[]string,
+) error {
+	snapshotsClient, err := compute.NewSnapshotsRESTClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer snapshotsClient.Close()
+
+	req := &computepb.InsertSnapshotRequest{
+		Project: projectID,
+		SnapshotResource: &computepb.Snapshot{
+			Name:             proto.String(snapshotName),
+			SourceDisk:       proto.String(disk.GetSelfLink()),
+			StorageLocations: *locations,
+		},
+	}
+
+	op, err := snapshotsClient.Insert(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	return op.Wait(ctx)
+}
+
+func deleteSnapshot(ctx context.Context, projectID, snapshotName string) error {
+	snapshotsClient, err := compute.NewSnapshotsRESTClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer snapshotsClient.Close()
+
+	req := &computepb.DeleteSnapshotRequest{
+		Project:  projectID,
+		Snapshot: snapshotName,
+	}
+
+	op, err := snapshotsClient.Delete(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	return op.Wait(ctx)
+}
+
 func TestComputeDiskImageSnippets(t *testing.T) {
 	ctx := context.Background()
 	var r *rand.Rand = rand.New(
@@ -81,18 +149,81 @@ func TestComputeDiskImageSnippets(t *testing.T) {
 	imageName := fmt.Sprintf("test-image-go-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	diskName := fmt.Sprintf("test-disk-go-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	sourceImage := "projects/debian-cloud/global/images/family/debian-11"
+	snapshotName := fmt.Sprintf("test-snapshot-go-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 
 	buf := &bytes.Buffer{}
 
 	err := createDisk(ctx, tc.ProjectID, zone, diskName, sourceImage)
 	if err != nil {
-		t.Fatalf("createDisk got err: %v", err)
+		t.Errorf("createDisk got err: %v", err)
 	}
 
 	t.Run("Test snapshot creation and deletion", func(t *testing.T) {
 		want := "created"
 
 		if err := createImageFromDisk(buf, tc.ProjectID, zone, diskName, imageName, []string{}, false); err != nil {
+			t.Fatalf("createImageFromDisk got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("createImageFromDisk got %q, want %q", got, want)
+		}
+
+		want = "deprecated"
+		buf.Reset()
+
+		if err := deprecateDiskImage(buf, tc.ProjectID, imageName); err != nil {
+			t.Errorf("deprecateDiskImage got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("deprecateDiskImage got %q, want %q", got, want)
+		}
+
+		buf.Reset()
+		want = "was found"
+
+		err = getDiskImage(buf, tc.ProjectID, imageName)
+		if err != nil {
+			t.Errorf("getDiskImage got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("getDiskImage got %q, want %q", got, want)
+		}
+
+		buf.Reset()
+		want = "Newest disk image was found"
+
+		_, err = getDiskImageFromFamily(buf, "debian-cloud", "debian-11")
+		if err != nil {
+			t.Errorf("getDiskImageFromFamily got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("getDiskImageFromFamily got %q, want %q", got, want)
+		}
+
+		buf.Reset()
+		want = "deleted"
+
+		if err := deleteDiskImage(buf, tc.ProjectID, imageName); err != nil {
+			t.Errorf("deleteDiskImage got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("deleteDiskImage got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("Test image creation and deletion from snapshot", func(t *testing.T) {
+		disk, err := getDisk(ctx, tc.ProjectID, diskName, zone)
+		if err != nil {
+			t.Fatalf("getDisk got err: %v", err)
+		}
+
+		err = createSnapshot(ctx, tc.ProjectID, snapshotName, disk, &[]string{})
+		if err != nil {
+			t.Fatalf("getDisk got err: %v", err)
+		}
+
+		want := "created"
+		if err := createImageFromSnapshot(buf, tc.ProjectID, snapshotName, imageName); err != nil {
 			t.Fatalf("createImageFromDisk got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, want) {
@@ -113,5 +244,10 @@ func TestComputeDiskImageSnippets(t *testing.T) {
 	err = deleteDisk(ctx, tc.ProjectID, zone, diskName)
 	if err != nil {
 		t.Errorf("deleteDisk got err: %v", err)
+	}
+
+	err = deleteSnapshot(ctx, tc.ProjectID, snapshotName)
+	if err != nil {
+		t.Errorf("deleteSnapshot got err: %v", err)
 	}
 }

@@ -17,9 +17,8 @@ package acl
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"testing"
-	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -36,12 +35,10 @@ func TestACL(t *testing.T) {
 	defer client.Close()
 
 	var (
-		bucket                = tc.ProjectID + "-samples-acl-bucket-1"
+		bucket                = testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, "samples-acl-bucket-1")
 		object                = "foo.txt"
 		allAuthenticatedUsers = storage.AllAuthenticatedUsers
 	)
-
-	testutil.CleanBucket(ctx, t, tc.ProjectID, bucket)
 
 	b := client.Bucket(bucket)
 
@@ -55,46 +52,23 @@ func TestACL(t *testing.T) {
 	}
 
 	// Run all the tests.
-	if err := addBucketOwner(bucket, allAuthenticatedUsers); err != nil {
-		t.Errorf("addBucketOwner: %v", err)
-	}
 	if err := addBucketDefaultOwner(bucket, allAuthenticatedUsers); err != nil {
 		t.Errorf("addBucketDefaultOwner: %v", err)
 	}
-	if err := printBucketACL(ioutil.Discard, bucket); err != nil {
-		t.Errorf("printBucketACL: %v", err)
-	}
-	if err := printBucketACLForUser(ioutil.Discard, bucket, allAuthenticatedUsers); err != nil {
-		t.Errorf("printBucketACLForUser: %v", err)
-	}
+
 	if err := removeBucketDefaultOwner(bucket, allAuthenticatedUsers); err != nil {
 		t.Errorf("removeBucketDefaultOwner: %v", err)
-	}
-	if err := removeBucketOwner(bucket, allAuthenticatedUsers); err != nil {
-		t.Errorf("removeBucketOwner: %v", err)
 	}
 	if err := addFileOwner(bucket, object, allAuthenticatedUsers); err != nil {
 		t.Errorf("addFileOwner: %v", err)
 	}
-	if err := printFileACL(ioutil.Discard, bucket, object); err != nil {
+	if err := printFileACL(io.Discard, bucket, object); err != nil {
 		t.Errorf("printFileACL: %v", err)
 	}
-	if err := printFileACLForUser(ioutil.Discard, bucket, object, allAuthenticatedUsers); err != nil {
+	if err := printFileACLForUser(io.Discard, bucket, object, allAuthenticatedUsers); err != nil {
 		t.Errorf("printFileACLForUser: %v", err)
 	}
 	if err := removeFileOwner(bucket, object, allAuthenticatedUsers); err != nil {
 		t.Errorf("removeFileOwner: %v", err)
 	}
-
-	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		// Cleanup, this part won't be executed if Fatal happens.
-		// TODO(jbd): Implement garbage cleaning.
-		b := client.Bucket(bucket)
-		if err := b.Object(object).Delete(ctx); err != nil {
-			r.Errorf("Object(%q).Delete: %v", object, err)
-		}
-		if err := b.Delete(ctx); err != nil {
-			r.Errorf("Bucket(%q).Delete: %v", bucket, err)
-		}
-	})
 }

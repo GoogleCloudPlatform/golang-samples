@@ -1,10 +1,12 @@
 {
   "extends": [
-    "config:base",
-    "schedule:weekly",
-    ":disableDependencyDashboard"
+    "config:recommended",
+    "schedule:weekly"
   ],
-  "semanticCommits": false,
+  "dependencyDashboardLabels": [
+    "type: process"
+  ],
+  "semanticCommits": "disabled",
   "postUpdateOptions": [
     "gomodTidy"
   ],
@@ -16,13 +18,13 @@
   "groupName": "everything",
   "packageRules": [
     {
-      "updateTypes": [
+      "matchUpdateTypes": [
         "major"
       ],
       "enabled": false
     },
     {
-      "packageNames": [
+      "matchPackageNames": [
         "golang.org/x/tools",
         "cloud.google.com/go/pubsublite",
         "contrib.go.opencensus.io/exporter/stackdriver"
@@ -32,7 +34,7 @@
   ],
   "force": {
     "constraints": {
-      "go": "1.19"
+      "go": "1.21"
     }
   }
 }

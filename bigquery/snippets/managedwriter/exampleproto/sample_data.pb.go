@@ -104,7 +104,7 @@ type SampleData struct {
 	StringCol  *string  `protobuf:"bytes,5,opt,name=string_col,json=stringCol" json:"string_col,omitempty"`
 	// The following data types require some encoding to use. See the
 	// documentation for the expected data formats:
-	// https://cloud.google.com/bigquery/docs/write-api#data_type_conversion
+	// https://cloud.google.com/bigquery/docs/write-api#data_type_conversions
 	DateCol       *int32  `protobuf:"varint,6,opt,name=date_col,json=dateCol" json:"date_col,omitempty"`
 	DatetimeCol   *string `protobuf:"bytes,7,opt,name=datetime_col,json=datetimeCol" json:"datetime_col,omitempty"`
 	GeographyCol  *string `protobuf:"bytes,8,opt,name=geography_col,json=geographyCol" json:"geography_col,omitempty"`

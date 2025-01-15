@@ -26,8 +26,8 @@ import (
 
 	"cloud.google.com/go/spanner"
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
+	adminpb "cloud.google.com/go/spanner/admin/database/apiv1/databasepb"
 	"google.golang.org/api/iterator"
-	adminpb "google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
 // Country describes a country and the cities inside it.

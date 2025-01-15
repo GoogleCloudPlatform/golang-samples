@@ -18,7 +18,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 
 	video "cloud.google.com/go/videointelligence/apiv1"
 	videopb "cloud.google.com/go/videointelligence/apiv1/videointelligencepb"
@@ -35,7 +35,7 @@ func label(w io.Writer, file string) error {
 	}
 	defer client.Close()
 
-	fileBytes, err := ioutil.ReadFile(file)
+	fileBytes, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func shotChange(w io.Writer, file string) error {
 	}
 	defer client.Close()
 
-	fileBytes, err := ioutil.ReadFile(file)
+	fileBytes, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}
@@ -132,7 +132,7 @@ func explicitContent(w io.Writer, file string) error {
 	}
 	defer client.Close()
 
-	fileBytes, err := ioutil.ReadFile(file)
+	fileBytes, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}
@@ -172,7 +172,7 @@ func speechTranscription(w io.Writer, file string) error {
 	}
 	defer client.Close()
 
-	fileBytes, err := ioutil.ReadFile(file)
+	fileBytes, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}

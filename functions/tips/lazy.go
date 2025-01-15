@@ -14,7 +14,6 @@
 
 // [START functions_tips_lazy_globals]
 // [START cloudrun_tips_global_lazy]
-// [START run_tips_global_lazy]
 
 // Package tips contains tips for writing Cloud Functions in Go.
 package tips
@@ -54,6 +53,5 @@ func LazyGlobal(w http.ResponseWriter, r *http.Request) {
 	// Use client.
 }
 
-// [END run_tips_global_lazy]
 // [END cloudrun_tips_global_lazy]
 // [END functions_tips_lazy_globals]

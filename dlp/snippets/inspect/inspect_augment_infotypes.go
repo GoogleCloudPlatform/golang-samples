@@ -102,7 +102,7 @@ func inspectAugmentInfoTypes(w io.Writer, projectID, textToInspect string, wordL
 	result := resp.Result
 	fmt.Fprintf(w, "Findings: %d\n", len(result.Findings))
 	for _, f := range result.Findings {
-		fmt.Fprintf(w, "\tQoute: %s\n", f.Quote)
+		fmt.Fprintf(w, "\tQuote: %s\n", f.Quote)
 		fmt.Fprintf(w, "\tInfo type: %s\n", f.InfoType.Name)
 		fmt.Fprintf(w, "\tLikelihood: %s\n", f.Likelihood)
 	}

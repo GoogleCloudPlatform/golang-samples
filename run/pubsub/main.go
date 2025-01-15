@@ -13,14 +13,13 @@
 // limitations under the License.
 
 // [START cloudrun_pubsub_server]
-// [START run_pubsub_server]
 
 // Sample run-pubsub is a Cloud Run service which handles Pub/Sub messages.
 package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -41,11 +40,9 @@ func main() {
 	}
 }
 
-// [END run_pubsub_server]
 // [END cloudrun_pubsub_server]
 
 // [START cloudrun_pubsub_handler]
-// [START run_pubsub_handler]
 
 // PubSubMessage is the payload of a Pub/Sub event.
 // See the documentation for more details:
@@ -61,9 +58,10 @@ type PubSubMessage struct {
 // HelloPubSub receives and processes a Pub/Sub push message.
 func HelloPubSub(w http.ResponseWriter, r *http.Request) {
 	var m PubSubMessage
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
+	defer r.Body.Close()
 	if err != nil {
-		log.Printf("ioutil.ReadAll: %v", err)
+		log.Printf("io.ReadAll: %v", err)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
@@ -81,5 +79,4 @@ func HelloPubSub(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Hello %s!", name)
 }
 
-// [END run_pubsub_handler]
 // [END cloudrun_pubsub_handler]

@@ -19,7 +19,7 @@ import (
 )
 
 func TestGreeting(t *testing.T) {
-	resp := greeting(&GreetingRequest{
+	resp, _ := greeting(&GreetingRequest{
 		FirstName: "Jane",
 		LastName:  "Doe",
 	})

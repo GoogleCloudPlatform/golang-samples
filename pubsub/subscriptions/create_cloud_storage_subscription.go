@@ -14,7 +14,7 @@
 
 package subscriptions
 
-// [START pubsub_cloudstorage_subscription]
+// [START pubsub_create_cloud_storage_subscription]
 import (
 	"context"
 	"fmt"
@@ -57,4 +57,4 @@ func createCloudStorageSubscription(w io.Writer, projectID, subID string, topic 
 	return nil
 }
 
-// [END pubsub_cloudstorage_subscription]
+// [END pubsub_create_cloud_storage_subscription]

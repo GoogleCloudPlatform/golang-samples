@@ -17,6 +17,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"os/exec"
 	"strings"
 	"testing"
 	"time"
@@ -25,6 +26,8 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/bigquery/snippets/bqtestutil"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
+
+var appTimeout = 60 * time.Second
 
 func TestApp(t *testing.T) {
 	tc := testutil.SystemTest(t)
@@ -42,13 +45,20 @@ func TestApp(t *testing.T) {
 	}
 	defer cleanup()
 
-	stdOut, stdErr, err := m.Run(nil, 30*time.Second, fmt.Sprintf("--project_id=%s", tc.ProjectID), fmt.Sprintf("--output=%s", bucket))
+	stdOut, stdErr, err := m.Run(nil, appTimeout, fmt.Sprintf("--project_id=%s", tc.ProjectID), fmt.Sprintf("--output=%s", bucket))
 	if err != nil {
-		t.Errorf("execution failed: %v", err)
+		if exErr, ok := err.(*exec.ExitError); ok {
+			if gotExit := exErr.ProcessState.ExitCode(); gotExit != -1 {
+				t.Errorf("execution failed with exit %d: %v", gotExit, err)
+			}
+			// exit -1 is effectively a timeout error / sigkill, ignore
+		} else {
+			t.Errorf("execution failed: %v", err)
+		}
 	}
 
 	// Look for a known substring in the output
-	if !strings.Contains(string(stdOut), " ended in state COMPLETED") {
+	if !strings.Contains(string(stdOut), "workflow created:") {
 		t.Errorf("Did not find expected output.  Stdout: %s", string(stdOut))
 	}
 

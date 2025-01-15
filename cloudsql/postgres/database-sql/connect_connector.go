@@ -24,8 +24,8 @@ import (
 	"os"
 
 	"cloud.google.com/go/cloudsqlconn"
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/stdlib"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/stdlib"
 )
 
 func connectWithConnector() (*sql.DB, error) {

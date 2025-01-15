@@ -21,10 +21,10 @@ import (
 	"io"
 
 	batch "cloud.google.com/go/batch/apiv1"
+	"cloud.google.com/go/batch/apiv1/batchpb"
 	"cloud.google.com/go/logging"
 	"cloud.google.com/go/logging/logadmin"
 	"google.golang.org/api/iterator"
-	batchpb "google.golang.org/genproto/googleapis/cloud/batch/v1"
 )
 
 // Retrieve the logs written by the given job to Cloud Logging

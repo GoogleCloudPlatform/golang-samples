@@ -17,7 +17,7 @@ env: flex
 
 runtime_config:
   operating_system: ubuntu22
-  runtime_version: 1.19
+  runtime_version: 1.21
 
 automatic_scaling:
   min_num_instances: 1

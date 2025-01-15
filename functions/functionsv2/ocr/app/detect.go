@@ -23,8 +23,8 @@ import (
 	"log"
 
 	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/vision/v2/apiv1/visionpb"
 	"golang.org/x/text/language"
-	visionpb "google.golang.org/genproto/googleapis/cloud/vision/v1"
 )
 
 // detectText detects the text in an image using the Google Vision API.

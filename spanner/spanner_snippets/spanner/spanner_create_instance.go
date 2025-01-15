@@ -21,7 +21,7 @@ import (
 	"io"
 
 	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
-	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
+	"cloud.google.com/go/spanner/admin/instance/apiv1/instancepb"
 )
 
 func createInstance(w io.Writer, projectID, instanceID string) error {
@@ -42,6 +42,7 @@ func createInstance(w io.Writer, projectID, instanceID string) error {
 			DisplayName: instanceID,
 			NodeCount:   1,
 			Labels:      map[string]string{"cloud_spanner_samples": "true"},
+			Edition:     instancepb.Instance_STANDARD,
 		},
 	})
 	if err != nil {

@@ -15,13 +15,14 @@
 package snippets
 
 // [START compute_regional_disk_attach]
+// [START compute_instance_attach_regional_disk_force]
 import (
 	"context"
 	"fmt"
 	"io"
 
 	compute "cloud.google.com/go/compute/apiv1"
-	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
+	computepb "cloud.google.com/go/compute/apiv1/computepb"
 )
 
 // Attaches the provided regional disk in read-write mode to the given VM
@@ -41,6 +42,8 @@ func attachRegionalDisk(w io.Writer, projectID, zone, instanceName, diskUrl stri
 	req := &computepb.AttachDiskInstanceRequest{
 		AttachedDiskResource: &computepb.AttachedDisk{
 			Source: &diskUrl,
+			// In case you want to force attach the disk
+			// ForceAttach: proto.Bool(true),
 		},
 		Instance: instanceName,
 		Project:  projectID,
@@ -62,3 +65,4 @@ func attachRegionalDisk(w io.Writer, projectID, zone, instanceName, diskUrl stri
 }
 
 // [END compute_regional_disk_attach]
+// [END compute_instance_attach_regional_disk_force]

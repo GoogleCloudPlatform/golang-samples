@@ -19,7 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
@@ -39,7 +39,7 @@ func inspectTextFile(w io.Writer, projectID, filePath string) error {
 	defer client.Close() // Closing the client safely cleans up background resources.
 
 	// Gather the resources for the request.
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func inspectTextFile(w io.Writer, projectID, filePath string) error {
 	// Process the results.
 	fmt.Fprintf(w, "Findings: %d\n", len(resp.Result.Findings))
 	for _, f := range resp.Result.Findings {
-		fmt.Fprintf(w, "\tQoute: %s\n", f.Quote)
+		fmt.Fprintf(w, "\tQuote: %s\n", f.Quote)
 		fmt.Fprintf(w, "\tInfo type: %s\n", f.InfoType.Name)
 		fmt.Fprintf(w, "\tLikelihood: %s\n", f.Likelihood)
 	}

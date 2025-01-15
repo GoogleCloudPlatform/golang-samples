@@ -22,330 +22,31 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
+	"os"
 	"strings"
+	"time"
 
 	"testing"
 
+	"cloud.google.com/go/bigquery"
+	dlp "cloud.google.com/go/dlp/apiv2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 	kms "cloud.google.com/go/kms/apiv1"
 	"cloud.google.com/go/kms/apiv1/kmspb"
+	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
+	"google.golang.org/api/iterator"
 )
 
-func TestMask(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	tests := []struct {
-		input            string
-		maskingCharacter string
-		numberToMask     int32
-		want             string
-	}{
-		{
-			input:            "My SSN is 111222333",
-			maskingCharacter: "+",
-			want:             "My SSN is +++++++++",
-		},
-		{
-			input: "My SSN is 111222333",
-			want:  "My SSN is *********",
-		},
-		{
-			input:            "My SSN is 111222333",
-			maskingCharacter: "+",
-			numberToMask:     6,
-			want:             "My SSN is ++++++333",
-		},
-	}
-	for _, test := range tests {
-		test := test
-		t.Run(test.input, func(t *testing.T) {
-			test := test
-			t.Parallel()
-			buf := new(bytes.Buffer)
-			err := mask(buf, tc.ProjectID, test.input, []string{"US_SOCIAL_SECURITY_NUMBER"}, test.maskingCharacter, test.numberToMask)
-			if err != nil {
-				t.Errorf("mask(%q, %s, %v) = error %q, want %q", test.input, test.maskingCharacter, test.numberToMask, err, test.want)
-			}
-			if got := buf.String(); got != test.want {
-				t.Errorf("mask(%q, %s, %v) = %q, want %q", test.input, test.maskingCharacter, test.numberToMask, got, test.want)
-			}
-		})
-	}
-}
-
-func TestDeidentifyDateShift(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	tests := []struct {
-		input      string
-		want       string
-		lowerBound int32
-		upperBound int32
-	}{
-		{
-			input:      "2016-01-10",
-			lowerBound: 1,
-			upperBound: 1,
-			want:       "2016-01-11",
-		},
-		{
-			input:      "2016-01-10",
-			lowerBound: -1,
-			upperBound: -1,
-			want:       "2016-01-09",
-		},
-	}
-	for _, test := range tests {
-		test := test
-		t.Run(test.input, func(t *testing.T) {
-			test := test
-			t.Parallel()
-			buf := new(bytes.Buffer)
-			err := deidentifyDateShift(buf, tc.ProjectID, test.lowerBound, test.upperBound, test.input)
-			if err != nil {
-				t.Errorf("deidentifyDateShift(%v, %v, %q) = error '%q', want %q", test.lowerBound, test.upperBound, err, test.input, test.want)
-			}
-			if got := buf.String(); got != test.want {
-				t.Errorf("deidentifyDateShift(%v, %v, %q) = %q, want %q", test.lowerBound, test.upperBound, got, test.input, test.want)
-			}
-		})
-	}
-}
-
-func TestDeidentifyTableRowSuppress(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	var buf bytes.Buffer
-	if err := deidentifyTableRowSuppress(&buf, tc.ProjectID); err != nil {
-		t.Errorf("deidentifyTableRowSuppress: %v", err)
-	}
-	got := buf.String()
-	if want := "Table after de-identification"; !strings.Contains(got, want) {
-		t.Errorf("deidentifyTableRowSuppress got %q, want %q", got, want)
-	}
-	if want := "values:{string_value:\"Charles Dickens\"} "; strings.Contains(got, want) {
-		t.Errorf("deidentifyTableRowSuppress got %q, want %q", got, want)
-	}
-}
-
-func TestDeidentifyTableInfoTypes(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	var buf bytes.Buffer
-
-	if err := deidentifyTableInfotypes(&buf, tc.ProjectID); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-	if want := "Table after de-identification"; !strings.Contains(got, want) {
-		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
-	}
-
-	if want := "[PERSON_NAME]"; !strings.Contains(got, want) {
-		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
-	}
-
-	if want := "Charles Dickens"; strings.Contains(got, want) {
-		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
-	}
-	if want := "Mark Twain"; strings.Contains(got, want) {
-		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
-	}
-	if want := "Jane Austen"; strings.Contains(got, want) {
-		t.Errorf("deidentifyTableInfotypes got %q, want %q", got, want)
-	}
-
-}
-
-func TestDeIdentifyWithRedact(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	input := "My name is Alicia Abernathy, and my email address is aabernathy@example.com."
-	infoTypeNames := []string{"EMAIL_ADDRESS"}
-	want := "output: My name is Alicia Abernathy, and my email address is ."
-
-	var buf bytes.Buffer
-
-	if err := deidentifyWithRedact(&buf, tc.ProjectID, input, infoTypeNames); err != nil {
-		t.Errorf("deidentifyWithRedact(%q) = error '%q', want %q", err, input, want)
-	}
-	if got := buf.String(); got != want {
-		t.Errorf("deidentifyWithRedact(%q) = %q, want %q", got, input, want)
-	}
-}
-
-func TestDeidentifyExceptionList(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	input := "jack@example.org accessed customer record of user5@example.com"
-	want := "output : jack@example.org accessed customer record of [EMAIL_ADDRESS]"
-
-	var buf bytes.Buffer
-
-	if err := deidentifyExceptionList(&buf, tc.ProjectID, input); err != nil {
-		t.Errorf("deidentifyExceptionList(%q) = error '%q', want %q", input, err, want)
-	}
-	if got := buf.String(); got != want {
-		t.Errorf("deidentifyExceptionList(%q) = %q, want %q", input, got, want)
-	}
-
-}
-
-func TestDeIdentifyWithReplacement(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	input := "My name is Alicia Abernathy, and my email address is aabernathy@example.com."
-	infoType := []string{"EMAIL_ADDRESS"}
-	replaceVal := "[email-address]"
-	want := "output : My name is Alicia Abernathy, and my email address is [email-address]."
-
-	var buf bytes.Buffer
-	err := deidentifyWithReplacement(&buf, tc.ProjectID, input, infoType, replaceVal)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got := buf.String(); got != want {
-		t.Errorf("deidentifyWithReplacement(%q) = %q, want %q", input, got, want)
-	}
-}
-
-func TestDeidentifyTableBucketing(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	if err := deIdentifyTableBucketing(&buf, tc.ProjectID); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if want := "values:{string_value:\"70:80\"}}"; !strings.Contains(got, want) {
-		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
-	}
-	if want := "values:{string_value:\"75\"}}"; strings.Contains(got, want) {
-		t.Errorf("deIdentifyTableBucketing got %q, want %q", got, want)
-	}
-
-}
-
-func TestDeidentifyTableMaskingCondition(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-	if err := deidentifyTableMaskingCondition(&buf, tc.ProjectID); err != nil {
-		t.Fatal(err)
-	}
-	got := buf.String()
-	if want := "Table after de-identification :"; !strings.Contains(got, want) {
-		t.Errorf("deidentifyTableMaskingCondition got (%q) =%q ", got, want)
-	}
-	if want := "values:{string_value:\"**\"}"; !strings.Contains(got, want) {
-		t.Errorf("deidentifyTableMaskingCondition got (%q) =%q ", got, want)
-	}
-}
-
-func TestDeidentifyTableConditionInfoTypes(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	if err := deidentifyTableConditionInfoTypes(&buf, tc.ProjectID, []string{"PATIENT", "FACTOID"}); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-	if want := "Table after de-identification"; !strings.Contains(got, want) {
-		t.Errorf("deidentifyTableConditionInfoTypes got %q, want %q", got, want)
-	}
-	if want := "values:{string_value:\"[PERSON_NAME] name was a curse invented by [PERSON_NAME].\"}}"; !strings.Contains(got, want) {
-		t.Errorf("deidentifyTableConditionInfoTypes got %q, want %q", got, want)
-	}
-}
-
-func TestDeIdentifyWithWordList(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-	input := "Patient was seen in RM-YELLOW then transferred to rm green."
-	infoType := "CUSTOM_ROOM_ID"
-	wordList := []string{"RM-GREEN", "RM-YELLOW", "RM-ORANGE"}
-	want := "output : Patient was seen in [CUSTOM_ROOM_ID] then transferred to [CUSTOM_ROOM_ID]."
-
-	if err := deidentifyWithWordList(&buf, tc.ProjectID, input, infoType, wordList); err != nil {
-		t.Errorf("deidentifyWithWordList(%q) = error '%q', want %q", input, err, want)
-	}
-	if got := buf.String(); got != want {
-		t.Errorf("deidentifyWithWordList(%q) = %q, want %q", input, got, want)
-	}
-}
-
-func TestDeIdentifyWithInfotype(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	input := "My email is test@example.com"
-	infoType := []string{"EMAIL_ADDRESS"}
-	want := "output : My email is [EMAIL_ADDRESS]"
-
-	var buf bytes.Buffer
-
-	if err := deidentifyWithInfotype(&buf, tc.ProjectID, input, infoType); err != nil {
-		t.Fatal(err)
-	}
-	if got := buf.String(); got != want {
-		t.Errorf("deidentifyFreeTextWithFPEUsingSurrogate(%q) = %q, want %q", input, got, want)
-	}
-
-}
-
-func TestDeidentifyTableFPE(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	keyRingName, err := createKeyRing(t, tc.ProjectID)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	kmsKeyName, wrappedAesKey, keyVersion, err := createKey(t, tc.ProjectID, keyRingName)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer destroyKey(t, tc.ProjectID, keyVersion)
-
-	contains := "De-identify Table after format-preserving encryption"
-
-	var buf bytes.Buffer
-
-	if err := deidentifyTableFPE(&buf, tc.ProjectID, kmsKeyName, wrappedAesKey); err != nil {
-		t.Fatal(err)
-	}
-
-	if got := buf.String(); !strings.Contains(got, contains) {
-		t.Errorf("deidentifyTableFPE() = %q,%q ", got, contains)
-	}
-}
-func TestDeIdentifyDeterministic(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	input := "Jack's phone number is 5555551212"
-	infoTypeNames := []string{"PHONE_NUMBER"}
-	keyRingName, err := createKeyRing(t, tc.ProjectID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	keyFileName, cryptoKeyName, keyVersion, err := createKey(t, tc.ProjectID, keyRingName)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer destroyKey(t, tc.ProjectID, keyVersion)
-
-	surrogateInfoType := "PHONE_TOKEN"
-	want := "output : Jack's phone number is PHONE_TOKEN(36):"
-
-	var buf bytes.Buffer
-
-	if err := deIdentifyDeterministicEncryption(&buf, tc.ProjectID, input, infoTypeNames, keyFileName, cryptoKeyName, surrogateInfoType); err != nil {
-		t.Errorf("deIdentifyDeterministicEncryption(%q) = error '%q', want %q", err, input, want)
-	}
-
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("deIdentifyDeterministicEncryption(%q) = %q, want %q", input, got, want)
-	}
-
-}
+const (
+	filePathToGCSForDeidTest       = "./testdata/dlp_sample.csv"
+	tableID                        = "dlp_test_deid_table"
+	dataSetID                      = "dlp_test_deid_dataset"
+	deidentifyTemplateID           = "deidentified-templat-test-go"
+	deidentifyStructuredTemplateID = "deidentified-structured-template-go"
+	redactImageTemplate            = "redact-image-template-go"
+)
 
 func TestDeIdentifyFreeTextWithFPEUsingSurrogate(t *testing.T) {
 	tc := testutil.SystemTest(t)
@@ -379,44 +80,6 @@ func getUnwrappedKey(t *testing.T) (string, error) {
 	// Encode the key to base64
 	encodedKey := base64.StdEncoding.EncodeToString(key)
 	return string(encodedKey), nil
-
-}
-
-func TestReidentifyWithDeterministic(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	inputStr := "My SSN is 372819127"
-	infoTypeNames := []string{"US_SOCIAL_SECURITY_NUMBER"}
-	keyRingName, err := createKeyRing(t, tc.ProjectID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	keyFileName, cryptoKeyName, keyVersion, err := createKey(t, tc.ProjectID, keyRingName)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer destroyKey(t, tc.ProjectID, keyVersion)
-
-	surrogateInfoType := "SSN_TOKEN"
-
-	if err := deIdentifyDeterministicEncryption(&buf, tc.ProjectID, inputStr, infoTypeNames, keyFileName, cryptoKeyName, surrogateInfoType); err != nil {
-		t.Fatal(err)
-	}
-
-	deidContent := buf.String()
-
-	inputForReid := strings.TrimPrefix(deidContent, "output : ")
-
-	buf.Reset()
-	if err := reidentifyWithDeterministic(&buf, tc.ProjectID, inputForReid, surrogateInfoType, keyFileName, cryptoKeyName); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-	if want := "output: My SSN is 372819127"; got != want {
-		t.Errorf("reidentifyWithDeterministic got %q, want %q", got, want)
-	}
 
 }
 
@@ -516,147 +179,445 @@ func destroyKey(t *testing.T, projectID, key string) error {
 	return nil
 }
 
-func TestDeIdentifyTimeExtract(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-	if err := deIdentifyTimeExtract(&buf, tc.ProjectID); err != nil {
-		t.Fatal(err)
+var (
+	u                                  = uuid.New().String()[:8]
+	bucketForDeidCloudStorageForInput  = "dlp-test-deid-input-" + u
+	bucketForDeidCloudStorageForOutput = "dlp-test-deid-output-" + u
+)
+
+func TestMain(m *testing.M) {
+	tc := testutil.Context{}
+	tc.ProjectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	createRedactImageTemplate(tc.ProjectID, redactImageTemplate)
+	createDeidentifiedTemplate(tc.ProjectID, deidentifyTemplateID)
+	createStructuredDeidentifiedTemplate(tc.ProjectID, deidentifyStructuredTemplateID)
+	v := []string{bucketForDeidCloudStorageForInput, bucketForDeidCloudStorageForOutput}
+	for _, v := range v {
+		createBucket(tc.ProjectID, v)
 	}
-	got := buf.String()
-	if want := "Table after de-identification :"; !strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTimeExtract got %q, want %q", got, want)
+	filePathtoGCS(tc.ProjectID)
+	createBigQueryDataSetId(tc.ProjectID)
+	createTableInsideDataset(tc.ProjectID, dataSetID)
+	m.Run()
+	deleteBigQueryAssets(tc.ProjectID)
+	for _, v := range v {
+		deleteBucket(tc.ProjectID, v)
 	}
-	if want := "values:{string_value:\"1970\"}"; !strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTimeExtract got %q, want %q", got, want)
-	}
-	if want := "values:{string_value:\"1996\"}}"; !strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTimeExtract got %q, want %q", got, want)
-	}
+	deleteTemplate(tc.ProjectID)
 }
 
-func TestReidTextDataWithFPE(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	input := "My SSN is 123456789"
-	infoTypeNames := []string{"US_SOCIAL_SECURITY_NUMBER"}
-	surrogateInfoType := "AGE"
-
-	keyRingName, err := createKeyRing(t, tc.ProjectID)
+func createDeidentifiedTemplate(projectID, deidentifyTemplateID string) error {
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
 	if err != nil {
-		t.Fatal(err)
+		return err
 	}
-	keyFileName, cryptoKeyName, keyVersion, err := createKey(t, tc.ProjectID, keyRingName)
+	defer client.Close()
+
+	replaceWithInfoTypeConfig := &dlppb.ReplaceWithInfoTypeConfig{}
+
+	infoTypeTransformations := &dlppb.InfoTypeTransformations{
+		Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
+			{PrimitiveTransformation: &dlppb.PrimitiveTransformation{
+				Transformation: &dlppb.PrimitiveTransformation_ReplaceWithInfoTypeConfig{
+					ReplaceWithInfoTypeConfig: replaceWithInfoTypeConfig,
+				},
+			}},
+		},
+	}
+	deidentifyConfig := &dlppb.DeidentifyConfig{
+		Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
+			InfoTypeTransformations: infoTypeTransformations,
+		},
+	}
+	template := &dlppb.DeidentifyTemplate{
+		DeidentifyConfig: deidentifyConfig,
+	}
+	req := &dlppb.CreateDeidentifyTemplateRequest{
+		Parent:             fmt.Sprintf("projects/%s/locations/global", projectID),
+		DeidentifyTemplate: template,
+		TemplateId:         deidentifyTemplateID,
+	}
+	resp, err := client.CreateDeidentifyTemplate(ctx, req)
 	if err != nil {
-		t.Fatal(err)
+		return err
 	}
-	defer destroyKey(t, tc.ProjectID, keyVersion)
-
-	if err := deidentifyFPE(&buf, tc.ProjectID, input, infoTypeNames, keyFileName, cryptoKeyName, surrogateInfoType); err != nil {
-		t.Fatal(err)
-	}
-
-	deidContent := buf.String()
-
-	inputForReid := strings.TrimPrefix(deidContent, "output: ")
-	buf.Reset()
-
-	if err := reidTextDataWithFPE(&buf, tc.ProjectID, inputForReid, keyFileName, cryptoKeyName, surrogateInfoType); err != nil {
-		t.Fatal(err)
-	}
-
-	got := buf.String()
-	if want := "output: My SSN is 123456789"; got != want {
-		t.Errorf("reidentifyFreeTextWithFPEUsingSurrogate got %q, want %q", got, want)
-	}
+	fmt.Print("\n" + "template " + resp.Name + "is created")
+	return nil
 }
 
-func TestDeIdentifyTableWithCryptoHash(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	var buf bytes.Buffer
-	transientKeyName := "YOUR_TRANSIENT_CRYPTO_KEY_NAME"
-
-	if err := deIdentifyTableWithCryptoHash(&buf, tc.ProjectID, transientKeyName); err != nil {
-		t.Fatal(err)
+func createStructuredDeidentifiedTemplate(projectID, deidentifyStructuredTemplateID string) error {
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return err
 	}
-	got := buf.String()
-
-	if want := "Table after de-identification :"; !strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
+	defer client.Close()
+	value := &dlppb.Value_StringValue{
+		StringValue: "Hello",
 	}
-	if want := "user3@example.org"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
+	replaceValueConfig := &dlppb.ReplaceValueConfig{
+		NewValue: &dlppb.Value{
+			Type: value,
+		},
 	}
-	if want := "858-555-0224"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
+	recordTransformations := &dlppb.RecordTransformations{
+		FieldTransformations: []*dlppb.FieldTransformation{
+			{
+				Transformation: &dlppb.FieldTransformation_PrimitiveTransformation{
+					PrimitiveTransformation: &dlppb.PrimitiveTransformation{
+						Transformation: &dlppb.PrimitiveTransformation_ReplaceConfig{
+							ReplaceConfig: replaceValueConfig,
+						},
+					},
+				},
+			},
+		},
 	}
-	if want := "user2@example.org"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
+	deidentifyConfig := &dlppb.DeidentifyConfig{
+		Transformation: &dlppb.DeidentifyConfig_RecordTransformations{
+			RecordTransformations: recordTransformations,
+		},
 	}
-	if want := "858-555-0223"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
+	template := &dlppb.DeidentifyTemplate{
+		DeidentifyConfig: deidentifyConfig,
 	}
-	if want := "user1@example.org"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
+	req := &dlppb.CreateDeidentifyTemplateRequest{
+		Parent:             fmt.Sprintf("projects/%s/locations/global", projectID),
+		DeidentifyTemplate: template,
+		TemplateId:         deidentifyStructuredTemplateID,
 	}
-	if want := "858-555-0222"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithCryptoHash got %q, want %q", got, want)
+	resp, err := client.CreateDeidentifyTemplate(ctx, req)
+	if err != nil {
+		return err
 	}
+	fmt.Print("\n" + "template " + resp.Name + "is created")
+	return nil
 }
 
-func TestDeIdentifyTableWithMultipleCryptoHash(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-
-	if err := deIdentifyTableWithMultipleCryptoHash(&buf, tc.ProjectID, "your-transient-crypto-key-name-1", "your-transient-crypto-key-name-2"); err != nil {
-		t.Fatal(err)
+func createRedactImageTemplate(projectID, redactImageTemplate string) error {
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return err
 	}
-	got := buf.String()
-	if want := "Table after de-identification :"; !strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithMultipleCryptoHash got %q, want %q", got, want)
+	defer client.Close()
+	imageTransformation := &dlppb.ImageTransformations_ImageTransformation{
+		RedactionColor: &dlppb.Color{
+			Red:   1,
+			Green: 0,
+			Blue:  0,
+		},
 	}
-	if want := "user1@example.org"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithMultipleCryptoHash got %q, want %q", got, want)
+	imageTransformations := &dlppb.ImageTransformations{
+		Transforms: []*dlppb.ImageTransformations_ImageTransformation{
+			imageTransformation,
+		},
 	}
-	if want := "858-555-0222"; strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithMultipleCryptoHash got %q, want %q", got, want)
+	deidentifyConfig := &dlppb.DeidentifyConfig{
+		Transformation: &dlppb.DeidentifyConfig_ImageTransformations{
+			ImageTransformations: imageTransformations,
+		},
 	}
-	if want := "abbyabernathy1"; !strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTableWithMultipleCryptoHash got %q, want %q", got, want)
+	template := &dlppb.DeidentifyTemplate{
+		DeidentifyConfig: deidentifyConfig,
 	}
+	req := &dlppb.CreateDeidentifyTemplateRequest{
+		Parent:             fmt.Sprintf("projects/%s/locations/global", projectID),
+		DeidentifyTemplate: template,
+		TemplateId:         redactImageTemplate,
+	}
+	resp, err := client.CreateDeidentifyTemplate(ctx, req)
+	if err != nil {
+		return err
+	}
+	fmt.Print("\n" + "template " + resp.Name + "is created")
+	return nil
 }
 
-func TestDeIdentifyTablePrimitiveBucketing(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
-	if err := deIdentifyTablePrimitiveBucketing(&buf, tc.ProjectID); err != nil {
-		t.Fatal(err)
+func deleteTemplate(projectID string) error {
+	ctx := context.Background()
+	client, err := dlp.NewClient(ctx)
+	if err != nil {
+		return err
 	}
-	got := buf.String()
-	if want := "Table after de-identification :"; !strings.Contains(got, want) {
-		t.Errorf("TestDeIdentifyTablePrimitiveBucketing got %q, want %q", got, want)
+	defer client.Close()
+	abc := []string{deidentifyTemplateID, deidentifyStructuredTemplateID, redactImageTemplate}
+	for _, v := range abc {
+		name := fmt.Sprint("projects/" + projectID + "/deidentifyTemplates/" + v)
+		req := &dlppb.DeleteDeidentifyTemplateRequest{
+			Name: name,
+		}
+		err := client.DeleteDeidentifyTemplate(ctx, req)
+		if err != nil {
+			return err
+		}
+		log.Printf("[info] deleted a template : %s", v)
 	}
-
-	if want := `values:{string_value:"High"}`; !strings.Contains(got, want) {
-		t.Errorf("TestDeidentifyDataReplaceWithDictionary got %q, want %q", got, want)
-	}
-	if want := `values:{string_value:"75"}`; strings.Contains(got, want) {
-		t.Errorf("TestDeidentifyDataReplaceWithDictionary got %q, want %q", got, want)
-	}
+	return nil
 }
 
-func TestDeidentifyDataReplaceWithDictionary(t *testing.T) {
-	tc := testutil.SystemTest(t)
-	var buf bytes.Buffer
+func createBucket(projectID, bucketName string) error {
 
-	if err := deidentifyDataReplaceWithDictionary(&buf, tc.ProjectID, "My name is Alicia Abernathy, and my email address is aabernathy@example.com."); err != nil {
-		t.Fatal(err)
+	ctx := context.Background()
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
 	}
-	got := buf.String()
-	want1 := "output: My name is Alicia Abernathy, and my email address is izumi@example.com."
-	want2 := "output: My name is Alicia Abernathy, and my email address is alex@example.com."
-	if !strings.Contains(got, want1) && !strings.Contains(got, want2) {
-		t.Errorf("TestDeidentifyDataReplaceWithDictionary got %q, output does not contains value from dictionary", got)
+	defer client.Close()
+
+	// Check if the bucket already exists.
+	bucketExists := false
+	_, err = client.Bucket(bucketName).Attrs(ctx)
+	if err == nil {
+		bucketExists = true
 	}
+
+	// If the bucket doesn't exist, create it.
+	if !bucketExists {
+		if err := client.Bucket(bucketName).Create(ctx, projectID, &storage.BucketAttrs{
+			StorageClass: "STANDARD",
+			Location:     "us-central1",
+		}); err != nil {
+			log.Fatalf("---Failed to create bucket: %v", err)
+			return err
+		}
+		fmt.Printf("---Bucket '%s' created successfully.\n", bucketName)
+	} else {
+		fmt.Printf("---Bucket '%s' already exists.\n", bucketName)
+	}
+	fmt.Println("createbucket function is executed-------")
+	return nil
+}
+
+func filePathtoGCS(projectID string) error {
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	// Check if the bucket already exists.
+	bucketExists := false
+	_, err = client.Bucket(bucketForDeidCloudStorageForInput).Attrs(ctx)
+	if err == nil {
+		bucketExists = true
+	}
+
+	// If the bucket doesn't exist, create it.
+	if !bucketExists {
+		if err := client.Bucket(bucketForDeidCloudStorageForInput).Create(ctx, projectID, &storage.BucketAttrs{
+			StorageClass: "STANDARD",
+			Location:     "us-central1",
+		}); err != nil {
+			return err
+		}
+		fmt.Printf("Bucket '%s' created successfully.\n", bucketForDeidCloudStorageForInput)
+	} else {
+		fmt.Printf("Bucket '%s' already exists.\n", bucketForDeidCloudStorageForInput)
+	}
+
+	// Check if the directory already exists in the bucket.
+	dirExists := false
+	query := &storage.Query{Prefix: filePathToGCSForDeidTest}
+	it := client.Bucket(bucketForDeidCloudStorageForInput).Objects(ctx, query)
+	_, err = it.Next()
+	if err == nil {
+		dirExists = true
+	}
+
+	// If the directory doesn't exist, create it.
+	if !dirExists {
+		obj := client.Bucket(bucketForDeidCloudStorageForInput).Object(filePathToGCSForDeidTest)
+		if _, err := obj.NewWriter(ctx).Write([]byte("")); err != nil {
+			log.Fatalf("Failed to create directory: %v", err)
+		}
+		fmt.Printf("Directory '%s' created successfully in bucket '%s'.\n", filePathToGCSForDeidTest, bucketForDeidCloudStorageForInput)
+	} else {
+		fmt.Printf("Directory '%s' already exists in bucket '%s'.\n", filePathToGCSForDeidTest, bucketForDeidCloudStorageForInput)
+	}
+
+	// file upload code
+
+	// Open local file.
+	file, err := os.ReadFile(filePathToGCSForDeidTest)
+	if err != nil {
+		log.Fatalf("Failed to read file: %v", err)
+		return err
+	}
+
+	// Get a reference to the bucket
+	bucket := client.Bucket(bucketForDeidCloudStorageForInput)
+
+	// Upload the file
+	object := bucket.Object(filePathToGCSForDeidTest)
+	writer := object.NewWriter(ctx)
+	_, err = writer.Write(file)
+	if err != nil {
+		log.Fatalf("Failed to write file: %v", err)
+		return err
+	}
+	err = writer.Close()
+	if err != nil {
+		log.Fatalf("Failed to close writer: %v", err)
+		return err
+	}
+	fmt.Printf("File uploaded successfully: %v\n", filePathToGCSForDeidTest)
+
+	// Check if the file exists in the bucket
+	_, err = bucket.Object(filePathToGCSForDeidTest).Attrs(ctx)
+	if err != nil {
+		if err == storage.ErrObjectNotExist {
+			fmt.Printf("File %v does not exist in bucket %v\n", filePathToGCSForDeidTest, bucketForDeidCloudStorageForInput)
+		} else {
+			log.Fatalf("Failed to check file existence: %v", err)
+		}
+	} else {
+		fmt.Printf("File %v exists in bucket %v\n", filePathToGCSForDeidTest, bucketForDeidCloudStorageForInput)
+	}
+
+	fmt.Println("filePathtoGCS function is executed-------")
+	return nil
+}
+
+func deleteBucket(projectID, bucketName string) error {
+
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	bucket := client.Bucket(bucketName)
+
+	// List all objects in the bucket.
+	objs := bucket.Objects(ctx, nil)
+	for {
+		objAttrs, err := objs.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatalf("Failed to list objects in bucket: %v", err)
+		}
+
+		// Delete each object in the bucket.
+		if err := bucket.Object(objAttrs.Name).Delete(ctx); err != nil {
+			log.Fatalf("Failed to delete object %s: %v", objAttrs.Name, err)
+		}
+		fmt.Printf("Deleted object: %s\n", objAttrs.Name)
+	}
+	if err := bucket.Delete(ctx); err != nil {
+		log.Fatalf("Failed to delete bucket: %v", err)
+	}
+
+	return nil
+}
+
+func createBigQueryDataSetId(projectID string) error {
+
+	ctx := context.Background()
+
+	client, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	meta := &bigquery.DatasetMetadata{
+		Location: "US", // See https://cloud.google.com/bigquery/docs/locations
+	}
+
+	if err := client.Dataset(dataSetID).Create(ctx, meta); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func createTableInsideDataset(projectID, dataSetID string) error {
+	ctx := context.Background()
+	client, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	sampleSchema := bigquery.Schema{
+		{Name: "user_id", Type: bigquery.StringFieldType},
+		{Name: "age", Type: bigquery.IntegerFieldType},
+		{Name: "title", Type: bigquery.StringFieldType},
+		{Name: "score", Type: bigquery.StringFieldType},
+	}
+
+	metaData := &bigquery.TableMetadata{
+		Schema:         sampleSchema,
+		ExpirationTime: time.Now().AddDate(1, 0, 0), // Table will be automatically deleted in 1 year.
+	}
+
+	tableRef := client.Dataset(dataSetID).Table(tableID)
+	if err := tableRef.Create(ctx, metaData); err != nil {
+		log.Printf("[INFO] createBigQueryDataSetId Error while table creation: %v", err)
+		return err
+	}
+
+	duration := time.Duration(90) * time.Second
+	time.Sleep(duration)
+
+	inserter := client.Dataset(dataSetID).Table(tableID).Inserter()
+	items := []*BigQueryTableItem{
+		// Item implements the ValueSaver interface.
+		{UserId: "602-61-8588", Age: 32, Title: "Biostatistician III", Score: "A"},
+		{UserId: "618-96-2322", Age: 69, Title: "Programmer I", Score: "C"},
+		{UserId: "618-96-2322", Age: 69, Title: "Executive Secretary", Score: "C"},
+	}
+	if err := inserter.Put(ctx, items); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type BigQueryTableItem struct {
+	UserId string
+	Age    int
+	Title  string
+	Score  string
+}
+
+func (i *BigQueryTableItem) Save() (map[string]bigquery.Value, string, error) {
+	return map[string]bigquery.Value{
+		"user_id": i.UserId,
+		"age":     i.Age,
+		"title":   i.Title,
+		"score":   i.Score,
+	}, bigquery.NoDedupeID, nil
+}
+
+func deleteBigQueryAssets(projectID string) error {
+
+	log.Printf("[START] deleteBigQueryAssets: projectID %v and ", projectID)
+	ctx := context.Background()
+
+	client, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	log.Printf("[INFO] deleteBigQueryAssets: delete dataset err %v", err)
+
+	if err := client.Dataset(dataSetID).DeleteWithContents(ctx); err != nil {
+		log.Printf("[INFO] deleteBigQueryAssets: delete dataset err %v", err)
+		return err
+	}
+
+	duration := time.Duration(30) * time.Second
+	time.Sleep(duration)
+
+	log.Printf("[END] deleteBigQueryAssets:")
+	return nil
 }

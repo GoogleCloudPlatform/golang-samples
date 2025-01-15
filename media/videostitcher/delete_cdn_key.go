@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import (
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 // deleteCDNKey deletes a CDN key.
@@ -38,16 +38,20 @@ func deleteCDNKey(w io.Writer, projectID, keyID string) error {
 
 	name := fmt.Sprintf("projects/%s/locations/%s/cdnKeys/%s", projectID, location, keyID)
 
-	req := &stitcherpb.DeleteCdnKeyRequest{
+	req := &stitcherstreampb.DeleteCdnKeyRequest{
 		Name: name,
 	}
 	// Deletes the CDN key.
-	err = client.DeleteCdnKey(ctx, req)
+	op, err := client.DeleteCdnKey(ctx, req)
 	if err != nil {
 		return fmt.Errorf("client.DeleteCdnKey: %w", err)
 	}
+	err = op.Wait(ctx)
+	if err != nil {
+		return err
+	}
 
-	fmt.Fprintf(w, "Deleted CDN key: %s", name)
+	fmt.Fprintf(w, "Deleted CDN key")
 	return nil
 }
 

@@ -32,7 +32,7 @@ func deidentifyTableFPE(w io.Writer, projectID string, kmsKeyName, wrappedAESKey
 	   + "keyRings/YOUR_KEYRING_NAME/"
 	   + "cryptoKeys/YOUR_KEY_NAME"
 	*/
-	// wrappedAESKey := "YOUR_ENCRYPTED_AES_256_KEY"git
+	// wrappedAESKey := "YOUR_ENCRYPTED_AES_256_KEY"
 
 	// define your table.
 	row1 := &dlppb.Table_Row{
@@ -95,7 +95,7 @@ func deidentifyTableFPE(w io.Writer, projectID string, kmsKeyName, wrappedAESKey
 	// Specify an encrypted AES-256 key and the name of the Cloud KMS key that encrypted it.
 	kmsKeyDecode, err := base64.StdEncoding.DecodeString(wrappedAESKey)
 	if err != nil {
-		return fmt.Errorf("error in decoding key: %v", err)
+		return fmt.Errorf("error in decoding key: %w", err)
 	}
 
 	kmsWrappedCryptoKey := &dlppb.KmsWrappedCryptoKey{

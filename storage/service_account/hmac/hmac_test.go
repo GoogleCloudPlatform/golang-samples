@@ -18,15 +18,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"google.golang.org/api/iterator"
-
 	"cloud.google.com/go/storage"
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"google.golang.org/api/googleapi"
+	"google.golang.org/api/iterator"
 )
 
 var serviceAccountEmail = os.Getenv("GOLANG_SAMPLES_SERVICE_ACCOUNT_EMAIL")
@@ -157,17 +158,32 @@ func TestDeleteKey(t *testing.T) {
 	// Keys must be in INACTIVE state before deletion.
 	ctx := context.Background()
 	handle := storageClient.HMACKeyHandle(key.ProjectID, key.AccessID)
-	handle.Update(ctx, storage.HMACKeyAttrsToUpdate{State: "INACTIVE"})
-
-	err = deleteHMACKey(ioutil.Discard, key.AccessID, key.ProjectID)
+	_, err = handle.Update(ctx, storage.HMACKeyAttrsToUpdate{State: "INACTIVE"})
 	if err != nil {
-		t.Errorf("Error in deleteHMACKey: %s", err)
-	}
-	key, _ = handle.Get(ctx)
-	if key != nil && key.State != "DELETED" {
-		t.Errorf("State of key is %s, should be DELETED", key.State)
+		t.Errorf("Error updating HMAC key: %s", err)
 	}
 
+	// Retry as HMAC key updates can take up to 3 minutes to propagate.
+	testutil.Retry(t, 18, 10*time.Second, func(r *testutil.R) {
+		err = deleteHMACKey(io.Discard, key.AccessID, key.ProjectID)
+		if err != nil {
+			// 400 error with reason "invalid" means the key was already deleted;
+			// this can happen if there was a previous call that returned an error
+			// but succeeded on the server side.
+			var ge *googleapi.Error
+			if errors.As(err, &ge) {
+				if ge.Code == 400 && len(ge.Errors) > 0 && ge.Errors[0].Reason == "invalid" {
+					return
+				}
+			}
+			r.Errorf("Error in deleteHMACKey: %s", err)
+		}
+		key, _ = handle.Get(ctx)
+		if key != nil && key.State != "DELETED" {
+			r.Errorf("State of key is %s, should be DELETED", key.State)
+		}
+
+	})
 }
 
 // Delete all HMAC keys in the project.

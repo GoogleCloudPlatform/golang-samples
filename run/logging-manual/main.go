@@ -52,7 +52,6 @@ func main() {
 }
 
 // [START cloudrun_manual_logging_object]
-// [START run_manual_logging_object]
 
 // Entry defines a log entry.
 type Entry struct {
@@ -76,11 +75,9 @@ func (e Entry) String() string {
 	return string(out)
 }
 
-// [END run_manual_logging_object]
 // [END cloudrun_manual_logging_object]
 
 // [START cloudrun_manual_logging]
-// [START run_manual_logging]
 
 func init() {
 	// Disable log prefixes such as the default timestamp.
@@ -113,5 +110,4 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Hello Logger!")
 }
 
-// [END run_manual_logging]
 // [END cloudrun_manual_logging]

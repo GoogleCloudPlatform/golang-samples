@@ -22,7 +22,7 @@ import (
 	"io"
 
 	stitcher "cloud.google.com/go/video/stitcher/apiv1"
-	"cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
+	stitcherstreampb "cloud.google.com/go/video/stitcher/apiv1/stitcherpb"
 )
 
 // getVodAdTagDetail gets the specified ad tag detail for a video on demand (VOD) session.
@@ -38,7 +38,7 @@ func getVodAdTagDetail(w io.Writer, projectID, sessionID, adTagDetailID string) 
 	}
 	defer client.Close()
 
-	req := &stitcherpb.GetVodAdTagDetailRequest{
+	req := &stitcherstreampb.GetVodAdTagDetailRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/vodSessions/%s/vodAdTagDetails/%s", projectID, location, sessionID, adTagDetailID),
 	}
 	// Gets the ad tag detail.

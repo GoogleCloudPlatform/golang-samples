@@ -44,7 +44,7 @@ func createWithEndpoint(w io.Writer, projectID, subID string, topic *pubsub.Topi
 	if err != nil {
 		return fmt.Errorf("CreateSubscription: %w", err)
 	}
-	fmt.Fprintf(w, "Created subscription: %v\n", sub)
+	fmt.Fprintf(w, "Created push subscription: %v\n", sub)
 	return nil
 }
 

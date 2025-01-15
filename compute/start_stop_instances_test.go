@@ -25,8 +25,8 @@ import (
 	"time"
 
 	compute "cloud.google.com/go/compute/apiv1"
+	computepb "cloud.google.com/go/compute/apiv1/computepb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -45,7 +45,7 @@ func TestStartStopSnippets(t *testing.T) {
 	instanceName := "test-instance-" + fmt.Sprint(seededRand.Int())
 	instanceName2 := "test-instance-" + fmt.Sprint(seededRand.Int())
 	machineType := "n1-standard-1"
-	sourceImage := "projects/debian-cloud/global/images/family/debian-10"
+	sourceImage := "projects/debian-cloud/global/images/family/debian-12"
 	networkName := "global/networks/default"
 
 	buf := &bytes.Buffer{}

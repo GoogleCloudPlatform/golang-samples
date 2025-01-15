@@ -29,26 +29,12 @@ import (
 func TestBlurOffensiveImages(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	inputBucket, err := testutil.CreateTestBucket(
+	inputBucket := testutil.CreateTestBucket(
 		context.Background(),
 		t, storageClient, tc.ProjectID, "test-blur-input")
-	if err != nil {
-		t.Errorf("failed to create input bucket: %v", err)
-	}
-	defer testutil.DeleteBucketIfExists(
-		context.Background(),
-		storageClient,
-		inputBucket)
-	outputBucket, err := testutil.CreateTestBucket(
+	outputBucket := testutil.CreateTestBucket(
 		context.Background(),
 		t, storageClient, tc.ProjectID, "test-blur-output")
-	if err != nil {
-		t.Errorf("failed to create output bucket: %v", err)
-	}
-	defer testutil.DeleteBucketIfExists(
-		context.Background(),
-		storageClient,
-		outputBucket)
 	oldEnvValue := os.Getenv("BLURRED_BUCKET_NAME")
 	os.Setenv("BLURRED_BUCKET_NAME", outputBucket)
 	defer os.Setenv("BLURRED_BUCKET_NAME", oldEnvValue)

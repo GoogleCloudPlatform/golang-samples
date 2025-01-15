@@ -37,10 +37,9 @@ func TestMain(t *testing.T) {
 		t.Errorf("failed to build app")
 	}
 
-	// Delete the bucket (if it exists) then recreate it.
+	// Create a bucket in GCS.
 	ctx := context.Background()
-	bucketName := fmt.Sprintf("%s-for-assets", tc.ProjectID)
-	testutil.CleanBucket(ctx, t, tc.ProjectID, bucketName)
+	bucketName := testutil.TestBucket(ctx, t, tc.ProjectID, "for-assets")
 	uri := fmt.Sprintf("gs://%s/client_library_obj", bucketName)
 
 	stdOut, stdErr, err := m.Run(env, 2*time.Minute, fmt.Sprintf("--scope=%s", scope), fmt.Sprintf("--fullResourceName=%s", fullResourceName), fmt.Sprintf("--uri=%s", uri))

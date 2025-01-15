@@ -34,11 +34,7 @@ func TestConfigureRetries(t *testing.T) {
 	}
 	defer client.Close()
 
-	bucket, err := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, "storage-buckets-test")
-	if err != nil {
-		t.Fatalf("creating bucket: %v", err)
-	}
-	defer testutil.DeleteBucketIfExists(ctx, client, bucket)
+	bucket := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, "storage-buckets-test")
 	object := "foo.txt"
 
 	// Upload test object to delete in sample.

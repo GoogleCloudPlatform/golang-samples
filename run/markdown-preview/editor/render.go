@@ -15,12 +15,11 @@
 package main
 
 // [START cloudrun_secure_request]
-// [START run_secure_request]
 import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -65,11 +64,9 @@ func (s *RenderService) NewRequest(method string) (*http.Request, error) {
 	return req, nil
 }
 
-// [END run_secure_request]
 // [END cloudrun_secure_request]
 
 // [START cloudrun_secure_request_do]
-// [START run_secure_request_do]
 
 var renderClient = &http.Client{Timeout: 30 * time.Second}
 
@@ -79,7 +76,8 @@ func (s *RenderService) Render(in []byte) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("RenderService.NewRequest: %w", err)
 	}
-	req.Body = ioutil.NopCloser(bytes.NewReader(in))
+
+	req.Body = io.NopCloser(bytes.NewReader(in))
 	defer req.Body.Close()
 
 	resp, err := renderClient.Do(req)
@@ -87,7 +85,7 @@ func (s *RenderService) Render(in []byte) ([]byte, error) {
 		return nil, fmt.Errorf("http.Client.Do: %w", err)
 	}
 
-	out, err := ioutil.ReadAll(resp.Body)
+	out, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("ioutil.ReadAll: %w", err)
 	}
@@ -99,5 +97,4 @@ func (s *RenderService) Render(in []byte) ([]byte, error) {
 	return out, nil
 }
 
-// [END run_secure_request_do]
 // [END cloudrun_secure_request_do]

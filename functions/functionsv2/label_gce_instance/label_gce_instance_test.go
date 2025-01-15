@@ -24,9 +24,9 @@ import (
 	"testing"
 
 	compute "cloud.google.com/go/compute/apiv1"
+	"cloud.google.com/go/compute/apiv1/computepb"
 	"github.com/cloudevents/sdk-go/v2/event"
 	"google.golang.org/api/option"
-	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 

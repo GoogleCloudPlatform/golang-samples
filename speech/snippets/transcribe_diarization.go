@@ -27,9 +27,8 @@ import (
 )
 
 // transcribe_diarization_gcs_beta Transcribes a remote audio file using speaker diarization.
-func transcribe_diarization_gcs_beta(w io.Writer, gcsUri string) error {
+func transcribe_diarization_gcs_beta(w io.Writer) error {
 	// Google Cloud Storage URI pointing to the audio content.
-	// gcsUri := "gs://bucket-name/path_to_audio_file"
 
 	ctx := context.Background()
 
@@ -54,7 +53,7 @@ func transcribe_diarization_gcs_beta(w io.Writer, gcsUri string) error {
 
 	// Set the remote path for the audio file
 	audio := &speechpb.RecognitionAudio{
-		AudioSource: &speechpb.RecognitionAudio_Uri{Uri: gcsUri},
+		AudioSource: &speechpb.RecognitionAudio_Uri{Uri: "gs://cloud-samples-tests/speech/commercial_mono.wav"},
 	}
 
 	longRunningRecognizeRequest := &speechpb.LongRunningRecognizeRequest{
@@ -64,7 +63,7 @@ func transcribe_diarization_gcs_beta(w io.Writer, gcsUri string) error {
 
 	operation, err := client.LongRunningRecognize(ctx, longRunningRecognizeRequest)
 	if err != nil {
-		return fmt.Errorf("error running recognize %v", err)
+		return fmt.Errorf("error running recognize %w", err)
 	}
 
 	response, err := operation.Wait(ctx)

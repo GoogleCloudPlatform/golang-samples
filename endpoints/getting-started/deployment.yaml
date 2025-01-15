@@ -41,6 +41,7 @@ spec:
         app: esp-echo
     spec:
       containers:
+      # [START endpoints_esp]
       # [START esp]
       - name: esp
         image: gcr.io/endpoints-release/endpoints-runtime:1
@@ -51,6 +52,7 @@ spec:
           "--rollout_strategy", "managed",
         ]
       # [END esp]
+      # [END endpoints_esp]
         ports:
           - containerPort: 8081
       - name: echo

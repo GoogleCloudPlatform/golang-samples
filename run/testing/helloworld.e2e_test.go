@@ -15,11 +15,9 @@
 package cloudruntests
 
 import (
-	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -34,23 +32,21 @@ func TestHelloworldService(t *testing.T) {
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)
 	}
-	defer service.Clean()
+	defer func(service *cloudrunci.Service) {
+		err := service.Clean()
+		if err != nil {
+			t.Fatalf("service.Clean %q: %v", service.Name, err)
+		}
+	}(service)
 
-	req, err := service.NewRequest("GET", "/")
+	resp, err := service.Request("GET", "/")
 	if err != nil {
-		t.Fatalf("service.NewRequest: %v", err)
+		t.Fatalf("request: %v", err)
 	}
 
-	client := http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
+	out, err := io.ReadAll(resp.Body)
 	if err != nil {
-		t.Fatalf("client.Do: %v", err)
-	}
-	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
-
-	out, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf("ioutil.ReadAll: %v", err)
+		t.Fatalf("io.ReadAll: %v", err)
 	}
 
 	if got, want := string(out), "Hello Override!\n"; got != want {

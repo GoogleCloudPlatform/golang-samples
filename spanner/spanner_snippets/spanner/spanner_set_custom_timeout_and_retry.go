@@ -34,10 +34,10 @@ func setCustomTimeoutAndRetry(w io.Writer, db string) error {
 		ExecuteSql: []gax.CallOption{
 			gax.WithRetry(func() gax.Retryer {
 				return gax.OnCodes([]codes.Code{
-					codes.Unavailable, codes.DeadlineExceeded,
+					codes.Unavailable,
 				}, gax.Backoff{
 					Initial:    500 * time.Millisecond,
-					Max:        64000 * time.Millisecond,
+					Max:        16000 * time.Millisecond,
 					Multiplier: 1.5,
 				})
 			}),

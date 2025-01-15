@@ -21,7 +21,7 @@ import (
 	"io"
 
 	admin "cloud.google.com/go/datastore/admin/apiv1"
-	adminpb "google.golang.org/genproto/googleapis/datastore/admin/v1"
+	"cloud.google.com/go/datastore/admin/apiv1/adminpb"
 )
 
 // indexGet gets an index.

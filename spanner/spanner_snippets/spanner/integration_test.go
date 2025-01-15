@@ -33,10 +33,10 @@ import (
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	adminpb "cloud.google.com/go/spanner/admin/database/apiv1/databasepb"
 	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
+	"cloud.google.com/go/spanner/admin/instance/apiv1/instancepb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
 	"google.golang.org/api/iterator"
-	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
 	"google.golang.org/genproto/protobuf/field_mask"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -47,7 +47,9 @@ type sampleFuncWithContext func(ctx context.Context, w io.Writer, dbName string)
 type instanceSampleFunc func(w io.Writer, projectID, instanceID string) error
 type backupSampleFunc func(ctx context.Context, w io.Writer, dbName, backupID string) error
 type backupSampleFuncWithoutContext func(w io.Writer, dbName, backupID string) error
+type backupScheduleSampleFunc func(w io.Writer, dbName string, scheduleId string) error
 type createBackupSampleFunc func(ctx context.Context, w io.Writer, dbName, backupID string, versionTime time.Time) error
+type instancePartitionSampleFunc func(w io.Writer, projectID, instanceID, instancePartitionID string) error
 
 var (
 	validInstancePattern = regexp.MustCompile("^projects/(?P<project>[^/]+)/instances/(?P<instance>[^/]+)$")
@@ -60,7 +62,8 @@ func initTest(t *testing.T, id string) (instName, dbName string, cleanup func())
 		configName = "regional-us-central1"
 	}
 	log.Printf("Running test by using the instance config: %s\n", configName)
-	instName, cleanup = createTestInstance(t, projectID, configName)
+	instanceID, cleanup := createTestInstance(t, projectID, configName)
+	instName = fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
 	dbID := validLength(fmt.Sprintf("smpl-%s", id), t)
 	dbName = fmt.Sprintf("%s/databases/%s", instName, dbID)
 
@@ -69,7 +72,8 @@ func initTest(t *testing.T, id string) (instName, dbName string, cleanup func())
 
 func initTestWithConfig(t *testing.T, id string, instanceConfigName string) (instName, dbName string, cleanup func()) {
 	projectID := getSampleProjectId(t)
-	instName, cleanup = createTestInstance(t, projectID, instanceConfigName)
+	instanceID, cleanup := createTestInstance(t, projectID, instanceConfigName)
+	instName = fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
 	dbID := validLength(fmt.Sprintf("smpl-%s", id), t)
 	dbName = fmt.Sprintf("%s/databases/%s", instName, dbID)
 
@@ -109,12 +113,34 @@ func initBackupTest(t *testing.T, id, instName string) (restoreDBName, backupID,
 	return
 }
 
+func initInstancePartitionTest(t *testing.T, id string) (string, string, string, func()) {
+	projectID := getSampleProjectId(t)
+	instancePartitionID := fmt.Sprintf("instance-partition-%s", id)
+	instanceID, cleanup := createTestInstance(t, projectID, "regional-us-central1")
+
+	return projectID, instanceID, instancePartitionID, cleanup
+}
+
 func TestCreateInstances(t *testing.T) {
 	_ = testutil.SystemTest(t)
 	t.Parallel()
 
-	runCreateInstanceSample(t, createInstance)
+	runCreateAndUpdateInstanceSample(t, createInstance, updateInstance)
+	runCreateAndUpdateInstanceSample(t, createInstanceWithoutDefaultBackupSchedule, updateInstanceDefaultBackupScheduleType)
 	runCreateInstanceSample(t, createInstanceWithProcessingUnits)
+	runCreateInstanceSample(t, createInstanceWithAutoscalingConfig)
+}
+
+func runCreateAndUpdateInstanceSample(t *testing.T, createFunc, updateFunc instanceSampleFunc) {
+	projectID := getSampleProjectId(t)
+	instanceID := fmt.Sprintf("go-sample-test-%s", uuid.New().String()[:8])
+	out := runInstanceSample(t, createFunc, projectID, instanceID, "failed to create an instance")
+	assertContains(t, out, fmt.Sprintf("Created instance [%s]", instanceID))
+	out = runInstanceSample(t, updateFunc, projectID, instanceID, "failed to update an instance")
+	assertContains(t, out, fmt.Sprintf("Updated instance [%s]", instanceID))
+	if err := cleanupInstance(projectID, instanceID); err != nil {
+		t.Logf("cleanupInstance error: %s", err)
+	}
 }
 
 func runCreateInstanceSample(t *testing.T, f instanceSampleFunc) {
@@ -141,6 +167,8 @@ func TestSample(t *testing.T) {
 	mustRunSample(t, createDatabase, dbName, "failed to create a database")
 	runSample(t, createClients, dbName, "failed to create clients")
 	runSample(t, write, dbName, "failed to insert data")
+	out = runSample(t, batchWrite, dbName, "failed to write data using BatchWrite")
+	assertNotContains(t, out, "could not be applied with error")
 	runSampleWithContext(ctx, t, addNewColumn, dbName, "failed to add new column")
 	runSample(t, delete, dbName, "failed to delete data")
 	runSample(t, write, dbName, "failed to insert data")
@@ -270,6 +298,12 @@ func TestSample(t *testing.T) {
 	out = runSample(t, setCustomTimeoutAndRetry, dbName, "failed to insert using DML with custom timeout and retry")
 	assertContains(t, out, "record(s) inserted")
 
+	out = runSample(t, setStatementTimeout, dbName, "failed to execute statement with a timeout")
+	assertContains(t, out, "record(s) inserted")
+
+	out = runSample(t, transactionTimeout, dbName, "failed to run transaction with a timeout")
+	assertContains(t, out, "Transaction with timeout was executed successfully")
+
 	out = runSample(t, updateUsingDML, dbName, "failed to update using DML")
 	assertContains(t, out, "record(s) updated")
 
@@ -295,6 +329,9 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "record(s) inserted")
 
 	out = runSample(t, commitStats, dbName, "failed to request commit stats")
+	assertContains(t, out, "4 mutations in transaction")
+
+	out = runSample(t, maxCommitDelay, dbName, "failed to set max commit delay")
 	assertContains(t, out, "4 mutations in transaction")
 
 	out = runSample(t, queryWithParameter, dbName, "failed to query with parameter")
@@ -387,6 +424,20 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "Updated data to VenueDetails column\n")
 	out = runSample(t, queryWithJsonParameter, dbName, "failed to query with json parameter")
 	assertContains(t, out, "The venue details for venue id 19")
+
+	out = runSample(t, createSequence, dbName, "failed to create table with bit reverse sequence enabled")
+	assertContains(t, out, "Created Seq sequence and Customers table, where the key column CustomerId uses the sequence as a default value\n")
+	assertContains(t, out, "Inserted customer record with CustomerId")
+	assertContains(t, out, "Number of customer records inserted is: 3")
+	out = runSample(t, alterSequence, dbName, "failed to alter table with bit reverse sequence enabled")
+	assertContains(t, out, "Altered Seq sequence to skip an inclusive range between 1000 and 5000000\n")
+	assertContains(t, out, "Inserted customer record with CustomerId")
+	assertContains(t, out, "Number of customer records inserted is: 3")
+	out = runSample(t, dropSequence, dbName, "failed to drop bit reverse sequence column")
+	assertContains(t, out, "Altered Customers table to drop DEFAULT from CustomerId column and dropped the Seq sequence\n")
+
+	out = runSample(t, directedReadOptions, dbName, "failed to read using directed read options")
+	assertContains(t, out, "1 1 Total Junk")
 }
 
 func TestBackupSample(t *testing.T) {
@@ -437,6 +488,53 @@ func TestBackupSample(t *testing.T) {
 
 	out = runBackupSample(ctx, t, deleteBackup, dbName, backupID, "failed to delete a backup")
 	assertContains(t, out, fmt.Sprintf("Deleted backup %s", backupID))
+}
+
+func TestBackupScheduleSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	_, dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	// Set up the database for testing backup schedule operations.
+	mustRunSample(t, createDatabase, dbName, "failed to create a database")
+
+	var out string
+	out = runBackupScheduleSample(t, createFullBackupSchedule, dbName, "full-backup-schedule", "failed to create full backup schedule")
+	assertContains(t, out, "Created full backup schedule")
+	assertContains(t, out, fmt.Sprintf("%s/backupSchedules/%s", dbName, "full-backup-schedule"))
+
+	out = runBackupScheduleSample(t, createIncrementalBackupSchedule, dbName, "incremental-backup-schedule", "failed to create incremental backup schedule")
+	assertContains(t, out, "Created incremental backup schedule")
+	assertContains(t, out, fmt.Sprintf("%s/backupSchedules/%s", dbName, "incremental-backup-schedule"))
+
+	out = runSample(t, listBackupSchedules, dbName, "failed to list backup schedule")
+	assertContains(t, out, fmt.Sprintf("%s/backupSchedules/%s", dbName, "full-backup-schedule"))
+	assertContains(t, out, fmt.Sprintf("%s/backupSchedules/%s", dbName, "incremental-backup-schedule"))
+
+	out = runBackupScheduleSample(t, getBackupSchedule, dbName, "full-backup-schedule", "failed to get backup schedule")
+	assertContains(t, out, fmt.Sprintf("%s/backupSchedules/%s", dbName, "full-backup-schedule"))
+
+	out = runBackupScheduleSample(t, updateBackupSchedule, dbName, "full-backup-schedule", "failed to update backup schedule")
+	assertContains(t, out, "Updated backup schedule")
+	assertContains(t, out, fmt.Sprintf("%s/backupSchedules/%s", dbName, "full-backup-schedule"))
+
+	out = runBackupScheduleSample(t, deleteBackupSchedule, dbName, "full-backup-schedule", "failed to delete backup schedule")
+	assertContains(t, out, "Deleted backup schedule")
+}
+
+func TestInstancePartitionSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	id := randomID()
+	projectID, instanceID, instancePartitionID, cleanup := initInstancePartitionTest(t, id)
+	defer cleanup()
+
+	var out string
+	out = runInstancePartitionSample(t, createInstancePartition, projectID, instanceID, instancePartitionID, "failed to create an instance partition")
+	assertContains(t, out, fmt.Sprintf("Created instance partition [%s]", instancePartitionID))
 }
 
 func TestCreateDatabaseWithRetentionPeriodSample(t *testing.T) {
@@ -511,6 +609,82 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 	out = runBackupSampleWithRetry(ctx, t, restoreFunc, restoredName, backupId, "failed to restore database with customer managed encryption key", 10)
 	assertContains(t, out, fmt.Sprintf("Database %s restored", dbName))
 	assertContains(t, out, fmt.Sprintf("using encryption key %s", kmsKeyName))
+	t.Logf("restore backup operation took: %v\n", time.Since(startTime))
+}
+
+func TestCustomerManagedMultiRegionEncryptionKeys(t *testing.T) {
+	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
+		t.Skip("GOLANG_SAMPLES_E2E_TEST not set")
+	}
+	tc := testutil.SystemTest(t)
+	t.Parallel()
+	startTime := time.Now()
+	instName, dbName, cleanup := initTestWithConfig(t, randomID(), "nam3")
+	defer cleanup()
+
+	projectID, instanceID, databaseID, err := parseDatabaseName(dbName)
+	if err != nil {
+		t.Errorf("failed to parse database name: %v", err)
+	}
+	var b bytes.Buffer
+	var kmsKeyNames []string
+	keyRingId := "spanner-test-keyring"
+	keyId := "spanner-test-cmek"
+	for _, locationId := range []string{"us-central1", "us-east1", "us-east4"} {
+		// Create an encryption key if it does not already exist.
+		if err := maybeCreateKey(tc.ProjectID, locationId, keyRingId, keyId); err != nil {
+			t.Errorf("failed to create encryption key: %v", err)
+		}
+		kmsKeyNames = append(kmsKeyNames, fmt.Sprintf(
+			"projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
+			tc.ProjectID,
+			locationId,
+			keyRingId,
+			keyId,
+		))
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Minute)
+	defer cancel()
+
+	// Create an encrypted database. The database is automatically deleted by the cleanup function.
+	if err := createDatabaseWithCustomerManagedMultiRegionEncryptionKey(ctx, &b, projectID, instanceID, databaseID, kmsKeyNames); err != nil {
+		t.Errorf("failed to create database with customer managed multi-region encryption keys: %v", err)
+	}
+	out := b.String()
+	assertContains(t, out, fmt.Sprintf("Created database [%s] using multi-region encryption keys %q", dbName, kmsKeyNames))
+	t.Logf("create database operation took: %v\n", time.Since(startTime))
+
+	// Try to create a backup of the encrypted database and delete it after the test.
+	backupId := fmt.Sprintf("enc-backup-%s", randomID())
+	b.Reset()
+	if err := createBackupWithCustomerManagedMultiRegionEncryptionKey(ctx, &b, projectID, instanceID, databaseID, backupId, kmsKeyNames); err != nil {
+		t.Errorf("failed to create backup with customer managed multi-region encryption keys: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, fmt.Sprintf("backups/%s", backupId))
+	assertContains(t, out, fmt.Sprintf("using multi-region encryption keys %q", kmsKeyNames))
+	t.Logf("create backup operation took: %v\n", time.Since(startTime))
+
+	// Try to create copy of a backup of the encrypted database and delete it after the test.
+	copyBackupId := fmt.Sprintf("copy-enc-backup-%s", randomID())
+	b.Reset()
+	if err := copyBackupWithMultiRegionEncryptionKey(&b, instName, copyBackupId, fmt.Sprintf("%s/backups/%s", instName, backupId), kmsKeyNames); err != nil {
+		t.Errorf("failed to copy backup with customer managed multi-region encryption keys: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, fmt.Sprintf("backups/%s", copyBackupId))
+	assertContains(t, out, "multi-region encryption keys\n")
+	t.Logf("copy backup operation took: %v\n", time.Since(startTime))
+
+	// Try to restore the encrypted database and delete the restored database after the test.
+	restoredName := fmt.Sprintf("rest-enc-%s", randomID())
+	restoreFunc := func(ctx context.Context, w io.Writer, dbName, backupID string) error {
+		return restoreBackupWithCustomerManagedMultiRegionEncryptionKey(ctx, w, instName, dbName, backupId, kmsKeyNames)
+	}
+	out = runBackupSampleWithRetry(ctx, t, restoreFunc, restoredName, backupId, "failed to restore database with customer managed multi-region encryption keys", 10)
+	assertContains(t, out, fmt.Sprintf("Database %s restored", dbName))
+	assertContains(t, out, "using multi-region encryption keys")
 	t.Logf("restore backup operation took: %v\n", time.Since(startTime))
 }
 
@@ -671,6 +845,25 @@ func TestCustomInstanceConfigSample(t *testing.T) {
 	assertContains(t, out, "Deleted instance configuration")
 }
 
+func TestForeignKeyDeleteCascadeSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	_, dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	mustRunSample(t, createDatabase, dbName, "failed to create a database")
+
+	var out string
+
+	out = runSample(t, createTableWithForeignKeyDeleteCascade, dbName, "failed to create table with foreign key delete constraint")
+	assertContains(t, out, "Created Customers and ShoppingCarts table with FKShoppingCartsCustomerId foreign key constraint")
+	out = runSample(t, alterTableWithForeignKeyDeleteCascade, dbName, "failed to alter table with foreign key delete constraint")
+	assertContains(t, out, "Altered ShoppingCarts table with FKShoppingCartsCustomerName foreign key constraint")
+	out = runSample(t, dropForeignKeyDeleteCascade, dbName, "failed to drop foreign key delete constraint")
+	assertContains(t, out, "Altered ShoppingCarts table to drop FKShoppingCartsCustomerName foreign key constraint")
+}
+
 func TestPgSample(t *testing.T) {
 	_ = testutil.SystemTest(t)
 	t.Parallel()
@@ -727,6 +920,17 @@ func TestPgSample(t *testing.T) {
 	assertContains(t, out, "Updated data to VenueDetails column\n")
 	out = runSample(t, queryWithJsonBParameter, dbName, "failed to query with jsonB parameter")
 	assertContains(t, out, "The venue details for venue id 19")
+
+	out = runSample(t, pgCreateSequence, dbName, "failed to create table with bit reverse sequence enabled in Spanner PG database")
+	assertContains(t, out, "Created Seq sequence and Customers table, where its key column CustomerId uses the sequence as a default value\n")
+	assertContains(t, out, "Inserted customer record with CustomerId")
+	assertContains(t, out, "Number of customer records inserted is: 3")
+	out = runSample(t, pgAlterSequence, dbName, "failed to alter table with bit reverse sequence enabled in Spanner PG database")
+	assertContains(t, out, "Altered Seq sequence to skip an inclusive range between 1000 and 5000000\n")
+	assertContains(t, out, "Inserted customer record with CustomerId")
+	assertContains(t, out, "Number of customer records inserted is: 3")
+	out = runSample(t, dropSequence, dbName, "failed to drop bit reverse sequence column in Spanner PG database")
+	assertContains(t, out, "Altered Customers table to drop DEFAULT from CustomerId column and dropped the Seq sequence\n")
 }
 
 func TestPgQueryParameter(t *testing.T) {
@@ -1016,6 +1220,90 @@ func TestPgOrderNulls(t *testing.T) {
 	assertContains(t, out, "Singers ORDER BY Name DESC NULLS LAST\n\tBruce\n\tAlice\n\t<null>")
 }
 
+func TestProtoColumnSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	_, dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+
+	statements := []string{
+		`CREATE TABLE Singers (
+				SingerId   INT64 NOT NULL,
+				FirstName  STRING(1024),
+				LastName   STRING(1024),
+			) PRIMARY KEY (SingerId)`,
+		`CREATE TABLE Albums (
+				SingerId     INT64 NOT NULL,
+				AlbumId      INT64 NOT NULL,
+				AlbumTitle   STRING(MAX)
+			) PRIMARY KEY (SingerId, AlbumId),
+			INTERLEAVE IN PARENT Singers ON DELETE CASCADE`,
+	}
+	dbCleanup, err := createTestDatabase(dbName, statements...)
+	if err != nil {
+		t.Fatalf("failed to create test database: %v", err)
+	}
+	defer dbCleanup()
+
+	var out string
+	runSample(t, write, dbName, "failed to insert data")
+	runSampleWithContext(ctx, t, addProtoColumn, dbName, "failed to update db for proto columns")
+	out = runSample(t, updateDataWithProtoColumn, dbName, "failed to update data with proto columns")
+	assertContains(t, out, "Data updated\n")
+	out = runSample(t, updateDataWithProtoColumnWithDml, dbName, "failed to update data with proto columns using dml")
+	assertContains(t, out, "record(s) updated.")
+	out = runSample(t, queryWithProtoParameter, dbName, "failed to query with proto parameter")
+	assertContains(t, out, "2 singer_id:2")
+}
+
+func TestGraphSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	_, dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+	out := runSampleWithContext(
+		ctx, t, createDatabaseWithPropertyGraph, dbName,
+		"failed to create a Spanner database with a property graph")
+	assertContains(t, out, fmt.Sprintf("Created database [%s]", dbName))
+
+	out = runSample(t, insertGraphData, dbName, "")
+
+	out = runSample(t, insertGraphDataWithDml, dbName, "")
+	assertContains(t, out, "2 Account record(s) inserted")
+	assertContains(t, out, "2 AccountTransferAccount record(s) inserted")
+
+	out = runSample(t, queryGraphData, dbName, "")
+	assertContains(t, out, "Dana Alex 500.000000 2020-10-04T16:55:05Z")
+	assertContains(t, out, "Lee Dana 300.000000 2020-09-25T02:36:14Z")
+	assertContains(t, out, "Alex Lee 300.000000 2020-08-29T15:28:58Z")
+	assertContains(t, out, "Alex Lee 100.000000 2020-10-04T16:55:05Z")
+	assertContains(t, out, "Dana Lee 200.000000 2020-10-17T03:59:40Z")
+
+	out = runSample(t, queryGraphDataWithParameter, dbName, "")
+	assertContains(t, out, "Dana Alex 500.000000 2020-10-04T16:55:05Z")
+
+	out = runSample(t, updateGraphDataWithDml, dbName, "")
+	assertContains(t, out, "1 Account record(s) updated.")
+	assertContains(t, out, "1 AccountTransferAccount record(s) updated.")
+
+	out = runSample(t, updateGraphDataWithGraphQueryInDml, dbName, "")
+	assertContains(t, out, "2 Account record(s) updated.")
+
+	out = runSample(t, deleteGraphDataWithDml, dbName, "")
+	assertContains(t, out, "1 AccountTransferAccount record(s) deleted.")
+	assertContains(t, out, "1 Account record(s) deleted.")
+
+	out = runSample(t, deleteGraphData, dbName, "")
+}
+
 func maybeCreateKey(projectId, locationId, keyRingId, keyId string) error {
 	client, err := kms.NewKeyManagementClient(context.Background())
 	if err != nil {
@@ -1108,6 +1396,22 @@ func runBackupSampleWithRetry(ctx context.Context, t *testing.T, f backupSampleF
 	return b.String()
 }
 
+func runBackupScheduleSample(t *testing.T, f backupScheduleSampleFunc, dbName string, scheduleId string, errMsg string) string {
+	var b bytes.Buffer
+	if err := f(&b, dbName, scheduleId); err != nil {
+		t.Errorf("%s: %v", errMsg, err)
+	}
+	return b.String()
+}
+
+func runInstancePartitionSample(t *testing.T, f instancePartitionSampleFunc, projectID, instanceID, instancePartitionID, errMsg string) string {
+	var b bytes.Buffer
+	if err := f(&b, projectID, instanceID, instancePartitionID); err != nil {
+		t.Errorf("%s: %v", errMsg, err)
+	}
+	return b.String()
+}
+
 func runInstanceSample(t *testing.T, f instanceSampleFunc, projectID, instanceID, errMsg string) string {
 	var b bytes.Buffer
 
@@ -1137,10 +1441,10 @@ func mustRunSample(t *testing.T, f sampleFuncWithContext, dbName, errMsg string)
 	return b.String()
 }
 
-func createTestInstance(t *testing.T, projectID string, instanceConfigName string) (instanceName string, cleanup func()) {
+func createTestInstance(t *testing.T, projectID string, instanceConfigName string) (instanceID string, cleanup func()) {
 	ctx := context.Background()
-	instanceID := fmt.Sprintf("go-sample-%s", uuid.New().String()[:16])
-	instanceName = fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
+	instanceID = fmt.Sprintf("go-sample-%s", uuid.New().String()[:16])
+	instanceName := fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
 	instanceAdmin, err := instance.NewInstanceAdminClient(ctx)
 	if err != nil {
 		t.Fatalf("failed to create InstanceAdminClient: %v", err)
@@ -1192,6 +1496,7 @@ func createTestInstance(t *testing.T, projectID string, instanceConfigName strin
 					"cloud_spanner_samples_test": "true",
 					"create_time":                fmt.Sprintf("%v", time.Now().Unix()),
 				},
+				Edition: instancepb.Instance_ENTERPRISE_PLUS,
 			},
 		})
 		if err != nil {
@@ -1210,7 +1515,7 @@ func createTestInstance(t *testing.T, projectID string, instanceConfigName strin
 		}
 	})
 
-	return instanceName, func() {
+	return instanceID, func() {
 		deleteInstanceAndBackups(t, instanceName, instanceAdmin, databaseAdmin)
 		instanceAdmin.Close()
 		databaseAdmin.Close()
@@ -1263,6 +1568,44 @@ func createTestPgDatabase(db string, extraStatements ...string) (func(), error) 
 		if err := opUpdate.Wait(ctx); err != nil {
 			return dropDb, err
 		}
+	}
+	return dropDb, nil
+}
+
+func createTestDatabase(db string, extraStatements ...string) (func(), error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+	m := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
+	if m == nil || len(m) != 3 {
+		return func() {}, fmt.Errorf("invalid database id %s", db)
+	}
+
+	client, err := database.NewDatabaseAdminClient(ctx)
+	if err != nil {
+		return func() {}, err
+	}
+	defer client.Close()
+
+	opCreate, err := client.CreateDatabase(ctx, &adminpb.CreateDatabaseRequest{
+		Parent:          m[1],
+		CreateStatement: "CREATE DATABASE `" + m[2] + "`",
+		ExtraStatements: extraStatements,
+	})
+	if err != nil {
+		return func() {}, err
+	}
+	if _, err := opCreate.Wait(ctx); err != nil {
+		return func() {}, err
+	}
+	dropDb := func() {
+		client, err := database.NewDatabaseAdminClient(ctx)
+		if err != nil {
+			return
+		}
+		defer client.Close()
+		client.DropDatabase(context.Background(), &adminpb.DropDatabaseRequest{
+			Database: db,
+		})
 	}
 	return dropDb, nil
 }

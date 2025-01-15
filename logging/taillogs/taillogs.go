@@ -21,7 +21,7 @@ import (
 	"io"
 
 	logging "cloud.google.com/go/logging/apiv2"
-	loggingpb "google.golang.org/genproto/googleapis/logging/v2"
+	"cloud.google.com/go/logging/apiv2/loggingpb"
 )
 
 // tailLogs creates a channel to stream log entries that were recently ingested for a project

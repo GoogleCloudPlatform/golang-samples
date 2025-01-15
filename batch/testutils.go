@@ -20,7 +20,7 @@ import (
 	"time"
 
 	batch "cloud.google.com/go/batch/apiv1"
-	batchpb "google.golang.org/genproto/googleapis/cloud/batch/v1"
+	"cloud.google.com/go/batch/apiv1/batchpb"
 )
 
 func jobSucceeded(projectID, region, jobName string) (bool, error) {

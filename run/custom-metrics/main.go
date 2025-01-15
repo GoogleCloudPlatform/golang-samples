@@ -23,13 +23,13 @@ import (
 	"os"
 
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
-	"go.opentelemetry.io/otel/metric/instrument"
-	"go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/metric"
+	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
-	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 )
 
-var counter instrument.Int64Counter
+var counter metric.Int64Counter
 
 func main() {
 	ctx := context.Background()
@@ -64,7 +64,7 @@ func setupCounter(ctx context.Context) func(context.Context) error {
 		),
 	)
 	if err != nil {
-		log.Fatalf("Error creating resource: %s", err)
+		log.Fatalf("Error creating resource: %v", err)
 	}
 
 	exporter, err := otlpmetricgrpc.New(ctx,
@@ -73,9 +73,9 @@ func setupCounter(ctx context.Context) func(context.Context) error {
 	if err != nil {
 		log.Fatalf("Error creating exporter: %s", err)
 	}
-	provider := metric.NewMeterProvider(
-		metric.WithReader(metric.NewPeriodicReader(exporter)),
-		metric.WithResource(r),
+	provider := sdkmetric.NewMeterProvider(
+		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(exporter)),
+		sdkmetric.WithResource(r),
 	)
 
 	meter := provider.Meter("example.com/metrics")

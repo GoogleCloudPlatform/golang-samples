@@ -21,7 +21,7 @@ import (
 	"io"
 
 	compute "cloud.google.com/go/compute/apiv1"
-	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
+	computepb "cloud.google.com/go/compute/apiv1/computepb"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -35,7 +35,7 @@ func createWndowsServerInstanceExternalIP(
 	// zone := "europe-central2-b"
 	// instanceName := "your_instance_name"
 	// machineType := "n1-standard-1"
-	// sourceImageFamily := "windows-2012-r2"
+	// sourceImageFamily := "windows-2022"
 
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)

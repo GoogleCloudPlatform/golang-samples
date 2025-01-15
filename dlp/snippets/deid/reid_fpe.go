@@ -17,9 +17,9 @@ package deid
 // [START dlp_reidentify_fpe]
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	dlp "cloud.google.com/go/dlp/apiv2"
 	"cloud.google.com/go/dlp/apiv2/dlppb"
@@ -30,7 +30,7 @@ import (
 // full KMS key resource name used to wrap the key. surrogateInfoType is an
 // the identifier used during deidentification.
 // Info types can be found with the infoTypes.list method or on https://cloud.google.com/dlp/docs/infotypes-reference
-func reidentifyFPE(w io.Writer, projectID, input, keyFileName, cryptoKeyName, surrogateInfoType string) error {
+func reidentifyFPE(w io.Writer, projectID, input, kmsKeyName, wrappedAesKey, surrogateInfoType string) error {
 	// projectID := "my-project-id"
 	// input := "My SSN is 123456789"
 	// keyFileName := "projects/YOUR_GCLOUD_PROJECT/locations/YOUR_LOCATION/keyRings/YOUR_KEYRING_NAME/cryptoKeys/YOUR_KEY_NAME"
@@ -42,11 +42,24 @@ func reidentifyFPE(w io.Writer, projectID, input, keyFileName, cryptoKeyName, su
 		return fmt.Errorf("dlp.NewClient: %w", err)
 	}
 	defer client.Close()
-	// Read the key file.
-	keyBytes, err := ioutil.ReadFile(keyFileName)
+
+	// Specify an encrypted AES-256 key and the name of the Cloud KMS key that encrypted it.
+	kmsWrappedCryptoKey, err := base64.StdEncoding.DecodeString(wrappedAesKey)
 	if err != nil {
-		return fmt.Errorf("ReadFile: %w", err)
+		fmt.Fprintf(w, "error %v", err)
+		return err
 	}
+
+	// Specify the crypto key configuration that will used for encryption.
+	cryptoKey := &dlppb.CryptoKey{
+		Source: &dlppb.CryptoKey_KmsWrapped{
+			KmsWrapped: &dlppb.KmsWrappedCryptoKey{
+				WrappedKey:    kmsWrappedCryptoKey,
+				CryptoKeyName: kmsKeyName,
+			},
+		},
+	}
+
 	// Create a configured request.
 	req := &dlppb.ReidentifyContentRequest{
 		Parent: fmt.Sprintf("projects/%s/locations/global", projectID),
@@ -59,14 +72,7 @@ func reidentifyFPE(w io.Writer, projectID, input, keyFileName, cryptoKeyName, su
 							PrimitiveTransformation: &dlppb.PrimitiveTransformation{
 								Transformation: &dlppb.PrimitiveTransformation_CryptoReplaceFfxFpeConfig{
 									CryptoReplaceFfxFpeConfig: &dlppb.CryptoReplaceFfxFpeConfig{
-										CryptoKey: &dlppb.CryptoKey{
-											Source: &dlppb.CryptoKey_KmsWrapped{
-												KmsWrapped: &dlppb.KmsWrappedCryptoKey{
-													WrappedKey:    keyBytes,
-													CryptoKeyName: cryptoKeyName,
-												},
-											},
-										},
+										CryptoKey: cryptoKey,
 										// Set the alphabet used for the encrypted fields.
 										Alphabet: &dlppb.CryptoReplaceFfxFpeConfig_CommonAlphabet{
 											CommonAlphabet: dlppb.CryptoReplaceFfxFpeConfig_ALPHA_NUMERIC,

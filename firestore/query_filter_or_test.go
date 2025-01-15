@@ -16,64 +16,9 @@ package firestore
 
 import (
 	"bytes"
-	"context"
-	"log"
-	"os"
 	"strings"
 	"testing"
-
-	"cloud.google.com/go/firestore"
 )
-
-var projectID string
-
-func TestMain(m *testing.M) {
-	ctx := context.Background()
-	projectID = os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
-	client, err := firestore.NewClient(ctx, projectID)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer client.Close()
-
-	bw := client.BulkWriter(ctx)
-	colName := "users"
-
-	docs := []struct {
-		shortName string
-		birthYear int
-	}{
-		{shortName: "aturing", birthYear: 1912},
-		{shortName: "alovelace", birthYear: 1815},
-		{shortName: "cbabbage", birthYear: 1791},
-		{shortName: "ghopper", birthYear: 1906},
-	}
-	var refs []*firestore.DocumentRef
-
-	for _, d := range docs {
-		ref := client.Collection(colName).Doc(d.shortName)
-		_, err := bw.Create(ref, map[string]interface{}{"birthYear": d.birthYear})
-		if err != nil {
-			log.Fatal(err)
-		}
-		refs = append(refs, ref)
-	}
-	bw.End()
-
-	// Run the test
-	m.Run()
-
-	// New BulkWriter instance
-	bw = client.BulkWriter(ctx)
-
-	for _, d := range refs {
-		_, err := bw.Delete(d)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-	bw.End()
-}
 
 func TestQueryFilterOr(t *testing.T) {
 	var buf bytes.Buffer

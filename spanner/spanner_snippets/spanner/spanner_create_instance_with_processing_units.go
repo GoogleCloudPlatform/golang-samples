@@ -21,7 +21,7 @@ import (
 	"io"
 
 	instance "cloud.google.com/go/spanner/admin/instance/apiv1"
-	instancepb "google.golang.org/genproto/googleapis/spanner/admin/instance/v1"
+	"cloud.google.com/go/spanner/admin/instance/apiv1/instancepb"
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
@@ -46,6 +46,7 @@ func createInstanceWithProcessingUnits(w io.Writer, projectID, instanceID string
 			DisplayName:     "This is a display name.",
 			ProcessingUnits: 500,
 			Labels:          map[string]string{"cloud_spanner_samples": "true"},
+			Edition:         instancepb.Instance_ENTERPRISE_PLUS,
 		},
 	})
 	if err != nil {

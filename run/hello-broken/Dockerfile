@@ -13,12 +13,11 @@
 # limitations under the License.
 
 # [START cloudrun_broken_dockerfile]
-# [START run_broken_dockerfile]
 
-# Use the offical golang image to create a binary.
+# Use the official Go image to create a binary.
 # This is based on Debian and sets the GOPATH to /go.
 # https://hub.docker.com/_/golang
-FROM golang:1.17-buster as builder
+FROM golang:1.21-bookworm as builder
 
 # Create and change to the app directory.
 WORKDIR /app
@@ -38,7 +37,7 @@ RUN go build -v -o server
 # Use the official Debian slim image for a lean production container.
 # https://hub.docker.com/_/debian
 # https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds
-FROM debian:buster-slim
+FROM debian:bookworm-slim
 RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     ca-certificates && \
     rm -rf /var/lib/apt/lists/*
@@ -49,5 +48,4 @@ COPY --from=builder /app/server /server
 # Run the web service on container startup.
 CMD ["/server"]
 
-# [END run_broken_dockerfile]
 # [END cloudrun_broken_dockerfile]

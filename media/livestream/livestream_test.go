@@ -16,18 +16,25 @@ package livestream
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
 
+	livestream "cloud.google.com/go/video/livestream/apiv1"
+	"cloud.google.com/go/video/livestream/apiv1/livestreampb"
+
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"google.golang.org/api/iterator"
 )
 
 const (
 	deleteChannelEventResponse = "Deleted channel event"
 	deleteChannelResponse      = "Deleted channel"
 	deleteInputResponse        = "Deleted input"
+	deleteAssetResponse        = "Deleted asset"
 	startChannelResponse       = "Started channel"
 	stopChannelResponse        = "Stopped channel"
 	location                   = "us-central1"
@@ -35,7 +42,13 @@ const (
 	backupInputID              = "my-go-test-backup-input"
 	channelID                  = "my-go-test-channel"
 	eventID                    = "my-go-test-channel-event"
+	assetID                    = "my-go-test-asset"
+	poolID                     = "default" // only 1 pool supported per location
 )
+
+var bucketName string
+var outputURI string
+var assetURI string
 
 // To run the tests, do the following:
 // Export the following env vars:
@@ -44,28 +57,70 @@ const (
 // Enable the following API on the test project:
 // *   Live Stream API
 
-// TestLiveStream tests major operations on inputs, channels, and channel
-// events.
-func TestLiveStream(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	bucketName := tc.ProjectID + "-golang-samples-livestream-test"
-	outputURI := "gs://" + bucketName + "/test-output-channel/"
-
-	testInputs(t)
-	t.Logf("\ntestInputs() completed\n")
-
-	testChannels(t, outputURI)
-	t.Logf("\ntestChannels() completed\n")
-
-	testChannelEvents(t, outputURI)
-	t.Logf("\ntestChannelEvents() completed\n")
+// TestMain tests major operations on inputs, channels, channel
+// events, assets, and pools.
+func TestMain(m *testing.M) {
+	tc, _ := testutil.ContextMain(m)
+	bucketName = tc.ProjectID + "-golang-samples-livestream-test"
+	outputURI = "gs://" + bucketName + "/test-output-channel/"
+	assetURI = "gs://cloud-samples-data/media/ForBiggerEscapes.mp4"
+	m.Run()
+	cleanStaleAssets(tc)
 }
 
-// testInputs tests major operations on inputs. Create, list, update,
+func cleanStaleAssets(tc testutil.Context) {
+	ctx := context.Background()
+	var threeHoursInSec int64 = 60 * 60 * 3
+	timeNowSec := time.Now().Unix()
+
+	client, err := livestream.NewClient(ctx)
+	if err != nil {
+		fmt.Printf("NewClient: %v", err)
+	}
+	defer client.Close()
+
+	req := &livestreampb.ListAssetsRequest{
+		Parent: fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, location),
+	}
+
+	it := client.ListAssets(ctx, req)
+	for {
+		response, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			fmt.Printf("ListAssets: %v", err)
+			continue
+		}
+		req := &livestreampb.GetAssetRequest{
+			Name: response.Name,
+		}
+		asset, err := client.GetAsset(ctx, req)
+		if err != nil {
+			fmt.Printf("GetAsset: %v", err)
+			continue
+		}
+		if asset.GetCreateTime().GetSeconds() < timeNowSec-threeHoursInSec {
+			fmt.Printf("%v - delete asset", asset.GetCreateTime().GetSeconds())
+			req := &livestreampb.DeleteAssetRequest{
+				Name: asset.GetName(),
+			}
+			// No need to wait for delete ops to finish, as this is a background
+			// cleanup.
+			_, err := client.DeleteAsset(ctx, req)
+			if err != nil {
+				fmt.Printf("DeleteAsset: %v", err)
+				continue
+			}
+		}
+	}
+}
+
+// TestInputs tests major operations on inputs. Create, list, update,
 // and get operations check if the input resource name is returned. The
 // delete operation checks for a hard-coded string response.
-func testInputs(t *testing.T) {
+func TestInputs(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 
@@ -169,12 +224,13 @@ func testInputs(t *testing.T) {
 			r.Errorf("deleteInput got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteInputResponse)
 		}
 	})
+	t.Logf("\nTestInputs() completed\n")
 }
 
-// testChannels tests major operations on channels. Create, list, update,
+// TestChannels tests major operations on channels. Create, list, update,
 // and get operations check if the channel resource name is returned. The
 // delete operation checks for a hard-coded string response.
-func testChannels(t *testing.T, outputURI string) {
+func TestChannels(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 
@@ -343,12 +399,13 @@ func testChannels(t *testing.T, outputURI string) {
 			r.Errorf("deleteInput got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteInputResponse)
 		}
 	})
+	t.Logf("\nTestChannels() completed\n")
 }
 
-// testChannelEvents tests event operations on channels. Create, list, and get
+// TestChannelEvents tests event operations on channels. Create, list, and get
 // operations check if the channel event resource name is returned. The delete
 // operation checks for a hard-coded string response.
-func testChannelEvents(t *testing.T, outputURI string) {
+func TestChannelEvents(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
 
@@ -491,4 +548,101 @@ func testChannelEvents(t *testing.T, outputURI string) {
 			r.Errorf("deleteInput got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteInputResponse)
 		}
 	})
+	t.Logf("\nTestChannelEvents() completed\n")
+}
+
+// TestAssets tests major operations on assets. Create, list,
+// and get operations check if the asset resource name is returned. The
+// delete operation checks for a hard-coded string response.
+func TestAssets(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := &bytes.Buffer{}
+
+	// Tests
+
+	// Create a new asset.
+
+	testAssetID := fmt.Sprintf("%s-%s", assetID, strconv.FormatInt(time.Now().Unix(), 10))
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		testAssetName := fmt.Sprintf("projects/%s/locations/%s/assets/%s", tc.ProjectID, location, testAssetID)
+		if err := createAsset(buf, tc.ProjectID, location, testAssetID, assetURI); err != nil {
+			r.Errorf("createAsset got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, testAssetName) {
+			r.Errorf("createAsset got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, testAssetName)
+		}
+	})
+	buf.Reset()
+
+	// List the assets for a given location.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		testAssetName := fmt.Sprintf("projects/%s/locations/%s/assets/%s", tc.ProjectID, location, testAssetID)
+		if err := listAssets(buf, tc.ProjectID, location); err != nil {
+			r.Errorf("listAssets got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, testAssetName) {
+			r.Errorf("listAssets got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, testAssetName)
+		}
+	})
+	buf.Reset()
+
+	// Get the asset.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		testAssetName := fmt.Sprintf("projects/%s/locations/%s/assets/%s", tc.ProjectID, location, testAssetID)
+		if err := getAsset(buf, tc.ProjectID, location, testAssetID); err != nil {
+			r.Errorf("getAsset got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, testAssetName) {
+			r.Errorf("getAsset got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, testAssetName)
+		}
+	})
+	buf.Reset()
+
+	// Delete the asset.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		if err := deleteAsset(buf, tc.ProjectID, location, testAssetID); err != nil {
+			r.Errorf("deleteAsset got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, deleteAssetResponse) {
+			r.Errorf("deleteAsset got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, deleteAssetResponse)
+		}
+	})
+	buf.Reset()
+	t.Logf("\nTestAssets() completed\n")
+}
+
+// TestPools tests major operations on pool. Get and update
+// operations check if the pool resource name is returned.
+func TestPools(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := &bytes.Buffer{}
+
+	// Tests
+
+	// Get the pool.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		poolName := fmt.Sprintf("projects/%s/locations/%s/pools/%s", tc.ProjectID, location, poolID)
+		if err := getPool(buf, tc.ProjectID, location, poolID); err != nil {
+			r.Errorf("getPool got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, poolName) {
+			r.Errorf("getPool got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, poolName)
+		}
+	})
+	buf.Reset()
+
+	// Update an existing pool. Set the updated peer network to "", which
+	// is the same as the default otherwise the test will take a long time
+	// to complete.
+	testutil.Retry(t, 3, 2*time.Second, func(r *testutil.R) {
+		poolName := fmt.Sprintf("projects/%s/locations/%s/pools/%s", tc.ProjectID, location, poolID)
+		if err := updatePool(buf, tc.ProjectID, location, poolID, ""); err != nil {
+			r.Errorf("updatePool got err: %v", err)
+		}
+		if got := buf.String(); !strings.Contains(got, poolName) {
+			r.Errorf("updatePool got\n----\n%v\n----\nWant to contain:\n----\n%v\n----\n", got, poolName)
+		}
+	})
+	buf.Reset()
+	t.Logf("\nTestPools() completed\n")
 }

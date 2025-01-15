@@ -48,6 +48,7 @@ var (
 func init() {
 	register.DoFn3x0[context.Context, string, func(string)](&extractFn{})
 	register.Emitter1[string]()
+	register.Function2x1(formatFn)
 }
 
 var (

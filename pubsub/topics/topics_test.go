@@ -29,6 +29,9 @@ import (
 
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/pstest"
+	trace "cloud.google.com/go/trace/apiv1"
+	"cloud.google.com/go/trace/apiv1/tracepb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"google.golang.org/api/iterator"
 )
@@ -291,5 +294,104 @@ func TestDelete(t *testing.T) {
 	}
 	if ok {
 		t.Fatalf("got topic = %q; want none", topicID)
+	}
+}
+
+func TestTopicKinesisIngestion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	// Use the pstest fake with emulator settings since Pub/Sub service expects real AWS Kinesis
+	// resources, which we cannot provide in a samples test.
+	srv := pstest.NewServer()
+	t.Setenv("PUBSUB_EMULATOR_HOST", srv.Addr)
+
+	if err := createTopicWithKinesisIngestion(buf, tc.ProjectID, topicID); err != nil {
+		t.Fatalf("failed to create a topic with kinesis ingestion: %v", err)
+	}
+
+	// test updateTopicType
+	if err := updateTopicType(buf, tc.ProjectID, topicID); err != nil {
+		t.Fatalf("failed to update a topic type to kinesis ingestion: %v", err)
+	}
+}
+
+func TestTopicCloudStorageIngestion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	srv := pstest.NewServer()
+	t.Setenv("PUBSUB_EMULATOR_HOST", srv.Addr)
+
+	// Test creating a cloud storage ingestion topic with Text input format.
+	if err := createTopicWithCloudStorageIngestion(buf, tc.ProjectID, topicID, "fake-bucket", "**.txt", "2006-01-02T15:04:05Z"); err != nil {
+		t.Fatalf("failed to create a topic with cloud storage ingestion: %v", err)
+	}
+}
+
+func TestPublishOpenTelemetryTracing(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+	ctx := context.Background()
+
+	// Use the pstest fake with emulator settings.
+	srv := pstest.NewServer()
+	t.Setenv("PUBSUB_EMULATOR_HOST", srv.Addr)
+	setup(t)
+
+	otelTopicID := topicID + "-otel"
+
+	if err := create(buf, tc.ProjectID, otelTopicID); err != nil {
+		t.Fatalf("failed to create topic: %v", err)
+	}
+	defer delete(buf, tc.ProjectID, otelTopicID)
+
+	if err := publishOpenTelemetryTracing(buf, tc.ProjectID, otelTopicID, 1.0); err != nil {
+		t.Fatalf("failed to publish message with otel tracing: %v", err)
+	}
+	got := buf.String()
+	want := "Published a traced message"
+	if !strings.Contains(got, want) {
+		t.Fatalf("failed to publish message:\n got: %v", got)
+	}
+
+	traceClient, err := trace.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("trace client instantiation: %v", err)
+	}
+
+	testutil.Retry(t, 3, time.Second, func(r *testutil.R) {
+		// Wait some time for the spans to show up in Cloud Trace.
+		time.Sleep(5 * time.Second)
+		iter := traceClient.ListTraces(ctx, &tracepb.ListTracesRequest{
+			ProjectId: tc.ProjectID,
+			Filter:    fmt.Sprintf("+messaging.destination.name:%v", otelTopicID),
+		})
+		numTrace := 0
+		for {
+			_, err := iter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				r.Errorf("got err in iter.Next: %v", err)
+			}
+			numTrace++
+		}
+		// Two traces are expected: create and (batch) publish traces.
+		if want := 2; numTrace != want {
+			r.Errorf("got %d traces, want %d", numTrace, want)
+		}
+	})
+}
+
+func TestPublishWithCompression(t *testing.T) {
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+	client.CreateTopic(ctx, topicID)
+	buf := new(bytes.Buffer)
+	if err := publishWithCompression(buf, tc.ProjectID, topicID); err != nil {
+		t.Errorf("failed to publish message: %v", err)
 	}
 }

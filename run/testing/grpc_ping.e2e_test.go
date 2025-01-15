@@ -73,35 +73,42 @@ func TestGRPCPingService(t *testing.T) {
 	}
 
 	message := "Hello Tester"
-	resp, err := grpcRequest(pingURL.Host+":443", pingURL.String(), func(ctx context.Context, conn *grpc.ClientConn) (interface{}, error) {
-		c := pb.NewPingServiceClient(conn)
-		return c.Send(ctx, &pb.Request{
-			Message: message,
-		})
-	})
-	if err != nil {
-		t.Fatalf("grpcRequest (Send): %v", err)
-	}
-	got := resp.(*pb.Response).Pong.GetMessage()
-	if want := message; got != want {
-		t.Errorf("response: got %q, want %q", got, want)
-	}
 
-	// Test a gRPC request for upstream relay.
-	resp, err = grpcRequest(pingURL.Host+":443", pingURL.String(), func(ctx context.Context, conn *grpc.ClientConn) (interface{}, error) {
-		c := pb.NewPingServiceClient(conn)
-		return c.SendUpstream(ctx, &pb.Request{
-			Message: message,
+	testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
+		resp, err := grpcRequest(pingURL.Host+":443", pingURL.String(), func(ctx context.Context, conn *grpc.ClientConn) (interface{}, error) {
+			c := pb.NewPingServiceClient(conn)
+			return c.Send(ctx, &pb.Request{
+				Message: message,
+			})
 		})
+		if err != nil {
+			r.Errorf("grpcRequest (Send): %v", err)
+			return
+		}
+		got := resp.(*pb.Response).Pong.GetMessage()
+		if want := message; got != want {
+			r.Errorf("response: got %q, want %q", got, want)
+		}
 	})
-	if err != nil {
-		t.Fatalf("grpcRequest (SendUpstream): %v", err)
-	}
 
-	got = resp.(*pb.Response).Pong.GetMessage()
-	if want := fmt.Sprintf("%s (relayed)", message); got != want {
-		t.Errorf("response: got %q, want %q", got, want)
-	}
+	testutil.Retry(t, 10, 20*time.Second, func(r *testutil.R) {
+		// Test a gRPC request for upstream relay.
+		resp, err := grpcRequest(pingURL.Host+":443", pingURL.String(), func(ctx context.Context, conn *grpc.ClientConn) (interface{}, error) {
+			c := pb.NewPingServiceClient(conn)
+			return c.SendUpstream(ctx, &pb.Request{
+				Message: message,
+			})
+		})
+		if err != nil {
+			r.Errorf("grpcRequest (SendUpstream): %v", err)
+			return
+		}
+
+		got := resp.(*pb.Response).Pong.GetMessage()
+		if want := fmt.Sprintf("%s (relayed)", message); got != want {
+			r.Errorf("response: got %q, want %q", got, want)
+		}
+	})
 }
 
 // grpcRequest takes a callback to issue a gRPC request.

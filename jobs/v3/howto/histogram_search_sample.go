@@ -23,7 +23,7 @@ import (
 	talent "google.golang.org/api/jobs/v3"
 )
 
-// [START histogram_search]
+// [START job_histogram_search]
 
 // histogramSearch searches for jobs with histogram facets.
 func histogramSearch(w io.Writer, projectID, companyName string) (*talent.SearchJobsResponse, error) {
@@ -83,4 +83,4 @@ func histogramSearch(w io.Writer, projectID, companyName string) (*talent.Search
 	return resp, nil
 }
 
-// [END histogram_search]
+// [END job_histogram_search]

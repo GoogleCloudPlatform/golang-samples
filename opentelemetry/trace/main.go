@@ -19,6 +19,7 @@ package main
 // [START opentelemetry_trace_import]
 import (
 	"context"
+	"errors"
 	"log"
 	"os"
 
@@ -27,7 +28,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 )
 
 // [END opentelemetry_trace_import]
@@ -52,7 +53,9 @@ func main() {
 			semconv.ServiceNameKey.String("my-application"),
 		),
 	)
-	if err != nil {
+	if errors.Is(err, resource.ErrPartialResource) || errors.Is(err, resource.ErrSchemaURLConflict) {
+		log.Println(err)
+	} else if err != nil {
 		log.Fatalf("resource.New: %v", err)
 	}
 
@@ -67,7 +70,7 @@ func main() {
 		sdktrace.WithBatcher(exporter),
 		sdktrace.WithResource(res),
 	)
-	defer tp.ForceFlush(ctx) // flushes any pending spans
+	defer tp.Shutdown(ctx) // flushes any pending spans, and closes connections.
 	otel.SetTracerProvider(tp)
 
 	// [START opentelemetry_trace_custom_span]

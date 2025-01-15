@@ -20,7 +20,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 
 	healthcare "google.golang.org/api/healthcare/v1"
 )
@@ -29,7 +29,7 @@ import (
 func ingestHL7V2Message(w io.Writer, projectID, location, datasetID, hl7V2StoreID, messageFile string) error {
 	ctx := context.Background()
 
-	hl7v2message, err := ioutil.ReadFile(messageFile)
+	hl7v2message, err := os.ReadFile(messageFile)
 	if err != nil {
 		return fmt.Errorf("ReadFile: %w", err)
 	}

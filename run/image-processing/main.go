@@ -13,14 +13,13 @@
 // limitations under the License.
 
 // [START cloudrun_imageproc_controller]
-// [START run_imageproc_controller]
 
 // Sample image-processing is a Cloud Run service which performs asynchronous processing on images.
 package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -56,7 +55,7 @@ type PubSubMessage struct {
 // HelloPubSub receives and processes a Pub/Sub push message.
 func HelloPubSub(w http.ResponseWriter, r *http.Request) {
 	var m PubSubMessage
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("ioutil.ReadAll: %v", err)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
@@ -87,5 +86,4 @@ func HelloPubSub(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// [END run_imageproc_controller]
 // [END cloudrun_imageproc_controller]

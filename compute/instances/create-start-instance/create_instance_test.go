@@ -24,8 +24,8 @@ import (
 	"time"
 
 	compute "cloud.google.com/go/compute/apiv1"
+	computepb "cloud.google.com/go/compute/apiv1/computepb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -197,5 +197,210 @@ func TestComputeCreateInstanceSnippets(t *testing.T) {
 	err = deleteDisk(ctx, tc.ProjectID, zone, diskName2)
 	if err != nil {
 		t.Errorf("deleteDisk got err: %v", err)
+	}
+}
+
+func TestComputeBulkCreateInstanceSnippets(t *testing.T) {
+	ctx := context.Background()
+
+	instanceTemplatesClient, err := compute.NewInstanceTemplatesRESTClient(ctx)
+	if err != nil {
+		t.Fatalf("NewInstanceTemplatesRESTClient: %v", err)
+	}
+	defer instanceTemplatesClient.Close()
+
+	var seededRand *rand.Rand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+	tc := testutil.SystemTest(t)
+	zone := "europe-central2-b"
+	instanceTemplateName := "test-instance-template" + fmt.Sprint(seededRand.Int())
+	machineType := "n1-standard-1"
+	sourceImage := "projects/debian-cloud/global/images/family/debian-12"
+	networkName := "global/networks/default"
+
+	insertTemplateReq := &computepb.InsertInstanceTemplateRequest{
+		Project: tc.ProjectID,
+		InstanceTemplateResource: &computepb.InstanceTemplate{
+			Name: &instanceTemplateName,
+			Properties: &computepb.InstanceProperties{
+				MachineType: proto.String(machineType),
+				Disks: []*computepb.AttachedDisk{
+					{
+						InitializeParams: &computepb.AttachedDiskInitializeParams{
+							DiskSizeGb:  proto.Int64(10),
+							SourceImage: proto.String(sourceImage),
+						},
+						AutoDelete: proto.Bool(true),
+						Boot:       proto.Bool(true),
+						Type:       proto.String(computepb.AttachedDisk_PERSISTENT.String()),
+					},
+				},
+				NetworkInterfaces: []*computepb.NetworkInterface{
+					{
+						Name: proto.String(networkName),
+					},
+				},
+			},
+		},
+	}
+
+	op, err := instanceTemplatesClient.Insert(ctx, insertTemplateReq)
+	if err != nil {
+		t.Fatalf("unable to create instance template: %v", err)
+	}
+
+	if err = op.Wait(ctx); err != nil {
+		t.Errorf("unable to wait for the operation: %v", err)
+	}
+
+	namePattern := "i-#-" + fmt.Sprint(seededRand.Int())[0:5]
+	buf := &bytes.Buffer{}
+
+	instances, err := createFiveInstances(buf, tc.ProjectID, zone, instanceTemplateName, namePattern)
+	if err != nil {
+		t.Errorf("createFiveInstances got err: %v", err)
+	}
+
+	for _, instance := range instances {
+		if err := deleteInstance(ctx, tc.ProjectID, zone, *instance.Name); err != nil {
+			t.Errorf("deleteInstance got err: %v", err)
+		}
+	}
+
+	deleteTemplateReq := &computepb.DeleteInstanceTemplateRequest{
+		Project:          tc.ProjectID,
+		InstanceTemplate: instanceTemplateName,
+	}
+
+	op, err = instanceTemplatesClient.Delete(ctx, deleteTemplateReq)
+	if err != nil {
+		t.Errorf("unable to delete instance template: %v", err)
+	}
+}
+
+func TestCreateWithReplica(t *testing.T) {
+	ctx := context.Background()
+
+	var seededRand *rand.Rand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+	tc := testutil.SystemTest(t)
+	region := "europe-central2"
+	zone := "europe-central2-b"
+	replicaZones := []string{"europe-central2-a", "europe-central2-b"}
+	instanceName := "test-instance" + fmt.Sprint(seededRand.Int())
+	diskName := "test-disk" + fmt.Sprint(seededRand.Int())
+	replicatedDiskName := "test-replicated-disk" + fmt.Sprint(seededRand.Int())
+	snapshotName := "test-snapshot" + fmt.Sprint(seededRand.Int())
+	snapshotLink := fmt.Sprintf("projects/%s/global/snapshots/%s", tc.ProjectID, snapshotName)
+	var buf bytes.Buffer
+
+	imagesClient, err := compute.NewImagesRESTClient(ctx)
+	if err != nil {
+		t.Fatalf("NewImagesRESTClient: %v", err)
+	}
+	defer imagesClient.Close()
+
+	snapshotsClient, err := compute.NewSnapshotsRESTClient(ctx)
+	if err != nil {
+		t.Fatalf("NewSnapshotsRESTClient: %v", err)
+	}
+	defer snapshotsClient.Close()
+
+	disksClient, err := compute.NewDisksRESTClient(ctx)
+	if err != nil {
+		t.Fatalf("NewDisksRESTClient: %v", err)
+	}
+	defer disksClient.Close()
+
+	newestDebianReq := &computepb.GetFromFamilyImageRequest{
+		Project: "debian-cloud",
+		Family:  "debian-11",
+	}
+
+	newestDebian, err := imagesClient.GetFromFamily(ctx, newestDebianReq)
+	if err != nil {
+		t.Errorf("unable to get image from family: %v", err)
+	}
+
+	insertDiskReq := &computepb.InsertDiskRequest{
+		Project: tc.ProjectID,
+		Zone:    zone,
+		DiskResource: &computepb.Disk{
+			SourceImage: newestDebian.SelfLink,
+			Name:        proto.String(diskName),
+		},
+	}
+
+	op, err := disksClient.Insert(ctx, insertDiskReq)
+	if err != nil {
+		t.Errorf("unable to create disk: %v", err)
+	}
+
+	if err = op.Wait(ctx); err != nil {
+		t.Errorf("unable to wait for the operation: %v", err)
+	}
+	defer deleteDisk(ctx, tc.ProjectID, zone, diskName)
+
+	diskSnaphotReq := &computepb.CreateSnapshotDiskRequest{
+		Project: tc.ProjectID,
+		Zone:    zone,
+		Disk:    diskName,
+		SnapshotResource: &computepb.Snapshot{
+			Name: proto.String(snapshotName),
+		},
+	}
+
+	op, err = disksClient.CreateSnapshot(ctx, diskSnaphotReq)
+	if err != nil {
+		t.Errorf("unable to create disk snapshot: %v", err)
+	}
+
+	if err = op.Wait(ctx); err != nil {
+		t.Errorf("unable to wait for the operation: %v", err)
+	}
+
+	if err := createReplicatedBootDisk(&buf, tc.ProjectID, zone, snapshotLink, replicatedDiskName, instanceName, replicaZones); err != nil {
+		t.Errorf("createReplicatedBootDisk failed: %v", err)
+	}
+
+	// Cleanup
+	err = deleteInstance(ctx, tc.ProjectID, zone, instanceName)
+	if err != nil {
+		t.Errorf("deleteInstance got err: %v", err)
+	}
+
+	regionDisksClient, err := compute.NewRegionDisksRESTClient(ctx)
+	if err != nil {
+		t.Errorf("NewDisksRESTClient: %v", err)
+	}
+	defer disksClient.Close()
+
+	req := &computepb.DeleteRegionDiskRequest{
+		Project: tc.ProjectID,
+		Region:  region,
+		Disk:    replicatedDiskName,
+	}
+
+	op, err = regionDisksClient.Delete(ctx, req)
+	if err != nil {
+		t.Errorf("unable to delete disk: %v", err)
+	}
+
+	if err = op.Wait(ctx); err != nil {
+		t.Errorf("unable to wait for the operation: %v", err)
+	}
+
+	delReq := &computepb.DeleteSnapshotRequest{
+		Project:  tc.ProjectID,
+		Snapshot: snapshotName,
+	}
+
+	op, err = snapshotsClient.Delete(ctx, delReq)
+	if err != nil {
+		t.Errorf("unable to delete snapshot: %v", err)
+	}
+
+	if err = op.Wait(ctx); err != nil {
+		t.Errorf("unable to wait for the operation: %v", err)
 	}
 }

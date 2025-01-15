@@ -20,7 +20,7 @@ import (
 	"fmt"
 
 	compute "cloud.google.com/go/compute/apiv1"
-	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
+	computepb "cloud.google.com/go/compute/apiv1/computepb"
 )
 
 // getInstanceTemplate retrieves an instance template, which you can use to create virtual machine

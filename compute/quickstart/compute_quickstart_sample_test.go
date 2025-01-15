@@ -29,8 +29,6 @@ import (
 // https://medium.com/@victor.neuret/mocking-the-official-mongo-golang-driver-5aad5b226a78
 func TestLoad(t *testing.T) {
 	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
-	defer mt.Close()
-
 	mt.Run("success", func(mt *mtest.T) {
 		tm := &trainerManager{
 			collection: mt.Coll,
@@ -75,7 +73,6 @@ func TestLoad(t *testing.T) {
 
 func TestList(t *testing.T) {
 	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
-	defer mt.Close()
 
 	want := []trainer{
 		{Name: "Ash", Age: 10, City: "Pallet Town"},
@@ -121,7 +118,6 @@ func TestList(t *testing.T) {
 
 func TestListHandler(t *testing.T) {
 	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
-	defer mt.Close()
 
 	mt.Run("success", func(mt *mtest.T) {
 		tm := &trainerManager{

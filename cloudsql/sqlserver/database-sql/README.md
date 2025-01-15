@@ -15,9 +15,10 @@ Note the connection string, database user, and database password that you create
 [instructions](https://cloud.google.com/sql/docs/sqlserver/create-manage-databases).
 Note the database name.
 
-1. Create a service account with the 'Cloud SQL Client' permissions by following these
-[instructions](https://cloud.google.com/sql/docs/mysql/connect-external-app#4_if_required_by_your_authentication_method_create_a_service_account).
-Download a JSON key to use to authenticate your connection.
+1. Set up [Application Default Credentials][adc] and ensure you have
+   added the 'Cloud SQL Client' role to your IAM principal.
+
+[adc]: https://cloud.google.com/docs/authentication/provide-credentials-adc
 
 ## Running locally
 
@@ -34,7 +35,6 @@ To run the sample locally with a TCP connection, set environment variables and l
 #### Linux / Mac OS
 Use these terminal commands to initialize environment variables:
 ```bash
-export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service/account/key.json
 export INSTANCE_HOST='127.0.0.1'
 export DB_PORT='1433'
 export DB_USER='<YOUR_DB_USER_NAME>'
@@ -44,13 +44,12 @@ export DB_NAME='<YOUR_DB_NAME>'
 
 Then use this command to launch the proxy in the background:
 ```bash
-./cloud_sql_proxy -instances=<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>=tcp:1433 -credential_file=$GOOGLE_APPLICATION_CREDENTIALS &
+./cloud-sql-proxy <PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME> --port=1433 &
 ```
 
 #### Windows/PowerShell
 Use these PowerShell commands to initialize environment variables:
 ```powershell
-$env:GOOGLE_APPLICATION_CREDENTIALS="<CREDENTIALS_JSON_FILE>"
 $env:INSTANCE_HOST="127.0.0.1"
 $env:DB_PORT="1433"
 $env:DB_USER="<YOUR_DB_USER_NAME>"
@@ -60,7 +59,7 @@ $env:DB_NAME="<YOUR_DB_NAME>"
 
 Then use this command to launch the proxy in a separate PowerShell session:
 ```powershell
-Start-Process -filepath "C:\<path to proxy exe>" -ArgumentList "-instances=<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME>=tcp:1433 -credential_file=<CREDENTIALS_JSON_FILE>"
+Start-Process -filepath "C:\<path to proxy exe>" -ArgumentList "<PROJECT-ID>:<INSTANCE-REGION>:<INSTANCE-NAME> --port=1433"
 ```
 
 ### Testing the application

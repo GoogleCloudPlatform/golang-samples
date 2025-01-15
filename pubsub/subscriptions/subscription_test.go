@@ -29,7 +29,10 @@ import (
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/pstest"
 	"cloud.google.com/go/storage"
+	trace "cloud.google.com/go/trace/apiv1"
+	"cloud.google.com/go/trace/apiv1/tracepb"
 	"google.golang.org/api/iterator"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -85,9 +88,8 @@ func setup(t *testing.T) *pubsub.Client {
 				}
 				timeTCreated := time.Unix(0, timestamp)
 				if time.Since(timeTCreated) > expireAge {
-					if err := t.Delete(ctx); err != nil {
-						fmt.Printf("Delete topic err: %v: %v", t.String(), err)
-					}
+					// Topic deletion can be fire and forget
+					t.Delete(ctx)
 				}
 			}
 		}
@@ -112,9 +114,8 @@ func setup(t *testing.T) *pubsub.Client {
 				}
 				timeTCreated := time.Unix(0, timestamp)
 				if time.Since(timeTCreated) > expireAge {
-					if err := s.Delete(ctx); err != nil {
-						fmt.Printf("Delete sub err: %v: %v", s.String(), err)
-					}
+					// Subscription deletion can be fire and forget
+					s.Delete(ctx)
 				}
 			}
 		}
@@ -747,6 +748,81 @@ func TestCreateWithFilter(t *testing.T) {
 	}
 }
 
+func TestCreatePushSubscription(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+	defer client.Close()
+
+	t.Run("default push subscription", func(t *testing.T) {
+		topicID := topicID + "-default-push"
+		subID := subID + "-default-push"
+		t.Cleanup(func() {
+			// Don't check delete errors since if it doesn't exist
+			// that's fine.
+			topic := client.Topic(topicID)
+			topic.Delete(ctx)
+
+			sub := client.Subscription(subID)
+			sub.Delete(ctx)
+		})
+
+		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+			topic, err := getOrCreateTopic(ctx, client, topicID)
+			if err != nil {
+				r.Errorf("CreateTopic: %v", err)
+			}
+
+			var b bytes.Buffer
+			endpoint := "https://my-test-project.appspot.com/push"
+			if err := createWithEndpoint(&b, tc.ProjectID, subID, topic, endpoint); err != nil {
+				r.Errorf("failed to create push subscription: %v", err)
+			}
+
+			got := b.String()
+			want := "Created push subscription"
+			if !strings.Contains(got, want) {
+				r.Errorf("got %s, want %s", got, want)
+			}
+		})
+	})
+
+	t.Run("no wrapper", func(t *testing.T) {
+		topicID := topicID + "-no-wrapper"
+		subID := subID + "-no-wrapper"
+
+		t.Cleanup(func() {
+			// Don't check delete errors since if it doesn't exist
+			// that's fine.
+			topic := client.Topic(topicID)
+			topic.Delete(ctx)
+
+			sub := client.Subscription(subID)
+			sub.Delete(ctx)
+		})
+
+		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+			topic, err := getOrCreateTopic(ctx, client, topicID)
+			if err != nil {
+				r.Errorf("CreateTopic: %v", err)
+			}
+
+			var b bytes.Buffer
+			endpoint := "https://my-test-project.appspot.com/push"
+			if err := createPushNoWrapperSubscription(&b, tc.ProjectID, subID, topic, endpoint); err != nil {
+				r.Errorf("failed to create push subscription: %v", err)
+			}
+
+			got := b.String()
+			want := "Created push no wrapper subscription"
+			if !strings.Contains(got, want) {
+				r.Errorf("got %s, want %s", got, want)
+			}
+		})
+	})
+}
+
 func TestCreateBigQuerySubscription(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
@@ -875,6 +951,110 @@ func TestReceiveMessagesWithExactlyOnceDelivery(t *testing.T) {
 	if !strings.Contains(got, want) {
 		t.Fatalf("receiveMessagesWithExactlyOnceDeliveryEnabled got %s\nwant %s", got, want)
 	}
+}
+
+func TestOptimisticSubscribe(t *testing.T) {
+	t.Parallel()
+	client := setup(t)
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	optTopicID := topicID + "-opt"
+	optSubID := subID + "-opt"
+
+	testutil.Retry(t, 3, 5*time.Second, func(r *testutil.R) {
+		topic, err := getOrCreateTopic(ctx, client, optTopicID)
+		if err != nil {
+			r.Errorf("getOrCreateTopic: %v", err)
+		}
+		defer topic.Delete(ctx)
+		defer topic.Stop()
+
+		buf := new(bytes.Buffer)
+		err = optimisticSubscribe(buf, tc.ProjectID, optTopicID, optSubID)
+		if err != nil {
+			r.Errorf("failed to pull messages: %v", err)
+		}
+
+		// Check that we created the subscription instead of using
+		// an existing one. We can't test receiving a message
+		// since a message published won't be delivered to a new
+		// subscription.
+		got := buf.String()
+		want := "Created subscription"
+		if !strings.Contains(got, want) {
+			r.Errorf("optimisticSubscribe\ngot: %s\nwant: %s", got, want)
+		}
+
+		sub := client.Subscription(optSubID)
+		sub.Delete(ctx)
+	})
+}
+
+func TestSubscribeOpenTelemetryTracing(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+	ctx := context.Background()
+
+	// Use the pstest fake with emulator settings.
+	srv := pstest.NewServer()
+	t.Setenv("PUBSUB_EMULATOR_HOST", srv.Addr)
+	client := setup(t)
+
+	otelTopicID := topicID + "-otel"
+	otelSubID := subID + "-otel"
+
+	topic, err := client.CreateTopic(ctx, otelTopicID)
+	if err != nil {
+		t.Fatalf("failed to create topic: %v", err)
+	}
+	defer topic.Delete(ctx)
+
+	if err := create(buf, tc.ProjectID, otelSubID, topic); err != nil {
+		t.Fatalf("failed to create a topic: %v", err)
+	}
+	defer client.Subscription(otelSubID).Delete(ctx)
+
+	if err := publishMsgs(ctx, topic, 1); err != nil {
+		t.Fatalf("failed to publish setup message: %v", err)
+	}
+
+	if err := subscribeOpenTelemetryTracing(buf, tc.ProjectID, otelSubID, 1.0); err != nil {
+		t.Fatalf("failed to subscribe message with otel tracing: %v", err)
+	}
+	got := buf.String()
+	want := "Received 1 message"
+	if !strings.Contains(got, want) {
+		t.Fatalf("expected 1 message, got: %s", got)
+	}
+
+	traceClient, err := trace.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("trace client instantiation: %v", err)
+	}
+
+	testutil.Retry(t, 3, time.Second, func(r *testutil.R) {
+		// Wait some time for the spans to show up in Cloud Trace.
+		time.Sleep(5 * time.Second)
+		iter := traceClient.ListTraces(ctx, &tracepb.ListTracesRequest{
+			ProjectId: tc.ProjectID,
+			Filter:    fmt.Sprintf("+messaging.destination.name:%v", otelSubID),
+		})
+		numTrace := 0
+		for {
+			_, err := iter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				r.Errorf("got err in iter.Next: %v", err)
+			}
+			numTrace++
+		}
+		// Three traces are created from subscribe side: subscribe, ack, modack spans.
+		if want := 3; numTrace != want {
+			r.Errorf("got %d traces, want %d", numTrace, want)
+		}
+	})
 }
 
 func publishMsgs(ctx context.Context, t *pubsub.Topic, numMsgs int) error {

@@ -16,7 +16,6 @@
 package authentication
 
 // [START cloudrun_service_to_service_auth]
-// [START run_service_to_service_auth]
 import (
 	"fmt"
 	"net/http"
@@ -42,5 +41,4 @@ func makeGetRequest(serviceURL string) (*http.Response, error) {
 	return http.DefaultClient.Do(req)
 }
 
-// [END run_service_to_service_auth]
 // [END cloudrun_service_to_service_auth]

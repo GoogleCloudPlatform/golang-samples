@@ -24,8 +24,8 @@ import (
 	"time"
 
 	compute "cloud.google.com/go/compute/apiv1"
+	computepb "cloud.google.com/go/compute/apiv1/computepb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	computepb "google.golang.org/genproto/googleapis/cloud/compute/v1"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -66,7 +66,7 @@ func TestCreateWindowsOSImageSnippets(t *testing.T) {
 						DiskName:   proto.String(diskName),
 						DiskSizeGb: proto.Int64(64),
 						SourceImage: proto.String(
-							"projects/windows-cloud/global/images/windows-server-2012-r2-dc-core-v20220314",
+							"projects/windows-cloud/global/images/windows-server-2022-dc-core-v20231011",
 						),
 					},
 					DeviceName: proto.String(diskName),

@@ -32,13 +32,16 @@ func delete(w io.Writer, db string) error {
 	defer client.Close()
 
 	m := []*spanner.Mutation{
-		// Delete individual rows.
+		// spanner.Key can be used to delete a specific set of rows.
+		// Delete the Albums with the key values (2,1) and (2,3).
 		spanner.Delete("Albums", spanner.Key{2, 1}),
 		spanner.Delete("Albums", spanner.Key{2, 3}),
-		// Delete a range of rows where the column key is >=3 and <5.
+		// spanner.KeyRange can be used to delete rows with a key in a specific range.
+		// Delete a range of rows where the column key is >=3 and <5
 		spanner.Delete("Singers", spanner.KeyRange{Start: spanner.Key{3}, End: spanner.Key{5}, Kind: spanner.ClosedOpen}),
-		// Delete remaining Singers rows, which will also delete the remaining
-		// Albums rows because Albums was defined with ON DELETE CASCADE.
+		// spanner.AllKeys can be used to delete all the rows in a table.
+		// Delete remaining Singers rows, which will also delete the remaining Albums rows since it was
+		// defined with ON DELETE CASCADE.
 		spanner.Delete("Singers", spanner.AllKeys()),
 	}
 	_, err = client.Apply(ctx, m)

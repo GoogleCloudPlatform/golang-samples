@@ -25,7 +25,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -67,7 +67,7 @@ func init() {
 // by a Slack command.
 func kgSearch(w http.ResponseWriter, r *http.Request) {
 
-	bodyBytes, err := ioutil.ReadAll(r.Body)
+	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("failed to read body: %v", err)
 		http.Error(w, "could not read request body", http.StatusBadRequest)

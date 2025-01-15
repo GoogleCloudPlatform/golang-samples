@@ -5,96 +5,56 @@
 # https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners#codeowners-syntax
 
 
-# The go-samples-reviewers team is the default owner for anything not
-# explicitly taken by someone else.
-*                                     @GoogleCloudPlatform/go-samples-reviewers
-/docs/                                @GoogleCloudPlatform/go-samples-reviewers
+# The go-samples-reviewers team is the default owner for anything not explicitly taken by someone else.
+# The cloud-samples-reviewer team is a default samples owner.
+# The cloud-samples-infra team is a repository & testing owner.
+*                                     @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers
+/*                                    @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra
+/.github/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra
+/docs/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra
 /getting-started/                     @GoogleCloudPlatform/go-samples-reviewers
-/internal/                            @GoogleCloudPlatform/go-samples-reviewers
-/testing/                             @GoogleCloudPlatform/go-samples-reviewers
-
+/internal/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra
+/testing/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra
 
 # CNDB, Storage, and Infra-DB
-/bigtable/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
-/cloudsql/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/infra-db-sdk
-/datastore/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
-/firestore/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
-/memorystore/                         @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
-/spanner/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
-/storage/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-storage-dpes
-/storagetransfer/                     @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-storage-dpes
-
-
-# TORuS
-/container_registry/                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
-/endpoints/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
-/eventarc/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
-/internal/cloudrunci/                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
-/run/                                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
-/tasks/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe
-
-
-# Data & AI DEE
-/automl/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai 
-/bigquery/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
-/datacatalog/                          @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai 
-/dataflow/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
-/dataproc/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
-/dialogflow/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
-/documentai/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
-/jobs/                                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
-/language/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
-/pubsub/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai 
-/pubsublite/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
-/speech/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
-/texttospeech/                         @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
-/translate/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai 
-/videointelligence/                    @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
-/vision/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
-
+/bigtable/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
+/cloudsql/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-sql-connectors
+/datastore/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
+/firestore/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
+/memorystore/                         @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
+/spanner/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
+/storage/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-storage-dpes
+/storagetransfer/                     @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-storage-dpes
 
 # DEE Infra
-/auth/                                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra @GoogleCloudPlatform/googleapis-auth
-/batch/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
-/compute/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
-/iam/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
-/iap/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
-/kms/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
-/privateca/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
-/securitycenter/                       @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
-/secretmanager/                        @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra
-/mediacdn/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-infra @justin-mp
+/batch/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/dee-infra
+/compute/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/dee-infra
+/iam/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/dee-infra
+/iap/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/dee-infra
+/kms/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/dee-infra
+/privateca/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/dee-infra
+/mediacdn/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/dee-infra
 
-# DEE Platform Ops
-/container/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops
-/errorreporting/                       @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops
-/logging/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops 
-/monitoring/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops
-/opencensus/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops 
-/opentelemetry/                        @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops 
-/servicedirectory/                     @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops
-/trace/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-platform-ops 
-
-
-# Non-DEE owner
-/asset/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-asset-analysis-team @GoogleCloudPlatform/cloud-asset-platform-team
-/billing/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/billing-samples-maintainers
-/dlp/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/googleapis-dlp
-/iot/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/api-iot
-/iotkit/                               @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/api-iot
-/healthcare/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/healthcare-life-sciences
-/media/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-media-team
-/discoveryengine/                      @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/dee-data-ai
+# Other Owners
+/auth/                                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/googleapis-auth
+/asset/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-asset-analysis-team
+/billing/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/billing-samples-maintainers
+/dlp/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/googleapis-dlp
+/healthcare/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/healthcare-life-sciences
+/media/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-media-team
+/secretmanager/                        @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-secrets-team
+/securitycenter/                       @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/gcp-security-command-center
+/translate/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-ml-translate-dev
 
 # Does not have owner
-/cdn/                                  @GoogleCloudPlatform/go-samples-reviewers
-/profiler/                             @GoogleCloudPlatform/go-samples-reviewers
-
-## Assisted
-
-/functions/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/torus-dpe @GoogleCloudPlatform/functions-framework-google
+/cdn/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers
+/profiler/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers
 
 ## Self-Service
 
-/appengine/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/serverless-runtimes
-/appengine_flexible/                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/serverless-runtimes
+/appengine/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/serverless-runtimes
+/appengine_flexible/                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/serverless-runtimes
+
+## OpenTelemetry
+/opencensus/                          @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/opentelemetry-ops
+/opentelemetry/                       @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/opentelemetry-ops

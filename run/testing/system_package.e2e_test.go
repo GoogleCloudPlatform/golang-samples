@@ -15,10 +15,8 @@
 package cloudruntests
 
 import (
-	"fmt"
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -42,16 +40,13 @@ func TestDiagramService(t *testing.T) {
 	q.Add("dot", "digraph G { A -> {B, C, D} -> {F} }")
 	req.URL.RawQuery = q.Encode()
 
-	client := http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
+	resp, err := service.Do(req)
 	if err != nil {
-		t.Fatalf("client.Do: %v", err)
+		t.Fatalf("request: %v", err)
 	}
-	defer resp.Body.Close()
-	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
 
-	if got := resp.StatusCode; got != 200 {
-		t.Errorf("response status: got %d, want %d", got, 200)
+	if got := resp.StatusCode; got != http.StatusOK {
+		t.Errorf("response status: got %d, want %d", got, http.StatusOK)
 	}
 
 	if got, want := resp.Header.Get("Content-Type"), "image/png"; got != want {
