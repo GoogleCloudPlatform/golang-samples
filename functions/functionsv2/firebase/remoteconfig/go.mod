@@ -1,14 +1,15 @@
 module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/firebase/remoteconfig
 
-go 1.21
+go 1.21.13
 
 require github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
 
-require google.golang.org/protobuf v1.34.2
+require google.golang.org/protobuf v1.35.2
 
 require (
 	github.com/google/go-cmp v0.6.0 // indirect
-	golang.org/x/time v0.5.0 // indirect
+	github.com/stretchr/testify v1.9.0 // indirect
+	golang.org/x/time v0.7.0 // indirect
 )
 
 require (
