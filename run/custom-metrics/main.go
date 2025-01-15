@@ -56,13 +56,15 @@ func setupCounter(ctx context.Context) func(context.Context) error {
 	if serviceName == "" {
 		serviceName = "sample-cloud-run-app"
 	}
+
 	r, err := resource.Merge(
 		resource.Default(),
 		resource.NewWithAttributes(
-			semconv.SchemaURL,
+			resource.Default().SchemaURL(),
 			semconv.ServiceName(serviceName),
 		),
 	)
+
 	if err != nil {
 		log.Fatalf("Error creating resource: %v", err)
 	}
