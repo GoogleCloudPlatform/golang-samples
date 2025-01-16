@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Use the offical Golang image to create a build artifact.
+# Use the offical Go image to create a build artifact.
 # https://hub.docker.com/_/golang
 FROM golang:1.21-bookworm as builder
 
