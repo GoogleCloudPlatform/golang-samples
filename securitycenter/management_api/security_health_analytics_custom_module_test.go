@@ -22,7 +22,6 @@ import (
 	"os"
 	"regexp"
 	"strings"
-	// "sync"
 	"testing"
 
 	securitycentermanagement "cloud.google.com/go/securitycentermanagement/apiv1"
@@ -35,10 +34,7 @@ import (
 
 var orgID = ""
 var createdCustomModuleID = ""
-var (
-	createdModules []string
-	// mu             sync.Mutex
-)
+var createdModules []string
 
 func TestMain(m *testing.M) {
 	orgID = os.Getenv("GCLOUD_ORGANIZATION")
@@ -56,15 +52,11 @@ func TestMain(m *testing.M) {
 
 // AddModuleToCleanup registers a module for cleanup.
 func AddModuleToCleanup(moduleID string) {
-	// mu.Lock()
-	// defer mu.Unlock()
 	createdModules = append(createdModules, moduleID)
 }
 
 // PrintAllCreatedModules prints all created custom modules.
 func PrintAllCreatedModules() {
-	// mu.Lock()
-	// defer mu.Unlock()
 
 	if len(createdModules) == 0 {
 		fmt.Println("No custom modules were created.")
@@ -78,8 +70,6 @@ func PrintAllCreatedModules() {
 
 // CleanupCreatedModules deletes all created custom modules.
 func CleanupCreatedModules() {
-	// mu.Lock()
-	// defer mu.Unlock()
 
 	if len(createdModules) == 0 {
 		fmt.Println("No custom modules to clean up.")
@@ -271,6 +261,12 @@ func TestCreateCustomModule(t *testing.T) {
 	}
 
 	got := buf.String()
+
+	if got == "" {
+		t.Errorf("createSecurityHealthAnalyticsCustomModule() returned an empty string")
+		return
+	}
+
 	fmt.Printf("Response: %v\n", got)
 
 	parts := strings.Split(got, ":")

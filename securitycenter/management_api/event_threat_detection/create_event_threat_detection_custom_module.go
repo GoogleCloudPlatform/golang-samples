@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"regexp"
 
 	securitycentermanagement "cloud.google.com/go/securitycentermanagement/apiv1"
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
@@ -42,6 +43,11 @@ func createEventThreatDetectionCustomModule(w io.Writer, parent string) error {
 	defer client.Close()
 
 	uniqueSuffix := uuid.New().String()
+
+	// Remove invalid characters (anything that isn't alphanumeric or an underscore)
+	re := regexp.MustCompile(`[^a-zA-Z0-9_]`)
+	uniqueSuffix = re.ReplaceAllString(uniqueSuffix, "_")
+
 	// Create unique display name
 	displayName := fmt.Sprintf("go_sample_etd_custom_module_%s", uniqueSuffix)
 
