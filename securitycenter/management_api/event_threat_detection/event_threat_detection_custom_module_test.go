@@ -21,7 +21,7 @@ import (
 	"log"
 	"os"
 	"strings"
-	"sync"
+	// "sync"
 	"testing"
 
 	securitycentermanagement "cloud.google.com/go/securitycentermanagement/apiv1"
@@ -36,7 +36,7 @@ var orgID = ""
 var createdCustomModuleID = ""
 var (
 	createdModules []string
-	mu             sync.Mutex
+	// mu             sync.Mutex
 )
 
 func TestMain(m *testing.M) {
@@ -55,15 +55,15 @@ func TestMain(m *testing.M) {
 
 // AddModuleToCleanup registers a module for cleanup.
 func AddModuleToCleanup(moduleID string) {
-	mu.Lock()
-	defer mu.Unlock()
+	// mu.Lock()
+	// defer mu.Unlock()
 	createdModules = append(createdModules, moduleID)
 }
 
 // PrintAllCreatedModules prints all created custom modules.
 func PrintAllCreatedModules() {
-	mu.Lock()
-	defer mu.Unlock()
+	// mu.Lock()
+	// defer mu.Unlock()
 
 	if len(createdModules) == 0 {
 		fmt.Println("No custom modules were created.")
@@ -77,8 +77,8 @@ func PrintAllCreatedModules() {
 
 // CleanupCreatedModules deletes all created custom modules.
 func CleanupCreatedModules() {
-	mu.Lock()
-	defer mu.Unlock()
+	// mu.Lock()
+	// defer mu.Unlock()
 
 	if len(createdModules) == 0 {
 		fmt.Println("No custom modules to clean up.")
