@@ -19,10 +19,12 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	securitycentermanagement "cloud.google.com/go/securitycentermanagement/apiv1"
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
@@ -34,7 +36,8 @@ import (
 
 var orgID = ""
 var createdCustomModuleID = ""
-var createdModules []string
+var moduleID = ""
+var sharedModules []string
 
 func TestMain(m *testing.M) {
 	orgID = os.Getenv("GCLOUD_ORGANIZATION")
@@ -43,35 +46,49 @@ func TestMain(m *testing.M) {
 		log.Fatalf("GCLOUD_ORGANIZATION environment variable is not set.")
 	}
 
+	setupSharedModules()
+
 	// Run the tests
 	code := m.Run()
+
+	PrintAllCreatedModules()
+	CleanupSharedModules()
 
 	// Exit with the appropriate code
 	os.Exit(code)
 }
 
+func setupSharedModules() {
+	for i := 0; i < 3; i++ {
+		moduleID, _ = addCustomModule()
+		if moduleID != "" {
+			sharedModules = append(sharedModules, moduleID)
+		}
+	}
+}
+
 // AddModuleToCleanup registers a module for cleanup.
 func AddModuleToCleanup(moduleID string) {
-	createdModules = append(createdModules, moduleID)
+	sharedModules = append(sharedModules, moduleID)
 }
 
 // PrintAllCreatedModules prints all created custom modules.
 func PrintAllCreatedModules() {
 
-	if len(createdModules) == 0 {
+	if len(sharedModules) == 0 {
 		fmt.Println("No custom modules were created.")
 	} else {
 		fmt.Println("Created Custom Modules:")
-		for _, module := range createdModules {
+		for _, module := range sharedModules {
 			fmt.Println(module)
 		}
 	}
 }
 
-// CleanupCreatedModules deletes all created custom modules.
-func CleanupCreatedModules() {
+// CleanupSharedModules deletes all created custom modules.
+func CleanupSharedModules() {
 
-	if len(createdModules) == 0 {
+	if len(sharedModules) == 0 {
 		fmt.Println("No custom modules to clean up.")
 		return
 	}
@@ -83,11 +100,11 @@ func CleanupCreatedModules() {
 	}
 	defer client.Close()
 
-	for len(createdModules) > 0 {
-		moduleID := createdModules[0]
+	for len(sharedModules) > 0 {
+		moduleID = sharedModules[0]
 		if !CustomModuleExists(moduleID) {
 			fmt.Printf("Module not found (already deleted): %s\n", moduleID)
-			createdModules = createdModules[1:]
+			sharedModules = sharedModules[1:]
 			continue
 		}
 		err := client.DeleteSecurityHealthAnalyticsCustomModule(ctx, &securitycentermanagementpb.DeleteSecurityHealthAnalyticsCustomModuleRequest{
@@ -99,8 +116,16 @@ func CleanupCreatedModules() {
 			return
 		}
 		fmt.Printf("Deleted custom module: %s\n", moduleID)
-		createdModules = createdModules[1:]
+		sharedModules = sharedModules[1:]
 	}
+}
+
+func getRandomSharedModule() string {
+	if len(sharedModules) == 0 {
+		return ""
+	}
+	rand.Seed(time.Now().UnixNano())
+	return sharedModules[rand.Intn(len(sharedModules))]
 }
 
 // CustomModuleExists checks if a module exists.
@@ -117,15 +142,6 @@ func CustomModuleExists(moduleID string) bool {
 		log.Printf("Error checking module existence: %v", err)
 	}
 	return true
-}
-
-// CleanupAfterTests is a helper for test cleanup.
-func CleanupAfterTests(t *testing.T) {
-	t.Cleanup(func() {
-		PrintAllCreatedModules()
-		fmt.Println("Cleaning up created custom modules...")
-		CleanupCreatedModules()
-	})
 }
 
 // extractCustomModuleID extracts the custom module ID from the full name
@@ -217,19 +233,14 @@ func addCustomModule() (string, error) {
 func TestDeleteCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
-	CleanupAfterTests(t)
-
-	createdCustomModuleID, err := addCustomModule()
-	AddModuleToCleanup(createdCustomModuleID)
-
-	if err != nil {
-		t.Fatalf("Could not setup test environment: %v", err)
-		return
+	moduleID = getRandomSharedModule()
+	if moduleID == "" {
+		t.Fatalf("No shared modules available")
 	}
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
-	err = deleteSecurityHealthAnalyticsCustomModule(&buf, parent, createdCustomModuleID)
+	err := deleteSecurityHealthAnalyticsCustomModule(&buf, parent, moduleID)
 
 	if err != nil {
 		t.Fatalf("deleteSecurityHealthAnalyticsCustomModule() had error: %v", err)
@@ -238,8 +249,8 @@ func TestDeleteCustomModule(t *testing.T) {
 
 	got := buf.String()
 
-	if !strings.Contains(got, createdCustomModuleID) {
-		t.Fatalf("deleteSecurityHealthAnalyticsCustomModule() got: %s want %s", got, createdCustomModuleID)
+	if !strings.Contains(got, moduleID) {
+		t.Fatalf("deleteSecurityHealthAnalyticsCustomModule() got: %s want %s", got, moduleID)
 	}
 }
 
@@ -247,8 +258,6 @@ func TestDeleteCustomModule(t *testing.T) {
 func TestCreateCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 	var createModulePath = ""
-
-	CleanupAfterTests(t)
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
@@ -285,19 +294,14 @@ func TestCreateCustomModule(t *testing.T) {
 func TestListDescendantCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
-	CleanupAfterTests(t)
-
-	createdCustomModuleID, err := addCustomModule()
-	AddModuleToCleanup(createdCustomModuleID)
-
-	if err != nil {
-		t.Fatalf("Could not setup test environment: %v", err)
-		return
+	moduleID = getRandomSharedModule()
+	if moduleID == "" {
+		t.Fatalf("No shared modules available")
 	}
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
-	err = listDescendantSecurityHealthAnalyticsCustomModule(&buf, parent)
+	err := listDescendantSecurityHealthAnalyticsCustomModule(&buf, parent)
 
 	if err != nil {
 		t.Fatalf("listDescendantSecurityHealthAnalyticsCustomModule() had error: %v", err)
@@ -316,20 +320,15 @@ func TestListDescendantCustomModule(t *testing.T) {
 func TestGetCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
-	CleanupAfterTests(t)
-
-	createdCustomModuleID, err := addCustomModule()
-	AddModuleToCleanup(createdCustomModuleID)
-
-	if err != nil {
-		t.Fatalf("Could not setup test environment: %v", err)
-		return
+	moduleID = getRandomSharedModule()
+	if moduleID == "" {
+		t.Fatalf("No shared modules available")
 	}
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
 	// Call Get
-	err = getSecurityHealthAnalyticsCustomModule(&buf, parent, createdCustomModuleID)
+	err := getSecurityHealthAnalyticsCustomModule(&buf, parent, moduleID)
 
 	if err != nil {
 		t.Fatalf("getSecurityHealthAnalyticsCustomModule() had error: %v", err)
@@ -369,19 +368,14 @@ func TestSimulateCustomModule(t *testing.T) {
 func TestListEffectiveCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
-	CleanupAfterTests(t)
-
-	createdCustomModuleID, err := addCustomModule()
-	AddModuleToCleanup(createdCustomModuleID)
-
-	if err != nil {
-		t.Fatalf("Could not setup test environment: %v", err)
-		return
+	moduleID = getRandomSharedModule()
+	if moduleID == "" {
+		t.Fatalf("No shared modules available")
 	}
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
-	err = listEffectiveSecurityHealthAnalyticsCustomModule(&buf, parent)
+	err := listEffectiveSecurityHealthAnalyticsCustomModule(&buf, parent)
 
 	if err != nil {
 		t.Fatalf("listEffectiveSecurityHealthAnalyticsCustomModule() had error: %v", err)
@@ -400,19 +394,14 @@ func TestListEffectiveCustomModule(t *testing.T) {
 func TestUpdateCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
-	CleanupAfterTests(t)
-
-	createdCustomModuleID, err := addCustomModule()
-	AddModuleToCleanup(createdCustomModuleID)
-
-	if err != nil {
-		t.Fatalf("Could not setup test environment: %v", err)
-		return
+	moduleID = getRandomSharedModule()
+	if moduleID == "" {
+		t.Fatalf("No shared modules available")
 	}
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 	// Call Update
-	err = updateSecurityHealthAnalyticsCustomModule(&buf, parent, createdCustomModuleID)
+	err := updateSecurityHealthAnalyticsCustomModule(&buf, parent, moduleID)
 
 	if err != nil {
 		t.Fatalf("updateSecurityHealthAnalyticsCustomModule() had error: %v", err)
@@ -430,20 +419,15 @@ func TestUpdateCustomModule(t *testing.T) {
 func TestGetEffectiveCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
-	CleanupAfterTests(t)
-
-	createdCustomModuleID, err := addCustomModule()
-	AddModuleToCleanup(createdCustomModuleID)
-
-	if err != nil {
-		t.Fatalf("Could not setup test environment: %v", err)
-		return
+	moduleID = getRandomSharedModule()
+	if moduleID == "" {
+		t.Fatalf("No shared modules available")
 	}
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
 	// Call Get
-	err = getEffectiveSecurityHealthAnalyticsCustomModule(&buf, parent, createdCustomModuleID)
+	err := getEffectiveSecurityHealthAnalyticsCustomModule(&buf, parent, moduleID)
 
 	if err != nil {
 		t.Fatalf("getEffectiveSecurityHealthAnalyticsCustomModule() had error: %v", err)
@@ -462,19 +446,14 @@ func TestGetEffectiveCustomModule(t *testing.T) {
 func TestListCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
-	CleanupAfterTests(t)
-
-	createdCustomModuleID, err := addCustomModule()
-	AddModuleToCleanup(createdCustomModuleID)
-
-	if err != nil {
-		t.Fatalf("Could not setup test environment: %v", err)
-		return
+	moduleID = getRandomSharedModule()
+	if moduleID == "" {
+		t.Fatalf("No shared modules available")
 	}
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
-	err = listSecurityHealthAnalyticsCustomModule(&buf, parent)
+	err := listSecurityHealthAnalyticsCustomModule(&buf, parent)
 
 	if err != nil {
 		t.Fatalf("listSecurityHealthAnalyticsCustomModule() had error: %v", err)
