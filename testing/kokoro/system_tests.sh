@@ -200,13 +200,6 @@ set +e # Don't exit on errors to make sure we run all tests.
 # runTests runs the tests in the current directory. If an argument is specified,
 # it is used as the argument to `go test`.
 runTests() {
-  if goVersionShouldSkip; then
-    set +x
-    echo "SKIPPING: module's minimum version is newer than the current Go version."
-    set -x
-    return 0
-  fi
-
   set +x
   test_dir=$(realpath --relative-to $PROJECT_ROOT $(pwd))
   echo "Running 'go test' in '${test_dir}'..."
@@ -216,18 +209,6 @@ runTests() {
   exit_code=$((exit_code + $?))
   popd
   set +x
-}
-
-# Returns 0 if the test should be skipped because the current Go
-# version is too old for the current module.
-goVersionShouldSkip() {
-  modVersion="$(go list -m -f '{{.GoVersion}}')"
-  if [ -z "$modVersion" ]; then
-    # Not in a module or minimum Go version not specified, don't skip.
-    return 1
-  fi
-
-  go list -f "{{context.ReleaseTags}}" ./... | grep -q -v "go$modVersion\b"
 }
 
 if [[ $RUN_ALL_TESTS = "1" ]]; then
