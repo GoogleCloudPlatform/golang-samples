@@ -1,4 +1,4 @@
-runtime: go121
+runtime: go122
 
 inbound_services:
   - warmup
