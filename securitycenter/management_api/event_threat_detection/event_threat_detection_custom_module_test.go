@@ -166,6 +166,11 @@ func addCustomModule() (string, error) {
 	}
 	defer client.Close()
 	uniqueSuffix := uuid.New().String()
+
+	// Remove invalid characters (anything that isn't alphanumeric or an underscore)
+	re := regexp.MustCompile(`[^a-zA-Z0-9_]`)
+	uniqueSuffix = re.ReplaceAllString(uniqueSuffix, "_")
+
 	// Create unique display name
 	displayName := fmt.Sprintf("go_sample_etd_custom_module_test_%s", uniqueSuffix)
 
