@@ -24,11 +24,13 @@ func example() {
 	ctx := context.Background()
 
 	// [START gae_deferred_tasks]
+	// [START deferred_tasks]
 	var expensiveFunc = delay.Func("some-arbitrary-key", func(ctx context.Context, a string, b int) {
 		// Do something expensive!
 	})
 
 	// Somewhere else.
 	expensiveFunc.Call(ctx, "Hello, world!", 42)
-	// [END gae_deferred_tasks]
+	// [END deferred_tasks]
+	// [START gae_deferred_tasks]
 }
