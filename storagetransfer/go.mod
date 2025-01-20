@@ -10,7 +10,7 @@ require (
 	cloud.google.com/go/storagetransfer v1.11.1
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v0.6.1
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	github.com/aws/aws-sdk-go v1.55.5
+	github.com/aws/aws-sdk-go v1.55.6
 	google.golang.org/genproto v0.0.0-20241015192408-796eee8c2d53
 	google.golang.org/protobuf v1.35.2
 )
