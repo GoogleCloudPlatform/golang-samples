@@ -30,5 +30,5 @@ func example() {
 
 	// Somewhere else.
 	expensiveFunc.Call(ctx, "Hello, world!", 42)
-	// [START gae_deferred_tasks]
+	// [END gae_deferred_tasks]
 }
