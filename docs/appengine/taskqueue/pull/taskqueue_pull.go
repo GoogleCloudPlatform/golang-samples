@@ -30,7 +30,7 @@ func addTaskHandler(_ http.ResponseWriter, r *http.Request) {
 		Method:  "PULL",
 	}
 	_, err := taskqueue.Add(ctx, t, "pull-queue")
-	// [END gae_adding_tasks_to_a_pull_queue]
+	// [END gae_adding_tasks_to_pull_queue]
 	_ = err
 
 	// [START gae_leasing_tasks_1]
