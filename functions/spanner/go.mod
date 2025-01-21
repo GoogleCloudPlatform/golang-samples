@@ -51,7 +51,7 @@ require (
 	cloud.google.com/go/longrunning v0.6.4 // indirect
 	github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/cncf/xds/go v0.0.0-20241223141626-cff3c89139a3 // indirect
+	github.com/cncf/xds/go v0.0.0-20250121191232-2f005788dc42 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.1.0 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
