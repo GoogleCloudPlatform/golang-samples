@@ -5,7 +5,7 @@ go 1.21.13
 require (
 	github.com/cloudevents/sdk-go/v2 v2.15.2
 	github.com/googleapis/google-cloudevents-go v0.8.0
-	google.golang.org/protobuf v1.35.2
+	google.golang.org/protobuf v1.36.3
 )
 
 require (

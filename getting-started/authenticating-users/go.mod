@@ -7,4 +7,4 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 )
 
-require golang.org/x/sys v0.28.0 // indirect
+require golang.org/x/sys v0.29.0 // indirect
