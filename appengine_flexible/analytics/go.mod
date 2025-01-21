@@ -1,6 +1,8 @@
 module github.com/GoogleCloudPlatform/appengine_flexible/analytics
 
-go 1.21.13
+go 1.22.0
+
+toolchain go1.22.7
 
 require (
 	github.com/gofrs/uuid v4.4.0+incompatible

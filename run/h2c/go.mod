@@ -1,6 +1,8 @@
 module github.com/GoogleCloudPlatform/golang-samples/run/h2c
 
-go 1.21.13
+go 1.22.0
+
+toolchain go1.22.7
 
 require golang.org/x/net v0.34.0
 

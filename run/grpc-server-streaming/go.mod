@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming
 
-go 1.22
+go 1.22.0
 
 toolchain go1.22.7
 
@@ -10,6 +10,8 @@ require (
 )
 
 require (
+	go.opentelemetry.io/otel v1.34.0 // indirect
+	go.opentelemetry.io/otel/sdk/metric v1.34.0 // indirect
 	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect

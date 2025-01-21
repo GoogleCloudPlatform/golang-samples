@@ -1,6 +1,8 @@
 module github.com/GoogleCloudPlatform/appengine_flexible/redis
 
-go 1.21.13
+go 1.22.0
+
+toolchain go1.22.7
 
 require (
 	github.com/gomodule/redigo v2.0.0+incompatible
