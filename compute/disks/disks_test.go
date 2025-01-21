@@ -1082,11 +1082,11 @@ func TestConsistencyGroup(t *testing.T) {
 		}
 
 		want = fmt.Sprintf("- %s", diskName)
-		if err := listConsistencyGroup(&buf, tc.ProjectID, region, groupName); err != nil {
-			t.Errorf("listConsistencyGroup got err: %v", err)
+		if err := listRegionalConsistencyGroup(&buf, tc.ProjectID, region, groupName); err != nil {
+			t.Errorf("listRegionalConsistencyGroup got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, want) {
-			t.Errorf("listConsistencyGroup got %q, want %q", got, want)
+			t.Errorf("listRegionalConsistencyGroup got %q, want %q", got, want)
 		}
 
 		buf.Reset()
