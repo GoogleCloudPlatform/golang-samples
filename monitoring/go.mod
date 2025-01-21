@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/monitoring
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	cloud.google.com/go/monitoring v1.23.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.15-0.20230702191903-2de6d2748484

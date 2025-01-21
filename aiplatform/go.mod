@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/aiplatform
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	cloud.google.com/go/aiplatform v1.70.0
 	cloud.google.com/go/storage v1.50.0

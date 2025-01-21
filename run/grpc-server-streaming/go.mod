@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	github.com/golang/protobuf v1.5.4
 	google.golang.org/grpc v1.69.4

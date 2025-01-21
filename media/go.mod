@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/media
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	cloud.google.com/go/storage v1.50.0
 	cloud.google.com/go/video v1.23.3

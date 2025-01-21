@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/compute
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	cloud.google.com/go/compute v1.31.1
 	cloud.google.com/go/storage v1.50.0

@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/slack
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
 	google.golang.org/api v0.217.0

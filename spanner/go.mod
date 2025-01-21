@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/spanner
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	cloud.google.com/go v0.118.0
 	cloud.google.com/go/iam v1.3.1

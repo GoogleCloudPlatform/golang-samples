@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/vertexai/embeddings
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	cloud.google.com/go/aiplatform v1.70.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20241115184038-424e8c898d67

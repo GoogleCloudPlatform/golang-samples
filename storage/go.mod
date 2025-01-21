@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/storage
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	cloud.google.com/go/iam v1.3.1
 	cloud.google.com/go/pubsub v1.45.3

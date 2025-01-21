@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/testing/gimmeproj
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require cloud.google.com/go/datastore v1.20.0
 
 require (

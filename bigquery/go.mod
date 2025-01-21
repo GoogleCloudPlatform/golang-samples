@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/bigquery
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	cloud.google.com/go v0.118.0
 	cloud.google.com/go/bigquery v1.65.0

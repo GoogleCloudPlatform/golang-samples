@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/endpoints
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	github.com/golang/protobuf v1.5.4
 	github.com/gorilla/mux v1.8.1

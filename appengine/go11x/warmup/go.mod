@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/appengine/go11x/warmup
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require cloud.google.com/go/storage v1.50.0
 
 require (

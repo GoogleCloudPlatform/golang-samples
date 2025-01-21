@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/getting-started/gopher-run
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	cloud.google.com/go/firestore v1.18.0
 	cloud.google.com/go/storage v1.50.0

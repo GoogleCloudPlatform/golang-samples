@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/profiler
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	cloud.google.com/go/cloudprofiler v0.3.4
 	cloud.google.com/go/profiler v0.4.1

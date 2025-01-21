@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/storagetransfer
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	cloud.google.com/go/iam v1.3.1
 	cloud.google.com/go/longrunning v0.6.4

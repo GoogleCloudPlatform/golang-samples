@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/translate
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	cloud.google.com/go/storage v1.50.0
 	cloud.google.com/go/translate v1.12.3

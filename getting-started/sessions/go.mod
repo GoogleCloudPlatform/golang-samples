@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/getting-started/sessions
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	cloud.google.com/go/firestore v1.18.0
 	github.com/GoogleCloudPlatform/firestore-gorilla-sessions v0.1.0

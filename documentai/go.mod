@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/documentai
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	cloud.google.com/go/documentai v1.35.1
 	google.golang.org/api v0.217.0

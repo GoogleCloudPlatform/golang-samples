@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/getting-started/background
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	cloud.google.com/go/firestore v1.18.0
 	cloud.google.com/go/pubsub v1.45.3

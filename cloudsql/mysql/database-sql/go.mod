@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/cloudsql/mysql/database-sql
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	cloud.google.com/go/cloudsqlconn v1.11.1
 	github.com/GoogleCloudPlatform/functions-framework-go v1.8.1

@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/bigtable
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	cloud.google.com/go/bigtable v1.34.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7

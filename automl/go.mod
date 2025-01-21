@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/automl
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	cloud.google.com/go/automl v1.14.4
 	cloud.google.com/go/longrunning v0.6.4

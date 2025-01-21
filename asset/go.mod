@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/asset
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	cloud.google.com/go/asset v1.20.4
 	cloud.google.com/go/bigquery v1.65.0

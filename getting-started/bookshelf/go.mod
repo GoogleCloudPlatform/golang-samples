@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	cloud.google.com/go/errorreporting v0.3.2
 	cloud.google.com/go/firestore v1.18.0

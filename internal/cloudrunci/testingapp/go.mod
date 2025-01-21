@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci/testing
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
 
 require (

@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/label
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require github.com/cloudevents/sdk-go/v2 v2.15.2
 
 require (

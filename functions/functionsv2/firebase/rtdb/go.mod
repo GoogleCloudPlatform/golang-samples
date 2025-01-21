@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/functions/functionsv2/firebase/rtdb
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require (
 	github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
 	github.com/cloudevents/sdk-go/v2 v2.15.2

@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/fireb
 
 go 1.22.0
 
-toolchain go1.22.7
-
 require github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
 
 require google.golang.org/protobuf v1.36.3
