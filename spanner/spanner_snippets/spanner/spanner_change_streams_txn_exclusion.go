@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,13 +24,15 @@ import (
 	"cloud.google.com/go/spanner"
 )
 
-// rwTxnExcludedFromChangeStreams executes the insert and update DMLs on Singers table excluded from allowed tracking change streams
-func rwTxnExcludedFromChangeStreams(w io.Writer, db string) error {
+// readWriteTxnExcludedFromChangeStreams executes the insert and update DMLs on
+// Singers table excluded from tracking change streams with ddl option
+// allow_txn_exclusion = true.
+func readWriteTxnExcludedFromChangeStreams(w io.Writer, db string) error {
 	// db = `projects/<project>/instances/<instance-id>/database/<database-id>`
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
 	if err != nil {
-		return fmt.Errorf("rwTxnExcludedFromChangeStreams.NewClient: %w", err)
+		return fmt.Errorf("readWriteTxnExcludedFromChangeStreams.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -41,15 +43,15 @@ func rwTxnExcludedFromChangeStreams(w io.Writer, db string) error {
 		}
 		_, err := txn.Update(ctx, stmt)
 		if err != nil {
-			return fmt.Errorf("rwTxnExcludedFromChangeStreams.Update: %w", err)
+			return fmt.Errorf("readWriteTxnExcludedFromChangeStreams.Update: %w", err)
 		}
-		fmt.Fprintf(w, "New singer inserted.")
+		fmt.Fprintln(w, "New singer inserted.")
 		stmt = spanner.Statement{
 			SQL: `UPDATE Singers SET FirstName = 'Hi' WHERE SingerId = 111`,
 		}
 		_, err = txn.Update(ctx, stmt)
 		if err != nil {
-			return fmt.Errorf("rwTxnExcludedFromChangeStreams.Update: %w", err)
+			return fmt.Errorf("readWriteTxnExcludedFromChangeStreams.Update: %w", err)
 		}
 		fmt.Fprint(w, "Singer first name updated.")
 		return nil
