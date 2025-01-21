@@ -14,7 +14,7 @@
 
 package snippets
 
-// [START compute_consistency_group_add_disk]
+// [START compute_consistency_group_clone]
 import (
 	"context"
 	"fmt"
@@ -62,4 +62,4 @@ func cloneConsistencyGroup(w io.Writer, projectID, region, groupName string) err
 	return nil
 }
 
-// [END compute_consistency_group_add_disk]
+// [END compute_consistency_group_clone]
