@@ -21,23 +21,23 @@ import (
 	"google.golang.org/appengine/taskqueue"
 )
 
-func addTaskHandler(w http.ResponseWriter, r *http.Request) {
+func addTaskHandler(_ http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 
-	// [START adding_tasks_to_a_pull_queue]
+	// [START gae_adding_tasks_to_pull_queue]
 	t := &taskqueue.Task{
 		Payload: []byte("hello world"),
 		Method:  "PULL",
 	}
 	_, err := taskqueue.Add(ctx, t, "pull-queue")
-	// [END adding_tasks_to_a_pull_queue]
+	// [END gae_adding_tasks_to_pull_queue]
 	_ = err
 
-	// [START leasing_tasks_1]
+	// [START gae_leasing_tasks_1]
 	tasks, err := taskqueue.Lease(ctx, 100, "pull-queue", 3600)
-	// [END leasing_tasks_1]
+	// [END gae_leasing_tasks_1]
 
-	// [START leasing_tasks_2]
+	// [START gae_leasing_tasks_2]
 	_, err = taskqueue.Add(ctx, &taskqueue.Task{
 		Payload: []byte("parse"), Method: "PULL", Tag: "parse",
 	}, "pull-queue")
@@ -50,13 +50,13 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Leases up to 100 tasks that have same tag.
 	tasks, err = taskqueue.LeaseByTag(ctx, 100, "pull-queue", 3600, "")
-	// [END leasing_tasks_2]
+	// [END gae_leasing_tasks_2]
 
-	// [START deleting_tasks_1]
+	// [START gae_deleting_tasks_1]
 	tasks, err = taskqueue.Lease(ctx, 100, "pull-queue", 3600)
 	// Perform some work with the tasks here
 
 	taskqueue.DeleteMulti(ctx, tasks, "pull-queue")
-	// [END deleting_tasks_1]
+	// [END gae_deleting_tasks_1]
 
 }
