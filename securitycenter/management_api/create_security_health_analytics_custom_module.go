@@ -20,11 +20,11 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"math/rand"
-	"time"
+	"regexp"
 
 	securitycentermanagement "cloud.google.com/go/securitycentermanagement/apiv1"
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
+	"github.com/google/uuid"
 	expr "google.golang.org/genproto/googleapis/type/expr"
 )
 
@@ -42,10 +42,12 @@ func createSecurityHealthAnalyticsCustomModule(w io.Writer, parent string) error
 	}
 	defer client.Close()
 
-	// Seed the random number generator
-	rand.Seed(time.Now().UnixNano())
-	// Generate a unique suffix
-	uniqueSuffix := fmt.Sprintf("%d_%d", time.Now().Unix(), rand.Intn(1000))
+	uniqueSuffix := uuid.New().String()
+
+	// Remove invalid characters (anything that isn't alphanumeric or an underscore)
+	re := regexp.MustCompile(`[^a-zA-Z0-9_]`)
+	uniqueSuffix = re.ReplaceAllString(uniqueSuffix, "_")
+
 	// Create unique display name
 	displayName := fmt.Sprintf("go_sample_sha_custom_module_%s", uniqueSuffix)
 
