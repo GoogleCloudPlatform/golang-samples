@@ -14,7 +14,7 @@
 
 package sample
 
-// [START creating_a_document]
+// [START gae_search_creating_a_document]
 import (
 	"context"
 	"fmt"
@@ -43,9 +43,9 @@ func putHandler(w http.ResponseWriter, r *http.Request) {
 		Birthday:  time.Date(1960, time.June, 19, 0, 0, 0, 0, nil),
 	}
 	// ...
-	// [END creating_a_document]
+	// [END gae_search_creating_a_document]
 
-	// [START putting_documents_in_an_index_1]
+	// [START gae_search_putting_documents_in_an_index_1]
 	// ...
 	ctx := appengine.NewContext(r)
 	index, err := search.Open("users")
@@ -60,19 +60,19 @@ func putHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Fprint(w, "OK")
 
-	// [END putting_documents_in_an_index_1]
+	// [END gae_search_putting_documents_in_an_index_1]
 
-	// [START putting_documents_in_an_index_2]
+	// [START gae_search_putting_documents_in_an_index_2]
 	id, err = index.Put(ctx, "", user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	fmt.Fprint(w, id)
-	// [END putting_documents_in_an_index_2]
+	// [END gae_search_putting_documents_in_an_index_2]
 }
 
-// [START retrieving_documents_by_doc_ids]
+// [START gae_search_retrieving_documents_by_doc_ids]
 func getHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 
@@ -91,9 +91,9 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Retrieved document: ", user)
 }
 
-// [END retrieving_documents_by_doc_ids]
+// [END gae_search_retrieving_documents_by_doc_ids]
 
-// [START deleting_documents_from_an_index]
+// [START gae_search_deleting_documents_from_an_index]
 func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 
@@ -112,11 +112,11 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Deleted document: ", id)
 }
 
-// [END deleting_documents_from_an_index]
+// [END gae_search_deleting_documents_from_an_index]
 
 type Doc struct{}
 
-// [START search_example_1]
+// [START gae_search_search_example_1]
 func searchHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 
@@ -139,23 +139,23 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// [END search_example_1]
+// [END gae_search_search_example_1]
 
 func sample() {
 	var ctx context.Context
 	var index search.Index
 
-	// [START queries_1]
+	// [START gae_search_queries_1]
 	index.Search(ctx, "rose water", nil)
-	// [END queries_1]
+	// [END gae_search_queries_1]
 
-	// [START queries_2]
+	// [START gae_search_queries_2]
 	index.Search(ctx, "1776-07-04", nil)
-	// [END queries_2]
+	// [END gae_search_queries_2]
 
-	// [START queries_3]
+	// [START gae_search_queries_3]
 	// search for documents with pianos that cost less than $5000
 	index.Search(ctx, "Product = piano AND Price < 5000", nil)
-	// [END queries_3]
+	// [END gae_search_queries_3]
 
 }

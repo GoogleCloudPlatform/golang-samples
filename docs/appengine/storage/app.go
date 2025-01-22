@@ -16,7 +16,6 @@
 package gcsdemo
 
 //[START gae_storage_imports]
-//[START imports]
 import (
 	"bytes"
 	"context"
@@ -33,7 +32,6 @@ import (
 	"google.golang.org/appengine/log"
 )
 
-//[END imports]
 //[END gae_storage_imports]
 
 func init() {
@@ -70,14 +68,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//[START gae_storage_get_default_bucket]
-	//[START get_default_bucket]
 	// Use `dev_appserver.py --default_gcs_bucket_name GCS_BUCKET_NAME`
 	// when running locally.
 	bucket, err := file.DefaultBucketName(ctx)
 	if err != nil {
 		log.Errorf(ctx, "failed to get default GCS bucket name: %v", err)
 	}
-	//[END get_default_bucket]
 	//[END gae_storage_get_default_bucket]
 
 	client, err := storage.NewClient(ctx)
@@ -131,7 +127,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 // [START gae_storage_write]
-// [START write]
 // createFile creates a file in Google Cloud Storage.
 func (d *demo) createFile(fileName string) {
 	fmt.Fprintf(d.w, "Creating file /%v/%v\n", d.bucketName, fileName)
@@ -158,11 +153,9 @@ func (d *demo) createFile(fileName string) {
 	}
 }
 
-//[END write]
 //[END gae_storage_write]
 
 // [START gae_storage_read]
-// [START read]
 // readFile reads the named file in Google Cloud Storage.
 func (d *demo) readFile(fileName string) {
 	io.WriteString(d.w, "\nAbbreviated file content (first line and last 1K):\n")
@@ -187,11 +180,9 @@ func (d *demo) readFile(fileName string) {
 	}
 }
 
-//[END read]
 //[END gae_storage_read]
 
 // [START gae_storage_copy]
-// [START copy]
 // copyFile copies a file in Google Cloud Storage.
 func (d *demo) copyFile(fileName string) {
 	copyName := fileName + "-copy"
@@ -207,7 +198,6 @@ func (d *demo) copyFile(fileName string) {
 	d.dumpStats(obj)
 }
 
-//[END copy]
 //[END gae_storage_copy]
 
 func (d *demo) dumpStats(obj *storage.ObjectAttrs) {
@@ -250,7 +240,6 @@ func (d *demo) createListFiles() {
 }
 
 // [START gae_storage_list_bucket]
-// [START list_bucket]
 // listBucket lists the contents of a bucket in Google Cloud Storage.
 func (d *demo) listBucket() {
 	io.WriteString(d.w, "\nListbucket result:\n")
@@ -270,7 +259,6 @@ func (d *demo) listBucket() {
 	}
 }
 
-//[END list_bucket]
 //[END gae_storage_list_bucket]
 
 func (d *demo) listDir(name, indent string) {
