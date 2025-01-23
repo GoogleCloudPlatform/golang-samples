@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/appengine_flexible/redis
 
-go 1.21.13
+go 1.22.0
 
 require (
 	github.com/gomodule/redigo v2.0.0+incompatible
@@ -10,5 +10,5 @@ require (
 require (
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	google.golang.org/protobuf v1.35.2 // indirect
+	google.golang.org/protobuf v1.36.3 // indirect
 )
