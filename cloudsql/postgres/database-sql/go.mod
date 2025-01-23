@@ -3,9 +3,9 @@ module github.com/GoogleCloudPlatform/golang-samples/cloudsql/postgres/database-
 go 1.22.0
 
 require (
-	cloud.google.com/go/cloudsqlconn v1.11.1
+	cloud.google.com/go/cloudsqlconn v1.14.0
 	github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
-	github.com/jackc/pgx/v5 v5.6.0
+	github.com/jackc/pgx/v5 v5.7.2
 )
 
 require (
@@ -22,8 +22,8 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
-	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
-	github.com/jackc/puddle/v2 v2.2.1 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
+	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
