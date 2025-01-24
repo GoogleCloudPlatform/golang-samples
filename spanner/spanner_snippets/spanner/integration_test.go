@@ -438,6 +438,10 @@ func TestSample(t *testing.T) {
 
 	out = runSample(t, directedReadOptions, dbName, "failed to read using directed read options")
 	assertContains(t, out, "1 1 Total Junk")
+
+	out = runSample(t, readWriteTxnExcludedFromChangeStreams, dbName, "failed to commit rw txn excluded from change streams")
+	assertContains(t, out, "New singer inserted.")
+	assertContains(t, out, "Singer first name updated.")
 }
 
 func TestBackupSample(t *testing.T) {
