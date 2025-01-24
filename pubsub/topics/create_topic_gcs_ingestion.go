@@ -21,15 +21,18 @@ import (
 	"io"
 	"time"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func createTopicWithCloudStorageIngestion(w io.Writer, projectID, topicID, bucket, matchGlob, minimumObjectCreateTime string) error {
+func createTopicWithCloudStorageIngestion(w io.Writer, projectID, topicID, bucket, matchGlob, minimumObjectCreateTime, delimiter string) error {
 	// projectID := "my-project-id"
 	// topicID := "my-topic"
 	// bucket := "my-bucket"
 	// matchGlob := "**.txt"
 	// minimumObjectCreateTime := "2006-01-02T15:04:05Z"
+	// delimiter := ","
 
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
@@ -43,20 +46,36 @@ func createTopicWithCloudStorageIngestion(w io.Writer, projectID, topicID, bucke
 		return err
 	}
 
-	cfg := &pubsub.TopicConfig{
-		IngestionDataSourceSettings: &pubsub.IngestionDataSourceSettings{
-			Source: &pubsub.IngestionDataSourceCloudStorage{
-				Bucket: bucket,
-				// Alternatively, can be Avro or PubSubAvro formats. See
-				InputFormat: &pubsub.IngestionDataSourceCloudStorageTextFormat{
-					Delimiter: ",",
+	topicpb := &pubsubpb.Topic{
+		Name: fmt.Sprintf("projects/%s/topics/%s", projectID, topicID),
+		// IngestionDataSourceSettings: &pubsubpb.IngestionDataSourceSettings{
+		// 	Source: &pubsub.IngestionDataSourceCloudStorage{
+		// 		Bucket: bucket,
+		// 		// Alternatively, can be Avro or PubSubAvro formats. See
+		// 		InputFormat: &pubsub.IngestionDataSourceCloudStorageTextFormat{
+		// 			Delimiter: ",",
+		// 		},
+		// 		MatchGlob:               matchGlob,
+		// 		MinimumObjectCreateTime: minCreateTime,
+		// 	},
+		// },
+		IngestionDataSourceSettings: &pubsubpb.IngestionDataSourceSettings{
+			Source: &pubsubpb.IngestionDataSourceSettings_CloudStorage_{
+				CloudStorage: &pubsubpb.IngestionDataSourceSettings_CloudStorage{
+					Bucket: bucket,
+					// Alternatively, can be Avro or PubSubAvro formats. See
+					InputFormat: &pubsubpb.IngestionDataSourceSettings_CloudStorage_TextFormat_{
+						TextFormat: &pubsubpb.IngestionDataSourceSettings_CloudStorage_TextFormat{
+							Delimiter: &delimiter,
+						},
+					},
+					MatchGlob:               matchGlob,
+					MinimumObjectCreateTime: timestamppb.New(minCreateTime),
 				},
-				MatchGlob:               matchGlob,
-				MinimumObjectCreateTime: minCreateTime,
 			},
 		},
 	}
-	t, err := client.CreateTopicWithConfig(ctx, topicID, cfg)
+	t, err := client.TopicAdminClient.CreateTopic(ctx, topicpb)
 	if err != nil {
 		return fmt.Errorf("CreateTopic: %w", err)
 	}

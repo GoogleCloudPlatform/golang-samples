@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 )
 
 func publishSingleGoroutine(w io.Writer, projectID, topicID, msg string) error {
@@ -34,10 +34,11 @@ func publishSingleGoroutine(w io.Writer, projectID, topicID, msg string) error {
 	}
 	defer client.Close()
 
-	t := client.Topic(topicID)
-	t.PublishSettings.NumGoroutines = 1
+	// Make sure to reuse this publisher across publishes.
+	p := client.Publisher(topicID)
+	p.PublishSettings.NumGoroutines = 1
 
-	result := t.Publish(ctx, &pubsub.Message{Data: []byte(msg)})
+	result := p.Publish(ctx, &pubsub.Message{Data: []byte(msg)})
 	// Block until the result is returned and a server-generated
 	// ID is returned for the published message.
 	id, err := result.Get(ctx)

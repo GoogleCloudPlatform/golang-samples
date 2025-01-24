@@ -21,8 +21,8 @@ import (
 	"io"
 	"time"
 
-	"cloud.google.com/go/pubsub"
-	vkit "cloud.google.com/go/pubsub/apiv1"
+	"cloud.google.com/go/pubsub/v2"
+	vkit "cloud.google.com/go/pubsub/v2/apiv1"
 	gax "github.com/googleapis/gax-go/v2"
 	"google.golang.org/grpc/codes"
 )
@@ -34,7 +34,7 @@ func publishWithRetrySettings(w io.Writer, projectID, topicID, msg string) error
 	ctx := context.Background()
 
 	config := &pubsub.ClientConfig{
-		PublisherCallOptions: &vkit.PublisherCallOptions{
+		PublisherCallOptions: &vkit.TopicAdminCallOptions{
 			Publish: []gax.CallOption{
 				gax.WithRetry(func() gax.Retryer {
 					return gax.OnCodes([]codes.Code{
@@ -61,8 +61,9 @@ func publishWithRetrySettings(w io.Writer, projectID, topicID, msg string) error
 	}
 	defer client.Close()
 
-	t := client.Topic(topicID)
-	result := t.Publish(ctx, &pubsub.Message{
+	// Make sure to reuse this publisher across publishes.
+	p := client.Publisher(topicID)
+	result := p.Publish(ctx, &pubsub.Message{
 		Data: []byte(msg),
 	})
 	// Block until the result is returned and a server-generated

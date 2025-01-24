@@ -20,7 +20,8 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	pubsub "cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 )
 
 func createTopicWithKinesisIngestion(w io.Writer, projectID, topicID string) error {
@@ -38,21 +39,23 @@ func createTopicWithKinesisIngestion(w io.Writer, projectID, topicID string) err
 	}
 	defer client.Close()
 
-	cfg := &pubsub.TopicConfig{
-		IngestionDataSourceSettings: &pubsub.IngestionDataSourceSettings{
-			Source: &pubsub.IngestionDataSourceAWSKinesis{
-				StreamARN:         streamARN,
-				ConsumerARN:       consumerARN,
-				AWSRoleARN:        awsRoleARN,
-				GCPServiceAccount: gcpServiceAccount,
+	topicpb := &pubsubpb.Topic{
+		IngestionDataSourceSettings: &pubsubpb.IngestionDataSourceSettings{
+			Source: &pubsubpb.IngestionDataSourceSettings_AwsKinesis_{
+				AwsKinesis: &pubsubpb.IngestionDataSourceSettings_AwsKinesis{
+					StreamArn:         streamARN,
+					ConsumerArn:       consumerARN,
+					AwsRoleArn:        awsRoleARN,
+					GcpServiceAccount: gcpServiceAccount,
+				},
 			},
 		},
 	}
-	t, err := client.CreateTopicWithConfig(ctx, topicID, cfg)
+	topicpb, err = client.TopicAdminClient.CreateTopic(ctx, topicpb)
 	if err != nil {
-		return fmt.Errorf("CreateTopic: %w", err)
+		return fmt.Errorf("failed to create topic with kinesis: %w", err)
 	}
-	fmt.Fprintf(w, "Kinesis topic created: %v\n", t)
+	fmt.Fprintf(w, "Kinesis topic created: %v\n", topicpb)
 	return nil
 }
 

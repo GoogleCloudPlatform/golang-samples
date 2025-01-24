@@ -20,7 +20,9 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
 func updateTopicType(w io.Writer, projectID, topicID string) error {
@@ -38,18 +40,24 @@ func updateTopicType(w io.Writer, projectID, topicID string) error {
 	}
 	defer client.Close()
 
-	updateCfg := pubsub.TopicConfigToUpdate{
-		// If wanting to clear ingestion settings, set this to zero value: &pubsub.IngestionDataSourceSettings{}
-		IngestionDataSourceSettings: &pubsub.IngestionDataSourceSettings{
-			Source: &pubsub.IngestionDataSourceAWSKinesis{
-				StreamARN:         streamARN,
-				ConsumerARN:       consumerARN,
-				AWSRoleARN:        awsRoleARN,
-				GCPServiceAccount: gcpServiceAccount,
+	updateReq := &pubsubpb.UpdateTopicRequest{
+		Topic: &pubsubpb.Topic{
+			IngestionDataSourceSettings: &pubsubpb.IngestionDataSourceSettings{
+				Source: &pubsubpb.IngestionDataSourceSettings_AwsKinesis_{
+					AwsKinesis: &pubsubpb.IngestionDataSourceSettings_AwsKinesis{
+						StreamArn:         streamARN,
+						ConsumerArn:       consumerARN,
+						AwsRoleArn:        awsRoleARN,
+						GcpServiceAccount: gcpServiceAccount,
+					},
+				},
 			},
 		},
+		UpdateMask: &fieldmaskpb.FieldMask{
+			Paths: []string{"ingestion_data_source_settings"},
+		},
 	}
-	topicCfg, err := client.Topic(topicID).Update(ctx, updateCfg)
+	topicCfg, err := client.TopicAdminClient.UpdateTopic(ctx, updateReq)
 	if err != nil {
 		return fmt.Errorf("topic.Update: %w", err)
 	}

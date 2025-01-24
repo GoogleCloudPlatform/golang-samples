@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -27,7 +28,6 @@ import (
 	"testing"
 	"time"
 
-	"cloud.google.com/go/iam"
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/pubsub/pstest"
 	trace "cloud.google.com/go/trace/apiv1"
@@ -113,22 +113,9 @@ func TestList(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		topics, err := list(tc.ProjectID)
-		if err != nil {
+		if err := listTopics(io.Discard, tc.ProjectID); err != nil {
 			r.Errorf("failed to list topics: %v", err)
 		}
-
-		for _, t := range topics {
-			if t.ID() == topicID {
-				return // PASS
-			}
-		}
-
-		topicIDs := make([]string, len(topics))
-		for i, t := range topics {
-			topicIDs[i] = t.ID()
-		}
-		r.Errorf("got %+v; want a list with topic = %q", topicIDs, topicID)
 	})
 }
 
@@ -206,22 +193,25 @@ func TestIAM(t *testing.T) {
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		if err := addUsers(tc.ProjectID, topicID); err != nil {
+		buf := new(bytes.Buffer)
+		if err := addUsers(buf, tc.ProjectID, topicID); err != nil {
 			r.Errorf("addUsers: %v", err)
 		}
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		policy, err := policy(buf, tc.ProjectID, topicID)
-		if err != nil {
-			r.Errorf("policy: %v", err)
+		if err := getIAMPolicy(buf, tc.ProjectID, topicID); err != nil {
+			r.Errorf("getIAMPolicy: %v", err)
 		}
-		if role, member := iam.Editor, "group:cloud-logs@google.com"; !policy.HasRole(member, role) {
-			r.Errorf("want %q as viewer, policy=%v", member, policy)
+		got := buf.String()
+
+		if !strings.Contains(got, "role: roles/editor, member: group:cloud-logs@google.com") {
+			r.Errorf("want %s as editor", "group:cloud-logs@google.com")
 		}
-		if role, member := iam.Viewer, iam.AllUsers; !policy.HasRole(member, role) {
-			r.Errorf("want %q as viewer, policy=%v", member, policy)
+
+		if !strings.Contains(got, "role: roles/viewer, member: allUsers") {
+			r.Errorf("want %s as viewer", "allUsers")
 		}
 	})
 }
@@ -324,7 +314,7 @@ func TestTopicCloudStorageIngestion(t *testing.T) {
 	t.Setenv("PUBSUB_EMULATOR_HOST", srv.Addr)
 
 	// Test creating a cloud storage ingestion topic with Text input format.
-	if err := createTopicWithCloudStorageIngestion(buf, tc.ProjectID, topicID, "fake-bucket", "**.txt", "2006-01-02T15:04:05Z"); err != nil {
+	if err := createTopicWithCloudStorageIngestion(buf, tc.ProjectID, topicID, "fake-bucket", "**.txt", "2006-01-02T15:04:05Z", ","); err != nil {
 		t.Fatalf("failed to create a topic with cloud storage ingestion: %v", err)
 	}
 }

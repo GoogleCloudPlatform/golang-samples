@@ -18,12 +18,13 @@ package topics
 import (
 	"context"
 	"fmt"
+	"io"
 
-	"cloud.google.com/go/iam"
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/iam/apiv1/iampb"
+	"cloud.google.com/go/pubsub/v2"
 )
 
-func addUsers(projectID, topicID string) error {
+func addUsers(w io.Writer, projectID, topicID string) error {
 	// projectID := "my-project-id"
 	// topicID := "my-topic"
 	ctx := context.Background()
@@ -33,21 +34,34 @@ func addUsers(projectID, topicID string) error {
 	}
 	defer client.Close()
 
-	topic := client.Topic(topicID)
-	policy, err := topic.IAM().Policy(ctx)
+	topicName := fmt.Sprintf("projects/%s/topics/%s", projectID, topicID)
+	req := &iampb.GetIamPolicyRequest{
+		Resource: topicName,
+	}
+	policy, err := client.TopicAdminClient.GetIamPolicy(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Policy: %w", err)
+		return fmt.Errorf("error calling GetIamPolicy: %w", err)
 	}
-	// Other valid prefixes are "serviceAccount:", "user:"
-	// See the documentation for more values.
-	policy.Add(iam.AllUsers, iam.Viewer)
-	policy.Add("group:cloud-logs@google.com", iam.Editor)
-	if err := topic.IAM().SetPolicy(ctx, policy); err != nil {
-		return fmt.Errorf("SetPolicy: %w", err)
+	b1 := &iampb.Binding{
+		Role:    "roles/viewer",
+		Members: []string{"allUsers"},
 	}
-	// NOTE: It may be necessary to retry this operation if IAM policies are
-	// being modified concurrently. SetPolicy will return an error if the policy
-	// was modified since it was retrieved.
+	b2 := &iampb.Binding{
+		Role: "roles/editor",
+		// Other valid prefixes are "serviceAccount:", "user:"
+		// See the documentation for more values.
+		Members: []string{"group:cloud-logs@google.com"},
+	}
+	policy.Bindings = append(policy.Bindings, b1, b2)
+
+	setRequest := &iampb.SetIamPolicyRequest{
+		Resource: topicName,
+		Policy:   policy,
+	}
+	_, err = client.TopicAdminClient.SetIamPolicy(ctx, setRequest)
+	if err != nil {
+		return fmt.Errorf("error calling SetIamPolicy: %w", err)
+	}
 	return nil
 }
 
