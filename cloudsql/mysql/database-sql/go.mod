@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples/cloudsql/mysql/database-sql
 go 1.22.0
 
 require (
-	cloud.google.com/go/cloudsqlconn v1.14.0
+	cloud.google.com/go/cloudsqlconn v1.14.1
 	github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
 	github.com/go-sql-driver/mysql v1.8.1
 )
@@ -40,9 +40,9 @@ require (
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/time v0.9.0 // indirect
-	google.golang.org/api v0.217.0 // indirect
+	google.golang.org/api v0.218.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250115164207-1a7da9e5054f // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250115164207-1a7da9e5054f // indirect
-	google.golang.org/grpc v1.69.4 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250122153221-138b5a5a4fd4 // indirect
+	google.golang.org/grpc v1.70.0 // indirect
 	google.golang.org/protobuf v1.36.3 // indirect
 )
