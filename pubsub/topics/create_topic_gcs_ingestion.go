@@ -48,17 +48,6 @@ func createTopicWithCloudStorageIngestion(w io.Writer, projectID, topicID, bucke
 
 	topicpb := &pubsubpb.Topic{
 		Name: fmt.Sprintf("projects/%s/topics/%s", projectID, topicID),
-		// IngestionDataSourceSettings: &pubsubpb.IngestionDataSourceSettings{
-		// 	Source: &pubsub.IngestionDataSourceCloudStorage{
-		// 		Bucket: bucket,
-		// 		// Alternatively, can be Avro or PubSubAvro formats. See
-		// 		InputFormat: &pubsub.IngestionDataSourceCloudStorageTextFormat{
-		// 			Delimiter: ",",
-		// 		},
-		// 		MatchGlob:               matchGlob,
-		// 		MinimumObjectCreateTime: minCreateTime,
-		// 	},
-		// },
 		IngestionDataSourceSettings: &pubsubpb.IngestionDataSourceSettings{
 			Source: &pubsubpb.IngestionDataSourceSettings_CloudStorage_{
 				CloudStorage: &pubsubpb.IngestionDataSourceSettings_CloudStorage{
