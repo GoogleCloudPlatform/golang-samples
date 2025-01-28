@@ -129,6 +129,7 @@ func TestCreateInstances(t *testing.T) {
 	runCreateAndUpdateInstanceSample(t, createInstanceWithoutDefaultBackupSchedule, updateInstanceDefaultBackupScheduleType)
 	runCreateInstanceSample(t, createInstanceWithProcessingUnits)
 	runCreateInstanceSample(t, createInstanceWithAutoscalingConfig)
+	runCreateInstanceSample(t, createInstanceWithAsymmetricAutoscalingConfig)
 }
 
 func runCreateAndUpdateInstanceSample(t *testing.T, createFunc, updateFunc instanceSampleFunc) {
