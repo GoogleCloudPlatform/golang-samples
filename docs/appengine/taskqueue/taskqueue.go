@@ -61,13 +61,11 @@ func example() {
 	_ = err
 
 	// [START gae_taskqueue_host]
-	// [START taskqueue_host]
 	h := http.Header{}
 	h.Add("Host", "versionHostname")
 	task := taskqueue.Task{
 		Header: h,
 	}
-	// [END taskqueue_host]
 	// [END gae_taskqueue_host]
 	_ = task
 }
