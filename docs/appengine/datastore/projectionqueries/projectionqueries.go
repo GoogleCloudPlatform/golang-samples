@@ -60,14 +60,14 @@ func example2() {
 }
 
 func example3() {
-	// [START gae_grouping_grouping]
+	// [START gae_datastore_grouping]
 	// [START grouping]
 	q := datastore.NewQuery("Person").
 		Project("LastName", "Height").Distinct().
 		Filter("Height >", 20).
 		Order("-Height").Order("LastName")
 	// [END grouping]
-	// [END gae_grouping_grouping]
+	// [END gae_datastore_grouping]
 	_ = q
 
 	type Foo struct {
