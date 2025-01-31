@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// generateV4GetObjectSignedURL generates object signed URL with PUT method.
+// generateV4PutObjectSignedURL generates object signed URL with PUT method.
 func generateV4PutObjectSignedURL(w io.Writer, bucket, object string) (string, error) {
 	// bucket := "bucket-name"
 	// object := "object-name"
