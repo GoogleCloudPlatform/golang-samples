@@ -28,13 +28,16 @@ type EventLog struct {
 }
 
 func example() {
+	// [START gae_datastore_using_1]
 	// [START using_1]
 	q := datastore.NewQuery("People").Project("FirstName", "LastName")
 	// [END using_1]
+	// [END gae_datastore_using_1]
 	_ = q
 }
 
 func example2() {
+	// [START gae_datastore_using_2]
 	// [START using_2]
 	q := datastore.NewQuery("EventLog").
 		Project("Title", "ReadPath", "DateWritten").
@@ -53,15 +56,18 @@ func example2() {
 		log.Infof(ctx, "Log record: %v, %v, %v", l.Title, l.ReadPath, l.DateWritten)
 	}
 	// [END using_2]
+	// [END gae_datastore_using_2]
 }
 
 func example3() {
+	// [START gae_datastore_grouping]
 	// [START grouping]
 	q := datastore.NewQuery("Person").
 		Project("LastName", "Height").Distinct().
 		Filter("Height >", 20).
 		Order("-Height").Order("LastName")
 	// [END grouping]
+	// [END gae_datastore_grouping]
 	_ = q
 
 	type Foo struct {
@@ -69,15 +75,19 @@ func example3() {
 		B []string
 	}
 
+	// [START gae_datastore_projections_and_multiple_valued_properties_1]
 	// [START projections_and_multiple_valued_properties_1]
 	entity := Foo{A: []int{1, 1, 2, 3}, B: []string{"x", "y", "x"}}
 	// [END projections_and_multiple_valued_properties_1]
+	// [END gae_datastore_projections_and_multiple_valued_properties_1]
 	_ = entity
 }
 
 func example4() {
+	// [START gae_datastore_projections_and_multiple_valued_properties_2]
 	// [START projections_and_multiple_valued_properties_2]
 	q := datastore.NewQuery("Foo").Project("A", "B").Filter("A <", 3)
 	// [END projections_and_multiple_valued_properties_2]
+	// [END gae_datastore_projections_and_multiple_valued_properties_2]
 	_ = q
 }
