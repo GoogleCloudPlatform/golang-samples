@@ -1,6 +1,6 @@
-go 1.22.0
+go 1.23.0
 
-toolchain go1.22.7
+toolchain go1.23.5
 
 use (
 	.
@@ -84,6 +84,7 @@ use (
 	./functions/tips
 	./functions/tips/infinite_retries
 	./functions/typed/greeting
+	./genai
 	./getting-started
 	./getting-started/authenticating-users
 	./getting-started/background
