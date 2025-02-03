@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/golang-samples/genai/text_generation
+module github.com/GoogleCloudPlatform/golang-samples/genai
 
 go 1.23.0
 
