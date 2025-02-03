@@ -60,7 +60,7 @@ func createTopicWithAzureEventHubsIngestion(w io.Writer, projectID, topicID, res
 	if err != nil {
 		return fmt.Errorf("CreateTopic: %w", err)
 	}
-	fmt.Fprintf(w, "Created topic with azure event hub ingestion: %v\n", t)
+	fmt.Fprintf(w, "Created topic with azure event hubs ingestion: %v\n", t)
 	return nil
 }
 
