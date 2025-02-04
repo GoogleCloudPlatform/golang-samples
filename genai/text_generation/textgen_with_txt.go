@@ -25,21 +25,19 @@ import (
 )
 
 // generateWithText shows how to generate text using a text prompt.
-func generateWithText(w io.Writer, projectID string) error {
-	location := "us-central1"
-	modelName := "gemini-2.0-flash-001"
+func generateWithText(w io.Writer) error {
 	ctx := context.Background()
 
-	client, err := genai.NewClient(ctx, &genai.ClientConfig{
-		Project:  projectID,
-		Location: location,
-		Backend:  genai.BackendVertexAI,
-	})
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{})
 	if err != nil {
 		return fmt.Errorf("unable to create genai client: %w", err)
 	}
 
-	resp, err := client.Models.GenerateContent(ctx, modelName, genai.Text("How does AI work?"), nil)
+	resp, err := client.Models.GenerateContent(ctx,
+		"gemini-2.0-flash-001",
+		genai.Text("How does AI work?"),
+		nil,
+	)
 	if err != nil {
 		return fmt.Errorf("unable to generate content: %w", err)
 	}

@@ -24,11 +24,15 @@ import (
 func TestTextGeneration(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
+	t.Setenv("GOOGLE_GENAI_USE_VERTEXAI", "1")
+	t.Setenv("GOOGLE_CLOUD_LOCATION", "us-central1")
+	t.Setenv("GOOGLE_CLOUD_PROJECT", tc.ProjectID)
+
 	buf := new(bytes.Buffer)
 
 	t.Run("generate text with text prompt", func(t *testing.T) {
 		buf.Reset()
-		err := generateWithText(buf, tc.ProjectID)
+		err := generateWithText(buf)
 		if err != nil {
 			t.Fatalf("generateWithText failed: %v", err)
 		}
