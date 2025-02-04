@@ -25,16 +25,11 @@ import (
 )
 
 // generateWithTextImage shows how to generate text using both text and image input
-func generateWithTextImage(w io.Writer, projectID string) error {
-	location := "us-central1"
+func generateWithTextImage(w io.Writer) error {
 	modelName := "gemini-2.0-flash-001"
 	ctx := context.Background()
 
-	client, err := genai.NewClient(ctx, &genai.ClientConfig{
-		Project:  projectID,
-		Location: location,
-		Backend:  genai.BackendVertexAI,
-	})
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{})
 	if err != nil {
 		return fmt.Errorf("unable to create genai client: %w", err)
 	}
