@@ -15,7 +15,7 @@
 // Package text_generation shows examples of generating text using the GenAI SDK.
 package text_generation
 
-// [START googlegenaisdk_textgen_sys_instr_with_txt]
+// [START googlegenaisdk_textgen_with_txt_stream]
 import (
 	"context"
 	"fmt"
@@ -24,8 +24,8 @@ import (
 	genai "google.golang.org/genai"
 )
 
-// generateWithSystem shows how to generate text using a text prompt and system instruction.
-func generateWithSystem(w io.Writer) error {
+// generateWithTextStream shows how to generate text stream using a text prompt.
+func generateWithTextStream(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{})
@@ -35,29 +35,26 @@ func generateWithSystem(w io.Writer) error {
 
 	modelName := "gemini-2.0-flash-001"
 	contents := genai.Text("Why is the sky blue?")
-	config := &genai.GenerateContentConfig{
-		SystemInstruction: &genai.Content{
-			Parts: []*genai.Part{
-				{Text: "You're a language translator. Your mission is to translate text in English to French."},
-			},
-		},
-	}
 
-	resp, err := client.Models.GenerateContent(ctx, modelName, contents, config)
-	if err != nil {
-		return fmt.Errorf("unable to generate content: %w", err)
-	}
+	for resp, err := range client.Models.GenerateContentStream(ctx, modelName, contents, nil) {
+		if err != nil {
+			return fmt.Errorf("unable to generate content: %w", err)
+		}
 
-	respText, err := resp.Text()
-	if err != nil {
-		return fmt.Errorf("unable to convert model response to text: %w", err)
+		chunk, err := resp.Text()
+		if err != nil {
+			return fmt.Errorf("unable to convert model response to text: %w", err)
+		}
+		fmt.Fprintln(w, chunk)
 	}
-	fmt.Fprintln(w, respText)
 
 	// Example response:
-	// Pourquoi le ciel est-il bleu ?
+	// The
+	//  sky is blue
+	//  because of a phenomenon called **Rayleigh scattering**. Here's the breakdown:
+	// ...
 
 	return nil
 }
 
-// [END googlegenaisdk_textgen_sys_instr_with_txt]
+// [END googlegenaisdk_textgen_with_txt_stream]

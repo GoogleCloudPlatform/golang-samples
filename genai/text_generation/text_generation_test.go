@@ -81,4 +81,17 @@ func TestTextGeneration(t *testing.T) {
 			t.Error("expected non-empty output, got empty")
 		}
 	})
+
+	t.Run("generate text stream with text prompt", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithTextStream(buf)
+		if err != nil {
+			t.Fatalf("generateWithTextStream failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
 }

@@ -26,7 +26,6 @@ import (
 
 // generateWithTextImage shows how to generate text using both text and image input
 func generateWithTextImage(w io.Writer) error {
-	modelName := "gemini-2.0-flash-001"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{})
@@ -34,6 +33,7 @@ func generateWithTextImage(w io.Writer) error {
 		return fmt.Errorf("unable to create genai client: %w", err)
 	}
 
+	modelName := "gemini-2.0-flash-001"
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: "What is shown in this image?"},

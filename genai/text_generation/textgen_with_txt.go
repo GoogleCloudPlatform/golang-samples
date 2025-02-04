@@ -26,13 +26,14 @@ import (
 
 // generateWithText shows how to generate text using a text prompt.
 func generateWithText(w io.Writer) error {
-	modelName := "gemini-2.0-flash-001"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{})
 	if err != nil {
 		return fmt.Errorf("unable to create genai client: %w", err)
 	}
+
+	modelName := "gemini-2.0-flash-001"
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, genai.Text("How does AI work?"), nil)
 	if err != nil {
