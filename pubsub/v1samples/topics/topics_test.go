@@ -316,6 +316,65 @@ func TestTopicKinesisIngestion(t *testing.T) {
 	}
 }
 
+func TestTopicAmazonMSKIngestion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	srv := pstest.NewServer()
+	t.Setenv("PUBSUB_EMULATOR_HOST", srv.Addr)
+
+	clusterARN := "cluster-arn"
+	mskTopic := "msk-topic"
+	awsRoleARN := "aws-role-arn"
+	gcpSA := "gcp-service-account"
+
+	if err := createTopicWithAWSMSKIngestion(buf, tc.ProjectID, topicID, clusterARN, mskTopic, awsRoleARN, gcpSA); err != nil {
+		t.Fatalf("failed to create a topic with AWS MSK ingestion: %v", err)
+	}
+}
+
+func TestTopicAzureEventHubsIngestion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	srv := pstest.NewServer()
+	t.Setenv("PUBSUB_EMULATOR_HOST", srv.Addr)
+
+	resourceGroup := "resource-group"
+	namespace := "namespace"
+	eventHub := "event-hub"
+	clientID := "client-id"
+	tenantID := "tenant-id"
+	subID := "subscription-id"
+	gcpSA := "gcp-service-account"
+
+	err := createTopicWithAzureEventHubsIngestion(buf, tc.ProjectID, topicID, resourceGroup,
+		namespace, eventHub, clientID, tenantID, subID, gcpSA)
+	if err != nil {
+		t.Fatalf("failed to create a topic with event hubs ingestion: %v", err)
+	}
+}
+
+func TestTopicConfluentCloudIngestion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
+
+	srv := pstest.NewServer()
+	t.Setenv("PUBSUB_EMULATOR_HOST", srv.Addr)
+
+	bootstrapServer := "bootstrap-server"
+	clusterID := "cluster-id"
+	confluentTopic := "confluent-topic"
+	poolID := "identity-pool-id"
+	gcpSA := "gcp-service-account"
+
+	err := createTopicWithConfluentCloudIngestion(buf, tc.ProjectID, topicID,
+		bootstrapServer, clusterID, confluentTopic, poolID, gcpSA)
+	if err != nil {
+		t.Fatalf("failed to create a topic with confluent cloud ingestion: %v", err)
+	}
+}
+
 func TestTopicCloudStorageIngestion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
@@ -328,7 +387,6 @@ func TestTopicCloudStorageIngestion(t *testing.T) {
 		t.Fatalf("failed to create a topic with cloud storage ingestion: %v", err)
 	}
 }
-
 func TestPublishOpenTelemetryTracing(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := new(bytes.Buffer)
