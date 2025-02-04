@@ -38,4 +38,17 @@ func TestTextGeneration(t *testing.T) {
 			t.Error("expected non-empty output, got empty")
 		}
 	})
+
+	t.Run("generate text with text and image prompt", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithTextImage(buf, tc.ProjectID)
+		if err != nil {
+			t.Fatalf("generateWithTextImage failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
 }
