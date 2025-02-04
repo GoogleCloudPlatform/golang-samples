@@ -37,14 +37,12 @@ RUN CGO_ENABLED=0 go build -v -o server
 FROM alpine:3
 
 # [START cloudrun_imageproc_dockerfile_imagemagick]
-# [START run_imageproc_dockerfile_imagemagick]
 
 # Install Imagemagick into the container image.
 # For more on system packages review the system packages tutorial.
 # https://cloud.google.com/run/docs/tutorials/system-packages#dockerfile
 RUN apk add --no-cache imagemagick
 
-# [END run_imageproc_dockerfile_imagemagick]
 # [END cloudrun_imageproc_dockerfile_imagemagick]
 
 # Install certificates for secure communication with network services.
