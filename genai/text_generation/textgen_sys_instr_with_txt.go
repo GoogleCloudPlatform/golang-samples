@@ -15,7 +15,7 @@
 // Package text_generation shows examples of generating text using the GenAI SDK.
 package text_generation
 
-// [START googlegenaisdk_textgen_config_with_txt]
+// [START googlegenaisdk_textgen_sys_instr_with_txt]
 import (
 	"context"
 	"fmt"
@@ -24,8 +24,9 @@ import (
 	genai "google.golang.org/genai"
 )
 
-// generateWithConfig shows how to generate text using a text prompt and custom configuration.
-func generateWithConfig(w io.Writer) error {
+// generateWithSystem shows how to generate text using a text prompt and system instruction.
+func generateWithSystem(w io.Writer) error {
+
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{})
@@ -36,9 +37,11 @@ func generateWithConfig(w io.Writer) error {
 	modelName := "gemini-2.0-flash-001"
 	contents := genai.Text("Why is the sky blue?")
 	config := &genai.GenerateContentConfig{
-		Temperature:      genai.Ptr(0.0),
-		CandidateCount:   genai.Ptr(int64(1)),
-		ResponseMIMEType: "application/json",
+		SystemInstruction: &genai.Content{
+			Parts: []*genai.Part{
+				{Text: "You're a language translator. Your mission is to translate text in English to French."},
+			},
+		},
 	}
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, config)
@@ -51,12 +54,11 @@ func generateWithConfig(w io.Writer) error {
 		return fmt.Errorf("unable to convert model response to text: %w", err)
 	}
 	fmt.Fprintln(w, respText)
+
 	// Example response:
-	// {
-	//   "explanation": "The sky is blue due to a phenomenon called Rayleigh scattering ...
-	// }
+	// Pourquoi le ciel est-il bleu ?
 
 	return nil
 }
 
-// [END googlegenaisdk_textgen_config_with_txt]
+// [END googlegenaisdk_textgen_sys_instr_with_txt]

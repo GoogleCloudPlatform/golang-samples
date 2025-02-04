@@ -43,6 +43,7 @@ func generateWithTextImage(w io.Writer) error {
 			}},
 		}},
 	}
+
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)
 	if err != nil {
 		return fmt.Errorf("unable to generate content: %w", err)
