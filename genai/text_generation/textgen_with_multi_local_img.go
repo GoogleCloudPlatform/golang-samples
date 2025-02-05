@@ -15,17 +15,18 @@
 // Package text_generation shows examples of generating text using the GenAI SDK.
 package text_generation
 
-// [START googlegenaisdk_textgen_with_multi_img]
+// [START googlegenaisdk_textgen_with_multi_local_img]
 import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 
 	genai "google.golang.org/genai"
 )
 
-// generateWithMultiImg shows how to generate text using multiple image inputs.
-func generateWithMultiImg(w io.Writer) error {
+// generateWithMultiLocalImg shows how to generate text using multiple local images as inputs.
+func generateWithMultiLocalImg(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{})
@@ -33,20 +34,30 @@ func generateWithMultiImg(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	// TODO(Developer): Update with paths to your image files.
+	imageBytes1, err := os.ReadFile("./test_data/latte.jpg")
+	if err != nil {
+		return fmt.Errorf("failed to read first image: %w", err)
+	}
+	imageBytes2, err := os.ReadFile("./test_data/scones.jpg")
+	if err != nil {
+		return fmt.Errorf("failed to read first image: %w", err)
+	}
+
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
-			{Text: "Generate a list of all the objects contained in both images."},
-			{FileData: &genai.FileData{
-				FileURI:  "gs://cloud-samples-data/generative-ai/image/scones.jpg",
+			{Text: "Write an advertising jingle based on the items in both images."},
+			{InlineData: &genai.Blob{
+				Data:     imageBytes1,
 				MIMEType: "image/jpeg",
 			}},
-			{FileData: &genai.FileData{
-				FileURI:  "gs://cloud-samples-data/generative-ai/image/latte.jpg",
+			{InlineData: &genai.Blob{
+				Data:     imageBytes2,
 				MIMEType: "image/jpeg",
 			}},
 		}},
 	}
+	modelName := "gemini-2.0-flash-001"
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)
 	if err != nil {
@@ -60,10 +71,12 @@ func generateWithMultiImg(w io.Writer) error {
 	fmt.Fprintln(w, respText)
 
 	// Example response:
-	// Here are the objects that appear in both images:
+	// Okay, here's a jingle inspired by the images of cake, coffee, and blueberry scones:
+	//
+	// (Upbeat, folksy music)
 	// ...
 
 	return nil
 }
 
-// [END googlegenaisdk_textgen_with_multi_img]
+// [END googlegenaisdk_textgen_with_multi_local_img]
