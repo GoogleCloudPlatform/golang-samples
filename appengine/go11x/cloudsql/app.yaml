@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-runtime: go122
+runtime: go123
 
 env_variables:
   # Replace INSTANCE_CONNECTION_NAME with the value obtained when configuring your

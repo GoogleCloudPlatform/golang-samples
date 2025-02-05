@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-runtime: go122
+runtime: go123
 env_variables:
     # This token is used to verify that requests originate from your
     # application. It can be any sufficiently random string.
