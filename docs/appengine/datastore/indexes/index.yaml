@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-// [START gae_datastore_exploding_index_2_yaml_go]
 // [START exploding_index_example_2]
 indexes:
 - kind: Widget
@@ -21,9 +20,7 @@ indexes:
   - name: Y
   - name: Date
 // [END exploding_index_example_2]
-// [END gae_datastore_exploding_index_2_yaml_go]
 
-// [START gae_datastore_exploding_index_4_yaml_go]
 // [START exploding_index_example_4]
 indexes:
 - kind: Widget
@@ -35,4 +32,3 @@ indexes:
   - name: Y
   - name: Date
 // [END exploding_index_example_4]
-// [END gae_datastore_exploding_index_4_yaml_go]
