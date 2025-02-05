@@ -84,7 +84,6 @@ use (
 	./functions/tips
 	./functions/tips/infinite_retries
 	./functions/typed/greeting
-	./genai
 	./getting-started
 	./getting-started/authenticating-users
 	./getting-started/background
