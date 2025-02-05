@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 
 	genai "google.golang.org/genai"
 )
@@ -33,20 +34,26 @@ func generateWithMultiImg(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	// TODO(Developer): Update with path to your image file.
+	imageBytes, err := os.ReadFile("./test_data/latte.jpg")
+	if err != nil {
+		return fmt.Errorf("failed to read image: %w", err)
+	}
+
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
-			{Text: "Generate a list of all the objects contained in both images."},
+			{Text: "Write an advertising jingle based on the items in both images."},
 			{FileData: &genai.FileData{
 				FileURI:  "gs://cloud-samples-data/generative-ai/image/scones.jpg",
 				MIMEType: "image/jpeg",
 			}},
-			{FileData: &genai.FileData{
-				FileURI:  "gs://cloud-samples-data/generative-ai/image/latte.jpg",
+			{InlineData: &genai.Blob{
+				Data:     imageBytes,
 				MIMEType: "image/jpeg",
 			}},
 		}},
 	}
+	modelName := "gemini-2.0-flash-001"
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)
 	if err != nil {
@@ -60,7 +67,9 @@ func generateWithMultiImg(w io.Writer) error {
 	fmt.Fprintln(w, respText)
 
 	// Example response:
-	// Here are the objects that appear in both images:
+	// Okay, here's an advertising jingle inspired by the blueberry scones, coffee, flowers, chocolate cake, and latte:
+	//
+	// (Upbeat, jazzy music)
 	// ...
 
 	return nil
