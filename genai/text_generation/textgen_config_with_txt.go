@@ -35,6 +35,7 @@ func generateWithConfig(w io.Writer) error {
 
 	modelName := "gemini-2.0-flash-001"
 	contents := genai.Text("Why is the sky blue?")
+	// See the documentation: https://googleapis.github.io/python-genai/genai.html#genai.types.GenerateContentConfig
 	config := &genai.GenerateContentConfig{
 		Temperature:      genai.Ptr(0.0),
 		CandidateCount:   genai.Ptr(int64(1)),
