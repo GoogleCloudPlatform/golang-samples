@@ -30,7 +30,7 @@ func TestTextGeneration(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 
-	t.Run("generate text with text prompt", func(t *testing.T) {
+	t.Run("generate with text prompt", func(t *testing.T) {
 		buf.Reset()
 		err := generateWithText(buf)
 		if err != nil {
