@@ -30,7 +30,7 @@ func generateWithText(w io.Writer) error {
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{})
 	if err != nil {
-		return fmt.Errorf("unable to create genai client: %w", err)
+		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
 	resp, err := client.Models.GenerateContent(ctx,
@@ -39,12 +39,12 @@ func generateWithText(w io.Writer) error {
 		nil,
 	)
 	if err != nil {
-		return fmt.Errorf("unable to generate content: %w", err)
+		return fmt.Errorf("failed to generate content: %w", err)
 	}
 
 	respText, err := resp.Text()
 	if err != nil {
-		return fmt.Errorf("unable to convert model response to text: %w", err)
+		return fmt.Errorf("failed to convert model response to text: %w", err)
 	}
 	fmt.Fprintln(w, respText)
 	// Example response:
