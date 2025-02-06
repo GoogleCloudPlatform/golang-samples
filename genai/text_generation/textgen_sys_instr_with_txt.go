@@ -32,7 +32,7 @@ func generateWithSystem(w io.Writer) error {
 		HTTPOptions: genai.HTTPOptions{APIVersion: "v1"},
 	})
 	if err != nil {
-		return fmt.Errorf("unable to create genai client: %w", err)
+		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
 	modelName := "gemini-2.0-flash-001"
@@ -47,12 +47,12 @@ func generateWithSystem(w io.Writer) error {
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, config)
 	if err != nil {
-		return fmt.Errorf("unable to generate content: %w", err)
+		return fmt.Errorf("failed to generate content: %w", err)
 	}
 
 	respText, err := resp.Text()
 	if err != nil {
-		return fmt.Errorf("unable to convert model response to text: %w", err)
+		return fmt.Errorf("failed to convert model response to text: %w", err)
 	}
 	fmt.Fprintln(w, respText)
 

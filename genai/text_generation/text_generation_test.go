@@ -30,7 +30,7 @@ func TestTextGeneration(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 
-	t.Run("generate text with text prompt", func(t *testing.T) {
+	t.Run("generate with text prompt", func(t *testing.T) {
 		buf.Reset()
 		err := generateWithText(buf)
 		if err != nil {
@@ -43,7 +43,7 @@ func TestTextGeneration(t *testing.T) {
 		}
 	})
 
-	t.Run("generate text with text and image prompt", func(t *testing.T) {
+	t.Run("generate with text and image prompt", func(t *testing.T) {
 		buf.Reset()
 		err := generateWithTextImage(buf)
 		if err != nil {
@@ -56,7 +56,7 @@ func TestTextGeneration(t *testing.T) {
 		}
 	})
 
-	t.Run("generate text with text prompt and custom configuration", func(t *testing.T) {
+	t.Run("generate with text prompt and custom configuration", func(t *testing.T) {
 		buf.Reset()
 		err := generateWithConfig(buf)
 		if err != nil {
@@ -69,7 +69,7 @@ func TestTextGeneration(t *testing.T) {
 		}
 	})
 
-	t.Run("generate text with text prompt and system instructions", func(t *testing.T) {
+	t.Run("generate with text prompt and system instructions", func(t *testing.T) {
 		buf.Reset()
 		err := generateWithSystem(buf)
 		if err != nil {
@@ -82,7 +82,7 @@ func TestTextGeneration(t *testing.T) {
 		}
 	})
 
-	t.Run("generate text stream with text prompt", func(t *testing.T) {
+	t.Run("generate stream with text prompt", func(t *testing.T) {
 		buf.Reset()
 		err := generateWithTextStream(buf)
 		if err != nil {
