@@ -30,7 +30,7 @@ func TestTextGeneration(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 
-	t.Run("generate text with text prompt", func(t *testing.T) {
+	t.Run("generate with text prompt", func(t *testing.T) {
 		buf.Reset()
 		err := generateWithText(buf)
 		if err != nil {
@@ -43,11 +43,24 @@ func TestTextGeneration(t *testing.T) {
 		}
 	})
 
-	t.Run("generate text with video file input (no sound)", func(t *testing.T) {
+	t.Run("generate with video file input (no sound)", func(t *testing.T) {
 		buf.Reset()
 		err := generateWithMuteVideo(buf)
 		if err != nil {
 			t.Fatalf("generateWithMuteVideo failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate with video file input", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithVideo(buf)
+		if err != nil {
+			t.Fatalf("generateWithVideo failed: %v", err)
 		}
 
 		output := buf.String()
