@@ -28,7 +28,9 @@ import (
 func generateWithTextStream(w io.Writer) error {
 	ctx := context.Background()
 
-	client, err := genai.NewClient(ctx, &genai.ClientConfig{})
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{
+		HTTPOptions: genai.HTTPOptions{APIVersion: "v1"},
+	})
 	if err != nil {
 		return fmt.Errorf("unable to create genai client: %w", err)
 	}
