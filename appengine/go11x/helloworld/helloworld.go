@@ -17,6 +17,7 @@
 // Sample helloworld is an App Engine app.
 package main
 
+// [START gae_go111_import]
 // [START import]
 import (
 	"fmt"
@@ -26,6 +27,8 @@ import (
 )
 
 // [END import]
+// [END gae_go111_import]
+
 // [START main_func]
 
 func main() {
