@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/gemma2
 
-go 1.22.0
+go 1.23.0
 
 require (
 	cloud.google.com/go/aiplatform v1.70.0

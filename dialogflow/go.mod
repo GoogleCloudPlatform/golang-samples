@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/dialogflow
 
-go 1.22.0
+go 1.23.0
 
 require (
 	cloud.google.com/go/dialogflow v1.64.1
