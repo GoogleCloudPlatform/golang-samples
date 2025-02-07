@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START hotmid]
-
 // Sample hotmid is an application that simulates multiple calls to a library
 // function made via different call paths. Each of these calls is not
 // particularly expensive (and so does not stand out on the flame graph). But
@@ -125,5 +123,3 @@ func main() {
 
 	run()
 }
-
-// [END hotmid]
