@@ -27,7 +27,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-const RuntimeVersion = "go122"
+const RuntimeVersion = "go123"
 const FunctionsRegion = "us-central1"
 
 func TestMain(m *testing.M) {
