@@ -42,4 +42,17 @@ func TestTextGeneration(t *testing.T) {
 			t.Error("expected non-empty output, got empty")
 		}
 	})
+
+	t.Run("generate with YT video file input", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithYTVideo(buf)
+		if err != nil {
+			t.Fatalf("generateWithYTVideo failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
 }
