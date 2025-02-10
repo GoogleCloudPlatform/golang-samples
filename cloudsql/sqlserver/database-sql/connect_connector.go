@@ -67,7 +67,7 @@ func connectWithConnector() (*sql.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("mssql.NewConnector: %w", err)
 	}
-	dialer, err := cloudsqlconn.NewDialer(context.Background())
+	dialer, err := cloudsqlconn.NewDialer(context.Background(),cloudsqlconn.WithLazyRefresh())
 	if err != nil {
 		return nil, fmt.Errorf("cloudsqlconn.NewDailer: %w", err)
 	}

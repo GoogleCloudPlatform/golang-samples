@@ -47,7 +47,7 @@ func connectWithConnectorIAMAuthN() (*sql.DB, error) {
 		usePrivate             = os.Getenv("PRIVATE_IP")
 	)
 
-	d, err := cloudsqlconn.NewDialer(context.Background(), cloudsqlconn.WithIAMAuthN())
+	d, err := cloudsqlconn.NewDialer(context.Background(), cloudsqlconn.WithIAMAuthN(), cloudsqlconn.WithLazyRefresh())
 	if err != nil {
 		return nil, fmt.Errorf("cloudsqlconn.NewDialer: %w", err)
 	}
