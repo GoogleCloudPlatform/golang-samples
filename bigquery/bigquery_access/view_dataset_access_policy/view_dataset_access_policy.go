@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Command simpleapp queries the Stack Overflow public dataset in Google BigQuery.
-
 package viewdatasetaccesspolicy
 
 // [START bigquery_view_dataset_access_policies]
