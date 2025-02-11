@@ -16,9 +16,12 @@ package viewdatasetaccesspolicy
 
 import (
 	"bytes"
+	"context"
+	"log"
 	"strings"
 	"testing"
 
+	"cloud.google.com/go/bigquery"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
@@ -28,6 +31,27 @@ func TestViewDatasetAccessPolicies(t *testing.T) {
 	datasetName := "my_new_dataset"
 
 	b := bytes.Buffer{}
+
+	ctx := context.Background()
+
+	// Creates a client.
+	client, err := bigquery.NewClient(ctx, tc.ProjectID)
+	if err != nil {
+		log.Fatalf("bigquery.NewClient: %v", err)
+	}
+
+	//Creates dataset.
+	if err := client.Dataset(datasetName).Create(ctx, &bigquery.DatasetMetadata{}); err != nil {
+		log.Fatalf("Failed to create dataset: %v", err)
+	}
+
+	// Once test is run, the dataset is deleted and the client connection closed
+	defer func() {
+		if err := client.Dataset(datasetName).Delete(ctx); err != nil {
+			log.Fatalf("Failed to delete dataset: %v", err)
+		}
+		client.Close()
+	}()
 
 	if err := viewDatasetAccessPolicies(&b, tc.ProjectID, datasetName); err != nil {
 		t.Fatal(err)
