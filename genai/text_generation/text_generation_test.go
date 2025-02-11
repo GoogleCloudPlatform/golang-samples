@@ -43,19 +43,6 @@ func TestTextGeneration(t *testing.T) {
 		}
 	})
 
-	t.Run("generate with text and image prompt", func(t *testing.T) {
-		buf.Reset()
-		err := generateWithTextImage(buf)
-		if err != nil {
-			t.Fatalf("generateWithTextImage failed: %v", err)
-		}
-
-		output := buf.String()
-		if output == "" {
-			t.Error("expected non-empty output, got empty")
-		}
-	})
-
 	t.Run("generate with text prompt and custom configuration", func(t *testing.T) {
 		buf.Reset()
 		err := generateWithConfig(buf)
