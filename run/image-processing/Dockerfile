@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Use the offical golang image to create a binary.
+# Use the official Go image to create a binary.
 # This is based on Debian and sets the GOPATH to /go.
 # https://hub.docker.com/_/golang
 FROM golang:1.21-bookworm as builder
@@ -37,14 +37,12 @@ RUN CGO_ENABLED=0 go build -v -o server
 FROM alpine:3
 
 # [START cloudrun_imageproc_dockerfile_imagemagick]
-# [START run_imageproc_dockerfile_imagemagick]
 
 # Install Imagemagick into the container image.
 # For more on system packages review the system packages tutorial.
 # https://cloud.google.com/run/docs/tutorials/system-packages#dockerfile
 RUN apk add --no-cache imagemagick
 
-# [END run_imageproc_dockerfile_imagemagick]
 # [END cloudrun_imageproc_dockerfile_imagemagick]
 
 # Install certificates for secure communication with network services.

@@ -1,4 +1,6 @@
-go 1.21.1
+go 1.22.7
+
+toolchain go1.23.4
 
 use (
 	.
@@ -80,7 +82,6 @@ use (
 	./functions/slack
 	./functions/spanner
 	./functions/tips
-	./functions/tips/contexttip
 	./functions/tips/infinite_retries
 	./functions/typed/greeting
 	./getting-started
@@ -104,7 +105,6 @@ use (
 	./media
 	./memorystore
 	./monitoring
-	./opencensus
 	./opentelemetry/instrumentation/app
 	./opentelemetry/trace
 	./privateca
@@ -147,6 +147,7 @@ use (
 	./vertexai/chat
 	./vertexai/context-caching
 	./vertexai/controlled-generation
+	./vertexai/embeddings
 	./vertexai/evaluation
 	./vertexai/function-calling
 	./vertexai/gemma2

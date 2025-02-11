@@ -14,7 +14,7 @@
 
 package sample
 
-// [START tasks_within_transactions]
+// [START gae_tasks_within_transactions]
 import (
 	"context"
 	"net/http"
@@ -43,29 +43,29 @@ func f(ctx context.Context) {
 	// ...
 }
 
-// [END tasks_within_transactions]
+// [END gae_tasks_within_transactions]
 
 func example() {
 	var ctx context.Context
 
-	// [START purging_tasks]
+	// [START gae_purging_tasks]
 	// Purge entire queue...
 	err := taskqueue.Purge(ctx, "queue1")
-	// [END purging_tasks]
+	// [END gae_purging_tasks]
 
-	// [START deleting_tasks]
+	// [START gae_deleting_tasks]
 	// Delete an individual task...
 	t := &taskqueue.Task{Name: "foo"}
 	err = taskqueue.Delete(ctx, t, "queue1")
-	// [END deleting_tasks]
+	// [END gae_deleting_tasks]
 	_ = err
 
-	// [START taskqueue_host]
+	// [START gae_taskqueue_host]
 	h := http.Header{}
 	h.Add("Host", "versionHostname")
 	task := taskqueue.Task{
 		Header: h,
 	}
-	// [END taskqueue_host]
+	// [END gae_taskqueue_host]
 	_ = task
 }

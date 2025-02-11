@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -48,9 +47,9 @@ func downloadEncryptedFile(w io.Writer, bucket, object string, secretKey []byte)
 	}
 	defer rc.Close()
 
-	data, err := ioutil.ReadAll(rc)
+	data, err := io.ReadAll(rc)
 	if err != nil {
-		return nil, fmt.Errorf("ioutil.ReadAll: %w", err)
+		return nil, fmt.Errorf("io.ReadAll: %w", err)
 	}
 	fmt.Fprintf(w, "File %v downloaded with encryption key.\n", object)
 	return data, nil

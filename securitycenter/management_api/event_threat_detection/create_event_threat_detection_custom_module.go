@@ -20,13 +20,15 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"regexp"
 
 	securitycentermanagement "cloud.google.com/go/securitycentermanagement/apiv1"
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
+	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-// createEventThreatDetectionCustomModule creates a custom module for Security Health Analytics.
+// createEventThreatDetectionCustomModule creates a custom module for Event Threat Detection.
 func createEventThreatDetectionCustomModule(w io.Writer, parent string) error {
 	// parent: Use any one of the following options:
 	// - organizations/{organization_id}/locations/{location_id}
@@ -39,6 +41,15 @@ func createEventThreatDetectionCustomModule(w io.Writer, parent string) error {
 		return fmt.Errorf("securitycentermanagement.NewClient: %w", err)
 	}
 	defer client.Close()
+
+	uniqueSuffix := uuid.New().String()
+
+	// Remove invalid characters (anything that isn't alphanumeric or an underscore)
+	re := regexp.MustCompile(`[^a-zA-Z0-9_]`)
+	uniqueSuffix = re.ReplaceAllString(uniqueSuffix, "_")
+
+	// Create unique display name
+	displayName := fmt.Sprintf("go_sample_etd_custom_module_%s", uniqueSuffix)
 
 	// Define the metadata and other config parameters as a map
 	configMap := map[string]interface{}{
@@ -61,7 +72,7 @@ func createEventThreatDetectionCustomModule(w io.Writer, parent string) error {
 	customModule := &securitycentermanagementpb.EventThreatDetectionCustomModule{
 		Config: configStruct,
 		//Replace with desired Display Name.
-		DisplayName:     "go_sample_etd_custom_module",
+		DisplayName:     displayName,
 		EnablementState: securitycentermanagementpb.EventThreatDetectionCustomModule_ENABLED,
 		Type:            "CONFIGURABLE_BAD_IP",
 	}

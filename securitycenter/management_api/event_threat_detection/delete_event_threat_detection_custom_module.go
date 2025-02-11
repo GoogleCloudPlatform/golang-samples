@@ -25,7 +25,7 @@ import (
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
 )
 
-// deleteEventThreatDetectionCustomModule retrieves a specific custom module by its name.
+// deleteEventThreatDetectionCustomModule deletes a specific custom module by its name.
 func deleteEventThreatDetectionCustomModule(w io.Writer, parent string, customModuleID string) error {
 	// parent: Use any one of the following options:
 	//             - organizations/{organization_id}/locations/{location_id}
