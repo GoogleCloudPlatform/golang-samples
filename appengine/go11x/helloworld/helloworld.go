@@ -18,7 +18,6 @@
 package main
 
 // [START gae_go111_import]
-// [START import]
 import (
 	"fmt"
 	"log"
@@ -26,7 +25,6 @@ import (
 	"os"
 )
 
-// [END import]
 // [END gae_go111_import]
 
 // [START main_func]
