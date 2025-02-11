@@ -48,9 +48,9 @@ func connectWithConnector() (*sql.DB, error) {
 	)
 
 	// setting the refresh strategy to LAZY
-    // to refresh the tokens when they are needed, rather than on a regular interval
-    // this is recommended for serverless environments to 
-    // avoid background refreshes from throttling CPU.
+	// to refresh the tokens when they are needed, rather than on a regular interval
+	// this is recommended for serverless environments to
+	// avoid background refreshes from throttling CPU.
 	d, err := cloudsqlconn.NewDialer(context.Background(), cloudsqlconn.WithLazyRefresh())
 	if err != nil {
 		return nil, fmt.Errorf("cloudsqlconn.NewDialer: %w", err)

@@ -58,9 +58,9 @@ func connectWithConnector() (*sql.DB, error) {
 		opts = append(opts, cloudsqlconn.WithDefaultDialOptions(cloudsqlconn.WithPrivateIP()))
 	}
 	// setting the refresh strategy to LAZY
-    // to refresh the tokens when they are needed, rather than on a regular interval
-    // this is recommended for serverless environments to 
-    // avoid background refreshes from throttling CPU.
+	// to refresh the tokens when they are needed, rather than on a regular interval
+	// this is recommended for serverless environments to
+	// avoid background refreshes from throttling CPU.
 	opts = append(opts, cloudsqlconn.WithLazyRefresh())
 	d, err := cloudsqlconn.NewDialer(context.Background(), opts...)
 	if err != nil {
