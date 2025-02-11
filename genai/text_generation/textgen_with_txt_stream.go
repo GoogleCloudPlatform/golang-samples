@@ -15,17 +15,17 @@
 // Package text_generation shows examples of generating text using the GenAI SDK.
 package text_generation
 
-// [START googlegenaisdk_textgen_with_txt]
+// [START googlegenaisdk_textgen_with_txt_stream]
 import (
 	"context"
 	"fmt"
 	"io"
 
-	"google.golang.org/genai"
+	genai "google.golang.org/genai"
 )
 
-// generateWithText shows how to generate text using a text prompt.
-func generateWithText(w io.Writer) error {
+// generateWithTextStream shows how to generate text stream using a text prompt.
+func generateWithTextStream(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
@@ -36,24 +36,27 @@ func generateWithText(w io.Writer) error {
 	}
 
 	modelName := "gemini-2.0-flash-001"
+	contents := genai.Text("Why is the sky blue?")
 
-	resp, err := client.Models.GenerateContent(ctx, modelName, genai.Text("How does AI work?"), nil)
-	if err != nil {
-		return fmt.Errorf("failed to generate content: %w", err)
+	for resp, err := range client.Models.GenerateContentStream(ctx, modelName, contents, nil) {
+		if err != nil {
+			return fmt.Errorf("failed to generate content: %w", err)
+		}
+
+		chunk, err := resp.Text()
+		if err != nil {
+			return fmt.Errorf("failed to convert model response to text: %w", err)
+		}
+		fmt.Fprintln(w, chunk)
 	}
 
-	respText, err := resp.Text()
-	if err != nil {
-		return fmt.Errorf("failed to convert model response to text: %w", err)
-	}
-	fmt.Fprintln(w, respText)
 	// Example response:
-	// That's a great question! Understanding how AI works can feel like ...
-	// ...
-	// **1. The Foundation: Data and Algorithms**
+	// The
+	//  sky is blue
+	//  because of a phenomenon called **Rayleigh scattering**. Here's the breakdown:
 	// ...
 
 	return nil
 }
 
-// [END googlegenaisdk_textgen_with_txt]
+// [END googlegenaisdk_textgen_with_txt_stream]
