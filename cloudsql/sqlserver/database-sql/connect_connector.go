@@ -68,7 +68,7 @@ func connectWithConnector() (*sql.DB, error) {
 		return nil, fmt.Errorf("mssql.NewConnector: %w", err)
 	}
 	// WithLazyRefresh() Option is used to perform refresh
-	// When needed, rather than on a scheduled interval.
+	// when needed, rather than on a scheduled interval.
 	// This is recommended for serverless environments to
 	// avoid background refreshes from throttling CPU.
 	dialer, err := cloudsqlconn.NewDialer(context.Background(), cloudsqlconn.WithLazyRefresh())

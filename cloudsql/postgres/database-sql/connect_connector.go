@@ -58,7 +58,7 @@ func connectWithConnector() (*sql.DB, error) {
 		opts = append(opts, cloudsqlconn.WithDefaultDialOptions(cloudsqlconn.WithPrivateIP()))
 	}
 	// WithLazyRefresh() Option is used to perform refresh
-	// When needed, rather than on a scheduled interval.
+	// when needed, rather than on a scheduled interval.
 	// This is recommended for serverless environments to
 	// avoid background refreshes from throttling CPU.
 	opts = append(opts, cloudsqlconn.WithLazyRefresh())

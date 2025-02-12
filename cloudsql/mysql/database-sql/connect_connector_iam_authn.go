@@ -48,7 +48,7 @@ func connectWithConnectorIAMAuthN() (*sql.DB, error) {
 	)
 
 	// WithLazyRefresh() Option is used to perform refresh
-	// When needed, rather than on a scheduled interval.
+	// when needed, rather than on a scheduled interval.
 	// This is recommended for serverless environments to
 	// avoid background refreshes from throttling CPU.
 	d, err := cloudsqlconn.NewDialer(
