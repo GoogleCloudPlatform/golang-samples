@@ -54,7 +54,7 @@ func connectWithConnectorIAMAuthN() (*sql.DB, error) {
 	d, err := cloudsqlconn.NewDialer(
 		context.Background(),
 		cloudsqlconn.WithIAMAuthN(),
-		cloudsqlconn.WithLazyRefresh()
+		cloudsqlconn.WithLazyRefresh(),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("cloudsqlconn.NewDialer: %w", err)
