@@ -17,48 +17,42 @@ package viewdatasetaccesspolicy
 import (
 	"bytes"
 	"context"
-	"log"
 	"strings"
 	"testing"
 
 	"cloud.google.com/go/bigquery"
+	bigqueryaccess "github.com/GoogleCloudPlatform/golang-samples/bigquery/bigquery_access"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestViewDatasetAccessPolicies(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	datasetName := "my_new_dataset"
+	datasetName := "my_new_dataset_test"
 
 	b := bytes.Buffer{}
 
 	ctx := context.Background()
 
-	var client *bigquery.Client
-
-	// Creates a client.
-	client, err := bigquery.NewClient(ctx, tc.ProjectID)
+	// Creates bq client.
+	client, err := bigqueryaccess.TestClient(t, ctx)
 	if err != nil {
-		log.Fatalf("bigquery.NewClient: %v", err)
+		t.Fatalf("bigquery.NewClient: %v", err)
 	}
-	defer client.Close()
 
-	//Creates dataset.
+	// Creates dataset.
 	if err := client.Dataset(datasetName).Create(ctx, &bigquery.DatasetMetadata{}); err != nil {
-		log.Fatalf("Failed to create dataset: %v", err)
+		t.Errorf("Failed to create dataset: %v", err)
 	}
 
-	defer func() {
-		if err := client.Dataset(datasetName).Delete(ctx); err != nil {
-			log.Fatalf("Failed to delete dataset: %v", err)
-		}
-	}()
+	// Once test is run, resources and clients are closed
+	defer bigqueryaccess.TestCleanup(t, ctx, client, datasetName)
 
 	if err := viewDatasetAccessPolicies(&b, tc.ProjectID, datasetName); err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
-	if got, want := b.String(), "Role"; !strings.Contains(got, want) {
+	if got, want := b.String(), "Details for Access entries in dataset"; !strings.Contains(got, want) {
 		t.Errorf("viewDatasetAccessPolicies: expected %q to contain %q", got, want)
 	}
 
