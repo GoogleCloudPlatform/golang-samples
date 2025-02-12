@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package viewdatasetaccesspolicy
+package viewtableorviewpolicy
 
-// [START bigquery_view_dataset_access_policies]
+// [START bigquery_view_table_access_policies]
 
 import (
 	"context"
@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
-func viewDatasetAccessPolicies(w io.Writer, projectID, datasetName string) error {
+func viewTableAccessPolicies(w io.Writer, projectID, datasetName, resourceName string) error {
 	ctx := context.Background()
 
 	// Creates new client.
@@ -34,22 +34,22 @@ func viewDatasetAccessPolicies(w io.Writer, projectID, datasetName string) error
 	}
 	defer client.Close()
 
-	// Creates handle for managing dataset
-	dataset := client.Dataset(datasetName)
+	// Creates handle for managing dataset's table.
+	table := client.Dataset(datasetName).Table(resourceName)
 
-	// Gets dataset's metadata
-	metaData, err := dataset.Metadata(ctx)
+	// Gets table's policy access.
+	policy, err := table.IAM().Policy(ctx)
 	if err != nil {
-		return fmt.Errorf("dataset.Metadata: %v", err)
+		return fmt.Errorf("table.IAM.Policy %w", err)
 	}
 
-	fmt.Fprintf(w, "Details for Access entries in dataset %v.\n", datasetName)
-	// Iterate over access permissions
-	for _, access := range metaData.Access {
-		fmt.Fprintf(w, "Role %s : %s\n", access.Role, access.Entity)
+	fmt.Fprintf(w, "Details for Access entries in table or view %v.\n", resourceName)
+
+	for _, role := range policy.Roles() {
+		fmt.Fprintf(w, "Role %s : %s\n", role, policy.Members(role))
 	}
 
 	return nil
 }
 
-// [START bigquery_view_dataset_access_policies]
+// [START bigquery_view_table_access_policies]
