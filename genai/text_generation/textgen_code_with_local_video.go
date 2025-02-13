@@ -38,7 +38,7 @@ func generateWithLocalVideo(w io.Writer) error {
 
 	// TODO(Developer): Update the path to file (video source:
 	//   https://storage.googleapis.com/cloud-samples-data/generative-ai/video/describe_video_content.mp4)
-	videoBytes, err := os.ReadFile("./test_data/describe_video_content.mp4")
+	videoBytes, err := os.ReadFile("./testdata/describe_video_content.mp4")
 	if err != nil {
 		return fmt.Errorf("failed to read video file: %w", err)
 	}
