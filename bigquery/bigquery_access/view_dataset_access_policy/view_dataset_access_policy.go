@@ -14,7 +14,7 @@
 
 package viewdatasetaccesspolicy
 
-// [START bigquery_view_dataset_access_policies]
+// [START bigquery_view_dataset_access_policy]
 
 import (
 	"context"
@@ -24,7 +24,11 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
-func viewDatasetAccessPolicies(w io.Writer, projectID, datasetName string) error {
+func viewDatasetAccessPolicies(w io.Writer, projectID, datasetID string) error {
+
+	// projectID := "my-project-id"
+	// datasetID := "mydataset"
+
 	ctx := context.Background()
 
 	// Creates new client.
@@ -34,16 +38,13 @@ func viewDatasetAccessPolicies(w io.Writer, projectID, datasetName string) error
 	}
 	defer client.Close()
 
-	// Creates handle for managing dataset
-	dataset := client.Dataset(datasetName)
-
 	// Gets dataset's metadata
-	metaData, err := dataset.Metadata(ctx)
+	metaData, err := client.Dataset(datasetID).Metadata(ctx)
 	if err != nil {
-		return fmt.Errorf("dataset.Metadata: %v", err)
+		return fmt.Errorf("bigquery.Client.Dataset.Metadata: %w", err)
 	}
 
-	fmt.Fprintf(w, "Details for Access entries in dataset %v.\n", datasetName)
+	fmt.Fprintf(w, "Details for Access entries in dataset %v.\n", datasetID)
 	// Iterate over access permissions
 	for _, access := range metaData.Access {
 		fmt.Fprintf(w, "Role %s : %s\n", access.Role, access.Entity)
@@ -52,4 +53,4 @@ func viewDatasetAccessPolicies(w io.Writer, projectID, datasetName string) error
 	return nil
 }
 
-// [START bigquery_view_dataset_access_policies]
+// [START bigquery_view_dataset_access_policy]

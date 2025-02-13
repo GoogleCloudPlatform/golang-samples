@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package viewtableorviewpolicy
-
-// [START bigquery_view_table_or_view_access_policy]
+package grantaccesstableorview
 
 import (
 	"context"
@@ -22,35 +20,51 @@ import (
 	"io"
 
 	"cloud.google.com/go/bigquery"
+	"cloud.google.com/go/iam"
 )
 
-func viewTableOrViewccessPolicies(w io.Writer, projectID, datasetID, resourceID string) error {
+func grantAccessTableOrView(w io.Writer, projectID, datasetID, resourceID string) error {
+
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
 	// resourceID := "myresource"
 
 	ctx := context.Background()
 
-	// Creates new client.
+	// Creates new client
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 
-	// Gets table's policy access.
+	// Gets resource policy.
 	policy, err := client.Dataset(datasetID).Table(resourceID).IAM().Policy(ctx)
+	if err != nil {
+		return fmt.Errorf("bigquery.Dataset.Table.IAM.Policy: %w", err)
+	}
+
+	// Adds new policy.
+	analystEmail := "example-analyst-group@google.com"
+	policy.Add(fmt.Sprintf("group:%s", analystEmail), iam.Viewer)
+
+	// Updates resource's policy.
+	err = client.Dataset(datasetID).Table(resourceID).IAM().SetPolicy(ctx, policy)
+	if err != nil {
+		return fmt.Errorf("bigquery.Dataset.Table.IAM.V3.Policy: %w", err)
+	}
+
+	// Gets resource policy again expecting the update.
+	updatedPolicy, err := client.Dataset(datasetID).Table(resourceID).IAM().Policy(ctx)
 	if err != nil {
 		return fmt.Errorf("bigquery.Dataset.Table.IAM.Policy: %w", err)
 	}
 
 	fmt.Fprintf(w, "Details for Access entries in table or view %v.\n", resourceID)
 
-	for _, role := range policy.Roles() {
+	for _, role := range updatedPolicy.Roles() {
 		fmt.Fprintf(w, "Role %s : %s\n", role, policy.Members(role))
 	}
 
 	return nil
 }
-
-// [START bigquery_view_table_or_view_access_policy]
