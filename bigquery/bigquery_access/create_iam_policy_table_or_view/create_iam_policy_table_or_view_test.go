@@ -89,7 +89,7 @@ func TestGrantAccessView(t *testing.T) {
 	}
 }
 
-func TestGrantAccess(t *testing.T) {
+func TestGrantAccessTable(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	datasetName := "my_new_dataset_go"
