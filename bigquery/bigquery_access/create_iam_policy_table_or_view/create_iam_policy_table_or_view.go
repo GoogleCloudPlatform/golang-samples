@@ -23,6 +23,7 @@ import (
 	"cloud.google.com/go/iam"
 )
 
+// [START bigquery_create_iam_policy]
 func createPolicyTableOrView(w io.Writer, projectID, datasetID, resourceID string) error {
 
 	// projectID := "my-project-id"
@@ -68,3 +69,5 @@ func createPolicyTableOrView(w io.Writer, projectID, datasetID, resourceID strin
 
 	return nil
 }
+
+// [START bigquery_create_iam_policy]
