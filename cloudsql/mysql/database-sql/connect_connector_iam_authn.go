@@ -47,7 +47,15 @@ func connectWithConnectorIAMAuthN() (*sql.DB, error) {
 		usePrivate             = os.Getenv("PRIVATE_IP")
 	)
 
-	d, err := cloudsqlconn.NewDialer(context.Background(), cloudsqlconn.WithIAMAuthN())
+	// WithLazyRefresh() Option is used to perform refresh
+	// when needed, rather than on a scheduled interval.
+	// This is recommended for serverless environments to
+	// avoid background refreshes from throttling CPU.
+	d, err := cloudsqlconn.NewDialer(
+		context.Background(),
+		cloudsqlconn.WithIAMAuthN(),
+		cloudsqlconn.WithLazyRefresh(),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("cloudsqlconn.NewDialer: %w", err)
 	}
