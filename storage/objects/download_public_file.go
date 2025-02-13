@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -47,9 +46,9 @@ func downloadPublicFile(w io.Writer, bucket, object string) ([]byte, error) {
 	}
 	defer rc.Close()
 
-	data, err := ioutil.ReadAll(rc)
+	data, err := io.ReadAll(rc)
 	if err != nil {
-		return nil, fmt.Errorf("ioutil.ReadAll: %w", err)
+		return nil, fmt.Errorf("io.ReadAll: %w", err)
 	}
 	fmt.Fprintf(w, "Blob %v downloaded.\n", object)
 	return data, nil
