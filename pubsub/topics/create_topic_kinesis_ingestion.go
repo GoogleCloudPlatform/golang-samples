@@ -24,9 +24,9 @@ import (
 	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 )
 
-func createTopicWithKinesisIngestion(w io.Writer, projectID, topicID string) error {
+func createTopicWithKinesisIngestion(w io.Writer, projectID, topic string) error {
 	// projectID := "my-project-id"
-	// topicID := "my-topic"
+	// topicID := "projects/my-project-id/topics/my-topic"
 	streamARN := "stream-arn"
 	consumerARN := "consumer-arn"
 	awsRoleARN := "aws-role-arn"
@@ -40,6 +40,7 @@ func createTopicWithKinesisIngestion(w io.Writer, projectID, topicID string) err
 	defer client.Close()
 
 	topicpb := &pubsubpb.Topic{
+		Name: topic,
 		IngestionDataSourceSettings: &pubsubpb.IngestionDataSourceSettings{
 			Source: &pubsubpb.IngestionDataSourceSettings_AwsKinesis_{
 				AwsKinesis: &pubsubpb.IngestionDataSourceSettings_AwsKinesis{

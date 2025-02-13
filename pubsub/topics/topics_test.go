@@ -194,7 +194,7 @@ func TestIAM(t *testing.T) {
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		if err := addUsers(buf, tc.ProjectID, topicID); err != nil {
+		if err := addUsersToTopic(buf, tc.ProjectID, topicID); err != nil {
 			r.Errorf("addUsers: %v", err)
 		}
 	})
@@ -208,10 +208,6 @@ func TestIAM(t *testing.T) {
 
 		if !strings.Contains(got, "role: roles/editor, member: group:cloud-logs@google.com") {
 			r.Errorf("want %s as editor", "group:cloud-logs@google.com")
-		}
-
-		if !strings.Contains(got, "role: roles/viewer, member: allUsers") {
-			r.Errorf("want %s as viewer", "allUsers")
 		}
 	})
 }

@@ -25,9 +25,9 @@ import (
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-func updateTopicType(w io.Writer, projectID, topicID string) error {
+func updateTopicType(w io.Writer, projectID, topic string) error {
 	// projectID := "my-project-id"
-	// topicID := "my-topic"
+	// topic := "projects/my-project-id/topics/my-topic"
 	streamARN := "stream-arn"
 	consumerARN := "consumer-arn"
 	awsRoleARN := "aws-role-arn"
@@ -42,6 +42,7 @@ func updateTopicType(w io.Writer, projectID, topicID string) error {
 
 	updateReq := &pubsubpb.UpdateTopicRequest{
 		Topic: &pubsubpb.Topic{
+			Name: topic,
 			IngestionDataSourceSettings: &pubsubpb.IngestionDataSourceSettings{
 				Source: &pubsubpb.IngestionDataSourceSettings_AwsKinesis_{
 					AwsKinesis: &pubsubpb.IngestionDataSourceSettings_AwsKinesis{

@@ -21,7 +21,7 @@ import (
 	"io"
 	"time"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 	"google.golang.org/api/option"
 )
 
@@ -43,11 +43,11 @@ func receiveMessagesWithExactlyOnceDeliveryEnabled(w io.Writer, projectID, subID
 	}
 	defer client.Close()
 
-	sub := client.Subscription(subID)
+	sub := client.Subscriber(subID)
 	// Set MinExtensionPeriod high to avoid any unintentional
 	// acknowledgment expirations (e.g. due to network events).
 	// This can lead to high tail latency in case of client crashes.
-	sub.ReceiveSettings.MinExtensionPeriod = 600 * time.Second
+	sub.ReceiveSettings.MinDurationPerLeaseExtension = 600 * time.Second
 
 	// Receive messages for 10 seconds, which simplifies testing.
 	// Comment this out in production, since `Receive` should

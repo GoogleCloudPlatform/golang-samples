@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/pubsub/v2"
 )
 
-func addUsers(w io.Writer, projectID, topicID string) error {
+func addUsersToTopic(w io.Writer, projectID, topicID string) error {
 	// projectID := "my-project-id"
 	// topicID := "my-topic"
 	ctx := context.Background()
@@ -42,17 +42,13 @@ func addUsers(w io.Writer, projectID, topicID string) error {
 	if err != nil {
 		return fmt.Errorf("error calling GetIamPolicy: %w", err)
 	}
-	b1 := &iampb.Binding{
-		Role:    "roles/viewer",
-		Members: []string{"allUsers"},
-	}
-	b2 := &iampb.Binding{
+	b := &iampb.Binding{
 		Role: "roles/editor",
 		// Other valid prefixes are "serviceAccount:", "user:"
 		// See the documentation for more values.
 		Members: []string{"group:cloud-logs@google.com"},
 	}
-	policy.Bindings = append(policy.Bindings, b1, b2)
+	policy.Bindings = append(policy.Bindings, b)
 
 	setRequest := &iampb.SetIamPolicyRequest{
 		Resource: topicName,
@@ -62,6 +58,7 @@ func addUsers(w io.Writer, projectID, topicID string) error {
 	if err != nil {
 		return fmt.Errorf("error calling SetIamPolicy: %w", err)
 	}
+	fmt.Fprintln(w, "Added roles to topic.")
 	return nil
 }
 
