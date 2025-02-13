@@ -169,8 +169,7 @@ func TestIAM(t *testing.T) {
 		createTopic(ctx, client, topicName)
 		createSubscription(ctx, client, topicName, subName)
 
-		buf := new(bytes.Buffer)
-		perms, err := testPermissions(buf, tc.ProjectID, subID)
+		perms, err := testPermissions(io.Discard, tc.ProjectID, subID)
 		if err != nil {
 			r.Errorf("testPermissions: %v", err)
 		}
@@ -207,8 +206,7 @@ func TestDelete(t *testing.T) {
 	createTopic(ctx, client, topicName)
 	createSubscription(ctx, client, topicName, subName)
 
-	buf := new(bytes.Buffer)
-	if err := delete(buf, tc.ProjectID, subID); err != nil {
+	if err := delete(io.Discard, tc.ProjectID, subID); err != nil {
 		t.Fatalf("failed to delete subscription (%q): %v", subID, err)
 	}
 }
@@ -323,16 +321,15 @@ func TestDeadLetterPolicy(t *testing.T) {
 		createTopic(ctx, client, deadLetterSource)
 		createTopic(ctx, client, deadLetterSink)
 
-		buf := new(bytes.Buffer)
-		if err := createSubWithDeadLetter(buf, tc.ProjectID, deadLetterSource, deadLetterSub, deadLetterSink); err != nil {
+		if err := createSubWithDeadLetter(io.Discard, tc.ProjectID, deadLetterSource, deadLetterSub, deadLetterSink); err != nil {
 			r.Errorf("createSubWithDeadLetter failed: %v", err)
 			return
 		}
-		if err := updateDeadLetter(buf, tc.ProjectID, deadLetterSub, deadLetterSink); err != nil {
+		if err := updateDeadLetter(io.Discard, tc.ProjectID, deadLetterSub, deadLetterSink); err != nil {
 			r.Errorf("updateDeadLetter failed: %v", err)
 			return
 		}
-		if err := removeDeadLetterTopic(buf, tc.ProjectID, deadLetterSub); err != nil {
+		if err := removeDeadLetterTopic(io.Discard, tc.ProjectID, deadLetterSub); err != nil {
 			r.Errorf("removeDeadLetterTopic failed: %v", err)
 			return
 		}
@@ -405,14 +402,14 @@ func TestCreatePushSubscription(t *testing.T) {
 		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
 			createTopic(ctx, client, pushTopic)
 
-			var b bytes.Buffer
+			buf := new(bytes.Buffer)
 			endpoint := "https://my-test-project.appspot.com/push"
-			if err := createWithEndpoint(&b, tc.ProjectID, pushTopic, pushSub, endpoint); err != nil {
+			if err := createWithEndpoint(buf, tc.ProjectID, pushTopic, pushSub, endpoint); err != nil {
 
 				r.Errorf("failed to create push subscription: %v", err)
 			}
 
-			got := b.String()
+			got := buf.String()
 			want := "Created push subscription"
 			if !strings.Contains(got, want) {
 				r.Errorf("got %s, want %s", got, want)
@@ -427,13 +424,13 @@ func TestCreatePushSubscription(t *testing.T) {
 		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
 			createTopic(ctx, client, pushTopic)
 
-			var b bytes.Buffer
+			buf := new(bytes.Buffer)
 			endpoint := "https://my-test-project.appspot.com/push"
-			if err := createPushNoWrapperSubscription(&b, tc.ProjectID, pushTopic, pushSub, endpoint); err != nil {
+			if err := createPushNoWrapperSubscription(buf, tc.ProjectID, pushTopic, pushSub, endpoint); err != nil {
 				r.Errorf("failed to create push subscription: %v", err)
 			}
 
-			got := b.String()
+			got := buf.String()
 			want := "Created push no wrapper subscription"
 			if !strings.Contains(got, want) {
 				r.Errorf("got %s, want %s", got, want)

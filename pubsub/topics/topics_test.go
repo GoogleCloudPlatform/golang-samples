@@ -103,8 +103,7 @@ func setup(t *testing.T) *pubsub.Client {
 
 func TestCreate(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
-	if err := create(buf, tc.ProjectID, topicID); err != nil {
+	if err := create(io.Discard, tc.ProjectID, topicID); err != nil {
 		t.Fatalf("failed to create a topic: %v", err)
 	}
 }
@@ -126,8 +125,7 @@ func TestPublish(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	client := setup(t)
 	createTopic(ctx, client, topicName)
-	buf := new(bytes.Buffer)
-	if err := publish(buf, tc.ProjectID, topicID, "hello world"); err != nil {
+	if err := publish(io.Discard, tc.ProjectID, topicID, "hello world"); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
@@ -137,8 +135,7 @@ func TestPublishThatScales(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	client := setup(t)
 	createTopic(ctx, client, topicName)
-	buf := new(bytes.Buffer)
-	if err := publishThatScales(buf, tc.ProjectID, topicID, 10); err != nil {
+	if err := publishThatScales(io.Discard, tc.ProjectID, topicID, 10); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
@@ -158,8 +155,7 @@ func TestPublishCustomAttributes(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	client := setup(t)
 	createTopic(ctx, client, topicName)
-	buf := new(bytes.Buffer)
-	if err := publishCustomAttributes(buf, tc.ProjectID, topicID); err != nil {
+	if err := publishCustomAttributes(io.Discard, tc.ProjectID, topicID); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
@@ -169,8 +165,7 @@ func TestPublishWithRetrySettings(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	client := setup(t)
 	createTopic(ctx, client, topicName)
-	buf := new(bytes.Buffer)
-	if err := publishWithRetrySettings(buf, tc.ProjectID, topicID, "hello world"); err != nil {
+	if err := publishWithRetrySettings(io.Discard, tc.ProjectID, topicID, "hello world"); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
@@ -182,8 +177,7 @@ func TestIAM(t *testing.T) {
 	createTopic(ctx, client, topicName)
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		buf := new(bytes.Buffer)
-		perms, err := testPermissions(buf, tc.ProjectID, topicID)
+		perms, err := testPermissions(io.Discard, tc.ProjectID, topicID)
 		if err != nil {
 			r.Errorf("testPermissions: %v", err)
 		}
@@ -193,8 +187,7 @@ func TestIAM(t *testing.T) {
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		buf := new(bytes.Buffer)
-		if err := addUsersToTopic(buf, tc.ProjectID, topicID); err != nil {
+		if err := addUsersToTopic(io.Discard, tc.ProjectID, topicID); err != nil {
 			r.Errorf("addUsers: %v", err)
 		}
 	})
@@ -247,8 +240,7 @@ func TestPublishWithFlowControl(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	client := setup(t)
 	createTopic(ctx, client, topicName)
-	buf := new(bytes.Buffer)
-	if err := publishWithFlowControlSettings(buf, tc.ProjectID, topicID); err != nil {
+	if err := publishWithFlowControlSettings(io.Discard, tc.ProjectID, topicID); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
@@ -256,40 +248,37 @@ func TestPublishWithFlowControl(t *testing.T) {
 func TestDelete(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	buf := new(bytes.Buffer)
-	if err := delete(buf, tc.ProjectID, topicID); err != nil {
+	if err := delete(io.Discard, tc.ProjectID, topicID); err != nil {
 		t.Fatalf("failed to delete topic (%q): %v", topicID, err)
 	}
 }
 
 func TestTopicKinesisIngestion(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
 
 	// Use the pstest fake with emulator settings since Pub/Sub service expects real AWS Kinesis
 	// resources, which we cannot provide in a samples test.
 	srv := pstest.NewServer()
 	t.Setenv("PUBSUB_EMULATOR_HOST", srv.Addr)
 
-	if err := createTopicWithKinesisIngestion(buf, tc.ProjectID, topicID); err != nil {
+	if err := createTopicWithKinesisIngestion(io.Discard, tc.ProjectID, topicID); err != nil {
 		t.Fatalf("failed to create a topic with kinesis ingestion: %v", err)
 	}
 
 	// test updateTopicType
-	if err := updateTopicType(buf, tc.ProjectID, topicID); err != nil {
+	if err := updateTopicType(io.Discard, tc.ProjectID, topicID); err != nil {
 		t.Fatalf("failed to update a topic type to kinesis ingestion: %v", err)
 	}
 }
 
 func TestTopicCloudStorageIngestion(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	buf := new(bytes.Buffer)
 
 	srv := pstest.NewServer()
 	t.Setenv("PUBSUB_EMULATOR_HOST", srv.Addr)
 
 	// Test creating a cloud storage ingestion topic with Text input format.
-	if err := createTopicWithCloudStorageIngestion(buf, tc.ProjectID, topicID, "fake-bucket", "**.txt", "2006-01-02T15:04:05Z", ","); err != nil {
+	if err := createTopicWithCloudStorageIngestion(io.Discard, tc.ProjectID, topicID, "fake-bucket", "**.txt", "2006-01-02T15:04:05Z", ","); err != nil {
 		t.Fatalf("failed to create a topic with cloud storage ingestion: %v", err)
 	}
 }
@@ -355,8 +344,7 @@ func TestPublishWithCompression(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	client := setup(t)
 	createTopic(ctx, client, topicName)
-	buf := new(bytes.Buffer)
-	if err := publishWithCompression(buf, tc.ProjectID, topicID); err != nil {
+	if err := publishWithCompression(io.Discard, tc.ProjectID, topicID); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
