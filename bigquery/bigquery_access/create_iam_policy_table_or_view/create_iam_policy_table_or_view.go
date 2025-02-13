@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package grantaccesstableorview
+package createiampolicytableorview
 
 import (
 	"context"
@@ -23,7 +23,7 @@ import (
 	"cloud.google.com/go/iam"
 )
 
-func grantAccessTableOrView(w io.Writer, projectID, datasetID, resourceID string) error {
+func createPolicyTableOrView(w io.Writer, projectID, datasetID, resourceID string) error {
 
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package grantaccesstableorview
+package createiampolicytableorview
 
 import (
 	"bytes"
@@ -80,7 +80,7 @@ func TestGrantAccessView(t *testing.T) {
 		t.Errorf("Failed to create view: %v", err)
 	}
 
-	if err := grantAccessTableOrView(&b, tc.ProjectID, datasetName, viewName); err != nil {
+	if err := createPolicyTableOrView(&b, tc.ProjectID, datasetName, viewName); err != nil {
 		t.Error(err)
 	}
 
@@ -132,7 +132,7 @@ func TestGrantAccess(t *testing.T) {
 		t.Errorf("Failed to create table: %v", err)
 	}
 
-	if err := grantAccessTableOrView(&b, tc.ProjectID, datasetName, tableName); err != nil {
+	if err := createPolicyTableOrView(&b, tc.ProjectID, datasetName, tableName); err != nil {
 		t.Error(err)
 	}
 
