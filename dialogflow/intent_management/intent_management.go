@@ -14,7 +14,6 @@
 
 package intentmgmt
 
-// [START import_libraries]
 import (
 	"context"
 	"errors"
@@ -24,8 +23,6 @@ import (
 	"cloud.google.com/go/dialogflow/apiv2/dialogflowpb"
 	"google.golang.org/api/iterator"
 )
-
-// [END import_libraries]
 
 // [START dialogflow_list_intents]
 
@@ -39,7 +36,7 @@ func ListIntents(projectID string) ([]*dialogflowpb.Intent, error) {
 	defer intentsClient.Close()
 
 	if projectID == "" {
-		return nil, errors.New(fmt.Sprintf("Received empty project (%s)", projectID))
+		return nil, fmt.Errorf("Received empty project (%s)", projectID)
 	}
 
 	parent := fmt.Sprintf("projects/%s/agent", projectID)
