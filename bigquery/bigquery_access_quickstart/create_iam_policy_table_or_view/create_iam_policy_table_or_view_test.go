@@ -116,19 +116,9 @@ func TestGrantAccessTable(t *testing.T) {
 		t.Errorf("Failed to create dataset: %v", err)
 	}
 
-	// Table schema.
-	sampleSchema := bigquery.Schema{
-		{Name: "full_name", Type: bigquery.StringFieldType},
-		{Name: "age", Type: bigquery.IntegerFieldType},
-	}
-
-	tableMetaData := &bigquery.TableMetadata{
-		Schema: sampleSchema,
-	}
-
 	// Creates table.
 	table := dataset.Table(tableName)
-	if err := table.Create(ctx, tableMetaData); err != nil {
+	if err := table.Create(ctx, &bigquery.TableMetadata{}); err != nil {
 		t.Errorf("Failed to create table: %v", err)
 	}
 

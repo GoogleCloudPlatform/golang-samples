@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package createiampolicytableorview
+package revokeiampolicytableorview
 
 import (
 	"context"
@@ -23,9 +23,7 @@ import (
 	"cloud.google.com/go/iam"
 )
 
-// [START bigquery_create_iam_policy]
-func createPolicyTableOrView(w io.Writer, projectID, datasetID, resourceID string) error {
-
+func revokeTableOrViewAccessPolicies(w io.Writer, projectID, datasetID, resourceID string) error {
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
 	// resourceID := "myresource"
@@ -47,7 +45,7 @@ func createPolicyTableOrView(w io.Writer, projectID, datasetID, resourceID strin
 
 	// Adds new policy.
 	analystEmail := "example-analyst-group@google.com"
-	policy.Add(fmt.Sprintf("group:%s", analystEmail), iam.Viewer)
+	policy.Remove(fmt.Sprintf("group:%s", analystEmail), iam.Viewer)
 
 	// Updates resource's policy.
 	err = client.Dataset(datasetID).Table(resourceID).IAM().SetPolicy(ctx, policy)
@@ -69,5 +67,3 @@ func createPolicyTableOrView(w io.Writer, projectID, datasetID, resourceID strin
 
 	return nil
 }
-
-// [START bigquery_create_iam_policy]
