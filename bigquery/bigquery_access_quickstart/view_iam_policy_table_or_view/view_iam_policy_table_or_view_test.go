@@ -29,14 +29,17 @@ import (
 func TestViewTableAccessPolicies(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	datasetName := "my_new_dataset_go"
-	tableName := "my_table"
+	preffix := testfunctions.RandString()
+	topic := fmt.Sprintf("%s_view_access_to_table", preffix)
+
+	datasetName := fmt.Sprintf("%s_dataset", topic)
+	tableName := fmt.Sprintf("%s_table", topic)
 
 	b := bytes.Buffer{}
 
 	ctx := context.Background()
 
-	// Creates bq client.
+	// Creates Big Query client.
 	client, err := testfunctions.TestClient(t)
 	if err != nil {
 		t.Fatalf("bigquery.NewClient: %v", err)
@@ -70,15 +73,18 @@ func TestViewTableAccessPolicies(t *testing.T) {
 func TestViewViewAccessPolicies(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	datasetName := "my_new_dataset_go"
-	tableName := "my_table"
-	viewName := "my_view"
+	preffix := testfunctions.RandString()
+	topic := fmt.Sprintf("%s_view_access_to_view", preffix)
+
+	datasetName := fmt.Sprintf("%s_dataset", topic)
+	tableName := fmt.Sprintf("%s_table", topic)
+	viewName := fmt.Sprintf("%s_view", topic)
 
 	b := bytes.Buffer{}
 
 	ctx := context.Background()
 
-	// Creates bq client.
+	// Creates Big Query client.
 	client, err := testfunctions.TestClient(t)
 	if err != nil {
 		t.Fatalf("bigquery.NewClient: %v", err)
@@ -97,8 +103,7 @@ func TestViewViewAccessPolicies(t *testing.T) {
 
 	// Table schema.
 	sampleSchema := bigquery.Schema{
-		{Name: "full_name", Type: bigquery.StringFieldType},
-		{Name: "age", Type: bigquery.IntegerFieldType},
+		{Name: "id", Type: bigquery.IntegerFieldType, Required: true},
 	}
 
 	tableMetaData := &bigquery.TableMetadata{
@@ -113,7 +118,7 @@ func TestViewViewAccessPolicies(t *testing.T) {
 
 	// Sets view query.
 	viewMetadata := &bigquery.TableMetadata{
-		ViewQuery: fmt.Sprintf("SELECT UPPER(full_name) FROM `%s.%s` ORDER BY age ASC", datasetName, tableName),
+		ViewQuery: fmt.Sprintf("SELECT * FROM `%s.%s`", datasetName, tableName),
 	}
 
 	// Creates view

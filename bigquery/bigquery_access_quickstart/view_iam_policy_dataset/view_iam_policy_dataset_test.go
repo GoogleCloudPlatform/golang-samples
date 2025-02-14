@@ -17,6 +17,7 @@ package viewiampolicydataset
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -28,13 +29,16 @@ import (
 func TestViewDatasetAccessPolicies(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	datasetName := "my_new_dataset_test"
+	preffix := testfunctions.RandString()
+	topic := fmt.Sprintf("%s_view_access_to_dataset", preffix)
+
+	datasetName := fmt.Sprintf("%s_dataset", topic)
 
 	b := bytes.Buffer{}
 
 	ctx := context.Background()
 
-	// Creates bq client.
+	// Creates Big Query client.
 	client, err := testfunctions.TestClient(t)
 	if err != nil {
 		t.Fatalf("bigquery.NewClient: %v", err)

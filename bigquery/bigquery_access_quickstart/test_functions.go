@@ -20,7 +20,18 @@ import (
 
 	"cloud.google.com/go/bigquery"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"golang.org/x/exp/rand"
 )
+
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func RandString() string {
+	b := make([]rune, 10)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
+}
 
 func TestClient(t *testing.T) (*bigquery.Client, error) {
 	t.Helper()
