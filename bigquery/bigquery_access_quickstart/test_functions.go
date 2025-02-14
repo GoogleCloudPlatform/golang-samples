@@ -22,9 +22,11 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestClient(t *testing.T, ctx context.Context) (*bigquery.Client, error) {
-	tc := testutil.SystemTest(t)
+func TestClient(t *testing.T) (*bigquery.Client, error) {
 	t.Helper()
+
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
 
 	// Creates a client.
 	client, err := bigquery.NewClient(ctx, tc.ProjectID)
@@ -34,8 +36,10 @@ func TestClient(t *testing.T, ctx context.Context) (*bigquery.Client, error) {
 	return client, nil
 }
 
-func TestCleanup(t *testing.T, ctx context.Context, client *bigquery.Client, datasetName string) {
+func TestCleanup(t *testing.T, client *bigquery.Client, datasetName string) {
 	t.Helper()
+
+	ctx := context.Background()
 
 	if err := client.Dataset(datasetName).DeleteWithContents(ctx); err != nil {
 		t.Errorf("Failed to delete table: %v", err)

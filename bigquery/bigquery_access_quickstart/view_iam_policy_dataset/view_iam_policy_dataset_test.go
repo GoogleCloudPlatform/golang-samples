@@ -35,7 +35,7 @@ func TestViewDatasetAccessPolicies(t *testing.T) {
 	ctx := context.Background()
 
 	// Creates bq client.
-	client, err := testfunctions.TestClient(t, ctx)
+	client, err := testfunctions.TestClient(t)
 	if err != nil {
 		t.Fatalf("bigquery.NewClient: %v", err)
 	}
@@ -46,7 +46,7 @@ func TestViewDatasetAccessPolicies(t *testing.T) {
 	}
 
 	// Once test is run, resources and clients are closed
-	defer testfunctions.TestCleanup(t, ctx, client, datasetName)
+	defer testfunctions.TestCleanup(t, client, datasetName)
 
 	if err := viewDatasetAccessPolicies(&b, tc.ProjectID, datasetName); err != nil {
 		t.Error(err)

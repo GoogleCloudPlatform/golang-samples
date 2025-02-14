@@ -38,7 +38,7 @@ func TestGrantAccessView(t *testing.T) {
 	ctx := context.Background()
 
 	// Creates bq client.
-	client, err := testfunctions.TestClient(t, ctx)
+	client, err := testfunctions.TestClient(t)
 	if err != nil {
 		t.Fatalf("bigquery.NewClient: %v", err)
 	}
@@ -47,7 +47,7 @@ func TestGrantAccessView(t *testing.T) {
 	dataset := client.Dataset(datasetName)
 
 	// Once test is run, resources and clients are closed
-	defer testfunctions.TestCleanup(t, ctx, client, datasetName)
+	defer testfunctions.TestCleanup(t, client, datasetName)
 
 	// Creates dataset.
 	if err := dataset.Create(ctx, &bigquery.DatasetMetadata{}); err != nil {
@@ -100,7 +100,7 @@ func TestGrantAccessTable(t *testing.T) {
 	ctx := context.Background()
 
 	// Creates bq client.
-	client, err := testfunctions.TestClient(t, ctx)
+	client, err := testfunctions.TestClient(t)
 	if err != nil {
 		t.Fatalf("bigquery.NewClient: %v", err)
 	}
@@ -109,7 +109,7 @@ func TestGrantAccessTable(t *testing.T) {
 	dataset := client.Dataset(datasetName)
 
 	// Once test is run, resources and clients are closed
-	defer testfunctions.TestCleanup(t, ctx, client, datasetName)
+	defer testfunctions.TestCleanup(t, client, datasetName)
 
 	// Creates dataset.
 	if err := dataset.Create(ctx, &bigquery.DatasetMetadata{}); err != nil {
