@@ -36,7 +36,7 @@ func ListIntents(projectID string) ([]*dialogflowpb.Intent, error) {
 	defer intentsClient.Close()
 
 	if projectID == "" {
-		return nil, fmt.Errorf("Received empty project (%s)", projectID)
+		return nil, fmt.Errorf("intentmgmt.ListIntents received empty project (%s)", projectID)
 	}
 
 	parent := fmt.Sprintf("projects/%s/agent", projectID)
