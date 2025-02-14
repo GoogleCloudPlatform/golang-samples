@@ -46,7 +46,7 @@ func createPolicyTableOrView(w io.Writer, projectID, datasetID, resourceID strin
 	}
 
 	// Adds new policy.
-	analystEmail := "example-analyst-group@google.com"
+	analystEmail := "example-analyst-group@example.com"
 	policy.Add(fmt.Sprintf("group:%s", analystEmail), iam.Viewer)
 
 	// Updates resource's policy.

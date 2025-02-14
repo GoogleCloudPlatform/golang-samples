@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package createiampolicytableorview
+package viewtableorviewpolicy
 
 import (
 	"bytes"
@@ -22,11 +22,52 @@ import (
 	"testing"
 
 	"cloud.google.com/go/bigquery"
-	bigqueryaccess "github.com/GoogleCloudPlatform/golang-samples/bigquery/bigquery_access"
+	testfunctions "github.com/GoogleCloudPlatform/golang-samples/bigquery/bigquery_access_quickstart"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestGrantAccessView(t *testing.T) {
+func TestViewTableAccessPolicies(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	datasetName := "my_new_dataset_go"
+	tableName := "my_table"
+
+	b := bytes.Buffer{}
+
+	ctx := context.Background()
+
+	// Creates bq client.
+	client, err := testfunctions.TestClient(t, ctx)
+	if err != nil {
+		t.Fatalf("bigquery.NewClient: %v", err)
+	}
+
+	// Creates dataset handler.
+	dataset := client.Dataset(datasetName)
+
+	// Once test is run, resources and clients are closed
+	defer testfunctions.TestCleanup(t, ctx, client, datasetName)
+
+	//Creates dataset.
+	if err := dataset.Create(ctx, &bigquery.DatasetMetadata{}); err != nil {
+		t.Errorf("Failed to create dataset: %v", err)
+	}
+
+	//Creates table.
+	if err := dataset.Table(tableName).Create(ctx, &bigquery.TableMetadata{}); err != nil {
+		t.Errorf("Failed to create table: %v", err)
+	}
+
+	if err := viewTableOrViewccessPolicies(&b, tc.ProjectID, datasetName, tableName); err != nil {
+		t.Error(err)
+	}
+
+	if got, want := b.String(), fmt.Sprintf("Details for Access entries in table or view %v.", tableName); !strings.Contains(got, want) {
+		t.Errorf("viewTableAccessPolicies: expected %q to contain %q", got, want)
+	}
+}
+
+func TestViewViewAccessPolicies(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	datasetName := "my_new_dataset_go"
@@ -38,7 +79,7 @@ func TestGrantAccessView(t *testing.T) {
 	ctx := context.Background()
 
 	// Creates bq client.
-	client, err := bigqueryaccess.TestClient(t, ctx)
+	client, err := testfunctions.TestClient(t, ctx)
 	if err != nil {
 		t.Fatalf("bigquery.NewClient: %v", err)
 	}
@@ -47,7 +88,7 @@ func TestGrantAccessView(t *testing.T) {
 	dataset := client.Dataset(datasetName)
 
 	// Once test is run, resources and clients are closed
-	defer bigqueryaccess.TestCleanup(t, ctx, client, datasetName)
+	defer testfunctions.TestCleanup(t, ctx, client, datasetName)
 
 	// Creates dataset.
 	if err := dataset.Create(ctx, &bigquery.DatasetMetadata{}); err != nil {
@@ -80,63 +121,11 @@ func TestGrantAccessView(t *testing.T) {
 		t.Errorf("Failed to create view: %v", err)
 	}
 
-	if err := createPolicyTableOrView(&b, tc.ProjectID, datasetName, viewName); err != nil {
+	if err := viewTableOrViewccessPolicies(&b, tc.ProjectID, datasetName, viewName); err != nil {
 		t.Error(err)
 	}
 
 	if got, want := b.String(), fmt.Sprintf("Details for Access entries in table or view %v.", viewName); !strings.Contains(got, want) {
-		t.Errorf("viewTableAccessPolicies: expected %q to contain %q", got, want)
-	}
-}
-
-func TestGrantAccessTable(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	datasetName := "my_new_dataset_go"
-	tableName := "my_table"
-
-	b := bytes.Buffer{}
-
-	ctx := context.Background()
-
-	// Creates bq client.
-	client, err := bigqueryaccess.TestClient(t, ctx)
-	if err != nil {
-		t.Fatalf("bigquery.NewClient: %v", err)
-	}
-
-	// Creates dataset handler.
-	dataset := client.Dataset(datasetName)
-
-	// Once test is run, resources and clients are closed
-	defer bigqueryaccess.TestCleanup(t, ctx, client, datasetName)
-
-	// Creates dataset.
-	if err := dataset.Create(ctx, &bigquery.DatasetMetadata{}); err != nil {
-		t.Errorf("Failed to create dataset: %v", err)
-	}
-
-	// Table schema.
-	sampleSchema := bigquery.Schema{
-		{Name: "full_name", Type: bigquery.StringFieldType},
-		{Name: "age", Type: bigquery.IntegerFieldType},
-	}
-
-	tableMetaData := &bigquery.TableMetadata{
-		Schema: sampleSchema,
-	}
-
-	// Creates table.
-	table := dataset.Table(tableName)
-	if err := table.Create(ctx, tableMetaData); err != nil {
-		t.Errorf("Failed to create table: %v", err)
-	}
-
-	if err := createPolicyTableOrView(&b, tc.ProjectID, datasetName, tableName); err != nil {
-		t.Error(err)
-	}
-
-	if got, want := b.String(), fmt.Sprintf("Details for Access entries in table or view %v.", tableName); !strings.Contains(got, want) {
 		t.Errorf("viewTableAccessPolicies: expected %q to contain %q", got, want)
 	}
 }

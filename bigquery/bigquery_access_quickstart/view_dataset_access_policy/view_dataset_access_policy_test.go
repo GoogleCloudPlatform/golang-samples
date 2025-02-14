@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"cloud.google.com/go/bigquery"
-	bigqueryaccess "github.com/GoogleCloudPlatform/golang-samples/bigquery/bigquery_access"
+	testfunctions "github.com/GoogleCloudPlatform/golang-samples/bigquery/bigquery_access_quickstart"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
@@ -35,7 +35,7 @@ func TestViewDatasetAccessPolicies(t *testing.T) {
 	ctx := context.Background()
 
 	// Creates bq client.
-	client, err := bigqueryaccess.TestClient(t, ctx)
+	client, err := testfunctions.TestClient(t, ctx)
 	if err != nil {
 		t.Fatalf("bigquery.NewClient: %v", err)
 	}
@@ -46,7 +46,7 @@ func TestViewDatasetAccessPolicies(t *testing.T) {
 	}
 
 	// Once test is run, resources and clients are closed
-	defer bigqueryaccess.TestCleanup(t, ctx, client, datasetName)
+	defer testfunctions.TestCleanup(t, ctx, client, datasetName)
 
 	if err := viewDatasetAccessPolicies(&b, tc.ProjectID, datasetName); err != nil {
 		t.Error(err)
