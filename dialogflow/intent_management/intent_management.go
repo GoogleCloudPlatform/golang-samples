@@ -16,7 +16,6 @@ package intentmgmt
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	dialogflow "cloud.google.com/go/dialogflow/apiv2"
@@ -67,7 +66,7 @@ func CreateIntent(projectID, displayName string, trainingPhraseParts, messageTex
 	defer intentsClient.Close()
 
 	if projectID == "" || displayName == "" {
-		return errors.New(fmt.Sprintf("Received empty project (%s) or intent (%s)", projectID, displayName))
+		return fmt.Errorf("intentmgmt.CreateIntent received empty project (%s) or intent (%s)", projectID, displayName)
 	}
 
 	parent := fmt.Sprintf("projects/%s/agent", projectID)
@@ -110,7 +109,7 @@ func DeleteIntent(projectID, intentID string) error {
 	defer intentsClient.Close()
 
 	if projectID == "" || intentID == "" {
-		return errors.New(fmt.Sprintf("Received empty project (%s) or intent (%s)", projectID, intentID))
+		return fmt.Errorf("intentmgmt.DeleteIntent received empty project (%s) or intent (%s)", projectID, intentID)
 	}
 
 	targetPath := fmt.Sprintf("projects/%s/agent/intents/%s", projectID, intentID)
