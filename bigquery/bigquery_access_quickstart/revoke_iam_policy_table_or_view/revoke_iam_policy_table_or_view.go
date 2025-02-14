@@ -43,7 +43,7 @@ func revokeTableOrViewAccessPolicies(w io.Writer, projectID, datasetID, resource
 		return fmt.Errorf("bigquery.Dataset.Table.IAM.Policy: %w", err)
 	}
 
-	// Adds new policy.
+	// Revokes policy access.
 	analystEmail := "example-analyst-group@google.com"
 	policy.Remove(fmt.Sprintf("group:%s", analystEmail), iam.Viewer)
 
