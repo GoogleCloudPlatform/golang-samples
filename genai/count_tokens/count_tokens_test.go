@@ -45,9 +45,22 @@ func TestTextGeneration(t *testing.T) {
 
 	t.Run("count tokens with text input", func(t *testing.T) {
 		buf.Reset()
-		err := countWithText(buf)
+		err := countWithTxt(buf)
 		if err != nil {
-			t.Fatalf("countWithText failed: %v", err)
+			t.Fatalf("countWithTxt failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("count tokens with text and video inputs", func(t *testing.T) {
+		buf.Reset()
+		err := countWithTxtAndVid(buf)
+		if err != nil {
+			t.Fatalf("countWithTxtAndVid failed: %v", err)
 		}
 
 		output := buf.String()

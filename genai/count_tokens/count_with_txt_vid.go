@@ -16,8 +16,8 @@
 package count_tokens
 
 // TODO[vburlaka@google.com,msampathkumar@google.com]: Remove `count_tokens` region tags after Feb 2025
-// [START googlegenaisdk_count_tokens_with_txt]
-// [START googlegenaisdk_counttoken_with_txt]
+// [START googlegenaisdk_count_tokens_with_txt_img_vid]
+// [START googlegenaisdk_counttoken_with_txt_vid]
 import (
 	"context"
 	"fmt"
@@ -26,8 +26,8 @@ import (
 	genai "google.golang.org/genai"
 )
 
-// countWithText shows how to count tokens with text input.
-func countWithText(w io.Writer) error {
+// countWithTxtAndVid shows how to count tokens with text and video inputs.
+func countWithTxtAndVid(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
@@ -40,7 +40,11 @@ func countWithText(w io.Writer) error {
 	modelName := "gemini-2.0-flash-001"
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
-			{Text: "What's the highest mountain in Africa?"},
+			{Text: "Provide a description of the video."},
+			{FileData: &genai.FileData{
+				FileURI:  "gs://cloud-samples-data/generative-ai/video/pixel8.mp4",
+				MIMEType: "video/mp4",
+			}},
 		}},
 	}
 
@@ -52,11 +56,11 @@ func countWithText(w io.Writer) error {
 	fmt.Fprintf(w, "Total: %d\nCached: %d\n", resp.TotalTokens, resp.CachedContentTokenCount)
 
 	// Example response:
+	// Total: 16252
 	// Cached: 0
-	// Total: 9
 
 	return nil
 }
 
-// [END googlegenaisdk_counttoken_with_txt]
-// [END googlegenaisdk_count_tokens_with_txt]
+// [END googlegenaisdk_counttoken_with_txt_vid]
+// [END googlegenaisdk_count_tokens_with_txt_img_vid]
