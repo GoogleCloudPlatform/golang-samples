@@ -30,6 +30,7 @@ import (
 )
 
 func TestPolicyTagManager(t *testing.T) {
+	t.Skip("deprecated service")
 	tc := testutil.SystemTest(t)
 
 	location := "us"
