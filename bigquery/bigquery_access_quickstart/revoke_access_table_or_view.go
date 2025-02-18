@@ -46,18 +46,14 @@ func revokeTableOrViewAccessPolicies(w io.Writer, projectID, datasetID, resource
 		return fmt.Errorf("bigquery.Dataset.Table.IAM.Policy: %w", err)
 	}
 
-	// Find more details about BigQuery Entity Types here:
-	// https://pkg.go.dev/cloud.google.com/go/bigquery#EntityType
-	//
 	// Find more details about IAM Roles here:
 	// https://pkg.go.dev/cloud.google.com/go/iam#RoleName
 
-	entityType := bigquery.GroupEmailEntity
 	entityID := "example-analyst-group@google.com"
 	roleType := iam.Viewer
 
 	// Revokes policy access.
-	policy.Remove(fmt.Sprintf("%v:%s", entityType, entityID), roleType)
+	policy.Remove(fmt.Sprintf("group:%s", entityID), roleType)
 
 	// Updates resource's policy.
 	err = client.Dataset(datasetID).Table(resourceID).IAM().SetPolicy(ctx, policy)
