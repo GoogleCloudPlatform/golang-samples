@@ -14,10 +14,8 @@
 
 package detect
 
-// [START import_libraries]
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -26,8 +24,6 @@ import (
 	dialogflow "cloud.google.com/go/dialogflow/apiv2"
 	"cloud.google.com/go/dialogflow/apiv2/dialogflowpb"
 )
-
-// [END import_libraries]
 
 // [START dialogflow_detect_intent_text]
 func DetectIntentText(projectID, sessionID, text, languageCode string) (string, error) {
@@ -40,7 +36,7 @@ func DetectIntentText(projectID, sessionID, text, languageCode string) (string, 
 	defer sessionClient.Close()
 
 	if projectID == "" || sessionID == "" {
-		return "", errors.New(fmt.Sprintf("Received empty project (%s) or session (%s)", projectID, sessionID))
+		return "", fmt.Errorf("detect.DetectIntentText received empty project (%s) or session (%s)", projectID, sessionID)
 	}
 
 	sessionPath := fmt.Sprintf("projects/%s/agent/sessions/%s", projectID, sessionID)
@@ -72,7 +68,7 @@ func DetectIntentAudio(projectID, sessionID, audioFile, languageCode string) (st
 	defer sessionClient.Close()
 
 	if projectID == "" || sessionID == "" {
-		return "", errors.New(fmt.Sprintf("Received empty project (%s) or session (%s)", projectID, sessionID))
+		return "", fmt.Errorf("detect.DetectIntentAudio empty project (%s) or session (%s)", projectID, sessionID)
 	}
 
 	sessionPath := fmt.Sprintf("projects/%s/agent/sessions/%s", projectID, sessionID)
@@ -113,7 +109,7 @@ func DetectIntentStream(projectID, sessionID, audioFile, languageCode string) (s
 	defer sessionClient.Close()
 
 	if projectID == "" || sessionID == "" {
-		return "", errors.New(fmt.Sprintf("Received empty project (%s) or session (%s)", projectID, sessionID))
+		return "", fmt.Errorf("detect.DetectIntentStream empty project (%s) or session (%s)", projectID, sessionID)
 	}
 
 	sessionPath := fmt.Sprintf("projects/%s/agent/sessions/%s", projectID, sessionID)
