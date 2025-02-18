@@ -46,9 +46,18 @@ func grantAccessToResource(w io.Writer, projectID, datasetID, resourceID string)
 		return fmt.Errorf("bigquery.Dataset.Table.IAM.Policy: %w", err)
 	}
 
+	// Find more details about BigQuery Entity Types here:
+	// https://pkg.go.dev/cloud.google.com/go/bigquery#EntityType
+	//
+	// Find more details about IAM Roles here:
+	// https://pkg.go.dev/cloud.google.com/go/iam#RoleName
+
+	entityType := bigquery.GroupEmailEntity
+	entityID := "example-analyst-group@google.com"
+	roleType := iam.Viewer
+
 	// Adds new policy.
-	analystEmail := "example-analyst-group@google.com"
-	policy.Add(fmt.Sprintf("group:%s", analystEmail), iam.Viewer)
+	policy.Add(fmt.Sprintf("%v:%s", entityType, entityID), roleType)
 
 	// Updates resource's policy.
 	err = client.Dataset(datasetID).Table(resourceID).IAM().SetPolicy(ctx, policy)

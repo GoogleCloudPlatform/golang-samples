@@ -47,13 +47,23 @@ func grantAccessToDataset(w io.Writer, projectID, datasetID string) error {
 		return fmt.Errorf("bigquery.Dataset.Metadata: %w", err)
 	}
 
+	// Find more details about BigQuery Entity Types here:
+	// https://pkg.go.dev/cloud.google.com/go/bigquery#EntityType
+	//
+	// Find more details about BigQuery Access Roles here:
+	// https://pkg.go.dev/cloud.google.com/go/bigquery#AccessRole
+
+	entityType := bigquery.GroupEmailEntity
+	entityID := "example-analyst-group@google.com"
+	roleType := bigquery.ReaderRole
+
 	// Appends a new access control entry to the existing access list.
 	update := bigquery.DatasetMetadataToUpdate{
 		Access: append(meta.Access, &bigquery.AccessEntry{
-			Role:       bigquery.ReaderRole,
-			EntityType: bigquery.GroupEmailEntity,
-			Entity:     "example-analyst-group@google.com"},
-		),
+			Role:       roleType,
+			EntityType: entityType,
+			Entity:     entityID,
+		}),
 	}
 
 	// Leverage the ETag for the update to assert there's been no modifications to the
