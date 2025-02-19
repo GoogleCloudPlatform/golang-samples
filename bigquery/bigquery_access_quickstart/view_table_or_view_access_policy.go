@@ -22,24 +22,27 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
-// [START bigquery_view_table_or_view_access_policy]
-func viewTableOrViewccessPolicies(w io.Writer, projectID, datasetID, resourceID string) error {
+func viewTableOrViewAccessPolicies(w io.Writer, projectID, datasetID, resourceID string) error {
 
+	// [START bigquery_view_table_or_view_access_policy]
+
+	// Resource can be a table or a view
+	//
 	// TODO(developer): uncomment and update the following lines:
 	// projectID := "my-project-id"
-	// datasetID := "mydataset"
-	// resourceID := "myresource"
+	// datasetID := "my-dataset-id"
+	// resourceID := "my-resource-id"
 
 	ctx := context.Background()
 
-	// Creates new client.
+	// Create new client.
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 
-	// Gets table's policy access.
+	// Get resource's policy access.
 	policy, err := client.Dataset(datasetID).Table(resourceID).IAM().Policy(ctx)
 	if err != nil {
 		return fmt.Errorf("bigquery.Dataset.Table.IAM.Policy: %w", err)
@@ -48,10 +51,12 @@ func viewTableOrViewccessPolicies(w io.Writer, projectID, datasetID, resourceID 
 	fmt.Fprintf(w, "Details for Access entries in table or view %v.\n", resourceID)
 
 	for _, role := range policy.Roles() {
-		fmt.Fprintf(w, "Role %s : %s\n", role, policy.Members(role))
+		fmt.Fprintln(w)
+		fmt.Fprintf(w, "Role: %s\n", role)
+		fmt.Fprintf(w, "Entities: %v\n", policy.Members(role))
 	}
+
+	// [END bigquery_view_table_or_view_access_policy]
 
 	return nil
 }
-
-// [END bigquery_view_table_or_view_access_policy]

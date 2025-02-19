@@ -22,8 +22,9 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
-// [START bigquery_grant_access_to_dataset]
 func grantAccessToDataset(w io.Writer, projectID, datasetID string) error {
+
+	// [START bigquery_grant_access_to_dataset]
 
 	// TODO(developer): uncomment and update the following lines:
 	// projectID := "my-project-id"
@@ -31,17 +32,17 @@ func grantAccessToDataset(w io.Writer, projectID, datasetID string) error {
 
 	ctx := context.Background()
 
-	// Creates BigQuery handler.
+	// Create BigQuery handler.
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 
-	// Creates dataset handler
+	// Create dataset handler
 	dataset := client.Dataset(datasetID)
 
-	//Gets metadata
+	// Get metadata
 	meta, err := dataset.Metadata(ctx)
 	if err != nil {
 		return fmt.Errorf("bigquery.Dataset.Metadata: %w", err)
@@ -57,7 +58,7 @@ func grantAccessToDataset(w io.Writer, projectID, datasetID string) error {
 	entityID := "example-analyst-group@google.com"
 	roleType := bigquery.ReaderRole
 
-	// Appends a new access control entry to the existing access list.
+	// Append a new access control entry to the existing access list.
 	update := bigquery.DatasetMetadataToUpdate{
 		Access: append(meta.Access, &bigquery.AccessEntry{
 			Role:       roleType,
@@ -75,10 +76,13 @@ func grantAccessToDataset(w io.Writer, projectID, datasetID string) error {
 
 	fmt.Fprintf(w, "Details for Access entries in dataset %v.\n", datasetID)
 	for _, access := range meta.Access {
-		fmt.Fprintf(w, "Role %s : %s\n", access.Role, access.Entity)
+		fmt.Fprintln(w)
+		fmt.Fprintf(w, "Role: %s\n", access.Role)
+		fmt.Fprintf(w, "Entities: %v\n", access.Entity)
 	}
 
-	return nil
-}
+	// [END bigquery_grant_access_to_dataset]
 
-// [END bigquery_grant_access_to_dataset]
+	return nil
+
+}

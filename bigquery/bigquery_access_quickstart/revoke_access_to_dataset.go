@@ -22,8 +22,9 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
-// [START bigquery_revoke_dataset_access]
 func revokeAccessToDataset(w io.Writer, projectID, datasetID, entity string) error {
+
+	// [START bigquery_revoke_dataset_access]
 
 	// TODO(developer): uncomment and update the following lines:
 	// projectID := "my-project-id"
@@ -32,23 +33,23 @@ func revokeAccessToDataset(w io.Writer, projectID, datasetID, entity string) err
 
 	ctx := context.Background()
 
-	// Creates BigQuery client.
+	// Create BigQuery client.
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 
-	// Gets dataset handler
+	// Get dataset handler
 	dataset := client.Dataset(datasetID)
 
-	// Gets dataset metadata
+	// Get dataset metadata
 	meta, err := dataset.Metadata(ctx)
 	if err != nil {
 		return err
 	}
 
-	// Creates new access entry list by copying the existing and omiting the access entry entity value
+	// Create new access entry list by copying the existing and omiting the access entry entity value
 	var newAccessList []*bigquery.AccessEntry
 	for _, entry := range meta.Access {
 		if entry.Entity != entity {
@@ -74,10 +75,12 @@ func revokeAccessToDataset(w io.Writer, projectID, datasetID, entity string) err
 	fmt.Fprintf(w, "Details for Access entries in dataset %v.\n", datasetID)
 
 	for _, access := range meta.Access {
-		fmt.Fprintf(w, "Role %s : %s\n", access.Role, access.Entity)
+		fmt.Fprintln(w)
+		fmt.Fprintf(w, "Role: %s\n", access.Role)
+		fmt.Fprintf(w, "Entity: %v\n", access.Entity)
 	}
+
+	// [END bigquery_revoke_dataset_access]
 
 	return nil
 }
-
-// [END bigquery_revoke_dataset_access]

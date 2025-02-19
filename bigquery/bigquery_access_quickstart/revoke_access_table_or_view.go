@@ -23,9 +23,12 @@ import (
 	"cloud.google.com/go/iam"
 )
 
-// [START bigquery_revoke_access_to_table_or_view]
 func revokeTableOrViewAccessPolicies(w io.Writer, projectID, datasetID, resourceID string) error {
 
+	// [START bigquery_revoke_access_to_table_or_view]
+
+	// Resource can be a table or a view
+	//
 	// TODO(developer): uncomment and update the following lines:
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
@@ -33,14 +36,14 @@ func revokeTableOrViewAccessPolicies(w io.Writer, projectID, datasetID, resource
 
 	ctx := context.Background()
 
-	// Creates new client
+	// Create new client
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
 	defer client.Close()
 
-	// Gets resource policy.
+	// Get resource policy.
 	policy, err := client.Dataset(datasetID).Table(resourceID).IAM().Policy(ctx)
 	if err != nil {
 		return fmt.Errorf("bigquery.Dataset.Table.IAM.Policy: %w", err)
@@ -52,28 +55,30 @@ func revokeTableOrViewAccessPolicies(w io.Writer, projectID, datasetID, resource
 	entityID := "example-analyst-group@google.com"
 	roleType := iam.Viewer
 
-	// Revokes policy access.
+	// Revoke policy access.
 	policy.Remove(fmt.Sprintf("group:%s", entityID), roleType)
 
-	// Updates resource's policy.
+	// Update resource's policy.
 	err = client.Dataset(datasetID).Table(resourceID).IAM().SetPolicy(ctx, policy)
 	if err != nil {
 		return fmt.Errorf("bigquery.Dataset.Table.IAM.Policy: %w", err)
 	}
 
-	// Gets resource policy again expecting the update.
-	updatedPolicy, err := client.Dataset(datasetID).Table(resourceID).IAM().Policy(ctx)
+	// Get resource policy again expecting the update.
+	policy, err = client.Dataset(datasetID).Table(resourceID).IAM().Policy(ctx)
 	if err != nil {
 		return fmt.Errorf("bigquery.Dataset.Table.IAM.Policy: %w", err)
 	}
 
 	fmt.Fprintf(w, "Details for Access entries in table or view %v.\n", resourceID)
 
-	for _, role := range updatedPolicy.Roles() {
-		fmt.Fprintf(w, "Role %s : %s\n", role, policy.Members(role))
+	for _, role := range policy.Roles() {
+		fmt.Fprintln(w)
+		fmt.Fprintf(w, "Role: %s\n", role)
+		fmt.Fprintf(w, "Entities: %v\n", policy.Members(role))
 	}
+
+	// [END bigquery_revoke_access_to_table_or_view]
 
 	return nil
 }
-
-// [END bigquery_revoke_access_to_table_or_view]
