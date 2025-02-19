@@ -23,12 +23,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 
-	// [START language_imports]
 	language "cloud.google.com/go/language/apiv1"
 	"cloud.google.com/go/language/apiv1/languagepb"
-	// [END language_imports]
 )
 
 func main() {
@@ -148,5 +146,11 @@ func printResp(v proto.Message, err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	proto.MarshalText(os.Stdout, v)
+
+	out, err := proto.Marshal(v)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Fprint(os.Stdout, out)
 }
