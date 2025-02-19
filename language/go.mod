@@ -5,7 +5,7 @@ go 1.22.0
 require (
 	cloud.google.com/go/language v1.14.3
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	github.com/golang/protobuf v1.5.4
+	google.golang.org/protobuf v1.36.3
 )
 
 require (
@@ -54,5 +54,4 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20250115164207-1a7da9e5054f // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250115164207-1a7da9e5054f // indirect
 	google.golang.org/grpc v1.69.4 // indirect
-	google.golang.org/protobuf v1.36.3 // indirect
 )
