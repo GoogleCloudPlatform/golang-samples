@@ -28,7 +28,7 @@ import (
 
 // findLabels gets labels from the Vision API for an image at the given file path.
 func findLabels(file string) ([]string, error) {
-	// [START init]
+
 	ctx := context.Background()
 
 	// Create the client.
@@ -37,7 +37,6 @@ func findLabels(file string) ([]string, error) {
 		return nil, err
 	}
 	defer client.Close()
-	// [END init]
 
 	// [START request]
 	// Open the file.
