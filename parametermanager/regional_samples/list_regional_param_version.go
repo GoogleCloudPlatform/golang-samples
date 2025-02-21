@@ -32,7 +32,6 @@ import (
 // projectID: The ID of the project where the parameter is located.
 // locationID: The ID of the region where the parameter is located.
 // parameterID: The ID of the parameter for which the version is to be listed.
-// versionID: The ID of the version to be listed.
 //
 // The function returns an error if the parameter version listing fails
 func listRegionalParamVersion(w io.Writer, projectID, locationID, parameterID string) error {
