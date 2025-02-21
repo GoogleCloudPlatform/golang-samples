@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/pubsub
 
-go 1.22.7
+go 1.23.0
 
 require (
 	cloud.google.com/go/bigquery v1.66.0
