@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package content_cache shows examples of ... [TODO]
+// Package content_cache shows examples of using content caching with the GenAI SDK.
 package content_cache
 
 // [START googlegenaisdk_contentcache_create_with_txt_gcs_pdf]
@@ -25,7 +25,7 @@ import (
 	genai "google.golang.org/genai"
 )
 
-// createContentCache shows how to create a content cache [TODO]
+// createContentCache shows how to create a content cache with an expiration parameter.
 func createContentCache(w io.Writer) (string, error) {
 	ctx := context.Background()
 
@@ -38,8 +38,9 @@ func createContentCache(w io.Writer) (string, error) {
 
 	modelName := "gemini-1.5-pro-002"
 
-	systemInstruction := `You are an expert researcher. You always stick to the facts in the sources provided, and never make up new facts.
-Now look at these research papers, and answer the following questions.`
+	systemInstruction := "You are an expert researcher. You always stick to the facts " +
+		"in the sources provided, and never make up new facts. " +
+		"Now look at these research papers, and answer the following questions."
 
 	cacheContents := []*genai.Content{
 		{

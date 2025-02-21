@@ -17,6 +17,7 @@ package content_cache
 import (
 	"bytes"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -31,21 +32,35 @@ func TestContentCaching(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 
-	// 1) Create a content cache. The name of the cache created will be used in the next test steps.
+	// 1) Create a content cache.
+	// The name of the cache resource created in this step will be used in the next test steps.
 	cacheName, err := createContentCache(buf)
 	if err != nil {
 		t.Fatalf("createContentCache: %v", err.Error())
 	}
 
-	fmt.Println(cacheName)
-
-	// 2) Update the cached content by its name.
-	buf.Reset()
+	// 2) Update the expiration time of the content cache.
 	err = updateContentCache(buf, cacheName)
 	if err != nil {
 		t.Errorf("updateContentCache: %v", err.Error())
 	}
 
-	// 3) - Use
-	// 4) - Delete
+	// 3) Use cached content with a text prompt.
+	err = useContentCacheWithTxt(buf, cacheName)
+	if err != nil {
+		t.Errorf("useContentCacheWithTxt: %v", err.Error())
+	}
+
+	// 4) Delete the content cache.
+	buf.Reset()
+	err = deleteContentCache(buf, cacheName)
+	if err != nil {
+		t.Errorf("deleteContentCache: %v", err.Error())
+	}
+
+	exp := fmt.Sprintf("Deleted cache %q", cacheName)
+	act := buf.String()
+	if !strings.Contains(act, exp) {
+		t.Errorf("deleteContentCache: got %q, want %q", act, exp)
+	}
 }

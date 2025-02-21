@@ -15,18 +15,17 @@
 // Package content_cache shows examples of using content caching with the GenAI SDK.
 package content_cache
 
-// [START googlegenaisdk_contentcache_update]
+// [START googlegenaisdk_contentcache_use_with_txt]
 import (
 	"context"
 	"fmt"
 	"io"
-	"time"
 
 	genai "google.golang.org/genai"
 )
 
-// updateContentCache shows how to update content cache expiration time.
-func updateContentCache(w io.Writer, cacheName string) error {
+// useContentCacheWithTxt shows how to use content cache to generate text content.
+func useContentCacheWithTxt(w io.Writer, cacheName string) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
@@ -36,32 +35,31 @@ func updateContentCache(w io.Writer, cacheName string) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	// Update expire time using TTL
-	resp, err := client.Caches.Update(ctx, cacheName, &genai.UpdateCachedContentConfig{
-		TTL: "36000s",
-	})
+	resp, err := client.Models.GenerateContent(ctx,
+		"gemini-1.5-pro-002",
+		genai.Text("Summarize the pdfs"),
+		&genai.GenerateContentConfig{
+			CachedContent: cacheName,
+		},
+	)
 	if err != nil {
-		return fmt.Errorf("failed to update content cache exp. time with TTL: %w", err)
+		return fmt.Errorf("failed to use content cache to generate content: %w", err)
 	}
 
-	fmt.Fprintf(w, "Cache expires in: %s\n", time.Until(*resp.ExpireTime))
-	// Example response:
-	// Cache expires in: 10h0m0.005875s
-
-	// Update expire time using specific time stamp
-	inSevenDays := time.Now().Add(7 * 24 * time.Hour)
-	resp, err = client.Caches.Update(ctx, cacheName, &genai.UpdateCachedContentConfig{
-		ExpireTime: &inSevenDays,
-	})
+	respText, err := resp.Text()
 	if err != nil {
-		return fmt.Errorf("failed to update content cache expire time: %w", err)
+		return fmt.Errorf("failed to convert model response to text: %w", err)
 	}
+	fmt.Fprintln(w, respText)
 
-	fmt.Fprintf(w, "Cache expires in: %s\n", time.Until(*resp.ExpireTime))
 	// Example response:
-	// Cache expires in: 167h59m59.80327s
+	// The provided research paper introduces Gemini 1.5 Pro, a multimodal model capable of recalling
+	// and reasoning over information from very long contexts (up to 10 million tokens).  Key findings include:
+	//
+	// * **Long Context Performance:**
+	// ...
 
 	return nil
 }
 
-// [END googlegenaisdk_contentcache_update]
+// [END googlegenaisdk_contentcache_use_with_txt]

@@ -20,13 +20,12 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"time"
 
 	genai "google.golang.org/genai"
 )
 
-// updateContentCache shows how to update content cache expiration time.
-func updateContentCache(w io.Writer, cacheName string) error {
+// deleteContentCache shows how to delete content cache.
+func deleteContentCache(w io.Writer, cacheName string) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
@@ -36,30 +35,15 @@ func updateContentCache(w io.Writer, cacheName string) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	// Update expire time using TTL
-	resp, err := client.Caches.Update(ctx, cacheName, &genai.UpdateCachedContentConfig{
-		TTL: "36000s",
-	})
+	_, err = client.Caches.Delete(ctx, cacheName, &genai.DeleteCachedContentConfig{})
 	if err != nil {
-		return fmt.Errorf("failed to update content cache exp. time with TTL: %w", err)
+		return fmt.Errorf("failed to delete content cache: %w", err)
 	}
 
-	fmt.Fprintf(w, "Cache expires in: %s\n", time.Until(*resp.ExpireTime))
-	// Example response:
-	// Cache expires in: 10h0m0.005875s
+	fmt.Fprintf(w, "Deleted cache %q\n", cacheName)
 
-	// Update expire time using specific time stamp
-	inSevenDays := time.Now().Add(7 * 24 * time.Hour)
-	resp, err = client.Caches.Update(ctx, cacheName, &genai.UpdateCachedContentConfig{
-		ExpireTime: &inSevenDays,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to update content cache expire time: %w", err)
-	}
-
-	fmt.Fprintf(w, "Cache expires in: %s\n", time.Until(*resp.ExpireTime))
 	// Example response:
-	// Cache expires in: 167h59m59.80327s
+	// Deleted cache "projects/111111111111/locations/us-central1/cachedContents/1111111111111111111"
 
 	return nil
 }
