@@ -107,6 +107,7 @@ use (
 	./monitoring
 	./opentelemetry/instrumentation/app
 	./opentelemetry/trace
+	./parametermanager
 	./privateca
 	./profiler
 	./profiler/shakesapp
