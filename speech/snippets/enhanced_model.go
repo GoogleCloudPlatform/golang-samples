@@ -16,17 +16,14 @@
 package snippets
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
 	"strings"
 
-	// [START imports]
-	"context"
-
 	speech "cloud.google.com/go/speech/apiv1"
 	"cloud.google.com/go/speech/apiv1/speechpb"
-	// [END imports]
 )
 
 // [START speech_transcribe_enhanced_model]
