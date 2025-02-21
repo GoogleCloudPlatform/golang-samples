@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START intro]
+// [START gae_taskqueue_push_intro]
 
 package counter
 
@@ -88,4 +88,4 @@ const handlerHTML = `
 </form>
 `
 
-// [END intro]
+// [END gae_taskqueue_push_intro]
