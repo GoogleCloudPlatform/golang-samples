@@ -28,7 +28,7 @@ import (
 //
 // w: The io.Writer object used to write the output.
 // projectID: The ID of the project where the parameter is located.
-// parameterID: The ID of the parameter for which the version is to be created.
+// parameterID: The ID of the parameter to be created.
 //
 // The function returns an error if the parameter creation fails.
 func createParam(w io.Writer, projectID, parameterID string) error {

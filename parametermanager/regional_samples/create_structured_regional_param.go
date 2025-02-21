@@ -29,8 +29,8 @@ import (
 //
 // w: The io.Writer object used to write the output.
 // projectID: The ID of the project where the parameter is located.
-// locationID: The ID of the region where the parameter is located.
-// parameterID: The ID of the parameter for which the version is to be created.
+// locationID: The region where the parameter is to be created.
+// parameterID: The ID of the parameter to be created.
 // format: The format type of the parameter (UNFORMATTED, YAML, JSON).
 //
 // The function returns an error if the parameter creation fails.

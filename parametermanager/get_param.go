@@ -28,7 +28,7 @@ import (
 //
 // w: The io.Writer object used to write the output.
 // projectID: The ID of the project where the parameter is located.
-// parameterID: The ID of the parameter to retrieve.
+// parameterID: The ID of the parameter to retrieved.
 //
 // The function returns an error if the parameter retrieval fails.
 func getParam(w io.Writer, projectID, parameterID string) error {
