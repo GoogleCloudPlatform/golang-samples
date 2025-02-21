@@ -21,11 +21,9 @@ import (
 	"os"
 	"path/filepath"
 
-	// [START imports]
 	"context"
 
 	vision "cloud.google.com/go/vision/apiv1"
-	// [END imports]
 )
 
 // findLabels gets labels from the Vision API for an image at the given file path.
