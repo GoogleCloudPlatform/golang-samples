@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/appengine_flexible/staticfiles
 
-go 1.22.0
+go 1.23.0
 
 require google.golang.org/appengine v1.6.8
 
