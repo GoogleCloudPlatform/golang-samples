@@ -14,6 +14,7 @@
 
 package sample
 
+// [START gae_datastore_intro]
 // [START intro]
 import (
 	"fmt"
@@ -58,3 +59,4 @@ func handle(w http.ResponseWriter, r *http.Request) {
 }
 
 // [END intro]
+// [END gae_datastore_intro]
