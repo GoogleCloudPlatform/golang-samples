@@ -14,7 +14,7 @@
 
 package sample
 
-// [START intro]
+// [START gae_urlfetch_intro]
 import (
 	"fmt"
 	"net/http"
@@ -34,4 +34,4 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "HTTP GET returned status %v", resp.Status)
 }
 
-// [END intro]
+// [END gae_urlfetch_intro]
