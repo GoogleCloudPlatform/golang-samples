@@ -42,4 +42,43 @@ func TestTextGeneration(t *testing.T) {
 			t.Error("expected non-empty output, got empty")
 		}
 	})
+
+	t.Run("generate with text prompt and custom configuration", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithConfig(buf)
+		if err != nil {
+			t.Fatalf("generateWithConfig failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate with text prompt and system instructions", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithSystem(buf)
+		if err != nil {
+			t.Fatalf("generateWithSystem failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate stream with text prompt", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithTextStream(buf)
+		if err != nil {
+			t.Fatalf("generateWithTextStream failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
 }
