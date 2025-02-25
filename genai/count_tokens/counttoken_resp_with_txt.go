@@ -15,19 +15,18 @@
 // Package count_tokens shows examples of counting tokens using the GenAI SDK.
 package count_tokens
 
-// TODO[vburlaka@google.com,msampathkumar@google.com]: Remove `count_tokens` region tags after Feb 2025
-// [START googlegenaisdk_count_tokens_with_txt]
-// [START googlegenaisdk_counttoken_with_txt]
+// [START googlegenaisdk_counttoken_resp_with_txt]
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 
 	genai "google.golang.org/genai"
 )
 
-// countWithTxt shows how to count tokens with text input.
-func countWithTxt(w io.Writer) error {
+// generateTextAndCount shows how to generate text and obtain token count metadata from the model response.
+func generateTextAndCount(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
@@ -40,23 +39,29 @@ func countWithTxt(w io.Writer) error {
 	modelName := "gemini-2.0-flash-001"
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
-			{Text: "What's the highest mountain in Africa?"},
+			{Text: "Why is the sky blue?"},
 		}},
 	}
 
-	resp, err := client.Models.CountTokens(ctx, modelName, contents, nil)
+	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)
 	if err != nil {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
 
-	fmt.Fprintf(w, "Total: %d\nCached: %d\n", resp.TotalTokens, resp.CachedContentTokenCount)
+	usage, err := json.MarshalIndent(resp.UsageMetadata, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to convert usage metadata to JSON: %w", err)
+	}
+	fmt.Fprintln(w, string(usage))
 
 	// Example response:
-	// Total: 9
-	// Cached: 0
+	// {
+	// 	 "candidatesTokenCount": 339,
+	// 	 "promptTokenCount": 6,
+	// 	 "totalTokenCount": 345
+	// }
 
 	return nil
 }
 
-// [END googlegenaisdk_counttoken_with_txt]
-// [END googlegenaisdk_count_tokens_with_txt]
+// [END googlegenaisdk_counttoken_resp_with_txt]

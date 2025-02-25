@@ -15,8 +15,6 @@
 // Package count_tokens shows examples of counting tokens using the GenAI SDK.
 package count_tokens
 
-// TODO[vburlaka@google.com,msampathkumar@google.com]: Remove `count_tokens` region tags after Feb 2025
-// [START googlegenaisdk_count_tokens_with_txt_img_vid]
 // [START googlegenaisdk_counttoken_with_txt_vid]
 import (
 	"context"
@@ -63,4 +61,3 @@ func countWithTxtAndVid(w io.Writer) error {
 }
 
 // [END googlegenaisdk_counttoken_with_txt_vid]
-// [END googlegenaisdk_count_tokens_with_txt_img_vid]
