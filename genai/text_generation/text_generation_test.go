@@ -81,4 +81,56 @@ func TestTextGeneration(t *testing.T) {
 			t.Error("expected non-empty output, got empty")
 		}
 	})
+
+	t.Run("generate with text and image prompt", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithTextImage(buf)
+		if err != nil {
+			t.Fatalf("generateWithTextImage failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate with multiple image inputs", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithMultiImg(buf)
+		if err != nil {
+			t.Fatalf("generateWithMultiImg failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate with multiple local image inputs", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithMultiLocalImg(buf)
+		if err != nil {
+			t.Fatalf("generateWithMultiLocalImg failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate with pdf file input", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithPDF(buf)
+		if err != nil {
+			t.Fatalf("generateWithPDF failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
 }
