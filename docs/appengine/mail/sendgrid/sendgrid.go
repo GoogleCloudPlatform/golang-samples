@@ -14,7 +14,7 @@
 
 package sendgrid
 
-// [START gae_mail_sendgrid]
+// [START sample]
 
 import (
 	"net/http"
@@ -38,4 +38,4 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	sg.Send(message)
 }
 
-// [END gae_mail_sendgrid]
+// [END sample]
