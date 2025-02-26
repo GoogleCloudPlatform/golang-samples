@@ -27,12 +27,12 @@ import (
 
 // [END gae_go111_import]
 
-// [START main_func]
+// [START appengine_main_func]
 
 func main() {
 	http.HandleFunc("/", indexHandler)
 
-	// [START setting_port]
+	// [START appengine_setting_port]
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
@@ -48,7 +48,7 @@ func main() {
 
 // [END main_func]
 
-// [START indexHandler]
+// [START appengine_indexHandler]
 
 // indexHandler responds to requests with our greeting.
 func indexHandler(w http.ResponseWriter, r *http.Request) {
