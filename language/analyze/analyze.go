@@ -34,14 +34,12 @@ func main() {
 		usage("Missing command.")
 	}
 
-	// [START init]
 	ctx := context.Background()
 	client, err := language.NewClient(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer client.Close()
-	// [END init]
 
 	text := strings.Join(os.Args[2:], " ")
 	if text == "" {

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START package_example_1]
+// [START gae_unittest_package_example]
 
 package newsletter
 
@@ -35,7 +35,7 @@ func TestComposeNewsletter(t *testing.T) {
 	}
 }
 
-// [END package_example_1]
+// [END gae_unittest_package_example]
 
 func composeNewsletter() *mail.Message {
 	return &mail.Message{
