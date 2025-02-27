@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START gae_datastore_using_transactions]
 // [START using_transactions]
 
 package counter
@@ -61,7 +62,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 // [END using_transactions]
+// [END gae_datastore_using_transactions]
 
+// [START gae_datastore_uses_for_transactions_1]
 // [START uses_for_transactions_1]
 func increment(ctx context.Context, key *datastore.Key) error {
 	return datastore.RunInTransaction(ctx, func(ctx context.Context) error {
@@ -76,7 +79,9 @@ func increment(ctx context.Context, key *datastore.Key) error {
 }
 
 // [END uses_for_transactions_1]
+// [END gae_datastore_uses_for_transactions_1]
 
+// [START gae_datastore_uses_for_transactions_2]
 // [START uses_for_transactions_2]
 type Account struct {
 	Address string
@@ -99,9 +104,11 @@ func GetOrUpdate(ctx context.Context, id, addr, phone string) error {
 }
 
 // [END uses_for_transactions_2]
+// [END gae_datastore_uses_for_transactions_2]
 
 func example() {
 	var ctx context.Context
+	// [START gae_datastore_transactional_task_enqueuing]
 	// [START transactional_task_enqueuing]
 	datastore.RunInTransaction(ctx, func(ctx context.Context) error {
 		t := &taskqueue.Task{Path: "/path/to/worker"}
@@ -112,4 +119,5 @@ func example() {
 		return nil
 	}, nil)
 	// [END transactional_task_enqueuing]
+	// [END gae_datastore_transactional_task_enqueuing]
 }
