@@ -14,7 +14,7 @@
 
 package newsletter
 
-// [START utility_example_2]
+// [START gae_unittest_utility_example_2]
 import (
 	"context"
 	"errors"
@@ -52,7 +52,7 @@ func TestMyFunction(t *testing.T) {
 	// [END_EXCLUDE]
 }
 
-// [END utility_example_2]
+// [END gae_unittest_utility_example_2]
 
 // [START datastore_example_1]
 func TestWithdrawLowBal(t *testing.T) {

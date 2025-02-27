@@ -14,7 +14,7 @@
 
 package newsletter
 
-// [START utility_example_1]
+// [START gae_unittest_utility_example_1]
 import (
 	"testing"
 
@@ -34,7 +34,7 @@ func TestWithContext(t *testing.T) {
 	// [END_EXCLUDE]
 }
 
-// [END utility_example_1]
+// [END gae_unittest_utility_example_1]
 
 func check(t *testing.T, ctx interface{}) {
 }
