@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/cloudsql/postgres/database-sql
 
-go 1.22.0
+go 1.23.0
 
 require (
 	cloud.google.com/go/cloudsqlconn v1.14.1
