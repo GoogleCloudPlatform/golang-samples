@@ -17,12 +17,15 @@
 // Sample helloworld is an App Engine app.
 package main
 
+// [START gae_go111_import]
 import (
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 )
+
+// [END gae_go111_import]
 
 // [START gae_go111_main_func]
 // [START main_func]
