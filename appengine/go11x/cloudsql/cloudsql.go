@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START gae_cloudsql]
-
 // Sample cloudsql demonstrates connection to a Cloud SQL instance from App Engine standard.
 package main
 
@@ -119,5 +117,3 @@ func mustGetenv(k string) string {
 	}
 	return v
 }
-
-// [END gae_cloudsql]
