@@ -15,12 +15,13 @@
 // Package snippets contains speech examples.
 package snippets
 
+// [START tts_synthesize_text_audio_profile]
 // [START texttospeech_audio_profile]
 
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 
 	"context"
 
@@ -57,7 +58,7 @@ func audioProfile(w io.Writer, text string, outputFile string) error {
 		return fmt.Errorf("SynthesizeSpeech: %w", err)
 	}
 
-	if err = ioutil.WriteFile(outputFile, resp.AudioContent, 0644); err != nil {
+	if err = os.WriteFile(outputFile, resp.AudioContent, 0644); err != nil {
 		return err
 	}
 
@@ -67,3 +68,4 @@ func audioProfile(w io.Writer, text string, outputFile string) error {
 }
 
 // [END texttospeech_audio_profile]
+// [END tts_synthesize_text_audio_profile]
