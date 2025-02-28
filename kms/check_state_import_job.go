@@ -14,7 +14,6 @@
 
 package kms
 
-// [START kms_check_state_import_job]
 import (
 	"context"
 	"fmt"
@@ -46,5 +45,3 @@ func checkStateImportJob(w io.Writer, name string) error {
 	fmt.Fprintf(w, "Current state of import job %q: %s\n", result.Name, result.State)
 	return nil
 }
-
-// [END kms_check_state_import_job]

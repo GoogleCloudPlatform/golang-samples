@@ -32,8 +32,6 @@ func init() {
 	_ = os.Open
 }
 
-// [START vision_face_detection]
-
 // detectFaces gets faces from the Vision API for an image at the given file path.
 func detectFaces(w io.Writer, file string) error {
 	ctx := context.Background()
@@ -71,8 +69,6 @@ func detectFaces(w io.Writer, file string) error {
 	}
 	return nil
 }
-
-// [END vision_face_detection]
 
 // [START vision_label_detection]
 
