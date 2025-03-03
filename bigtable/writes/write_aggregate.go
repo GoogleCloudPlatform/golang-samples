@@ -15,7 +15,6 @@
 // Package writes contains snippets related to writing to Cloud Bigtable.
 package writes
 
-// [START bigtable_writes_aggregate]
 import (
 	"context"
 	"fmt"
@@ -55,5 +54,3 @@ func writeAggregate(w io.Writer, projectID, instanceID string, tableName string)
 	fmt.Fprintf(w, "Successfully wrote row: %s\n", rowKey)
 	return nil
 }
-
-// [END bigtable_writes_aggregate]
