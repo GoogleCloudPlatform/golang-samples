@@ -22,4 +22,4 @@ handlers:
   login: admin
 - url: /.*
   script: _go_app
-/ [START gae_taskqueue_securing_urls_yaml_go]
+/ [END gae_taskqueue_securing_urls_yaml_go]
