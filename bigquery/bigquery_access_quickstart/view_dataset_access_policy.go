@@ -14,6 +14,7 @@
 
 package bigqueryaccessquickstart
 
+// [START bigquery_view_dataset_access_policy]
 import (
 	"context"
 	"fmt"
@@ -22,10 +23,10 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// viewDatasetAccessPolicies retrieves the ACL for the given dataset
+// For more information on the types of ACLs available see:
+// https://cloud.google.com/storage/docs/access-control/lists
 func viewDatasetAccessPolicies(w io.Writer, projectID, datasetID string) error {
-
-	// [START bigquery_view_dataset_access_policy]
-
 	// TODO(developer): uncomment and update the following lines:
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
@@ -54,7 +55,7 @@ func viewDatasetAccessPolicies(w io.Writer, projectID, datasetID string) error {
 		fmt.Fprintf(w, "Entity: %v\n", access.Entity)
 	}
 
-	// [END bigquery_view_dataset_access_policy]
-
 	return nil
 }
+
+// [END bigquery_view_dataset_access_policy]

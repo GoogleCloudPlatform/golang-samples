@@ -14,6 +14,7 @@
 
 package bigqueryaccessquickstart
 
+// [START bigquery_view_table_or_view_access_policy]
 import (
 	"context"
 	"fmt"
@@ -22,10 +23,10 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// viewTableOrViewAccessPolicies retrieves the ACL for the given resource
+// For more information on the types of ACLs available see:
+// https://cloud.google.com/storage/docs/access-control/lists
 func viewTableOrViewAccessPolicies(w io.Writer, projectID, datasetID, resourceID string) error {
-
-	// [START bigquery_view_table_or_view_access_policy]
-
 	// Resource can be a table or a view
 	//
 	// TODO(developer): uncomment and update the following lines:
@@ -56,7 +57,7 @@ func viewTableOrViewAccessPolicies(w io.Writer, projectID, datasetID, resourceID
 		fmt.Fprintf(w, "Entities: %v\n", policy.Members(role))
 	}
 
-	// [END bigquery_view_table_or_view_access_policy]
-
 	return nil
 }
+
+// [END bigquery_view_table_or_view_access_policy]

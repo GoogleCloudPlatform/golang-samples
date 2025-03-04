@@ -33,30 +33,28 @@ func TestViewDatasetAccessPolicies(t *testing.T) {
 
 	datasetName := fmt.Sprintf("%s_dataset", prefix)
 
-	b := bytes.Buffer{}
-
 	ctx := context.Background()
+
+	var buf bytes.Buffer
 
 	// Create BigQuery client.
 	client, err := testClient(t)
 	if err != nil {
 		t.Fatalf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Create dataset.
 	if err := client.Dataset(datasetName).Create(ctx, &bigquery.DatasetMetadata{}); err != nil {
-		t.Errorf("Failed to create dataset: %v", err)
+		t.Fatalf("Failed to create dataset: %v", err)
 	}
-
-	// Once test is run, resources and clients are closed.
 	defer testCleanup(t, client, datasetName)
 
-	if err := viewDatasetAccessPolicies(&b, tc.ProjectID, datasetName); err != nil {
+	if err := viewDatasetAccessPolicies(&buf, tc.ProjectID, datasetName); err != nil {
 		t.Error(err)
 	}
 
-	if got, want := b.String(), "Details for Access entries in dataset"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Details for Access entries in dataset"; !strings.Contains(got, want) {
 		t.Errorf("viewDatasetAccessPolicies: expected %q to contain %q", got, want)
 	}
-
 }
