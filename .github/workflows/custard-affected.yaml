@@ -40,19 +40,24 @@ jobs:
       paths: ${{ fromJson(steps.custard.outputs.paths) }}
       ci-setups: ${{ fromJson(steps.custard.outputs.ci-setups) }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0 # fetch the entire branch history to find diffs
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Setup Go
+        uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5
+        with:
+          go-version: ${{ inputs.go-version }}
+      - name: Fetch Custard
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           repository: GoogleCloudPlatform/cloud-samples-tools
           ref: v0.2.1
           path: cloud-samples-tools
-      - uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5
-        with:
-          go-version: ${{ inputs.go-version }}
       - name: Build Custard (from cloud-samples-tools)
-        run: go build -o ${{ github.workspace }} -v ./...
+        run: |
+          ls
+          go build -o ${{ github.workspace }} -v ./...
         working-directory: cloud-samples-tools/custard
       - name: Get diffs
         run: git --no-pager diff --name-only HEAD origin/main | tee diffs.txt
