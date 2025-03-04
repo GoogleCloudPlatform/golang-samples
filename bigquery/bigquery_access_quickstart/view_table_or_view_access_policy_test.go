@@ -26,7 +26,6 @@ import (
 )
 
 func TestViewTableAccessPolicies(t *testing.T) {
-
 	tc := testutil.SystemTest(t)
 
 	prefixer := testPrefix()
