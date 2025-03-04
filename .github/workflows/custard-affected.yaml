@@ -55,9 +55,7 @@ jobs:
           ref: v0.2.1
           path: cloud-samples-tools
       - name: Build Custard (from cloud-samples-tools)
-        run: |
-          ls
-          go build -o ${{ github.workspace }} -v ./...
+        run: go build -o ${{ github.workspace }}/custard -v ./cmd/custard
         working-directory: cloud-samples-tools/custard
       - name: Get diffs
         run: git --no-pager diff --name-only HEAD origin/main | tee diffs.txt
