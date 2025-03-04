@@ -29,7 +29,7 @@ import (
 func handler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 
-	// [START intro_2]
+	// [START gae_memcache]
 	// Create an Item
 	item := &memcache.Item{
 		Key:   "lyric",
@@ -57,6 +57,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		log.Infof(ctx, "the lyric is %q", item.Value)
 	}
-	// [END intro_2]
+	// [END gae_memcache]
 
 }
