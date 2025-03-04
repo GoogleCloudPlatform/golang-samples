@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/iam"
 )
 
-// revokeTableOrViewAccessPolicies creates a new ACL removing the VIEWER role to the group "example-analyst-group@google.com"
+// revokeTableOrViewAccessPolicies creates a new ACL removing the VIEWER role to group "example-analyst-group@google.com"
 // For more information on the types of ACLs available see:
 // https://cloud.google.com/storage/docs/access-control/lists
 func revokeTableOrViewAccessPolicies(w io.Writer, projectID, datasetID, resourceID string) error {
