@@ -52,13 +52,13 @@ func TestRevokeAccessDataset(t *testing.T) {
 
 	// Create dataset.
 	if err := dataset.Create(ctx, &bigquery.DatasetMetadata{}); err != nil {
-		t.Errorf("Failed to create dataset: %v", err)
+		t.Fatalf("Failed to create dataset: %v", err)
 	}
 
 	// Get metadata.
 	meta, err := dataset.Metadata(ctx)
 	if err != nil {
-		t.Errorf("Failed to get metadata: %v", err)
+		t.Fatalf("Failed to get metadata: %v", err)
 	}
 
 	// Appends a new access control entry to the existing access list.
@@ -73,7 +73,7 @@ func TestRevokeAccessDataset(t *testing.T) {
 	// Leverage the ETag for the update to assert there's been no modifications to the
 	// dataset since the metadata was originally read.
 	if _, err := dataset.Update(ctx, update, meta.ETag); err != nil {
-		t.Errorf("Failed to update metadata: %v", err)
+		t.Fatalf("Failed to update metadata: %v", err)
 	}
 
 	if err = revokeAccessToDataset(&buff, tc.ProjectID, datasetName, entity); err != nil {
