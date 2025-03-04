@@ -26,7 +26,6 @@ import (
 )
 
 func TestGrantAccessView(t *testing.T) {
-
 	tc := testutil.SystemTest(t)
 
 	prefixer := testPrefix()
@@ -91,7 +90,6 @@ func TestGrantAccessView(t *testing.T) {
 }
 
 func TestGrantAccessTable(t *testing.T) {
-
 	tc := testutil.SystemTest(t)
 
 	prefixer := testPrefix()
