@@ -23,6 +23,9 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// revokeAccessToDataset creates a new ACL removing the dataset access to "example-analyst-group@google.com" entity
+// For more information on the types of ACLs available see:
+// https://cloud.google.com/storage/docs/access-control/lists
 func revokeAccessToDataset(w io.Writer, projectID, datasetID, entity string) error {
 	// TODO(developer): uncomment and update the following lines:
 	// projectID := "my-project-id"

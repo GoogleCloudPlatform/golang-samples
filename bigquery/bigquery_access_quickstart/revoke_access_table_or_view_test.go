@@ -38,7 +38,7 @@ func TestRevokeTableAccessPolicies(t *testing.T) {
 
 	ctx := context.Background()
 
-	var buff bytes.Buffer
+	var buf bytes.Buffer
 
 	// Create BigQuery client.
 	client, err := testClient(t)
@@ -78,11 +78,11 @@ func TestRevokeTableAccessPolicies(t *testing.T) {
 		t.Fatalf("Failed to set policy: %v", err)
 	}
 
-	if err := revokeTableOrViewAccessPolicies(&buff, tc.ProjectID, datasetName, tableName); err != nil {
+	if err := revokeTableOrViewAccessPolicies(&buf, tc.ProjectID, datasetName, tableName); err != nil {
 		t.Error(err)
 	}
 
-	if got, want := buff.String(), fmt.Sprintf("Details for Access entries in table or view %v.", tableName); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Details for Access entries in table or view %v.", tableName); !strings.Contains(got, want) {
 		t.Errorf("viewTableAccessPolicies: expected %q to contain %q", got, want)
 	}
 }
@@ -99,7 +99,7 @@ func TestRevokeViewAccessPolicies(t *testing.T) {
 
 	ctx := context.Background()
 
-	var buff bytes.Buffer
+	var buf bytes.Buffer
 
 	// Create BigQuery client.
 	client, err := testClient(t)
@@ -114,7 +114,7 @@ func TestRevokeViewAccessPolicies(t *testing.T) {
 
 	// Create dataset.
 	if err := dataset.Create(ctx, &bigquery.DatasetMetadata{}); err != nil {
-		t.Errorf("Failed to create dataset: %v", err)
+		t.Fatalf("Failed to create dataset: %v", err)
 	}
 
 	// Table schema.
@@ -129,7 +129,7 @@ func TestRevokeViewAccessPolicies(t *testing.T) {
 	// Create table.
 	table := dataset.Table(tableName)
 	if err := table.Create(ctx, tableMetaData); err != nil {
-		t.Errorf("Failed to create table: %v", err)
+		t.Fatalf("Failed to create table: %v", err)
 	}
 
 	// Sets view query.
@@ -140,13 +140,13 @@ func TestRevokeViewAccessPolicies(t *testing.T) {
 	// Create view.
 	view := dataset.Table(viewName)
 	if err := view.Create(ctx, viewMetadata); err != nil {
-		t.Errorf("Failed to create view: %v", err)
+		t.Fatalf("Failed to create view: %v", err)
 	}
 
 	// Get view policy.
 	policy, err := table.IAM().Policy(ctx)
 	if err != nil {
-		t.Errorf("Failed to get policy: %v", err)
+		t.Fatalf("Failed to get policy: %v", err)
 	}
 
 	// Adds new policy which will be deleted.
@@ -156,14 +156,14 @@ func TestRevokeViewAccessPolicies(t *testing.T) {
 	// Update views's policy.
 	err = table.IAM().SetPolicy(ctx, policy)
 	if err != nil {
-		t.Errorf("Failed to set policy: %v", err)
+		t.Fatalf("Failed to set policy: %v", err)
 	}
 
-	if err := revokeTableOrViewAccessPolicies(&buff, tc.ProjectID, datasetName, viewName); err != nil {
+	if err := revokeTableOrViewAccessPolicies(&buf, tc.ProjectID, datasetName, viewName); err != nil {
 		t.Error(err)
 	}
 
-	if got, want := buff.String(), fmt.Sprintf("Details for Access entries in table or view %v.", viewName); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Details for Access entries in table or view %v.", viewName); !strings.Contains(got, want) {
 		t.Errorf("viewTableAccessPolicies: expected %q to contain %q", got, want)
 	}
 }
