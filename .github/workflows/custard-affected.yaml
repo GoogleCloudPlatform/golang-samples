@@ -49,7 +49,7 @@ jobs:
         with:
           go-version: ${{ inputs.go-version }}
       - name: Install Custard from cloud-samples-tools
-        run: go install github.com/GoogleCloudPlatform/golang-samples/cloud-samples-tools/custard
+        run: go install github.com/GoogleCloudPlatform/golang-samples/cloud-samples-tools/custard/cmd/custard
       - name: Get diffs
         run: git --no-pager diff --name-only HEAD origin/main | tee diffs.txt
       - name: Find affected packages
