@@ -1,0 +1,14 @@
+{
+  "name": "custard",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "vars": "node cmd/vars.js",
+    "test": "mocha -p -j 2 **/*.test.js"
+  },
+  "devDependencies": {
+    "mocha": "^11.1.0"
+  }
+}
