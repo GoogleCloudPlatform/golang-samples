@@ -36,25 +36,24 @@ func TestGrantAccessView(t *testing.T) {
 	tableName := fmt.Sprintf("%s_table", prefix)
 	viewName := fmt.Sprintf("%s_view", prefix)
 
-	b := bytes.Buffer{}
-
 	ctx := context.Background()
+
+	var buf bytes.Buffer
 
 	// Create BigQuery client.
 	client, err := testClient(t)
 	if err != nil {
 		t.Fatalf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Create dataset handler.
 	dataset := client.Dataset(datasetName)
-
-	// Once test is run, resources and clients are closed.
 	defer testCleanup(t, client, datasetName)
 
 	// Create dataset.
 	if err := dataset.Create(ctx, &bigquery.DatasetMetadata{}); err != nil {
-		t.Errorf("Failed to create dataset: %v", err)
+		t.Fatalf("Failed to create dataset: %v", err)
 	}
 
 	// Table schema.
@@ -69,7 +68,7 @@ func TestGrantAccessView(t *testing.T) {
 	// Create table.
 	table := dataset.Table(tableName)
 	if err := table.Create(ctx, tableMetaData); err != nil {
-		t.Errorf("Failed to create table: %v", err)
+		t.Fatalf("Failed to create table: %v", err)
 	}
 
 	// Sets view query.
@@ -79,17 +78,16 @@ func TestGrantAccessView(t *testing.T) {
 
 	// Create view.
 	if err := dataset.Table(viewName).Create(ctx, viewMetadata); err != nil {
-		t.Errorf("Failed to create view: %v", err)
+		t.Fatalf("Failed to create view: %v", err)
 	}
 
-	if err := grantAccessToResource(&b, tc.ProjectID, datasetName, viewName); err != nil {
+	if err := grantAccessToResource(&buf, tc.ProjectID, datasetName, viewName); err != nil {
 		t.Error(err)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Details for Access entries in table or view %v.", viewName); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Details for Access entries in table or view %v.", viewName); !strings.Contains(got, want) {
 		t.Errorf("viewTableAccessPolicies: expected %q to contain %q", got, want)
 	}
-
 }
 
 func TestGrantAccessTable(t *testing.T) {
@@ -102,39 +100,37 @@ func TestGrantAccessTable(t *testing.T) {
 	datasetName := fmt.Sprintf("%s_dataset", prefix)
 	tableName := fmt.Sprintf("%s_table", prefix)
 
-	b := bytes.Buffer{}
-
 	ctx := context.Background()
+
+	var buf bytes.Buffer
 
 	// Create BigQuery client.
 	client, err := testClient(t)
 	if err != nil {
 		t.Fatalf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Create dataset handler.
 	dataset := client.Dataset(datasetName)
-
-	// Once test is run, resources and clients are closed.
 	defer testCleanup(t, client, datasetName)
 
 	// Create dataset.
 	if err := dataset.Create(ctx, &bigquery.DatasetMetadata{}); err != nil {
-		t.Errorf("Failed to create dataset: %v", err)
+		t.Fatalf("Failed to create dataset: %v", err)
 	}
 
 	// Create table.
 	table := dataset.Table(tableName)
 	if err := table.Create(ctx, &bigquery.TableMetadata{}); err != nil {
-		t.Errorf("Failed to create table: %v", err)
+		t.Fatalf("Failed to create table: %v", err)
 	}
 
-	if err := grantAccessToResource(&b, tc.ProjectID, datasetName, tableName); err != nil {
+	if err := grantAccessToResource(&buf, tc.ProjectID, datasetName, tableName); err != nil {
 		t.Error(err)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Details for Access entries in table or view %v.", tableName); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Details for Access entries in table or view %v.", tableName); !strings.Contains(got, want) {
 		t.Errorf("viewTableAccessPolicies: expected %q to contain %q", got, want)
 	}
-
 }

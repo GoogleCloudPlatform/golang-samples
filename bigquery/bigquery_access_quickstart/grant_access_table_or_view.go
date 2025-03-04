@@ -14,6 +14,7 @@
 
 package bigqueryaccessquickstart
 
+// [START bigquery_grant_access_to_table_or_view]
 import (
 	"context"
 	"fmt"
@@ -23,10 +24,10 @@ import (
 	"cloud.google.com/go/iam"
 )
 
+// grantAccessToResource creates a new ACL conceding the VIEWER role to the group "example-analyst-group@google.com"
+// For more information on the types of ACLs available see:
+// https://cloud.google.com/storage/docs/access-control/lists
 func grantAccessToResource(w io.Writer, projectID, datasetID, resourceID string) error {
-
-	// [START bigquery_grant_access_to_table_or_view]
-
 	// Resource can be a table or a view
 	//
 	// TODO(developer): uncomment and update the following lines:
@@ -77,8 +78,7 @@ func grantAccessToResource(w io.Writer, projectID, datasetID, resourceID string)
 		fmt.Fprintf(w, "Entities: %v\n", policy.Members(role))
 	}
 
-	// [END bigquery_grant_access_to_table_or_view]
-
 	return nil
-
 }
+
+// [END bigquery_grant_access_to_table_or_view]

@@ -34,33 +34,31 @@ func TestGrantAccessDataset(t *testing.T) {
 
 	datasetName := fmt.Sprintf("%s_dataset", prefix)
 
-	b := bytes.Buffer{}
-
 	ctx := context.Background()
+
+	var buff bytes.Buffer
 
 	// Create BigQuery client.
 	client, err := testClient(t)
 	if err != nil {
 		t.Fatalf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Create dataset handler.
 	dataset := client.Dataset(datasetName)
-
-	// Once test is run, resources and clients are closed.
 	defer testCleanup(t, client, datasetName)
 
 	// Create dataset.
 	if err := dataset.Create(ctx, &bigquery.DatasetMetadata{}); err != nil {
-		t.Errorf("Failed to create dataset: %v", err)
+		t.Fatalf("Failed to create dataset: %v", err)
 	}
 
-	if err := grantAccessToDataset(&b, tc.ProjectID, datasetName); err != nil {
+	if err := grantAccessToDataset(&buff, tc.ProjectID, datasetName); err != nil {
 		t.Error(err)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Details for Access entries in dataset %v.\n", datasetName); !strings.Contains(got, want) {
+	if got, want := buff.String(), fmt.Sprintf("Details for Access entries in dataset %v.\n", datasetName); !strings.Contains(got, want) {
 		t.Errorf("viewTableAccessPolicies: expected %q to contain %q", got, want)
 	}
-
 }

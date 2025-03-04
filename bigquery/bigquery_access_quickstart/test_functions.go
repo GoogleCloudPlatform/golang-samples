@@ -23,10 +23,13 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
+// testPrefix creates a prefix that serves as an identifier when creating a resource
+// in order to isolate possible conflicts in concurrent tests.
 func testPrefix() string {
 	return time.Now().Format("2006_01_02_15_04_05")
 }
 
+// testClient creates a BigQuery client in order to avoid repeatedly creating customers in the common way
 func testClient(t *testing.T) (*bigquery.Client, error) {
 	t.Helper()
 
@@ -41,6 +44,7 @@ func testClient(t *testing.T) (*bigquery.Client, error) {
 	return client, nil
 }
 
+// testCleanup is used for cleaning the dataset and its content once test is done
 func testCleanup(t *testing.T, client *bigquery.Client, datasetName string) {
 	t.Helper()
 
@@ -48,9 +52,5 @@ func testCleanup(t *testing.T, client *bigquery.Client, datasetName string) {
 
 	if err := client.Dataset(datasetName).DeleteWithContents(ctx); err != nil {
 		t.Errorf("Failed to delete table: %v", err)
-	}
-
-	if err := client.Close(); err != nil {
-		t.Fatalf("Failed to close BigQuery client: %v", err)
 	}
 }

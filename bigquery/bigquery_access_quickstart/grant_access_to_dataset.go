@@ -14,6 +14,7 @@
 
 package bigqueryaccessquickstart
 
+// [START bigquery_grant_access_to_dataset]
 import (
 	"context"
 	"fmt"
@@ -22,10 +23,10 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
+// grantAccessToDataset creates a new ACL conceding the READER role to the group "example-analyst-group@google.com"
+// For more information on the types of ACLs available see:
+// https://cloud.google.com/storage/docs/access-control/lists
 func grantAccessToDataset(w io.Writer, projectID, datasetID string) error {
-
-	// [START bigquery_grant_access_to_dataset]
-
 	// TODO(developer): uncomment and update the following lines:
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
@@ -81,8 +82,7 @@ func grantAccessToDataset(w io.Writer, projectID, datasetID string) error {
 		fmt.Fprintf(w, "Entities: %v\n", access.Entity)
 	}
 
-	// [END bigquery_grant_access_to_dataset]
-
 	return nil
-
 }
+
+// [END bigquery_grant_access_to_dataset]
