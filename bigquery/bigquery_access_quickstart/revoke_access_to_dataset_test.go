@@ -33,22 +33,21 @@ func TestRevokeAccessDataset(t *testing.T) {
 
 	datasetName := fmt.Sprintf("%s_dataset", prefix)
 
-	b := bytes.Buffer{}
-
 	ctx := context.Background()
 
 	entity := "example-analyst-group@google.com"
+
+	var buff bytes.Buffer
 
 	// Create BigQuery client.
 	client, err := testClient(t)
 	if err != nil {
 		t.Fatalf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Create dataset handler.
 	dataset := client.Dataset(datasetName)
-
-	// Once test is run, resources and clients are closed.
 	defer testCleanup(t, client, datasetName)
 
 	// Create dataset.
@@ -77,11 +76,11 @@ func TestRevokeAccessDataset(t *testing.T) {
 		t.Errorf("Failed to update metadata: %v", err)
 	}
 
-	if err = revokeAccessToDataset(&b, tc.ProjectID, datasetName, entity); err != nil {
+	if err = revokeAccessToDataset(&buff, tc.ProjectID, datasetName, entity); err != nil {
 		t.Error(err)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Details for Access entries in dataset %v.\n", datasetName); !strings.Contains(got, want) {
+	if got, want := buff.String(), fmt.Sprintf("Details for Access entries in dataset %v.\n", datasetName); !strings.Contains(got, want) {
 		t.Errorf("viewTableAccessPolicies: expected %q to contain %q", got, want)
 	}
 }

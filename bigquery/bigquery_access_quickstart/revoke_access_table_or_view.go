@@ -14,6 +14,7 @@
 
 package bigqueryaccessquickstart
 
+// [START bigquery_revoke_access_to_table_or_view]
 import (
 	"context"
 	"fmt"
@@ -23,10 +24,10 @@ import (
 	"cloud.google.com/go/iam"
 )
 
+// revokeTableOrViewAccessPolicies creates a new ACL removing the VIEWER role to the group "example-analyst-group@google.com"
+// For more information on the types of ACLs available see:
+// https://cloud.google.com/storage/docs/access-control/lists
 func revokeTableOrViewAccessPolicies(w io.Writer, projectID, datasetID, resourceID string) error {
-
-	// [START bigquery_revoke_access_to_table_or_view]
-
 	// Resource can be a table or a view
 	//
 	// TODO(developer): uncomment and update the following lines:
@@ -51,7 +52,6 @@ func revokeTableOrViewAccessPolicies(w io.Writer, projectID, datasetID, resource
 
 	// Find more details about IAM Roles here:
 	// https://pkg.go.dev/cloud.google.com/go/iam#RoleName
-
 	entityID := "example-analyst-group@google.com"
 	roleType := iam.Viewer
 
@@ -78,7 +78,7 @@ func revokeTableOrViewAccessPolicies(w io.Writer, projectID, datasetID, resource
 		fmt.Fprintf(w, "Entities: %v\n", policy.Members(role))
 	}
 
-	// [END bigquery_revoke_access_to_table_or_view]
-
 	return nil
 }
+
+// [END bigquery_revoke_access_to_table_or_view]

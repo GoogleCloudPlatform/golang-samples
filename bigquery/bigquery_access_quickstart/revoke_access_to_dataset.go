@@ -14,6 +14,7 @@
 
 package bigqueryaccessquickstart
 
+// [START bigquery_revoke_dataset_access]
 import (
 	"context"
 	"fmt"
@@ -23,9 +24,6 @@ import (
 )
 
 func revokeAccessToDataset(w io.Writer, projectID, datasetID, entity string) error {
-
-	// [START bigquery_revoke_dataset_access]
-
 	// TODO(developer): uncomment and update the following lines:
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
@@ -80,7 +78,7 @@ func revokeAccessToDataset(w io.Writer, projectID, datasetID, entity string) err
 		fmt.Fprintf(w, "Entity: %v\n", access.Entity)
 	}
 
-	// [END bigquery_revoke_dataset_access]
-
 	return nil
 }
+
+// [END bigquery_revoke_dataset_access]

@@ -36,37 +36,36 @@ func TestRevokeTableAccessPolicies(t *testing.T) {
 	datasetName := fmt.Sprintf("%s_dataset", prefix)
 	tableName := fmt.Sprintf("%s_table", prefix)
 
-	b := bytes.Buffer{}
-
 	ctx := context.Background()
+
+	var buff bytes.Buffer
 
 	// Create BigQuery client.
 	client, err := testClient(t)
 	if err != nil {
 		t.Fatalf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Create dataset handler.
 	dataset := client.Dataset(datasetName)
-
-	// Once test is run, resources and clients are closed.
 	defer testCleanup(t, client, datasetName)
 
 	// Create dataset.
 	if err := dataset.Create(ctx, &bigquery.DatasetMetadata{}); err != nil {
-		t.Errorf("Failed to create dataset: %v", err)
+		t.Fatalf("Failed to create dataset: %v", err)
 	}
 
 	// Create table.
 	table := dataset.Table(tableName)
 	if err := table.Create(ctx, &bigquery.TableMetadata{}); err != nil {
-		t.Errorf("Failed to create table: %v", err)
+		t.Fatalf("Failed to create table: %v", err)
 	}
 
 	// Get resource policy.
 	policy, err := table.IAM().Policy(ctx)
 	if err != nil {
-		t.Errorf("Failed to get policy: %v", err)
+		t.Fatalf("Failed to get policy: %v", err)
 	}
 
 	// Adds new policy which will be deleted.
@@ -76,17 +75,16 @@ func TestRevokeTableAccessPolicies(t *testing.T) {
 	// Update resource's policy.
 	err = table.IAM().SetPolicy(ctx, policy)
 	if err != nil {
-		t.Errorf("Failed to set policy: %v", err)
+		t.Fatalf("Failed to set policy: %v", err)
 	}
 
-	if err := revokeTableOrViewAccessPolicies(&b, tc.ProjectID, datasetName, tableName); err != nil {
+	if err := revokeTableOrViewAccessPolicies(&buff, tc.ProjectID, datasetName, tableName); err != nil {
 		t.Error(err)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Details for Access entries in table or view %v.", tableName); !strings.Contains(got, want) {
+	if got, want := buff.String(), fmt.Sprintf("Details for Access entries in table or view %v.", tableName); !strings.Contains(got, want) {
 		t.Errorf("viewTableAccessPolicies: expected %q to contain %q", got, want)
 	}
-
 }
 
 func TestRevokeViewAccessPolicies(t *testing.T) {
@@ -99,20 +97,19 @@ func TestRevokeViewAccessPolicies(t *testing.T) {
 	tableName := fmt.Sprintf("%s_table", prefix)
 	viewName := fmt.Sprintf("%s_view", prefix)
 
-	b := bytes.Buffer{}
-
 	ctx := context.Background()
+
+	var buff bytes.Buffer
 
 	// Create BigQuery client.
 	client, err := testClient(t)
 	if err != nil {
 		t.Fatalf("bigquery.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	// Create dataset handler.
 	dataset := client.Dataset(datasetName)
-
-	// Once test is run, resources and clients are closed.
 	defer testCleanup(t, client, datasetName)
 
 	// Create dataset.
@@ -162,11 +159,11 @@ func TestRevokeViewAccessPolicies(t *testing.T) {
 		t.Errorf("Failed to set policy: %v", err)
 	}
 
-	if err := revokeTableOrViewAccessPolicies(&b, tc.ProjectID, datasetName, viewName); err != nil {
+	if err := revokeTableOrViewAccessPolicies(&buff, tc.ProjectID, datasetName, viewName); err != nil {
 		t.Error(err)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Details for Access entries in table or view %v.", viewName); !strings.Contains(got, want) {
+	if got, want := buff.String(), fmt.Sprintf("Details for Access entries in table or view %v.", viewName); !strings.Contains(got, want) {
 		t.Errorf("viewTableAccessPolicies: expected %q to contain %q", got, want)
 	}
 }
