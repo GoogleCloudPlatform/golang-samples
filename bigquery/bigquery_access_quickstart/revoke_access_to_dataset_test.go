@@ -26,7 +26,6 @@ import (
 )
 
 func TestRevokeAccessDataset(t *testing.T) {
-
 	tc := testutil.SystemTest(t)
 
 	prefixer := testPrefix()

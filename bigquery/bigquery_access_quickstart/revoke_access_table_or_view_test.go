@@ -27,7 +27,6 @@ import (
 )
 
 func TestRevokeTableAccessPolicies(t *testing.T) {
-
 	tc := testutil.SystemTest(t)
 
 	prefixer := testPrefix()
@@ -88,7 +87,6 @@ func TestRevokeTableAccessPolicies(t *testing.T) {
 }
 
 func TestRevokeViewAccessPolicies(t *testing.T) {
-
 	tc := testutil.SystemTest(t)
 
 	prefixer := testPrefix()
