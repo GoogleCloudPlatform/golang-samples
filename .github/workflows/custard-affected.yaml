@@ -48,15 +48,8 @@ jobs:
         uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5
         with:
           go-version: ${{ inputs.go-version }}
-      - name: Fetch Custard
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-        with:
-          repository: GoogleCloudPlatform/cloud-samples-tools
-          ref: v0.2.1
-          path: cloud-samples-tools
-      - name: Build Custard (from cloud-samples-tools)
-        run: go build -o ${{ github.workspace }}/custard -v ./cmd/custard
-        working-directory: cloud-samples-tools/custard
+      - name: Install Custard from cloud-samples-tools
+        run: go install github.com/GoogleCloudPlatform/golang-samples/cloud-samples-tools/custard@v0.2.1
       - name: Get diffs
         run: git --no-pager diff --name-only HEAD origin/main | tee diffs.txt
       - name: Find affected packages
