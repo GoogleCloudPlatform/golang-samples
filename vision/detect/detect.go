@@ -14,6 +14,7 @@
 
 package main
 
+// [START vision_imports]
 import (
 	"context"
 	"fmt"
@@ -24,6 +25,8 @@ import (
 	vision "cloud.google.com/go/vision/apiv1"
 	"cloud.google.com/go/vision/v2/apiv1/visionpb"
 )
+
+// [START vision_imports]
 
 func init() {
 	// Refer to these functions so that goimports is happy before boilerplate is inserted.
