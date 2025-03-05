@@ -15,6 +15,10 @@
 on:
   workflow_call:
     inputs:
+      config-file:
+        description: Path to the 🍮 custard config file.
+        required: true
+        type: string
       go-version:
         description: Go version to use to build the custard tools.
         default: ^1.22.0
@@ -67,6 +71,6 @@ jobs:
       - name: Find affected packages
         id: custard
         run: |
-          echo "paths=$(custard affected .github/config/nodejs-dev.jsonc diffs.txt paths.txt)" >> $GITHUB_OUTPUT
+          echo "paths=$(custard affected ${{ inputs.config-file }} diffs.txt paths.txt)" >> $GITHUB_OUTPUT
           cat paths.txt
-          echo "ci-setups=$(custard setup-files .github/config/nodejs-dev.jsonc paths.txt)" >> $GITHUB_OUTPUT
+          echo "ci-setups=$(custard setup-files ${{ inputs.config-file }} paths.txt)" >> $GITHUB_OUTPUT

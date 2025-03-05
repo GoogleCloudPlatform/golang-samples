@@ -22,6 +22,8 @@ on:
 jobs:
   affected:
     uses: ./.github/workflows/custard-affected.yaml
+    with:
+      config-file: .github/config/golang-dev.jsonc
 
   test-latest:
     name: Test latest
