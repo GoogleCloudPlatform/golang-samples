@@ -19,8 +19,8 @@ inputs:
   path:
     description: Path of the package to run.
     required: true
-  ci-setups:
-    description: The CI setups for the affected packages in JSON.
+  ci-setup:
+    description: The CI setup for the package path.
     required: true
   project_id:
     description: The Google Cloud project ID.
@@ -31,11 +31,6 @@ inputs:
   service_account:
     description: The Google Cloud service account to use for credentials.
     required: true
-
-outputs:
-  ci-setup:
-    description: The CI setup configuration for the given path.
-    value: ${{ fromJson(inputs.ci-setups)[inputs.path] }}
 
 runs:
   using: composite
@@ -59,7 +54,7 @@ runs:
           return await setupVars({
             core,
             projectId: '${{ inputs.project_id }}',
-            setup: ${{ toJson(fromJson(inputs.ci-setups)[inputs.path]) }},
+            setup: ${{ inputs.ci-setup }},
             serviceAccount: '${{ inputs.service_account }}',
             idToken: '${{ steps.auth.outputs.id_token }}',
           })

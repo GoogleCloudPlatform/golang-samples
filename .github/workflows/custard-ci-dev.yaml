@@ -46,15 +46,15 @@ jobs:
         uses: ./.github/custard-setup
         with:
           path: ${{ matrix.path }}
-          ci-setups: ${{ toJson(needs.affected.outputs.ci-setups) }}
+          ci-setup: ${{ toJson(fromJson(needs.affected.outputs.ci-setups)[matrix.path]) }}
           project_id: golang-samples-tests
           workload_identity_provider: TODO
           service_account: kokoro-golang-samples-tests@golang-samples-tests.iam.gserviceaccount.com
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ steps.custard.outputs.ci-setup.go-version-latest }}
+          go-version: ${{ fromJson(needs.affected.outputs.ci-setups)[matrix.path].go-version-latest }}
       - name: Run tests for ${{ matrix.path }}
         run: |
-          timeout ${{ steps.custard.outputs.ci-setup.timeout-minutes }}m \
+          timeout ${{ fromJson(needs.affected.outputs.ci-setups)[matrix.path].timeout-minutes }}m \
             make test dir=${{ matrix.path }}
