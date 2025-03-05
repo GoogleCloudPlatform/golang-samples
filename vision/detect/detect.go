@@ -26,7 +26,7 @@ import (
 	"cloud.google.com/go/vision/v2/apiv1/visionpb"
 )
 
-// [START vision_imports]
+// [END vision_imports]
 
 func init() {
 	// Refer to these functions so that goimports is happy before boilerplate is inserted.
