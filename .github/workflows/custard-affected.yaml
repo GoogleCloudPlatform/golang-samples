@@ -27,6 +27,7 @@ on:
         description: Timeout to find affected packages.
         default: 2
         type: number
+
     outputs:
       paths:
         description: The affected paths as a JSON list.
@@ -41,8 +42,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: ${{ inputs.timeout-minutes }}
     outputs:
-      paths: ${{ fromJson(steps.custard.outputs.paths) }}
-      ci-setups: ${{ fromJson(steps.custard.outputs.ci-setups) }}
+      paths: ${{ steps.custard.outputs.paths }}
+      ci-setups: ${{ steps.custard.outputs.ci-setups }}
     steps:
       # Install the Custard tools.
       - name: Setup Go

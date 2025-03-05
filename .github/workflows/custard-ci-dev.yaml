@@ -53,8 +53,8 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ steps.custard.outputs.ci-setup.go-version-latest }}
+          go-version: ${{ fromJson(steps.custard.outputs.ci-setup).go-version-latest }}
       - name: Run tests for ${{ matrix.path }}
         run: |
-          timeout ${{ steps.custard.outputs.ci-setup.timeout-minutes }}m \
+          timeout ${{ fromJson(steps.custard.outputs.ci-setup).timeout-minutes }}m \
             make test dir=${{ matrix.path }}
