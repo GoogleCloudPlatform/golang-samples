@@ -40,24 +40,30 @@ jobs:
       paths: ${{ fromJson(steps.custard.outputs.paths) }}
       ci-setups: ${{ fromJson(steps.custard.outputs.ci-setups) }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-        with:
-          fetch-depth: 0 # fetch the entire branch history to find diffs
       - name: Setup Go
         uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5
         with:
           go-version: ${{ inputs.go-version }}
-      - name: Install Custard from cloud-samples-tools
-        run: |
-          go get github.com/GoogleCloudPlatform/golang-samples/cloud-samples-tools/custard/cmd/custard
-          go install github.com/GoogleCloudPlatform/golang-samples/cloud-samples-tools/custard/cmd/custard
-      - name: Get diffs
+      - name: Fetch Custard from cloud-samples-tools
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          repository: GoogleCloudPlatform/cloud-samples-tools
+          ref: v0.2.1
+          path: ../cloud-samples-tools
+      - name: Install Custard
+        run: go install ./cmd/custard
+        working-directory: ../cloud-samples-tools/custard
+      - name: Checkout the commit history
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0 # fetch the entire branch history to find diffs
+      - name: Get diffs from main and the PR
         run: git --no-pager diff --name-only HEAD origin/main | tee diffs.txt
       - name: Find affected packages
         id: custard
         run: |
           set -e
-          echo "paths=$(./cloud-samples-tools/bin/custard affected .github/config/nodejs-dev.jsonc diffs.txt paths.txt)" >> $GITHUB_OUTPUT
+          echo "paths=$(custard this is a test that should fail)" >> $GITHUB_OUTPUT
+          echo "paths=$(custard affected .github/config/nodejs-dev.jsonc diffs.txt paths.txt)" >> $GITHUB_OUTPUT
           cat paths.txt  # show the affected paths in the logs
-          echo "ci-setups=$(./cloud-samples-tools/bin/custard setup-files .github/config/nodejs-dev.jsonc paths.txt)" >> $GITHUB_OUTPUT
+          echo "ci-setups=$(custard setup-files .github/config/nodejs-dev.jsonc paths.txt)" >> $GITHUB_OUTPUT
