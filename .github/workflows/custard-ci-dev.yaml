@@ -37,10 +37,12 @@ jobs:
       matrix:
         path: ${{ needs.affected.outputs.paths }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-      - id: custard
+      - name: Setup Custard testing environment
+        id: custard
         uses: ./.github/custard-setup
         with:
           path: ${{ matrix.path }}
@@ -48,7 +50,8 @@ jobs:
           project_id: golang-samples-tests
           workload_identity_provider: TODO
           service_account: kokoro-golang-samples-tests@golang-samples-tests.iam.gserviceaccount.com
-      - uses: actions/setup-go@v5
+      - name: Setup Go
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ steps.custard.outputs.ci-setup.go-version-latest }}
       - name: Run tests for ${{ matrix.path }}
