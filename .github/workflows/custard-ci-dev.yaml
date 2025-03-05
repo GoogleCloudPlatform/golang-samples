@@ -46,7 +46,7 @@ jobs:
         uses: ./.github/custard-setup
         with:
           path: ${{ matrix.path }}
-          affected: ${{ needs.affected }}
+          ci-setups: ${{ toJson(needs.affected.outputs.ci-setups) }}
           project_id: golang-samples-tests
           workload_identity_provider: TODO
           service_account: kokoro-golang-samples-tests@golang-samples-tests.iam.gserviceaccount.com

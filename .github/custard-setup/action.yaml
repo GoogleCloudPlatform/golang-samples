@@ -19,8 +19,8 @@ inputs:
   path:
     description: Path of the package to run.
     required: true
-  affected:
-    description: The job for affected packages.
+  ci-setups:
+    description: The CI setups for the affected packages in JSON.
     required: true
   project_id:
     description: The Google Cloud project ID.
@@ -35,7 +35,7 @@ inputs:
 outputs:
   ci-setup:
     description: The CI setup configuration for the given path.
-    value: ${{ fromJson(inputs.affected).outputs.ci-setups[inputs.path] }}
+    value: ${{ fromJson(inputs.ci-setups)[inputs.path] }}
 
 runs:
   using: composite
@@ -59,7 +59,7 @@ runs:
           return await setupVars({
             core,
             projectId: '${{ inputs.project_id }}',
-            setup: ${{ toJson(fromJson(inputs.affected).outputs.ci-setups[inputs.path]) }},
+            setup: ${{ toJson(fromJson(inputs.ci-setups)[inputs.path]) }},
             serviceAccount: '${{ inputs.service_account }}',
             idToken: '${{ steps.auth.outputs.id_token }}',
           })
