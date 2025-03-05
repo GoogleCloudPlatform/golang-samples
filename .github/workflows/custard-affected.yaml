@@ -49,10 +49,12 @@ jobs:
         with:
           repository: GoogleCloudPlatform/cloud-samples-tools
           ref: v0.2.1
-          path: ../cloud-samples-tools
+          path: cloud-samples-tools
       - name: Install Custard
         run: go install ./cmd/custard
-        working-directory: ../cloud-samples-tools/custard
+        working-directory: cloud-samples-tools/custard
+      - name: Clean up the workspace
+        run: rm -rf cloud-samples-tools
       - name: Checkout the commit history
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
