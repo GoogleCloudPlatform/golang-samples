@@ -35,7 +35,7 @@ inputs:
 outputs:
   ci-setup:
     description: The CI setup configuration for the given path.
-    value: ${{ inputs.affected.outputs.ci-setups[inputs.path] }}
+    value: ${{ fromJson(inputs.affected).outputs.ci-setups[inputs.path] }}
 
 runs:
   using: composite
@@ -59,7 +59,7 @@ runs:
           return await setupVars({
             core,
             projectId: '${{ inputs.project_id }}',
-            setup: ${{ toJson(inputs.affected.outputs.ci-setups[inputs.path]) }},
+            setup: ${{ toJson(fromJson(inputs.affected).outputs.ci-setups[inputs.path]) }},
             serviceAccount: '${{ inputs.service_account }}',
             idToken: '${{ steps.auth.outputs.id_token }}',
           })

@@ -35,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        path: ${{ needs.affected.outputs.paths }}
+        path: ${{ fromJson(needs.affected.outputs.paths) }}
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -53,8 +53,8 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ fromJson(steps.custard.outputs.ci-setup).go-version-latest }}
+          go-version: ${{ steps.custard.outputs.ci-setup.go-version-latest }}
       - name: Run tests for ${{ matrix.path }}
         run: |
-          timeout ${{ fromJson(steps.custard.outputs.ci-setup).timeout-minutes }}m \
+          timeout ${{ steps.custard.outputs.ci-setup.timeout-minutes }}m \
             make test dir=${{ matrix.path }}
