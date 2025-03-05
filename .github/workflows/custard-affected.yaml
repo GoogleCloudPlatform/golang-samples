@@ -40,6 +40,7 @@ jobs:
       paths: ${{ fromJson(steps.custard.outputs.paths) }}
       ci-setups: ${{ fromJson(steps.custard.outputs.ci-setups) }}
     steps:
+      # Install the Custard tools.
       - name: Setup Go
         uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5
         with:
@@ -55,6 +56,8 @@ jobs:
         working-directory: cloud-samples-tools/custard
       - name: Clean up the workspace
         run: rm -rf cloud-samples-tools
+
+      # Find the affected packages.
       - name: Checkout the commit history
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -64,7 +67,6 @@ jobs:
       - name: Find affected packages
         id: custard
         run: |
-          set -e
           echo "paths=$(custard this is a test that should fail)" >> $GITHUB_OUTPUT
           echo "paths=$(custard affected .github/config/nodejs-dev.jsonc diffs.txt paths.txt)" >> $GITHUB_OUTPUT
           cat paths.txt  # show the affected paths in the logs
