@@ -54,8 +54,9 @@ func getParam(w io.Writer, projectID, parameterID string) error {
 		return fmt.Errorf("Failed to get parameter: %v\n", err)
 	}
 
-	// Print the name of the parameter.
-	fmt.Fprintf(w, "Found parameter: %s with format %s \n", param.Name, param.Format)
+	// Find more details for the Parameter object here:
+	// https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters#Parameter
+	fmt.Fprintf(w, "Found parameter %s with format %s\n", param.Name, param.Format.String())
 	return nil
 }
 

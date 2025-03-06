@@ -61,7 +61,7 @@ func listParamVersion(w io.Writer, projectID, parameterID string) error {
 		}
 
 		// Print the name of the parameter version.
-		fmt.Fprintf(w, "Found parameter version: %s with disabled: %v\n", resp.Name, resp.Disabled)
+		fmt.Fprintf(w, "Found parameter version %s with state %s\n", resp.Name, map[bool]string{true: "disabled", false: "enabled"}[resp.Disabled])
 	}
 
 	return nil

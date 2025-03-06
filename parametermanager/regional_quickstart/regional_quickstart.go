@@ -62,6 +62,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create parameter: %v\n", err)
 	}
+	fmt.Printf("Created regional parameter %s with format %s\n", parameter.Name, parameter.Format.String())
 
 	parameterVersion, err := client.CreateParameterVersion(ctx, &parametermanagerpb.CreateParameterVersionRequest{
 		Parent:             parameter.Name,
@@ -75,6 +76,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create parameter version: %v\n", err)
 	}
+	fmt.Printf("Created regional parameter version %s\n", parameterVersion.Name)
 
 	getParameterVersion, err := client.GetParameterVersion(ctx, &parametermanagerpb.GetParameterVersionRequest{
 		Name: parameterVersion.Name,
@@ -83,7 +85,8 @@ func main() {
 		log.Fatalf("Failed to get parameter version: %v\n", err)
 	}
 
-	fmt.Printf("Parameter Version Data: %s", getParameterVersion.Payload.Data)
+	fmt.Printf("Retrieved regional parameter version: %s\n", getParameterVersion.Name)
+	fmt.Printf("Payload: %s\n", getParameterVersion.Payload.Data)
 }
 
 // [END parametermanager_regional_quickstart]

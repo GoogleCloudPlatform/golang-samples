@@ -67,7 +67,7 @@ func enableRegionalParamVersion(w io.Writer, projectID, locationID, parameterID,
 	}
 
 	// Output a success message.
-	fmt.Fprintf(w, "Enabled regional parameter version: %s\n", name)
+	fmt.Fprintf(w, "Enabled regional parameter version: %s for parameter %s\n", name, parameterID)
 	return nil
 }
 

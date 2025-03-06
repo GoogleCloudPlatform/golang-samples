@@ -63,7 +63,7 @@ func createStructuredRegionalParam(w io.Writer, projectID, locationID, parameter
 	}
 
 	// Print the created parameter.
-	fmt.Fprintf(w, "Created regional parameter with format: %s\n", parameter.Name)
+	fmt.Fprintf(w, "Created regional parameter %s with format %s\n", parameter.Name, parameter.Format.String())
 	return nil
 }
 
