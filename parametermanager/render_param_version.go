@@ -56,7 +56,12 @@ func renderParamVersion(w io.Writer, projectID, parameterID, versionID string) e
 	}
 
 	// Print the rendered parameter version.
-	fmt.Fprintf(w, "Rendered Parameter Version: %s\n", rendered)
+	fmt.Fprintf(w, "Rendered parameter version: %s\n", rendered.ParameterVersion)
+
+	// If the parameter contains secret references, they will be resolved
+	// and the actual secret values will be included in the rendered output.
+	// Be cautious with logging or displaying this information.
+	fmt.Fprintf(w, "Rendered payload: %s\n", rendered.RenderedPayload)
 	return nil
 }
 

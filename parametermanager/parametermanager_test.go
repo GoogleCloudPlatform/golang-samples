@@ -237,7 +237,7 @@ func TestCreateStructuredParam(t *testing.T) {
 	}
 	defer testCleanupParameter(t, fmt.Sprintf("projects/%s/locations/global/parameters/%s", tc.ProjectID, parameterID))
 
-	if got, want := b.String(), "Created parameter with format:"; !strings.Contains(got, want) {
+	if got, want := b.String(), fmt.Sprintf("Created parameter %s with format JSON", fmt.Sprintf("projects/%s/locations/global/parameters/%s", tc.ProjectID, parameterID)); !strings.Contains(got, want) {
 		t.Errorf("createParameter: expected %q to contain %q", got, want)
 	}
 }
@@ -292,7 +292,7 @@ func TestCreateParamVersionWithSecret(t *testing.T) {
 	defer testCleanupParameter(t, parameter.Name)
 	defer testCleanupParameterVersion(t, fmt.Sprintf("%s/versions/%s", parameter.Name, parameterVersionID))
 
-	if got, want := b.String(), "Created parameter version:"; !strings.Contains(got, want) {
+	if got, want := b.String(), "Created parameter version with secret reference:"; !strings.Contains(got, want) {
 		t.Errorf("createParameterVersion: expected %q to contain %q", got, want)
 	}
 }
@@ -308,7 +308,7 @@ func TestGetParam(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), "Found parameter:"; !strings.Contains(got, want) {
+	if got, want := b.String(), fmt.Sprintf("Found parameter %s with format JSON", parameter.Name); !strings.Contains(got, want) {
 		t.Errorf("GetParameter: expected %q to contain %q", got, want)
 	}
 }
@@ -327,7 +327,7 @@ func TestGetParamVersion(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), "Found parameter version:"; !strings.Contains(got, want) {
+	if got, want := b.String(), fmt.Sprintf("Found parameter version %s with state enabled", parameterVersion.Name); !strings.Contains(got, want) {
 		t.Errorf("GetParameterVersion: expected %q to contain %q", got, want)
 	}
 }
@@ -353,7 +353,11 @@ func TestRenderParamVersion(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), "Rendered Parameter Version:"; !strings.Contains(got, want) {
+	if got, want := b.String(), "Rendered parameter version:"; !strings.Contains(got, want) {
+		t.Errorf("RenderParameterVersion: expected %q to contain %q", got, want)
+	}
+
+	if got, want := b.String(), fmt.Sprintf(`Rendered payload: {"username": "test-user","password": "very secret data"}`); !strings.Contains(got, want) {
 		t.Errorf("RenderParameterVersion: expected %q to contain %q", got, want)
 	}
 }
@@ -372,11 +376,11 @@ func TestListParam(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Found parameter: %s with format %s \n", parameter1.Name, parameter1.Format); !strings.Contains(got, want) {
+	if got, want := b.String(), fmt.Sprintf("Found parameter %s with format %s \n", parameter1.Name, parameter1.Format); !strings.Contains(got, want) {
 		t.Errorf("ListParameter: expected %q to contain %q", got, want)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Found parameter: %s with format %s \n", parameter2.Name, parameter2.Format); !strings.Contains(got, want) {
+	if got, want := b.String(), fmt.Sprintf("Found parameter %s with format %s \n", parameter2.Name, parameter2.Format); !strings.Contains(got, want) {
 		t.Errorf("ListParameter: expected %q to contain %q", got, want)
 	}
 }
@@ -398,11 +402,11 @@ func TestListParamVersion(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Found parameter version: %s with disabled: %v\n", parameterVersion1.Name, parameterVersion1.Disabled); !strings.Contains(got, want) {
+	if got, want := b.String(), fmt.Sprintf("Found parameter version %s with state enabled\n", parameterVersion1.Name); !strings.Contains(got, want) {
 		t.Errorf("ListParameterVersion: expected %q to contain %q", got, want)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Found parameter version: %s with disabled: %v\n", parameterVersion2.Name, parameterVersion2.Disabled); !strings.Contains(got, want) {
+	if got, want := b.String(), fmt.Sprintf("Found parameter version %s with state enabled\n", parameterVersion2.Name); !strings.Contains(got, want) {
 		t.Errorf("ListParameterVersion: expected %q to contain %q", got, want)
 	}
 }
@@ -421,7 +425,7 @@ func TestDisableEnableParamVersion(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got, want := b1.String(), "Disabled parameter version:"; !strings.Contains(got, want) {
+	if got, want := b1.String(), "Disabled parameter version"; !strings.Contains(got, want) {
 		t.Errorf("DisableParameterVersion: expected %q to contain %q", got, want)
 	}
 
@@ -430,7 +434,7 @@ func TestDisableEnableParamVersion(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got, want := b2.String(), "Enabled parameter version:"; !strings.Contains(got, want) {
+	if got, want := b2.String(), "Enabled parameter version"; !strings.Contains(got, want) {
 		t.Errorf("DisableParameterVersion: expected %q to contain %q", got, want)
 	}
 }

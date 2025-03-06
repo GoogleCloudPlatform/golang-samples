@@ -59,7 +59,7 @@ func listParam(w io.Writer, projectID string) error {
 		}
 
 		// Print the name of the parameter.
-		fmt.Fprintf(w, "Found parameter: %s with format %s \n", resp.Name, resp.Format)
+		fmt.Fprintf(w, "Found parameter %s with format %s \n", resp.Name, resp.Format.String())
 	}
 
 	return nil

@@ -65,7 +65,7 @@ func listRegionalParam(w io.Writer, projectID, locationID string) error {
 		}
 
 		// Print the name of the parameter.
-		fmt.Fprintf(w, "Found regional parameter: %s with format %s \n", resp.Name, resp.Format)
+		fmt.Fprintf(w, "Found regional parameter %s with format %s\n", resp.Name, resp.Format.String())
 	}
 
 	return nil

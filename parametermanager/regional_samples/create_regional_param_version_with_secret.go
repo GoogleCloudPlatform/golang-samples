@@ -66,7 +66,7 @@ func createRegionalParamVersionWithSecret(w io.Writer, projectID, locationID, pa
 	if err != nil {
 		return fmt.Errorf("failed to create parameter version: %w", err)
 	}
-	fmt.Fprintf(w, "Created regional parameter version: %s\n", version.Name)
+	fmt.Fprintf(w, "Created regional parameter version with secret reference: %s\n", version.Name)
 	return nil
 }
 

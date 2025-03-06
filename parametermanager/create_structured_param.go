@@ -60,7 +60,7 @@ func createStructuredParam(w io.Writer, projectID, parameterID string, format pa
 	}
 
 	// Print the name of the created parameter.
-	fmt.Fprintf(w, "Created parameter with format: %s\n", parameter.Name)
+	fmt.Fprintf(w, "Created parameter %s with format %s\n", parameter.Name, parameter.Format.String())
 	return nil
 }
 

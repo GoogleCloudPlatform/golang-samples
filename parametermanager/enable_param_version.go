@@ -62,7 +62,7 @@ func enableParamVersion(w io.Writer, projectID, parameterID, versionID string) e
 	}
 
 	// Output a success message.
-	fmt.Fprintf(w, "Enabled parameter version: %s\n", name)
+	fmt.Fprintf(w, "Enabled parameter version %s for parameter %s\n", name, parameterID)
 	return nil
 }
 

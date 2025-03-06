@@ -65,7 +65,7 @@ func createParamVersionWithSecret(w io.Writer, projectID, parameterID, versionID
 	}
 
 	// Print the name of the created parameter version.
-	fmt.Fprintf(w, "Created parameter version: %s\n", version.Name)
+	fmt.Fprintf(w, "Created parameter version with secret reference: %s\n", version.Name)
 	return nil
 }
 

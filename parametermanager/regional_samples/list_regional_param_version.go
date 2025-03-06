@@ -66,7 +66,7 @@ func listRegionalParamVersion(w io.Writer, projectID, locationID, parameterID st
 		}
 
 		// Print the name of the parameter version.
-		fmt.Fprintf(w, "Found regional parameter version: %s with disabled: %v\n", resp.Name, resp.Disabled)
+		fmt.Fprintf(w, "Found regional parameter version %s with state %s\n", resp.Name, map[bool]string{true: "disabled", false: "enabled"}[resp.Disabled])
 	}
 
 	return nil
