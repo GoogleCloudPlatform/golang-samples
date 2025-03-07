@@ -14,7 +14,7 @@
 
 package sample
 
-// [START OAuth_and_App_Engine]
+// [START gae_users_oauth]
 import (
 	"fmt"
 	"net/http"
@@ -37,4 +37,4 @@ func welcomeOAuth(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, `Welcome, admin user %s!`, u)
 }
 
-// [END OAuth_and_App_Engine]
+// [END gae_users_oauth]
