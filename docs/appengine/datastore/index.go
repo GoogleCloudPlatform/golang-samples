@@ -15,7 +15,6 @@
 package sample
 
 // [START gae_datastore_intro]
-// [START intro]
 import (
 	"fmt"
 	"net/http"
@@ -58,5 +57,4 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Stored and retrieved the Employee named %q", e2.Name)
 }
 
-// [END intro]
 // [END gae_datastore_intro]
