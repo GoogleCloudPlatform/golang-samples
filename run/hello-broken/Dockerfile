@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# [START cloudrun_broken_dockerfile_go]
 # [START cloudrun_broken_dockerfile]
 
 # Use the official Go image to create a binary.
@@ -49,3 +50,4 @@ COPY --from=builder /app/server /server
 CMD ["/server"]
 
 # [END cloudrun_broken_dockerfile]
+# [END cloudrun_broken_dockerfile_go]
