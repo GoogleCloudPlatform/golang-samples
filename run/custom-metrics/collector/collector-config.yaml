@@ -1,4 +1,4 @@
-# Copyright 2023 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ processors:
 
   resource:
     attributes:
-      # add instance_id as a resource attribute                                                                                                                                                    
+    # add instance_id as a resource attribute
     - key: service.instance.id
       from_attribute: faas.id
       action: upsert
@@ -51,10 +51,10 @@ processors:
 
 exporters:
   googlemanagedprometheus: # Note: this is intentionally left blank   
-  
+
 extensions:
   health_check:
-
+    endpoint: 0.0.0.0:13133
 service:
   extensions: [health_check]
   pipelines:

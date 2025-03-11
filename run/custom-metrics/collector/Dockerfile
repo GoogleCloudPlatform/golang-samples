@@ -1,4 +1,4 @@
-# Copyright 2023 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # [START cloudrun_mc_custom_metrics_collector]
-FROM otel/opentelemetry-collector-contrib:0.101.0
+FROM us-docker.pkg.dev/cloud-ops-agents-artifacts/google-cloud-opentelemetry-collector/otelcol-google:0.121.0
 
-COPY collector-config.yaml /etc/otelcol-contrib/config.yaml
+COPY collector-config.yaml /etc/otelcol-google/config.yaml
 # [END cloudrun_mc_custom_metrics_collector]
