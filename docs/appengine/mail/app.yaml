@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-// [START intro_2]
+// [START gae_mail_service_yaml_go]
 inbound_services:
 - mail
-// [END intro_2]
+// [END gae_mail_service_yaml_go]
