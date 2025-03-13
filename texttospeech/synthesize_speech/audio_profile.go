@@ -16,7 +16,6 @@
 package snippets
 
 // [START tts_synthesize_text_audio_profile]
-// [START texttospeech_audio_profile]
 
 import (
 	"fmt"
@@ -67,5 +66,4 @@ func audioProfile(w io.Writer, text string, outputFile string) error {
 	return nil
 }
 
-// [END texttospeech_audio_profile]
 // [END tts_synthesize_text_audio_profile]
