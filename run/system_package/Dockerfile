@@ -14,7 +14,7 @@
 
 # Use the offical Go image to create a build artifact.
 # https://hub.docker.com/_/golang
-FROM golang:1.21-bookworm as builder
+FROM golang:1.23-bookworm as builder
 
 # Create and change to the app directory.
 WORKDIR /app

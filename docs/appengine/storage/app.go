@@ -21,7 +21,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -166,7 +165,7 @@ func (d *demo) readFile(fileName string) {
 		return
 	}
 	defer rc.Close()
-	slurp, err := ioutil.ReadAll(rc)
+	slurp, err := io.ReadAll(rc)
 	if err != nil {
 		d.errorf("readFile: unable to read data from bucket %q, file %q: %v", d.bucketName, fileName, err)
 		return
