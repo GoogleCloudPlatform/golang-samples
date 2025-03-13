@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/appengine
 
-go 1.22.0
+go 1.23.0
 
 require (
 	cloud.google.com/go/cloudtasks v1.13.3
