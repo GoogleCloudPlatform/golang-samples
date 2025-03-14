@@ -1,0 +1,60 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Custard CI (dev)
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  affected:
+    uses: ./.github/workflows/custard-affected.yaml
+    with:
+      config-file: .github/config/golang-dev.jsonc
+
+  test-latest:
+    name: Test latest
+    needs: affected
+    runs-on: ubuntu-latest
+    timeout-minutes: 120 # 2 hours hard limit
+    permissions:
+      id-token: write # needed for google-github-actions/auth
+    strategy:
+      fail-fast: false
+      matrix:
+        path: ${{ fromJson(needs.affected.outputs.paths) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Setup Custard testing environment
+        id: custard
+        uses: ./.github/custard-setup
+        with:
+          path: ${{ matrix.path }}
+          ci-setup: ${{ toJson(fromJson(needs.affected.outputs.ci-setups)[matrix.path]) }}
+          project_id: golang-samples-tests
+          workload_identity_provider: TODO
+          service_account: kokoro-golang-samples-tests@golang-samples-tests.iam.gserviceaccount.com
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ fromJson(needs.affected.outputs.ci-setups)[matrix.path].go-version-latest }}
+      - name: Run tests for ${{ matrix.path }}
+        run: |
+          timeout ${{ fromJson(needs.affected.outputs.ci-setups)[matrix.path].timeout-minutes }}m \
+            make test dir=${{ matrix.path }}
