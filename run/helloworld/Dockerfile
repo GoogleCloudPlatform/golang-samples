@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# [START cloudrun_helloworld_dockerfile_go]
 # [START cloudrun_helloworld_dockerfile]
 
 # Use the official Go image to create a binary.
@@ -49,3 +50,4 @@ COPY --from=builder /app/server /app/server
 CMD ["/app/server"]
 
 # [END cloudrun_helloworld_dockerfile]
+# [END cloudrun_helloworld_dockerfile_go]
