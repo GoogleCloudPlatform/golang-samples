@@ -16,6 +16,7 @@ package cloudruntests
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"testing"
 	"time"
