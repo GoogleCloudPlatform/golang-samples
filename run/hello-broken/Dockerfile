@@ -13,7 +13,6 @@
 # limitations under the License.
 
 # [START cloudrun_broken_dockerfile_go]
-# [START cloudrun_broken_dockerfile]
 
 # Use the official Go image to create a binary.
 # This is based on Debian and sets the GOPATH to /go.
@@ -49,5 +48,4 @@ COPY --from=builder /app/server /server
 # Run the web service on container startup.
 CMD ["/server"]
 
-# [END cloudrun_broken_dockerfile]
 # [END cloudrun_broken_dockerfile_go]
