@@ -783,3 +783,77 @@ func TestCreateBucketObjectRetention(t *testing.T) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
+
+func TestSetSoftDeletePolicy(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	bucketName := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	if err := setSoftDeletePolicy(bucketName); err != nil {
+		t.Fatalf("setSoftDeletePolicy: %v", err)
+	}
+
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if got, want := (attrs.SoftDeletePolicy), (&storage.SoftDeletePolicy{RetentionDuration: 10 * 24 * time.Hour}); got == nil || got.RetentionDuration != 10*24*time.Hour {
+		t.Errorf("Attrs.SoftDeletePolicy: got %v, want %v", got, want)
+	}
+}
+
+func TestGetSoftDeletePolicy(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	bucketName := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	buf := new(bytes.Buffer)
+	if err := getSoftDeletePolicy(buf, bucketName); err != nil {
+		t.Fatalf("getSoftDeletePolicy: %v", err)
+	}
+	if got, want := buf.String(), "Soft delete policy for bucket"; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestDisableSoftDeletePolicy(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	bucketName := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	if err := disableSoftDeletePolicy(bucketName); err != nil {
+		t.Fatalf("disableSoftDeletePolicy: %v", err)
+	}
+
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+	if got, want := (attrs.SoftDeletePolicy), (&storage.SoftDeletePolicy{RetentionDuration: time.Duration(0)}); got == nil || got.RetentionDuration != 0 {
+		t.Errorf("Attrs.SoftDeletePolicy: got %v, want %v", got, want)
+	}
+}
