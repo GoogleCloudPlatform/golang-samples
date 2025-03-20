@@ -44,7 +44,8 @@ func createDataset(w io.Writer, projectID, datasetID string) error {
 	}
 	defer dsClient.Close()
 
-	// Construct a request, populating many of the available confi
+	// Construct a request, populating some of the available configuration
+	// settings.
 	req := &bigquerypb.InsertDatasetRequest{
 		ProjectId: projectID,
 		Dataset: &bigquerypb.Dataset{
@@ -66,7 +67,7 @@ func createDataset(w io.Writer, projectID, datasetID string) error {
 		if apierr, ok := apierror.FromError(err); ok {
 			if status := apierr.GRPCStatus(); status.Code() == codes.AlreadyExists {
 				// The error was due to the dataset already existing.  For this sample
-				// that's sufficient.
+				// we don't consider that a failure, so return nil.
 				return nil
 			}
 		}

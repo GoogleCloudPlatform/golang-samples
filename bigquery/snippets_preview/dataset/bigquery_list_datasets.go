@@ -49,10 +49,12 @@ func listDatasets(w io.Writer, projectID string) error {
 		MaxResults: &wrapperspb.UInt32Value{Value: 100},
 	}
 
-	// ListDatasets provides a convenience iterator so users don't have to manage pagination directly.
+	// ListDatasets returns an iterator so users don't have to manage pagination when processing
+	// the results.
 	it := dsClient.ListDatasets(ctx, req)
 
-	// Process data from the iterator one result at a time.  The iterator itself is fetching pages at a time.
+	// Process data from the iterator one result at a time.  The internal implementation of the iterator
+	// is fetching pages at a time.
 	for {
 		dataset, err := it.Next()
 		if err == iterator.Done {
@@ -63,7 +65,7 @@ func listDatasets(w io.Writer, projectID string) error {
 			return fmt.Errorf("iterator errored: %w", err)
 		}
 		// Print basic information to the provided writer.
-		fmt.Fprintf(w, "dataset %q in location %q", dataset.GetDatasetReference().GetDatasetId(), dataset.GetLocation())
+		fmt.Fprintf(w, "dataset %q in location %q\n", dataset.GetDatasetReference().GetDatasetId(), dataset.GetLocation())
 	}
 	return nil
 }
