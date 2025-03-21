@@ -24,6 +24,7 @@ import (
 	"cloud.google.com/go/storage"
 )
 
+// Retrieves and outputs the soft delete policy for a bucket. Returns an error if the operation fails.
 func getSoftDeletePolicy(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
@@ -44,18 +45,7 @@ func getSoftDeletePolicy(w io.Writer, bucketName string) error {
 		return fmt.Errorf("bucket.Attrs: %w", err)
 	}
 
-	// Check if soft delete policy is set.
-	softDeletePolicy := attrs.SoftDeletePolicy
-	if softDeletePolicy == nil {
-		fmt.Printf("Bucket %s does not have a soft delete policy set.\n", bucketName)
-		return nil
-	}
-	if softDeletePolicy.RetentionDuration == 0 {
-		fmt.Printf("Soft delete is disabled for bucket %s.\n", bucketName)
-		return nil
-	}
-
-	fmt.Fprintf(w, "Soft delete policy for bucket %s is:\n EffectiveTime: %s\n RetentionDuration: %s\n", bucketName, softDeletePolicy.EffectiveTime.String(), softDeletePolicy.RetentionDuration.String())
+	fmt.Fprintf(w, "Soft delete policy for bucket %s is:\n %+v\n", bucketName, attrs.SoftDeletePolicy)
 	return nil
 }
 

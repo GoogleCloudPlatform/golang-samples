@@ -18,12 +18,14 @@ package buckets
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
-func setSoftDeletePolicy(bucketName string) error {
+// Sets a bucket's soft delete policy with a 10-day retention period. Returns an error if the operation fails.
+func setSoftDeletePolicy(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -37,26 +39,17 @@ func setSoftDeletePolicy(bucketName string) error {
 
 	bucket := client.Bucket(bucketName)
 
-	// Get the current bucket attributes.
-	attrs, err := bucket.Attrs(ctx)
-	if err != nil {
-		return fmt.Errorf("bucket.Attrs: %w", err)
-	}
-
 	// Set soft delete policy with 10-day retention period.
-	attrs.SoftDeletePolicy = &storage.SoftDeletePolicy{
-		RetentionDuration: 10 * 24 * time.Hour, // 10 days in hours
-	}
-
-	// Update the bucket with new attributes.
 	_, err = bucket.Update(ctx, storage.BucketAttrsToUpdate{
-		SoftDeletePolicy: attrs.SoftDeletePolicy,
+		SoftDeletePolicy: &storage.SoftDeletePolicy{
+			RetentionDuration: 10 * 24 * time.Hour, // 10 days in hours
+		},
 	})
 	if err != nil {
 		return fmt.Errorf("bucket.Update: %w", err)
 	}
 
-	fmt.Printf("Soft delete policy for %s was set to a 10-day retention period\n", bucketName)
+	fmt.Fprintf(w, "Soft delete policy for %s was set to a 10-day retention period\n", bucketName)
 	return nil
 }
 

@@ -18,12 +18,14 @@ package buckets
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
 )
 
-func disableSoftDeletePolicy(bucketName string) error {
+// Disables the soft delete policy for a bucket by setting retention duration to 0. Returns an error if the operation fails.
+func disableSoftDeletePolicy(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -37,26 +39,17 @@ func disableSoftDeletePolicy(bucketName string) error {
 
 	bucket := client.Bucket(bucketName)
 
-	// Get the current bucket attributes.
-	attrs, err := bucket.Attrs(ctx)
-	if err != nil {
-		return fmt.Errorf("bucket.Attrs: %w", err)
-	}
-
-	// Setting retention duration to 0 disables soft delete.
-	attrs.SoftDeletePolicy = &storage.SoftDeletePolicy{
-		RetentionDuration: time.Duration(0),
-	}
-
-	// Update the bucket with zero retention duration.
+	// Update the bucket with zero retention duration to disable soft delete.
 	_, err = bucket.Update(ctx, storage.BucketAttrsToUpdate{
-		SoftDeletePolicy: attrs.SoftDeletePolicy,
+		SoftDeletePolicy: &storage.SoftDeletePolicy{
+			RetentionDuration: time.Duration(0),
+		},
 	})
 	if err != nil {
 		return fmt.Errorf("bucket.Update: %w", err)
 	}
 
-	fmt.Printf("Soft delete policy for %s was disabled.\n", bucketName)
+	fmt.Fprintf(w, "Soft delete policy for bucket %s was disabled.\n", bucketName)
 	return nil
 }
 
