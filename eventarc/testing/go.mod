@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples/eventarc/testing
 go 1.23.0
 
 require (
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	github.com/GoogleCloudPlatform/golang-samples 8d5f15dd6168
 	github.com/cloudevents/sdk-go/v2 v2.15.2
 )
 

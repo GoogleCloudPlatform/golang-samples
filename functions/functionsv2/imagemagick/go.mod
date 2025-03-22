@@ -1,14 +1,14 @@
 module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/imagemagick
 
 require (
-	cloud.google.com/go/storage v1.50.0
+	cloud.google.com/go/storage v1.51.0
 	cloud.google.com/go/vision v1.2.0
-	cloud.google.com/go/vision/v2 v2.9.3
-	github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	cloud.google.com/go/vision/v2 v2.9.4
+	github.com/GoogleCloudPlatform/functions-framework-go v1.9.1
+	github.com/GoogleCloudPlatform/golang-samples 8d5f15dd6168
 	github.com/cloudevents/sdk-go/v2 v2.15.2
-	github.com/googleapis/google-cloudevents-go v0.8.0
-	google.golang.org/protobuf v1.36.3
+	github.com/googleapis/google-cloudevents-go v0.9.0
+	google.golang.org/protobuf v1.36.5
 )
 
 require (

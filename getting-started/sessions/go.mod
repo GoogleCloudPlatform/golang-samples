@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	cloud.google.com/go/firestore v1.18.0
 	github.com/GoogleCloudPlatform/firestore-gorilla-sessions v0.1.0
-	github.com/gorilla/sessions v1.3.0
+	github.com/gorilla/sessions v1.4.0
 )
 
 require (
