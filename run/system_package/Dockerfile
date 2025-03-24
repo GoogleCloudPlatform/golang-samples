@@ -35,11 +35,11 @@ RUN go build -v -o server
 # https://hub.docker.com/_/ubuntu
 FROM ubuntu
 
-# [START cloudrun_system_package_ubuntu]
+# [START cloudrun_system_package_ubuntu_dockerfile_go]
 RUN apt-get update -y && apt-get install -y \
   graphviz \
   && apt-get clean
-# [END cloudrun_system_package_ubuntu]
+# [END cloudrun_system_package_ubuntu_dockerfile_go]
 
 # Copy the binary to the production image from the builder stage.
 COPY --from=builder /app/server /server
