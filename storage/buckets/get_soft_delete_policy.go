@@ -49,4 +49,4 @@ func getSoftDeletePolicy(w io.Writer, bucketName string) error {
 	return nil
 }
 
-// [START storage_get_soft_delete_policy]
+// [END storage_get_soft_delete_policy]
