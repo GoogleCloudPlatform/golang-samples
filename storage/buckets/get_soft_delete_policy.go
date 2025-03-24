@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// Retrieves and outputs the soft delete policy for a bucket. Returns an error if the operation fails.
+// Retrieves and outputs the soft delete policy for a bucket.
 func getSoftDeletePolicy(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()

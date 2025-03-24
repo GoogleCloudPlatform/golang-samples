@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// Disables the soft delete policy for a bucket by setting retention duration to 0. Returns an error if the operation fails.
+// Disables the soft delete policy for a bucket by setting retention duration to 0.
 func disableSoftDeletePolicy(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
@@ -41,9 +41,7 @@ func disableSoftDeletePolicy(w io.Writer, bucketName string) error {
 
 	// Update the bucket with zero retention duration to disable soft delete.
 	_, err = bucket.Update(ctx, storage.BucketAttrsToUpdate{
-		SoftDeletePolicy: &storage.SoftDeletePolicy{
-			RetentionDuration: time.Duration(0),
-		},
+		SoftDeletePolicy: &storage.SoftDeletePolicy{},
 	})
 	if err != nil {
 		return fmt.Errorf("bucket.Update: %w", err)
