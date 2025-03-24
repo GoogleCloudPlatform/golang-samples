@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// Disables the soft delete policy for a bucket by setting retention duration to 0.
+// disableSoftDeletePolicy disables the soft delete policy for a bucket by setting retention duration to 0.
 func disableSoftDeletePolicy(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()

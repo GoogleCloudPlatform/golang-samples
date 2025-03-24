@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// Sets a bucket's soft delete policy with a 10-day retention period.
+// setSoftDeletePolicy sets a bucket's soft delete policy with a 10-day retention period.
 func setSoftDeletePolicy(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()

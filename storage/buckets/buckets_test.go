@@ -799,8 +799,8 @@ func TestSetSoftDeletePolicy(t *testing.T) {
 	bucketName := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
-	buf := new(bytes.Buffer)
-	if err := setSoftDeletePolicy(buf, bucketName); err != nil {
+	var buf = bytes.Buffer{}
+	if err := setSoftDeletePolicy(&buf, bucketName); err != nil {
 		t.Fatalf("setSoftDeletePolicy: %v", err)
 	}
 
@@ -839,8 +839,8 @@ func TestGetSoftDeletePolicy(t *testing.T) {
 	bucketName := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
-	buf := new(bytes.Buffer)
-	if err := getSoftDeletePolicy(buf, bucketName); err != nil {
+	var buf = bytes.Buffer{}
+	if err := getSoftDeletePolicy(&buf, bucketName); err != nil {
 		t.Fatalf("getSoftDeletePolicy: %v", err)
 	}
 
@@ -865,8 +865,8 @@ func TestDisableSoftDeletePolicy(t *testing.T) {
 	bucketName := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
 	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
-	buf := new(bytes.Buffer)
-	if err := disableSoftDeletePolicy(buf, bucketName); err != nil {
+	var buf = bytes.Buffer{}
+	if err := disableSoftDeletePolicy(&buf, bucketName); err != nil {
 		t.Fatalf("disableSoftDeletePolicy: %v", err)
 	}
 
