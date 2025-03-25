@@ -23,17 +23,13 @@ import (
 
 	parametermanager "cloud.google.com/go/parametermanager/apiv1"
 	parametermanagerpb "cloud.google.com/go/parametermanager/apiv1/parametermanagerpb"
-	secretmanager "cloud.google.com/go/secretmanager/apiv1"
-	secretmanagerpb "cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/gofrs/uuid"
 	grpccodes "google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
 )
 
-func testName(tb testing.TB) string {
-	tb.Helper()
-
+func testName(tb *testing.T) string {
 	u, err := uuid.NewV4()
 	if err != nil {
 		tb.Fatalf("testName: failed to generate uuid: %v", err)
@@ -41,23 +37,16 @@ func testName(tb testing.TB) string {
 	return u.String()
 }
 
-func testClient(tb testing.TB) (*parametermanager.Client, context.Context) {
-	tb.Helper()
+func testParameter(tb *testing.T, projectID string, format parametermanagerpb.ParameterFormat) (*parametermanagerpb.Parameter, string) {
+	parameterID := testName(tb)
 
 	ctx := context.Background()
 	client, err := parametermanager.NewClient(ctx)
 	if err != nil {
-		tb.Fatalf("testClient: failed to create client: %v", err)
+		tb.Fatalf("failed to create client: %v", err)
 	}
-	return client, ctx
-}
+	defer client.Close()
 
-func testParameter(tb testing.TB, projectID string, format parametermanagerpb.ParameterFormat) (*parametermanagerpb.Parameter, string) {
-	tb.Helper()
-
-	parameterID := testName(tb)
-
-	client, ctx := testClient(tb)
 	parent := fmt.Sprintf("projects/%s/locations/global", projectID)
 	parameter, err := client.CreateParameter(ctx, &parametermanagerpb.CreateParameterRequest{
 		Parent:      parent,
@@ -73,11 +62,16 @@ func testParameter(tb testing.TB, projectID string, format parametermanagerpb.Pa
 	return parameter, parameterID
 }
 
-func testParameterVersion(tb testing.TB, projectID, parameterID, payload string) (*parametermanagerpb.ParameterVersion, string) {
-	tb.Helper()
+func testParameterVersion(tb *testing.T, projectID, parameterID, payload string) (*parametermanagerpb.ParameterVersion, string) {
 	parameterVersionID := testName(tb)
 
-	client, ctx := testClient(tb)
+	ctx := context.Background()
+	client, err := parametermanager.NewClient(ctx)
+	if err != nil {
+		tb.Fatalf("failed to create client: %v", err)
+	}
+	defer client.Close()
+
 	parent := fmt.Sprintf("projects/%s/locations/global/parameters/%s", projectID, parameterID)
 
 	parameterVersion, err := client.CreateParameterVersion(ctx, &parametermanagerpb.CreateParameterVersionRequest{
@@ -96,10 +90,13 @@ func testParameterVersion(tb testing.TB, projectID, parameterID, payload string)
 	return parameterVersion, parameterVersionID
 }
 
-func testCleanupParameter(tb testing.TB, name string) {
-	tb.Helper()
-
-	client, ctx := testClient(tb)
+func testCleanupParameter(tb *testing.T, name string) {
+	ctx := context.Background()
+	client, err := parametermanager.NewClient(ctx)
+	if err != nil {
+		tb.Fatalf("failed to create client: %v", err)
+	}
+	defer client.Close()
 
 	if err := client.DeleteParameter(ctx, &parametermanagerpb.DeleteParameterRequest{
 		Name: name,
@@ -110,102 +107,19 @@ func testCleanupParameter(tb testing.TB, name string) {
 	}
 }
 
-func testCleanupParameterVersion(tb testing.TB, name string) {
-	tb.Helper()
-
-	client, ctx := testClient(tb)
+func testCleanupParameterVersion(tb *testing.T, name string) {
+	ctx := context.Background()
+	client, err := parametermanager.NewClient(ctx)
+	if err != nil {
+		tb.Fatalf("failed to create client: %v", err)
+	}
+	defer client.Close()
 
 	if err := client.DeleteParameterVersion(ctx, &parametermanagerpb.DeleteParameterVersionRequest{
 		Name: name,
 	}); err != nil {
 		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
 			tb.Fatalf("testCleanupParameterVersion: failed to delete parameter version: %v", err)
-		}
-	}
-}
-
-func testClientForSecret(tb testing.TB) (*secretmanager.Client, context.Context) {
-	tb.Helper()
-
-	ctx := context.Background()
-	client, err := secretmanager.NewClient(ctx)
-	if err != nil {
-		tb.Fatalf("testClient: failed to create client: %v", err)
-	}
-	return client, ctx
-}
-
-func testSecret(tb testing.TB, projectID string) *secretmanagerpb.Secret {
-	tb.Helper()
-
-	secretID := testName(tb)
-
-	client, ctx := testClientForSecret(tb)
-	secret, err := client.CreateSecret(ctx, &secretmanagerpb.CreateSecretRequest{
-		Parent:   fmt.Sprintf("projects/%s", projectID),
-		SecretId: secretID,
-		Secret: &secretmanagerpb.Secret{
-			Replication: &secretmanagerpb.Replication{
-				Replication: &secretmanagerpb.Replication_Automatic_{
-					Automatic: &secretmanagerpb.Replication_Automatic{},
-				},
-			},
-		},
-	})
-	if err != nil {
-		tb.Fatalf("testSecret: failed to create secret: %v", err)
-	}
-
-	return secret
-}
-
-func testSecretVersion(tb testing.TB, parent string, payload []byte) *secretmanagerpb.SecretVersion {
-	tb.Helper()
-
-	client, ctx := testClientForSecret(tb)
-
-	version, err := client.AddSecretVersion(ctx, &secretmanagerpb.AddSecretVersionRequest{
-		Parent: parent,
-		Payload: &secretmanagerpb.SecretPayload{
-			Data: payload,
-		},
-	})
-	if err != nil {
-		tb.Fatalf("testSecretVersion: failed to create secret version: %v", err)
-	}
-	return version
-}
-
-func testIamGrantAccess(tb testing.TB, name, member string) error {
-	tb.Helper()
-
-	client, ctx := testClientForSecret(tb)
-
-	handle := client.IAM(name)
-	policy, err := handle.Policy(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to get policy: %w", err)
-	}
-
-	// Grant the member access permissions.
-	policy.Add(member, "roles/secretmanager.secretAccessor")
-	if err = handle.SetPolicy(ctx, policy); err != nil {
-		return fmt.Errorf("failed to save policy: %w", err)
-	}
-
-	return nil
-}
-
-func testCleanupSecret(tb testing.TB, name string) {
-	tb.Helper()
-
-	client, ctx := testClientForSecret(tb)
-
-	if err := client.DeleteSecret(ctx, &secretmanagerpb.DeleteSecretRequest{
-		Name: name,
-	}); err != nil {
-		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
-			tb.Fatalf("testCleanupSecret: failed to delete secret: %v", err)
 		}
 	}
 }

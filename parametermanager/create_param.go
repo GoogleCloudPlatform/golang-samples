@@ -36,7 +36,7 @@ func createParam(w io.Writer, projectID, parameterID string) error {
 	ctx := context.Background()
 	client, err := parametermanager.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to create Parameter Manager client: %v\n", err)
+		return fmt.Errorf("failed to create Parameter Manager client: %w", err)
 	}
 	defer client.Close()
 
@@ -53,10 +53,9 @@ func createParam(w io.Writer, projectID, parameterID string) error {
 	// Call the API to create the parameter.
 	parameter, err := client.CreateParameter(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Failed to create parameter: %v\n", err)
+		return fmt.Errorf("failed to create parameter: %w", err)
 	}
 
-	// Print the name of the created parameter.
 	fmt.Fprintf(w, "Created parameter: %s\n", parameter.Name)
 	return nil
 }

@@ -38,7 +38,7 @@ func createParamVersionWithSecret(w io.Writer, projectID, parameterID, versionID
 	ctx := context.Background()
 	client, err := parametermanager.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to create Parameter Manager client: %v\n", err)
+		return fmt.Errorf("failed to create Parameter Manager client: %w", err)
 	}
 	defer client.Close()
 
@@ -61,10 +61,9 @@ func createParamVersionWithSecret(w io.Writer, projectID, parameterID, versionID
 	// Call the API to create the parameter version.
 	version, err := client.CreateParameterVersion(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Failed to create parameter version: %v\n", err)
+		return fmt.Errorf("failed to create parameter version: %w", err)
 	}
 
-	// Print the name of the created parameter version.
 	fmt.Fprintf(w, "Created parameter version with secret reference: %s\n", version.Name)
 	return nil
 }
