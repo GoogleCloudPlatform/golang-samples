@@ -41,7 +41,7 @@ func createRegionalParam(w io.Writer, projectID, locationID, parameterID string)
 	endpoint := fmt.Sprintf("parametermanager.%s.rep.googleapis.com:443", locationID)
 	client, err := parametermanager.NewClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
-		return fmt.Errorf("Failed to create Parameter Manager client: %v\n", err)
+		return fmt.Errorf("failed to create Parameter Manager client: %w", err)
 	}
 	defer client.Close()
 
@@ -58,10 +58,9 @@ func createRegionalParam(w io.Writer, projectID, locationID, parameterID string)
 	}
 	parameter, err := client.CreateParameter(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Failed to create parameter: %v\n", err)
+		return fmt.Errorf("Failed to create parameter: %w", err)
 	}
 
-	// Print the created parameter.
 	fmt.Fprintf(w, "Created regional parameter: %s\n", parameter.Name)
 	return nil
 }

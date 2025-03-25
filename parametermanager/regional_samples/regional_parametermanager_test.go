@@ -24,8 +24,6 @@ import (
 
 	parametermanager "cloud.google.com/go/parametermanager/apiv1"
 	parametermanagerpb "cloud.google.com/go/parametermanager/apiv1/parametermanagerpb"
-	secretmanager "cloud.google.com/go/secretmanager/apiv1"
-	secretmanagerpb "cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/gofrs/uuid"
 	"google.golang.org/api/option"
@@ -33,47 +31,35 @@ import (
 	grpcstatus "google.golang.org/grpc/status"
 )
 
-func testName(tb testing.TB) string {
-	tb.Helper()
-
+func testName(t *testing.T) string {
 	u, err := uuid.NewV4()
 	if err != nil {
-		tb.Fatalf("testName: failed to generate uuid: %v", err)
+		t.Fatalf("testName: failed to generate uuid: %v", err)
 	}
 	return u.String()
 }
 
-func testLocation(tb testing.TB) string {
-	tb.Helper()
-
+func testLocation(t *testing.T) string {
 	v := os.Getenv("GOLANG_REGIONAL_SAMPLES_LOCATION")
 	if v == "" {
-		tb.Skip("testIamUser: missing GOLANG_REGIONAL_SAMPLES_LOCATION")
+		t.Skip("testIamUser: missing GOLANG_REGIONAL_SAMPLES_LOCATION")
 	}
 
 	return v
 }
 
-func testClient(tb testing.TB) (*parametermanager.Client, context.Context) {
-	tb.Helper()
+func testParameter(t *testing.T, projectID string, format parametermanagerpb.ParameterFormat) (*parametermanagerpb.Parameter, string) {
+	parameterID := testName(t)
+	locationId := testLocation(t)
 
-	locationId := testLocation(tb)
 	ctx := context.Background()
 	endpoint := fmt.Sprintf("parametermanager.%s.rep.googleapis.com:443", locationId)
 	client, err := parametermanager.NewClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
-		tb.Fatalf("testClient: failed to create client: %v", err)
+		t.Fatalf("failed to create client: %v", err)
 	}
-	return client, ctx
-}
+	defer client.Close()
 
-func testParameter(tb testing.TB, projectID string, format parametermanagerpb.ParameterFormat) (*parametermanagerpb.Parameter, string) {
-	tb.Helper()
-
-	parameterID := testName(tb)
-	locationId := testLocation(tb)
-
-	client, ctx := testClient(tb)
 	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationId)
 	parameter, err := client.CreateParameter(ctx, &parametermanagerpb.CreateParameterRequest{
 		Parent:      parent,
@@ -83,18 +69,24 @@ func testParameter(tb testing.TB, projectID string, format parametermanagerpb.Pa
 		},
 	})
 	if err != nil {
-		tb.Fatalf("testParameter: failed to create parameter: %v", err)
+		t.Fatalf("testParameter: failed to create parameter: %v", err)
 	}
 
 	return parameter, parameterID
 }
 
-func testParameterVersion(tb testing.TB, projectID, parameterID, payload string) (*parametermanagerpb.ParameterVersion, string) {
-	tb.Helper()
-	parameterVersionID := testName(tb)
-	locationId := testLocation(tb)
+func testParameterVersion(t *testing.T, projectID, parameterID, payload string) (*parametermanagerpb.ParameterVersion, string) {
+	parameterVersionID := testName(t)
+	locationId := testLocation(t)
 
-	client, ctx := testClient(tb)
+	ctx := context.Background()
+	endpoint := fmt.Sprintf("parametermanager.%s.rep.googleapis.com:443", locationId)
+	client, err := parametermanager.NewClient(ctx, option.WithEndpoint(endpoint))
+	if err != nil {
+		t.Fatalf("failed to create client: %v", err)
+	}
+	defer client.Close()
+
 	parent := fmt.Sprintf("projects/%s/locations/%s/parameters/%s", projectID, locationId, parameterID)
 
 	parameterVersion, err := client.CreateParameterVersion(ctx, &parametermanagerpb.CreateParameterVersionRequest{
@@ -107,120 +99,48 @@ func testParameterVersion(tb testing.TB, projectID, parameterID, payload string)
 		},
 	})
 	if err != nil {
-		tb.Fatalf("testParameterVersion: failed to create parameter version: %v", err)
+		t.Fatalf("testParameterVersion: failed to create parameter version: %v", err)
 	}
 
 	return parameterVersion, parameterVersionID
 }
 
-func testCleanupParameter(tb testing.TB, name string) {
-	tb.Helper()
+func testCleanupParameter(t *testing.T, name string) {
+	ctx := context.Background()
+	locationId := testLocation(t)
 
-	client, ctx := testClient(tb)
+	endpoint := fmt.Sprintf("parametermanager.%s.rep.googleapis.com:443", locationId)
+	client, err := parametermanager.NewClient(ctx, option.WithEndpoint(endpoint))
+	if err != nil {
+		t.Fatalf("failed to create client: %v", err)
+	}
+	defer client.Close()
 
 	if err := client.DeleteParameter(ctx, &parametermanagerpb.DeleteParameterRequest{
 		Name: name,
 	}); err != nil {
 		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
-			tb.Fatalf("testCleanupParameter: failed to delete parameter: %v", err)
+			t.Fatalf("testCleanupParameter: failed to delete parameter: %v", err)
 		}
 	}
 }
 
-func testCleanupParameterVersion(tb testing.TB, name string) {
-	tb.Helper()
+func testCleanupParameterVersion(t *testing.T, name string) {
+	ctx := context.Background()
+	locationId := testLocation(t)
 
-	client, ctx := testClient(tb)
+	endpoint := fmt.Sprintf("parametermanager.%s.rep.googleapis.com:443", locationId)
+	client, err := parametermanager.NewClient(ctx, option.WithEndpoint(endpoint))
+	if err != nil {
+		t.Fatalf("failed to create client: %v", err)
+	}
+	defer client.Close()
 
 	if err := client.DeleteParameterVersion(ctx, &parametermanagerpb.DeleteParameterVersionRequest{
 		Name: name,
 	}); err != nil {
 		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
-			tb.Fatalf("testCleanupParameterVersion: failed to delete parameter version: %v", err)
-		}
-	}
-}
-
-func testClientForSecret(tb testing.TB) (*secretmanager.Client, context.Context) {
-	tb.Helper()
-
-	locationId := testLocation(tb)
-
-	ctx := context.Background()
-	endpoint := fmt.Sprintf("secretmanager.%s.rep.googleapis.com:443", locationId)
-	client, err := secretmanager.NewClient(ctx, option.WithEndpoint(endpoint))
-	if err != nil {
-		tb.Fatalf("testClient: failed to create client: %v", err)
-	}
-	return client, ctx
-}
-
-func testSecret(tb testing.TB, projectID string) *secretmanagerpb.Secret {
-	tb.Helper()
-
-	secretID := testName(tb)
-	locationId := testLocation(tb)
-
-	client, ctx := testClientForSecret(tb)
-	secret, err := client.CreateSecret(ctx, &secretmanagerpb.CreateSecretRequest{
-		Parent:   fmt.Sprintf("projects/%s/locations/%s", projectID, locationId),
-		SecretId: secretID,
-		Secret:   &secretmanagerpb.Secret{},
-	})
-	if err != nil {
-		tb.Fatalf("testSecret: failed to create secret: %v", err)
-	}
-
-	return secret
-}
-
-func testSecretVersion(tb testing.TB, parent string, payload []byte) *secretmanagerpb.SecretVersion {
-	tb.Helper()
-
-	client, ctx := testClientForSecret(tb)
-
-	version, err := client.AddSecretVersion(ctx, &secretmanagerpb.AddSecretVersionRequest{
-		Parent: parent,
-		Payload: &secretmanagerpb.SecretPayload{
-			Data: payload,
-		},
-	})
-	if err != nil {
-		tb.Fatalf("testSecretVersion: failed to create secret version: %v", err)
-	}
-	return version
-}
-
-func testIamGrantAccess(tb testing.TB, name, member string) error {
-	tb.Helper()
-
-	client, ctx := testClientForSecret(tb)
-
-	handle := client.IAM(name)
-	policy, err := handle.Policy(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to get policy: %w", err)
-	}
-
-	// Grant the member access permissions.
-	policy.Add(member, "roles/secretmanager.secretAccessor")
-	if err = handle.SetPolicy(ctx, policy); err != nil {
-		return fmt.Errorf("failed to save policy: %w", err)
-	}
-
-	return nil
-}
-
-func testCleanupSecret(tb testing.TB, name string) {
-	tb.Helper()
-
-	client, ctx := testClientForSecret(tb)
-
-	if err := client.DeleteSecret(ctx, &secretmanagerpb.DeleteSecretRequest{
-		Name: name,
-	}); err != nil {
-		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
-			tb.Fatalf("testCleanupSecret: failed to delete secret: %v", err)
+			t.Fatalf("testCleanupParameterVersion: failed to delete parameter version: %v", err)
 		}
 	}
 }
