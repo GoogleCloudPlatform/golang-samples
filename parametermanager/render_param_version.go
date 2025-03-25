@@ -37,7 +37,7 @@ func renderParamVersion(w io.Writer, projectID, parameterID, versionID string) e
 	ctx := context.Background()
 	client, err := parametermanager.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to create Parameter Manager client: %v\n", err)
+		return fmt.Errorf("failed to create Parameter Manager client: %w", err)
 	}
 	defer client.Close()
 
@@ -52,10 +52,9 @@ func renderParamVersion(w io.Writer, projectID, parameterID, versionID string) e
 	// Call the API to render a parameter version.
 	rendered, err := client.RenderParameterVersion(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Failed to render parameter version: %v\n", err)
+		return fmt.Errorf("failed to render parameter version: %w", err)
 	}
 
-	// Print the rendered parameter version.
 	fmt.Fprintf(w, "Rendered parameter version: %s\n", rendered.ParameterVersion)
 
 	// If the parameter contains secret references, they will be resolved

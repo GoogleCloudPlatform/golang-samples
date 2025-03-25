@@ -37,7 +37,7 @@ func getParamVersion(w io.Writer, projectID, parameterID, versionID string) erro
 	ctx := context.Background()
 	client, err := parametermanager.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to create Parameter Manager client: %v\n", err)
+		return fmt.Errorf("failed to create Parameter Manager client: %w", err)
 	}
 	defer client.Close()
 
@@ -52,7 +52,7 @@ func getParamVersion(w io.Writer, projectID, parameterID, versionID string) erro
 	// Call the API to get parameter version.
 	version, err := client.GetParameterVersion(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Failed to get parameter version: %v\n", err)
+		return fmt.Errorf("failed to get parameter version: %w", err)
 	}
 
 	// Find more details for the Parameter Version object here:

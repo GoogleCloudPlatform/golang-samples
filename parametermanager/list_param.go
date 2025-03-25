@@ -36,7 +36,7 @@ func listParam(w io.Writer, projectID string) error {
 	ctx := context.Background()
 	client, err := parametermanager.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to create Parameter Manager client: %v\n", err)
+		return fmt.Errorf("failed to create Parameter Manager client: %w", err)
 	}
 	defer client.Close()
 
@@ -55,10 +55,9 @@ func listParam(w io.Writer, projectID string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("Failed to list parameters: %v\n", err)
+			return fmt.Errorf("failed to list parameters: %w", err)
 		}
 
-		// Print the name of the parameter.
 		fmt.Fprintf(w, "Found parameter %s with format %s \n", resp.Name, resp.Format.String())
 	}
 
