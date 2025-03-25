@@ -41,7 +41,7 @@ func deleteRegionalParam(w io.Writer, projectID, locationID, parameterID string)
 	endpoint := fmt.Sprintf("parametermanager.%s.rep.googleapis.com:443", locationID)
 	client, err := parametermanager.NewClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
-		return fmt.Errorf("Failed to create Parameter Manager client: %v\n", err)
+		return fmt.Errorf("failed to create Parameter Manager client: %w", err)
 	}
 	defer client.Close()
 
@@ -55,10 +55,9 @@ func deleteRegionalParam(w io.Writer, projectID, locationID, parameterID string)
 
 	// Call the API to delete the parameter.
 	if err := client.DeleteParameter(ctx, req); err != nil {
-		return fmt.Errorf("Failed to delete parameter: %v\n", err)
+		return fmt.Errorf("failed to delete parameter: %w", err)
 	}
 
-	// Output a success message.
 	fmt.Fprintf(w, "Deleted regional parameter: %s\n", name)
 	return nil
 }
