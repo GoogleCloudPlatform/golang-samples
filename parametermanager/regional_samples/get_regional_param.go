@@ -41,7 +41,7 @@ func getRegionalParam(w io.Writer, projectID, locationID, parameterID string) er
 	endpoint := fmt.Sprintf("parametermanager.%s.rep.googleapis.com:443", locationID)
 	client, err := parametermanager.NewClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
-		return fmt.Errorf("Failed to create Parameter Manager client: %v\n", err)
+		return fmt.Errorf("failed to create Parameter Manager client: %w", err)
 	}
 	defer client.Close()
 
@@ -56,7 +56,7 @@ func getRegionalParam(w io.Writer, projectID, locationID, parameterID string) er
 	// Call the API to get the parameter.
 	param, err := client.GetParameter(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Failed to get parameter: %v\n", err)
+		return fmt.Errorf("failed to get parameter: %w", err)
 	}
 
 	// Find more details for the Parameter object here:

@@ -42,7 +42,7 @@ func getRegionalParamVersion(w io.Writer, projectID, locationID, parameterID, ve
 	endpoint := fmt.Sprintf("parametermanager.%s.rep.googleapis.com:443", locationID)
 	client, err := parametermanager.NewClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
-		return fmt.Errorf("Failed to create Parameter Manager client: %v\n", err)
+		return fmt.Errorf("failed to create Parameter Manager client: %w", err)
 	}
 	defer client.Close()
 
@@ -57,7 +57,7 @@ func getRegionalParamVersion(w io.Writer, projectID, locationID, parameterID, ve
 	// Call the API to get the parameter version.
 	version, err := client.GetParameterVersion(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Failed to get parameter version: %v\n", err)
+		return fmt.Errorf("failed to get parameter version: %w", err)
 	}
 
 	// Find more details for the Parameter Version object here:
