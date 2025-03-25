@@ -3,7 +3,6 @@ module github.com/GoogleCloudPlatform/golang-samples/docs
 go 1.23.0
 
 require (
-	cloud.google.com/go/storage v1.50.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
 	github.com/fluent/fluent-logger-golang v1.9.0
 	github.com/go-sql-driver/mysql v1.8.1
@@ -23,6 +22,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
 	cloud.google.com/go/iam v1.3.1 // indirect
 	cloud.google.com/go/monitoring v1.23.0 // indirect
+	cloud.google.com/go/storage v1.50.0 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.25.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.49.0 // indirect
