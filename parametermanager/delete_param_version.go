@@ -39,7 +39,7 @@ func deleteParamVersion(w io.Writer, projectID, parameterID, versionID string) e
 	// Initialize a Parameter Manager client.
 	client, err := parametermanager.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to create Parameter Manager client: %v\n", err)
+		return fmt.Errorf("failed to create Parameter Manager client: %w", err)
 	}
 	defer client.Close()
 
@@ -53,10 +53,9 @@ func deleteParamVersion(w io.Writer, projectID, parameterID, versionID string) e
 
 	// Call the API to delete the parameter version.
 	if err := client.DeleteParameterVersion(ctx, req); err != nil {
-		return fmt.Errorf("Failed to delete parameter version: %v\n", err)
+		return fmt.Errorf("failed to delete parameter version: %w", err)
 	}
 
-	// Output a success message.
 	fmt.Fprintf(w, "Deleted parameter version: %s\n", name)
 	return nil
 }

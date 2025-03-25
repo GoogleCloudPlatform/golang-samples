@@ -45,7 +45,7 @@ func enableParamVersion(w io.Writer, projectID, parameterID, versionID string) e
 	// Construct the name of the parameter version to enable.
 	name := fmt.Sprintf("projects/%s/locations/global/parameters/%s/versions/%s", projectID, parameterID, versionID)
 
-	// Build the request to enable the parameter version.
+	// Build the request to enable the parameter version by updating the parameter version.
 	req := &parametermanagerpb.UpdateParameterVersionRequest{
 		UpdateMask: &field_mask.FieldMask{
 			Paths: []string{"disabled"},
@@ -58,10 +58,9 @@ func enableParamVersion(w io.Writer, projectID, parameterID, versionID string) e
 
 	// Call the API to enable the parameter version.
 	if _, err := client.UpdateParameterVersion(ctx, req); err != nil {
-		return fmt.Errorf("Failed to enable parameter version: %v\n", err)
+		return fmt.Errorf("failed to enable parameter version: %w", err)
 	}
 
-	// Output a success message.
 	fmt.Fprintf(w, "Enabled parameter version %s for parameter %s\n", name, parameterID)
 	return nil
 }

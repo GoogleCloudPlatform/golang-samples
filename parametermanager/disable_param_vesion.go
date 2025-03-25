@@ -45,7 +45,7 @@ func disableParamVersion(w io.Writer, projectID, parameterID, versionID string) 
 	// Construct the name of the parameter version to disable.
 	name := fmt.Sprintf("projects/%s/locations/global/parameters/%s/versions/%s", projectID, parameterID, versionID)
 
-	// Build the request to disable the parameter version.
+	// Build the request to disable the parameter version by updating the parameter version.
 	req := &parametermanagerpb.UpdateParameterVersionRequest{
 		UpdateMask: &field_mask.FieldMask{
 			Paths: []string{"disabled"},
@@ -58,10 +58,9 @@ func disableParamVersion(w io.Writer, projectID, parameterID, versionID string) 
 
 	// Call the API to disable the parameter version.
 	if _, err := client.UpdateParameterVersion(ctx, req); err != nil {
-		return fmt.Errorf("Failed to disable parameter version: %v\n", err)
+		return fmt.Errorf("failed to disable parameter version: %w", err)
 	}
 
-	// Output a success message.
 	fmt.Fprintf(w, "Disabled parameter version %s for parameter %s\n", name, parameterID)
 	return nil
 }
