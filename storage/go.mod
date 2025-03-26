@@ -8,7 +8,6 @@ require (
 	cloud.google.com/go/storage v1.50.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
 	github.com/aws/aws-sdk-go v1.55.5
-	github.com/google/go-cmp v0.6.0
 	github.com/googleapis/gax-go/v2 v2.14.1
 	google.golang.org/api v0.217.0
 	google.golang.org/genproto v0.0.0-20250115164207-1a7da9e5054f
