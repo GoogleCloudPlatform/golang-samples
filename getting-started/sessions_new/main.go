@@ -20,7 +20,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"html/template"
 	"log"
 	"math/rand"
@@ -87,7 +86,7 @@ func newApp(projectID string) (*app, error) {
 
 	tmpl, err := template.New("Index").Parse(`<body>{{.views}} {{if eq .views 1}}view{{else}}views{{end}} for "{{.greeting}}"</body>`)
 	if err != nil {
-		return nil, fmt.Errorf("template.New: %w", err)
+		log.Fatalf("template.New: %v", err)
 	}
 
 	return &app{
@@ -151,7 +150,8 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 		_, err := a.client.Collection(collectionName).Doc(id).Set(ctx, session)
 		if err != nil {
 			log.Printf("client.Collection.Doc.Set error: %v", err)
-			// Don't return early so the user still gets a response.
+			http.Error(w, "Error creating session", http.StatusInternalServerError)
+			return
 		}
 
 		// Cookie is set
@@ -167,14 +167,16 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 		doc, err := a.client.Collection(collectionName).Doc(cookie.Value).Get(ctx)
 		if err != nil {
 			log.Printf("client.Collection.Doc.Get error: %v", err)
-			// Don't return early so the user still gets a response.
+			http.Error(w, "Error getting session", http.StatusInternalServerError)
+			return
 		}
 
 		// Unmarshal documents's content to local type
 		err = doc.DataTo(&session)
 		if err != nil {
 			log.Printf("doc.DataTo error: %v", err)
-			// Don't return early so the user still gets a response.
+			http.Error(w, "Error parsing session", http.StatusInternalServerError)
+			return
 		}
 
 		// Add 1 to current views value
@@ -184,7 +186,8 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 		_, err = a.client.Collection(collectionName).Doc(cookie.Value).Set(ctx, session)
 		if err != nil {
 			log.Printf("client.Collection.Doc.Set error: %v", err)
-			// Don't return early so the user still gets a response.
+			http.Error(w, "Error saving session", http.StatusInternalServerError)
+			return
 		}
 	}
 
