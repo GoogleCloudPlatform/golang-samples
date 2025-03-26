@@ -16,17 +16,17 @@ package main
 
 import (
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
-
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestIndex(t *testing.T) {
-	tc := testutil.SystemTest(t)
+
+	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
 
 	// Create new app
-	a, err := newApp(tc.ProjectID)
+	a, err := newApp(projectID)
 	if err != nil {
 		t.Fatalf("newApp: %v", err)
 	}
@@ -57,9 +57,10 @@ func TestIndex(t *testing.T) {
 }
 
 func TestIndexCorrupted(t *testing.T) {
-	tc := testutil.SystemTest(t)
+	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
 
-	a, err := newApp(tc.ProjectID)
+	// Create new app
+	a, err := newApp(projectID)
 	if err != nil {
 		t.Fatalf("newApp: %v", err)
 	}
