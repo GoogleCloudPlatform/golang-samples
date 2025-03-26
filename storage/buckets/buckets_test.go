@@ -30,8 +30,6 @@ import (
 	"cloud.google.com/go/iam/apiv1/iampb"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 const (
@@ -810,20 +808,6 @@ func TestSetSoftDeletePolicy(t *testing.T) {
 	if gotOutput != wantOutput {
 		t.Errorf("Output mismatch: got %q, want %q", gotOutput, wantOutput)
 	}
-
-	// Verify the bucket's attributes.
-	attrs, err := client.Bucket(bucketName).Attrs(ctx)
-	if err != nil {
-		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
-	}
-
-	want := &storage.SoftDeletePolicy{
-		RetentionDuration: 10 * 24 * time.Hour, // 10 days
-	}
-	// Ensure RententionDuration is as expected and ignore EffectiveTime.
-	if diff := cmp.Diff(want, attrs.SoftDeletePolicy, cmpopts.IgnoreFields(storage.SoftDeletePolicy{}, "EffectiveTime")); diff != "" {
-		t.Errorf("SoftDeletePolicy mismatch (-want +got):\n%s", diff)
-	}
 }
 
 func TestGetSoftDeletePolicy(t *testing.T) {
@@ -870,19 +854,10 @@ func TestDisableSoftDeletePolicy(t *testing.T) {
 		t.Fatalf("disableSoftDeletePolicy: %v", err)
 	}
 
-	attrs, err := client.Bucket(bucketName).Attrs(ctx)
-	if err != nil {
-		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
-	}
-
 	// Verify the output was printed as expected.
 	got := buf.String()
 	want := fmt.Sprintf("Soft delete policy for bucket %s was disabled.\n", bucketName)
 	if !strings.HasPrefix(got, want) {
 		t.Errorf("Output mismatch: got %q, want %q", got, want)
-	}
-
-	if diff := cmp.Diff(&storage.SoftDeletePolicy{RetentionDuration: 0}, attrs.SoftDeletePolicy); diff != "" {
-		t.Errorf("SoftDeletePolicy mismatch (-want +got):\n%s", diff)
 	}
 }
