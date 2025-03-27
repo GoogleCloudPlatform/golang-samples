@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START parametermanager_quickstart]
 package main
+
+// [START parametermanager_quickstart]
 
 // Sample quickstart is a basic program that uses Parameter Manager.
 import (
 	"context"
 	"fmt"
-	"log"
 
 	parametermanager "cloud.google.com/go/parametermanager/apiv1"
 	parametermanagerpb "cloud.google.com/go/parametermanager/apiv1/parametermanagerpb"
@@ -40,27 +40,33 @@ func main() {
 	// Create a Parameter Manager client.
 	client, err := parametermanager.NewClient(ctx)
 	if err != nil {
-		log.Fatalf("Failed to create Parameter Manager client: %v", err)
+		fmt.Println("Failed to create Parameter Manager client: %v", err)
+		return
 	}
 	defer client.Close()
 
 	// Construct the name of the parent resource to create the parameter.
 	parent := fmt.Sprintf("projects/%s/locations/global", projectID)
 
-	// Create a new parameter.
-	parameter, err := client.CreateParameter(ctx, &parametermanagerpb.CreateParameterRequest{
+	// Build a parameter creation request.
+	paramCreateReq := &parametermanagerpb.CreateParameterRequest{
 		Parent:      parent,
 		ParameterId: parameterID,
 		Parameter: &parametermanagerpb.Parameter{
 			Format: parametermanagerpb.ParameterFormat_JSON,
 		},
-	})
+	}
+
+	// Create a new parameter.
+	parameter, err := client.CreateParameter(ctx, paramCreateReq)
 	if err != nil {
-		log.Fatalf("Failed to create parameter: %v\n", err)
+		fmt.Printf("Failed to create parameter: %v\n", err)
+		return
 	}
 	fmt.Printf("Created parameter %s with format %s\n", parameter.Name, parameter.Format.String())
 
-	parameterVersion, err := client.CreateParameterVersion(ctx, &parametermanagerpb.CreateParameterVersionRequest{
+	// Build a parameter version creation request.
+	paramVersionCreateReq := &parametermanagerpb.CreateParameterVersionRequest{
 		Parent:             parameter.Name,
 		ParameterVersionId: versionID,
 		ParameterVersion: &parametermanagerpb.ParameterVersion{
@@ -68,17 +74,25 @@ func main() {
 				Data: []byte(payload),
 			},
 		},
-	})
+	}
+
+	parameterVersion, err := client.CreateParameterVersion(ctx, paramVersionCreateReq)
 	if err != nil {
-		log.Fatalf("Failed to create parameter version: %v\n", err)
+		fmt.Printf("Failed to create parameter version: %v\n", err)
+		return
 	}
 	fmt.Printf("Created parameter version: %s\n", parameterVersion.Name)
 
-	result, err := client.GetParameterVersion(ctx, &parametermanagerpb.GetParameterVersionRequest{
+	// Build a parameter version get request.
+	paramVersionGetReq := &parametermanagerpb.GetParameterVersionRequest{
 		Name: parameterVersion.Name,
-	})
+	}
+
+	// Get the parameter version.
+	result, err := client.GetParameterVersion(ctx, paramVersionGetReq)
 	if err != nil {
-		log.Fatalf("Failed to get parameter version: %v\n", err)
+		fmt.Printf("Failed to get parameter version: %v\n", err)
+		return
 	}
 
 	fmt.Printf("Retrieved parameter version: %s", result.Name)
