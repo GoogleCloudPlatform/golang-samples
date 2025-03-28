@@ -84,7 +84,7 @@ func newApp(projectID string) (*app, error) {
 		log.Fatalf("firestore.NewClient: %v", err)
 	}
 
-	tmpl, err := template.New("Index").Parse(`<body>{{.views}} {{if eq .views 1}}view{{else}}views{{end}} for "{{.greeting}}"</body>`)
+	tmpl, err := template.New("Index").Parse(`<body>{{.Views}} {{if eq .Views 1}}view{{else}}views{{end}} for "{{.Greetings}}"</body>`)
 	if err != nil {
 		log.Fatalf("template.New: %v", err)
 	}
@@ -191,12 +191,7 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	templateData := map[string]interface{}{
-		"views":    session.Views,
-		"greeting": session.Greetings,
-	}
-
-	if err := a.tmpl.Execute(w, templateData); err != nil {
+	if err := a.tmpl.Execute(w, session); err != nil {
 		log.Printf("Execute: %v", err)
 	}
 }
