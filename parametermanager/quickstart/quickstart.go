@@ -40,7 +40,7 @@ func main() {
 	// Create a Parameter Manager client.
 	client, err := parametermanager.NewClient(ctx)
 	if err != nil {
-		fmt.Println("Failed to create Parameter Manager client: %v", err)
+		fmt.Printf("Failed to create Parameter Manager client: %v", err)
 		return
 	}
 	defer client.Close()
