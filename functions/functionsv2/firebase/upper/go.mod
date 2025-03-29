@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/fireb
 
 require (
 	cloud.google.com/go/firestore v1.18.0
-	firebase.google.com/go/v4 v4.14.1
+	firebase.google.com/go/v4 v4.15.2
 )
 
 require (
@@ -47,16 +47,16 @@ require (
 	cloud.google.com/go/iam v1.3.1 // indirect
 	cloud.google.com/go/longrunning v0.6.4 // indirect
 	cloud.google.com/go/storage v1.50.0 // indirect
-	github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
+	github.com/GoogleCloudPlatform/functions-framework-go v1.9.2
 	github.com/MicahParks/keyfunc v1.9.0 // indirect
-	github.com/cloudevents/sdk-go/v2 v2.15.2
+	github.com/cloudevents/sdk-go/v2 v2.16.0
 	github.com/golang-jwt/jwt/v4 v4.5.1 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.1 // indirect
-	github.com/googleapis/google-cloudevents-go v0.8.0
+	github.com/googleapis/google-cloudevents-go v0.9.0
 	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/oauth2 v0.25.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
@@ -67,7 +67,7 @@ require (
 	google.golang.org/appengine/v2 v2.0.6 // indirect
 	google.golang.org/genproto v0.0.0-20250115164207-1a7da9e5054f // indirect
 	google.golang.org/grpc v1.69.4 // indirect
-	google.golang.org/protobuf v1.36.3
+	google.golang.org/protobuf v1.36.6
 )
 
 go 1.23.0
