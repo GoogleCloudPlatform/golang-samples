@@ -28,9 +28,9 @@ import (
 
 // app stores a sessions.Store. Create a new app with newApp.
 type app struct {
-	client       *firestore.Client
 	tmpl         *template.Template
 	collectionID string
+	projectID    string
 }
 
 // session stores the client's session information.
@@ -84,22 +84,15 @@ func main() {
 
 // newApp creates a new app.
 func newApp(projectID, collectionID string) (app, error) {
-	ctx := context.Background()
-	client, err := firestore.NewClient(ctx, projectID)
-	if err != nil {
-		log.Fatalf("firestore.NewClient: %v", err)
-	}
-	defer client.Close()
-
 	tmpl, err := template.New("Index").Parse(`<body>{{.Views}} {{if eq .Views 1}}view{{else}}views{{end}} for "{{.Greetings}}"</body>`)
 	if err != nil {
 		log.Fatalf("template.New: %v", err)
 	}
 
 	return app{
-		client:       client,
 		tmpl:         tmpl,
 		collectionID: collectionID,
+		projectID:    projectID,
 	}, nil
 }
 
@@ -117,6 +110,12 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 
+	client, err := firestore.NewClient(ctx, a.projectID)
+	if err != nil {
+		log.Fatalf("firestore.NewClient: %v", err)
+	}
+	defer client.Close()
+
 	// cookieName is a non-empty identifier for this app, it is used as the key name
 	// that contains the session's id value.
 	//
@@ -133,7 +132,7 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 	// If isNewSession flag is true, the session will be created
 	if isNewSession {
 		// Get unique id for new document
-		doc = a.client.Collection(a.collectionID).NewDoc()
+		doc = client.Collection(a.collectionID).NewDoc()
 
 		session.Greetings = greetings[rand.Intn(len(greetings))]
 		session.Views = 1
@@ -148,7 +147,7 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 		// The session exists
 
 		// Retrieve document from Firestore by ID
-		doc, err := a.client.Collection(a.collectionID).Doc(cookie.Value).Get(ctx)
+		doc, err := client.Collection(a.collectionID).Doc(cookie.Value).Get(ctx)
 		if err != nil {
 			log.Printf("client.Collection.Doc.Get error: %v", err)
 			http.Error(w, "Error getting session", http.StatusInternalServerError)
