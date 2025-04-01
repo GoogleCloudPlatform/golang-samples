@@ -12,14 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START getting_started_sessions_setup]
-
-// Command sessions starts an HTTP server that uses session state.
 package main
 
+// [START getting_started_sessions_setup]
 import (
 	"context"
-	"errors"
 	"html/template"
 	"log"
 	"math/rand"
@@ -86,19 +83,20 @@ func main() {
 }
 
 // newApp creates a new app.
-func newApp(projectID, collectionID string) (*app, error) {
+func newApp(projectID, collectionID string) (app, error) {
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
 		log.Fatalf("firestore.NewClient: %v", err)
 	}
+	defer client.Close()
 
 	tmpl, err := template.New("Index").Parse(`<body>{{.Views}} {{if eq .Views 1}}view{{else}}views{{end}} for "{{.Greetings}}"</body>`)
 	if err != nil {
 		log.Fatalf("template.New: %v", err)
 	}
 
-	return &app{
+	return app{
 		client:       client,
 		tmpl:         tmpl,
 		collectionID: collectionID,
@@ -112,16 +110,12 @@ func newApp(projectID, collectionID string) (*app, error) {
 // index uses sessions to assign users a random greeting and keep track of
 // views.
 func (a *app) index(w http.ResponseWriter, r *http.Request) {
-	if r.RequestURI != "/" {
-		return
-	}
+	var session session
+	var doc *firestore.DocumentRef
+
+	isNewSession := false
 
 	ctx := context.Background()
-
-	var id string
-	var session session
-	var cookie *http.Cookie
-	var isNewSession bool
 
 	// cookieName is a non-empty identifier for this app, it is used as the key name
 	// that contains the session's id value.
@@ -132,42 +126,28 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 	// If err is different to nil, it means the cookie has not been set, so it will be created.
 	cookie, err := r.Cookie(cookieName)
 	if err != nil {
-		if errors.Is(err, http.ErrNoCookie) {
-			// isNewSession flag is set to true
-			isNewSession = true
-		} else {
-			log.Printf("Error getting cookie: %v", err)
-			http.Error(w, "Error accessing session", http.StatusInternalServerError)
-			return
-		}
+		// isNewSession flag is set to true
+		isNewSession = true
 	}
 
 	// If isNewSession flag is true, the session will be created
 	if isNewSession {
 		// Get unique id for new document
-		id = a.client.Collection(a.collectionID).NewDoc().ID
+		doc = a.client.Collection(a.collectionID).NewDoc()
 
 		session.Greetings = greetings[rand.Intn(len(greetings))]
 		session.Views = 1
 
-		// New document is created
-		_, err := a.client.Collection(a.collectionID).Doc(id).Set(ctx, session)
-		if err != nil {
-			log.Printf("client.Collection.Doc.Set error: %v", err)
-			http.Error(w, "Error creating session", http.StatusInternalServerError)
-			return
-		}
-
 		// Cookie is set
 		cookie = &http.Cookie{
 			Name:  cookieName,
-			Value: id,
+			Value: doc.ID,
 		}
 		http.SetCookie(w, cookie)
 	} else {
 		// The session exists
 
-		// Get session
+		// Retrieve document from Firestore by ID
 		doc, err := a.client.Collection(a.collectionID).Doc(cookie.Value).Get(ctx)
 		if err != nil {
 			log.Printf("client.Collection.Doc.Get error: %v", err)
@@ -185,14 +165,14 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 
 		// Add 1 to current views value
 		session.Views++
+	}
 
-		// Update document
-		_, err = a.client.Collection(a.collectionID).Doc(cookie.Value).Set(ctx, session)
-		if err != nil {
-			log.Printf("client.Collection.Doc.Set error: %v", err)
-			http.Error(w, "Error saving session", http.StatusInternalServerError)
-			return
-		}
+	// The document is created/updated
+	_, err = doc.Set(ctx, session)
+	if err != nil {
+		log.Printf("client.Collection.Doc.Set error: %v", err)
+		http.Error(w, "Error creating session", http.StatusInternalServerError)
+		return
 	}
 
 	if err := a.tmpl.Execute(w, session); err != nil {
