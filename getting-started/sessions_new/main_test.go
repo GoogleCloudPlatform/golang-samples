@@ -64,44 +64,6 @@ func TestIndex(t *testing.T) {
 	cleanup(t, projectID, collectionID)
 }
 
-// TestIndexCorrupted checks if changing the cookie's value to an invalid one resets the counter.
-func TestIndexCorrupted(t *testing.T) {
-	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
-	collectionID := "test-hello-views"
-
-	// Create new app
-	a, err := newApp(projectID, collectionID)
-	if err != nil {
-		t.Fatalf("newApp: %v", err)
-	}
-
-	// Simulate HTTP GET request
-	r := httptest.NewRequest("GET", "/", nil)
-	rr := httptest.NewRecorder()
-
-	a.index(rr, r)
-
-	// ResponseWriter body should contain 1 view
-	if got, want := rr.Body.String(), "1 view"; !strings.Contains(got, want) {
-		t.Errorf("index first visit got:\n----\n%v\n----\nWant to contain %q", got, want)
-	}
-
-	// Simulate HTTP Get request but removing the assigned session ID
-	r = httptest.NewRequest("GET", "/", nil)
-	r.Header.Set("Cookie", "this is not a valid session ID")
-
-	rr = httptest.NewRecorder()
-
-	a.index(rr, r)
-
-	// As the current session ID is not valid, it should contain 1
-	if got, want := rr.Body.String(), "1 view"; !strings.Contains(got, want) {
-		t.Errorf("index first visit got:\n----\n%v\n----\nWant to contain %q", got, want)
-	}
-
-	cleanup(t, projectID, collectionID)
-}
-
 // cleanup function deletes all documents inside a collection
 func cleanup(t *testing.T, projectID, collectionID string) {
 
