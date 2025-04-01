@@ -146,21 +146,23 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// The session exists
 
-		// Retrieve document from Firestore by ID
-		doc, err := client.Collection(a.collectionID).Doc(cookie.Value).Get(ctx)
+		// Retrieve document from collection by ID
+		docSnapshot, err := client.Collection(a.collectionID).Doc(cookie.Value).Get(ctx)
 		if err != nil {
-			log.Printf("client.Collection.Doc.Get error: %v", err)
+			log.Printf("doc.Get error: %v", err)
 			http.Error(w, "Error getting session", http.StatusInternalServerError)
 			return
 		}
 
 		// Unmarshal documents's content to local type
-		err = doc.DataTo(&session)
+		err = docSnapshot.DataTo(&session)
 		if err != nil {
 			log.Printf("doc.DataTo error: %v", err)
 			http.Error(w, "Error parsing session", http.StatusInternalServerError)
 			return
 		}
+
+		doc = docSnapshot.Ref
 
 		// Add 1 to current views value
 		session.Views++
@@ -169,7 +171,7 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 	// The document is created/updated
 	_, err = doc.Set(ctx, session)
 	if err != nil {
-		log.Printf("client.Collection.Doc.Set error: %v", err)
+		log.Printf("doc.Set error: %v", err)
 		http.Error(w, "Error creating session", http.StatusInternalServerError)
 		return
 	}

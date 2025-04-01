@@ -28,7 +28,8 @@ import (
 // TestIndex checks if simulating the request twice by reusing the first request increases the counter.
 func TestIndex(t *testing.T) {
 
-	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
+	//projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
+	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	collectionID := "test-hello-views"
 
 	// Create new app
