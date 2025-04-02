@@ -677,3 +677,97 @@ func TestObjectRetention(t *testing.T) {
 		t.Errorf("retention time should be less than 10 days from the start of the test; got %v, want sooner than %v", got, want)
 	}
 }
+
+func TestSoftDelete(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	t.Cleanup(func() { client.Close() })
+
+	var (
+		bucketName = testutil.UniqueBucketName(testPrefix)
+		objectName = "soft-deleted-object.txt"
+	)
+
+	bucket := client.Bucket(bucketName)
+	if err := bucket.Create(ctx, tc.ProjectID, &storage.BucketAttrs{SoftDeletePolicy: &storage.SoftDeletePolicy{
+		RetentionDuration: 10 * 24 * time.Hour, // 10 days in hours
+	}}); err != nil {
+		t.Fatalf("Bucket.Create(%q): %v", bucketName, err)
+	}
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	// bucketName := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	// defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	// // Enable versioning for the bucket.
+	// if err := enableVersioning(io.Discard, bucketName); err != nil {
+	// 	t.Fatalf("enableVersioning: %v", err)
+	// }
+
+	// Upload the object to the bucket.
+	if err := uploadFile(io.Discard, bucketName, objectName); err != nil {
+		t.Fatalf("uploadFile(%q): %v", objectName, err)
+	}
+
+	// Get object attributes to retrieve the generation before deleting the object.
+	obj := client.Bucket(bucketName).Object(objectName)
+	attrs, err := obj.Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Object(%q).Attrs: %v", objectName, err)
+	}
+	generation := attrs.Generation
+	// Simulate soft deletion by deleting the object.
+	if err := obj.Delete(ctx); err != nil {
+		t.Fatalf("Object(%q).Delete: %v", objectName, err)
+	}
+
+	t.Run("listSoftDeletedObjects", func(t *testing.T) {
+		var buf bytes.Buffer
+		if err := listSoftDeletedObjects(&buf, bucketName); err != nil {
+			t.Fatalf("listSoftDeletedObjects: %v", err)
+		}
+		// Verify the output was printed as expected.
+		got := buf.String()
+		want := fmt.Sprintf("Soft-deleted object: %s\n", objectName)
+		if !strings.HasPrefix(got, want) {
+			t.Errorf("Output mismatch: got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("restoreSoftDeletedObject", func(t *testing.T) {
+		var buf bytes.Buffer
+		if err := restoreSoftDeletedObject(&buf, bucketName, objectName, generation); err != nil {
+			t.Fatalf("restoreSoftDeletedObject: %v", err)
+		}
+		if !strings.Contains(buf.String(), "has been restored") {
+			t.Errorf("restoreSoftDeletedObject output mismatch: got %q", buf.String())
+		}
+
+		// Verify the object is restored by checking its attributes.
+		restoredAttrs, err := obj.Attrs(ctx)
+		if err != nil {
+			t.Fatalf("Object(%q).Attrs after restore: %v", objectName, err)
+		}
+		if !restoredAttrs.Deleted.IsZero() {
+			t.Errorf("Object(%q) is still marked as deleted after restore", objectName)
+		}
+	})
+
+	t.Run("listSoftDeletedVersionsOfObject", func(t *testing.T) {
+		var buf bytes.Buffer
+		if err := listSoftDeletedVersionsOfObject(&buf, bucketName, objectName); err != nil {
+			t.Fatalf("listSoftDeletedVersionsOfObject: %v", err)
+		}
+		// Verify the output was printed as expected.
+		got := buf.String()
+		want := fmt.Sprintf("Soft-deleted object version: %s (generation: %d)\n", objectName, generation)
+		if !strings.HasPrefix(got, want) {
+			t.Errorf("Output mismatch: got %q, want %q", got, want)
+		}
+	})
+}
