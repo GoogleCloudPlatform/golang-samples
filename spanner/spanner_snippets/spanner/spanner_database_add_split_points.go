@@ -44,43 +44,45 @@ func addSplitpoints(w io.Writer, dbName string) error {
 		Database:   dbName,
 		Statements: ddl,
 	})
-	if err != nil {
-		return err
-	}
+
 	// Wait for the UpdateDatabaseDdl operation to finish.
 	if err := op.Wait(ctx); err != nil {
-		return fmt.Errorf("waiting for bit reverse sequence skip range to finish failed: %w", err)
+		return fmt.Errorf("waiting for UpdateDatabaseDdlRequest to finish failed: %w", err)
 	}
-	fmt.Fprintf(w, "Added tables for Split testing\n")
+	fmt.Fprintf(w, "Added indexes for Split testing\n")
 
 	splitTableKey := databasepb.SplitPoints_Key{
 		KeyParts: &structpb.ListValue{
-			Values: &structpb.Value{
+			Values: []*structpb.Value{
 				structpb.NewStringValue("42"),
 			},
 		},
 	}
 
+	splitsKeysArrayForTable := [...]databasepb.SplitPoints_Key{splitTableKey}
+
 	splitForTable := databasepb.SplitPoints{
 		Table: "Singers",
-		Keys:  &splitTableKey,
+		Keys:  &splitsKeysArrayForTable,
 	}
 
 	splitIndexKey := databasepb.SplitPoints_Key{
 		KeyParts: &structpb.ListValue{
-			Values: &[]structpb.Value{
-				{structpb.NewStringValue("John")},
-				{structpb.NewStringValue("Doe")},
+			Values: []*structpb.Value{
+				structpb.NewStringValue("John"),
+				structpb.NewStringValue("Doe"),
 			},
 		},
 	}
 
+	splitsKeysArrayForIndex := [...]databasepb.SplitPoints_Key{splitIndexKey}
+
 	splitForindex := databasepb.SplitPoints{
 		Index: "SingersByFirstLastName",
-		Keys:  &splitIndexKey,
+		Keys:  &splitsKeysArrayForIndex,
 	}
 
-	splitsArray := [...]databasepb.SplitPoints{splitForTable, splitIndexKey}
+	splitsArray := [...]databasepb.SplitPoints{splitForTable, splitForindex}
 	// Add split points to table and index
 	req := databasepb.AddSplitPointsRequest{
 		Database:    dbName,

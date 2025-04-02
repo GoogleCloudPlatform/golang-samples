@@ -444,7 +444,7 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "New singer inserted.")
 	assertContains(t, out, "Singer first name updated.")
 
-	out = runSample(t, addSplitpoints, dbName, "failed to add split points")
+	out = runSample(t, addSplitpoints, dbName, "Addsplitpoints sample failed")
 	assertContains(t, out, "Added split points")
 
 }
