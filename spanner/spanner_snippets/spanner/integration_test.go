@@ -443,6 +443,10 @@ func TestSample(t *testing.T) {
 	out = runSample(t, readWriteTxnExcludedFromChangeStreams, dbName, "failed to commit rw txn excluded from change streams")
 	assertContains(t, out, "New singer inserted.")
 	assertContains(t, out, "Singer first name updated.")
+
+	out = runSample(t, addSplitpoints, dbName, "failed to add split points")
+	assertContains(t, out, "Added split points")
+
 }
 
 func TestBackupSample(t *testing.T) {
