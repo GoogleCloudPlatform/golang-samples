@@ -443,6 +443,11 @@ func TestSample(t *testing.T) {
 	out = runSample(t, readWriteTxnExcludedFromChangeStreams, dbName, "failed to commit rw txn excluded from change streams")
 	assertContains(t, out, "New singer inserted.")
 	assertContains(t, out, "Singer first name updated.")
+
+	// Test isolation level functionality
+	out = runSample(t, writeWithTransactionUsingIsolationLevel, dbName, "failed to write with transaction using isolation level")
+	assertContains(t, out, "Current album title: Total Junk")
+	assertContains(t, out, "Updated 1 record(s)")
 }
 
 func TestBackupSample(t *testing.T) {
