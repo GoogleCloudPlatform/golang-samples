@@ -444,6 +444,11 @@ func TestSample(t *testing.T) {
 	assertContains(t, out, "New singer inserted.")
 	assertContains(t, out, "Singer first name updated.")
 
+	// Test isolation level functionality
+	out = runSample(t, writeWithTransactionUsingIsolationLevel, dbName, "failed to write with transaction using isolation level")
+	assertContains(t, out, "Current album title: Total Junk")
+	assertContains(t, out, "Updated 1 record(s)")
+
 	out = runSample(t, addSplitpoints, dbName, "Addsplitpoints sample failed")
 	assertContains(t, out, "Added split points")
 
