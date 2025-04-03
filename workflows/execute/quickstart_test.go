@@ -55,7 +55,6 @@ func TestExecuteWorkflow(t *testing.T) {
 	if got, want := buf.String(), "Execution results"; !strings.Contains(got, want) {
 		t.Errorf("executeWorkflow: expected %q to contain %q", got, want)
 	}
-
 }
 
 // testCreateWorkflow creates a testing workflow by the given name.

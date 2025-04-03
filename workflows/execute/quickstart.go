@@ -33,7 +33,7 @@ import (
 // For more information about Workflows see:
 // https://cloud.google.com/workflows/docs/overview
 func executeWorkflow(w io.Writer, projectID, workflowID, locationID string) error {
-	// TODO(developer): uncomment and update the following lines:
+	// TODO(developer): Uncomment and update the following lines:
 	// projectID := "YOUR_PROJECT_ID"
 	// workflowID := "YOUR_WORKFLOW_ID"
 	// locationID := "YOUR_LOCATION_ID"
@@ -41,7 +41,7 @@ func executeWorkflow(w io.Writer, projectID, workflowID, locationID string) erro
 	ctx := context.Background()
 
 	delay := time.Second * 1
-	timeout := time.Minute * 10 // Timeout for workflow execution.
+	timeout := time.Minute * 10 // Timeout for workflow execution
 
 	// Construct the location path.
 	parent := fmt.Sprintf("projects/%s/locations/%s/workflows/%s", projectID, locationID, workflowID)
@@ -77,8 +77,9 @@ func executeWorkflow(w io.Writer, projectID, workflowID, locationID string) erro
 		// Double the delay to provide exponential backoff.
 		delay *= 2
 
-		// Evaluate whether the current delay has passed, or the execution has timed out.
-		// The last case will return an error indicating an timeout error.
+		// Evaluate whether the current delay has passed, or the execution
+		// has timed out.
+		// The last case will return an error indicating a timeout error.
 		select {
 		case <-time.After(delay):
 			log.Println("- Waiting for results...")
