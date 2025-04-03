@@ -29,30 +29,37 @@ import (
 	"google.golang.org/api/workflows/v1"
 )
 
+// TestExecuteWorkflow tests the executeWorkflow function
+// and evaluates the success by comparing if the function's
+// output contains an expected value.
 func TestExecuteWorkflow(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
+	// Build the workflowID by generating a random uuid adding it as suffix.
 	workflowID := fmt.Sprintf("myFirstWorkflow_%s", uuid.NewString())
 	locationID := "us-central1"
 
 	var buf bytes.Buffer
 
+	// Create the test workflow that will be cleaned up once the test is done.
 	if err := testCreateWorkflow(t, workflowID, tc.ProjectID, locationID); err != nil {
 		t.Fatalf("testCreateWorkflow error: %v\n", err)
 	}
 	defer testCleanup(t, workflowID, tc.ProjectID, locationID)
 
+	// Execute the workflow
 	if err := executeWorkflow(&buf, tc.ProjectID, workflowID, locationID); err != nil {
 		t.Fatalf("executeWorkflow error: %v\n", err)
 	}
 
+	// Evaluate the if the output contains the expected string.
 	if got, want := buf.String(), "Execution results"; !strings.Contains(got, want) {
 		t.Errorf("executeWorkflow: expected %q to contain %q", got, want)
 	}
 
 }
 
-// testCreateWorkflow creates a testing workflow by the given name
+// testCreateWorkflow creates a testing workflow by the given name.
 func testCreateWorkflow(t *testing.T, workflowID, projectID, locationID string) error {
 	t.Helper()
 
@@ -60,34 +67,41 @@ func testCreateWorkflow(t *testing.T, workflowID, projectID, locationID string) 
 
 	timeout := time.Minute * 5
 
+	// Build the parent and workflowName by the given values.
 	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
 	workflowName := fmt.Sprintf("%s/workflows/%s", parent, workflowID)
 
+	// Create client
 	client, err := workflows.NewService(ctx, option.WithEndpoint("https://workflows.googleapis.com/"))
 	if err != nil {
 		return fmt.Errorf("workflows.NewService error: %w", err)
 	}
-
+	// Read file's content
 	content, err := os.ReadFile("../myFirstWorkflow.yaml")
 	if err != nil {
 		return fmt.Errorf("os.ReadFile error: %w", err)
 	}
 
+	// Build the workflow by assigning the name and the content.
 	workflow := &workflows.Workflow{
 		Name:           workflowName,
 		SourceContents: string(content),
 	}
 
+	// Get the workflow service for avoiding repetitive code.
 	service := client.Projects.Locations.Workflows
 
+	// Create workflow
 	_, err = service.Create(parent, workflow).WorkflowId(workflowID).Do()
 	if err != nil {
 		return fmt.Errorf("service.Create failed to create workflow: %v", err)
 	}
 
+	// To avoid an infinite loop a context with timeout will be created.
 	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
+	// Loop the workflow's creation state until it's different from active.
 	for workflow.State != "ACTIVE" {
 		workflow, err = service.Get(workflowName).Do()
 		if err != nil {
@@ -104,19 +118,22 @@ func testCreateWorkflow(t *testing.T, workflowID, projectID, locationID string) 
 	return nil
 }
 
-// testCreateWorkflow creates a testing workflow by the given name
+// testCreateWorkflow creates a testing workflow by the given name.
 func testCleanup(t *testing.T, workflowID, projectID, locationID string) error {
 	t.Helper()
 
 	ctx := context.Background()
 
+	// Build the parent and workflowName by the given values.
 	parent := fmt.Sprintf("projects/%s/locations/%s/workflows/%s", projectID, locationID, workflowID)
 
+	// Create client.
 	client, err := workflows.NewService(ctx, option.WithEndpoint("https://workflows.googleapis.com/"))
 	if err != nil {
 		return fmt.Errorf("workflows.NewService error: %w", err)
 	}
 
+	// Delete workflow.
 	service := client.Projects.Locations.Workflows
 	_, err = service.Delete(parent).Do()
 	if err != nil {

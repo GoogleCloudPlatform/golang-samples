@@ -15,7 +15,6 @@
 package execute
 
 // [START workflows_api_quickstart]
-
 import (
 	"context"
 	"fmt"
@@ -35,14 +34,14 @@ import (
 // https://cloud.google.com/workflows/docs/overview
 func executeWorkflow(w io.Writer, projectID, workflowID, locationID string) error {
 	// TODO(developer): uncomment and update the following lines:
-	// projectID := "my-project-id"
-	// workflowID := "my-workflow-id"
-	// locationID := "location-id"
+	// projectID := "YOUR_PROJECT_ID"
+	// workflowID := "YOUR_WORKFLOW_ID"
+	// locationID := "YOUR_LOCATION_ID"
 
 	ctx := context.Background()
 
 	delay := time.Second * 1
-	timeout := time.Minute * 10 // Timeout for workflow execution
+	timeout := time.Minute * 10 // Timeout for workflow execution.
 
 	// Construct the location path.
 	parent := fmt.Sprintf("projects/%s/locations/%s/workflows/%s", projectID, locationID, workflowID)
@@ -78,7 +77,8 @@ func executeWorkflow(w io.Writer, projectID, workflowID, locationID string) erro
 		// Double the delay to provide exponential backoff.
 		delay *= 2
 
-		// Select statement to Evaluate whether the delay or the context with timeout has completed.
+		// Evaluate whether the current delay has passed, or the execution has timed out.
+		// The last case will return an error indicating an timeout error.
 		select {
 		case <-time.After(delay):
 			log.Println("- Waiting for results...")
