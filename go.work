@@ -145,23 +145,15 @@ use (
 	./texttospeech
 	./trace
 	./translate
-	./vertexai/chat
-	./vertexai/context-caching
 	./vertexai/embeddings
 	./vertexai/evaluation
 	./vertexai/function-calling
 	./vertexai/gemma2
-	./vertexai/multimodal
-	./vertexai/multimodal-multiple
-	./vertexai/multimodal-pdf
-	./vertexai/multimodal-video
 	./vertexai/multimodal-video-with-audio
 	./vertexai/safety-settings
-	./vertexai/safety-settings-multimodal
 	./vertexai/snippets
 	./vertexai/stream-multimodality-basic
 	./vertexai/stream-text-basic
-	./vertexai/system-instruction
 	./vertexai/token-count
 	./videointelligence
 	./vision
