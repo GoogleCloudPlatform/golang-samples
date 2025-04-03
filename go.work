@@ -145,6 +145,8 @@ use (
 	./texttospeech
 	./trace
 	./translate
+	./vertexai/batch-predict
+	./vertexai/context-caching
 	./vertexai/embeddings
 	./vertexai/evaluation
 	./vertexai/function-calling
