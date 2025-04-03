@@ -59,11 +59,9 @@ func addSplitpoints(w io.Writer, dbName string) error {
 		},
 	}
 
-	splitsKeysArrayForTable := [...]databasepb.SplitPoints_Key{splitTableKey}
-
 	splitForTable := databasepb.SplitPoints{
 		Table: "Singers",
-		Keys:  &splitsKeysArrayForTable,
+		Keys:  []*databasepb.SplitPoints_Key{&splitTableKey},
 	}
 
 	splitIndexKey := databasepb.SplitPoints_Key{
@@ -75,18 +73,15 @@ func addSplitpoints(w io.Writer, dbName string) error {
 		},
 	}
 
-	splitsKeysArrayForIndex := [...]databasepb.SplitPoints_Key{splitIndexKey}
-
 	splitForindex := databasepb.SplitPoints{
 		Index: "SingersByFirstLastName",
-		Keys:  &splitsKeysArrayForIndex,
+		Keys:  []*databasepb.SplitPoints_Key{&splitIndexKey},
 	}
 
-	splitsArray := [...]databasepb.SplitPoints{splitForTable, splitForindex}
 	// Add split points to table and index
 	req := databasepb.AddSplitPointsRequest{
 		Database:    dbName,
-		SplitPoints: &splitsArray,
+		SplitPoints: []*databasepb.SplitPoints{&splitForTable, &splitForindex},
 	}
 
 	res, err := client.AddSplitPoints(ctx, &req)
