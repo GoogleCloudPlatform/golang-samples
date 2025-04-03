@@ -4,7 +4,6 @@ go 1.22.7
 
 require (
 	cloud.google.com/go/parametermanager v0.1.0
-	cloud.google.com/go/secretmanager v1.14.3
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250212223439-8f5918015429
 	github.com/gofrs/uuid v4.4.0+incompatible
 	google.golang.org/api v0.221.0
@@ -15,6 +14,9 @@ require (
 require (
 	cel.dev/expr v0.19.1 // indirect
 	cloud.google.com/go v0.118.0 // indirect
+)
+
+require (
 	cloud.google.com/go/auth v0.14.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.7 // indirect
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
