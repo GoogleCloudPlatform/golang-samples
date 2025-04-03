@@ -25,7 +25,6 @@ import (
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
-	"google.golang.org/api/option"
 	"google.golang.org/api/workflows/v1"
 )
 
@@ -72,7 +71,7 @@ func testCreateWorkflow(t *testing.T, workflowID, projectID, locationID string) 
 	workflowName := fmt.Sprintf("%s/workflows/%s", parent, workflowID)
 
 	// Create client
-	client, err := workflows.NewService(ctx, option.WithEndpoint("https://workflows.googleapis.com/"))
+	client, err := workflows.NewService(ctx)
 	if err != nil {
 		return fmt.Errorf("workflows.NewService error: %w", err)
 	}
@@ -128,7 +127,7 @@ func testCleanup(t *testing.T, workflowID, projectID, locationID string) error {
 	parent := fmt.Sprintf("projects/%s/locations/%s/workflows/%s", projectID, locationID, workflowID)
 
 	// Create client.
-	client, err := workflows.NewService(ctx, option.WithEndpoint("https://workflows.googleapis.com/"))
+	client, err := workflows.NewService(ctx)
 	if err != nil {
 		return fmt.Errorf("workflows.NewService error: %w", err)
 	}
