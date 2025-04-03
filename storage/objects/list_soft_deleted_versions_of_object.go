@@ -14,7 +14,7 @@
 
 package objects
 
-// [START storage_list_soft_deleted_objects]
+// [START storage_list_soft_deleted_versions_of_object]
 import (
 	"context"
 	"fmt"
@@ -56,3 +56,5 @@ func listSoftDeletedVersionsOfObject(w io.Writer, bucket string, object string) 
 	}
 	return nil
 }
+
+// [END storage_list_soft_deleted_versions_of_object]
