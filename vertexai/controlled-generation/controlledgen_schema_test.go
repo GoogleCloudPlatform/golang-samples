@@ -52,3 +52,22 @@ into [][]Item because: %v`, w.Bytes(), err)
 		t.Errorf("no items returned")
 	}
 }
+
+func Test_controlledGenerationResponseSchemaEnum(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	w := new(bytes.Buffer)
+
+	location := "us-central1"
+	modelName := "gemini-1.5-pro-001"
+
+	err := controlledGenerationResponseSchemaEnum(w, tc.ProjectID, location, modelName)
+	if err != nil {
+		t.Fatalf("controlledGenerationResponseSchemaEnum: %v", err.Error())
+	}
+
+	exp := `Candidate label: "documentary"`
+	act := w.String()
+	if !strings.Contains(w.String(), exp) {
+		t.Errorf("expected output to contain text %q, got: %q", exp, act)
+	}
+}
