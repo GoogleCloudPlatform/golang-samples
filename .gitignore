@@ -37,4 +37,3 @@ testing/kokoro/test-env.sh
 .DS_Store
 go.work.sum
 sponge_log.xml
-.vscode/*
