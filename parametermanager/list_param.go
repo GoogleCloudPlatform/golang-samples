@@ -14,7 +14,7 @@
 
 package parametermanager
 
-// [START parametermanager_list_param]
+// [START parametermanager_list_params]
 import (
 	"context"
 	"fmt"
@@ -31,7 +31,7 @@ import (
 // projectID: The ID of the project where the parameters are located.
 //
 // The function returns an error if the parameter listing fails.
-func listParam(w io.Writer, projectID string) error {
+func listParams(w io.Writer, projectID string) error {
 	// Create a context and a Parameter Manager client.
 	ctx := context.Background()
 	client, err := parametermanager.NewClient(ctx)
@@ -64,4 +64,4 @@ func listParam(w io.Writer, projectID string) error {
 	return nil
 }
 
-// [END parametermanager_list_param]
+// [END parametermanager_list_params]

@@ -123,7 +123,7 @@ func TestListParam(t *testing.T) {
 	defer testCleanupParameter(t, parameter2.Name)
 
 	var b bytes.Buffer
-	if err := listParam(&b, tc.ProjectID); err != nil {
+	if err := listParams(&b, tc.ProjectID); err != nil {
 		t.Fatal(err)
 	}
 
