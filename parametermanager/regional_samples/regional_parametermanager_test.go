@@ -31,7 +31,11 @@ import (
 	grpcstatus "google.golang.org/grpc/status"
 )
 
+// testName generates a unique name for testing purposes by creating a new UUID.
+// It returns the UUID as a string or fails the test if UUID generation fails.
 func testName(t *testing.T) string {
+	t.Helper()
+
 	u, err := uuid.NewV4()
 	if err != nil {
 		t.Fatalf("testName: failed to generate uuid: %v", err)
@@ -39,7 +43,12 @@ func testName(t *testing.T) string {
 	return u.String()
 }
 
+// testLocation retrieves the location for testing purposes from the environment variable
+// GOLANG_REGIONAL_SAMPLES_LOCATION. If the environment variable is not set,
+// the test is skipped.
 func testLocation(t *testing.T) string {
+	t.Helper()
+
 	v := os.Getenv("GOLANG_REGIONAL_SAMPLES_LOCATION")
 	if v == "" {
 		t.Skip("testIamUser: missing GOLANG_REGIONAL_SAMPLES_LOCATION")
@@ -48,7 +57,11 @@ func testLocation(t *testing.T) string {
 	return v
 }
 
+// testParameter creates a parameter in the specified GCP project with the given format.
+// It returns the created parameter and its ID or fails the test if parameter creation fails.
 func testParameter(t *testing.T, projectID string, format parametermanagerpb.ParameterFormat) (*parametermanagerpb.Parameter, string) {
+	t.Helper()
+
 	parameterID := testName(t)
 	locationId := testLocation(t)
 
@@ -75,37 +88,11 @@ func testParameter(t *testing.T, projectID string, format parametermanagerpb.Par
 	return parameter, parameterID
 }
 
-func testParameterVersion(t *testing.T, projectID, parameterID, payload string) (*parametermanagerpb.ParameterVersion, string) {
-	parameterVersionID := testName(t)
-	locationId := testLocation(t)
-
-	ctx := context.Background()
-	endpoint := fmt.Sprintf("parametermanager.%s.rep.googleapis.com:443", locationId)
-	client, err := parametermanager.NewClient(ctx, option.WithEndpoint(endpoint))
-	if err != nil {
-		t.Fatalf("failed to create client: %v", err)
-	}
-	defer client.Close()
-
-	parent := fmt.Sprintf("projects/%s/locations/%s/parameters/%s", projectID, locationId, parameterID)
-
-	parameterVersion, err := client.CreateParameterVersion(ctx, &parametermanagerpb.CreateParameterVersionRequest{
-		Parent:             parent,
-		ParameterVersionId: parameterVersionID,
-		ParameterVersion: &parametermanagerpb.ParameterVersion{
-			Payload: &parametermanagerpb.ParameterVersionPayload{
-				Data: []byte(payload),
-			},
-		},
-	})
-	if err != nil {
-		t.Fatalf("testParameterVersion: failed to create parameter version: %v", err)
-	}
-
-	return parameterVersion, parameterVersionID
-}
-
+// testCleanupParameter deletes the specified parameter in the GCP project.
+// It fails the test if the parameter deletion fails.
 func testCleanupParameter(t *testing.T, name string) {
+	t.Helper()
+
 	ctx := context.Background()
 	locationId := testLocation(t)
 
@@ -125,7 +112,11 @@ func testCleanupParameter(t *testing.T, name string) {
 	}
 }
 
+// testCleanupParameterVersion deletes the specified parameter version in the GCP project.
+// It fails the test if the parameter version deletion fails.
 func testCleanupParameterVersion(t *testing.T, name string) {
+	t.Helper()
+
 	ctx := context.Background()
 	locationId := testLocation(t)
 
@@ -145,6 +136,8 @@ func testCleanupParameterVersion(t *testing.T, name string) {
 	}
 }
 
+// TestCreateRegionalParam tests the createRegionalParam function by creating a regional parameter,
+// then verifies if the parameter was successfully created by checking the output.
 func TestCreateRegionalParam(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -162,6 +155,8 @@ func TestCreateRegionalParam(t *testing.T) {
 	}
 }
 
+// TestCreateStructuredRegionalParam tests the createStructuredRegionalParam function by creating a structured regional parameter,
+// then verifies if the parameter was successfully created by checking the output.
 func TestCreateStructuredRegionalParam(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -179,6 +174,8 @@ func TestCreateStructuredRegionalParam(t *testing.T) {
 	}
 }
 
+// TestCreateStructuredRegionalParamVersion tests the createStructuredRegionalParamVersion function by creating a structured regional parameter version,
+// then verifies if the parameter version was successfully created by checking the output.
 func TestCreateStructuredRegionalParamVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -199,6 +196,8 @@ func TestCreateStructuredRegionalParamVersion(t *testing.T) {
 	}
 }
 
+// TestCreateRegionalParamVersion tests the createRegionalParamVersion function by creating a regional parameter version,
+// then verifies if the parameter version was successfully created by checking the output.
 func TestCreateRegionalParamVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -219,6 +218,8 @@ func TestCreateRegionalParamVersion(t *testing.T) {
 	}
 }
 
+// TestCreateRegionalParamVersionWithSecret tests the createRegionalParamVersionWithSecret function by creating a regional parameter version with a secret reference,
+// then verifies if the parameter version was successfully created by checking the output.
 func TestCreateRegionalParamVersionWithSecret(t *testing.T) {
 	tc := testutil.SystemTest(t)
 

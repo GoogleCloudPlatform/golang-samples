@@ -50,7 +50,7 @@ func createRegionalParamVersionWithSecret(w io.Writer, projectID, locationID, pa
 	// Construct the name of the create parameter version.
 	parent := fmt.Sprintf("projects/%s/locations/%s/parameters/%s", projectID, locationID, parameterID)
 
-	payload := []byte(fmt.Sprintf(`{"username": "test-user","password": "__REF__(//secretmanager.googleapis.com/%s)"}`, secretID))
+	payload := []byte(fmt.Sprintf(`{"db_host": "localhost","db_password": "__REF__(//secretmanager.googleapis.com/%s)"}`, secretID))
 
 	// Create a parameter version.
 	req := &parametermanagerpb.CreateParameterVersionRequest{
