@@ -29,7 +29,11 @@ import (
 	grpcstatus "google.golang.org/grpc/status"
 )
 
+// testName generates a unique name for testing purposes by creating a new UUID.
+// It returns the UUID as a string or fails the test if UUID generation fails.
 func testName(t *testing.T) string {
+	t.Helper()
+
 	u, err := uuid.NewV4()
 	if err != nil {
 		t.Fatalf("testName: failed to generate uuid: %v", err)
@@ -37,7 +41,11 @@ func testName(t *testing.T) string {
 	return u.String()
 }
 
+// testParameter creates a parameter in the specified GCP project with the given format.
+// It returns the created parameter and its ID or fails the test if parameter creation fails.
 func testParameter(t *testing.T, projectID string, format parametermanagerpb.ParameterFormat) (*parametermanagerpb.Parameter, string) {
+	t.Helper()
+
 	parameterID := testName(t)
 
 	ctx := context.Background()
@@ -62,7 +70,11 @@ func testParameter(t *testing.T, projectID string, format parametermanagerpb.Par
 	return parameter, parameterID
 }
 
+// testParameterVersion creates a version of a parameter with the given payload in the specified GCP project.
+// It returns the created parameter version and its ID or fails the test if parameter version creation fails.
 func testParameterVersion(t *testing.T, projectID, parameterID, payload string) (*parametermanagerpb.ParameterVersion, string) {
+	t.Helper()
+
 	parameterVersionID := testName(t)
 
 	ctx := context.Background()
@@ -90,7 +102,11 @@ func testParameterVersion(t *testing.T, projectID, parameterID, payload string) 
 	return parameterVersion, parameterVersionID
 }
 
+// testCleanupParameter deletes the specified parameter in the GCP project.
+// It fails the test if the parameter deletion fails.
 func testCleanupParameter(t *testing.T, name string) {
+	t.Helper()
+
 	ctx := context.Background()
 	client, err := parametermanager.NewClient(ctx)
 	if err != nil {
@@ -107,7 +123,11 @@ func testCleanupParameter(t *testing.T, name string) {
 	}
 }
 
+// testCleanupParameterVersion deletes the specified parameter version in the GCP project.
+// It fails the test if the parameter version deletion fails.
 func testCleanupParameterVersion(t *testing.T, name string) {
+	t.Helper()
+
 	ctx := context.Background()
 	client, err := parametermanager.NewClient(ctx)
 	if err != nil {
@@ -124,6 +144,9 @@ func testCleanupParameterVersion(t *testing.T, name string) {
 	}
 }
 
+// TestDisableParamVersion tests the disableParamVersion function by creating a parameter and its version,
+// then attempts to disable the created parameter version. It verifies if the parameter version
+// was successfully disabled by checking the output.
 func TestDisableParamVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -143,6 +166,9 @@ func TestDisableParamVersion(t *testing.T) {
 	}
 }
 
+// TestEnableParamVersion tests the enableParamVersion function by creating a parameter and its version,
+// then attempts to enable the created parameter version. It verifies if the parameter version
+// was successfully enabled by checking the output.
 func TestEnableParamVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -162,6 +188,9 @@ func TestEnableParamVersion(t *testing.T) {
 	}
 }
 
+// TestDeleteParam tests the deleteParam function by creating a parameter,
+// then attempts to delete the created parameter. It verifies if the parameter
+// was successfully deleted by checking the output.
 func TestDeleteParam(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -178,6 +207,9 @@ func TestDeleteParam(t *testing.T) {
 	}
 }
 
+// TestDeleteParam tests the deleteParamVersion function by creating a parameter and
+// parameter version, then attempts to delete the created parameter version. It verifies
+// if the parameter version was successfully deleted by checking the output.
 func TestDeleteParamVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
