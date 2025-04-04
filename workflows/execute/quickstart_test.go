@@ -116,7 +116,7 @@ func testCreateWorkflow(t *testing.T, workflowID, projectID, locationID string) 
 	return nil
 }
 
-// testCreateWorkflow creates a testing workflow by the given name.
+// testCleanup deletes a workflow.
 func testCleanup(t *testing.T, workflowID, projectID, locationID string) error {
 	t.Helper()
 
