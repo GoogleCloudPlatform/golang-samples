@@ -448,6 +448,9 @@ func TestSample(t *testing.T) {
 	out = runSample(t, writeWithTransactionUsingIsolationLevel, dbName, "failed to write with transaction using isolation level")
 	assertContains(t, out, "Current album title: Total Junk")
 	assertContains(t, out, "Updated 1 record(s)")
+
+	out = runSample(t, addSplitpoints, dbName, "Addsplitpoints sample failed")
+	assertContains(t, out, "Added split points")
 }
 
 func TestBackupSample(t *testing.T) {
