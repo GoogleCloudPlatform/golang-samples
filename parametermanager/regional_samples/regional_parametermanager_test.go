@@ -33,7 +33,11 @@ import (
 	grpcstatus "google.golang.org/grpc/status"
 )
 
+// testName generates a unique name for testing purposes by creating a new UUID.
+// It returns the UUID as a string or fails the test if UUID generation fails.
 func testName(t *testing.T) string {
+	t.Helper()
+
 	u, err := uuid.NewV4()
 	if err != nil {
 		t.Fatalf("testName: failed to generate uuid: %v", err)
@@ -41,7 +45,12 @@ func testName(t *testing.T) string {
 	return u.String()
 }
 
+// testLocation retrieves the location for testing purposes from the environment variable
+// GOLANG_REGIONAL_SAMPLES_LOCATION. If the environment variable is not set,
+// the test is skipped.
 func testLocation(t *testing.T) string {
+	t.Helper()
+
 	v := os.Getenv("GOLANG_REGIONAL_SAMPLES_LOCATION")
 	if v == "" {
 		t.Skip("testLocation: missing GOLANG_REGIONAL_SAMPLES_LOCATION")
@@ -50,7 +59,10 @@ func testLocation(t *testing.T) string {
 	return v
 }
 
+// testParameterWithKmsKey creates a parameter with a KMS key in the specified GCP project.
+// It returns the created parameter and its ID or fails the test if parameter creation fails.
 func testParameterWithKmsKey(t *testing.T, projectID, kms_key string) (*parametermanagerpb.Parameter, string) {
+	t.Helper()
 	parameterID := testName(t)
 	locationId := testLocation(t)
 
@@ -78,7 +90,10 @@ func testParameterWithKmsKey(t *testing.T, projectID, kms_key string) (*paramete
 	return parameter, parameterID
 }
 
+// testCleanupParameter deletes the specified parameter in the GCP project.
+// It fails the test if the parameter deletion fails.
 func testCleanupParameter(t *testing.T, name string) {
+	t.Helper()
 	locationId := testLocation(t)
 	ctx := context.Background()
 
@@ -98,7 +113,10 @@ func testCleanupParameter(t *testing.T, name string) {
 	}
 }
 
+// testCleanupKeyVersions deletes the specified key version in the GCP project.
+// It fails the test if the key version deletion fails.
 func testCleanupKeyVersions(t *testing.T, name string) {
+	t.Helper()
 	ctx := context.Background()
 
 	client, err := kms.NewKeyManagementClient(ctx)
@@ -116,7 +134,10 @@ func testCleanupKeyVersions(t *testing.T, name string) {
 	}
 }
 
+// testCreateKeyRing creates a key ring in the specified GCP project.
+// It fails the test if the key ring creation fails.
 func testCreateKeyRing(t *testing.T, projectID, keyRingId string) {
+	t.Helper()
 	ctx := context.Background()
 	locationID := testLocation(t)
 
@@ -149,7 +170,10 @@ func testCreateKeyRing(t *testing.T, projectID, keyRingId string) {
 	}
 }
 
+// testCreateKeyHSM creates a HSM key in the specified key ring in the GCP project.
+// It fails the test if the key creation fails.
 func testCreateKeyHSM(t *testing.T, projectID, keyRing, id string) {
+	t.Helper()
 	ctx := context.Background()
 	locationID := testLocation(t)
 	client, err := kms.NewKeyManagementClient(ctx)
@@ -188,6 +212,8 @@ func testCreateKeyHSM(t *testing.T, projectID, keyRing, id string) {
 	}
 }
 
+// TestCreateRegionalParamWithKmsKey tests the createRegionalParamWithKmsKey function by creating a regional parameter with a KMS key,
+// and verifies if the parameter was successfully created by checking the output.
 func TestCreateRegionalParamWithKmsKey(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -211,6 +237,8 @@ func TestCreateRegionalParamWithKmsKey(t *testing.T) {
 	}
 }
 
+// TestUpdateRegionalParamKmsKey tests the updateRegionalParamKmsKey function by creating a regional parameter with a KMS key,
+// updating the KMS key, and verifying if the parameter was successfully updated by checking the output.
 func TestUpdateRegionalParamKmsKey(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -234,6 +262,8 @@ func TestUpdateRegionalParamKmsKey(t *testing.T) {
 	}
 }
 
+// TestRemoveRegionalParamKmsKey tests the removeRegionalParamKmsKey function by creating a regional parameter with a KMS key,
+// removing the KMS key, and verifying if the KMS key was successfully removed by checking the output.
 func TestRemoveRegionalParamKmsKey(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
