@@ -59,7 +59,7 @@ func executeWorkflow(w io.Writer, projectID, workflowID, locationID string) erro
 	if err != nil {
 		return fmt.Errorf("service.Create.Do error: %w", err)
 	}
-	fmt.Fprintln(w,"- Execution started...")
+	fmt.Fprintln(w, "- Execution started...")
 
 	// Set up a context with timeout to prevent an infinite loop.
 	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
