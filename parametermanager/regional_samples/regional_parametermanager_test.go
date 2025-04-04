@@ -31,7 +31,11 @@ import (
 	grpcstatus "google.golang.org/grpc/status"
 )
 
+// testName generates a unique name for testing purposes by creating a new UUID.
+// It returns the UUID as a string or fails the test if UUID generation fails.
 func testName(t *testing.T) string {
+	t.Helper()
+
 	u, err := uuid.NewV4()
 	if err != nil {
 		t.Fatalf("testName: failed to generate uuid: %v", err)
@@ -39,7 +43,12 @@ func testName(t *testing.T) string {
 	return u.String()
 }
 
+// testLocation retrieves the location for testing purposes from the environment variable
+// GOLANG_REGIONAL_SAMPLES_LOCATION. If the environment variable is not set,
+// the test is skipped.
 func testLocation(t *testing.T) string {
+	t.Helper()
+
 	v := os.Getenv("GOLANG_REGIONAL_SAMPLES_LOCATION")
 	if v == "" {
 		t.Skip("testLocation: missing GOLANG_REGIONAL_SAMPLES_LOCATION")
@@ -48,7 +57,11 @@ func testLocation(t *testing.T) string {
 	return v
 }
 
+// testParameter creates a parameter in the specified GCP project with the given format.
+// It returns the created parameter and its ID or fails the test if parameter creation fails.
 func testParameter(t *testing.T, projectID string, format parametermanagerpb.ParameterFormat) (*parametermanagerpb.Parameter, string) {
+	t.Helper()
+
 	parameterID := testName(t)
 	locationId := testLocation(t)
 
@@ -75,7 +88,11 @@ func testParameter(t *testing.T, projectID string, format parametermanagerpb.Par
 	return parameter, parameterID
 }
 
+// testParameterVersion creates a version of a parameter with the given payload in the specified GCP project.
+// It returns the created parameter version and its ID or fails the test if parameter version creation fails.
 func testParameterVersion(t *testing.T, projectID, parameterID, payload string) (*parametermanagerpb.ParameterVersion, string) {
+	t.Helper()
+
 	parameterVersionID := testName(t)
 	locationId := testLocation(t)
 
@@ -105,7 +122,11 @@ func testParameterVersion(t *testing.T, projectID, parameterID, payload string) 
 	return parameterVersion, parameterVersionID
 }
 
+// testCleanupParameter deletes the specified parameter in the GCP project.
+// It fails the test if the parameter deletion fails.
 func testCleanupParameter(t *testing.T, name string) {
+	t.Helper()
+	
 	locationId := testLocation(t)
 	ctx := context.Background()
 
@@ -125,7 +146,11 @@ func testCleanupParameter(t *testing.T, name string) {
 	}
 }
 
+// testCleanupParameterVersion deletes the specified parameter version in the GCP project.
+// It fails the test if the parameter version deletion fails.
 func testCleanupParameterVersion(t *testing.T, name string) {
+	t.Helper()
+
 	ctx := context.Background()
 	locationId := testLocation(t)
 
@@ -145,6 +170,9 @@ func testCleanupParameterVersion(t *testing.T, name string) {
 	}
 }
 
+// TestDisableRegionalParamVersion tests the disableRegionalParamVersion function by creating a parameter and its version,
+// then attempts to disable the created parameter version. It verifies if the parameter version
+// was successfully disabled by checking the output.
 func TestDisableRegionalParamVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -166,6 +194,9 @@ func TestDisableRegionalParamVersion(t *testing.T) {
 	}
 }
 
+// TestEnableRegionalParamVersion tests the enableRegionalParamVersion function by creating a parameter and its version,
+// then attempts to enable the created parameter version. It verifies if the parameter version
+// was successfully enabled by checking the output.
 func TestEnableRegionalParamVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -187,6 +218,9 @@ func TestEnableRegionalParamVersion(t *testing.T) {
 	}
 }
 
+// TestDeleteRegionalParam tests the deleteRegionalParam function by creating a parameter,
+// then attempts to delete the created parameter. It verifies if the parameter
+// was successfully deleted by checking the output.
 func TestDeleteRegionalParam(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -204,6 +238,9 @@ func TestDeleteRegionalParam(t *testing.T) {
 	}
 }
 
+// TestDeleteRegionalParamVersion tests the deleteRegionalParamVersion function by creating a parameter and its version,
+// then attempts to delete the created parameter version. It verifies if the parameter version
+// was successfully deleted by checking the output.
 func TestDeleteRegionalParamVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
