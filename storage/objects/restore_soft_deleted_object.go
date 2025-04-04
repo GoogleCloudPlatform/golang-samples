@@ -41,9 +41,7 @@ func restoreSoftDeletedObject(w io.Writer, bucketName, objectName string, genera
 
 	// Restore the soft-deleted object.
 	objHandle := client.Bucket(bucketName).Object(objectName).Generation(generation)
-	attrs, err := objHandle.Restore(ctx, &storage.RestoreOptions{
-		CopySourceACL: true,
-	})
+	attrs, err := objHandle.Restore(ctx, &storage.RestoreOptions{})
 	if err != nil {
 		return fmt.Errorf("Object(%q).Restore: %w", objectName, err)
 	}

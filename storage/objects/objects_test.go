@@ -701,14 +701,6 @@ func TestSoftDelete(t *testing.T) {
 	}
 	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
-	// bucketName := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
-	// defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
-
-	// // Enable versioning for the bucket.
-	// if err := enableVersioning(io.Discard, bucketName); err != nil {
-	// 	t.Fatalf("enableVersioning: %v", err)
-	// }
-
 	// Upload the object to the bucket.
 	if err := uploadFile(io.Discard, bucketName, objectName); err != nil {
 		t.Fatalf("uploadFile(%q): %v", objectName, err)
