@@ -30,20 +30,24 @@ import (
 func addSplitpoints(w io.Writer, dbName string) error {
 	ctx := context.Background()
 
-	client, err := database.NewDatabaseAdminClient(ctx)
+	dbAdminClient, err := database.NewDatabaseAdminClient(ctx)
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer dbAdminClient.Close()
 
 	// Singers table is already created int the createDatabase test
 	ddl := []string{
 		"CREATE INDEX IF NOT EXISTS SingersByFirstLastName ON Singers(FirstName, LastName)",
 	}
-	op, err := client.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
+	op, err := dbAdminClient.UpdateDatabaseDdl(ctx, &adminpb.UpdateDatabaseDdlRequest{
 		Database:   dbName,
 		Statements: ddl,
 	})
+
+	if err != nil {
+		return fmt.Errorf("addSplitPoints: waiting for UpdateDatabaseDdlRequest failed: %w", err)
+	}
 
 	// Wait for the UpdateDatabaseDdl operation to finish.
 	if err := op.Wait(ctx); err != nil {
@@ -78,13 +82,35 @@ func addSplitpoints(w io.Writer, dbName string) error {
 		Keys:  []*databasepb.SplitPoints_Key{&splitIndexKey},
 	}
 
+	splitIndexKeyWithTableKeyPart := databasepb.SplitPoints_Key{
+		KeyParts: &structpb.ListValue{
+			Values: []*structpb.Value{
+				structpb.NewStringValue("38"),
+			},
+		},
+	}
+
+	splitIndexKeyWithIndexKeyPart := databasepb.SplitPoints_Key{
+		KeyParts: &structpb.ListValue{
+			Values: []*structpb.Value{
+				structpb.NewStringValue("Jane"),
+				structpb.NewStringValue("Doe"),
+			},
+		},
+	}
+
+	splitForindexWithTableKey := databasepb.SplitPoints{
+		Index: "SingersByFirstLastName",
+		Keys:  []*databasepb.SplitPoints_Key{&splitIndexKeyWithTableKeyPart, &splitIndexKeyWithIndexKeyPart},
+	}
+
 	// Add split points to table and index
 	req := databasepb.AddSplitPointsRequest{
 		Database:    dbName,
-		SplitPoints: []*databasepb.SplitPoints{&splitForTable, &splitForindex},
+		SplitPoints: []*databasepb.SplitPoints{&splitForTable, &splitForindex, &splitForindexWithTableKey},
 	}
 
-	res, err := client.AddSplitPoints(ctx, &req)
+	res, err := dbAdminClient.AddSplitPoints(ctx, &req)
 	if err != nil {
 		return fmt.Errorf("addSplitpoints: failed to add split points: %w", err)
 	}
