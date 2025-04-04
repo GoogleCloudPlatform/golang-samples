@@ -116,7 +116,9 @@ func testCreateWorkflow(t *testing.T, workflowID, projectID, locationID string) 
 	return nil
 }
 
-// testCleanup deletes a workflow.
+// testCleanup deletes a workflow to ensure that all resources
+// created or utilized during the execution of the test are
+// released.
 func testCleanup(t *testing.T, workflowID, projectID, locationID string) error {
 	t.Helper()
 
