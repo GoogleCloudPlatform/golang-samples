@@ -34,7 +34,11 @@ import (
 	grpcstatus "google.golang.org/grpc/status"
 )
 
+// testName generates a unique name for testing purposes by creating a new UUID.
+// It returns the UUID as a string or fails the test if UUID generation fails.
 func testName(t *testing.T) string {
+	t.Helper()
+
 	u, err := uuid.NewV4()
 	if err != nil {
 		t.Fatalf("testName: failed to generate uuid: %v", err)
@@ -42,7 +46,12 @@ func testName(t *testing.T) string {
 	return u.String()
 }
 
+// testLocation retrieves the location for testing purposes from the environment variable
+// GOLANG_REGIONAL_SAMPLES_LOCATION. If the environment variable is not set,
+// the test is skipped.
 func testLocation(t *testing.T) string {
+	t.Helper()
+
 	v := os.Getenv("GOLANG_REGIONAL_SAMPLES_LOCATION")
 	if v == "" {
 		t.Skip("testIamUser: missing GOLANG_REGIONAL_SAMPLES_LOCATION")
@@ -51,7 +60,11 @@ func testLocation(t *testing.T) string {
 	return v
 }
 
+// testParameter creates a parameter in the specified GCP project with the given format.
+// It returns the created parameter and its ID or fails the test if parameter creation fails.
 func testParameter(t *testing.T, projectID string, format parametermanagerpb.ParameterFormat) (*parametermanagerpb.Parameter, string) {
+	t.Helper()
+
 	parameterID := testName(t)
 	locationId := testLocation(t)
 
@@ -78,7 +91,11 @@ func testParameter(t *testing.T, projectID string, format parametermanagerpb.Par
 	return parameter, parameterID
 }
 
+// testParameterVersion creates a version of a parameter with the given payload in the specified GCP project.
+// It returns the created parameter version and its ID or fails the test if parameter version creation fails.
 func testParameterVersion(t *testing.T, projectID, parameterID, payload string) (*parametermanagerpb.ParameterVersion, string) {
+	t.Helper()
+
 	parameterVersionID := testName(t)
 	locationId := testLocation(t)
 
@@ -108,7 +125,11 @@ func testParameterVersion(t *testing.T, projectID, parameterID, payload string) 
 	return parameterVersion, parameterVersionID
 }
 
+// testCleanupParameter deletes the specified parameter in the GCP project.
+// It fails the test if the parameter deletion fails.
 func testCleanupParameter(t *testing.T, name string) {
+	t.Helper()
+
 	locationId := testLocation(t)
 	ctx := context.Background()
 	endpoint := fmt.Sprintf("parametermanager.%s.rep.googleapis.com:443", locationId)
@@ -127,7 +148,11 @@ func testCleanupParameter(t *testing.T, name string) {
 	}
 }
 
+// testCleanupParameterVersion deletes the specified parameter version in the GCP project.
+// It fails the test if the parameter version deletion fails.
 func testCleanupParameterVersion(t *testing.T, name string) {
+	t.Helper()
+
 	ctx := context.Background()
 	locationId := testLocation(t)
 
@@ -147,7 +172,11 @@ func testCleanupParameterVersion(t *testing.T, name string) {
 	}
 }
 
+// testSecret creates a secret in the specified GCP project.
+// It returns the created secret or fails the test if secret creation fails.
 func testSecret(t *testing.T, projectID string) *secretmanagerpb.Secret {
+	t.Helper()
+
 	secretID := testName(t)
 	locationId := testLocation(t)
 
@@ -171,7 +200,11 @@ func testSecret(t *testing.T, projectID string) *secretmanagerpb.Secret {
 	return secret
 }
 
+// testSecretVersion creates a version of a secret with the given payload in the specified GCP project.
+// It returns the created secret version or fails the test if secret version creation fails.
 func testSecretVersion(t *testing.T, parent string, payload []byte) *secretmanagerpb.SecretVersion {
+	t.Helper()
+
 	ctx := context.Background()
 	locationId := testLocation(t)
 
@@ -194,7 +227,10 @@ func testSecretVersion(t *testing.T, parent string, payload []byte) *secretmanag
 	return version
 }
 
+// testIamGrantAccess grants the specified member access permissions to the secret.
 func testIamGrantAccess(t *testing.T, name, member string) error {
+	t.Helper()
+
 	ctx := context.Background()
 	locationId := testLocation(t)
 
@@ -220,7 +256,11 @@ func testIamGrantAccess(t *testing.T, name, member string) error {
 	return nil
 }
 
+// testCleanupSecret deletes the specified secret in the GCP project.
+// It fails the test if the secret deletion fails.
 func testCleanupSecret(t *testing.T, name string) {
+	t.Helper()
+
 	ctx := context.Background()
 	locationId := testLocation(t)
 
@@ -240,6 +280,9 @@ func testCleanupSecret(t *testing.T, name string) {
 	}
 }
 
+// TestGetRegionalParam tests the getRegionalParam function by creating a parameter,
+// then attempts to retrieve the created parameter. It verifies if the parameter
+// was successfully retrieved by checking the output.
 func TestGetRegionalParam(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -257,6 +300,9 @@ func TestGetRegionalParam(t *testing.T) {
 	}
 }
 
+// TestGetRegionalParamVersion tests the getRegionalParamVersion function by creating a parameter and its version,
+// then attempts to retrieve the created parameter version. It verifies if the parameter version
+// was successfully retrieved by checking the output.
 func TestGetRegionalParamVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -277,6 +323,9 @@ func TestGetRegionalParamVersion(t *testing.T) {
 	}
 }
 
+// TestRenderRegionalParamVersion tests the renderRegionalParamVersion function by creating a parameter,
+// its version, and a secret. It then attempts to render the created parameter version
+// and verifies if the parameter version was successfully rendered by checking the output.
 func TestRenderRegionalParamVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -309,6 +358,9 @@ func TestRenderRegionalParamVersion(t *testing.T) {
 	}
 }
 
+// TestListRegionalParam tests the listRegionalParam function by creating multiple parameters,
+// then attempts to list the created parameters. It verifies if the parameters
+// were successfully listed by checking the output.
 func TestListRegionalParam(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -333,6 +385,9 @@ func TestListRegionalParam(t *testing.T) {
 	}
 }
 
+// TestListRegionalParamVersion tests the listRegionalParamVersion function by creating a parameter and its versions,
+// then attempts to list the created parameter versions. It verifies if the parameter versions
+// were successfully listed by checking the output.
 func TestListRegionalParamVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
