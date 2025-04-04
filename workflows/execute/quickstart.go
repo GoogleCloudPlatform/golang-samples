@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"time"
 
 	workflowexecutions "google.golang.org/api/workflowexecutions/v1"
@@ -60,7 +59,7 @@ func executeWorkflow(w io.Writer, projectID, workflowID, locationID string) erro
 	if err != nil {
 		return fmt.Errorf("service.Create.Do error: %w", err)
 	}
-	log.Printf("- Execution started...")
+	fmt.Fprintln(w,"- Execution started...")
 
 	// Set up a context with timeout to prevent an infinite loop.
 	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
@@ -82,7 +81,7 @@ func executeWorkflow(w io.Writer, projectID, workflowID, locationID string) erro
 		// The last case will return an error indicating a timeout error.
 		select {
 		case <-time.After(delay):
-			log.Println("- Waiting for results...")
+			fmt.Fprintln(w, "- Waiting for results...")
 		case <-timeoutCtx.Done():
 			return timeoutCtx.Err()
 		}
