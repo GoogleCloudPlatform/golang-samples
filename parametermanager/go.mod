@@ -3,8 +3,8 @@ module github.com/GoogleCloudPlatform/golang-samples/parametermanager
 go 1.22.7
 
 require (
-	cloud.google.com/go/parametermanager v0.1.0
-	google.golang.org/api v0.221.0
+	cloud.google.com/go/parametermanager v0.2.0
+	google.golang.org/api v0.228.0
 )
 
 require (

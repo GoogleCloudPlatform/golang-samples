@@ -3,11 +3,11 @@ module github.com/GoogleCloudPlatform/golang-samples/profiler/shakesapp
 go 1.23.0
 
 require (
-	cloud.google.com/go/profiler v0.4.1
-	cloud.google.com/go/storage v1.50.0
+	cloud.google.com/go/profiler v0.4.2
+	cloud.google.com/go/storage v1.51.0
 	github.com/golang/protobuf v1.5.4
-	google.golang.org/api v0.217.0
-	google.golang.org/grpc v1.69.4
+	google.golang.org/api v0.228.0
+	google.golang.org/grpc v1.71.1
 )
 
 require (

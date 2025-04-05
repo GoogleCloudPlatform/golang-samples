@@ -4,9 +4,9 @@ go 1.23.0
 
 require (
 	cloud.google.com/go/logging v1.13.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	github.com/GoogleCloudPlatform/golang-samples 0aca11152736
 	github.com/google/uuid v1.6.0
-	google.golang.org/api v0.217.0
+	google.golang.org/api v0.228.0
 )
 
 require (

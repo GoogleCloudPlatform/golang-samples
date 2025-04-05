@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/appengine_flexible/storage
 go 1.23.0
 
 require (
-	cloud.google.com/go/storage v1.50.0
+	cloud.google.com/go/storage v1.51.0
 	google.golang.org/appengine v1.6.8
 )
 
