@@ -4,9 +4,9 @@ go 1.23.0
 
 require (
 	cloud.google.com/go/firestore v1.18.0
-	cloud.google.com/go/storage v1.50.0
-	golang.org/x/oauth2 v0.25.0
-	google.golang.org/api v0.217.0
+	cloud.google.com/go/storage v1.51.0
+	golang.org/x/oauth2 v0.29.0
+	google.golang.org/api v0.228.0
 )
 
 require (

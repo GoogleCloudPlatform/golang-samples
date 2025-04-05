@@ -3,9 +3,9 @@ module github.com/GoogleCloudPlatform/golang-samples/language
 go 1.23.0
 
 require (
-	cloud.google.com/go/language v1.14.3
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	google.golang.org/protobuf v1.36.3
+	cloud.google.com/go/language v1.14.4
+	github.com/GoogleCloudPlatform/golang-samples 0aca11152736
+	google.golang.org/protobuf v1.36.6
 )
 
 require (
