@@ -34,8 +34,7 @@ import (
 func TestExecuteWorkflow(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	// Build the workflowID by generating a random uuid adding it as suffix.
-	workflowID := fmt.Sprintf("myFirstWorkflow_%s", uuid.NewString())
+	workflowID := testGenerateWorkflowID()
 	locationID := "us-central1"
 
 	var buf bytes.Buffer
@@ -74,6 +73,7 @@ func testCreateWorkflow(t *testing.T, workflowID, projectID, locationID string) 
 	if err != nil {
 		return fmt.Errorf("workflows.NewService error: %w", err)
 	}
+	
 	// Read file's content
 	content, err := os.ReadFile("../myFirstWorkflow.yaml")
 	if err != nil {
@@ -141,4 +141,10 @@ func testCleanup(t *testing.T, workflowID, projectID, locationID string) error {
 	}
 
 	return nil
+}
+
+// testGenerateWorkflowID creates a random string to
+// assign it to a new workflow.
+func testGenerateWorkflowID() string {
+	return fmt.Sprintf("workflow-go-test%s", uuid.NewString())
 }
