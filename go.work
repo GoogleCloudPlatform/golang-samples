@@ -109,6 +109,7 @@ use (
 	./monitoring
 	./opentelemetry/instrumentation/app
 	./opentelemetry/trace
+	./parametermanager
 	./privateca
 	./profiler
 	./profiler/shakesapp
@@ -146,26 +147,17 @@ use (
 	./trace
 	./translate
 	./vertexai/batch-predict
-	./vertexai/chat
 	./vertexai/context-caching
 	./vertexai/controlled-generation
 	./vertexai/embeddings
 	./vertexai/evaluation
 	./vertexai/function-calling
 	./vertexai/gemma2
-	./vertexai/multimodal
-	./vertexai/multimodal-all
-	./vertexai/multimodal-audio
-	./vertexai/multimodal-multiple
-	./vertexai/multimodal-pdf
-	./vertexai/multimodal-video
 	./vertexai/multimodal-video-with-audio
 	./vertexai/safety-settings
-	./vertexai/safety-settings-multimodal
 	./vertexai/snippets
 	./vertexai/stream-multimodality-basic
 	./vertexai/stream-text-basic
-	./vertexai/system-instruction
 	./vertexai/token-count
 	./videointelligence
 	./vision
