@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package execute
+package workflows
 
 import (
 	"bytes"
@@ -75,7 +75,7 @@ func testCreateWorkflow(t *testing.T, workflowID, projectID, locationID string) 
 	}
 
 	// Read file's content
-	content, err := os.ReadFile("../myFirstWorkflow.yaml")
+	content, err := os.ReadFile("myFirstWorkflow.yaml")
 	if err != nil {
 		return fmt.Errorf("os.ReadFile error: %w", err)
 	}
