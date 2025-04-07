@@ -73,7 +73,7 @@ func testCreateWorkflow(t *testing.T, workflowID, projectID, locationID string) 
 	if err != nil {
 		return fmt.Errorf("workflows.NewService error: %w", err)
 	}
-	
+
 	// Read file's content
 	content, err := os.ReadFile("../myFirstWorkflow.yaml")
 	if err != nil {
