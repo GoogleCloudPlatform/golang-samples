@@ -36,7 +36,7 @@ func createContentCache(w io.Writer) (string, error) {
 		return "", fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-1.5-pro-002"
+	modelName := "gemini-2.0-flash-001"
 
 	systemInstruction := "You are an expert researcher. You always stick to the facts " +
 		"in the sources provided, and never make up new facts. " +
