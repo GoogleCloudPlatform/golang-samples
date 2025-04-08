@@ -1,0 +1,1 @@
+{"image_gcs_uri":"gs://cloud-samples-data/vision/automl_classification/flowers/daisy/100080576_f52e8ee070_n.jpg","classification_annotation":{"display_name":"daisy","annotation_resource_labels":{"key":"value"}},"data_item_resource_labels":{"aiplatform.googleapis.com/ml_use":"train"}}

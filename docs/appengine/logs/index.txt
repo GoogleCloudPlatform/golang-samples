@@ -1,0 +1,7 @@
+// [START the_development_server_and_Logs_API_1]
+dev_appserver.py --persist_logs your-app-directory
+// [END the_development_server_and_Logs_API_1]
+
+// [START the_development_server_and_Logs_API_2]
+dev_appserver.py --logs_path=your-path/your-logfile-name your-app-directory
+// [END the_development_server_and_Logs_API_2]

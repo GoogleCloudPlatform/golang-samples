@@ -1,0 +1,12 @@
+// [START setting_up_remote_api_1]
+- url: /_ah/remote_api
+  script: _go_app
+// [END setting_up_remote_api_1]
+
+// [START setting_up_remote_api_2]
+import _ "google.golang.org/appengine/remote_api"
+// [END setting_up_remote_api_2]
+
+// [START setting_up_remote_api_3]
+gcloud app deploy app.yaml
+// [END setting_up_remote_api_3]

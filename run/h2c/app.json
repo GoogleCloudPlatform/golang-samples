@@ -1,0 +1,6 @@
+{
+    "name": "h2c",
+    "options": {
+        "http2": true
+    }
+}

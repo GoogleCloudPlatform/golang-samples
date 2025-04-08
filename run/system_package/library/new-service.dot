@@ -1,0 +1,3 @@
+digraph New_Service {
+  Deploy -> "Create Service" -> "Create Revision" -> "Create Domain" -> "Warm Instance" -> "Route Traffic"
+}

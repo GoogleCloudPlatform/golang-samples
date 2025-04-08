@@ -1,0 +1,109 @@
+// [START gae_golang_about_app_yaml_example]
+runtime: go
+api_version: go1
+
+handlers:
+- url: /stylesheets
+  static_dir: stylesheets
+
+- url: /(.*\.(gif|png|jpg))$
+  static_files: static/\1
+  upload: static/.*\.(gif|png|jpg)$
+
+- url: /.*
+  script: _go_app
+// [END gae_golang_about_app_yaml_example]
+
+// [START gae_golang_handlers_example]
+handlers:
+- url: /images
+  static_dir: static/images
+
+- url: /.*
+  script: _go_app
+// [END gae_golang_handlers_example]
+
+// [START gae_golang_script_example]
+handlers:
+
+# The root URL (/) is handled by the Go application.
+# No other URLs match this pattern.
+- url: /
+  script: _go_app
+
+# The URL /index.html is also handled by the Go application.
+- url: /index\.html
+  script: _go_app
+
+# A regular expression indicating that it should be handled
+# by the Go application.
+- url: /browse/(books|videos|tools)
+  script: _go_app
+
+# All other URLs are handled by the Go application.
+- url: /.*
+  script: _go_app
+// [END gae_golang_script_example]
+
+// [START gae_golang_login_example]
+handlers:
+
+- url: /profile/.*
+  script: _go_app
+  login: required
+
+- url: /admin/.*
+  script: _go_app
+  login: admin
+
+- url: /.*
+  script: _go_app
+// [END gae_golang_login_example]
+
+//[START gae_golang_auth_fail_action_example]
+handlers:
+- url: /secure_api/.*
+  script: _go_app
+  login: required
+  auth_fail_action: unauthorized
+//[END gae_golang_auth_fail_action_example]
+
+//[START gae_golang_expiration_example]
+runtime: go
+api_version: go1
+
+default_expiration: "4d 5h"
+
+handlers:
+  # ...
+//[END gae_golang_expiration_example]
+
+//[START gae_golang_secure_urls]
+handlers:
+- url: /youraccount/.*
+  script: _go_app
+  login: required
+  secure: always
+//[END gae_golang_secure_urls]
+
+//[START gae_golang_inbound_services]
+inbound_services:
+- warmup
+//[END gae_golang_inbound_services]
+
+//[START gae_golang_os_getenv_example]
+import "os"
+//...
+if v := os.Getenv("MY_VAR"); v != "" {
+  //...
+}
+//[END gae_golang_os_getenv_example]
+
+//[START gae_golang_redirect_http_response_code]
+handlers:
+- url: /youraccount/.*
+  script: _go_app
+  login: required
+  secure: always
+  redirect_http_response_code: 301
+//[END gae_golang_redirect_http_response_code]

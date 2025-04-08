@@ -1,0 +1,12 @@
+digraph daas {
+  rankdir="LR"
+
+  A [ color="red" label="User" ]
+  B [ color="green" label="Web Service" ]
+  C [ color="blue" label="Graphviz Dot CLI" ]
+
+  A -> B [ label="http request" ]
+  B -> C [ label="system call" ]
+  C -> B [ label="results" ]
+  B -> A [ label="http response" ]
+}

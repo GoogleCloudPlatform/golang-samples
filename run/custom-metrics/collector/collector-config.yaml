@@ -1,0 +1,65 @@
+# Copyright 2023 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https:#www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# [START cloudrun_mc_custom_metrics_otel_config]
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+processors:
+  batch:
+    # batch metrics before sending to reduce API usage
+    send_batch_max_size: 200
+    send_batch_size: 200
+    timeout: 5s
+
+  memory_limiter:
+    # drop metrics if memory usage gets too high
+    check_interval: 1s
+    limit_percentage: 65
+    spike_limit_percentage: 20
+
+  # automatically detect Cloud Run resource metadata                                                                                                                                               
+  resourcedetection:
+    detectors: [env, gcp]
+    timeout: 2s
+    override: false
+
+  resource:
+    attributes:
+    # add instance_id as a resource attribute
+    - key: service.instance.id
+      from_attribute: faas.id
+      action: upsert
+      # parse service name from K_SERVICE Cloud Run variable                                                                                                                                       
+    - key: service.name
+      value: ${env:K_SERVICE}
+      action: insert
+
+exporters:
+  googlemanagedprometheus: # Note: this is intentionally left blank   
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+service:
+  extensions: [health_check]
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [batch, memory_limiter, resourcedetection, resource]
+      exporters: [googlemanagedprometheus]
+# [END cloudrun_mc_custom_metrics_otel_config]

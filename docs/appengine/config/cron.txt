@@ -1,0 +1,9 @@
+// [START securing_URLs_for_cron]
+runtime: go
+api_version: go1
+
+handlers:
+- url: /report/weekly
+  script: _go_app
+  login: admin
+// [END securing_URLs_for_cron]

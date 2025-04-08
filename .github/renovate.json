@@ -1,0 +1,40 @@
+{
+  "extends": [
+    "config:recommended",
+    "schedule:weekly"
+  ],
+  "dependencyDashboardLabels": [
+    "type: process"
+  ],
+  "semanticCommits": "disabled",
+  "postUpdateOptions": [
+    "gomodTidy"
+  ],
+  "commitMessagePrefix": "chore(all): ",
+  "commitMessageAction": "update",
+  "ignorePaths": [
+    "**/Dockerfile"
+  ],
+  "groupName": "everything",
+  "packageRules": [
+    {
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
+    },
+    {
+      "matchPackageNames": [
+        "golang.org/x/tools",
+        "cloud.google.com/go/pubsublite",
+        "contrib.go.opencensus.io/exporter/stackdriver"
+      ],
+      "enabled": false
+    }
+  ],
+  "force": {
+    "constraints": {
+      "go": "1.21"
+    }
+  }
+}

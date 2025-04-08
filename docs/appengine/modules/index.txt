@@ -1,0 +1,56 @@
+// [START manual_scaling]
+service: my_service
+runtime: go
+api_version: go1
+instance_class: B8
+manual_scaling:
+  instances: 5
+// [END manual_scaling]
+
+// [START basic_scaling]
+service: my_service
+runtime: go
+api_version: go1
+instance_class: B8
+basic_scaling:
+  max_instances: 11
+  idle_timeout: 10m
+// [END basic_scaling]
+
+// [START automatic_scaling]
+service: my_service
+runtime: go
+api_version: go1
+instance_class: F2
+automatic_scaling:
+  min_idle_instances: 5
+  max_idle_instances: automatic  # default value
+  min_pending_latency: 30ms  # default value
+  max_pending_latency: automatic
+  max_concurrent_requests: 50
+// [END automatic_scaling]
+
+// [START example_1]
+runtime: go
+api_version: go1
+// [END example_1]
+
+// [START example_2]
+service: mobile-frontend
+runtime: go
+api_version: go1
+
+automatic_scaling:
+  min_idle_instances: 2
+  max_pending_latency: 1s
+// [END example_2]
+
+// [START example_3]
+service: my_service
+runtime: go
+api_version: go1
+
+instance_class: B8
+manual_scaling:
+  instances: 1
+// [END example_3]
