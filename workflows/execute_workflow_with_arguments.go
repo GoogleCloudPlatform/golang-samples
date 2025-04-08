@@ -25,7 +25,7 @@ import (
 	workflowexecutions "google.golang.org/api/workflowexecutions/v1"
 )
 
-type Argument struct{
+type Argument struct {
 	SearchTerm string `json:"searchTerm"`
 }
 
@@ -67,7 +67,7 @@ func executeWorkflowWithArguments(w io.Writer, projectID, workflowID, locationID
 
 	// Encode argument to JSON
 	argumentEncoded, err := json.Marshal(argument)
-	if err != nil{
+	if err != nil {
 		return fmt.Errorf("json.Marshal error: %w", err)
 	}
 

@@ -51,8 +51,7 @@ func TestExecuteWorkflowWithArguments(t *testing.T) {
 	}
 
 	// Evaluate if the output contains the argument value.
-	if got, want := buf.String(), "Cloud"; !strings.Contains(got, want){
+	if got, want := buf.String(), "Cloud"; !strings.Contains(got, want) {
 		t.Errorf("executeWorkflow: expected %q to contain %q", got, want)
 	}
 }
-

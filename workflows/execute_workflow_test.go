@@ -49,4 +49,3 @@ func TestExecuteWorkflow(t *testing.T) {
 		t.Errorf("executeWorkflow: expected %q to contain %q", got, want)
 	}
 }
-
