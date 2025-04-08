@@ -27,6 +27,8 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
+// Adds split points to table and index
+// AddSplitPoins API - https://pkg.go.dev/cloud.google.com/go/spanner/admin/database/apiv1#DatabaseAdminClient.AddSplitPoints
 func addSplitpoints(w io.Writer, dbName string) error {
 	ctx := context.Background()
 
@@ -36,7 +38,8 @@ func addSplitpoints(w io.Writer, dbName string) error {
 	}
 	defer dbAdminClient.Close()
 
-	// Singers table is already created int the createDatabase test
+	// Database is assumed to exist - https://cloud.google.com/spanner/docs/getting-started/go#create_a_database
+	// Singers table is assumed to be present
 	ddl := []string{
 		"CREATE INDEX IF NOT EXISTS SingersByFirstLastName ON Singers(FirstName, LastName)",
 	}

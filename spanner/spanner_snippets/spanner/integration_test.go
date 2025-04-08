@@ -448,9 +448,6 @@ func TestSample(t *testing.T) {
 	out = runSample(t, writeWithTransactionUsingIsolationLevel, dbName, "failed to write with transaction using isolation level")
 	assertContains(t, out, "Current album title: Total Junk")
 	assertContains(t, out, "Updated 1 record(s)")
-
-	out = runSample(t, addSplitpoints, dbName, "Addsplitpoints sample failed")
-	assertContains(t, out, "Added split points")
 }
 
 func TestBackupSample(t *testing.T) {
@@ -1315,6 +1312,24 @@ func TestGraphSample(t *testing.T) {
 	assertContains(t, out, "1 Account record(s) deleted.")
 
 	out = runSample(t, deleteGraphData, dbName, "")
+}
+
+// Testing the AddSplitPoints feature
+func TestAddSplitPointsSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	_, dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	_, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+
+	var out string
+	mustRunSample(t, createDatabase, dbName, "failed to create a database")
+
+	out = runSample(t, addSplitpoints, dbName, "Addsplitpoints sample failed")
+	assertContains(t, out, "Added split points")
 }
 
 func maybeCreateKey(projectId, locationId, keyRingId, keyId string) error {
