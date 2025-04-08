@@ -14,7 +14,6 @@
 
 package workflows
 
-// [START workflows_api_quickstart]
 import (
 	"context"
 	"encoding/json"
@@ -112,5 +111,3 @@ func executeWorkflowWithArguments(w io.Writer, projectID, workflowID, locationID
 
 	return nil
 }
-
-// [END workflows_api_quickstart]
