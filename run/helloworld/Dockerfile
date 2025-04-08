@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START cloudrun_helloworld_dockerfile]
+# [START cloudrun_helloworld_dockerfile_go]
 
 # Use the official Go image to create a binary.
 # This is based on Debian and sets the GOPATH to /go.
@@ -48,4 +48,4 @@ COPY --from=builder /app/server /app/server
 # Run the web service on container startup.
 CMD ["/app/server"]
 
-# [END cloudrun_helloworld_dockerfile]
+# [END cloudrun_helloworld_dockerfile_go]

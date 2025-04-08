@@ -35,10 +35,11 @@ func generateWithText(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.0-flash-001"
-	contents := genai.Text("How does AI work?")
-
-	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)
+	resp, err := client.Models.GenerateContent(ctx,
+		"gemini-2.0-flash-001",
+		genai.Text("How does AI work?"),
+		nil,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
