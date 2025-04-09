@@ -2,11 +2,9 @@ module github.com/GoogleCloudPlatform/golang-samples/parametermanager
 
 go 1.23.0
 
-toolchain go1.23.4
-
 require (
 	cloud.google.com/go/parametermanager v0.2.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250404170905-0aca11152736
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250407185618-bc81fd377b99
 	github.com/gofrs/uuid v4.4.0+incompatible
 	google.golang.org/api v0.228.0
 	google.golang.org/grpc v1.71.1
