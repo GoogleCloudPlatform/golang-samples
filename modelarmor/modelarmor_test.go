@@ -27,6 +27,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
+	"github.com/joho/godotenv"
 	"google.golang.org/api/option"
 	grpccodes "google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
@@ -39,7 +40,7 @@ func testLocation(t *testing.T) string {
 	// Load the test.env file
 	err := godotenv.Load("./testdata/env/test.env")
 	if err != nil {
-		t.fatal(err)
+		t.Fatalf(err.Error())
 	}
 
 	v := os.Getenv("GOLANG_SAMPLES_LOCATION")
