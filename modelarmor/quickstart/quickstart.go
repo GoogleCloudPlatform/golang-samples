@@ -19,7 +19,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 
 	modelarmor "cloud.google.com/go/modelarmor/apiv1"
 	modelarmorpb "cloud.google.com/go/modelarmor/apiv1/modelarmorpb"
@@ -27,6 +26,7 @@ import (
 )
 
 func main() {
+	// TODO: Configure these values via environment variables or command-line flags
 	projectID := "your-project-id"
 	locationID := "us-central1"
 	templateID := "go-template"
@@ -35,7 +35,7 @@ func main() {
 	// Initialize Client
 	client, err := modelarmor.NewClient(ctx, option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)))
 	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
+		fmt.Printf("Failed to create client: %v", err)
 	}
 	defer client.Close()
 	// Setup Template
@@ -74,7 +74,7 @@ func main() {
 
 	createdTemplate, err := client.CreateTemplate(ctx, req)
 	if err != nil {
-		log.Fatalf("Failed to create template: %v", err)
+		fmt.Printf("Failed to create template: %v", err)
 	}
 
 	fmt.Printf("Created template: %s\n", createdTemplate.Name)
@@ -92,7 +92,7 @@ func main() {
 
 	userPromptSanitizeResp, err := client.SanitizeUserPrompt(ctx, userPromptSanitizeReq)
 	if err != nil {
-		log.Fatalf("Failed to sanitize user prompt: %v", err)
+		fmt.Printf("Failed to sanitize user prompt: %v", err)
 	}
 
 	fmt.Printf("Result for User Prompt Sanitization: %v\n", userPromptSanitizeResp.SanitizationResult)
@@ -111,7 +111,7 @@ func main() {
 	// Sanitize Model Response
 	modelSanitizeResp, err := client.SanitizeModelResponse(ctx, modelSanitizeReq)
 	if err != nil {
-		log.Fatalf("Failed to sanitize model response: %v", err)
+		fmt.Printf("Failed to sanitize model response: %v", err)
 	}
 
 	fmt.Printf("Result for Model Response Sanitization: %v\n", modelSanitizeResp.SanitizationResult)
