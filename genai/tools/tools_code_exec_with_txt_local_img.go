@@ -38,9 +38,15 @@ func generateWithCodeExecAndImg(w io.Writer) error {
 
 	// Image source:
 	//   https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Monty_open_door.svg/640px-Monty_open_door.svg.png
-	imgBytes, err := os.ReadFile("./640px-Monty_open_door.svg.png")
+	imagePath := filepath.Join(getMedia(), "640px-Monty_open_door.svg.png")
+	file, err := os.Open(imagePath)
 	if err != nil {
-		return fmt.Errorf("failed to read input file: %w", err)
+		log.Fatal("Error opening file:", err)
+	}
+	defer file.Close()
+	data, err := io.ReadAll(file)
+	if err != nil {
+		log.Fatal("Error reading file:", err)
 	}
 
 	prompt := `

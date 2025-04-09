@@ -37,13 +37,25 @@ func generateWithMultiLocalImg(w io.Writer) error {
 	}
 
 	// TODO(Developer): Update with paths to your image files.
-	imageBytes1, err := os.ReadFile("./testdata/latte.jpg")
+	imagePath := filepath.Join(getMedia(), "latte.jpg")
+	file, err := os.Open(imagePath)
 	if err != nil {
-		return fmt.Errorf("failed to read first image: %w", err)
+		log.Fatal("Error opening file:", err)
 	}
-	imageBytes2, err := os.ReadFile("./testdata/scones.jpg")
+	defer file.Close()
+	data, err := io.ReadAll(file)
 	if err != nil {
-		return fmt.Errorf("failed to read first image: %w", err)
+		log.Fatal("Error reading file:", err)
+	}
+	imagePath := filepath.Join(getMedia(), "scones.jpg")
+	file, err := os.Open(imagePath)
+	if err != nil {
+		log.Fatal("Error opening file:", err)
+	}
+	defer file.Close()
+	data, err := io.ReadAll(file)
+	if err != nil {
+		log.Fatal("Error reading file:", err)
 	}
 
 	contents := []*genai.Content{
