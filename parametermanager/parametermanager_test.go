@@ -171,3 +171,48 @@ func TestCreateParamVersionWithSecret(t *testing.T) {
 		t.Errorf("createParameterVersion: expected %q to contain %q", got, want)
 	}
 }
+
+// TestGetParam tests the getParam function by creating a parameter,
+// then attempts to retrieve the created parameter. It verifies if the parameter
+// was successfully retrieved by checking the output.
+func TestGetParam(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
+	defer testCleanupParameter(t, parameter.Name)
+
+	var b bytes.Buffer
+	if err := getParam(&b, tc.ProjectID, parameterID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), fmt.Sprintf("Found parameter %s with format JSON", parameter.Name); !strings.Contains(got, want) {
+		t.Errorf("GetParameter: expected %q to contain %q", got, want)
+	}
+}
+
+// TestListParam tests the listParam function by creating multiple parameters,
+// then attempts to list the created parameters. It verifies if the parameters
+// were successfully listed by checking the output.
+func TestListParam(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameter1, _ := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
+	parameter2, _ := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_UNFORMATTED)
+
+	defer testCleanupParameter(t, parameter1.Name)
+	defer testCleanupParameter(t, parameter2.Name)
+
+	var b bytes.Buffer
+	if err := listParams(&b, tc.ProjectID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), fmt.Sprintf("Found parameter %s with format %s \n", parameter1.Name, parameter1.Format); !strings.Contains(got, want) {
+		t.Errorf("ListParameter: expected %q to contain %q", got, want)
+	}
+
+	if got, want := b.String(), fmt.Sprintf("Found parameter %s with format %s \n", parameter2.Name, parameter2.Format); !strings.Contains(got, want) {
+		t.Errorf("ListParameter: expected %q to contain %q", got, want)
+	}
+}
