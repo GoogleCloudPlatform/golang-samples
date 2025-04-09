@@ -38,7 +38,7 @@ func generateWithMultiImg(w io.Writer) error {
 
 	// TODO(Developer): Update the path to file (image source:
 	//   https://storage.googleapis.com/cloud-samples-data/generative-ai/image/latte.jpg )
-	imageBytes, err := os.ReadFile("./testdata/latte.jpg")
+	imageBytes, err := os.ReadFile("./latte.jpg")
 	if err != nil {
 		return fmt.Errorf("failed to read image: %w", err)
 	}
