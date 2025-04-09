@@ -40,7 +40,7 @@ func testLocation(t *testing.T) string {
 	// Load the test.env file
 	err := godotenv.Load("./testdata/env/test.env")
 	if err != nil {
-		t.Fatalf(err.Error())
+		t.Fatalf("failed to load test environment file: %v", err)
 	}
 
 	v := os.Getenv("GOLANG_SAMPLES_LOCATION")
@@ -88,7 +88,7 @@ func testCleanupTemplate(t *testing.T, templateName string) {
 	client, ctx := testClient(t)
 	if err := client.DeleteTemplate(ctx, &modelarmorpb.DeleteTemplateRequest{Name: templateName}); err != nil {
 		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
-			t.Fatalf("testCleanupTemplate: failed to delete template: %v", err)
+			t.Fatalf("testCleanupTemplate: failed to delete template %s: %v", templateName, err)
 		}
 	}
 

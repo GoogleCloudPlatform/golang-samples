@@ -66,7 +66,7 @@ func sanitizeUserPrompt(w io.Writer, projectID, locationID, templateID, userProm
 		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client: %v", err)
+		return nil, fmt.Errorf("failed to create client for location %s: %v", locationID, err)
 	}
 	defer client.Close()
 
@@ -86,7 +86,7 @@ func sanitizeUserPrompt(w io.Writer, projectID, locationID, templateID, userProm
 	// Sanitize the user prompt.
 	response, err := client.SanitizeUserPrompt(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to sanitize user prompt: %v", err)
+		return nil, fmt.Errorf("failed to sanitize user prompt for template %s: %v", templateID, err)
 	}
 
 	// Sanitization Result.

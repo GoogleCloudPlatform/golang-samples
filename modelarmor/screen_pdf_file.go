@@ -89,7 +89,7 @@ func screenPDFFile(w io.Writer, projectID, locationID, templateID, pdfContentBas
 	// Sanitize the user prompt.
 	response, err := client.SanitizeUserPrompt(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to sanitize PDF content: %v", err)
+		return nil, fmt.Errorf("failed to sanitize PDF content for template %s: %v", templateID, err)
 	}
 
 	// Sanitization Result.

@@ -64,7 +64,7 @@ func createModelArmorTemplate(w io.Writer, projectID, location, templateID strin
 		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", location)),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client: %v", err)
+		return nil, fmt.Errorf("failed to create client for location %s: %v", location, err)
 	}
 	defer client.Close()
 
@@ -93,7 +93,7 @@ func createModelArmorTemplate(w io.Writer, projectID, location, templateID strin
 	// Create the template.
 	response, err := client.CreateTemplate(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create template: %v", err)
+		return nil, fmt.Errorf("failed to create client for location %s: %v", location, err)
 	}
 
 	// Print the new template name using fmt.Fprintf with the io.Writer.
