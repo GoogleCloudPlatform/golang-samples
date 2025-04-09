@@ -21,12 +21,16 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
+	dlp "cloud.google.com/go/dlp/apiv2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 	modelarmor "cloud.google.com/go/modelarmor/apiv1"
 	modelarmorpb "cloud.google.com/go/modelarmor/apiv1/modelarmorpb"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
+	"github.com/joho/godotenv"
 	"google.golang.org/api/option"
 	grpccodes "google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
@@ -39,7 +43,7 @@ func testLocation(t *testing.T) string {
 	// Load the test.env file
 	err := godotenv.Load("./testdata/env/test.env")
 	if err != nil {
-		t.fatal(err)
+		t.Fatalf(err.Error())
 	}
 
 	v := os.Getenv("GOLANG_SAMPLES_LOCATION")
@@ -106,16 +110,15 @@ func testSDPTemplate(t *testing.T, projectID string, locationID string) (string,
 
 	// Create the DLP client.
 	ctx := context.Background()
-	fmt.Println("Before Client")
 	dlpClient, err := dlp.NewClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {
 		fmt.Println("Getting error while creating the client")
 		t.Fatal(err)
 	}
-	fmt.Println("After Client")
+
 	defer dlpClient.Close()
 
-	Create the inspect template.
+	// Create the inspect template.
 	inspectRequest := &dlppb.CreateInspectTemplateRequest{
 		Parent:     parent,
 		TemplateId: inspectTemplateID,
@@ -130,7 +133,7 @@ func testSDPTemplate(t *testing.T, projectID string, locationID string) (string,
 		t.Fatal(err)
 	}
 
-	Create the deidentify template.
+	// Create the deidentify template.
 	deidentifyRequest := &dlppb.CreateDeidentifyTemplateRequest{
 		Parent:     parent,
 		TemplateId: deidentifyTemplateID,
@@ -164,7 +167,7 @@ func testSDPTemplate(t *testing.T, projectID string, locationID string) (string,
 
 	inspectTemplateName, deidentifyTemplateName := inspectResponse.Name, deidentifyResponse.Name
 
-	Clean up the templates.
+	// Clean up the templates.
 	defer func() {
 		time.Sleep(5 * time.Second)
 		err := dlpClient.DeleteInspectTemplate(ctx, &dlppb.DeleteInspectTemplateRequest{Name: inspectResponse.Name})
@@ -263,9 +266,7 @@ func TestCreateModelArmorTemplateWithAdvancedSDP(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
-	fmt.Println("BeforeTestSDPTemplate")
 	inspectTemplateName, deideintifyTemplateName := testSDPTemplate(t, tc.ProjectID, "us-central1")
-	fmt.Println("AfterTestSDPTemplate")
 
 	var b bytes.Buffer
 	if _, err := createModelArmorTemplateWithAdvancedSDP(&b, tc.ProjectID, "us-central1", templateID, inspectTemplateName, deideintifyTemplateName); err != nil {
@@ -450,8 +451,3 @@ func TestUpdateTemplateWithMaskConfiguration(t *testing.T) {
 		t.Errorf("updateModelArmorTemplateWithMaskConfiguration: expected %q to contain %q", got, want)
 	}
 }
-
-
-
-
-

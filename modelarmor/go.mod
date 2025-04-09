@@ -3,6 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples/modelarmor
 go 1.23.0
 
 require (
+	cloud.google.com/go/dlp v1.21.0
 	cloud.google.com/go/modelarmor v0.1.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250404170905-0aca11152736
 	github.com/google/uuid v1.6.0
@@ -33,6 +34,7 @@ require (
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.5 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.1 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/contrib/detectors/gcp v1.34.0 // indirect
