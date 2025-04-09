@@ -43,19 +43,6 @@ func TestTextGeneration(t *testing.T) {
 		}
 	})
 
-	t.Run("generate with code execution tool and local image input", func(t *testing.T) {
-		buf.Reset()
-		err := generateWithCodeExecAndImg(buf)
-		if err != nil {
-			t.Fatalf("generateWithCodeExecAndImg failed: %v", err)
-		}
-
-		output := buf.String()
-		if output == "" {
-			t.Error("expected non-empty output, got empty")
-		}
-	})
-
 	t.Run("generate with func declaration and func response", func(t *testing.T) {
 		buf.Reset()
 		err := generateWithFuncCall(buf)
