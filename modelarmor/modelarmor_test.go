@@ -26,10 +26,10 @@ import (
 	modelarmorpb "cloud.google.com/go/modelarmor/apiv1/modelarmorpb"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/joho/godotenv"
 	"google.golang.org/api/option"
 	grpccodes "google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
-	"github.com/joho/godotenv"
 	// modelarmorpb "cloud.google.com/go/modelarmor/apiv1/modelarmorpb"
 )
 
@@ -97,7 +97,7 @@ func TestGetOrganizationFloorSettings(t *testing.T) {
 	// Load the test.env file
 	err := godotenv.Load("./testdata/env/test.env")
 	if err != nil {
-		t.Fatalf(err.Error())
+		t.Fatal(err)
 	}
 
 	organizationID := os.Getenv("GOLANG_SAMPLES_ORGANIZATION_ID")

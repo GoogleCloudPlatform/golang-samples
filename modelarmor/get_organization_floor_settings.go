@@ -59,7 +59,7 @@ func getOrganizationFloorSettings(w io.Writer, organizationID string) (*modelarm
 	// Create the Model Armor client.
 	client, err := modelarmor.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client: %v", err)
+		return nil, fmt.Errorf("failed to create client: %w", err)
 	}
 	defer client.Close()
 
@@ -72,7 +72,7 @@ func getOrganizationFloorSettings(w io.Writer, organizationID string) (*modelarm
 
 	response, err := client.GetFloorSetting(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get floor setting: %v", err)
+		return nil, fmt.Errorf("failed to get floor setting: %w", err)
 	}
 
 	// Print the retrieved floor setting using fmt.Fprintf with the io.Writer.
