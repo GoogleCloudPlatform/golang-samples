@@ -45,7 +45,6 @@ func testName(t *testing.T) string {
 // It returns the created parameter and its ID or fails the test if parameter creation fails.
 func testParameter(t *testing.T, projectID string, format parametermanagerpb.ParameterFormat) (*parametermanagerpb.Parameter, string) {
 	t.Helper()
-
 	parameterID := testName(t)
 
 	ctx := context.Background()
@@ -192,7 +191,7 @@ func TestEnableParamVersion(t *testing.T) {
 // then attempts to delete the created parameter. It verifies if the parameter
 // was successfully deleted by checking the output.
 func TestDeleteParam(t *testing.T) {
-	tc := testutil.SystemTest(t)
+  tc := testutil.SystemTest(t)
 
 	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
 	defer testCleanupParameter(t, parameter.Name)
@@ -204,6 +203,86 @@ func TestDeleteParam(t *testing.T) {
 
 	if got, want := b.String(), "Deleted parameter"; !strings.Contains(got, want) {
 		t.Errorf("DeleteParameter: expected %q to contain %q", got, want)
+	}
+}
+
+// TestCreateStructuredParamVersion tests the createStructuredParamVersion function by creating a structured parameter version,
+// then verifies if the parameter version was successfully created by checking the output.
+func TestCreateStructuredParamVersion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
+	parameterVersionID := testName(t)
+	payload := `{"username": "test-user", "host": "localhost"}`
+	var b bytes.Buffer
+	if err := createStructuredParamVersion(&b, tc.ProjectID, parameterID, parameterVersionID, payload); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupParameter(t, parameter.Name)
+	defer testCleanupParameterVersion(t, fmt.Sprintf("%s/versions/%s", parameter.Name, parameterVersionID))
+
+	if got, want := b.String(), "Created parameter version:"; !strings.Contains(got, want) {
+		t.Errorf("createParameterVersion: expected %q to contain %q", got, want)
+	}
+}
+
+// TestCreateParamVersion tests the createParamVersion function by creating a parameter version,
+// then verifies if the parameter version was successfully created by checking the output.
+func TestCreateParamVersion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_UNFORMATTED)
+	parameterVersionID := testName(t)
+	payload := "test123"
+	var b bytes.Buffer
+	if err := createParamVersion(&b, tc.ProjectID, parameterID, parameterVersionID, payload); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupParameter(t, parameter.Name)
+	defer testCleanupParameterVersion(t, fmt.Sprintf("%s/versions/%s", parameter.Name, parameterVersionID))
+
+	if got, want := b.String(), "Created parameter version:"; !strings.Contains(got, want) {
+		t.Errorf("createParameterVersion: expected %q to contain %q", got, want)
+	}
+}
+
+// TestCreateParamVersionWithSecret tests the createParamVersionWithSecret function by creating a parameter version with a secret reference,
+// then verifies if the parameter version was successfully created by checking the output.
+func TestCreateParamVersionWithSecret(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_UNFORMATTED)
+	parameterVersionID := testName(t)
+	secretID := testName(t)
+	payload := fmt.Sprintf("projects/%s/secrets/%s/versions/latest", tc.ProjectID, secretID)
+	var b bytes.Buffer
+	if err := createParamVersionWithSecret(&b, tc.ProjectID, parameterID, parameterVersionID, payload); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupParameter(t, parameter.Name)
+	defer testCleanupParameterVersion(t, fmt.Sprintf("%s/versions/%s", parameter.Name, parameterVersionID))
+
+	if got, want := b.String(), "Created parameter version with secret reference:"; !strings.Contains(got, want) {
+		t.Errorf("createParameterVersion: expected %q to contain %q", got, want)
+	}
+}
+
+// TestGetParam tests the getParam function by creating a parameter,
+// then attempts to retrieve the created parameter. It verifies if the parameter
+// was successfully retrieved by checking the output.
+func TestGetParam(t *testing.T) {
+  tc := testutil.SystemTest(t)
+
+	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
+	defer testCleanupParameter(t, parameter.Name)
+
+	var b bytes.Buffer
+	if err := getParam(&b, tc.ProjectID, parameterID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), fmt.Sprintf("Found parameter %s with format JSON", parameter.Name); !strings.Contains(got, want) {
+		t.Errorf("GetParameter: expected %q to contain %q", got, want)
 	}
 }
 
@@ -226,5 +305,31 @@ func TestDeleteParamVersion(t *testing.T) {
 
 	if got, want := b.String(), "Deleted parameter version"; !strings.Contains(got, want) {
 		t.Errorf("DeleteParameterVersion: expected %q to contain %q", got, want)
+	}
+}
+
+// TestListParam tests the listParam function by creating multiple parameters,
+// then attempts to list the created parameters. It verifies if the parameters
+// were successfully listed by checking the output.
+func TestListParam(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameter1, _ := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
+	parameter2, _ := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_UNFORMATTED)
+
+	defer testCleanupParameter(t, parameter1.Name)
+	defer testCleanupParameter(t, parameter2.Name)
+
+	var b bytes.Buffer
+	if err := listParams(&b, tc.ProjectID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), fmt.Sprintf("Found parameter %s with format %s \n", parameter1.Name, parameter1.Format); !strings.Contains(got, want) {
+		t.Errorf("ListParameter: expected %q to contain %q", got, want)
+	}
+
+	if got, want := b.String(), fmt.Sprintf("Found parameter %s with format %s \n", parameter2.Name, parameter2.Format); !strings.Contains(got, want) {
+		t.Errorf("ListParameter: expected %q to contain %q", got, want)
 	}
 }
