@@ -45,7 +45,6 @@ func testName(t *testing.T) string {
 // It returns the created parameter and its ID or fails the test if parameter creation fails.
 func testParameter(t *testing.T, projectID string, format parametermanagerpb.ParameterFormat) (*parametermanagerpb.Parameter, string) {
 	t.Helper()
-
 	parameterID := testName(t)
 
 	ctx := context.Background()
@@ -88,6 +87,88 @@ func testCleanupParameter(t *testing.T, name string) {
 		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
 			t.Fatalf("testCleanupParameter: failed to delete parameter: %v", err)
 		}
+	}
+}
+
+// testCleanupParameterVersion deletes the specified parameter version in the GCP project.
+// It fails the test if the parameter version deletion fails.
+func testCleanupParameterVersion(t *testing.T, name string) {
+	t.Helper()
+
+	ctx := context.Background()
+	client, err := parametermanager.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("failed to create client: %v", err)
+	}
+	defer client.Close()
+
+	if err := client.DeleteParameterVersion(ctx, &parametermanagerpb.DeleteParameterVersionRequest{
+		Name: name,
+	}); err != nil {
+		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
+			t.Fatalf("testCleanupParameterVersion: failed to delete parameter version: %v", err)
+		}
+	}
+}
+
+// TestCreateStructuredParamVersion tests the createStructuredParamVersion function by creating a structured parameter version,
+// then verifies if the parameter version was successfully created by checking the output.
+func TestCreateStructuredParamVersion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
+	parameterVersionID := testName(t)
+	payload := `{"username": "test-user", "host": "localhost"}`
+	var b bytes.Buffer
+	if err := createStructuredParamVersion(&b, tc.ProjectID, parameterID, parameterVersionID, payload); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupParameter(t, parameter.Name)
+	defer testCleanupParameterVersion(t, fmt.Sprintf("%s/versions/%s", parameter.Name, parameterVersionID))
+
+	if got, want := b.String(), "Created parameter version:"; !strings.Contains(got, want) {
+		t.Errorf("createParameterVersion: expected %q to contain %q", got, want)
+	}
+}
+
+// TestCreateParamVersion tests the createParamVersion function by creating a parameter version,
+// then verifies if the parameter version was successfully created by checking the output.
+func TestCreateParamVersion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_UNFORMATTED)
+	parameterVersionID := testName(t)
+	payload := "test123"
+	var b bytes.Buffer
+	if err := createParamVersion(&b, tc.ProjectID, parameterID, parameterVersionID, payload); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupParameter(t, parameter.Name)
+	defer testCleanupParameterVersion(t, fmt.Sprintf("%s/versions/%s", parameter.Name, parameterVersionID))
+
+	if got, want := b.String(), "Created parameter version:"; !strings.Contains(got, want) {
+		t.Errorf("createParameterVersion: expected %q to contain %q", got, want)
+	}
+}
+
+// TestCreateParamVersionWithSecret tests the createParamVersionWithSecret function by creating a parameter version with a secret reference,
+// then verifies if the parameter version was successfully created by checking the output.
+func TestCreateParamVersionWithSecret(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_UNFORMATTED)
+	parameterVersionID := testName(t)
+	secretID := testName(t)
+	payload := fmt.Sprintf("projects/%s/secrets/%s/versions/latest", tc.ProjectID, secretID)
+	var b bytes.Buffer
+	if err := createParamVersionWithSecret(&b, tc.ProjectID, parameterID, parameterVersionID, payload); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupParameter(t, parameter.Name)
+	defer testCleanupParameterVersion(t, fmt.Sprintf("%s/versions/%s", parameter.Name, parameterVersionID))
+
+	if got, want := b.String(), "Created parameter version with secret reference:"; !strings.Contains(got, want) {
+		t.Errorf("createParameterVersion: expected %q to contain %q", got, want)
 	}
 }
 
