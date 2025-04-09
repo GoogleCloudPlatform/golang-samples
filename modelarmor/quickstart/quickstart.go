@@ -26,9 +26,11 @@ import (
 )
 
 func main() {
-	// TODO: Configure these values via environment variables or command-line flags
+	// Google Project ID
 	projectID := "your-project-id"
+	// Google Cloud Location
 	locationID := "us-central1"
+	// ID For The Model Armor Template To Create
 	templateID := "go-template"
 
 	ctx := context.Background()
