@@ -62,7 +62,7 @@ func deleteModelArmorTemplate(w io.Writer, projectID, location, templateID strin
 		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", location)),
 	)
 	if err != nil {
-		return fmt.Errorf("failed to create client: %v", err)
+		return fmt.Errorf("failed to create client for project %s, location %s: %v", projectID, location, err)
 	}
 	defer client.Close()
 

@@ -64,7 +64,7 @@ func getModelArmorTemplate(w io.Writer, projectID, location, templateID string) 
 		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", location)),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client: %v", err)
+		return nil, fmt.Errorf("failed to create client for project %s, location %s: %v", projectID, location, err)
 	}
 	defer client.Close()
 

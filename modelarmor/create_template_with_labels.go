@@ -70,7 +70,7 @@ func createModelArmorTemplateWithLabels(w io.Writer, projectID, locationID, temp
 		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client: %v", err)
+		return nil, fmt.Errorf("failed to create client for project %s, location %s: %v", projectID, locationID, err)
 	}
 	defer client.Close()
 

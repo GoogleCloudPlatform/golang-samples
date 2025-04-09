@@ -57,21 +57,21 @@ import (
 //	for _, template := range templates {
 //	    fmt.Println(template)
 //	}
-func listModelArmorTemplates(w io.Writer, projectID, location string) ([]*modelarmorpb.Template, error) {
+func listModelArmorTemplates(w io.Writer, projectID, locationID string) ([]*modelarmorpb.Template, error) {
 	ctx := context.Background()
 
 	// Create the Model Armor client.
 	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", location)),
+		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client: %v", err)
+		return nil, fmt.Errorf("failed to create client for project %s, location %s: %v", projectID, locationID, err)
 	}
 	defer client.Close()
 
 	// Initialize request argument(s).
 	req := &modelarmorpb.ListTemplatesRequest{
-		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+		Parent: fmt.Sprintf("projects/%s/locations/%s", projectID, locationID),
 	}
 
 	// Get list of templates.
