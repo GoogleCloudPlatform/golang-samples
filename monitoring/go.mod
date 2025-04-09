@@ -3,15 +3,15 @@ module github.com/GoogleCloudPlatform/golang-samples/monitoring
 go 1.23.0
 
 require (
-	cloud.google.com/go/monitoring v1.23.0
+	cloud.google.com/go/monitoring v1.24.1
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.15-0.20230702191903-2de6d2748484
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	github.com/GoogleCloudPlatform/golang-samples 41f0779fc9a7
 	github.com/golang/protobuf v1.5.4
-	github.com/prometheus/client_golang v1.20.5
+	github.com/prometheus/client_golang v1.22.0
 	go.opencensus.io v0.24.0
-	google.golang.org/api v0.217.0
-	google.golang.org/genproto v0.0.0-20250115164207-1a7da9e5054f
-	google.golang.org/genproto/googleapis/api v0.0.0-20250115164207-1a7da9e5054f
+	google.golang.org/api v0.228.0
+	google.golang.org/genproto ac9807e6c755
+	google.golang.org/genproto/googleapis/api ac9807e6c755
 )
 
 require (

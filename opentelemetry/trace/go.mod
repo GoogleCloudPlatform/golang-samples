@@ -3,14 +3,14 @@ module github.com/GoogleCloudPlatform/golang-samples/opentelemetry/trace
 go 1.23.0
 
 require (
-	cloud.google.com/go/trace v1.11.3
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.24.1
+	cloud.google.com/go/trace v1.11.5
+	github.com/GoogleCloudPlatform/golang-samples 41f0779fc9a7
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.27.0
 	go.opentelemetry.io/contrib/detectors/gcp v1.34.0
 	go.opentelemetry.io/otel v1.34.0
 	go.opentelemetry.io/otel/sdk v1.34.0
-	google.golang.org/api v0.217.0
-	google.golang.org/protobuf v1.36.3
+	google.golang.org/api v0.228.0
+	google.golang.org/protobuf v1.36.6
 )
 
 require (

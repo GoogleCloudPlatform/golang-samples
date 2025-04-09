@@ -5,11 +5,11 @@ go 1.23.0
 require (
 	cloud.google.com/go/errorreporting v0.3.2
 	cloud.google.com/go/firestore v1.18.0
-	cloud.google.com/go/storage v1.50.0
+	cloud.google.com/go/storage v1.51.0
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/gorilla/handlers v1.5.2
 	github.com/gorilla/mux v1.8.1
-	google.golang.org/api v0.217.0
+	google.golang.org/api v0.228.0
 )
 
 require (

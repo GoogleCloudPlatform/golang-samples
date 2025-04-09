@@ -3,8 +3,8 @@ module github.com/GoogleCloudPlatform/golang-samples/speech
 go 1.23.0
 
 require (
-	cloud.google.com/go/speech v1.26.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	cloud.google.com/go/speech v1.26.1
+	github.com/GoogleCloudPlatform/golang-samples 41f0779fc9a7
 )
 
 require (

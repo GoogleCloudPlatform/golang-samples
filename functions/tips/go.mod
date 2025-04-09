@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/functions/tips
 
-require cloud.google.com/go/storage v1.50.0
+require cloud.google.com/go/storage v1.51.0
 
 require (
 	cel.dev/expr v0.19.1 // indirect
@@ -45,7 +45,7 @@ require (
 	cloud.google.com/go v0.118.0 // indirect
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
 	cloud.google.com/go/iam v1.3.1 // indirect
-	github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
+	github.com/GoogleCloudPlatform/functions-framework-go v1.9.2
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect

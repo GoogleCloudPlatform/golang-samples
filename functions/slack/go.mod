@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/slack
 
 go 1.23.0
 
-require google.golang.org/api v0.217.0
+require google.golang.org/api v0.228.0
 
 require (
 	cloud.google.com/go/auth v0.14.0 // indirect

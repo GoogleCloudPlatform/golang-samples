@@ -3,22 +3,22 @@ module github.com/GoogleCloudPlatform/golang-samples/pubsub
 go 1.23.0
 
 require (
-	cloud.google.com/go/bigquery v1.66.0
-	cloud.google.com/go/iam v1.3.1
-	cloud.google.com/go/pubsub v1.47.0
-	cloud.google.com/go/storage v1.50.0
-	cloud.google.com/go/trace v1.11.3
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240820230436-761d0ae7aeff
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.24.1
-	github.com/google/go-cmp v0.6.0
+	cloud.google.com/go/bigquery v1.67.0
+	cloud.google.com/go/iam v1.5.0
+	cloud.google.com/go/pubsub v1.49.0
+	cloud.google.com/go/storage v1.51.0
+	cloud.google.com/go/trace v1.11.5
+	github.com/GoogleCloudPlatform/golang-samples 41f0779fc9a7
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.27.0
+	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
 	github.com/googleapis/gax-go/v2 v2.14.1
-	github.com/linkedin/goavro/v2 v2.13.0
+	github.com/linkedin/goavro/v2 v2.13.1
 	go.opentelemetry.io/otel v1.34.0
 	go.opentelemetry.io/otel/sdk v1.34.0
-	google.golang.org/api v0.219.0
-	google.golang.org/grpc v1.70.0
-	google.golang.org/protobuf v1.36.4
+	google.golang.org/api v0.228.0
+	google.golang.org/grpc v1.71.1
+	google.golang.org/protobuf v1.36.6
 )
 
 require (

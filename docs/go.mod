@@ -3,13 +3,13 @@ module github.com/GoogleCloudPlatform/golang-samples/docs
 go 1.23.0
 
 require (
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	github.com/GoogleCloudPlatform/golang-samples 41f0779fc9a7
 	github.com/fluent/fluent-logger-golang v1.9.0
-	github.com/go-sql-driver/mysql v1.8.1
+	github.com/go-sql-driver/mysql v1.9.2
 	github.com/mailgun/mailgun-go/v3 v3.6.4
 	github.com/mailjet/mailjet-apiv3-go v0.0.0-20201009050126-c24bc15a9394
-	golang.org/x/oauth2 v0.25.0
-	google.golang.org/api v0.217.0
+	golang.org/x/oauth2 v0.29.0
+	google.golang.org/api v0.228.0
 	google.golang.org/appengine v1.6.8
 	google.golang.org/appengine/v2 v2.0.6
 )

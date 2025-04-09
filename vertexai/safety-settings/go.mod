@@ -3,8 +3,8 @@ module github.com/GoogleCloudPlatform/golang-samples/vertexai/safety-settings
 go 1.23.0
 
 require (
-	cloud.google.com/go/vertexai v0.13.2
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	cloud.google.com/go/vertexai v0.13.3
+	github.com/GoogleCloudPlatform/golang-samples 41f0779fc9a7
 )
 
 require (

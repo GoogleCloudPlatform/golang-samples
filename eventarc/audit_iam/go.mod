@@ -3,9 +3,9 @@ module github.com/GoogleCloudPlatform/golang-samples/eventarc/audit_iam
 go 1.23.0
 
 require (
-	github.com/cloudevents/sdk-go/v2 v2.15.2
-	github.com/googleapis/google-cloudevents-go v0.8.0
-	google.golang.org/protobuf v1.36.3
+	github.com/cloudevents/sdk-go/v2 v2.16.0
+	github.com/googleapis/google-cloudevents-go v0.9.0
+	google.golang.org/protobuf v1.36.6
 )
 
 require (

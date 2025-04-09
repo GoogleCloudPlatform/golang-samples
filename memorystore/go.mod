@@ -3,8 +3,8 @@ module github.com/GoogleCloudPlatform/golang-samples/memorystore/redis
 go 1.23.0
 
 require (
-	cloud.google.com/go/redis v1.17.3
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	cloud.google.com/go/redis v1.18.1
+	github.com/GoogleCloudPlatform/golang-samples 41f0779fc9a7
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/uuid v1.6.0

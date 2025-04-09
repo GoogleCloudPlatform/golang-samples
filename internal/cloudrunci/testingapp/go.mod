@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci/testing
 
 go 1.23.0
 
-require github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+require github.com/GoogleCloudPlatform/golang-samples 41f0779fc9a7
 
 require (
 	cel.dev/expr v0.19.1 // indirect

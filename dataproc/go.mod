@@ -4,10 +4,10 @@ go 1.23.0
 
 require (
 	cloud.google.com/go/dataproc v1.12.0
-	cloud.google.com/go/storage v1.50.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	cloud.google.com/go/storage v1.51.0
+	github.com/GoogleCloudPlatform/golang-samples 41f0779fc9a7
 	github.com/google/uuid v1.6.0
-	google.golang.org/api v0.217.0
+	google.golang.org/api v0.228.0
 )
 
 require (

@@ -2,13 +2,13 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/label
 
 go 1.23.0
 
-require github.com/cloudevents/sdk-go/v2 v2.15.2
+require github.com/cloudevents/sdk-go/v2 v2.16.0
 
 require (
-	cloud.google.com/go/compute v1.31.1
-	github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
-	google.golang.org/api v0.217.0
-	google.golang.org/protobuf v1.36.3
+	cloud.google.com/go/compute v1.36.0
+	github.com/GoogleCloudPlatform/functions-framework-go v1.9.2
+	google.golang.org/api v0.228.0
+	google.golang.org/protobuf v1.36.6
 )
 
 require (

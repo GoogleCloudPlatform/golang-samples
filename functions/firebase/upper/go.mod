@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/firebase/upper
 
 require (
 	cloud.google.com/go/firestore v1.18.0
-	firebase.google.com/go/v4 v4.14.1
+	firebase.google.com/go/v4 v4.15.2
 )
 
 require (

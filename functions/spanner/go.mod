@@ -1,8 +1,8 @@
 module github.com/GoogleCloudPlatform/golang-samples/functions/spanner
 
 require (
-	cloud.google.com/go/spanner v1.73.0
-	google.golang.org/api v0.217.0
+	cloud.google.com/go/spanner v1.79.0
+	google.golang.org/api v0.228.0
 )
 
 require (
@@ -49,7 +49,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
 	cloud.google.com/go/iam v1.3.1 // indirect
 	cloud.google.com/go/longrunning v0.6.4 // indirect
-	github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
+	github.com/GoogleCloudPlatform/functions-framework-go v1.9.2
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cncf/xds/go v0.0.0-20250121191232-2f005788dc42 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.1.0 // indirect

@@ -3,13 +3,13 @@ module github.com/GoogleCloudPlatform/golang-samples/iam
 go 1.23.0
 
 require (
-	cloud.google.com/go/iam v1.3.1
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	cloud.google.com/go/iam v1.5.0
+	github.com/GoogleCloudPlatform/golang-samples 41f0779fc9a7
 	github.com/gofrs/uuid v4.4.0+incompatible
-	github.com/google/go-cmp v0.6.0
-	golang.org/x/oauth2 v0.25.0
-	google.golang.org/api v0.217.0
-	google.golang.org/genproto v0.0.0-20250115164207-1a7da9e5054f
+	github.com/google/go-cmp v0.7.0
+	golang.org/x/oauth2 v0.29.0
+	google.golang.org/api v0.228.0
+	google.golang.org/genproto ac9807e6c755
 )
 
 require (
