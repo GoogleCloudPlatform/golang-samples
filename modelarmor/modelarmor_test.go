@@ -29,6 +29,7 @@ import (
 	"google.golang.org/api/option"
 	grpccodes "google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
+	"github.com/joho/godotenv"
 	// modelarmorpb "cloud.google.com/go/modelarmor/apiv1/modelarmorpb"
 )
 
@@ -38,7 +39,7 @@ func testLocation(t *testing.T) string {
 	// Load the test.env file
 	err := godotenv.Load("./testdata/env/test.env")
 	if err != nil {
-		t.fatal(err)
+		t.Fatalf(err.Error())
 	}
 
 	v := os.Getenv("GOLANG_SAMPLES_LOCATION")
@@ -96,7 +97,7 @@ func TestGetOrganizationFloorSettings(t *testing.T) {
 	// Load the test.env file
 	err := godotenv.Load("./testdata/env/test.env")
 	if err != nil {
-		t.fatal(err)
+		t.Fatalf(err.Error())
 	}
 
 	organizationID := os.Getenv("GOLANG_SAMPLES_ORGANIZATION_ID")
@@ -114,7 +115,7 @@ func TestGetFolderFloorSettings(t *testing.T) {
 	// Load the test.env file
 	err := godotenv.Load("./testdata/env/test.env")
 	if err != nil {
-		t.fatal(err)
+		t.Fatalf(err.Error())
 	}
 
 	folderID := os.Getenv("GOLANG_SAMPLES_FOLDER_ID")
@@ -132,7 +133,7 @@ func TestUpdateFolderFloorSettings(t *testing.T) {
 	// Load the test.env file
 	err := godotenv.Load("./testdata/env/test.env")
 	if err != nil {
-		t.fatal(err)
+		t.Fatalf(err.Error())
 	}
 	folderID := os.Getenv("GOLANG_SAMPLES_FOLDER_ID")
 	var b bytes.Buffer
@@ -149,7 +150,7 @@ func TestUpdateOrganizationFloorSettings(t *testing.T) {
 	// Load the test.env file
 	err := godotenv.Load("./testdata/env/test.env")
 	if err != nil {
-		t.fatal(err)
+		t.Fatalf(err.Error())
 	}
 
 	organizationID := os.Getenv("GOLANG_SAMPLES_ORGANIZATION_ID")
