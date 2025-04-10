@@ -826,7 +826,7 @@ func TestListSoftDeletedVersionsOfObject(t *testing.T) {
 		t.Fatalf("Object(%q).Delete: %v", objectName1, err)
 	}
 	if err := client.Bucket(bucketName).Object(objectName2).Delete(ctx); err != nil {
-		t.Fatalf("Object(%q).Delete: %v", objectName1, err)
+		t.Fatalf("Object(%q).Delete: %v", objectName2, err)
 	}
 
 	var buf bytes.Buffer
