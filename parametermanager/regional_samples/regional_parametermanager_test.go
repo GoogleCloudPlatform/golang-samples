@@ -184,12 +184,12 @@ func TestDisableRegionalParamVersion(t *testing.T) {
 	defer testCleanupParameter(t, parameter.Name)
 	defer testCleanupParameterVersion(t, parameterVersion.Name)
 
-	var b bytes.Buffer
-	if err := disableRegionalParamVersion(&b, tc.ProjectID, locationId, parameterID, parameterVersionID); err != nil {
+	var buf bytes.Buffer
+	if err := disableRegionalParamVersion(&buf, tc.ProjectID, locationId, parameterID, parameterVersionID); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), "Disabled regional parameter version"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Disabled regional parameter version"; !strings.Contains(got, want) {
 		t.Errorf("DisableParameterVersion: expected %q to contain %q", got, want)
 	}
 }
@@ -208,12 +208,12 @@ func TestEnableRegionalParamVersion(t *testing.T) {
 	defer testCleanupParameter(t, parameter.Name)
 	defer testCleanupParameterVersion(t, parameterVersion.Name)
 
-	var b bytes.Buffer
-	if err := enableRegionalParamVersion(&b, tc.ProjectID, locationId, parameterID, parameterVersionID); err != nil {
+	var buf bytes.Buffer
+	if err := enableRegionalParamVersion(&buf, tc.ProjectID, locationId, parameterID, parameterVersionID); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), "Enabled regional parameter version"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Enabled regional parameter version"; !strings.Contains(got, want) {
 		t.Errorf("EnableParameterVersion: expected %q to contain %q", got, want)
 	}
 }
@@ -228,12 +228,12 @@ func TestDeleteRegionalParam(t *testing.T) {
 	locationId := testLocation(t)
 	defer testCleanupParameter(t, parameter.Name)
 
-	var b bytes.Buffer
-	if err := deleteRegionalParam(&b, tc.ProjectID, locationId, parameterID); err != nil {
+	var buf bytes.Buffer
+	if err := deleteRegionalParam(&buf, tc.ProjectID, locationId, parameterID); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), "Deleted regional parameter"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Deleted regional parameter"; !strings.Contains(got, want) {
 		t.Errorf("DeleteParameter: expected %q to contain %q", got, want)
 	}
 }
@@ -251,12 +251,12 @@ func TestDeleteRegionalParamVersion(t *testing.T) {
 	defer testCleanupParameterVersion(t, parameterVersion.Name)
 	locationId := testLocation(t)
 
-	var b bytes.Buffer
-	if err := deleteRegionalParamVersion(&b, tc.ProjectID, locationId, parameterID, parameterVersionID); err != nil {
+	var buf bytes.Buffer
+	if err := deleteRegionalParamVersion(&buf, tc.ProjectID, locationId, parameterID, parameterVersionID); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), "Deleted regional parameter version"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Deleted regional parameter version"; !strings.Contains(got, want) {
 		t.Errorf("DeleteParameterVersion: expected %q to contain %q", got, want)
 	}
 }
