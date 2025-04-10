@@ -290,12 +290,12 @@ func TestGetRegionalParam(t *testing.T) {
 	defer testCleanupParameter(t, parameter.Name)
 
 	locationId := testLocation(t)
-	var b bytes.Buffer
-	if err := getRegionalParam(&b, tc.ProjectID, locationId, parameterID); err != nil {
+	var buf bytes.Buffer
+	if err := getRegionalParam(&buf, tc.ProjectID, locationId, parameterID); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Found regional parameter %s with format JSON", parameter.Name); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found regional parameter %s with format JSON", parameter.Name); !strings.Contains(got, want) {
 		t.Errorf("GetParameter: expected %q to contain %q", got, want)
 	}
 }
@@ -313,12 +313,12 @@ func TestGetRegionalParamVersion(t *testing.T) {
 	defer testCleanupParameterVersion(t, parameterVersion.Name)
 	locationId := testLocation(t)
 
-	var b bytes.Buffer
-	if err := getRegionalParamVersion(&b, tc.ProjectID, locationId, parameterID, parameterVersionID); err != nil {
+	var buf bytes.Buffer
+	if err := getRegionalParamVersion(&buf, tc.ProjectID, locationId, parameterID, parameterVersionID); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Found regional parameter version %s with state enabled", parameterVersion.Name); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found regional parameter version %s with disabled state in %v", parameterVersion.Name, parameterVersion.Disabled); !strings.Contains(got, want) {
 		t.Errorf("GetParameterVersion: expected %q to contain %q", got, want)
 	}
 }
@@ -343,17 +343,17 @@ func TestRenderRegionalParamVersion(t *testing.T) {
 	defer testCleanupParameter(t, parameter.Name)
 	defer testCleanupParameterVersion(t, parameterVersion.Name)
 
-	var b bytes.Buffer
+	var buf bytes.Buffer
 	time.Sleep(2 * time.Minute)
-	if err := renderRegionalParamVersion(&b, tc.ProjectID, locationId, parameterID, parameterVersionID); err != nil {
+	if err := renderRegionalParamVersion(&buf, tc.ProjectID, locationId, parameterID, parameterVersionID); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), "Rendered regional parameter version:"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Rendered regional parameter version:"; !strings.Contains(got, want) {
 		t.Errorf("RenderParameterVersion: expected %q to contain %q", got, want)
 	}
 	expectedPayload := `{"username": "test-user","password": "very secret data"}`
-	if got, want := b.String(), fmt.Sprintf("Rendered payload: %s", expectedPayload); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Rendered payload: %s", expectedPayload); !strings.Contains(got, want) {
 		t.Errorf("RenderParameterVersion: expected %q to contain %q", got, want)
 	}
 }
@@ -371,16 +371,16 @@ func TestListRegionalParam(t *testing.T) {
 	defer testCleanupParameter(t, parameter1.Name)
 	defer testCleanupParameter(t, parameter2.Name)
 
-	var b bytes.Buffer
-	if err := listRegionalParam(&b, tc.ProjectID, locationId); err != nil {
+	var buf bytes.Buffer
+	if err := listRegionalParam(&buf, tc.ProjectID, locationId); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Found regional parameter %s with format %s\n", parameter1.Name, parameter1.Format); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found regional parameter %s with format %s\n", parameter1.Name, parameter1.Format); !strings.Contains(got, want) {
 		t.Errorf("ListParameter: expected %q to contain %q", got, want)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Found regional parameter %s with format %s\n", parameter2.Name, parameter2.Format); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found regional parameter %s with format %s\n", parameter2.Name, parameter2.Format); !strings.Contains(got, want) {
 		t.Errorf("ListParameter: expected %q to contain %q", got, want)
 	}
 }
@@ -401,16 +401,16 @@ func TestListRegionalParamVersion(t *testing.T) {
 	defer testCleanupParameterVersion(t, parameterVersion1.Name)
 	defer testCleanupParameterVersion(t, parameterVersion2.Name)
 
-	var b bytes.Buffer
-	if err := listRegionalParamVersion(&b, tc.ProjectID, locationId, parameterID); err != nil {
+	var buf bytes.Buffer
+	if err := listRegionalParamVersion(&buf, tc.ProjectID, locationId, parameterID); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Found regional parameter version %s with state enabled\n", parameterVersion1.Name); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found regional parameter version %s with disabled state in %v\n", parameterVersion1.Name, parameterVersion1.Disabled); !strings.Contains(got, want) {
 		t.Errorf("ListParameterVersion: expected %q to contain %q", got, want)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Found regional parameter version %s with state enabled\n", parameterVersion2.Name); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found regional parameter version %s with disabled state in %v\n", parameterVersion2.Name, parameterVersion2.Disabled); !strings.Contains(got, want) {
 		t.Errorf("ListParameterVersion: expected %q to contain %q", got, want)
 	}
 }

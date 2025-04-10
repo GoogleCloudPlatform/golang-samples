@@ -14,7 +14,7 @@
 
 package regional_parametermanager
 
-// [START parametermanager_list_regional_param]
+// [START parametermanager_list_regional_params]
 import (
 	"context"
 	"fmt"
@@ -54,9 +54,9 @@ func listRegionalParam(w io.Writer, projectID, locationID string) error {
 	}
 
 	// Call the API to list all parameters.
-	it := client.ListParameters(ctx, req)
+	parameters := client.ListParameters(ctx, req)
 	for {
-		resp, err := it.Next()
+		parameter, err := parameters.Next()
 		if err == iterator.Done {
 			break
 		}
@@ -64,10 +64,10 @@ func listRegionalParam(w io.Writer, projectID, locationID string) error {
 			return fmt.Errorf("failed to list parameters: %w", err)
 		}
 
-		fmt.Fprintf(w, "Found regional parameter %s with format %s\n", resp.Name, resp.Format.String())
+		fmt.Fprintf(w, "Found regional parameter %s with format %s\n", parameter.Name, parameter.Format.String())
 	}
 
 	return nil
 }
 
-// [END parametermanager_list_regional_param]
+// [END parametermanager_list_regional_params]

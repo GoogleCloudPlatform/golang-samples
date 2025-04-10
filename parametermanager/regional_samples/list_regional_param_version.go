@@ -14,7 +14,7 @@
 
 package regional_parametermanager
 
-// [START parametermanager_list_regional_param_version]
+// [START parametermanager_list_regional_param_versions]
 import (
 	"context"
 	"fmt"
@@ -55,9 +55,9 @@ func listRegionalParamVersion(w io.Writer, projectID, locationID, parameterID st
 	}
 
 	// Call the API to list all parameter versions.
-	it := client.ListParameterVersions(ctx, req)
+	parameterVersions := client.ListParameterVersions(ctx, req)
 	for {
-		resp, err := it.Next()
+		version, err := parameterVersions.Next()
 		if err == iterator.Done {
 			break
 		}
@@ -65,10 +65,10 @@ func listRegionalParamVersion(w io.Writer, projectID, locationID, parameterID st
 			return fmt.Errorf("failed to list parameter versions: %w", err)
 		}
 
-		fmt.Fprintf(w, "Found regional parameter version %s with state %s\n", resp.Name, map[bool]string{true: "disabled", false: "enabled"}[resp.Disabled])
+		fmt.Fprintf(w, "Found regional parameter version %s with disabled state in %v\n", version.Name, version.Disabled)
 	}
 
 	return nil
 }
 
-// [END parametermanager_list_regional_param_version]
+// [END parametermanager_list_regional_param_versions]
