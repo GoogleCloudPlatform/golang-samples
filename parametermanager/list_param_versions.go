@@ -14,7 +14,7 @@
 
 package parametermanager
 
-// [START parametermanager_list_param_version]
+// [START parametermanager_list_param_versions]
 import (
 	"context"
 	"fmt"
@@ -66,4 +66,4 @@ func listParamVersions(w io.Writer, projectID, parameterID string) error {
 	return nil
 }
 
-// [END parametermanager_list_param_version]
+// [END parametermanager_list_param_versions]

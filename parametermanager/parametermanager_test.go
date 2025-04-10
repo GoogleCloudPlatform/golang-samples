@@ -368,11 +368,11 @@ func TestListParamVersion(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got, want := buf.String(), fmt.Sprintf("Found parameter version %s with state enabled\n", parameterVersion1.Name); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found parameter version %s with disabled state in %v\n", parameterVersion1.Name, parameterVersion1.Disabled); !strings.Contains(got, want) {
 		t.Errorf("ListParameterVersion: expected %q to contain %q", got, want)
 	}
 
-	if got, want := buf.String(), fmt.Sprintf("Found parameter version %s with state enabled\n", parameterVersion2.Name); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found parameter version %s with disabled state in %v\n", parameterVersion2.Name, parameterVersion2.Disabled); !strings.Contains(got, want) {
 		t.Errorf("ListParameterVersion: expected %q to contain %q", got, want)
 	}
 }
@@ -394,7 +394,7 @@ func TestGetParamVersion(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got, want := buf.String(), fmt.Sprintf("Found parameter version %s with state enabled", parameterVersion.Name); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found parameter version %s with disabled state in %v", parameterVersion.Name, parameterVersion.Disabled); !strings.Contains(got, want) {
 		t.Errorf("GetParameterVersion: expected %q to contain %q", got, want)
 	}
 }
