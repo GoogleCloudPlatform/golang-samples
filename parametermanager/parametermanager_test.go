@@ -250,14 +250,14 @@ func TestCreateStructuredParamVersion(t *testing.T) {
 	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
 	parameterVersionID := testName(t)
 	payload := `{"username": "test-user", "host": "localhost"}`
-	var b bytes.Buffer
-	if err := createStructuredParamVersion(&b, tc.ProjectID, parameterID, parameterVersionID, payload); err != nil {
+	var buf bytes.Buffer
+	if err := createStructuredParamVersion(&buf, tc.ProjectID, parameterID, parameterVersionID, payload); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupParameter(t, parameter.Name)
 	defer testCleanupParameterVersion(t, fmt.Sprintf("%s/versions/%s", parameter.Name, parameterVersionID))
 
-	if got, want := b.String(), "Created parameter version:"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Created parameter version:"; !strings.Contains(got, want) {
 		t.Errorf("createParameterVersion: expected %q to contain %q", got, want)
 	}
 }
@@ -270,14 +270,14 @@ func TestCreateParamVersion(t *testing.T) {
 	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_UNFORMATTED)
 	parameterVersionID := testName(t)
 	payload := "test123"
-	var b bytes.Buffer
-	if err := createParamVersion(&b, tc.ProjectID, parameterID, parameterVersionID, payload); err != nil {
+	var buf bytes.Buffer
+	if err := createParamVersion(&buf, tc.ProjectID, parameterID, parameterVersionID, payload); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupParameter(t, parameter.Name)
 	defer testCleanupParameterVersion(t, fmt.Sprintf("%s/versions/%s", parameter.Name, parameterVersionID))
 
-	if got, want := b.String(), "Created parameter version:"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Created parameter version:"; !strings.Contains(got, want) {
 		t.Errorf("createParameterVersion: expected %q to contain %q", got, want)
 	}
 }
@@ -291,14 +291,14 @@ func TestCreateParamVersionWithSecret(t *testing.T) {
 	parameterVersionID := testName(t)
 	secretID := testName(t)
 	payload := fmt.Sprintf("projects/%s/secrets/%s/versions/latest", tc.ProjectID, secretID)
-	var b bytes.Buffer
-	if err := createParamVersionWithSecret(&b, tc.ProjectID, parameterID, parameterVersionID, payload); err != nil {
+	var buf bytes.Buffer
+	if err := createParamVersionWithSecret(&buf, tc.ProjectID, parameterID, parameterVersionID, payload); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupParameter(t, parameter.Name)
 	defer testCleanupParameterVersion(t, fmt.Sprintf("%s/versions/%s", parameter.Name, parameterVersionID))
 
-	if got, want := b.String(), "Created parameter version with secret reference:"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Created parameter version with secret reference:"; !strings.Contains(got, want) {
 		t.Errorf("createParameterVersion: expected %q to contain %q", got, want)
 	}
 }
@@ -312,12 +312,12 @@ func TestGetParam(t *testing.T) {
 	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
 	defer testCleanupParameter(t, parameter.Name)
 
-	var b bytes.Buffer
-	if err := getParam(&b, tc.ProjectID, parameterID); err != nil {
+	var buf bytes.Buffer
+	if err := getParam(&buf, tc.ProjectID, parameterID); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Found parameter %s with format JSON", parameter.Name); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format JSON", parameter.Name); !strings.Contains(got, want) {
 		t.Errorf("GetParameter: expected %q to contain %q", got, want)
 	}
 }
@@ -334,16 +334,16 @@ func TestListParam(t *testing.T) {
 	defer testCleanupParameter(t, parameter1.Name)
 	defer testCleanupParameter(t, parameter2.Name)
 
-	var b bytes.Buffer
-	if err := listParams(&b, tc.ProjectID); err != nil {
+	var buf bytes.Buffer
+	if err := listParams(&buf, tc.ProjectID); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Found parameter %s with format %s \n", parameter1.Name, parameter1.Format); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format %s \n", parameter1.Name, parameter1.Format); !strings.Contains(got, want) {
 		t.Errorf("ListParameter: expected %q to contain %q", got, want)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Found parameter %s with format %s \n", parameter2.Name, parameter2.Format); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format %s \n", parameter2.Name, parameter2.Format); !strings.Contains(got, want) {
 		t.Errorf("ListParameter: expected %q to contain %q", got, want)
 	}
 }
@@ -363,16 +363,16 @@ func TestListParamVersion(t *testing.T) {
 	defer testCleanupParameterVersion(t, parameterVersion1.Name)
 	defer testCleanupParameterVersion(t, parameterVersion2.Name)
 
-	var b bytes.Buffer
-	if err := listParamVersions(&b, tc.ProjectID, parameterID); err != nil {
+	var buf bytes.Buffer
+	if err := listParamVersions(&buf, tc.ProjectID, parameterID); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Found parameter version %s with state enabled\n", parameterVersion1.Name); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found parameter version %s with state enabled\n", parameterVersion1.Name); !strings.Contains(got, want) {
 		t.Errorf("ListParameterVersion: expected %q to contain %q", got, want)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Found parameter version %s with state enabled\n", parameterVersion2.Name); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found parameter version %s with state enabled\n", parameterVersion2.Name); !strings.Contains(got, want) {
 		t.Errorf("ListParameterVersion: expected %q to contain %q", got, want)
 	}
 }
@@ -389,12 +389,12 @@ func TestGetParamVersion(t *testing.T) {
 	defer testCleanupParameter(t, parameter.Name)
 	defer testCleanupParameterVersion(t, parameterVersion.Name)
 
-	var b bytes.Buffer
-	if err := getParamVersion(&b, tc.ProjectID, parameterID, parameterVersionID); err != nil {
+	var buf bytes.Buffer
+	if err := getParamVersion(&buf, tc.ProjectID, parameterID, parameterVersionID); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), fmt.Sprintf("Found parameter version %s with state enabled", parameterVersion.Name); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found parameter version %s with state enabled", parameterVersion.Name); !strings.Contains(got, want) {
 		t.Errorf("GetParameterVersion: expected %q to contain %q", got, want)
 	}
 }
@@ -418,16 +418,16 @@ func TestRenderParamVersion(t *testing.T) {
 	defer testCleanupParameter(t, parameter.Name)
 	defer testCleanupParameterVersion(t, parameterVersion.Name)
 
-	var b bytes.Buffer
-	if err := renderParamVersion(&b, tc.ProjectID, parameterID, parameterVersionID); err != nil {
+	var buf bytes.Buffer
+	if err := renderParamVersion(&buf, tc.ProjectID, parameterID, parameterVersionID); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), "Rendered parameter version:"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Rendered parameter version:"; !strings.Contains(got, want) {
 		t.Errorf("RenderParameterVersion: expected %q to contain %q", got, want)
 	}
 
-	if got, want := b.String(), `Rendered payload: {"username": "test-user","password": "very secret data"}`; !strings.Contains(got, want) {
+	if got, want := buf.String(), `Rendered payload: {"username": "test-user","password": "very secret data"}`; !strings.Contains(got, want) {
 		t.Errorf("RenderParameterVersion: expected %q to contain %q", got, want)
 	}
 }

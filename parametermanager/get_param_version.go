@@ -57,7 +57,7 @@ func getParamVersion(w io.Writer, projectID, parameterID, versionID string) erro
 
 	// Find more details for the Parameter Version object here:
 	// https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters.versions#ParameterVersion
-	fmt.Fprintf(w, "Found parameter version %s with state %s\n", version.Name, map[bool]string{true: "disabled", false: "enabled"}[version.Disabled])
+	fmt.Fprintf(w, "Found parameter version %s with disabled state in %v\n", version.Name, version.Disabled)
 	if !version.Disabled {
 		fmt.Fprintf(w, "Payload: %s\n", version.Payload.Data)
 	}

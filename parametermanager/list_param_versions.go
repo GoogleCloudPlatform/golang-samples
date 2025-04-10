@@ -50,9 +50,9 @@ func listParamVersions(w io.Writer, projectID, parameterID string) error {
 	}
 
 	// Call the API to list parameter versions.
-	it := client.ListParameterVersions(ctx, req)
+	parameterVersions := client.ListParameterVersions(ctx, req)
 	for {
-		resp, err := it.Next()
+		version, err := parameterVersions.Next()
 		if err == iterator.Done {
 			break
 		}
@@ -60,7 +60,7 @@ func listParamVersions(w io.Writer, projectID, parameterID string) error {
 			return fmt.Errorf("failed to list parameter versions: %w", err)
 		}
 
-		fmt.Fprintf(w, "Found parameter version %s with state %s\n", resp.Name, map[bool]string{true: "disabled", false: "enabled"}[resp.Disabled])
+		fmt.Fprintf(w, "Found parameter version %s with disabled state in %v\n", version.Name, version.Disabled)
 	}
 
 	return nil
