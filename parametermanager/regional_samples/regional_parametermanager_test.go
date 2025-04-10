@@ -144,13 +144,13 @@ func TestCreateRegionalParam(t *testing.T) {
 	parameterID := testName(t)
 	locationId := testLocation(t)
 
-	var b bytes.Buffer
-	if err := createRegionalParam(&b, tc.ProjectID, locationId, parameterID); err != nil {
+	var buf bytes.Buffer
+	if err := createRegionalParam(&buf, tc.ProjectID, locationId, parameterID); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupParameter(t, fmt.Sprintf("projects/%s/locations/%s/parameters/%s", tc.ProjectID, locationId, parameterID))
 
-	if got, want := b.String(), "Created regional parameter:"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Created regional parameter:"; !strings.Contains(got, want) {
 		t.Errorf("createParameter: expected %q to contain %q", got, want)
 	}
 }
@@ -163,13 +163,13 @@ func TestCreateStructuredRegionalParam(t *testing.T) {
 	parameterID := testName(t)
 	locationId := testLocation(t)
 
-	var b bytes.Buffer
-	if err := createStructuredRegionalParam(&b, tc.ProjectID, locationId, parameterID, parametermanagerpb.ParameterFormat_JSON); err != nil {
+	var buf bytes.Buffer
+	if err := createStructuredRegionalParam(&buf, tc.ProjectID, locationId, parameterID, parametermanagerpb.ParameterFormat_JSON); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupParameter(t, fmt.Sprintf("projects/%s/locations/%s/parameters/%s", tc.ProjectID, locationId, parameterID))
 
-	if got, want := b.String(), fmt.Sprintf("Created regional parameter %s with format JSON", fmt.Sprintf("projects/%s/locations/%s/parameters/%s", tc.ProjectID, locationId, parameterID)); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Created regional parameter %s with format JSON", fmt.Sprintf("projects/%s/locations/%s/parameters/%s", tc.ProjectID, locationId, parameterID)); !strings.Contains(got, want) {
 		t.Errorf("createParameter: expected %q to contain %q", got, want)
 	}
 }
@@ -184,14 +184,14 @@ func TestCreateStructuredRegionalParamVersion(t *testing.T) {
 	locationId := testLocation(t)
 
 	payload := `{"username": "test-user", "host": "localhost"}`
-	var b bytes.Buffer
-	if err := createStructuredRegionalParamVersion(&b, tc.ProjectID, locationId, parameterID, parameterVersionID, payload); err != nil {
+	var buf bytes.Buffer
+	if err := createStructuredRegionalParamVersion(&buf, tc.ProjectID, locationId, parameterID, parameterVersionID, payload); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupParameter(t, parameter.Name)
 	defer testCleanupParameterVersion(t, fmt.Sprintf("%s/versions/%s", parameter.Name, parameterVersionID))
 
-	if got, want := b.String(), "Created regional parameter version:"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Created regional parameter version:"; !strings.Contains(got, want) {
 		t.Errorf("createParameterVersion: expected %q to contain %q", got, want)
 	}
 }
@@ -206,14 +206,14 @@ func TestCreateRegionalParamVersion(t *testing.T) {
 	locationId := testLocation(t)
 
 	payload := "test123"
-	var b bytes.Buffer
-	if err := createRegionalParamVersion(&b, tc.ProjectID, locationId, parameterID, parameterVersionID, payload); err != nil {
+	var buf bytes.Buffer
+	if err := createRegionalParamVersion(&buf, tc.ProjectID, locationId, parameterID, parameterVersionID, payload); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupParameter(t, parameter.Name)
 	defer testCleanupParameterVersion(t, fmt.Sprintf("%s/versions/%s", parameter.Name, parameterVersionID))
 
-	if got, want := b.String(), "Created regional parameter version:"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Created regional parameter version:"; !strings.Contains(got, want) {
 		t.Errorf("createParameterVersion: expected %q to contain %q", got, want)
 	}
 }
@@ -228,14 +228,14 @@ func TestCreateRegionalParamVersionWithSecret(t *testing.T) {
 	locationId := testLocation(t)
 	secretID := testName(t)
 	payload := fmt.Sprintf("projects/%s/locations/%s/secrets/%s/versions/latest", tc.ProjectID, locationId, secretID)
-	var b bytes.Buffer
-	if err := createRegionalParamVersionWithSecret(&b, tc.ProjectID, locationId, parameterID, parameterVersionID, payload); err != nil {
+	var buf bytes.Buffer
+	if err := createRegionalParamVersionWithSecret(&buf, tc.ProjectID, locationId, parameterID, parameterVersionID, payload); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupParameter(t, parameter.Name)
 	defer testCleanupParameterVersion(t, fmt.Sprintf("%s/versions/%s", parameter.Name, parameterVersionID))
 
-	if got, want := b.String(), "Created regional parameter version with secret reference:"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Created regional parameter version with secret reference:"; !strings.Contains(got, want) {
 		t.Errorf("createParameterVersion: expected %q to contain %q", got, want)
 	}
 }
