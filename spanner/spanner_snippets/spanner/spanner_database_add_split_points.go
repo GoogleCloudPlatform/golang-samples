@@ -102,9 +102,10 @@ func addSplitpoints(w io.Writer, dbName string) error {
 		},
 	}
 
+	// the index key part is first and table keypart is second in the split definition
 	splitForindexWithTableKey := databasepb.SplitPoints{
 		Index: "SingersByFirstLastName",
-		Keys:  []*databasepb.SplitPoints_Key{&splitIndexKeyWithTableKeyPart, &splitIndexKeyWithIndexKeyPart},
+		Keys:  []*databasepb.SplitPoints_Key{&splitIndexKeyWithIndexKeyPart, &splitIndexKeyWithTableKeyPart},
 	}
 
 	// Add split points to table and index
