@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	cloud.google.com/go/parametermanager v0.2.0
 	cloud.google.com/go/secretmanager v1.14.6
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250407185618-bc81fd377b99
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250409195806-b3db6e18b370
 	github.com/gofrs/uuid v4.4.0+incompatible
 	google.golang.org/api v0.228.0
 	google.golang.org/grpc v1.71.1
