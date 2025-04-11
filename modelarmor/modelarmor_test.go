@@ -86,12 +86,12 @@ func TestUpdateTemplate(t *testing.T) {
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
 
 	var b bytes.Buffer
-	if _, err := createModelArmorTemplate(&b, tc.ProjectID, "us-central1", templateID); err != nil {
+	if _, err := createModelArmorTemplate(&b, tc.ProjectID, testLocation(t), templateID); err != nil {
 		t.Fatal(err)
 	}
-	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, "us-central1", templateID))
+	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, testLocation(t), templateID))
 
-	if _, err := updateModelArmorTemplate(&b, tc.ProjectID, "us-central1", templateID); err != nil {
+	if _, err := updateModelArmorTemplate(&b, tc.ProjectID, testLocation(t), templateID); err != nil {
 		t.Fatal(err)
 	}
 
