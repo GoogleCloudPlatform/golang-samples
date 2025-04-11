@@ -34,7 +34,6 @@ import (
 	"google.golang.org/api/option"
 	grpccodes "google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
-	// modelarmorpb "cloud.google.com/go/modelarmor/apiv1/modelarmorpb"
 )
 
 func testLocation(t *testing.T) string {
@@ -70,19 +69,6 @@ func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
 	}
 
 	return client, ctx
-}
-
-func testTemplate(t *testing.T) *modelarmorpb.Template {
-	tc := testutil.SystemTest(t)
-
-	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
-
-	var b bytes.Buffer
-	template, err := createModelArmorTemplate(&b, tc.ProjectID, "us-central1", templateID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return template
 }
 
 func testCleanupTemplate(t *testing.T, templateName string) {
