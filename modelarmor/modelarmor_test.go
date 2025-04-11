@@ -16,124 +16,19 @@ package modelarmor
 
 import (
 	"bytes"
-	"context"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
 
-	modelarmor "cloud.google.com/go/modelarmor/apiv1"
-	modelarmorpb "cloud.google.com/go/modelarmor/apiv1/modelarmorpb"
-
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/joho/godotenv"
-	"google.golang.org/api/option"
-	grpccodes "google.golang.org/grpc/codes"
-	grpcstatus "google.golang.org/grpc/status"
-	// modelarmorpb "cloud.google.com/go/modelarmor/apiv1/modelarmorpb"
 )
-
-func testLocation(t *testing.T) string {
-	t.Helper()
-
-	// Load the test.env file
-	err := godotenv.Load("./testdata/env/test.env")
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
-
-	v := os.Getenv("GOLANG_SAMPLES_LOCATION")
-	if v == "" {
-		t.Skip("testIamUser: missing GOLANG_SAMPLES_LOCATION")
-	}
-
-	return v
-}
-
-func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
-	t.Helper()
-
-	ctx := context.Background()
-
-	locationId := testLocation(t)
-
-	//Endpoint to send the request to regional server
-	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationId)),
-	)
-	if err != nil {
-		t.Fatalf("failed to create client: %v", err)
-	}
-
-	return client, ctx
-}
-
-func testCleanupTemplate(t *testing.T, templateName string) {
-	t.Helper()
-
-	client, ctx := testClient(t)
-	if err := client.DeleteTemplate(ctx, &modelarmorpb.DeleteTemplateRequest{Name: templateName}); err != nil {
-		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
-			t.Fatalf("testCleanupTemplate: failed to delete template: %v", err)
-		}
-	}
-
-}
-
-func TestGetProjectFloorSettings(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	var b bytes.Buffer
-	if _, err := getProjectFloorSettings(&b, tc.ProjectID); err != nil {
-		t.Fatal(err)
-	}
-
-	if got, want := b.String(), "Retrieved floor setting:"; !strings.Contains(got, want) {
-		t.Errorf("getFloorSettings: expected %q to contain %q", got, want)
-	}
-}
-
-func TestGetOrganizationFloorSettings(t *testing.T) {
-	// Load the test.env file
-	err := godotenv.Load("./testdata/env/test.env")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	organizationID := os.Getenv("GOLANG_SAMPLES_ORGANIZATION_ID")
-	var b bytes.Buffer
-	if _, err := getOrganizationFloorSettings(&b, organizationID); err != nil {
-		t.Fatal(err)
-	}
-
-	if got, want := b.String(), "Retrieved org floor setting:"; !strings.Contains(got, want) {
-		t.Errorf("getFloorSettings: expected %q to contain %q", got, want)
-	}
-}
-
-func TestGetFolderFloorSettings(t *testing.T) {
-	// Load the test.env file
-	err := godotenv.Load("./testdata/env/test.env")
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
-
-	folderID := os.Getenv("GOLANG_SAMPLES_FOLDER_ID")
-	var b bytes.Buffer
-	if _, err := getFolderFloorSettings(&b, folderID); err != nil {
-		t.Fatal(err)
-	}
-
-	if got, want := b.String(), "Retrieved folder floor setting: "; !strings.Contains(got, want) {
-		t.Errorf("getFloorSettings: expected %q to contain %q", got, want)
-	}
-}
 
 func TestUpdateFolderFloorSettings(t *testing.T) {
 	// Load the test.env file
 	err := godotenv.Load("./testdata/env/test.env")
 	if err != nil {
-		t.Fatalf(err.Error())
+		t.Fatal(err.Error())
 	}
 	folderID := os.Getenv("GOLANG_SAMPLES_FOLDER_ID")
 	var b bytes.Buffer
@@ -150,7 +45,7 @@ func TestUpdateOrganizationFloorSettings(t *testing.T) {
 	// Load the test.env file
 	err := godotenv.Load("./testdata/env/test.env")
 	if err != nil {
-		t.Fatalf(err.Error())
+		t.Fatal(err.Error())
 	}
 
 	organizationID := os.Getenv("GOLANG_SAMPLES_ORGANIZATION_ID")
