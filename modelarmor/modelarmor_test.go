@@ -42,7 +42,7 @@ func testLocation(t *testing.T) string {
 	// Load the test.env file
 	err := godotenv.Load("./testdata/env/test.env")
 	if err != nil {
-		t.Fatalf(err.Error())
+		t.Fatal(err.Error())
 	}
 
 	v := os.Getenv("GOLANG_SAMPLES_LOCATION")
@@ -98,8 +98,7 @@ func testSDPTemplate(t *testing.T, projectID string, locationID string) (string,
 	ctx := context.Background()
 	dlpClient, err := dlp.NewClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {
-		fmt.Println("Getting error while creating the client")
-		t.Fatal(err)
+		t.Fatalf("Getting error while creating the client: %v", err)
 	}
 
 	defer dlpClient.Close()
@@ -158,11 +157,11 @@ func testSDPTemplate(t *testing.T, projectID string, locationID string) (string,
 		time.Sleep(5 * time.Second)
 		err := dlpClient.DeleteInspectTemplate(ctx, &dlppb.DeleteInspectTemplateRequest{Name: inspectResponse.Name})
 		if err != nil {
-			t.Errorf("failed to delete inspect template: %v", err)
+			t.Errorf("failed to delete inspect template: %v, err: %v", inspectResponse.Name, err)
 		}
 		err = dlpClient.DeleteDeidentifyTemplate(ctx, &dlppb.DeleteDeidentifyTemplateRequest{Name: deidentifyResponse.Name})
 		if err != nil {
-			t.Errorf("failed to delete deidentify template: %v", err)
+			t.Errorf("failed to delete deidentify template: %v, err: %v", deidentifyResponse.Name, err)
 		}
 	}()
 
@@ -173,17 +172,16 @@ func TestCreateModelArmorTemplateWithAdvancedSDP(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
-	inspectTemplateName, deideintifyTemplateName := testSDPTemplate(t, tc.ProjectID, "us-central1")
+	inspectTemplateName, deideintifyTemplateName := testSDPTemplate(t, tc.ProjectID, testLocation(t))
 
 	var b bytes.Buffer
-	if _, err := createModelArmorTemplateWithAdvancedSDP(&b, tc.ProjectID, "us-central1", templateID, inspectTemplateName, deideintifyTemplateName); err != nil {
+	if _, err := createModelArmorTemplateWithAdvancedSDP(&b, tc.ProjectID, testLocation(t), templateID, inspectTemplateName, deideintifyTemplateName); err != nil {
 		fmt.Println("Error is here")
 		t.Fatal(err)
 	}
-	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, "us-central1", templateID))
+	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, testLocation(t), templateID))
 
 	if got, want := b.String(), "Created Template with advanced SDP: "; !strings.Contains(got, want) {
 		t.Errorf("createModelArmorTemplateWithAdvancedSDP: expected %q to contain %q", got, want)
 	}
 }
-
