@@ -24,10 +24,6 @@ import (
 	workflowexecutions "google.golang.org/api/workflowexecutions/v1"
 )
 
-type Argument struct {
-	SearchTerm string `json:"searchTerm"`
-}
-
 // Execute a workflow with arguments and print
 // the execution results.
 //
@@ -60,7 +56,9 @@ func executeWorkflowWithArguments(w io.Writer, projectID, workflowID, locationID
 	service := client.Projects.Locations.Workflows.Executions
 
 	// Create argument
-	argument := Argument{
+	argument := struct {
+		SearchTerm string `json:"searchTerm"`
+	}{
 		SearchTerm: "Cloud",
 	}
 

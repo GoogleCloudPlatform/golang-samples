@@ -1,15 +1,47 @@
-- getCurrentTime:
-    call: http.get
-    args:
-      url: https://timeapi.io/api/Time/current/zone?timeZone=Europe/Amsterdam
-    result: currentTime
-- readWikipedia:
-    call: http.get
-    args:
-      url: https://en.wikipedia.org/w/api.php
-      query:
-        action: opensearch
-        search: ${currentTime.body.dayOfWeek}
-    result: wikiResult
-- returnResult:
-    return: ${wikiResult.body[1]}
+# Copyright 2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# [START workflows_myfirstworkflow_yaml_go]
+# This workflow accepts an optional "searchTerm" argument for the Wikipedia API.
+# If no input arguments are provided or "searchTerm" is absent,
+# it will fetch the day of the week in Amsterdam and use it as the search term.
+
+main:
+    params: [input]
+    steps:
+    - validateSearchTermAndRedirectToReadWikipedia:
+        switch:
+            - condition: '${map.get(input, "searchTerm") != null}'
+              assign:
+                - searchTerm: '${input.searchTerm}'
+              next: readWikipedia
+    - getCurrentTime:
+        call: http.get
+        args:
+            url: https://timeapi.io/api/Time/current/zone?timeZone=Europe/Amsterdam
+        result: currentTime
+    - setFromCallResult:
+        assign:
+            - searchTerm: '${currentTime.body.dayOfWeek}'
+    - readWikipedia:
+        call: http.get
+        args:
+            url: 'https://en.wikipedia.org/w/api.php'
+            query:
+                action: opensearch
+                search: '${searchTerm}'
+        result: wikiResult
+    - returnOutput:
+            return: '${wikiResult.body[1]}'
+# [END workflows_myfirstworkflow_yaml_go]
