@@ -86,10 +86,10 @@ func TestCreateModelArmorTemplate(t *testing.T) {
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
 
 	var b bytes.Buffer
-	if _, err := createModelArmorTemplate(&b, tc.ProjectID, "us-central1", templateID); err != nil {
+	if _, err := createModelArmorTemplate(&b, tc.ProjectID, testLocation(t), templateID); err != nil {
 		t.Fatal(err)
 	}
-	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, "us-central1", templateID))
+	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, testLocation(t), templateID))
 
 	if got, want := b.String(), "Created template:"; !strings.Contains(got, want) {
 		t.Errorf("createModelArmorTemplate: expected %q to contain %q", got, want)
@@ -102,11 +102,11 @@ func TestDeleteModelArmorTemplate(t *testing.T) {
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
 
 	var b bytes.Buffer
-	if _, err := createModelArmorTemplate(&b, tc.ProjectID, "us-central1", templateID); err != nil {
+	if _, err := createModelArmorTemplate(&b, tc.ProjectID, testLocation(t), templateID); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := deleteModelArmorTemplate(&b, tc.ProjectID, "us-central1", templateID); err != nil {
+	if err := deleteModelArmorTemplate(&b, tc.ProjectID, testLocation(t), templateID); err != nil {
 		t.Fatal(err)
 	}
 
