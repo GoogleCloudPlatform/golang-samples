@@ -14,7 +14,7 @@
 
 package parametermanager
 
-// [START parametermanager_list_params]
+// [START parametermanager_delete_param]
 import (
 	"context"
 	"fmt"
@@ -22,46 +22,42 @@ import (
 
 	parametermanager "cloud.google.com/go/parametermanager/apiv1"
 	parametermanagerpb "cloud.google.com/go/parametermanager/apiv1/parametermanagerpb"
-	"google.golang.org/api/iterator"
 )
 
-// listParam lists parameters using the Parameter Manager SDK for GCP.
+// deleteParam deletes a parameter using the Parameter Manager SDK for GCP.
 //
 // w: The io.Writer object used to write the output.
-// projectID: The ID of the project where the parameters are located.
+// projectID: The ID of the project where the parameter is located.
+// parameterID: The ID of the parameter to be deleted.
 //
-// The function returns an error if the parameter listing fails.
-func listParams(w io.Writer, projectID string) error {
-	// Create a context and a Parameter Manager client.
+// The function returns an error if the parameter deletion fails.
+func deleteParam(w io.Writer, projectID, parameterID string) error {
+	// Create a new context.
 	ctx := context.Background()
+
+	// Initialize a Parameter Manager client.
 	client, err := parametermanager.NewClient(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to create Parameter Manager client: %w", err)
 	}
 	defer client.Close()
 
-	// Construct the name of the list parameter.
-	parent := fmt.Sprintf("projects/%s/locations/global", projectID)
-	// Build the request to list parameters.
-	req := &parametermanagerpb.ListParametersRequest{
-		Parent: parent,
+	// Construct the name of the parameter to delete.
+	name := fmt.Sprintf("projects/%s/locations/global/parameters/%s", projectID, parameterID)
+
+	// Build the request to delete the parameter.
+	req := &parametermanagerpb.DeleteParameterRequest{
+		Name: name,
 	}
 
-	// Call the API to list parameters.
-	parameters := client.ListParameters(ctx, req)
-	for {
-		parameter, err := parameters.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return fmt.Errorf("failed to list parameters: %w", err)
-		}
-
-		fmt.Fprintf(w, "Found parameter %s with format %s \n", parameter.Name, parameter.Format.String())
+	// Call the API to delete the parameter.
+	err = client.DeleteParameter(ctx, req)
+	if err != nil {
+		return fmt.Errorf("failed to delete parameter: %w", err)
 	}
 
+	fmt.Fprintf(w, "Deleted parameter: %s\n", name)
 	return nil
 }
 
-// [END parametermanager_list_params]
+// [END parametermanager_delete_param]
