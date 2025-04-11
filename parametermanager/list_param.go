@@ -48,9 +48,9 @@ func listParams(w io.Writer, projectID string) error {
 	}
 
 	// Call the API to list parameters.
-	it := client.ListParameters(ctx, req)
+	parameters := client.ListParameters(ctx, req)
 	for {
-		resp, err := it.Next()
+		parameter, err := parameters.Next()
 		if err == iterator.Done {
 			break
 		}
@@ -58,7 +58,7 @@ func listParams(w io.Writer, projectID string) error {
 			return fmt.Errorf("failed to list parameters: %w", err)
 		}
 
-		fmt.Fprintf(w, "Found parameter %s with format %s \n", resp.Name, resp.Format.String())
+		fmt.Fprintf(w, "Found parameter %s with format %s \n", parameter.Name, parameter.Format.String())
 	}
 
 	return nil
