@@ -14,12 +14,17 @@
 
 package main
 
+import (
+	"log"
+	"net/http"
+	"os"
+)
+
 func main(){
-	/*
-	http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/", receiveAuthorizedRequest)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 		log.Printf("Defaulting to port %s", port)
-	}*/
+	}
 }

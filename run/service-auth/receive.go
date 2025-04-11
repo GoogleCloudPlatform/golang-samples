@@ -14,8 +14,26 @@
 
 package main
 
-import "net/http"
+import (
+	"context"
+	"net/http"
+	"strings"
+
+	"google.golang.org/api/idtoken"
+)
 
 func receiveAuthorizedRequest(w http.ResponseWriter, r *http.Request){
+	ctx := context.Background()
 	
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" || len(strings.Split(authHeader, " ")) != 2 {
+		http.Error(w, "Missing Authorization header", http.StatusBadRequest)
+		return
+	}
+
+	token := strings.Split(authHeader, " ")[1]
+
+	payload, err := idtoken.Validate(context.Background(), splittedAuth[1], audience)
+	
+
 }
