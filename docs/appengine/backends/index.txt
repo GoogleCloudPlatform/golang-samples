@@ -1,0 +1,27 @@
+// NOTE: Backends are deprecated. The google.golang.org/appengine package does not support backends.
+
+// [START shutdown]
+func init() {
+    http.HandleFunc("/_ah/stop", shutdownHandler)
+}
+
+func shutdownHandler(w http.ResponseWriter, r *http.Request) {
+    doSomeWork()
+    saveState()
+}
+// [END shutdown]
+
+// [START addressing_backends]
+func handler(w http.ResponseWriter, r *http.Request) {
+    ctx := appengine.NewContext(r)
+
+    // Get the details of the current backend.
+    name, index := appengine.BackendInstance(ctx)
+
+    // Get the hostname of this specific backend.
+    hostname := appengine.BackendHostname(ctx, name, index)
+
+    fmt.Fprint(w, "I am backend %s instance %d ", name, index)
+    fmt.Fprint(w, "serving http://%s", hostname)
+}
+// [END addressing_backends]

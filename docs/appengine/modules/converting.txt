@@ -1,0 +1,39 @@
+// [START sample_1]
+backends:
+- name: memdb
+  class: B8
+  instances: 5
+- name: worker
+  start: _go_app
+  options: failfast
+- name: cmdline
+  options: dynamic
+// [END sample_1]
+
+// [START sample_2]
+service: memdb
+instance_class: B8
+manual_scaling:
+  instances: 5
+// [END sample_2]
+
+// [START sample_3]
+service: worker
+# For failfast functionality, please use the ‘X-AppEngine-FailFast’ header on requests made to this service.
+manual_scaling:
+  instances: 1
+handlers:
+# If a service has an /_ah/start handler, it should be listed first.
+- url: /_ah/start
+  script: _go_app
+// [END sample_3]
+
+// [START sample_4]
+service: cmdline
+basic_scaling:
+  max_instances: 1
+// [END sample_4]
+
+// [START sample_5]
+$ path-to-sdk/backends_conversion.py backends.yaml app.yaml
+// [END sample_5]

@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  app:
+    build: ./app
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcol:4318
+      - OTEL_SERVICE_NAME=otel-quickstart-go
+      - OTEL_GO_X_EXEMPLAR=true
+      - OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION=BASE2_EXPONENTIAL_BUCKET_HISTOGRAM
+    volumes:
+      - logs:/var/log:rw
+    depends_on:
+      - "otelcol"
+  otelcol:
+    image: otel/opentelemetry-collector-contrib:0.115.1
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+      - logs:/var/log:ro
+    environment:
+      - GOOGLE_CLOUD_QUOTA_PROJECT
+      - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT?}
+  loadgen:
+    image: golang:1.22
+    command: ["go", "run", "github.com/rakyll/hey@latest", "-c=2", "-q=1", "http://app:8080/multi"]
+    depends_on:
+      - "app"
+volumes:
+  logs:

@@ -1,0 +1,38 @@
+// [START sample_1]
+dispatch:
+  # Default service serves the typical web resources and all static resources.
+  - url: "*/favicon.ico"
+    service: default
+
+  # Default service serves simple hostname request.
+  - url: "simple-sample.appspot.com/"
+    service: default
+
+  # Send all mobile traffic to the mobile frontend.
+  - url: "*/mobile/*"
+    service: mobile-frontend
+
+  # Send all work to the one static backend.
+  - url: "*/work/*"
+    service: static-backend
+// [END sample_1]
+
+// [START sample_2]
+# Send any path that begins with “simple-sample.appspot.com/mobile” to the mobile-frontend service.
+- url: "simple-sample.appspot.com/mobile*"
+  service: mobile-frontend
+
+# Send any domain/sub-domain with a path that starts with “work” to the static backend service.
+- url: "*/work*"
+  service: static-backend
+// [END sample_2]
+
+// [START sample_3]
+# Matches the path "/fun", but not "/fun2" or "/fun/other".
+- url: "*/fun"
+  service: mobile-frontend
+
+# Matches the hostname "customer1.myapp.com", but not "1.customer1.myapp.com".
+- url: "customer1.myapp.com/*"
+  service: static-backend
+// [END sample_3]

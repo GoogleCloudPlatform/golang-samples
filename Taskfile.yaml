@@ -1,0 +1,33 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  # Allow overriding with envvar.
+  TEST_PROJECT_ID:
+    sh: "echo ${GOOGLE_SAMPLES_PROJECT:-}"
+
+env:
+  GOLANG_SAMPLES_E2E_TEST: true
+  GOLANG_SAMPLES_PROJECT_ID: "{{.TEST_PROJECT_ID}}"
+
+tasks:
+  build:
+    desc:"Compile go code in the current directory"
+    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - go build .
+
+  test:
+    desc:"Run all go tests in the current directory"
+    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - go test .
+
+  lint:
+    desc: "Run linters and tidy the current module"
+    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - go mod tidy
+      - go fmt .
+      - go vet .

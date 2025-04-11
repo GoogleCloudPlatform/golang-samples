@@ -1,0 +1,26 @@
+// [START queries_and_indexes_example_1]
+SELECT * FROM Person WHERE LastName = "Smith"
+                       AND Height < 72
+                  ORDER BY Height DESC
+// [END queries_and_indexes_example_1]
+
+// [START queries_and_indexes_example_2]
+SELECT * FROM Person WHERE LastName = "Jones"
+                       AND Height < 63
+                     ORDER BY Height DESC
+// [END queries_and_indexes_example_2]
+
+// [START queries_and_indexes_example_3]
+SELECT * FROM Person WHERE LastName = "Friedkin"
+                       AND FirstName = "Damian"
+                     ORDER BY Height ASC
+// [END queries_and_indexes_example_3]
+
+// [START queries_and_indexes_example_4]
+SELECT * FROM Person WHERE LastName = "Blair"
+                  ORDER BY FirstName, Height ASC
+// [END queries_and_indexes_example_4]
+
+// [START exploding_index_example_1]
+SELECT * FROM Widget WHERE X=1 AND Y=2 ORDER BY Date
+// [END exploding_index_example_1]
