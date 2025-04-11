@@ -25,6 +25,8 @@ import (
 	"google.golang.org/api/option"
 )
 
+// Modelarmor quickstart demonstrates how to create a Model Armor template and use it to
+// sanitize a user prompt and a model response.
 func main() {
 	// Google Project ID
 	projectID := "your-project-id"
@@ -35,30 +37,41 @@ func main() {
 
 	ctx := context.Background()
 	// Initialize Client
-	client, err := modelarmor.NewClient(ctx, option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)))
+	opts := []option.ClientOption{option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))}
+	client, err := modelarmor.NewClient(ctx, opts...)
 	if err != nil {
-		fmt.Printf("Failed to create client: %v", err)
+		wrappedErr := fmt.Errorf("failed to create client: %w", err)
+		fmt.Println(wrappedErr)
 	}
 	defer client.Close()
 	// Setup Template
 	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
 
+	// Template for Model Armor API requests.
+	// This template defines a filter configuration that detects and filters out
+	// sensitive content, including hate speech, harassment, sexually explicit content,
+	// and dangerous content.
 	template := &modelarmorpb.Template{
 		FilterConfig: &modelarmorpb.FilterConfig{
 			RaiSettings: &modelarmorpb.RaiFilterSettings{
+				// Define individual filters for sensitive content detection
 				RaiFilters: []*modelarmorpb.RaiFilterSettings_RaiFilter{
+					// Filter for detecting dangerous content with high confidence level
 					{
 						FilterType:      modelarmorpb.RaiFilterType_DANGEROUS,
 						ConfidenceLevel: modelarmorpb.DetectionConfidenceLevel_HIGH,
 					},
+					// Filter for detecting harassment with medium and above confidence level
 					{
 						FilterType:      modelarmorpb.RaiFilterType_HARASSMENT,
 						ConfidenceLevel: modelarmorpb.DetectionConfidenceLevel_MEDIUM_AND_ABOVE,
 					},
+					// Filter for detecting hate speech with high confidence level
 					{
 						FilterType:      modelarmorpb.RaiFilterType_HATE_SPEECH,
 						ConfidenceLevel: modelarmorpb.DetectionConfidenceLevel_HIGH,
 					},
+					// Filter for detecting sexually explicit content with high confidence level
 					{
 						FilterType:      modelarmorpb.RaiFilterType_SEXUALLY_EXPLICIT,
 						ConfidenceLevel: modelarmorpb.DetectionConfidenceLevel_HIGH,
@@ -76,7 +89,8 @@ func main() {
 
 	createdTemplate, err := client.CreateTemplate(ctx, req)
 	if err != nil {
-		fmt.Printf("Failed to create template: %v", err)
+		wrappedErr := fmt.Errorf("Failed to create template: %w", err)
+		fmt.Println(wrappedErr)
 	}
 
 	fmt.Printf("Created template: %s\n", createdTemplate.Name)
@@ -94,7 +108,8 @@ func main() {
 
 	userPromptSanitizeResp, err := client.SanitizeUserPrompt(ctx, userPromptSanitizeReq)
 	if err != nil {
-		fmt.Printf("Failed to sanitize user prompt: %v", err)
+		wrappedErr := fmt.Errorf("failed to sanitize user prompt: %w", err)
+		fmt.Println(wrappedErr)
 	}
 
 	fmt.Printf("Result for User Prompt Sanitization: %v\n", userPromptSanitizeResp.SanitizationResult)
@@ -113,7 +128,8 @@ func main() {
 	// Sanitize Model Response
 	modelSanitizeResp, err := client.SanitizeModelResponse(ctx, modelSanitizeReq)
 	if err != nil {
-		fmt.Printf("Failed to sanitize model response: %v", err)
+		wrappedErr := fmt.Errorf("failed to sanitize model response: %w", err)
+		fmt.Println(wrappedErr)
 	}
 
 	fmt.Printf("Result for Model Response Sanitization: %v\n", modelSanitizeResp.SanitizationResult)
