@@ -92,7 +92,6 @@ use (
 	./getting-started/gce
 	./getting-started/gopher-run
 	./getting-started/sessions
-	./getting-started/sessions_new
 	./healthcare
 	./iam
 	./iap
