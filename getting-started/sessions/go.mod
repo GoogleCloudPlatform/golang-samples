@@ -2,11 +2,7 @@ module github.com/GoogleCloudPlatform/golang-samples/getting-started/sessions
 
 go 1.23.0
 
-require (
-	cloud.google.com/go/firestore v1.18.0
-	github.com/GoogleCloudPlatform/firestore-gorilla-sessions v0.1.0
-	github.com/gorilla/sessions v1.3.0
-)
+require cloud.google.com/go/firestore v1.18.0
 
 require (
 	cloud.google.com/go v0.118.0 // indirect
@@ -21,7 +17,6 @@ require (
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.1 // indirect
-	github.com/gorilla/securecookie v1.1.2 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.59.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.59.0 // indirect
