@@ -28,47 +28,27 @@ import (
 	"google.golang.org/api/option"
 )
 
-// deleteModelArmorTemplate deletes a Model Armor template.
+// deleteModelArmorTemplate method deletes a Model Armor template with the provided ID.
 //
-// This method deletes a Model Armor template with the provided ID.
-//
-// Args:
-//
-//	w io.Writer: The writer to use for logging.
-//	projectID string: The ID of the Google Cloud project.
-//	locationID string: The ID of the Google Cloud location.
-//	templateID string: The ID of the template to delete.
-//
-// Returns:
-//
-//	error: Any error that occurred during template deletion.
-//
-// Example:
-//
-//	err := deleteModelArmorTemplate(
-//	    os.Stdout,
-//	    "my-project",
-//	    "us-central1",
-//	    "my-template",
-//	)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-func deleteModelArmorTemplate(w io.Writer, projectID, location, templateID string) error {
+// w io.Writer: The writer to use for logging.
+// projectID string: The ID of the Google Cloud project.
+// locationID string: The ID of the Google Cloud location.
+// templateID string: The ID of the template to delete.
+func deleteModelArmorTemplate(w io.Writer, projectID, locationID, templateID string) error {
 	ctx := context.Background()
 
-	// Create the call options
-	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", location))
+	// Create option for Model Armor client.
+	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))
 	// Create the Model Armor client.
 	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
-		return fmt.Errorf("failed to create client for project %s, location %s: %w", projectID, location, err)
+		return fmt.Errorf("failed to create client for project %s, location %s: %w", projectID, locationID, err)
 	}
 	defer client.Close()
 
 	// Build the request for deleting the template.
 	req := &modelarmorpb.DeleteTemplateRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/templates/%s", projectID, location, templateID),
+		Name: fmt.Sprintf("projects/%s/locations/%s/templates/%s", projectID, locationID, templateID),
 	}
 
 	// Delete the template.

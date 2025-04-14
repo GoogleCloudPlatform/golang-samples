@@ -104,18 +104,18 @@ func TestDeleteModelArmorTemplate(t *testing.T) {
 
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
 
-	var b bytes.Buffer
+	var buf bytes.Buffer
 	// Create template first to ensure it exists for deletion
-	if err := createModelArmorTemplate(&b, tc.ProjectID, testLocation(t), templateID); err != nil {
+	if err := createModelArmorTemplate(&buf, tc.ProjectID, testLocation(t), templateID); err != nil {
 		t.Fatal(err)
 	}
 
 	// Attempt to delete the template
-	if err := deleteModelArmorTemplate(&b, tc.ProjectID, testLocation(t), templateID); err != nil {
+	if err := deleteModelArmorTemplate(&buf, tc.ProjectID, testLocation(t), templateID); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), "Successfully deleted Model Armor template:"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Successfully deleted Model Armor template:"; !strings.Contains(got, want) {
 		t.Errorf("deleteModelArmorTemplate: expected %q to contain %q", got, want)
 	}
 }

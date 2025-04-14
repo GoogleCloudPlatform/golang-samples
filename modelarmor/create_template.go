@@ -28,26 +28,22 @@ import (
 	"google.golang.org/api/option"
 )
 
-// createModelArmorTemplate creates a new Model Armor template.
+// createModelArmorTemplate method creates a new
+// Model Armor template with the provided settings.
 //
-// This method creates a new Model Armor template with the provided settings.
-//
-// Args:
-//
-//	w io.Writer: The writer to use for logging.
-//	projectID string: The ID of the Google Cloud project.
-//	locationID string: The ID of the Google Cloud location.
-//	templateID string: The ID of the template to create.
-//
-func createModelArmorTemplate(w io.Writer, projectID, location, templateID string) error {
+// w io.Writer: The writer to use for logging.
+// projectID string: The ID of the Google Cloud project.
+// locationID string: The ID of the Google Cloud location.
+// templateID string: The ID of the template to create.
+func createModelArmorTemplate(w io.Writer, projectID, locationID, templateID string) error {
 	ctx := context.Background()
 
 	// Create the call options
-	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", location))
+	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))
 	// Create the Model Armor client.
 	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
-		return fmt.Errorf("failed to create client for project %s, location %s: %w", projectID, location, err)
+		return fmt.Errorf("failed to create client for project %s, location %s: %w", projectID, locationID, err)
 	}
 	defer client.Close()
 
@@ -65,10 +61,11 @@ func createModelArmorTemplate(w io.Writer, projectID, location, templateID strin
 			},
 		},
 	}
+	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
 
 	// Prepare the request for creating the template.
 	req := &modelarmorpb.CreateTemplateRequest{
-		Parent:     fmt.Sprintf("projects/%s/locations/%s", projectID, location),
+		Parent:     parent,
 		TemplateId: templateID,
 		Template:   template,
 	}
