@@ -28,45 +28,24 @@ import (
 	"google.golang.org/api/option"
 )
 
-// sanitizeModelResponse sanitizes a model response.
+
+// sanitizeModelResponse method sanitizes a model 
+// response based on the project, location, and template settings.
 //
-// This method sanitizes a model response based on the project, location, and template settings.
-//
-// Args:
-//
-//	w io.Writer: The writer to use for logging.
-//	projectID string: The ID of the project.
-//	locationID string: The ID of the location.
-//	templateID string: The ID of the template.
-//	modelResponse string: The model response to sanitize.
-//
-// Returns:
-//
-//	*modelarmorpb.SanitizeModelResponseResponse: The sanitized model response.
-//	error: Any error that occurred during sanitization.
-//
-// Example:
-//
-//	sanitizedResponse, err := sanitizeModelResponse(
-//	    os.Stdout,
-//	    "my-project",
-//	    "my-location",
-//	    "my-template",
-//	    "model response",
-//	)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//	fmt.Println(sanitizedResponse)
-func sanitizeModelResponse(w io.Writer, projectID, locationID, templateID, modelResponse string) (*modelarmorpb.SanitizeModelResponseResponse, error) {
+// w io.Writer: The writer to use for logging.
+// projectID string: The ID of the project.
+// locationID string: The ID of the location.
+// templateID string: The ID of the template.
+// modelResponse string: The model response to sanitize.
+func sanitizeModelResponse(w io.Writer, projectID, locationID, templateID, modelResponse string) error {
 	ctx := context.Background()
 
+	// Create options for Model Armor client.
+	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))
 	// Create the Model Armor client.
-	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)),
-	)
+	client, err := modelarmor.NewClient(ctx,opts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client for location %s: %v", locationID, err)
+		return fmt.Errorf("failed to create client for location %s: %w", locationID, err)
 	}
 	defer client.Close()
 
@@ -86,13 +65,14 @@ func sanitizeModelResponse(w io.Writer, projectID, locationID, templateID, model
 	// Sanitize the model response.
 	response, err := client.SanitizeModelResponse(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to sanitize model response with user prompt for template %s: %v", templateID, err)
+		return  fmt.Errorf("failed to sanitize model response with user prompt for template %s: %w", templateID, err)
 	}
 
 	// Sanitization Result.
 	fmt.Fprintf(w, "Sanitization Result: %v\n", response)
 
-	// [END modelarmor_sanitize_model_response]
 
-	return response, nil
+	return err
 }
+
+// [END modelarmor_sanitize_model_response]

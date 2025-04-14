@@ -84,9 +84,9 @@ func testModelArmorTemplate(t *testing.T, templateID string) (*modelarmorpb.Temp
 			},
 		},
 	}
-
+	parentID := fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, locationID)
 	req := &modelarmorpb.CreateTemplateRequest{
-		Parent:     fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, locationID),
+		Parent:     parentID,
 		TemplateId: templateID,
 		Template:   template,
 	}
@@ -127,7 +127,7 @@ func TestSanitizeModelResponse(t *testing.T) {
 	}
 	defer testCleanupTemplate(t, templateName)
 
-	if _, err := sanitizeModelResponse(&buf, tc.ProjectID, testLocation(t), templateID, modelResponse); err != nil {
+	if err := sanitizeModelResponse(&buf, tc.ProjectID, locationID, templateID, modelResponse); err != nil {
 		t.Fatal(err)
 	}
 
