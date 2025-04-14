@@ -37,8 +37,8 @@ func main() {
 
 	ctx := context.Background()
 	// Initialize Client
-	opts := []option.ClientOption{option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))}
-	client, err := modelarmor.NewClient(ctx, opts...)
+	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))
+	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
 		wrappedErr := fmt.Errorf("failed to create client: %w", err)
 		fmt.Println(wrappedErr)
