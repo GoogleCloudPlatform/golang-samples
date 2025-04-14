@@ -28,17 +28,14 @@ import (
 	"google.golang.org/api/option"
 )
 
-// createModelArmorTemplateWithLabels creates a new Model Armor template with custom labels.
+// createModelArmorTemplateWithLabels method creates a
+// new Model Armor template with custom labels.
 //
-// This method creates a new Model Armor template with custom labels.
-//
-// Args:
-//
-//	w io.Writer: The writer to use for logging.
-//	projectID string: The ID of the Google Cloud project.
-//	locationID string: The ID of the Google Cloud location.
-//	templateID string: The ID of the template to create.
-//	labels map[string]string: A map of custom labels to apply to the template.
+// w io.Writer: The writer to use for logging.
+// projectID string: The ID of the Google Cloud project.
+// locationID string: The ID of the Google Cloud location.
+// templateID string: The ID of the template to create.
+// labels map[string]string: A map of custom labels to apply to the template.
 func createModelArmorTemplateWithLabels(w io.Writer, projectID, locationID, templateID string, labels map[string]string) error {
 	ctx := context.Background()
 

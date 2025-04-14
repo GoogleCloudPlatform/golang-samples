@@ -65,6 +65,40 @@ func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
 	return client, ctx
 }
 
+// testModelArmorTemplate creates a new ModelArmor template for use in tests.
+// It returns the created template or an error.
+func testModelArmorTemplate(t *testing.T, templateID string) (*modelarmorpb.Template, error) {
+	t.Helper()
+	tc := testutil.SystemTest(t)
+	locationID := testLocation(t)
+	client, ctx := testClient(t)
+
+	template := &modelarmorpb.Template{
+		FilterConfig: &modelarmorpb.FilterConfig{
+			PiAndJailbreakFilterSettings: &modelarmorpb.PiAndJailbreakFilterSettings{
+				FilterEnforcement: modelarmorpb.PiAndJailbreakFilterSettings_ENABLED,
+				ConfidenceLevel:   modelarmorpb.DetectionConfidenceLevel_MEDIUM_AND_ABOVE,
+			},
+			MaliciousUriFilterSettings: &modelarmorpb.MaliciousUriFilterSettings{
+				FilterEnforcement: modelarmorpb.MaliciousUriFilterSettings_ENABLED,
+			},
+		},
+	}
+
+	req := &modelarmorpb.CreateTemplateRequest{
+		Parent:     fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, locationID),
+		TemplateId: templateID,
+		Template:   template,
+	}
+
+	response, err := client.CreateTemplate(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create template: %v", err)
+	}
+
+	return response, err
+}
+
 // testCleanupTemplate deletes a given template by name if it exists.
 // Ignores NotFound errors, which means the resource has already been deleted.
 func testCleanupTemplate(t *testing.T, templateName string) {
@@ -84,12 +118,13 @@ func TestCreateModelArmorTemplate(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	locationID := testLocation(t)
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
-
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
 	var b bytes.Buffer
-	if err := createModelArmorTemplate(&b, tc.ProjectID, locationID, templateID); err != nil {
+	if _, err := testModelArmorTemplate(t, templateID); err != nil {
 		t.Fatal(err)
 	}
-	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID))
+
+	defer testCleanupTemplate(t, templateName)
 
 	if got, want := b.String(), "Created template:"; !strings.Contains(got, want) {
 		t.Errorf("createModelArmorTemplate: expected %q to contain %q", got, want)
@@ -102,12 +137,13 @@ func TestCreateModelArmorTemplateWithMetadata(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	locationID := testLocation(t)
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
 
 	var b bytes.Buffer
 	if err := createModelArmorTemplateWithMetadata(&b, tc.ProjectID, locationID, templateID); err != nil {
 		t.Fatal(err)
 	}
-	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID))
+	defer testCleanupTemplate(t, templateName)
 
 	if got, want := b.String(), "Created Model Armor Template:"; !strings.Contains(got, want) {
 		t.Errorf("createModelArmorTemplateWithMetadata: expected %q to contain %q", got, want)
@@ -120,12 +156,13 @@ func TestCreateModelArmorTemplateWithLabels(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	locationID := testLocation(t)
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
 
 	var b bytes.Buffer
 	if err := createModelArmorTemplateWithLabels(&b, tc.ProjectID, locationID, templateID, map[string]string{"testkey": "testvalue"}); err != nil {
 		t.Fatal(err)
 	}
-	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID))
+	defer testCleanupTemplate(t, templateName)
 
 	if got, want := b.String(), "Created Template with labels: "; !strings.Contains(got, want) {
 		t.Errorf("createModelArmorTemplateWithLabels: expected %q to contain %q", got, want)

@@ -28,17 +28,14 @@ import (
 	"google.golang.org/api/option"
 )
 
-// createModelArmorTemplateWithMetadata creates a new Model Armor template with template metadata.
+// createModelArmorTemplateWithMetadata method creates a
+// new Model Armor template with template metadata.
 //
-// This method creates a new Model Armor template with template metadata.
-//
-// Args:
-//
-//	w io.Writer: The writer to use for logging.
-//	projectID string: The ID of the Google Cloud project.
-//	locationID string: The ID of the Google Cloud location.
-//	templateID string: The ID of the template to create.
-//	metadata *modelarmorpb.TemplateMetadata: The template metadata to apply.
+// w io.Writer: The writer to use for logging.
+// projectID string: The ID of the Google Cloud project.
+// locationID string: The ID of the Google Cloud location.
+// templateID string: The ID of the template to create.
+// metadata *modelarmorpb.TemplateMetadata: The template metadata to apply.
 func createModelArmorTemplateWithMetadata(w io.Writer, projectID, locationID, templateID string) error {
 	ctx := context.Background()
 
