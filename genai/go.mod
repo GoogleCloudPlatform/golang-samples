@@ -4,7 +4,7 @@ go 1.23.0
 
 require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250201051611-5fb145d1e974
-	google.golang.org/genai v0.3.0
+	google.golang.org/genai v0.4.0
 )
 
 require (
