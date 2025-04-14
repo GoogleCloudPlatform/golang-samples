@@ -163,12 +163,12 @@ func TestCreateModelArmorTemplateWithAdvancedSDP(t *testing.T) {
 
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
 	inspectTemplateName, deideintifyTemplateName := testSDPTemplate(t, tc.ProjectID, testLocation(t))
-
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, testLocation(t), templateID)
 	var b bytes.Buffer
 	if err := createModelArmorTemplateWithAdvancedSDP(&b, tc.ProjectID, testLocation(t), templateID, inspectTemplateName, deideintifyTemplateName); err != nil {
 		t.Fatal(err)
 	}
-	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, testLocation(t), templateID))
+	defer testCleanupTemplate(t, templateName)
 
 	if got, want := b.String(), "Created Template with advanced SDP: "; !strings.Contains(got, want) {
 		t.Errorf("createModelArmorTemplateWithAdvancedSDP: expected %q to contain %q", got, want)
