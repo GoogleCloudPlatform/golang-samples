@@ -40,37 +40,15 @@ import (
 //	locationID string: The ID of the location.
 //	templateID string: The ID of the template.
 //	labels map[string]string: The updated labels.
-//
-// Returns:
-//
-//	*modelarmorpb.Template: The updated template with new labels.
-//	error: Any error that occurred during update.
-//
-// Example:
-//
-//	updatedTemplate, err := updateModelArmorTemplateLabels(
-//	    os.Stdout,
-//	    "my-project",
-//	    "my-location",
-//	    "my-template",
-//	    map[string]string{
-//	        "key1": "value1",
-//	        "key2": "value2",
-//	    },
-//	)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//	fmt.Println(updatedTemplate)
-func updateModelArmorTemplateLabels(w io.Writer, projectID, locationID, templateID string, labels map[string]string) (*modelarmorpb.Template, error) {
+func updateModelArmorTemplateLabels(w io.Writer, projectID, locationID, templateID string, labels map[string]string) error {
 	ctx := context.Background()
 
+	// Create options for Model Armor client.
+	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))
 	// Create the Model Armor client.
-	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)),
-	)
+	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client for project %s, location %s: %v", projectID, locationID, err)
+		return fmt.Errorf("failed to create client for project %s, location %s: %w", projectID, locationID, err)
 	}
 	defer client.Close()
 
@@ -95,12 +73,12 @@ func updateModelArmorTemplateLabels(w io.Writer, projectID, locationID, template
 	// Update the template.
 	response, err := client.UpdateTemplate(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to update template: %v", err)
+		return fmt.Errorf("failed to update template: %w", err)
 	}
 
 	fmt.Fprintf(w, "Updated Model Armor Template Labels: %s\n", response.Name)
 
-	// [END modelarmor_update_template_with_labels]
-
-	return response, nil
+	return err
 }
+
+// [END modelarmor_update_template_with_labels]
