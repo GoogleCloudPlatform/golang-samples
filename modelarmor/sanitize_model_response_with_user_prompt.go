@@ -32,43 +32,21 @@ import (
 //
 // This method sanitizes a model response based on a user prompt.
 //
-// Args:
-//
-//	w io.Writer: The writer to use for logging.
-//	projectID string: The ID of the project.
-//	locationID string: The ID of the location.
-//	templateID string: The ID of the template.
-//	modelResponse string: The model response to sanitize.
-//	userPrompt string: The user prompt to use for sanitization.
-//
-// Returns:
-//
-//	*modelarmorpb.SanitizeModelResponseResponse: The sanitized model response.
-//	error: Any error that occurred during sanitization.
-//
-// Example:
-//
-//	sanitizedResponse, err := sanitizeModelResponseWithUserPrompt(
-//	    os.Stdout,
-//	    "my-project",
-//	    "my-location",
-//	    "my-template",
-//	    "model response",
-//	    "user prompt",
-//	)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//	fmt.Println(sanitizedResponse)
-func sanitizeModelResponseWithUserPrompt(w io.Writer, projectID, locationID, templateID, modelResponse, userPrompt string) (*modelarmorpb.SanitizeModelResponseResponse, error) {
+// w io.Writer: The writer to use for logging.
+// projectID string: The ID of the project.
+// locationID string: The ID of the location.
+// templateID string: The ID of the template.
+// modelResponse string: The model response to sanitize.
+// userPrompt string: The user prompt to use for sanitization.
+func sanitizeModelResponseWithUserPrompt(w io.Writer, projectID, locationID, templateID, modelResponse, userPrompt string) error {
 	ctx := context.Background()
 
+	// Create options for Model Armor client.
+	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))
 	// Create the Model Armor client.
-	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)),
-	)
+	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client: %v", err)
+		return fmt.Errorf("failed to create client: %w", err)
 	}
 	defer client.Close()
 
@@ -78,10 +56,10 @@ func sanitizeModelResponseWithUserPrompt(w io.Writer, projectID, locationID, tem
 			Text: modelResponse,
 		},
 	}
-
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", projectID, locationID, templateID)
 	// Prepare request for sanitizing model response.
 	req := &modelarmorpb.SanitizeModelResponseRequest{
-		Name:              fmt.Sprintf("projects/%s/locations/%s/templates/%s", projectID, locationID, templateID),
+		Name:              templateName,
 		ModelResponseData: modelResponseData,
 		UserPrompt:        userPrompt,
 	}
@@ -89,12 +67,12 @@ func sanitizeModelResponseWithUserPrompt(w io.Writer, projectID, locationID, tem
 	// Call the API to sanitize the model response.
 	response, err := client.SanitizeModelResponse(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to sanitize model response: %v", err)
+		return fmt.Errorf("failed to sanitize model response: %w", err)
 	}
 
 	fmt.Fprintf(w, "Sanitized response: %s\n", response)
 
-	// [END modelarmor_sanitize_model_response_with_user_prompt]
-
-	return response, nil
+	return err
 }
+
+// [END modelarmor_sanitize_model_response_with_user_prompt]
