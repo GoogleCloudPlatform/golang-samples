@@ -41,7 +41,7 @@ import (
 func listModelArmorTemplates(w io.Writer, projectID, locationID string) error {
 	ctx := context.Background()
 
-	// Create options for the Model Armor client/
+	// Create options for the Model Armor client
 	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))
 	// Create the Model Armor client.
 	client, err := modelarmor.NewClient(ctx, opts)
