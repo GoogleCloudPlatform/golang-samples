@@ -113,6 +113,8 @@ func testCleanupTemplate(t *testing.T, templateName string) {
 
 }
 
+// TestSanitizeUserPrompt verifies that the sanitizeUserPrompt function
+// It ensures the output contains the expected sanitization result.
 func TestSanitizeUserPrompt(t *testing.T) {
 
 	tc := testutil.SystemTest(t)
