@@ -33,6 +33,7 @@ import (
 // parameterID: The ID of the parameter to be created.
 // kmsKey: The ID of the KMS key to be used for encryption.
 // (e.g. "projects/my-project/locations/us-central1/keyRings/my-key-ring/cryptoKeys/my-encryption-key")
+// (For more information, see: https://cloud.google.com/secret-manager/parameter-manager/docs/cmek)
 //
 // The function returns an error if the parameter creation fails.
 func createRegionalParamWithKmsKey(w io.Writer, projectID, locationID, parameterID, kmsKey string) error {
@@ -61,7 +62,7 @@ func createRegionalParamWithKmsKey(w io.Writer, projectID, locationID, parameter
 	}
 	parameter, err := client.CreateParameter(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Failed to create parameter: %w", err)
+		return fmt.Errorf("failed to create parameter: %w", err)
 	}
 
 	fmt.Fprintf(w, "Created regional parameter %s with kms_key %s\n", parameter.Name, *parameter.KmsKey)

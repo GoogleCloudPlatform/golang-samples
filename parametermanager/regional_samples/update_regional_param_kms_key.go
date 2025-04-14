@@ -34,6 +34,7 @@ import (
 // parameterID: The ID of the parameter to be updated.
 // kmsKey: The ID of the KMS key to be used for encryption.
 // (e.g. "projects/my-project/locations/us-central1/keyRings/my-key-ring/cryptoKeys/my-encryption-key")
+// (For more information, see: https://cloud.google.com/secret-manager/parameter-manager/docs/cmek)
 //
 // The function returns an error if the parameter creation fails.
 func updateRegionalParamKmsKey(w io.Writer, projectID, locationID, parameterID, kmsKey string) error {
@@ -64,7 +65,7 @@ func updateRegionalParamKmsKey(w io.Writer, projectID, locationID, parameterID, 
 	}
 	parameter, err := client.UpdateParameter(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Failed to update parameter: %w", err)
+		return fmt.Errorf("failed to update parameter: %w", err)
 	}
 
 	fmt.Fprintf(w, "Updated regional parameter %s with kms_key %s\n", parameter.Name, *parameter.KmsKey)

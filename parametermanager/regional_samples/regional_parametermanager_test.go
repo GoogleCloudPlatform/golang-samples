@@ -219,20 +219,21 @@ func TestCreateRegionalParamWithKmsKey(t *testing.T) {
 
 	parameterID := testName(t)
 	locationID := testLocation(t)
+	parameterName := fmt.Sprintf("projects/%s/locations/%s/parameters/%s", tc.ProjectID, locationID, parameterID)
 
 	keyId := testName(t)
 	testCreateKeyRing(t, tc.ProjectID, "go-test-key-ring")
 	testCreateKeyHSM(t, tc.ProjectID, "go-test-key-ring", keyId)
 	kms_key := fmt.Sprintf("projects/%s/locations/%s/keyRings/go-test-key-ring/cryptoKeys/%s", tc.ProjectID, locationID, keyId)
 
-	defer testCleanupParameter(t, fmt.Sprintf("projects/%s/locations/%s/parameters/%s", tc.ProjectID, locationID, parameterID))
+	defer testCleanupParameter(t, parameterName)
 	defer testCleanupKeyVersions(t, fmt.Sprintf("%s/cryptoKeyVersions/1", kms_key))
 
 	var buf bytes.Buffer
 	if err := createRegionalParamWithKmsKey(&buf, tc.ProjectID, locationID, parameterID, kms_key); err != nil {
 		t.Fatalf("Failed to create regional parameter: %v", err)
 	}
-	if got, want := buf.String(), fmt.Sprintf("Created regional parameter %s with kms_key %s\n", fmt.Sprintf("projects/%s/locations/%s/parameters/%s", tc.ProjectID, locationID, parameterID), kms_key); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Created regional parameter %s with kms_key %s", parameterName, kms_key); !strings.Contains(got, want) {
 		t.Errorf("createParameter: expected %q to contain %q", got, want)
 	}
 }
@@ -257,7 +258,7 @@ func TestUpdateRegionalParamKmsKey(t *testing.T) {
 	if err := updateRegionalParamKmsKey(&buf, tc.ProjectID, locationID, parameterID, kms_key); err != nil {
 		t.Fatalf("Failed to update regional parameter: %v", err)
 	}
-	if got, want := buf.String(), fmt.Sprintf("Updated regional parameter %s with kms_key %s\n", fmt.Sprintf("projects/%s/locations/%s/parameters/%s", tc.ProjectID, locationID, parameterID), kms_key); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Updated regional parameter %s with kms_key %s", parameter.Name, kms_key); !strings.Contains(got, want) {
 		t.Errorf("createParameter: expected %q to contain %q", got, want)
 	}
 }
@@ -282,7 +283,7 @@ func TestRemoveRegionalParamKmsKey(t *testing.T) {
 	if err := removeRegionalParamKmsKey(&buf, tc.ProjectID, locationID, parameterID); err != nil {
 		t.Fatalf("Failed to create regional parameter: %v", err)
 	}
-	if got, want := buf.String(), fmt.Sprintf("Removed kms_key for regional parameter %s\n", fmt.Sprintf("projects/%s/locations/%s/parameters/%s", tc.ProjectID, locationID, parameterID)); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Removed kms_key for regional parameter %s", parameter.Name); !strings.Contains(got, want) {
 		t.Errorf("createParameter: expected %q to contain %q", got, want)
 	}
 }

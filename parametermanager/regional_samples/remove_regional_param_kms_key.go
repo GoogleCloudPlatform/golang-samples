@@ -61,7 +61,7 @@ func removeRegionalParamKmsKey(w io.Writer, projectID, locationID, parameterID s
 	}
 	parameter, err := client.UpdateParameter(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Failed to update parameter: %w", err)
+		return fmt.Errorf("failed to update parameter: %w", err)
 	}
 
 	fmt.Fprintf(w, "Removed kms_key for regional parameter %s\n", parameter.Name)
