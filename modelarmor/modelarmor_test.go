@@ -131,7 +131,7 @@ func TestUpdateTemplateMetadata(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), "Updated Model Armor Template Metadata: "; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Updated Model Armor Template Metadata: "; !strings.Contains(got, want) {
 		t.Errorf("updateModelArmorTemplateMetadata: expected %q to contain %q", got, want)
 	}
 }
