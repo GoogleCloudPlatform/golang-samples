@@ -39,38 +39,17 @@ import (
 //	locationID string: The ID of the Google Cloud location.
 //	templateID string: The ID of the template to create.
 //	metadata *modelarmorpb.TemplateMetadata: The template metadata to apply.
-//
-// Returns:
-//
-//	*modelarmorpb.Template: The created template.
-//	error: Any error that occurred during template creation.
-//
-// Example:
-//
-//	metadata := &modelarmorpb.TemplateMetadata{
-//	    Description: "My template",
-//	    Version:     "1.0",
-//	}
-//	template, err := createModelArmorTemplateWithMetadata(
-//	    os.Stdout,
-//	    "my-project",
-//	    "us-central1",
-//	    "my-template",
-//	    metadata,
-//	)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//	fmt.Println(template)
-func createModelArmorTemplateWithMetadata(w io.Writer, projectID, locationID, templateID string) (*modelarmorpb.Template, error) {
+func createModelArmorTemplateWithMetadata(w io.Writer, projectID, locationID, templateID string) error {
 	ctx := context.Background()
 
+	// Create options for Model Armor client.
+	opts := fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)
 	// Create the Model Armor client.
 	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)),
+		option.WithEndpoint(opts),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client for project %s, location %s: %v", projectID, locationID, err)
+		return fmt.Errorf("failed to create client for project %s, location %s: %w", projectID, locationID, err)
 	}
 	defer client.Close()
 
@@ -113,13 +92,13 @@ func createModelArmorTemplateWithMetadata(w io.Writer, projectID, locationID, te
 	// Create the template.
 	response, err := client.CreateTemplate(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create template: %v", err)
+		return fmt.Errorf("failed to create template: %w", err)
 	}
 
 	// Print the new template name using fmt.Fprintf with the io.Writer.
 	fmt.Fprintf(w, "Created Model Armor Template: %s\n", response.Name)
 
-	// [END modelarmor_create_template_with_metadata]
-
-	return response, nil
+	return err
 }
+
+// [END modelarmor_create_template_with_metadata]

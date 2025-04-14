@@ -36,53 +36,37 @@ import (
 //
 //	w io.Writer: The writer to use for logging.
 //	projectID string: The ID of the project.
-//	location string: The location of the template.
+//	locationID string: The location of the template.
 //	templateID string: The ID of the template.
-//
-// Returns:
-//
-//	*modelarmorpb.Template: The retrieved Model Armor template.
-//	error: Any error that occurred during retrieval.
-//
-// Example:
-//
-//	template, err := getModelArmorTemplate(
-//	    os.Stdout,
-//	    "my-project",
-//	    "my-location",
-//	    "my-template",
-//	)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//	fmt.Println(template)
-func getModelArmorTemplate(w io.Writer, projectID, location, templateID string) (*modelarmorpb.Template, error) {
+func getModelArmorTemplate(w io.Writer, projectID, locationID, templateID string) error {
 	ctx := context.Background()
 
+	// Create Options for the Model Armor Client
+	opts := fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)
 	// Create the Model Armor client.
 	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", location)),
+		option.WithEndpoint(opts),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client for project %s, location %s: %v", projectID, location, err)
+		return fmt.Errorf("failed to create client for project %s, locationID %s: %w", projectID, locationID, err)
 	}
 	defer client.Close()
 
 	// Initialize request arguments.
 	req := &modelarmorpb.GetTemplateRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/templates/%s", projectID, location, templateID),
+		Name: fmt.Sprintf("projects/%s/locations/%s/templates/%s", projectID, locationID, templateID),
 	}
 
 	// Get the template.
 	response, err := client.GetTemplate(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get template: %v", err)
+		return fmt.Errorf("failed to get template: %w", err)
 	}
 
 	// Print the template name using fmt.Fprintf with the io.Writer.
 	fmt.Fprintf(w, "Retrieved template: %s\n", response.Name)
 
-	// [END modelarmor_get_template]
-
-	return response, nil
+	return err
 }
+
+// [END modelarmor_get_template]

@@ -21,54 +21,52 @@ import (
 	"os"
 	"strings"
 	"testing"
-	
+
 	modelarmor "cloud.google.com/go/modelarmor/apiv1"
 	modelarmorpb "cloud.google.com/go/modelarmor/apiv1/modelarmorpb"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
-	"github.com/joho/godotenv"
 	"google.golang.org/api/option"
 	grpccodes "google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
-	// modelarmorpb "cloud.google.com/go/modelarmor/apiv1/modelarmorpb"
 )
 
+// testLocation returns the region where the tests should run,
+// based on the GOLANG_SAMPLES_LOCATION environment variable.
+// Skips the test if the variable is not set.
 func testLocation(t *testing.T) string {
 	t.Helper()
 
-	// Load the test.env file
-	err := godotenv.Load("./testdata/env/test.env")
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
-
 	v := os.Getenv("GOLANG_SAMPLES_LOCATION")
 	if v == "" {
-		t.Skip("testIamUser: missing GOLANG_SAMPLES_LOCATION")
+		t.Skip("testLocation: missing GOLANG_SAMPLES_LOCATION")
 	}
 
 	return v
 }
 
+// testClient creates a new Model Armor API client using the regional endpoint
+// derived from the environment. It returns the client and the context.
 func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
 	t.Helper()
 
 	ctx := context.Background()
-
 	locationId := testLocation(t)
 
-	//Endpoint to send the request to regional server
+	// Set the endpoint for the regional replica based on location
 	client, err := modelarmor.NewClient(ctx,
 		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationId)),
 	)
 	if err != nil {
-		t.Fatalf("failed to create client: %v", err)
+		t.Fatalf("testClient: failed to create client: %v", err)
 	}
 
 	return client, ctx
 }
 
+// testCleanupTemplate deletes a given template by name if it exists.
+// Ignores NotFound errors, which means the resource has already been deleted.
 func testCleanupTemplate(t *testing.T, templateName string) {
 	t.Helper()
 
@@ -78,68 +76,58 @@ func testCleanupTemplate(t *testing.T, templateName string) {
 			t.Fatalf("testCleanupTemplate: failed to delete template: %v", err)
 		}
 	}
-
 }
 
+// TestCreateModelArmorTemplate tests the creation of a basic Model Armor template.
+// Verifies that the output includes a success message after creation.
 func TestCreateModelArmorTemplate(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
+	locationID := testLocation(t)
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
 
 	var b bytes.Buffer
-	if _, err := createModelArmorTemplate(&b, tc.ProjectID, "us-central1", templateID); err != nil {
+	if err := createModelArmorTemplate(&b, tc.ProjectID, locationID, templateID); err != nil {
 		t.Fatal(err)
 	}
-	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, "us-central1", templateID))
+	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID))
 
 	if got, want := b.String(), "Created template:"; !strings.Contains(got, want) {
 		t.Errorf("createModelArmorTemplate: expected %q to contain %q", got, want)
 	}
 }
 
+// TestCreateModelArmorTemplateWithMetadata tests the creation of a template with metadata.
+// Verifies the success message is printed after template creation.
 func TestCreateModelArmorTemplateWithMetadata(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
+	locationID := testLocation(t)
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
 
 	var b bytes.Buffer
-	if _, err := createModelArmorTemplateWithMetadata(&b, tc.ProjectID, "us-central1", templateID); err != nil {
+	if err := createModelArmorTemplateWithMetadata(&b, tc.ProjectID, locationID, templateID); err != nil {
 		t.Fatal(err)
 	}
-	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, "us-central1", templateID))
+	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID))
 
 	if got, want := b.String(), "Created Model Armor Template:"; !strings.Contains(got, want) {
 		t.Errorf("createModelArmorTemplateWithMetadata: expected %q to contain %q", got, want)
 	}
 }
 
+// TestCreateModelArmorTemplateWithLabels tests the creation of a template with labels.
+// Verifies the output contains confirmation of successful template creation.
 func TestCreateModelArmorTemplateWithLabels(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
+	locationID := testLocation(t)
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
 
 	var b bytes.Buffer
-	if _, err := createModelArmorTemplateWithLabels(&b, tc.ProjectID, "us-central1", templateID, map[string]string{"testkey": "testvalue"}); err != nil {
+	if err := createModelArmorTemplateWithLabels(&b, tc.ProjectID, locationID, templateID, map[string]string{"testkey": "testvalue"}); err != nil {
 		t.Fatal(err)
 	}
-	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, "us-central1", templateID))
+	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID))
 
 	if got, want := b.String(), "Created Template with labels: "; !strings.Contains(got, want) {
-		fmt.Println("This is Got ", got)
-		fmt.Println("This is Want ", want)
 		t.Errorf("createModelArmorTemplateWithLabels: expected %q to contain %q", got, want)
-	} else {
-		template, err := getModelArmorTemplate(&b, tc.ProjectID, "us-central1", templateID)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		// Verify the labels
-		if len(template.Labels) != 1 {
-			t.Errorf("expected 1 label, got %d", len(template.Labels))
-		}
-		if template.Labels["testkey"] != "testvalue" {
-			t.Errorf("expected label testkey to be testvalue, got %s", template.Labels["testkey"])
-		}
 	}
 }

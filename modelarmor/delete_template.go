@@ -38,47 +38,34 @@ import (
 //	projectID string: The ID of the Google Cloud project.
 //	locationID string: The ID of the Google Cloud location.
 //	templateID string: The ID of the template to delete.
-//
-// Returns:
-//
-//	error: Any error that occurred during template deletion.
-//
-// Example:
-//
-//	err := deleteModelArmorTemplate(
-//	    os.Stdout,
-//	    "my-project",
-//	    "us-central1",
-//	    "my-template",
-//	)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-func deleteModelArmorTemplate(w io.Writer, projectID, location, templateID string) error {
+func deleteModelArmorTemplate(w io.Writer, projectID, locationID, templateID string) error {
 	ctx := context.Background()
 
+	// Create options for Model Armor client.
+	opts := fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)
 	// Create the Model Armor client.
 	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", location)),
+		option.WithEndpoint(opts),
 	)
 	if err != nil {
-		return fmt.Errorf("failed to create client for project %s, location %s: %v", projectID, location, err)
+		return fmt.Errorf("failed to create client for project %s, location %s: %w", projectID, locationID, err)
 	}
 	defer client.Close()
 
 	// Build the request for deleting the template.
 	req := &modelarmorpb.DeleteTemplateRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/templates/%s", projectID, location, templateID),
+		Name: fmt.Sprintf("projects/%s/locations/%s/templates/%s", projectID, locationID, templateID),
 	}
 
 	// Delete the template.
 	if err := client.DeleteTemplate(ctx, req); err != nil {
-		return fmt.Errorf("failed to delete template: %v", err)
+		return fmt.Errorf("failed to delete template: %w", err)
 	}
 
 	// Print the success message using fmt.Fprintf with the io.Writer.
 	fmt.Fprintf(w, "Successfully deleted Model Armor template: %s\n", req.Name)
-	// [END modelarmor_delete_template]
 
 	return nil
 }
+
+// [END modelarmor_delete_template]

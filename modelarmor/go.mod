@@ -6,7 +6,6 @@ require (
 	cloud.google.com/go/modelarmor v0.1.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250404170905-0aca11152736
 	github.com/google/uuid v1.6.0
-	github.com/joho/godotenv v1.5.1
 	google.golang.org/api v0.226.0
 	google.golang.org/grpc v1.71.0
 )

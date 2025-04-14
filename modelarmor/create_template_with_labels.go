@@ -39,38 +39,17 @@ import (
 //	locationID string: The ID of the Google Cloud location.
 //	templateID string: The ID of the template to create.
 //	labels map[string]string: A map of custom labels to apply to the template.
-//
-// Returns:
-//
-//	*modelarmorpb.Template: The created template.
-//	error: Any error that occurred during template creation.
-//
-// Example:
-//
-//	labels := map[string]string{
-//	    "env": "dev",
-//	    "team": "security",
-//	}
-//	template, err := createModelArmorTemplateWithLabels(
-//	    os.Stdout,
-//	    "my-project",
-//	    "us-central1",
-//	    "my-template",
-//	    labels,
-//	)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//	fmt.Println(template)
-func createModelArmorTemplateWithLabels(w io.Writer, projectID, locationID, templateID string, labels map[string]string) (*modelarmorpb.Template, error) {
+func createModelArmorTemplateWithLabels(w io.Writer, projectID, locationID, templateID string, labels map[string]string) error {
 	ctx := context.Background()
 
+	// Create options for Model Armor client.
+	opts := fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)
 	// Create the Model Armor client.
 	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)),
+		option.WithEndpoint(opts),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client for project %s, location %s: %v", projectID, locationID, err)
+		return fmt.Errorf("failed to create client for project %s, location %s: %w", projectID, locationID, err)
 	}
 	defer client.Close()
 
@@ -107,13 +86,13 @@ func createModelArmorTemplateWithLabels(w io.Writer, projectID, locationID, temp
 	// Create the template.
 	response, err := client.CreateTemplate(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create template: %v", err)
+		return fmt.Errorf("failed to create template: %w", err)
 	}
 
 	// Print the new template name using fmt.Fprintf with the io.Writer.
 	fmt.Fprintf(w, "Created Template with labels: %s\n", response.Name)
 
-	// [END modelarmor_create_template_with_labels]
-
-	return response, nil
+	return err
 }
+
+// [END modelarmor_create_template_with_labels]
