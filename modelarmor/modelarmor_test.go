@@ -119,18 +119,18 @@ func TestUpdateTemplateLabels(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	locationID := testLocation(t)
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
-
-	var b bytes.Buffer
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
+	var buf bytes.Buffer
 	if _, err := testModelArmorTemplate(t, templateID); err != nil {
 		t.Fatal(err)
 	}
-	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID))
+	defer testCleanupTemplate(t, templateName)
 
-	if err := updateModelArmorTemplateLabels(&b, tc.ProjectID, locationID, templateID, map[string]string{"testkey": "testvalue"}); err != nil {
+	if err := updateModelArmorTemplateLabels(&buf, tc.ProjectID, locationID, templateID, map[string]string{"testkey": "testvalue"}); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), "Updated Model Armor Template Labels: "; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Updated Model Armor Template Labels: "; !strings.Contains(got, want) {
 		t.Errorf("updateModelArmorTemplateLabels: expected %q to contain %q", got, want)
 	}
 }
