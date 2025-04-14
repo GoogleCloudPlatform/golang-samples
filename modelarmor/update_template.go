@@ -30,14 +30,12 @@ import (
 
 // updateModelArmorTemplate updates a Model Armor template.
 //
-// This method updates a Model Armor template.
+// updateModelArmorTemplate method updates a Model Armor template.
 //
-// Args:
-//
-//	w io.Writer: The writer to use for logging.
-//	projectID string: The ID of the project.
-//	locationID string: The ID of the location.
-//	templateID string: The ID of the template.
+// w io.Writer: The writer to use for logging.
+// projectID string: The ID of the project.
+// locationID string: The ID of the location.
+// templateID string: The ID of the template.
 func updateModelArmorTemplate(w io.Writer, projectID, locationID, templateID string) error {
 	ctx := context.Background()
 
