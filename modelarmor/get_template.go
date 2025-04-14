@@ -28,16 +28,13 @@ import (
 	"google.golang.org/api/option"
 )
 
-// getModelArmorTemplate gets a Model Armor template.
+// getModelArmorTemplate method retrieves a Model Armor template.
 //
-// This method retrieves a Model Armor template.
 //
-// Args:
-//
-//	w io.Writer: The writer to use for logging.
-//	projectID string: The ID of the project.
-//	locationID string: The location of the template.
-//	templateID string: The ID of the template.
+// w io.Writer: The writer to use for logging.
+// projectID string: The ID of the project.
+// locationID string: The location of the template.
+// templateID string: The ID of the template.
 func getModelArmorTemplate(w io.Writer, projectID, locationID, templateID string) error {
 	ctx := context.Background()
 

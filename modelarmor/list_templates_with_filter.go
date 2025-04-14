@@ -30,16 +30,12 @@ import (
 	"google.golang.org/api/option"
 )
 
-// listModelArmorTemplatesWithFilter lists Model Armor templates with a filter.
+// listModelArmorTemplatesWithFilter method lists Model Armor templates that match the specified filter.
 //
-// This method lists Model Armor templates that match the specified filter.
-//
-// Args:
-//
-//	w io.Writer: The writer to use for logging.
-//	projectID string: The ID of the project.
-//	locationID string: The ID of the location.
-//	templateID string: The ID of the template.
+// w io.Writer: The writer to use for logging.
+// projectID string: The ID of the project.
+// locationID string: The ID of the location.
+// templateID string: The ID of the template.
 func listModelArmorTemplatesWithFilter(w io.Writer, projectID, locationID, templateID string) error {
 	ctx := context.Background()
 
