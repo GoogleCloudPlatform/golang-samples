@@ -66,12 +66,12 @@ func testLocation(t *testing.T) string {
 // It verifies that the output buffer contains a confirmation message indicating a successful update.
 func TestUpdateFolderFloorSettings(t *testing.T) {
 	folderID := testFolderID(t)
-	var b bytes.Buffer
-	if err := updateFolderFloorSettings(&b, folderID, "us-central1"); err != nil {
+	var buf bytes.Buffer
+	if err := updateFolderFloorSettings(&buf, folderID, "us-central1"); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), "Updated folder floor setting: "; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Updated folder floor setting: "; !strings.Contains(got, want) {
 		t.Errorf("updateFolderFloorSettings: expected %q to contain %q", got, want)
 	}
 }
