@@ -52,10 +52,8 @@ func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
 
 	ctx := context.Background()
 	locationId := testLocation(t)
-
-	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationId)),
-	)
+	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationId))
+	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
@@ -83,12 +81,12 @@ func TestCreateModelArmorTemplateWithBasicSDP(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	locationID := testLocation(t)
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
-
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
 	var b bytes.Buffer
 	if err := createModelArmorTemplateWithBasicSDP(&b, tc.ProjectID, locationID, templateID); err != nil {
 		t.Fatal(err)
 	}
-	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, "us-central1", templateID))
+	defer testCleanupTemplate(t, templateName)
 
 	if got, want := b.String(), "Created Template with basic SDP: "; !strings.Contains(got, want) {
 		t.Errorf("createModelArmorTemplateWithBasicSDP: expected %q to contain %q", got, want)

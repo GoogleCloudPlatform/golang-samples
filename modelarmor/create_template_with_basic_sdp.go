@@ -28,23 +28,19 @@ import (
 	"google.golang.org/api/option"
 )
 
-// createModelArmorTemplateWithBasicSDP creates a new Model Armor template with basic SDP settings.
+// createModelArmorTemplateWithBasicSDP method creates a new Model Armor template with basic SDP settings.
 //
-// This method creates a new Model Armor template with basic SDP settings.
-//
-// Args:
-//
-//	w io.Writer: The writer to use for logging.
-//	projectID string: The ID of the Google Cloud project.
-//	locationID string: The ID of the Google Cloud location.
-//	templateID string: The ID of the template to create.
+// w io.Writer: The writer to use for logging.
+// projectID string: The ID of the Google Cloud project.
+// locationID string: The ID of the Google Cloud location.
+// templateID string: The ID of the template to create.
 func createModelArmorTemplateWithBasicSDP(w io.Writer, projectID, locationID, templateID string) error {
 	ctx := context.Background()
 
+	// Create options for Model Armor client.
+	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))
 	// Create the Model Armor client.
-	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)),
-	)
+	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
 		return fmt.Errorf("failed to create client for project %s, location %s: %w", projectID, locationID, err)
 	}
