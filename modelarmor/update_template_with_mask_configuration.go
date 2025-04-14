@@ -31,41 +31,19 @@ import (
 
 // updateModelArmorTemplateWithMaskConfiguration updates a Model Armor template with mask configuration.
 //
-// This method updates a Model Armor template with mask configuration.
-//
-// Args:
-//
 //	w io.Writer: The writer to use for logging.
 //	projectID string: The ID of the project.
 //	locationID string: The ID of the location.
 //	templateID string: The ID of the template.
-//
-// Returns:
-//
-//	*modelarmorpb.Template: The updated template with mask configuration.
-//	error: Any error that occurred during update.
-//
-// Example:
-//
-//	updatedTemplate, err := updateModelArmorTemplateWithMaskConfiguration(
-//	    os.Stdout,
-//	    "my-project",
-//	    "my-location",
-//	    "my-template",
-//	)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//	fmt.Println(updatedTemplate)
-func updateModelArmorTemplateWithMaskConfiguration(w io.Writer, projectID, locationID, templateID string) (*modelarmorpb.Template, error) {
+func updateModelArmorTemplateWithMaskConfiguration(w io.Writer, projectID, locationID, templateID string) error {
 	ctx := context.Background()
 
+	//Create options for Model Armor client.
+	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))
 	// Create the Model Armor client.
-	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)),
-	)
+	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client for project %s, location %s: %v", projectID, locationID, err)
+		return fmt.Errorf("failed to create client for project %s, location %s: %w", projectID, locationID, err)
 	}
 	defer client.Close()
 
@@ -125,12 +103,12 @@ func updateModelArmorTemplateWithMaskConfiguration(w io.Writer, projectID, locat
 	// Update the template.
 	response, err := client.UpdateTemplate(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to update template: %v", err)
+		return fmt.Errorf("failed to update template: %w", err)
 	}
 
 	fmt.Fprintf(w, "Updated Model Armor Template: %s\n", response.Name)
 
-	// [END modelarmor_update_template_with_mask_configuration]
-
-	return response, nil
+	return err
 }
+
+// [END modelarmor_update_template_with_mask_configuration]
