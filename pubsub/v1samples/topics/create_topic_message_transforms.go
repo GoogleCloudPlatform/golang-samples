@@ -38,7 +38,7 @@ func createTopicWithSMT(w io.Writer, projectID, topicID string) error {
 			delete data['ssn'];
 			message.data = JSON.stringify(data);
 			return message;"
-			}`
+		}`
 	transform := pubsub.MessageTransform{
 		Transform: &pubsub.JavaScriptUDF{
 			FunctionName: "redactSSN",
