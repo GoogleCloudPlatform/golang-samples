@@ -376,11 +376,11 @@ func TestListRegionalParam(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got, want := buf.String(), fmt.Sprintf("Found regional parameter %s with format %s\n", parameter1.Name, parameter1.Format); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found regional parameter %s with format %s", parameter1.Name, parameter1.Format); !strings.Contains(got, want) {
 		t.Errorf("ListParameter: expected %q to contain %q", got, want)
 	}
 
-	if got, want := buf.String(), fmt.Sprintf("Found regional parameter %s with format %s\n", parameter2.Name, parameter2.Format); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found regional parameter %s with format %s", parameter2.Name, parameter2.Format); !strings.Contains(got, want) {
 		t.Errorf("ListParameter: expected %q to contain %q", got, want)
 	}
 }
@@ -406,11 +406,11 @@ func TestListRegionalParamVersion(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got, want := buf.String(), fmt.Sprintf("Found regional parameter version %s with disabled state in %v\n", parameterVersion1.Name, parameterVersion1.Disabled); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found regional parameter version %s with disabled state in %v", parameterVersion1.Name, parameterVersion1.Disabled); !strings.Contains(got, want) {
 		t.Errorf("ListParameterVersion: expected %q to contain %q", got, want)
 	}
 
-	if got, want := buf.String(), fmt.Sprintf("Found regional parameter version %s with disabled state in %v\n", parameterVersion2.Name, parameterVersion2.Disabled); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found regional parameter version %s with disabled state in %v", parameterVersion2.Name, parameterVersion2.Disabled); !strings.Contains(got, want) {
 		t.Errorf("ListParameterVersion: expected %q to contain %q", got, want)
 	}
 }
