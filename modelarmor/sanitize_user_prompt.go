@@ -28,45 +28,23 @@ import (
 	"google.golang.org/api/option"
 )
 
-// sanitizeUserPrompt sanitizes a user prompt.
+// sanitizeUserPrompt sanitizes a user prompt based on the project, location, and template settings.
 //
-// This method sanitizes a user prompt based on the project, location, and template settings.
-//
-// Args:
-//
-//	w io.Writer: The writer to use for logging.
-//	projectID string: The ID of the project.
-//	locationID string: The ID of the location.
-//	templateID string: The ID of the template.
-//	userPrompt string: The user prompt to sanitize.
-//
-// Returns:
-//
-//	*modelarmorpb.SanitizeUserPromptResponse: The sanitized user prompt.
-//	error: Any error that occurred during sanitization.
-//
-// Example:
-//
-//	sanitizedPrompt, err := sanitizeUserPrompt(
-//	    os.Stdout,
-//	    "my-project",
-//	    "my-location",
-//	    "my-template",
-//	    "user prompt",
-//	)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//	fmt.Println(sanitizedPrompt)
-func sanitizeUserPrompt(w io.Writer, projectID, locationID, templateID, userPrompt string) (*modelarmorpb.SanitizeUserPromptResponse, error) {
+// w io.Writer: The writer to use for logging.
+// projectID string: The ID of the project.
+// locationID string: The ID of the location.
+// templateID string: The ID of the template.
+// userPrompt string: The user prompt to sanitize.
+func sanitizeUserPrompt(w io.Writer, projectID, locationID, templateID, userPrompt string) error {
 	ctx := context.Background()
 
+	//Create options for Model Armor client.
+	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))
+
 	// Create the Model Armor client.
-	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)),
-	)
+	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client for location %s: %v", locationID, err)
+		return fmt.Errorf("failed to create client for location %s: %w", locationID, err)
 	}
 	defer client.Close()
 
@@ -86,13 +64,13 @@ func sanitizeUserPrompt(w io.Writer, projectID, locationID, templateID, userProm
 	// Sanitize the user prompt.
 	response, err := client.SanitizeUserPrompt(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to sanitize user prompt for template %s: %v", templateID, err)
+		return fmt.Errorf("failed to sanitize user prompt for template %s: %w", templateID, err)
 	}
 
 	// Sanitization Result.
 	fmt.Fprintf(w, "Sanitization Result: %v\n", response)
 
-	// [END modelarmor_sanitize_user_prompt]
-
-	return response, nil
+	return err
 }
+
+// [END modelarmor_sanitize_user_prompt]
