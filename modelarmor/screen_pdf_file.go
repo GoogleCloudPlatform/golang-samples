@@ -32,41 +32,20 @@ import (
 //
 // This method screens a PDF file based on the project, location, and template settings.
 //
-// Args:
-//
-//	w io.Writer: The writer to use for logging.
-//	projectID string: The ID of the project.
-//	locationID string: The ID of the location.
-//	templateID string: The ID of the template.
-//	pdfContentBase64 string: The base64-encoded content of the PDF file.
-//
-// Returns:
-//
-//	*modelarmorpb.SanitizeUserPromptResponse: The response from screening the PDF file.
-//	error: Any error that occurred during screening.
-//
-// Example:
-//
-//	response, err := screenPDFFile(
-//	    os.Stdout,
-//	    "my-project",
-//	    "my-location",
-//	    "my-template",
-//	    "base64-encoded-pdf-content",
-//	)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//	fmt.Println(response)
-func screenPDFFile(w io.Writer, projectID, locationID, templateID, pdfContentBase64 string) (*modelarmorpb.SanitizeUserPromptResponse, error) {
+// w io.Writer: The writer to use for logging.
+// projectID string: The ID of the project.
+// locationID string: The ID of the location.
+// templateID string: The ID of the template.
+// pdfContentBase64 string: The base64-encoded content of the PDF file.
+func screenPDFFile(w io.Writer, projectID, locationID, templateID, pdfContentBase64 string) error {
 	ctx := context.Background()
 
+	// Create options for Model Armor client.
+	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))
 	// Create the Model Armor client.
-	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)),
-	)
+	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client: %v", err)
+		return fmt.Errorf("failed to create client: %w", err)
 	}
 	defer client.Close()
 
@@ -89,13 +68,13 @@ func screenPDFFile(w io.Writer, projectID, locationID, templateID, pdfContentBas
 	// Sanitize the user prompt.
 	response, err := client.SanitizeUserPrompt(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to sanitize PDF content for template %s: %v", templateID, err)
+		return fmt.Errorf("failed to sanitize PDF content for template %s: %w", templateID, err)
 	}
 
 	// Sanitization Result.
 	fmt.Fprintf(w, "PDF screening sanitization result: %v\n", response)
 
-	// [END modelarmor_screen_pdf_file]
-
-	return response, nil
+	return err
 }
+
+// [END modelarmor_screen_pdf_file]
