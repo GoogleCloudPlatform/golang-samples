@@ -38,34 +38,15 @@ import (
 //	w io.Writer: The writer to use for logging.
 //	projectID string: The ID of the project.
 //	location string: The location of the templates.
-//
-// Returns:
-//
-//	[]*modelarmorpb.Template: A list of Model Armor templates.
-//	error: Any error that occurred during retrieval.
-//
-// Example:
-//
-//	templates, err := listModelArmorTemplates(
-//	    os.Stdout,
-//	    "my-project",
-//	    "my-location",
-//	)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//	for _, template := range templates {
-//	    fmt.Println(template)
-//	}
-func listModelArmorTemplates(w io.Writer, projectID, locationID string) ([]*modelarmorpb.Template, error) {
+func listModelArmorTemplates(w io.Writer, projectID, locationID string) error {
 	ctx := context.Background()
 
+	// Create options for the Model Armor client/
+	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))
 	// Create the Model Armor client.
-	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)),
-	)
+	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client for project %s, location %s: %v", projectID, locationID, err)
+		return fmt.Errorf("failed to create client for project %s, location %s: %w", projectID, locationID, err)
 	}
 	defer client.Close()
 
@@ -84,13 +65,13 @@ func listModelArmorTemplates(w io.Writer, projectID, locationID string) ([]*mode
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("failed to iterate templates: %v", err)
+			return fmt.Errorf("failed to iterate templates: %w", err)
 		}
 		templates = append(templates, template)
 		fmt.Fprintf(w, "Template: %s\n", template.Name)
 	}
 
-	// [END modelarmor_list_templates]
-
-	return templates, nil
+	return err
 }
+
+// [END modelarmor_list_templates]
