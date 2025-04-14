@@ -4,7 +4,7 @@ go 1.23.0
 
 require (
 	cloud.google.com/go/parametermanager v0.2.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250409195806-b3db6e18b370
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250411200924-fe12c8881f35
 	github.com/gofrs/uuid v4.4.0+incompatible
 	google.golang.org/api v0.228.0
 	google.golang.org/genproto v0.0.0-20250409194420-de1ac958c67a

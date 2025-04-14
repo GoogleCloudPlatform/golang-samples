@@ -191,7 +191,7 @@ func TestEnableParamVersion(t *testing.T) {
 // then attempts to delete the created parameter. It verifies if the parameter
 // was successfully deleted by checking the output.
 func TestDeleteParam(t *testing.T) {
-  tc := testutil.SystemTest(t)
+	tc := testutil.SystemTest(t)
 
 	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
 	defer testCleanupParameter(t, parameter.Name)
@@ -271,7 +271,7 @@ func TestCreateParamVersionWithSecret(t *testing.T) {
 // then attempts to retrieve the created parameter. It verifies if the parameter
 // was successfully retrieved by checking the output.
 func TestGetParam(t *testing.T) {
-  tc := testutil.SystemTest(t)
+	tc := testutil.SystemTest(t)
 
 	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
 	defer testCleanupParameter(t, parameter.Name)
@@ -325,11 +325,11 @@ func TestListParam(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format %s \n", parameter1.Name, parameter1.Format); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format %s", parameter1.Name, parameter1.Format); !strings.Contains(got, want) {
 		t.Errorf("ListParameter: expected %q to contain %q", got, want)
 	}
 
-	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format %s \n", parameter2.Name, parameter2.Format); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format %s", parameter2.Name, parameter2.Format); !strings.Contains(got, want) {
 		t.Errorf("ListParameter: expected %q to contain %q", got, want)
 	}
 }
