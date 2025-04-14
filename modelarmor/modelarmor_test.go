@@ -53,11 +53,10 @@ func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
 
 	ctx := context.Background()
 	locationId := testLocation(t)
-
+	// Create option for Model Armor client.
+	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationId))
 	// Create a new client using the regional endpoint
-	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationId)),
-	)
+	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
 		t.Fatalf("testClient: failed to create client: %v", err)
 	}
@@ -85,12 +84,12 @@ func TestCreateModelArmorTemplate(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
-
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, testLocation(t), templateID)
 	var b bytes.Buffer
 	if err := createModelArmorTemplate(&b, tc.ProjectID, testLocation(t), templateID); err != nil {
 		t.Fatal(err)
 	}
-	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, testLocation(t), templateID))
+	defer testCleanupTemplate(t, templateName)
 
 	if got, want := b.String(), "Created template:"; !strings.Contains(got, want) {
 		t.Errorf("createModelArmorTemplate: expected %q to contain %q", got, want)
