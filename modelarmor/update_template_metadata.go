@@ -28,16 +28,12 @@ import (
 	"google.golang.org/api/option"
 )
 
-// updateModelArmorTemplateMetadata updates the metadata of a Model Armor template.
+// updateModelArmorTemplateMetadata method updates the metadata of a Model Armor template.
 //
-// This method updates the metadata of a Model Armor template.
-//
-// Args:
-//
-//	w io.Writer: The writer to use for logging.
-//	projectID string: The ID of the project.
-//	locationID string: The ID of the location.
-//	templateID string: The ID of the template.
+// w io.Writer: The writer to use for logging.
+// projectID string: The ID of the project.
+// locationID string: The ID of the location.
+// templateID string: The ID of the template.
 func updateModelArmorTemplateMetadata(w io.Writer, projectID, locationID, templateID string) error {
 	ctx := context.Background()
 

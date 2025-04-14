@@ -127,7 +127,7 @@ func TestUpdateTemplateMetadata(t *testing.T) {
 	}
 	defer testCleanupTemplate(t, templateName)
 
-	if err := updateModelArmorTemplateMetadata(&buf, tc.ProjectID, "us-central1", templateID); err != nil {
+	if err := updateModelArmorTemplateMetadata(&buf, tc.ProjectID, locationID, templateID); err != nil {
 		t.Fatal(err)
 	}
 
