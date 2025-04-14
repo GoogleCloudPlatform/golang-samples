@@ -34,11 +34,11 @@ func createTopicWithSMT(w io.Writer, projectID, topicID string) error {
 	defer client.Close()
 
 	code := `function redactSSN(message, metadata) {
-   		 		const data = JSON.parse(message.data);
-    	    	delete data['ssn'];
-	    	    message.data = JSON.stringify(data);
-	    	    return message;"
-	    	}`
+				const data = JSON.parse(message.data);
+				delete data['ssn'];
+				message.data = JSON.stringify(data);
+				return message;"
+			}`
 	transform := pubsub.MessageTransform{
 		Transform: &pubsub.JavaScriptUDF{
 			FunctionName: "redactSSN",

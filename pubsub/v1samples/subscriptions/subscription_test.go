@@ -1183,7 +1183,7 @@ func TestCreateSubscriptionWithSMT(t *testing.T) {
 			if !ok {
 				r.Errorf("CreateTopic failed with unknown err: %v", err)
 			}
-			// If the topic alredy exists, that's fine.
+			// Don't return error if topic already exists, just use that for the test.
 			if st.Code() != codes.AlreadyExists {
 				r.Errorf("CreateTopic: %v", err)
 			}

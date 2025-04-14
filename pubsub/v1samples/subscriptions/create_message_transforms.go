@@ -35,11 +35,11 @@ func createSubscriptionWithSMT(w io.Writer, projectID, subID string, topic *pubs
 	defer client.Close()
 
 	code := `function redactSSN(message, metadata) {
-   		 		const data = JSON.parse(message.data);
-    	    	delete data['ssn'];
-	    	    message.data = JSON.stringify(data);
-	    	    return message;"
-	    	}`
+				const data = JSON.parse(message.data);
+				delete data['ssn'];
+				message.data = JSON.stringify(data);
+				return message;"
+			}`
 	transform := pubsub.MessageTransform{
 		Transform: &pubsub.JavaScriptUDF{
 			FunctionName: "redactSSN",
