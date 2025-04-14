@@ -40,35 +40,15 @@ import (
 //	templateID string: The ID of the template to create.
 //	inspectTemplate string: The ID of the inspect template to use.
 //	deidentifyTemplate string: The ID of the deidentify template to use.
-//
-// Returns:
-//
-//	*modelarmorpb.Template: The created template.
-//	error: Any error that occurred during template creation.
-//
-// Example:
-//
-//	template, err := createModelArmorTemplateWithAdvancedSDP(
-//	    os.Stdout,
-//	    "my-project",
-//	    "us-central1",
-//	    "my-template",
-//	    "my-inspect-template",
-//	    "my-deidentify-template",
-//	)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//	fmt.Println(template)
-func createModelArmorTemplateWithAdvancedSDP(w io.Writer, projectID, locationID, templateID, inspectTemplate, deidentifyTemplate string) (*modelarmorpb.Template, error) {
+func createModelArmorTemplateWithAdvancedSDP(w io.Writer, projectID, locationID, templateID, inspectTemplate, deidentifyTemplate string) error {
 	ctx := context.Background()
 
+	// Create options for Model Armor client.
+	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))
 	// Create the Model Armor client.
-	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)),
-	)
+	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client for project %s, location %s: %v", projectID, locationID, err)
+		return fmt.Errorf("failed to create client for project %s, location %s: %w", projectID, locationID, err)
 	}
 	defer client.Close()
 
@@ -118,13 +98,13 @@ func createModelArmorTemplateWithAdvancedSDP(w io.Writer, projectID, locationID,
 	// Create the template.
 	response, err := client.CreateTemplate(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create template: %v", err)
+		return fmt.Errorf("failed to create template: %w", err)
 	}
 
 	// Print the new template name using fmt.Fprint with the io.Writer.
 	fmt.Fprintf(w, "Created Template with advanced SDP: %s\n", response.Name)
 
-	// [END modelarmor_create_template_with_advanced_sdp]
-
-	return response, nil
+	return err
 }
+
+// [END modelarmor_create_template_with_advanced_sdp]

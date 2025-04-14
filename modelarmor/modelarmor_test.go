@@ -30,20 +30,14 @@ import (
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
-	"github.com/joho/godotenv"
 	"google.golang.org/api/option"
 	grpccodes "google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
 )
 
+// testLocation returns the GOLANG_SAMPLES_LOCATION env var or skips the test.
 func testLocation(t *testing.T) string {
 	t.Helper()
-
-	// Load the test.env file
-	err := godotenv.Load("./testdata/env/test.env")
-	if err != nil {
-		t.Fatal(err.Error())
-	}
 
 	v := os.Getenv("GOLANG_SAMPLES_LOCATION")
 	if v == "" {
@@ -53,6 +47,7 @@ func testLocation(t *testing.T) string {
 	return v
 }
 
+// testClient creates a Model Armor client for the given test region.
 func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
 	t.Helper()
 
@@ -60,10 +55,8 @@ func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
 
 	locationId := testLocation(t)
 
-	//Endpoint to send the request to regional server
-	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationId)),
-	)
+	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationId))
+	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
@@ -71,6 +64,7 @@ func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
 	return client, ctx
 }
 
+// testCleanupTemplate deletes a template if it exists, ignoring not found errors.
 func testCleanupTemplate(t *testing.T, templateName string) {
 	t.Helper()
 
@@ -80,30 +74,28 @@ func testCleanupTemplate(t *testing.T, templateName string) {
 			t.Fatalf("testCleanupTemplate: failed to delete template: %v", err)
 		}
 	}
-
 }
 
+// testSDPTemplate creates DLP inspect and deidentify templates for use in tests.
 func testSDPTemplate(t *testing.T, projectID string, locationID string) (string, string) {
 	inspectTemplateID := fmt.Sprintf("model-armour-inspect-template-%s", uuid.New().String())
 	deidentifyTemplateID := fmt.Sprintf("model-armour-deidentify-template-%s", uuid.New().String())
 	apiEndpoint := fmt.Sprintf("dlp.%s.rep.googleapis.com:443", locationID)
 	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
+
 	infoTypes := []*dlppb.InfoType{
 		{Name: "EMAIL_ADDRESS"},
 		{Name: "PHONE_NUMBER"},
 		{Name: "US_INDIVIDUAL_TAXPAYER_IDENTIFICATION_NUMBER"},
 	}
 
-	// Create the DLP client.
 	ctx := context.Background()
 	dlpClient, err := dlp.NewClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {
 		t.Fatalf("Getting error while creating the client: %v", err)
 	}
-
 	defer dlpClient.Close()
 
-	// Create the inspect template.
 	inspectRequest := &dlppb.CreateInspectTemplateRequest{
 		Parent:     parent,
 		TemplateId: inspectTemplateID,
@@ -118,7 +110,6 @@ func testSDPTemplate(t *testing.T, projectID string, locationID string) (string,
 		t.Fatal(err)
 	}
 
-	// Create the deidentify template.
 	deidentifyRequest := &dlppb.CreateDeidentifyTemplateRequest{
 		Parent:     parent,
 		TemplateId: deidentifyTemplateID,
@@ -150,9 +141,7 @@ func testSDPTemplate(t *testing.T, projectID string, locationID string) (string,
 		t.Fatal(err)
 	}
 
-	inspectTemplateName, deidentifyTemplateName := inspectResponse.Name, deidentifyResponse.Name
-
-	// Clean up the templates.
+	// Cleanup the templates after test.
 	defer func() {
 		time.Sleep(5 * time.Second)
 		err := dlpClient.DeleteInspectTemplate(ctx, &dlppb.DeleteInspectTemplateRequest{Name: inspectResponse.Name})
@@ -165,9 +154,10 @@ func testSDPTemplate(t *testing.T, projectID string, locationID string) (string,
 		}
 	}()
 
-	return inspectTemplateName, deidentifyTemplateName
+	return inspectResponse.Name, deidentifyResponse.Name
 }
 
+// TestCreateModelArmorTemplateWithAdvancedSDP tests creating a Model Armor template with advanced SDP using DLP templates.
 func TestCreateModelArmorTemplateWithAdvancedSDP(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -175,8 +165,7 @@ func TestCreateModelArmorTemplateWithAdvancedSDP(t *testing.T) {
 	inspectTemplateName, deideintifyTemplateName := testSDPTemplate(t, tc.ProjectID, testLocation(t))
 
 	var b bytes.Buffer
-	if _, err := createModelArmorTemplateWithAdvancedSDP(&b, tc.ProjectID, testLocation(t), templateID, inspectTemplateName, deideintifyTemplateName); err != nil {
-		fmt.Println("Error is here")
+	if err := createModelArmorTemplateWithAdvancedSDP(&b, tc.ProjectID, testLocation(t), templateID, inspectTemplateName, deideintifyTemplateName); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, testLocation(t), templateID))
