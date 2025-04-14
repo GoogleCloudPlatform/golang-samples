@@ -38,33 +38,15 @@ import (
 //	projectID string: The ID of the project.
 //	locationID string: The ID of the location.
 //	templateID string: The ID of the template.
-//
-// Returns:
-//
-//	*modelarmorpb.Template: The updated template.
-//	error: Any error that occurred during update.
-//
-// Example:
-//
-//	updatedTemplate, err := updateModelArmorTemplate(
-//	    os.Stdout,
-//	    "my-project",
-//	    "my-location",
-//	    "my-template",
-//	)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//	fmt.Println(updatedTemplate)
-func updateModelArmorTemplate(w io.Writer, projectID, locationID, templateID string) (*modelarmorpb.Template, error) {
+func updateModelArmorTemplate(w io.Writer, projectID, locationID, templateID string) error {
 	ctx := context.Background()
 
+	// Create options for Model Armor client.
+	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))
 	// Create the Model Armor client.
-	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)),
-	)
+	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client for project %s, location %s: %v", projectID, locationID, err)
+		return fmt.Errorf("failed to create client for project %s, location %s: %w", projectID, locationID, err)
 	}
 	defer client.Close()
 
@@ -92,13 +74,13 @@ func updateModelArmorTemplate(w io.Writer, projectID, locationID, templateID str
 	// Update the template.
 	response, err := client.UpdateTemplate(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to update template: %v", err)
+		return fmt.Errorf("failed to update template: %w", err)
 	}
 
 	// Print the updated filters in the template.
 	fmt.Fprintf(w, "Updated Filter Config: %+v\n", response.FilterConfig)
 
-	// [END modelarmor_update_template]
-
-	return response, nil
+	return err
 }
+
+// [END modelarmor_update_template]
