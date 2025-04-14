@@ -57,12 +57,12 @@ import (
 func deleteModelArmorTemplate(w io.Writer, projectID, location, templateID string) error {
 	ctx := context.Background()
 
+	// Create the call options
+	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", location))
 	// Create the Model Armor client.
-	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", location)),
-	)
+	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
-		return fmt.Errorf("failed to create client for project %s, location %s: %v", projectID, location, err)
+		return fmt.Errorf("failed to create client for project %s, location %s: %w", projectID, location, err)
 	}
 	defer client.Close()
 
@@ -73,12 +73,13 @@ func deleteModelArmorTemplate(w io.Writer, projectID, location, templateID strin
 
 	// Delete the template.
 	if err := client.DeleteTemplate(ctx, req); err != nil {
-		return fmt.Errorf("failed to delete template: %v", err)
+		return fmt.Errorf("failed to delete template: %w", err)
 	}
 
 	// Print the success message using fmt.Fprintf with the io.Writer.
 	fmt.Fprintf(w, "Successfully deleted Model Armor template: %s\n", req.Name)
-	// [END modelarmor_delete_template]
 
-	return nil
+	return err
 }
+
+// [END modelarmor_delete_template]

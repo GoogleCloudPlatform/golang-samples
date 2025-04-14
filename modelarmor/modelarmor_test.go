@@ -27,7 +27,6 @@ import (
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
-	"github.com/joho/godotenv"
 	"google.golang.org/api/option"
 	grpccodes "google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
@@ -35,12 +34,6 @@ import (
 
 func testLocation(t *testing.T) string {
 	t.Helper()
-
-	// Load the test.env file
-	err := godotenv.Load("./testdata/env/test.env")
-	if err != nil {
-		t.Fatal(err.Error())
-	}
 
 	v := os.Getenv("GOLANG_SAMPLES_LOCATION")
 	if v == "" {
@@ -86,7 +79,7 @@ func TestCreateModelArmorTemplate(t *testing.T) {
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
 
 	var b bytes.Buffer
-	if _, err := createModelArmorTemplate(&b, tc.ProjectID, testLocation(t), templateID); err != nil {
+	if err := createModelArmorTemplate(&b, tc.ProjectID, testLocation(t), templateID); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, testLocation(t), templateID))
@@ -102,7 +95,7 @@ func TestDeleteModelArmorTemplate(t *testing.T) {
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
 
 	var b bytes.Buffer
-	if _, err := createModelArmorTemplate(&b, tc.ProjectID, testLocation(t), templateID); err != nil {
+	if err := createModelArmorTemplate(&b, tc.ProjectID, testLocation(t), templateID); err != nil {
 		t.Fatal(err)
 	}
 
