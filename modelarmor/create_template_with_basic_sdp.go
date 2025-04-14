@@ -38,7 +38,6 @@ import (
 //	projectID string: The ID of the Google Cloud project.
 //	locationID string: The ID of the Google Cloud location.
 //	templateID string: The ID of the template to create.
-
 func createModelArmorTemplateWithBasicSDP(w io.Writer, projectID, locationID, templateID string) error {
 	ctx := context.Background()
 
