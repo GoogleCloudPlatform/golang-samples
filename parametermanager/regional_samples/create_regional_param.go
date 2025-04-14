@@ -58,7 +58,7 @@ func createRegionalParam(w io.Writer, projectID, locationID, parameterID string)
 	}
 	parameter, err := client.CreateParameter(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Failed to create parameter: %w", err)
+		return fmt.Errorf("failed to create parameter: %w", err)
 	}
 
 	fmt.Fprintf(w, "Created regional parameter: %s\n", parameter.Name)
