@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package text_generation
+package count_tokens
 
 import (
 	"bytes"
@@ -32,9 +32,48 @@ func TestTextGeneration(t *testing.T) {
 
 	t.Run("generate with text prompt", func(t *testing.T) {
 		buf.Reset()
-		err := generateWithText(buf)
+		err := generateTextAndCount(buf)
 		if err != nil {
-			t.Fatalf("generateWithText failed: %v", err)
+			t.Fatalf("generateTextAndCount failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("count tokens with text input", func(t *testing.T) {
+		buf.Reset()
+		err := countWithTxt(buf)
+		if err != nil {
+			t.Fatalf("countWithTxt failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("count tokens with text and video inputs", func(t *testing.T) {
+		buf.Reset()
+		err := countWithTxtAndVid(buf)
+		if err != nil {
+			t.Fatalf("countWithTxtAndVid failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("compute tokens with text input", func(t *testing.T) {
+		buf.Reset()
+		err := computeWithTxt(buf)
+		if err != nil {
+			t.Fatalf("computeWithTxt failed: %v", err)
 		}
 
 		output := buf.String()
