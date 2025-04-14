@@ -32,41 +32,18 @@ import (
 //
 // This method updates the floor settings of a folder.
 //
-// Args:
-//
-//	w io.Writer: The writer to use for logging.
-//	folderID string: The ID of the folder.
-//	locationID string: The ID of the location.
-//
-// Returns:
-//
-//	*modelarmorpb.FloorSetting: The updated floor settings.
-//	error: Any error that occurred during update.
-//
-// Example:
-//
-//	updatedSettings, err := updateFolderFloorSettings(
-//	    os.Stdout,
-//	    "my-folder",
-//	    "my-location",
-//	)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//	fmt.Println(updatedSettings)
-func updateFolderFloorSettings(w io.Writer, folderID, locationID string) (*modelarmorpb.FloorSetting, error) {
+// w io.Writer: The writer to use for logging.
+// folderID string: The ID of the folder.
+// locationID string: The ID of the location.
+func updateFolderFloorSettings(w io.Writer, folderID, locationID string) error {
 	ctx := context.Background()
-
-	// TODO(Developer): Uncomment and set these variables.
-	// folderID := "YOUR_FOLDER_ID"
-	// locationID := "us-central1"
 
 	// Create the Model Armor client.
 	client, err := modelarmor.NewClient(ctx,
 		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client: %v", err)
+		return fmt.Errorf("failed to create client: %w", err)
 	}
 	defer client.Close()
 
@@ -98,13 +75,14 @@ func updateFolderFloorSettings(w io.Writer, folderID, locationID string) (*model
 	// Update the floor setting.
 	response, err := client.UpdateFloorSetting(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to update floor setting: %v", err)
+		return fmt.Errorf("failed to update floor setting: %w", err)
 	}
 
 	// Print the updated config
 	fmt.Fprintf(w, "Updated folder floor setting: %v\n", response)
 
-	// [END modelarmor_update_folder_floor_settings]
+	return err
 
-	return response, nil
 }
+
+// [END modelarmor_update_folder_floor_settings]

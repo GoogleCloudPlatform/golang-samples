@@ -21,18 +21,53 @@ import (
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/joho/godotenv"
 )
 
-func TestUpdateFolderFloorSettings(t *testing.T) {
-	// Load the test.env file
-	err := godotenv.Load("./testdata/env/test.env")
-	if err != nil {
-		t.Fatal(err.Error())
+// testOrganizationID retrieves the organization ID from the environment variable
+// `GOLANG_SAMPLES_ORGANIZATION_ID`. It skips the test if the variable is not set.
+func testOrganizationID(t *testing.T) string {
+	t.Helper()
+
+	v := os.Getenv("GOLANG_SAMPLES_ORGANIZATION_ID")
+	if v == "" {
+		t.Skip("testIamUser: missing GOLANG_SAMPLES_ORGANIZATION_ID")
 	}
-	folderID := os.Getenv("GOLANG_SAMPLES_FOLDER_ID")
+
+	return v
+}
+
+// testFolderID retrieves the folder ID from the environment variable
+// `GOLANG_SAMPLES_FOLDER_ID`. It skips the test if the variable is not set.
+func testFolderID(t *testing.T) string {
+	t.Helper()
+
+	v := os.Getenv("GOLANG_SAMPLES_FOLDER_ID")
+	if v == "" {
+		t.Skip("testIamUser: missing GOLANG_SAMPLES_FOLDER_ID")
+	}
+
+	return v
+}
+
+// testLocation returns the location for testing from the environment variable.
+// Skips the test if the environment variable is not set.
+func testLocation(t *testing.T) string {
+	t.Helper()
+
+	v := os.Getenv("GOLANG_SAMPLES_LOCATION")
+	if v == "" {
+		t.Skip("testIamUser: missing GOLANG_SAMPLES_LOCATION")
+	}
+
+	return v
+}
+
+// TestUpdateFolderFloorSettings tests updating floor settings for a specific folder.
+// It verifies that the output buffer contains a confirmation message indicating a successful update.
+func TestUpdateFolderFloorSettings(t *testing.T) {
+	folderID := testFolderID(t)
 	var b bytes.Buffer
-	if _, err := updateFolderFloorSettings(&b, folderID, "us-central1"); err != nil {
+	if err := updateFolderFloorSettings(&b, folderID, "us-central1"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -41,32 +76,32 @@ func TestUpdateFolderFloorSettings(t *testing.T) {
 	}
 }
 
+// TestUpdateOrganizationFloorSettings tests updating floor settings for a specific organization.
+// It ensures the output buffer includes a success message confirming the update.
 func TestUpdateOrganizationFloorSettings(t *testing.T) {
-	// Load the test.env file
-	err := godotenv.Load("./testdata/env/test.env")
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	organizationID := os.Getenv("GOLANG_SAMPLES_ORGANIZATION_ID")
-	var b bytes.Buffer
-	if _, err := updateOrganizationFloorSettings(&b, organizationID, "us-central1"); err != nil {
+	organizationID := testOrganizationID(t)
+	locationID := testLocation(t)
+	var buf bytes.Buffer
+	if err := updateOrganizationFloorSettings(&buf, organizationID, locationID); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), "Updated org floor setting: "; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Updated org floor setting: "; !strings.Contains(got, want) {
 		t.Errorf("updateOrganizationFloorSettings: expected %q to contain %q", got, want)
 	}
 }
 
+// TestUpdateProjectFloorSettings tests updating floor settings for a specific project.
+// It checks that the resulting output includes the expected confirmation message.
 func TestUpdateProjectFloorSettings(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	var b bytes.Buffer
-	if _, err := updateProjectFloorSettings(&b, tc.ProjectID, "us-central1"); err != nil {
+	locationID := testLocation(t)
+	var buf bytes.Buffer
+	if err := updateProjectFloorSettings(&buf, tc.ProjectID, locationID); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), "Updated project floor setting: "; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Updated project floor setting: "; !strings.Contains(got, want) {
 		t.Errorf("updateProjectFloorSettings: expected %q to contain %q", got, want)
 	}
 }

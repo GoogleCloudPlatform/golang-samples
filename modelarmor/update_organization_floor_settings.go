@@ -32,37 +32,18 @@ import (
 //
 // This method updates the floor settings of an organization.
 //
-// Args:
-//
-//	w io.Writer: The writer to use for logging.
-//	organizationID string: The ID of the organization.
-//	locationID string: The ID of the location.
-//
-// Returns:
-//
-//	*modelarmorpb.FloorSetting: The updated floor settings.
-//	error: Any error that occurred during update.
-//
-// Example:
-//
-//	updatedSettings, err := updateOrganizationFloorSettings(
-//	    os.Stdout,
-//	    "my-organization",
-//	    "my-location",
-//	)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//	fmt.Println(updatedSettings)
-func updateOrganizationFloorSettings(w io.Writer, organizationID, locationID string) (*modelarmorpb.FloorSetting, error) {
+// w io.Writer: The writer to use for logging.
+// organizationID string: The ID of the organization.
+// locationID string: The ID of the location.
+func updateOrganizationFloorSettings(w io.Writer, organizationID, locationID string) error {
 	ctx := context.Background()
 
+	// Create options for Model Armor client.
+	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))
 	// Create the Model Armor client.
-	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)),
-	)
+	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client: %v", err)
+		return fmt.Errorf("failed to create client: %w", err)
 	}
 	defer client.Close()
 
@@ -92,7 +73,7 @@ func updateOrganizationFloorSettings(w io.Writer, organizationID, locationID str
 
 	response, err := client.UpdateFloorSetting(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to update floor setting: %v", err)
+		return fmt.Errorf("failed to update floor setting: %w", err)
 	}
 
 	// Print the updated config
@@ -100,5 +81,5 @@ func updateOrganizationFloorSettings(w io.Writer, organizationID, locationID str
 
 	// [END modelarmor_update_organization_floor_settings]
 
-	return response, nil
+	return err
 }

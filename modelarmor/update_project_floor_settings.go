@@ -32,37 +32,18 @@ import (
 //
 // This method updates the floor settings of a project.
 //
-// Args:
-//
-//	w io.Writer: The writer to use for logging.
-//	projectID string: The ID of the project.
-//	locationID string: The ID of the location.
-//
-// Returns:
-//
-//	*modelarmorpb.FloorSetting: The updated floor settings.
-//	error: Any error that occurred during update.
-//
-// Example:
-//
-//	updatedSettings, err := updateProjectFloorSettings(
-//	    os.Stdout,
-//	    "my-project",
-//	    "my-location",
-//	)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//	fmt.Println(updatedSettings)
-func updateProjectFloorSettings(w io.Writer, projectID, locationID string) (*modelarmorpb.FloorSetting, error) {
+// w io.Writer: The writer to use for logging.
+// projectID string: The ID of the project.
+// locationID string: The ID of the location.
+func updateProjectFloorSettings(w io.Writer, projectID, locationID string) error {
 	ctx := context.Background()
 
+	// Create options for Model Armor client.
+	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))
 	// Create the Model Armor client.
-	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)),
-	)
+	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client: %v", err)
+		return fmt.Errorf("failed to create client: %w", err)
 	}
 	defer client.Close()
 
@@ -92,13 +73,13 @@ func updateProjectFloorSettings(w io.Writer, projectID, locationID string) (*mod
 
 	response, err := client.UpdateFloorSetting(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to update floor setting: %v", err)
+		return fmt.Errorf("failed to update floor setting: %w", err)
 	}
 
 	// Print the updated config
 	fmt.Fprintf(w, "Updated project floor setting: %+v\n", response)
 
-	// [END modelarmor_update_project_floor_settings]
-
-	return response, nil
+	return err
 }
+
+// [END modelarmor_update_project_floor_settings]
