@@ -31,33 +31,15 @@ import (
 //
 // This method retrieves the details of a single floor setting of a project.
 //
-// Args:
-//
-//	w io.Writer: The writer to use for logging.
-//	projectID string: The ID of the project.
-//
-// Returns:
-//
-//	*modelarmorpb.FloorSetting: The retrieved floor setting details.
-//	error: Any error that occurred during retrieval.
-//
-// Example:
-//
-//	floorSetting, err := getProjectFloorSettings(
-//	    os.Stdout,
-//	    "my-project",
-//	)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//	fmt.Println(floorSetting)
-func getProjectFloorSettings(w io.Writer, projectID string) (*modelarmorpb.FloorSetting, error) {
+// w io.Writer: The writer to use for logging.
+// projectID string: The ID of the project.
+func getProjectFloorSettings(w io.Writer, projectID string) error {
 	ctx := context.Background()
 
 	// Create the Model Armor client.
 	client, err := modelarmor.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client: %w", err)
+		return fmt.Errorf("failed to create client: %w", err)
 	}
 	defer client.Close()
 
@@ -70,13 +52,13 @@ func getProjectFloorSettings(w io.Writer, projectID string) (*modelarmorpb.Floor
 
 	response, err := client.GetFloorSetting(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get floor setting: %w", err)
+		return fmt.Errorf("failed to get floor setting: %w", err)
 	}
 
 	// Print the retrieved floor setting using fmt.Fprintf with the io.Writer.
 	fmt.Fprintf(w, "Retrieved floor setting: %v\n", response)
 
-	// [END modelarmor_get_project_floor_settings]
-
-	return response, nil
+	return err
 }
+
+// [END modelarmor_get_project_floor_settings]

@@ -21,54 +21,76 @@ import (
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/joho/godotenv"
 )
 
+// testOrganizationID retrieves the organization ID from the environment variable
+// `GOLANG_SAMPLES_ORGANIZATION_ID`. It skips the test if the variable is not set.
+func testOrganizationID(t *testing.T) string {
+	t.Helper()
+
+	v := os.Getenv("GOLANG_SAMPLES_ORGANIZATION_ID")
+	if v == "" {
+		t.Skip("testIamUser: missing GOLANG_SAMPLES_ORGANIZATION_ID")
+	}
+
+	return v
+}
+
+// testFolderID retrieves the folder ID from the environment variable
+// `GOLANG_SAMPLES_FOLDER_ID`. It skips the test if the variable is not set.
+func testFolderID(t *testing.T) string {
+	t.Helper()
+
+	v := os.Getenv("GOLANG_SAMPLES_FOLDER_ID")
+	if v == "" {
+		t.Skip("testIamUser: missing GOLANG_SAMPLES_FOLDER_ID")
+	}
+
+	return v
+}
+
+// TestGetProjectFloorSettings tests the retrieval of floor settings at the project level.
+// It verifies the output contains the expected confirmation string.
 func TestGetProjectFloorSettings(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	var b bytes.Buffer
-	if _, err := getProjectFloorSettings(&b, tc.ProjectID); err != nil {
+	var buf bytes.Buffer
+	if err := getProjectFloorSettings(&buf, tc.ProjectID); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), "Retrieved floor setting:"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Retrieved floor setting:"; !strings.Contains(got, want) {
 		t.Errorf("getFloorSettings: expected %q to contain %q", got, want)
 	}
 }
 
+// TestGetOrganizationFloorSettings tests the retrieval of floor settings at the organization level.
+// It checks that the output includes the expected string indicating success.
 func TestGetOrganizationFloorSettings(t *testing.T) {
-	// Load the test.env file
-	err := godotenv.Load("./testdata/env/test.env")
-	if err != nil {
+
+	organizationID := testOrganizationID(t)
+	var buf bytes.Buffer
+	if err := getOrganizationFloorSettings(&buf, organizationID); err != nil {
 		t.Fatal(err)
 	}
 
-	organizationID := os.Getenv("GOLANG_SAMPLES_ORGANIZATION_ID")
-	var b bytes.Buffer
-	if _, err := getOrganizationFloorSettings(&b, organizationID); err != nil {
-		t.Fatal(err)
-	}
-
-	if got, want := b.String(), "Retrieved org floor setting:"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Retrieved org floor setting:"; !strings.Contains(got, want) {
 		t.Errorf("getFloorSettings: expected %q to contain %q", got, want)
 	}
 }
 
-func TestGetFolderFloorSettings(t *testing.T) {
-	// Load the test.env file
-	err := godotenv.Load("./testdata/env/test.env")
-	if err != nil {
-		t.Fatal(err.Error())
-	}
 
-	folderID := os.Getenv("GOLANG_SAMPLES_FOLDER_ID")
-	var b bytes.Buffer
-	if _, err := getFolderFloorSettings(&b, folderID); err != nil {
+// TestGetFolderFloorSettings tests the retrieval of floor settings at the folder level.
+// It ensures the result contains the expected confirmation message.
+func TestGetFolderFloorSettings(t *testing.T) {
+
+	folderID := testFolderID(t)
+	var buf bytes.Buffer
+	if err := getFolderFloorSettings(&buf, folderID); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := b.String(), "Retrieved folder floor setting: "; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Retrieved folder floor setting: "; !strings.Contains(got, want) {
 		t.Errorf("getFloorSettings: expected %q to contain %q", got, want)
 	}
 }
