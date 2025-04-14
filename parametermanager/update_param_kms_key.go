@@ -61,7 +61,7 @@ func updateParamKmsKey(w io.Writer, projectID, parameterID, kmsKey string) error
 	}
 	parameter, err := client.UpdateParameter(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Failed to update parameter: %w", err)
+		return fmt.Errorf("failed to update parameter: %w", err)
 	}
 
 	fmt.Fprintf(w, "Updated parameter %s with kms_key %s\n", parameter.Name, *parameter.KmsKey)

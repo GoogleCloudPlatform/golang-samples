@@ -336,11 +336,11 @@ func TestListParam(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format %s \n", parameter1.Name, parameter1.Format); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format %s", parameter1.Name, parameter1.Format); !strings.Contains(got, want) {
 		t.Errorf("ListParameter: expected %q to contain %q", got, want)
 	}
 
-	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format %s \n", parameter2.Name, parameter2.Format); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format %s", parameter2.Name, parameter2.Format); !strings.Contains(got, want) {
 		t.Errorf("ListParameter: expected %q to contain %q", got, want)
 	}
 }
@@ -351,20 +351,21 @@ func TestCreateParamWithKmsKey(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	parameterID := testName(t)
+	parameterName := fmt.Sprintf("projects/%s/locations/global/parameters/%s", tc.ProjectID, parameterID)
 
 	keyId := testName(t)
 	testCreateKeyRing(t, tc.ProjectID, "go-test-key-ring")
 	testCreateKeyHSM(t, tc.ProjectID, "go-test-key-ring", keyId)
 	kms_key := fmt.Sprintf("projects/%s/locations/global/keyRings/go-test-key-ring/cryptoKeys/%s", tc.ProjectID, keyId)
 
-	defer testCleanupParameter(t, fmt.Sprintf("projects/%s/locations/global/parameters/%s", tc.ProjectID, parameterID))
+	defer testCleanupParameter(t, parameterName)
 	defer testCleanupKeyVersions(t, fmt.Sprintf("%s/cryptoKeyVersions/1", kms_key))
 
 	var buf bytes.Buffer
 	if err := createParamWithKmsKey(&buf, tc.ProjectID, parameterID, kms_key); err != nil {
 		t.Fatalf("Failed to create parameter: %v", err)
 	}
-	if got, want := buf.String(), fmt.Sprintf("Created parameter %s with kms_key %s\n", fmt.Sprintf("projects/%s/locations/global/parameters/%s", tc.ProjectID, parameterID), kms_key); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Created parameter %s with kms_key %s", parameterName, kms_key); !strings.Contains(got, want) {
 		t.Errorf("createParameter: expected %q to contain %q", got, want)
 	}
 }
@@ -388,7 +389,7 @@ func TestUpdateParamKmsKey(t *testing.T) {
 	if err := updateParamKmsKey(&buf, tc.ProjectID, parameterID, kms_key); err != nil {
 		t.Fatalf("Failed to update parameter: %v", err)
 	}
-	if got, want := buf.String(), fmt.Sprintf("Updated parameter %s with kms_key %s\n", fmt.Sprintf("projects/%s/locations/global/parameters/%s", tc.ProjectID, parameterID), kms_key); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Updated parameter %s with kms_key %s", parameter.Name, kms_key); !strings.Contains(got, want) {
 		t.Errorf("createParameter: expected %q to contain %q", got, want)
 	}
 }
@@ -411,7 +412,7 @@ func TestRemoveParamKmsKey(t *testing.T) {
 	if err := removeParamKmsKey(&buf, tc.ProjectID, parameterID); err != nil {
 		t.Fatalf("Failed to create parameter: %v", err)
 	}
-	if got, want := buf.String(), fmt.Sprintf("Removed kms_key for parameter %s\n", fmt.Sprintf("projects/%s/locations/global/parameters/%s", tc.ProjectID, parameterID)); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Removed kms_key for parameter %s", parameter.Name); !strings.Contains(got, want) {
 		t.Errorf("createParameter: expected %q to contain %q", got, want)
 	}
 }

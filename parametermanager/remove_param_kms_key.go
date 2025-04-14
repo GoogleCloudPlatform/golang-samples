@@ -58,7 +58,7 @@ func removeParamKmsKey(w io.Writer, projectID, parameterID string) error {
 	}
 	parameter, err := client.UpdateParameter(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Failed to update parameter: %w", err)
+		return fmt.Errorf("failed to update parameter: %w", err)
 	}
 
 	fmt.Fprintf(w, "Removed kms_key for parameter %s\n", parameter.Name)

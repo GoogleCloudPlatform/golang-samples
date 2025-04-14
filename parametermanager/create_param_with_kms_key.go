@@ -58,7 +58,7 @@ func createParamWithKmsKey(w io.Writer, projectID, parameterID, kmsKey string) e
 	}
 	parameter, err := client.CreateParameter(ctx, req)
 	if err != nil {
-		return fmt.Errorf("Failed to create parameter: %w", err)
+		return fmt.Errorf("failed to create parameter: %w", err)
 	}
 
 	fmt.Fprintf(w, "Created parameter %s with kms_key %s\n", parameter.Name, *parameter.KmsKey)
