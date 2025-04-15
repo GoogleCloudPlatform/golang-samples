@@ -15,25 +15,49 @@
 package main
 
 import (
-	"context"
+	"fmt"
 	"net/http"
 	"strings"
 
 	"google.golang.org/api/idtoken"
+	"google.golang.org/api/option"
 )
 
+// Parse the authorization header and decode the information beign
+// sent by the Bearer Token
 func receiveAuthorizedRequest(w http.ResponseWriter, r *http.Request){
-	ctx := context.Background()
 	
+	if r.Method != http.MethodGet{
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
+	
+	// Attempt to retrieve and validate the Authorization header.
 	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || len(strings.Split(authHeader, " ")) != 2 {
-		http.Error(w, "Missing Authorization header", http.StatusBadRequest)
+	if authHeader == "" {
+		w.Write([]byte("Hello, anonymus user\n"))
+		return
+	}
+
+	if len(strings.Split(authHeader, " ")) != 2 {
+		http.Error(w, "Malformed Authorization header", http.StatusBadRequest)
 		return
 	}
 
 	token := strings.Split(authHeader, " ")[1]
 
-	payload, err := idtoken.Validate(context.Background(), splittedAuth[1], audience)
+	// Verify and decode the JWT
+	v, err := idtoken.NewValidator(r.Context(), option.WithHTTPClient(http.DefaultClient))
+	if err != nil {
+		http.Error(w, "Unable to create Validator", http.StatusBadRequest)
+		return
+	}
 	
+	payload, err := v.Validate(r.Context(), token, "")
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Invalid Token: %v", err), http.StatusBadRequest)
+		return
+	}
 
+	w.Write([]byte(fmt.Sprintf("Hello, %s!\n", payload.Claims["email"])))
 }
