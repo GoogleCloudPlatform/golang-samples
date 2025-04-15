@@ -20,7 +20,7 @@ import (
 	"os"
 )
 
-func main(){
+func main() {
 	log.Print("starting server...")
 	http.HandleFunc("/", receiveAuthorizedRequest)
 

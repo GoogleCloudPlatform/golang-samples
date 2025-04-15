@@ -31,7 +31,7 @@ func TestAuth(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	serviceName := testGenerateServiceID()
-	
+
 	if err := testDeployReceiveService(t, serviceName, tc.ProjectID); err != nil {
 		t.Fatalf("testDeployReceiveService error: %v\n", err)
 	}
