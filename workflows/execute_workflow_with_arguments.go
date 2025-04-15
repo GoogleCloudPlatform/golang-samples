@@ -79,7 +79,7 @@ func executeWorkflowWithArguments(w io.Writer, projectID, workflowID, locationID
 
 	for res.State == "ACTIVE" {
 		time.Sleep(backoffDelay)
-		
+
 		// Request for getting the updated state of the execution.
 		getReq := service.Get(res.Name)
 		res, err = getReq.Do()
@@ -88,7 +88,7 @@ func executeWorkflowWithArguments(w io.Writer, projectID, workflowID, locationID
 		}
 
 		// Double the delay to provide exponential backoff (capped in 16 seconds).
-		if backoffDelay < time.Second * 16{
+		if backoffDelay < time.Second*16 {
 			backoffDelay *= 2
 		}
 	}

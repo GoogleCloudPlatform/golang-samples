@@ -43,23 +43,23 @@ func TestExecuteWorkflow(t *testing.T) {
 	defer testCleanup(t, workflowID, tc.ProjectID, locationID)
 
 	// Execute the workflow with a timeout if 10 minutes
-	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Minute * 10)
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Minute*10)
 	defer cancel()
 
 	chanErr := make(chan error, 1) // Buffered channel for receive the function's returning result
 
 	// Goroutine that expects the returning value from the workflow execution and sends it to the channel
-	go func(){
+	go func() {
 		chanErr <- executeWorkflowWithArguments(&buf, tc.ProjectID, workflowID, locationID)
 		close(chanErr)
 	}()
-	
-	// Block until timeout is done or received a returning value from the function call. 
-	select{
-	case <- ctxTimeout.Done():
+
+	// Block until timeout is done or received a returning value from the function call.
+	select {
+	case <-ctxTimeout.Done():
 		close(chanErr)
 		t.Fatalf("executeWorkflow error: %v", context.DeadlineExceeded)
-	case err = <- chanErr:
+	case err = <-chanErr:
 		if err != nil {
 			t.Fatalf("executeWorkflow error: %v\n", err)
 		}

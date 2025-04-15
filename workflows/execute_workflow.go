@@ -71,7 +71,7 @@ func executeWorkflow(w io.Writer, projectID, workflowID, locationID string) erro
 		}
 
 		// Double the delay to provide exponential backoff (capped in 16 seconds).
-		if backoffDelay < time.Second * 16{
+		if backoffDelay < time.Second*16 {
 			backoffDelay *= 2
 		}
 	}
