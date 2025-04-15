@@ -239,6 +239,42 @@ func testCreateKeyHSM(t *testing.T, projectID, keyRing, id string) {
 	}
 }
 
+// TestCreateParam tests the createParam function by creating a parameter,
+// then verifies if the parameter was successfully created by checking the output.
+func TestCreateParam(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameterID := testName(t)
+
+	var buf bytes.Buffer
+	if err := createParam(&buf, tc.ProjectID, parameterID); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupParameter(t, fmt.Sprintf("projects/%s/locations/global/parameters/%s", tc.ProjectID, parameterID))
+
+	if got, want := buf.String(), "Created parameter:"; !strings.Contains(got, want) {
+		t.Errorf("createParameter: expected %q to contain %q", got, want)
+	}
+}
+
+// TestCreateStructuredParam tests the createStructuredParam function by creating a structured parameter,
+// then verifies if the parameter was successfully created by checking the output.
+func TestCreateStructuredParam(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameterID := testName(t)
+
+	var buf bytes.Buffer
+	if err := createStructuredParam(&buf, tc.ProjectID, parameterID, parametermanagerpb.ParameterFormat_JSON); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupParameter(t, fmt.Sprintf("projects/%s/locations/global/parameters/%s", tc.ProjectID, parameterID))
+
+	if got, want := buf.String(), fmt.Sprintf("Created parameter %s with format JSON", fmt.Sprintf("projects/%s/locations/global/parameters/%s", tc.ProjectID, parameterID)); !strings.Contains(got, want) {
+		t.Errorf("createParameter: expected %q to contain %q", got, want)
+	}
+}
+
 // TestCreateStructuredParamVersion tests the createStructuredParamVersion function by creating a structured parameter version,
 // then verifies if the parameter version was successfully created by checking the output.
 func TestCreateStructuredParamVersion(t *testing.T) {
@@ -336,11 +372,11 @@ func TestListParam(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format %s", parameter1.Name, parameter1.Format); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format %s \n", parameter1.Name, parameter1.Format); !strings.Contains(got, want) {
 		t.Errorf("ListParameter: expected %q to contain %q", got, want)
 	}
 
-	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format %s", parameter2.Name, parameter2.Format); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format %s \n", parameter2.Name, parameter2.Format); !strings.Contains(got, want) {
 		t.Errorf("ListParameter: expected %q to contain %q", got, want)
 	}
 }
