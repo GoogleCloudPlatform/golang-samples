@@ -143,66 +143,39 @@ func testCleanupParameterVersion(t *testing.T, name string) {
 	}
 }
 
-// TestDisableParamVersion tests the disableParamVersion function by creating a parameter and its version,
-// then attempts to disable the created parameter version. It verifies if the parameter version
-// was successfully disabled by checking the output.
-func TestDisableParamVersion(t *testing.T) {
+// TestCreateParam tests the createParam function by creating a parameter,
+// then verifies if the parameter was successfully created by checking the output.
+func TestCreateParam(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
-	payload := `{"username": "test-user", "host": "localhost"}`
-	parameterVersion, parameterVersionID := testParameterVersion(t, tc.ProjectID, parameterID, payload)
-	defer testCleanupParameter(t, parameter.Name)
-	defer testCleanupParameterVersion(t, parameterVersion.Name)
+	parameterID := testName(t)
 
 	var buf bytes.Buffer
-	if err := disableParamVersion(&buf, tc.ProjectID, parameterID, parameterVersionID); err != nil {
+	if err := createParam(&buf, tc.ProjectID, parameterID); err != nil {
 		t.Fatal(err)
 	}
+	defer testCleanupParameter(t, fmt.Sprintf("projects/%s/locations/global/parameters/%s", tc.ProjectID, parameterID))
 
-	if got, want := buf.String(), "Disabled parameter version"; !strings.Contains(got, want) {
-		t.Errorf("DisableParameterVersion: expected %q to contain %q", got, want)
+	if got, want := buf.String(), "Created parameter:"; !strings.Contains(got, want) {
+		t.Errorf("createParameter: expected %q to contain %q", got, want)
 	}
 }
 
-// TestEnableParamVersion tests the enableParamVersion function by creating a parameter and its version,
-// then attempts to enable the created parameter version. It verifies if the parameter version
-// was successfully enabled by checking the output.
-func TestEnableParamVersion(t *testing.T) {
+// TestCreateStructuredParam tests the createStructuredParam function by creating a structured parameter,
+// then verifies if the parameter was successfully created by checking the output.
+func TestCreateStructuredParam(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
-	payload := `{"username": "test-user", "host": "localhost"}`
-	parameterVersion, parameterVersionID := testParameterVersion(t, tc.ProjectID, parameterID, payload)
-	defer testCleanupParameter(t, parameter.Name)
-	defer testCleanupParameterVersion(t, parameterVersion.Name)
+	parameterID := testName(t)
 
 	var buf bytes.Buffer
-	if err := enableParamVersion(&buf, tc.ProjectID, parameterID, parameterVersionID); err != nil {
+	if err := createStructuredParam(&buf, tc.ProjectID, parameterID, parametermanagerpb.ParameterFormat_JSON); err != nil {
 		t.Fatal(err)
 	}
+	defer testCleanupParameter(t, fmt.Sprintf("projects/%s/locations/global/parameters/%s", tc.ProjectID, parameterID))
 
-	if got, want := buf.String(), "Enabled parameter version"; !strings.Contains(got, want) {
-		t.Errorf("EnableParameterVersion: expected %q to contain %q", got, want)
-	}
-}
-
-// TestDeleteParam tests the deleteParam function by creating a parameter,
-// then attempts to delete the created parameter. It verifies if the parameter
-// was successfully deleted by checking the output.
-func TestDeleteParam(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
-	defer testCleanupParameter(t, parameter.Name)
-
-	var buf bytes.Buffer
-	if err := deleteParam(&buf, tc.ProjectID, parameterID); err != nil {
-		t.Fatal(err)
-	}
-
-	if got, want := buf.String(), "Deleted parameter"; !strings.Contains(got, want) {
-		t.Errorf("DeleteParameter: expected %q to contain %q", got, want)
+	if got, want := buf.String(), fmt.Sprintf("Created parameter %s with format JSON", fmt.Sprintf("projects/%s/locations/global/parameters/%s", tc.ProjectID, parameterID)); !strings.Contains(got, want) {
+		t.Errorf("createParameter: expected %q to contain %q", got, want)
 	}
 }
 
@@ -325,11 +298,74 @@ func TestListParam(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format %s", parameter1.Name, parameter1.Format); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format %s \n", parameter1.Name, parameter1.Format); !strings.Contains(got, want) {
 		t.Errorf("ListParameter: expected %q to contain %q", got, want)
 	}
 
-	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format %s", parameter2.Name, parameter2.Format); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format %s \n", parameter2.Name, parameter2.Format); !strings.Contains(got, want) {
 		t.Errorf("ListParameter: expected %q to contain %q", got, want)
+	}
+}
+
+// TestDisableParamVersion tests the disableParamVersion function by creating a parameter and its version,
+// then attempts to disable the created parameter version. It verifies if the parameter version
+// was successfully disabled by checking the output.
+func TestDisableParamVersion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
+	payload := `{"username": "test-user", "host": "localhost"}`
+	parameterVersion, parameterVersionID := testParameterVersion(t, tc.ProjectID, parameterID, payload)
+	defer testCleanupParameter(t, parameter.Name)
+	defer testCleanupParameterVersion(t, parameterVersion.Name)
+
+	var buf bytes.Buffer
+	if err := disableParamVersion(&buf, tc.ProjectID, parameterID, parameterVersionID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Disabled parameter version"; !strings.Contains(got, want) {
+		t.Errorf("DisableParameterVersion: expected %q to contain %q", got, want)
+	}
+}
+
+// TestEnableParamVersion tests the enableParamVersion function by creating a parameter and its version,
+// then attempts to enable the created parameter version. It verifies if the parameter version
+// was successfully enabled by checking the output.
+func TestEnableParamVersion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
+	payload := `{"username": "test-user", "host": "localhost"}`
+	parameterVersion, parameterVersionID := testParameterVersion(t, tc.ProjectID, parameterID, payload)
+	defer testCleanupParameter(t, parameter.Name)
+	defer testCleanupParameterVersion(t, parameterVersion.Name)
+
+	var buf bytes.Buffer
+	if err := enableParamVersion(&buf, tc.ProjectID, parameterID, parameterVersionID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Enabled parameter version"; !strings.Contains(got, want) {
+		t.Errorf("EnableParameterVersion: expected %q to contain %q", got, want)
+	}
+}
+
+// TestDeleteParam tests the deleteParam function by creating a parameter,
+// then attempts to delete the created parameter. It verifies if the parameter
+// was successfully deleted by checking the output.
+func TestDeleteParam(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
+	defer testCleanupParameter(t, parameter.Name)
+
+	var buf bytes.Buffer
+	if err := deleteParam(&buf, tc.ProjectID, parameterID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Deleted parameter"; !strings.Contains(got, want) {
+		t.Errorf("DeleteParameter: expected %q to contain %q", got, want)
 	}
 }
