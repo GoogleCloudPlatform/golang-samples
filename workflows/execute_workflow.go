@@ -14,7 +14,7 @@
 
 package workflows
 
-// [START workflows_api_quickstart]
+// [START workflows_execute_workflow_without_arguments]
 import (
 	"context"
 	"fmt"
@@ -39,9 +39,6 @@ func executeWorkflow(w io.Writer, projectID, workflowID, locationID string) erro
 
 	ctx := context.Background()
 
-	delay := time.Second * 1
-	timeout := time.Minute * 10 // Timeout for workflow execution
-
 	// Construct the location path.
 	parent := fmt.Sprintf("projects/%s/locations/%s/workflows/%s", projectID, locationID, workflowID)
 
@@ -61,11 +58,11 @@ func executeWorkflow(w io.Writer, projectID, workflowID, locationID string) erro
 	}
 	fmt.Fprintln(w, "- Execution started...")
 
-	// Set up a context with timeout to prevent an infinite loop.
-	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
+	backoffDelay := time.Second
 
 	for res.State == "ACTIVE" {
+		time.Sleep(backoffDelay)
+
 		// Request for getting the updated state of the execution.
 		getReq := service.Get(res.Name)
 		res, err = getReq.Do()
@@ -73,17 +70,9 @@ func executeWorkflow(w io.Writer, projectID, workflowID, locationID string) erro
 			return fmt.Errorf("getReq error: %w", err)
 		}
 
-		// Double the delay to provide exponential backoff.
-		delay *= 2
-
-		// Evaluate whether the current delay has passed, or the execution
-		// has timed out.
-		// The last case will return an error indicating a timeout error.
-		select {
-		case <-time.After(delay):
-			fmt.Fprintln(w, "- Waiting for results...")
-		case <-timeoutCtx.Done():
-			return timeoutCtx.Err()
+		// Double the delay to provide exponential backoff (capped in 16 seconds).
+		if backoffDelay < time.Second * 16{
+			backoffDelay *= 2
 		}
 	}
 
@@ -93,4 +82,4 @@ func executeWorkflow(w io.Writer, projectID, workflowID, locationID string) erro
 	return nil
 }
 
-// [END workflows_api_quickstart]
+// [END workflows_execute_workflow_without_arguments]

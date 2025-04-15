@@ -16,8 +16,10 @@ package workflows
 
 import (
 	"bytes"
+	"context"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
@@ -31,6 +33,7 @@ func TestExecuteWorkflow(t *testing.T) {
 	workflowID := testGenerateWorkflowID()
 	locationID := "us-central1"
 
+	var err error
 	var buf bytes.Buffer
 
 	// Create the test workflow that will be cleaned up once the test is done.
@@ -39,9 +42,27 @@ func TestExecuteWorkflow(t *testing.T) {
 	}
 	defer testCleanup(t, workflowID, tc.ProjectID, locationID)
 
-	// Execute the workflow
-	if err := executeWorkflow(&buf, tc.ProjectID, workflowID, locationID); err != nil {
-		t.Fatalf("executeWorkflow error: %v\n", err)
+	// Execute the workflow with a timeout if 10 minutes
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Minute * 10)
+	defer cancel()
+
+	chanErr := make(chan error, 1) // Buffered channel for receive the function's returning result
+
+	// Goroutine that expects the returning value from the workflow execution and sends it to the channel
+	go func(){
+		chanErr <- executeWorkflowWithArguments(&buf, tc.ProjectID, workflowID, locationID)
+		close(chanErr)
+	}()
+	
+	// Block until timeout is done or received a returning value from the function call. 
+	select{
+	case <- ctxTimeout.Done():
+		close(chanErr)
+		t.Fatalf("executeWorkflow error: %v", context.DeadlineExceeded)
+	case err = <- chanErr:
+		if err != nil {
+			t.Fatalf("executeWorkflow error: %v\n", err)
+		}
 	}
 
 	// Evaluate the if the output contains the expected string.
