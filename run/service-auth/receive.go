@@ -25,12 +25,12 @@ import (
 
 // Parse the authorization header and decode the information beign
 // sent by the Bearer Token
-func receiveAuthorizedRequest(w http.ResponseWriter, r *http.Request){
-	if r.Method != http.MethodGet{
+func receiveAuthorizedRequest(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 		return
 	}
-	
+
 	// Attempt to retrieve and validate the Authorization header.
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
@@ -53,7 +53,7 @@ func receiveAuthorizedRequest(w http.ResponseWriter, r *http.Request){
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	
+
 	payload, err := v.Validate(r.Context(), token, "")
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Invalid Token: %v", err), http.StatusBadRequest)
