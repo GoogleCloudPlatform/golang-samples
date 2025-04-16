@@ -25,11 +25,7 @@ import (
 	workflowexecutions "google.golang.org/api/workflowexecutions/v1"
 )
 
-// Execute a workflow with arguments and print
-// the execution results.
-//
-// A workflow consists of a series of steps described
-// using the Workflows syntax, and can be written in either YAML or JSON.
+// Execute a workflow with arguments and print the execution results.
 //
 // For more information about Workflows see:
 // https://cloud.google.com/workflows/docs/overview
@@ -53,14 +49,14 @@ func executeWorkflowWithArguments(w io.Writer, projectID, workflowID, locationID
 	// Get execution service.
 	service := client.Projects.Locations.Workflows.Executions
 
-	// Create argument
+	// Create argument.
 	argument := struct {
 		SearchTerm string `json:"searchTerm"`
 	}{
 		SearchTerm: "Cloud",
 	}
 
-	// Encode argument to JSON
+	// Encode argument to JSON.
 	argumentEncoded, err := json.Marshal(argument)
 	if err != nil {
 		return fmt.Errorf("json.Marshal error: %w", err)
@@ -75,19 +71,20 @@ func executeWorkflowWithArguments(w io.Writer, projectID, workflowID, locationID
 	}
 	fmt.Fprintln(w, "- Execution started...")
 
-	backoffDelay := time.Second // Timeout for workflow execution
+	// Set initial value for backoff delay in one second.
+	backoffDelay := time.Second
 
 	for res.State == "ACTIVE" {
 		time.Sleep(backoffDelay)
 
-		// Request for getting the updated state of the execution.
+		// Request the updated state for the execution.
 		getReq := service.Get(res.Name)
 		res, err = getReq.Do()
 		if err != nil {
 			return fmt.Errorf("getReq error: %w", err)
 		}
 
-		// Double the delay to provide exponential backoff (capped in 16 seconds).
+		// Double the delay to provide exponential backoff (capped at 16 seconds).
 		if backoffDelay < time.Second*16 {
 			backoffDelay *= 2
 		}

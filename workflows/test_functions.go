@@ -115,5 +115,5 @@ func testCleanup(t *testing.T, workflowID, projectID, locationID string) error {
 // testGenerateWorkflowID creates a random string to
 // assign it to a new workflow.
 func testGenerateWorkflowID() string {
-	return fmt.Sprintf("workflow-go-test%s", uuid.NewString())
+	return fmt.Sprintf("workflow-go-test-%s", uuid.NewString())
 }

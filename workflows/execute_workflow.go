@@ -26,9 +26,6 @@ import (
 
 // Execute a workflow and print the execution results.
 //
-// A workflow consists of a series of steps described
-// using the Workflows syntax, and can be written in either YAML or JSON.
-//
 // For more information about Workflows see:
 // https://cloud.google.com/workflows/docs/overview
 func executeWorkflow(w io.Writer, projectID, workflowID, locationID string) error {
@@ -58,19 +55,20 @@ func executeWorkflow(w io.Writer, projectID, workflowID, locationID string) erro
 	}
 	fmt.Fprintln(w, "- Execution started...")
 
+	// Set initial value for backoff delay in one second.
 	backoffDelay := time.Second
 
 	for res.State == "ACTIVE" {
 		time.Sleep(backoffDelay)
 
-		// Request for getting the updated state of the execution.
+		// Request the updated state for the execution.
 		getReq := service.Get(res.Name)
 		res, err = getReq.Do()
 		if err != nil {
 			return fmt.Errorf("getReq error: %w", err)
 		}
 
-		// Double the delay to provide exponential backoff (capped in 16 seconds).
+		// Double the delay to provide exponential backoff (capped at 16 seconds).
 		if backoffDelay < time.Second*16 {
 			backoffDelay *= 2
 		}

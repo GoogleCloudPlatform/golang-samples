@@ -42,19 +42,19 @@ func TestExecuteWorkflow(t *testing.T) {
 	}
 	defer testCleanup(t, workflowID, tc.ProjectID, locationID)
 
-	// Execute the workflow with a timeout if 10 minutes
+	// Execute the workflow with a timeout of 10 minutes.
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Minute*10)
 	defer cancel()
 
-	chanErr := make(chan error, 1) // Buffered channel for receive the function's returning result
+	chanErr := make(chan error, 1) // Buffered channel for receiving the function's result
 
-	// Goroutine that expects the returning value from the workflow execution and sends it to the channel
+	// Goroutine that expects the returning value from the workflow execution and sends it to the channel.
 	go func() {
-		chanErr <- executeWorkflowWithArguments(&buf, tc.ProjectID, workflowID, locationID)
+		chanErr <- executeWorkflow(&buf, tc.ProjectID, workflowID, locationID)
 		close(chanErr)
 	}()
 
-	// Block until timeout is done or received a returning value from the function call.
+	// Block until timeout or a return value is received from the function call.
 	select {
 	case <-ctxTimeout.Done():
 		close(chanErr)
@@ -65,7 +65,7 @@ func TestExecuteWorkflow(t *testing.T) {
 		}
 	}
 
-	// Evaluate the if the output contains the expected string.
+	// Evaluate whether the output contains the expected string.
 	if got, want := buf.String(), "Execution results"; !strings.Contains(got, want) {
 		t.Errorf("executeWorkflow: expected %q to contain %q", got, want)
 	}
