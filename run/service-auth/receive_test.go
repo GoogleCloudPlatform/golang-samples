@@ -21,6 +21,7 @@ import (
 	"os/exec"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
@@ -46,30 +47,33 @@ func TestAuth(t *testing.T) {
 		t.Fatalf("testGetGCPAuthToken error: %v\n", err)
 	}
 
-	request, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		t.Fatalf("http.NewRequest error: %v", err)
-	}
+	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
+		request, err := http.NewRequest(http.MethodGet, url, nil)
+		if err != nil {
+			r.Errorf("Attempt %v http.NewRequest error: %v", r.Attempt, err)
+		}
 
-	request.Header.Set("Authorization", "Bearer "+token)
+		request.Header.Set("Authorization", "Bearer "+token)
 
-	response, err := http.DefaultClient.Do(request)
-	if err != nil {
-		t.Fatalf("http.DefaultClient.Do error: %v", err)
-	}
-	defer response.Body.Close()
+		response, err := http.DefaultClient.Do(request)
+		if err != nil {
+			r.Errorf("Attempt %v http.DefaultClient.Do error: %v", r.Attempt, err)
+		}
+		defer response.Body.Close()
 
-	responseBody, err := io.ReadAll(response.Body)
-	if err != nil {
-		t.Fatalf("io.ReadAll error: %v", err)
-	}
+		responseBody, err := io.ReadAll(response.Body)
+		if err != nil {
+			r.Errorf("Attempt %v io.ReadAll error: %v", r.Attempt, err)
+		}
 
-	if got, want := response.StatusCode, http.StatusOK; got != want {
-		t.Errorf("Receive Service: unexpected status got %v want %v.\n Response: %s\n", got, want, responseBody)
-	}
-	if got, dontWant := string(responseBody), "anonymous"; strings.Contains(got, dontWant) {
-		t.Errorf("Receive Service: got: %s dont want %q\n", got, dontWant)
-	}
+		if got, want := response.StatusCode, http.StatusOK; got != want {
+			r.Errorf("Attempt %v Receive Service: unexpected status got %v want %v.\n", r.Attempt, got, want)
+		}
+
+		if got, dontWant := string(responseBody), "anonymous"; strings.Contains(got, dontWant) {
+			r.Errorf("Attempt %v Receive Service: got: %s dont want %q\n", r.Attempt, got, dontWant)
+		}
+	})
 }
 
 func testGetGCPAuthToken(t *testing.T) (string, error) {
