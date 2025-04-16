@@ -3,8 +3,8 @@ module github.com/GoogleCloudPlatform/golang-samples/parametermanager
 go 1.23.0
 
 require (
-	cloud.google.com/go/parametermanager v0.2.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250414233709-a153c3293cb0
+	cloud.google.com/go/parametermanager v0.2.1
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250415164901-4d997e9ab816
 	github.com/gofrs/uuid v4.4.0+incompatible
 	google.golang.org/api v0.229.0
 	google.golang.org/genproto v0.0.0-20250414145226-207652e42e2e
@@ -51,7 +51,7 @@ require (
 	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/text v0.24.0 // indirect
 	golang.org/x/time v0.11.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20250409194420-de1ac958c67a // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20250414145226-207652e42e2e // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250414145226-207652e42e2e // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 )
