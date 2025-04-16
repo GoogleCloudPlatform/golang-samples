@@ -17,7 +17,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os/exec"
 	"strings"
@@ -66,7 +65,7 @@ func TestAuth(t *testing.T) {
 	}
 
 	if got, want := response.StatusCode, http.StatusOK; got != want {
-		t.Errorf("Receive Service: unexpected status got %v want %v\n", got, want)
+		t.Errorf("Receive Service: unexpected status got %v want %v.\n Response: %s\n", got, want, responseBody)
 	}
 	if got, dontWant := string(responseBody), "anonymous"; strings.Contains(got, dontWant) {
 		t.Errorf("Receive Service: got: %s dont want %q\n", got, dontWant)
@@ -74,8 +73,6 @@ func TestAuth(t *testing.T) {
 }
 
 func testGetGCPAuthToken(t *testing.T) (string, error) {
-	log.Println("testGetGCPAuthToken")
-
 	t.Helper()
 
 	cmd := exec.Command(
@@ -95,7 +92,6 @@ func testGetGCPAuthToken(t *testing.T) (string, error) {
 }
 
 func testGetReceiveServiceURL(t *testing.T, serviceName, projectID string) (string, error) {
-	log.Println("testGetReceiveServiceURL")
 	t.Helper()
 
 	cmd := exec.Command(
@@ -121,7 +117,6 @@ func testGetReceiveServiceURL(t *testing.T, serviceName, projectID string) (stri
 }
 
 func testDeployReceiveService(t *testing.T, serviceName, projectID string) error {
-	log.Println("testDeployReceiveService")
 	t.Helper()
 
 	cmd := exec.Command(
@@ -145,7 +140,6 @@ func testDeployReceiveService(t *testing.T, serviceName, projectID string) error
 }
 
 func testDeleteReceiveService(t *testing.T, serviceName, projectID string) error {
-	log.Println("testDeleteReceiveService")
 	t.Helper()
 
 	cmd := exec.Command(

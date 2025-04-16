@@ -40,6 +40,7 @@ func receiveAuthorizedRequest(w http.ResponseWriter, r *http.Request){
 
 	if len(strings.Split(authHeader, " ")) != 2 {
 		http.Error(w, "Malformed Authorization header", http.StatusBadRequest)
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
@@ -49,12 +50,14 @@ func receiveAuthorizedRequest(w http.ResponseWriter, r *http.Request){
 	v, err := idtoken.NewValidator(r.Context(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		http.Error(w, "Unable to create Validator", http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	
 	payload, err := v.Validate(r.Context(), token, "")
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Invalid Token: %v", err), http.StatusBadRequest)
+		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 
