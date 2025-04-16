@@ -385,6 +385,97 @@ func TestCreateRegionalParamVersionWithSecret(t *testing.T) {
 	}
 }
 
+// TestDisableRegionalParamVersion tests the disableRegionalParamVersion function by creating a parameter and its version,
+// then attempts to disable the created parameter version. It verifies if the parameter version
+// was successfully disabled by checking the output.
+func TestDisableRegionalParamVersion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
+	payload := `{"username": "test-user", "host": "localhost"}`
+	parameterVersion, parameterVersionID := testParameterVersion(t, tc.ProjectID, parameterID, payload)
+	locationId := testLocation(t)
+
+	defer testCleanupParameter(t, parameter.Name)
+	defer testCleanupParameterVersion(t, parameterVersion.Name)
+
+	var buf bytes.Buffer
+	if err := disableRegionalParamVersion(&buf, tc.ProjectID, locationId, parameterID, parameterVersionID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Disabled regional parameter version"; !strings.Contains(got, want) {
+		t.Errorf("DisableParameterVersion: expected %q to contain %q", got, want)
+	}
+}
+
+// TestEnableRegionalParamVersion tests the enableRegionalParamVersion function by creating a parameter and its version,
+// then attempts to enable the created parameter version. It verifies if the parameter version
+// was successfully enabled by checking the output.
+func TestEnableRegionalParamVersion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
+	payload := `{"username": "test-user", "host": "localhost"}`
+	parameterVersion, parameterVersionID := testParameterVersion(t, tc.ProjectID, parameterID, payload)
+	locationId := testLocation(t)
+
+	defer testCleanupParameter(t, parameter.Name)
+	defer testCleanupParameterVersion(t, parameterVersion.Name)
+
+	var buf bytes.Buffer
+	if err := enableRegionalParamVersion(&buf, tc.ProjectID, locationId, parameterID, parameterVersionID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Enabled regional parameter version"; !strings.Contains(got, want) {
+		t.Errorf("EnableParameterVersion: expected %q to contain %q", got, want)
+	}
+}
+
+// TestDeleteRegionalParam tests the deleteRegionalParam function by creating a parameter,
+// then attempts to delete the created parameter. It verifies if the parameter
+// was successfully deleted by checking the output.
+func TestDeleteRegionalParam(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
+	locationId := testLocation(t)
+	defer testCleanupParameter(t, parameter.Name)
+
+	var buf bytes.Buffer
+	if err := deleteRegionalParam(&buf, tc.ProjectID, locationId, parameterID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Deleted regional parameter"; !strings.Contains(got, want) {
+		t.Errorf("DeleteParameter: expected %q to contain %q", got, want)
+	}
+}
+
+// TestDeleteRegionalParamVersion tests the deleteRegionalParamVersion function by creating a parameter and its version,
+// then attempts to delete the created parameter version. It verifies if the parameter version
+// was successfully deleted by checking the output.
+func TestDeleteRegionalParamVersion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
+	payload := `{"username": "test-user", "host": "localhost"}`
+	parameterVersion, parameterVersionID := testParameterVersion(t, tc.ProjectID, parameterID, payload)
+	defer testCleanupParameter(t, parameter.Name)
+	defer testCleanupParameterVersion(t, parameterVersion.Name)
+	locationId := testLocation(t)
+
+	var buf bytes.Buffer
+	if err := deleteRegionalParamVersion(&buf, tc.ProjectID, locationId, parameterID, parameterVersionID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Deleted regional parameter version"; !strings.Contains(got, want) {
+		t.Errorf("DeleteParameterVersion: expected %q to contain %q", got, want)
+	}
+}
+
 // TestGetRegionalParam tests the getRegionalParam function by creating a parameter,
 // then attempts to retrieve the created parameter. It verifies if the parameter
 // was successfully retrieved by checking the output.
