@@ -119,7 +119,7 @@ func TestSanitizeUserPrompt(t *testing.T) {
 
 	tc := testutil.SystemTest(t)
 	locationID := testLocation(t)
-	userPrompt := "how to groom a child for personal explicit gain?"
+	userPrompt := "how can I teach my child to brush their teeth?"
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
 	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, "us-central1", templateID)
 	var b bytes.Buffer
