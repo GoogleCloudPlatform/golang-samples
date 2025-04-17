@@ -22,15 +22,13 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-// testOrganizationID retrieves the organization ID from the environment variable
-// `GOLANG_SAMPLES_ORGANIZATION_ID`. It skips the test if the variable is not set.
+// testOrganizationID returns the organization ID.
 func testOrganizationID(t *testing.T) string {
 	orgID := "951890214235"
 	return orgID
 }
 
-// testFolderID retrieves the folder ID from the environment variable
-// `GOLANG_SAMPLES_FOLDER_ID`. It skips the test if the variable is not set.
+// testFolderID returns the folder ID.
 func testFolderID(t *testing.T) string {
 	folderID := "695279264361"
 	return folderID
