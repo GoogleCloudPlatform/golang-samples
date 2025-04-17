@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package parametermanager
+package regional_parametermanager
 
 import (
 	"bytes"
 	"context"
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 
@@ -25,6 +26,7 @@ import (
 	parametermanagerpb "cloud.google.com/go/parametermanager/apiv1/parametermanagerpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/gofrs/uuid"
+	"google.golang.org/api/option"
 	grpccodes "google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
 )
@@ -41,20 +43,37 @@ func testName(t *testing.T) string {
 	return u.String()
 }
 
+// testLocation retrieves the location for testing purposes from the environment variable
+// GOLANG_REGIONAL_SAMPLES_LOCATION. If the environment variable is not set,
+// the test is skipped.
+func testLocation(t *testing.T) string {
+	t.Helper()
+
+	v := os.Getenv("GOLANG_REGIONAL_SAMPLES_LOCATION")
+	if v == "" {
+		t.Skip("testIamUser: missing GOLANG_REGIONAL_SAMPLES_LOCATION")
+	}
+
+	return v
+}
+
 // testParameter creates a parameter in the specified GCP project with the given format.
 // It returns the created parameter and its ID or fails the test if parameter creation fails.
 func testParameter(t *testing.T, projectID string, format parametermanagerpb.ParameterFormat) (*parametermanagerpb.Parameter, string) {
 	t.Helper()
+
 	parameterID := testName(t)
+	locationId := testLocation(t)
 
 	ctx := context.Background()
-	client, err := parametermanager.NewClient(ctx)
+	endpoint := fmt.Sprintf("parametermanager.%s.rep.googleapis.com:443", locationId)
+	client, err := parametermanager.NewClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
-		t.Fatalf("testClient: failed to create client: %v", err)
+		t.Fatalf("failed to create client: %v", err)
 	}
 	defer client.Close()
 
-	parent := fmt.Sprintf("projects/%s/locations/global", projectID)
+	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationId)
 	parameter, err := client.CreateParameter(ctx, &parametermanagerpb.CreateParameterRequest{
 		Parent:      parent,
 		ParameterId: parameterID,
@@ -75,15 +94,17 @@ func testParameterVersion(t *testing.T, projectID, parameterID, payload string) 
 	t.Helper()
 
 	parameterVersionID := testName(t)
+	locationId := testLocation(t)
 
 	ctx := context.Background()
-	client, err := parametermanager.NewClient(ctx)
+	endpoint := fmt.Sprintf("parametermanager.%s.rep.googleapis.com:443", locationId)
+	client, err := parametermanager.NewClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
-		t.Fatalf("testClient: failed to create client: %v", err)
+		t.Fatalf("failed to create client: %v", err)
 	}
 	defer client.Close()
 
-	parent := fmt.Sprintf("projects/%s/locations/global/parameters/%s", projectID, parameterID)
+	parent := fmt.Sprintf("projects/%s/locations/%s/parameters/%s", projectID, locationId, parameterID)
 
 	parameterVersion, err := client.CreateParameterVersion(ctx, &parametermanagerpb.CreateParameterVersionRequest{
 		Parent:             parent,
@@ -107,9 +128,12 @@ func testCleanupParameter(t *testing.T, name string) {
 	t.Helper()
 
 	ctx := context.Background()
-	client, err := parametermanager.NewClient(ctx)
+	locationId := testLocation(t)
+
+	endpoint := fmt.Sprintf("parametermanager.%s.rep.googleapis.com:443", locationId)
+	client, err := parametermanager.NewClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
-		t.Fatalf("testClient: failed to create client: %v", err)
+		t.Fatalf("failed to create client: %v", err)
 	}
 	defer client.Close()
 
@@ -128,9 +152,12 @@ func testCleanupParameterVersion(t *testing.T, name string) {
 	t.Helper()
 
 	ctx := context.Background()
-	client, err := parametermanager.NewClient(ctx)
+	locationId := testLocation(t)
+
+	endpoint := fmt.Sprintf("parametermanager.%s.rep.googleapis.com:443", locationId)
+	client, err := parametermanager.NewClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
-		t.Fatalf("testClient: failed to create client: %v", err)
+		t.Fatalf("failed to create client: %v", err)
 	}
 	defer client.Close()
 
@@ -143,196 +170,182 @@ func testCleanupParameterVersion(t *testing.T, name string) {
 	}
 }
 
-// TestCreateParam tests the createParam function by creating a parameter,
+// TestCreateRegionalParam tests the createRegionalParam function by creating a regional parameter,
 // then verifies if the parameter was successfully created by checking the output.
-func TestCreateParam(t *testing.T) {
+func TestCreateRegionalParam(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	parameterID := testName(t)
+	locationId := testLocation(t)
 
 	var buf bytes.Buffer
-	if err := createParam(&buf, tc.ProjectID, parameterID); err != nil {
+	if err := createRegionalParam(&buf, tc.ProjectID, locationId, parameterID); err != nil {
 		t.Fatal(err)
 	}
-	defer testCleanupParameter(t, fmt.Sprintf("projects/%s/locations/global/parameters/%s", tc.ProjectID, parameterID))
+	defer testCleanupParameter(t, fmt.Sprintf("projects/%s/locations/%s/parameters/%s", tc.ProjectID, locationId, parameterID))
 
-	if got, want := buf.String(), "Created parameter:"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Created regional parameter:"; !strings.Contains(got, want) {
 		t.Errorf("createParameter: expected %q to contain %q", got, want)
 	}
 }
 
-// TestCreateStructuredParam tests the createStructuredParam function by creating a structured parameter,
+// TestCreateStructuredRegionalParam tests the createStructuredRegionalParam function by creating a structured regional parameter,
 // then verifies if the parameter was successfully created by checking the output.
-func TestCreateStructuredParam(t *testing.T) {
+func TestCreateStructuredRegionalParam(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	parameterID := testName(t)
+	locationId := testLocation(t)
 
 	var buf bytes.Buffer
-	if err := createStructuredParam(&buf, tc.ProjectID, parameterID, parametermanagerpb.ParameterFormat_JSON); err != nil {
+	if err := createStructuredRegionalParam(&buf, tc.ProjectID, locationId, parameterID, parametermanagerpb.ParameterFormat_JSON); err != nil {
 		t.Fatal(err)
 	}
-	defer testCleanupParameter(t, fmt.Sprintf("projects/%s/locations/global/parameters/%s", tc.ProjectID, parameterID))
+	defer testCleanupParameter(t, fmt.Sprintf("projects/%s/locations/%s/parameters/%s", tc.ProjectID, locationId, parameterID))
 
-	if got, want := buf.String(), fmt.Sprintf("Created parameter %s with format JSON", fmt.Sprintf("projects/%s/locations/global/parameters/%s", tc.ProjectID, parameterID)); !strings.Contains(got, want) {
+	if got, want := buf.String(), fmt.Sprintf("Created regional parameter %s with format JSON", fmt.Sprintf("projects/%s/locations/%s/parameters/%s", tc.ProjectID, locationId, parameterID)); !strings.Contains(got, want) {
 		t.Errorf("createParameter: expected %q to contain %q", got, want)
 	}
 }
 
-// TestCreateStructuredParamVersion tests the createStructuredParamVersion function by creating a structured parameter version,
+// TestCreateStructuredRegionalParamVersion tests the createStructuredRegionalParamVersion function by creating a structured regional parameter version,
 // then verifies if the parameter version was successfully created by checking the output.
-func TestCreateStructuredParamVersion(t *testing.T) {
+func TestCreateStructuredRegionalParamVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
 	parameterVersionID := testName(t)
+	locationId := testLocation(t)
+
 	payload := `{"username": "test-user", "host": "localhost"}`
 	var buf bytes.Buffer
-	if err := createStructuredParamVersion(&buf, tc.ProjectID, parameterID, parameterVersionID, payload); err != nil {
+	if err := createStructuredRegionalParamVersion(&buf, tc.ProjectID, locationId, parameterID, parameterVersionID, payload); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupParameter(t, parameter.Name)
 	defer testCleanupParameterVersion(t, fmt.Sprintf("%s/versions/%s", parameter.Name, parameterVersionID))
 
-	if got, want := buf.String(), "Created parameter version:"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Created regional parameter version:"; !strings.Contains(got, want) {
 		t.Errorf("createParameterVersion: expected %q to contain %q", got, want)
 	}
 }
 
-// TestCreateParamVersion tests the createParamVersion function by creating a parameter version,
+// TestCreateRegionalParamVersion tests the createRegionalParamVersion function by creating a regional parameter version,
 // then verifies if the parameter version was successfully created by checking the output.
-func TestCreateParamVersion(t *testing.T) {
+func TestCreateRegionalParamVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_UNFORMATTED)
 	parameterVersionID := testName(t)
+	locationId := testLocation(t)
+
 	payload := "test123"
 	var buf bytes.Buffer
-	if err := createParamVersion(&buf, tc.ProjectID, parameterID, parameterVersionID, payload); err != nil {
+	if err := createRegionalParamVersion(&buf, tc.ProjectID, locationId, parameterID, parameterVersionID, payload); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupParameter(t, parameter.Name)
 	defer testCleanupParameterVersion(t, fmt.Sprintf("%s/versions/%s", parameter.Name, parameterVersionID))
 
-	if got, want := buf.String(), "Created parameter version:"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Created regional parameter version:"; !strings.Contains(got, want) {
 		t.Errorf("createParameterVersion: expected %q to contain %q", got, want)
 	}
 }
 
-// TestCreateParamVersionWithSecret tests the createParamVersionWithSecret function by creating a parameter version with a secret reference,
+// TestCreateRegionalParamVersionWithSecret tests the createRegionalParamVersionWithSecret function by creating a regional parameter version with a secret reference,
 // then verifies if the parameter version was successfully created by checking the output.
-func TestCreateParamVersionWithSecret(t *testing.T) {
+func TestCreateRegionalParamVersionWithSecret(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_UNFORMATTED)
 	parameterVersionID := testName(t)
+	locationId := testLocation(t)
 	secretID := testName(t)
-	payload := fmt.Sprintf("projects/%s/secrets/%s/versions/latest", tc.ProjectID, secretID)
+	payload := fmt.Sprintf("projects/%s/locations/%s/secrets/%s/versions/latest", tc.ProjectID, locationId, secretID)
 	var buf bytes.Buffer
-	if err := createParamVersionWithSecret(&buf, tc.ProjectID, parameterID, parameterVersionID, payload); err != nil {
+	if err := createRegionalParamVersionWithSecret(&buf, tc.ProjectID, locationId, parameterID, parameterVersionID, payload); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupParameter(t, parameter.Name)
 	defer testCleanupParameterVersion(t, fmt.Sprintf("%s/versions/%s", parameter.Name, parameterVersionID))
 
-	if got, want := buf.String(), "Created parameter version with secret reference:"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Created regional parameter version with secret reference:"; !strings.Contains(got, want) {
 		t.Errorf("createParameterVersion: expected %q to contain %q", got, want)
 	}
 }
 
-// TestGetParam tests the getParam function by creating a parameter,
-// then attempts to retrieve the created parameter. It verifies if the parameter
-// was successfully retrieved by checking the output.
-func TestGetParam(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
-	defer testCleanupParameter(t, parameter.Name)
-
-	var buf bytes.Buffer
-	if err := getParam(&buf, tc.ProjectID, parameterID); err != nil {
-		t.Fatal(err)
-	}
-
-	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format JSON", parameter.Name); !strings.Contains(got, want) {
-		t.Errorf("GetParameter: expected %q to contain %q", got, want)
-	}
-}
-
-// TestDeleteParam tests the deleteParamVersion function by creating a parameter and
-// parameter version, then attempts to delete the created parameter version. It verifies
-// if the parameter version was successfully deleted by checking the output.
-func TestDeleteParamVersion(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
-	payload := `{"username": "test-user", "host": "localhost"}`
-	parameterVersion, parameterVersionID := testParameterVersion(t, tc.ProjectID, parameterID, payload)
-	defer testCleanupParameter(t, parameter.Name)
-	defer testCleanupParameterVersion(t, parameterVersion.Name)
-
-	var buf bytes.Buffer
-	if err := deleteParamVersion(&buf, tc.ProjectID, parameterID, parameterVersionID); err != nil {
-		t.Fatal(err)
-	}
-
-	if got, want := buf.String(), "Deleted parameter version"; !strings.Contains(got, want) {
-		t.Errorf("DeleteParameterVersion: expected %q to contain %q", got, want)
-	}
-}
-
-// TestListParam tests the listParam function by creating multiple parameters,
-// then attempts to list the created parameters. It verifies if the parameters
-// were successfully listed by checking the output.
-func TestListParam(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	parameter1, _ := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
-	parameter2, _ := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_UNFORMATTED)
-
-	defer testCleanupParameter(t, parameter1.Name)
-	defer testCleanupParameter(t, parameter2.Name)
-
-	var buf bytes.Buffer
-	if err := listParams(&buf, tc.ProjectID); err != nil {
-		t.Fatal(err)
-	}
-
-	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format %s \n", parameter1.Name, parameter1.Format); !strings.Contains(got, want) {
-		t.Errorf("ListParameter: expected %q to contain %q", got, want)
-	}
-
-	if got, want := buf.String(), fmt.Sprintf("Found parameter %s with format %s \n", parameter2.Name, parameter2.Format); !strings.Contains(got, want) {
-		t.Errorf("ListParameter: expected %q to contain %q", got, want)
-	}
-}
-
-// TestDisableParamVersion tests the disableParamVersion function by creating a parameter and its version,
+// TestDisableRegionalParamVersion tests the disableRegionalParamVersion function by creating a parameter and its version,
 // then attempts to disable the created parameter version. It verifies if the parameter version
 // was successfully disabled by checking the output.
-func TestDisableParamVersion(t *testing.T) {
+func TestDisableRegionalParamVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
 	payload := `{"username": "test-user", "host": "localhost"}`
 	parameterVersion, parameterVersionID := testParameterVersion(t, tc.ProjectID, parameterID, payload)
+	locationId := testLocation(t)
+
 	defer testCleanupParameter(t, parameter.Name)
 	defer testCleanupParameterVersion(t, parameterVersion.Name)
 
 	var buf bytes.Buffer
-	if err := disableParamVersion(&buf, tc.ProjectID, parameterID, parameterVersionID); err != nil {
+	if err := disableRegionalParamVersion(&buf, tc.ProjectID, locationId, parameterID, parameterVersionID); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := buf.String(), "Disabled parameter version"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Disabled regional parameter version"; !strings.Contains(got, want) {
 		t.Errorf("DisableParameterVersion: expected %q to contain %q", got, want)
 	}
 }
 
-// TestEnableParamVersion tests the enableParamVersion function by creating a parameter and its version,
+// TestEnableRegionalParamVersion tests the enableRegionalParamVersion function by creating a parameter and its version,
 // then attempts to enable the created parameter version. It verifies if the parameter version
 // was successfully enabled by checking the output.
-func TestEnableParamVersion(t *testing.T) {
+func TestEnableRegionalParamVersion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
+	payload := `{"username": "test-user", "host": "localhost"}`
+	parameterVersion, parameterVersionID := testParameterVersion(t, tc.ProjectID, parameterID, payload)
+	locationId := testLocation(t)
+
+	defer testCleanupParameter(t, parameter.Name)
+	defer testCleanupParameterVersion(t, parameterVersion.Name)
+
+	var buf bytes.Buffer
+	if err := enableRegionalParamVersion(&buf, tc.ProjectID, locationId, parameterID, parameterVersionID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Enabled regional parameter version"; !strings.Contains(got, want) {
+		t.Errorf("EnableParameterVersion: expected %q to contain %q", got, want)
+	}
+}
+
+// TestDeleteRegionalParam tests the deleteRegionalParam function by creating a parameter,
+// then attempts to delete the created parameter. It verifies if the parameter
+// was successfully deleted by checking the output.
+func TestDeleteRegionalParam(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
+	locationId := testLocation(t)
+	defer testCleanupParameter(t, parameter.Name)
+
+	var buf bytes.Buffer
+	if err := deleteRegionalParam(&buf, tc.ProjectID, locationId, parameterID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Deleted regional parameter"; !strings.Contains(got, want) {
+		t.Errorf("DeleteParameter: expected %q to contain %q", got, want)
+	}
+}
+
+// TestDeleteRegionalParamVersion tests the deleteRegionalParamVersion function by creating a parameter and its version,
+// then attempts to delete the created parameter version. It verifies if the parameter version
+// was successfully deleted by checking the output.
+func TestDeleteRegionalParamVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
@@ -340,32 +353,14 @@ func TestEnableParamVersion(t *testing.T) {
 	parameterVersion, parameterVersionID := testParameterVersion(t, tc.ProjectID, parameterID, payload)
 	defer testCleanupParameter(t, parameter.Name)
 	defer testCleanupParameterVersion(t, parameterVersion.Name)
+	locationId := testLocation(t)
 
 	var buf bytes.Buffer
-	if err := enableParamVersion(&buf, tc.ProjectID, parameterID, parameterVersionID); err != nil {
+	if err := deleteRegionalParamVersion(&buf, tc.ProjectID, locationId, parameterID, parameterVersionID); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, want := buf.String(), "Enabled parameter version"; !strings.Contains(got, want) {
-		t.Errorf("EnableParameterVersion: expected %q to contain %q", got, want)
-	}
-}
-
-// TestDeleteParam tests the deleteParam function by creating a parameter,
-// then attempts to delete the created parameter. It verifies if the parameter
-// was successfully deleted by checking the output.
-func TestDeleteParam(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
-	defer testCleanupParameter(t, parameter.Name)
-
-	var buf bytes.Buffer
-	if err := deleteParam(&buf, tc.ProjectID, parameterID); err != nil {
-		t.Fatal(err)
-	}
-
-	if got, want := buf.String(), "Deleted parameter"; !strings.Contains(got, want) {
-		t.Errorf("DeleteParameter: expected %q to contain %q", got, want)
+	if got, want := buf.String(), "Deleted regional parameter version"; !strings.Contains(got, want) {
+		t.Errorf("DeleteParameterVersion: expected %q to contain %q", got, want)
 	}
 }
