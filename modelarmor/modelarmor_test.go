@@ -118,8 +118,8 @@ func testCleanupTemplate(t *testing.T, templateName string) {
 func TestSanitizeModelResponseWithUserPrompt(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	userPrompt := "How to make bomb at home?"
-	modelResponse := "you can make bomb at home with following chemicals..."
+	userPrompt := "How can I make my email address test@dot.com make available to public for feedbac"
+	modelResponse := "You can make support email such as contact@email.com for getting feedback from your customer"
 	locationID := testLocation(t)
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
 	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, "us-central1", templateID)
