@@ -34,6 +34,8 @@ import (
 	trace "cloud.google.com/go/trace/apiv1"
 	"cloud.google.com/go/trace/apiv1/tracepb"
 	"google.golang.org/api/iterator"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/go-cmp/cmp"
@@ -1164,4 +1166,39 @@ func createOrGetStorageBucket(projectID, bucketID string) error {
 	}
 
 	return nil
+}
+
+func TestCreateSubscriptionWithSMT(t *testing.T) {
+	ctx := context.Background()
+	tc := testutil.SystemTest(t)
+	client := setup(t)
+
+	smtSubID := subID + "-smt"
+	var topic *pubsub.Topic
+	var err error
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		topic, err = client.CreateTopic(ctx, topicID)
+		if err != nil {
+			st, ok := status.FromError(err)
+			if !ok {
+				r.Errorf("CreateTopic failed with unknown err: %v", err)
+			}
+			// Don't return error if topic already exists, just use that for the test.
+			if st.Code() != codes.AlreadyExists {
+				r.Errorf("CreateTopic: %v", err)
+			}
+		}
+	})
+
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		if err := createSubscriptionWithSMT(buf, tc.ProjectID, smtSubID, topic); err != nil {
+			r.Errorf("failed to create subscription with SMT: %v", err)
+		}
+		got := buf.String()
+		want := "Created subscription with message transform"
+		if !strings.Contains(got, want) {
+			r.Errorf("got: %s, want: %v", got, want)
+		}
+	})
 }
