@@ -16,7 +16,6 @@ package modelarmor
 
 import (
 	"bytes"
-	"os"
 	"strings"
 	"testing"
 
@@ -26,27 +25,15 @@ import (
 // testOrganizationID retrieves the organization ID from the environment variable
 // `GOLANG_SAMPLES_ORGANIZATION_ID`. It skips the test if the variable is not set.
 func testOrganizationID(t *testing.T) string {
-	t.Helper()
-
-	v := os.Getenv("GOLANG_SAMPLES_ORGANIZATION_ID")
-	if v == "" {
-		t.Skip("testIamUser: missing GOLANG_SAMPLES_ORGANIZATION_ID")
-	}
-
-	return v
+	orgID := "951890214235"
+	return orgID
 }
 
 // testFolderID retrieves the folder ID from the environment variable
 // `GOLANG_SAMPLES_FOLDER_ID`. It skips the test if the variable is not set.
 func testFolderID(t *testing.T) string {
-	t.Helper()
-
-	v := os.Getenv("GOLANG_SAMPLES_FOLDER_ID")
-	if v == "" {
-		t.Skip("testIamUser: missing GOLANG_SAMPLES_FOLDER_ID")
-	}
-
-	return v
+	folderID := "695279264361"
+	return folderID
 }
 
 // TestGetProjectFloorSettings tests the retrieval of floor settings at the project level.
@@ -78,7 +65,6 @@ func TestGetOrganizationFloorSettings(t *testing.T) {
 		t.Errorf("getFloorSettings: expected %q to contain %q", got, want)
 	}
 }
-
 
 // TestGetFolderFloorSettings tests the retrieval of floor settings at the folder level.
 // It ensures the result contains the expected confirmation message.
