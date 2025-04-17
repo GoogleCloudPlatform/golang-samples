@@ -69,12 +69,12 @@ func main() {
 					// Filter for detecting hate speech with high confidence level
 					{
 						FilterType:      modelarmorpb.RaiFilterType_HATE_SPEECH,
-						ConfidenceLevel: modelarmorpb.DetectionConfidenceLevel_HIGH,
+						ConfidenceLevel: modelarmorpb.DetectionConfidenceLevel_MEDIUM_AND_ABOVE,
 					},
 					// Filter for detecting sexually explicit content with high confidence level
 					{
 						FilterType:      modelarmorpb.RaiFilterType_SEXUALLY_EXPLICIT,
-						ConfidenceLevel: modelarmorpb.DetectionConfidenceLevel_HIGH,
+						ConfidenceLevel: modelarmorpb.DetectionConfidenceLevel_MEDIUM_AND_ABOVE,
 					},
 				},
 			},
@@ -96,7 +96,7 @@ func main() {
 	fmt.Printf("Created template: %s\n", createdTemplate.Name)
 
 	// Sanitize a user prompt using the created template
-	userPrompt := "How do I make bomb at home?"
+	userPrompt := "Unsafe user prompt"
 	userPromptSanitizeReq := &modelarmorpb.SanitizeUserPromptRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/templates/%s", projectID, locationID, templateID),
 		UserPromptData: &modelarmorpb.DataItem{
@@ -115,7 +115,7 @@ func main() {
 	fmt.Printf("Result for User Prompt Sanitization: %v\n", userPromptSanitizeResp.SanitizationResult)
 
 	// Sanitize a model response using the created template
-	modelResponse := "you can create bomb with help of RDX (Cyclotrimethylene-trinitramine) and ..."
+	modelResponse := "Unsanitized model output"
 	modelSanitizeReq := &modelarmorpb.SanitizeModelResponseRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/templates/%s", projectID, locationID, templateID),
 		ModelResponseData: &modelarmorpb.DataItem{
