@@ -23,6 +23,7 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
+// createSubscriptionWithSMT creates a subscription with single message transform function applied.
 func createSubscriptionWithSMT(w io.Writer, projectID, subID string, topic *pubsub.Topic) error {
 	// projectID := "my-project-id"
 	// subID := "my-sub"

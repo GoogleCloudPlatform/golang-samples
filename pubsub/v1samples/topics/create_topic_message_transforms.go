@@ -23,6 +23,7 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
+// createTopicWithSMT creates a topic with single message transform function applied.
 func createTopicWithSMT(w io.Writer, projectID, topicID string) error {
 	// projectID := "my-project-id"
 	// topicID := "my-topic"
