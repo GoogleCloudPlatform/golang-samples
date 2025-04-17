@@ -22,6 +22,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 
 	modelarmor "cloud.google.com/go/modelarmor/apiv1"
 	modelarmorpb "cloud.google.com/go/modelarmor/apiv1/modelarmorpb"
@@ -36,8 +37,8 @@ import (
 // projectID string: The ID of the project.
 // locationID string: The ID of the location.
 // templateID string: The ID of the template.
-// pdfContentBase64 string: The base64-encoded content of the PDF file.
-func screenPDFFile(w io.Writer, projectID, locationID, templateID, pdfContentBase64 string) error {
+// pdfFilePath string: The path to the PDF file to be screened.
+func screenPDFFile(w io.Writer, projectID, locationID, templateID, pdfFilePath string) error {
 	ctx := context.Background()
 
 	// Create options for Model Armor client.
@@ -49,12 +50,18 @@ func screenPDFFile(w io.Writer, projectID, locationID, templateID, pdfContentBas
 	}
 	defer client.Close()
 
+	// Read PDF file content into bytes
+	pdfBytes, err := os.ReadFile(pdfFilePath)
+	if err != nil {
+		return fmt.Errorf("failed to read PDF file: %w", err)
+	}
+
 	// Initialize request argument(s)
 	userPromptData := &modelarmorpb.DataItem{
 		DataItem: &modelarmorpb.DataItem_ByteItem{
 			ByteItem: &modelarmorpb.ByteDataItem{
 				ByteDataType: modelarmorpb.ByteDataItem_PDF,
-				ByteData:     []byte(pdfContentBase64),
+				ByteData:     pdfBytes,
 			},
 		},
 	}
@@ -74,7 +81,7 @@ func screenPDFFile(w io.Writer, projectID, locationID, templateID, pdfContentBas
 	// Sanitization Result.
 	fmt.Fprintf(w, "PDF screening sanitization result: %v\n", response)
 
-	return err
+	return nil
 }
 
-// [END modelarmor_screen_pdf_file]
+// [START modelarmor_screen_pdf_file]
