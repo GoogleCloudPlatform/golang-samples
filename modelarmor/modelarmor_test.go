@@ -23,30 +23,16 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-// testOrganizationID retrieves the organization ID from the environment variable
-// `GOLANG_SAMPLES_ORGANIZATION_ID`. It skips the test if the variable is not set.
+// testOrganizationID returns the organization ID.
 func testOrganizationID(t *testing.T) string {
-	t.Helper()
-
-	v := os.Getenv("GOLANG_SAMPLES_ORGANIZATION_ID")
-	if v == "" {
-		t.Skip("testIamUser: missing GOLANG_SAMPLES_ORGANIZATION_ID")
-	}
-
-	return v
+	orgID := "951890214235"
+	return orgID
 }
 
-// testFolderID retrieves the folder ID from the environment variable
-// `GOLANG_SAMPLES_FOLDER_ID`. It skips the test if the variable is not set.
+// testFolderID returns the folder ID.
 func testFolderID(t *testing.T) string {
-	t.Helper()
-
-	v := os.Getenv("GOLANG_SAMPLES_FOLDER_ID")
-	if v == "" {
-		t.Skip("testIamUser: missing GOLANG_SAMPLES_FOLDER_ID")
-	}
-
-	return v
+	folderID := "695279264361"
+	return folderID
 }
 
 // testLocation returns the location for testing from the environment variable.
@@ -66,8 +52,9 @@ func testLocation(t *testing.T) string {
 // It verifies that the output buffer contains a confirmation message indicating a successful update.
 func TestUpdateFolderFloorSettings(t *testing.T) {
 	folderID := testFolderID(t)
+	locationID := testLocation(t)
 	var buf bytes.Buffer
-	if err := updateFolderFloorSettings(&buf, folderID, "us-central1"); err != nil {
+	if err := updateFolderFloorSettings(&buf, folderID, locationID); err != nil {
 		t.Fatal(err)
 	}
 

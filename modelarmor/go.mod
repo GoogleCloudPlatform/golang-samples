@@ -5,7 +5,6 @@ go 1.23.0
 require (
 	cloud.google.com/go/modelarmor v0.1.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250404170905-0aca11152736
-	github.com/joho/godotenv v1.5.1
 	google.golang.org/api v0.226.0
 )
 
