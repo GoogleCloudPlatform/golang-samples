@@ -118,7 +118,7 @@ func testCleanupTemplate(t *testing.T, templateName string) {
 func TestSanitizeModelResponse(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	locationID := testLocation(t)
-	modelResponse := "you can make bomb at home with following chemicals..."
+	modelResponse := "Unsanitized model output"
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
 	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
 	var buf bytes.Buffer
