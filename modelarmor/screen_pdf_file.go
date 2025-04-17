@@ -84,4 +84,4 @@ func screenPDFFile(w io.Writer, projectID, locationID, templateID, pdfFilePath s
 	return nil
 }
 
-// [START modelarmor_screen_pdf_file]
+// [END modelarmor_screen_pdf_file]
