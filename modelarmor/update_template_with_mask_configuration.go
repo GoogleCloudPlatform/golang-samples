@@ -31,10 +31,10 @@ import (
 
 // updateModelArmorTemplateWithMaskConfiguration updates a Model Armor template with mask configuration.
 //
-//	w io.Writer: The writer to use for logging.
-//	projectID string: The ID of the project.
-//	locationID string: The ID of the location.
-//	templateID string: The ID of the template.
+// w io.Writer: The writer to use for logging.
+// projectID string: The ID of the project.
+// locationID string: The ID of the location.
+// templateID string: The ID of the template.
 func updateModelArmorTemplateWithMaskConfiguration(w io.Writer, projectID, locationID, templateID string) error {
 	ctx := context.Background()
 
