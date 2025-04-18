@@ -52,12 +52,10 @@ func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
 	t.Helper()
 
 	ctx := context.Background()
-
-	locationID := testLocation(t)
-
-	// Create options for Model Armor client.
-	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))
-	// Create Model Armor client.
+	locationId := testLocation(t)
+	// Create option for Model Armor client.
+	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationId))
+	// Create a new client using the regional endpoint
 	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
 		t.Fatalf("testClient: failed to create client: %v", err)
@@ -120,14 +118,14 @@ func TestUpdateTemplate(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	locationID := testLocation(t)
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
-	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID,locationID,templateID)
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
 	var buf bytes.Buffer
 	if _, err := testModelArmorTemplate(t, templateID); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupTemplate(t, templateName)
 
-	if err := updateModelArmorTemplate(&buf, tc.ProjectID,locationID,templateID); err != nil {
+	if err := updateModelArmorTemplate(&buf, tc.ProjectID, locationID, templateID); err != nil {
 		t.Fatal(err)
 	}
 
