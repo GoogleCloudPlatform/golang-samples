@@ -64,8 +64,8 @@ func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
 	return client, ctx
 }
 
-// testCleanupTemplate deletes the specified Model Armor template if it exists,
-// ignoring the error if the template is already deleted.
+// testModelArmorTemplate creates a new Model Armor template with default
+// filter settings for use in integration tests. Returns the created template.
 func testModelArmorTemplate(t *testing.T, templateID string) (*modelarmorpb.Template, error) {
 	t.Helper()
 	tc := testutil.SystemTest(t)
