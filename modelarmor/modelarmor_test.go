@@ -64,8 +64,42 @@ func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
 	return client, ctx
 }
 
-// testCleanupTemplate deletes the specified Model Armor template if it exists,
-// ignoring the error if the template is already deleted.
+// testModelArmorTemplate creates a new Model Armor template with default
+// filter settings for use in integration tests. Returns the created template.
+func testModelArmorTemplate(t *testing.T, templateID string) (*modelarmorpb.Template, error) {
+	t.Helper()
+	tc := testutil.SystemTest(t)
+	locationID := testLocation(t)
+	client, ctx := testClient(t)
+
+	template := &modelarmorpb.Template{
+		FilterConfig: &modelarmorpb.FilterConfig{
+			PiAndJailbreakFilterSettings: &modelarmorpb.PiAndJailbreakFilterSettings{
+				FilterEnforcement: modelarmorpb.PiAndJailbreakFilterSettings_ENABLED,
+				ConfidenceLevel:   modelarmorpb.DetectionConfidenceLevel_MEDIUM_AND_ABOVE,
+			},
+			MaliciousUriFilterSettings: &modelarmorpb.MaliciousUriFilterSettings{
+				FilterEnforcement: modelarmorpb.MaliciousUriFilterSettings_ENABLED,
+			},
+		},
+	}
+
+	req := &modelarmorpb.CreateTemplateRequest{
+		Parent:     fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, locationID),
+		TemplateId: templateID,
+		Template:   template,
+	}
+
+	response, err := client.CreateTemplate(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create template: %v", err)
+	}
+
+	return response, err
+}
+
+// testCleanupTemplate deletes a Model Armor template by name, used for cleanup
+// after tests. Ignores errors if the template is already deleted.
 func testCleanupTemplate(t *testing.T, templateName string) {
 	t.Helper()
 
@@ -75,6 +109,28 @@ func testCleanupTemplate(t *testing.T, templateName string) {
 		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
 			t.Fatalf("testCleanupTemplate: failed to delete template: %v", err)
 		}
+	}
+}
+
+// TestUpdateTemplate verifies that the updateModelArmorTemplate function
+// successfully updates the filter configuration of an existing template.
+func TestUpdateTemplate(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	locationID := testLocation(t)
+	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
+	var buf bytes.Buffer
+	if _, err := testModelArmorTemplate(t, templateID); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupTemplate(t, templateName)
+
+	if err := updateModelArmorTemplate(&buf, tc.ProjectID, locationID, templateID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Updated Filter Config: "; !strings.Contains(got, want) {
+		t.Errorf("updateModelArmorTemplate: expected %q to contain %q", got, want)
 	}
 }
 
