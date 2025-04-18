@@ -16,6 +16,7 @@ package cloudruntests
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"testing"
 	"time"
@@ -49,7 +50,7 @@ func TestSigtermHandlerService(t *testing.T) {
 		t.Fatalf("client.Do: %v", err)
 	}
 	defer resp.Body.Close()
-	fmt.Printf("client.Do: %s %s\n", req.Method, req.URL)
+	log.Printf("client.Do: %s %s\n", req.Method, req.URL)
 
 	if got := resp.StatusCode; got != http.StatusOK {
 		t.Errorf("response status: got %d, want %d", got, http.StatusOK)
