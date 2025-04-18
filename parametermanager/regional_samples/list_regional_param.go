@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package parametermanager
+package regional_parametermanager
 
-// [START parametermanager_list_params]
+// [START parametermanager_list_regional_params]
 import (
 	"context"
 	"fmt"
@@ -23,31 +23,37 @@ import (
 	parametermanager "cloud.google.com/go/parametermanager/apiv1"
 	parametermanagerpb "cloud.google.com/go/parametermanager/apiv1/parametermanagerpb"
 	"google.golang.org/api/iterator"
+	"google.golang.org/api/option"
 )
 
-// listParam lists parameters using the Parameter Manager SDK for GCP.
+// listRegionalParam lists all parameters regional using the Parameter Manager SDK for GCP.
 //
-// w: The io.Writer object used to write the output.
-// projectID: The ID of the project where the parameters are located.
+// projectID: The ID of the project where the parameter is located.
+// locationID: The ID of the region where the parameter is located.
+// parameterID: The ID of the parameter to be listed.
 //
-// The function returns an error if the parameter listing fails.
-func listParams(w io.Writer, projectID string) error {
-	// Create a context and a Parameter Manager client.
+// The function returns an error if the parameter listing fails
+func listRegionalParam(w io.Writer, projectID, locationID string) error {
+	// Create a new context.
 	ctx := context.Background()
-	client, err := parametermanager.NewClient(ctx)
+
+	// Create a Parameter Manager client.
+	endpoint := fmt.Sprintf("parametermanager.%s.rep.googleapis.com:443", locationID)
+	client, err := parametermanager.NewClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
 		return fmt.Errorf("failed to create Parameter Manager client: %w", err)
 	}
 	defer client.Close()
 
-	// Construct the name of the list parameter.
-	parent := fmt.Sprintf("projects/%s/locations/global", projectID)
-	// Build the request to list parameters.
+	// Construct the name of the parent resource to list parameters.
+	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
+
+	// Build the request to list all parameters.
 	req := &parametermanagerpb.ListParametersRequest{
 		Parent: parent,
 	}
 
-	// Call the API to list parameters.
+	// Call the API to list all parameters.
 	parameters := client.ListParameters(ctx, req)
 	for {
 		parameter, err := parameters.Next()
@@ -58,10 +64,10 @@ func listParams(w io.Writer, projectID string) error {
 			return fmt.Errorf("failed to list parameters: %w", err)
 		}
 
-		fmt.Fprintf(w, "Found parameter %s with format %s \n", parameter.Name, parameter.Format.String())
+		fmt.Fprintf(w, "Found regional parameter %s with format %s\n", parameter.Name, parameter.Format.String())
 	}
 
 	return nil
 }
 
-// [END parametermanager_list_params]
+// [END parametermanager_list_regional_params]
