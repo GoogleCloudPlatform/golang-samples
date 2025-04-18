@@ -55,11 +55,10 @@ func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
 	t.Helper()
 
 	ctx := context.Background()
-
 	locationId := testLocation(t)
 	// Create option for Model Armor client.
 	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationId))
-	// Create Model Armor client.
+	// Create a new client using the regional endpoint
 	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
 		t.Fatalf("testClient: failed to create client: %v", err)
@@ -75,6 +74,7 @@ func testCleanupTemplate(t *testing.T, templateName string) {
 
 	client, ctx := testClient(t)
 	if err := client.DeleteTemplate(ctx, &modelarmorpb.DeleteTemplateRequest{Name: templateName}); err != nil {
+		// Ignore NotFound errors (template may already be deleted)
 		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
 			t.Fatalf("testCleanupTemplate: failed to delete template: %v", err)
 		}
