@@ -5,7 +5,9 @@ go 1.23.0
 require (
 	cloud.google.com/go/modelarmor v0.1.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250404170905-0aca11152736
+	github.com/google/uuid v1.6.0
 	google.golang.org/api v0.226.0
+	google.golang.org/grpc v1.71.0
 )
 
 require (
@@ -28,7 +30,6 @@ require (
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.5 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.1 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
