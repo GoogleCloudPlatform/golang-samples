@@ -92,7 +92,7 @@ func testModelArmorTemplate(t *testing.T, templateID string) (*modelarmorpb.Temp
 
 	response, err := client.CreateTemplate(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create template: %", err)
+		return nil, fmt.Errorf("failed to create template: %w", err)
 	}
 
 	return response, err
