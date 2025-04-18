@@ -90,6 +90,9 @@ func testCleanupTemplate(t *testing.T, templateName string) {
 	}
 }
 
+// testDisableFloorSettings disables floor setting enforcement.
+// It sends an update request to Model Armor to turn off 
+// enforcement using the given floorSettingName and location IDs.
 func testDisableFloorSettings(floorSettingName string, locationID string) error {
 	ctx := context.Background()
 
