@@ -73,7 +73,7 @@ func createModelArmorTemplate(w io.Writer, projectID, locationID, templateID str
 	// Create the template.
 	response, err := client.CreateTemplate(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to create template: %w", err)
+		return fmt.Errorf("failed to create template: %v", err)
 	}
 
 	// Print the new template name using fmt.Fprintf with the io.Writer.
