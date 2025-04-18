@@ -120,10 +120,9 @@ func TestCreateModelArmorTemplate(t *testing.T) {
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
 	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
 	var b bytes.Buffer
-	if _, err := testModelArmorTemplate(t, templateID); err != nil {
+	if err := createModelArmorTemplate(&b, tc.ProjectID, locationID, templateID); err != nil {
 		t.Fatal(err)
 	}
-
 	defer testCleanupTemplate(t, templateName)
 
 	if got, want := b.String(), "Created template:"; !strings.Contains(got, want) {
