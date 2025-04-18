@@ -32,14 +32,15 @@ import (
 	grpcstatus "google.golang.org/grpc/status"
 )
 
-// testLocation returns the test location from the environment variable `GOLANG_SAMPLES_LOCATION`.
-// If not set, the test is skipped.
+// testLocation retrieves the GOLANG_SAMPLES_LOCATION environment variable
+// used to determine the region for running the test.
+// Skips the test if the environment variable is not set.
 func testLocation(t *testing.T) string {
 	t.Helper()
 
 	v := os.Getenv("GOLANG_SAMPLES_LOCATION")
 	if v == "" {
-		t.Skip("testIamUser: missing GOLANG_SAMPLES_LOCATION")
+		t.Skip("testLocation: missing GOLANG_SAMPLES_LOCATION")
 	}
 
 	return v
@@ -59,14 +60,14 @@ func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
 	// Create the Model Armor client.
 	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
-		t.Fatalf("failed to create client: %v", err)
+		t.Fatalf("testClient: failed to create client: %v", err)
 	}
 
 	return client, ctx
 }
 
-// testModelArmorTemplate creates a new ModelArmor template for use in tests.
-// It returns the created template or an error.
+// testCleanupTemplate deletes the specified Model Armor template if it exists,
+// ignoring the error if the template is already deleted.
 func testModelArmorTemplate(t *testing.T, templateID string) (*modelarmorpb.Template, error) {
 	t.Helper()
 	tc := testutil.SystemTest(t)
@@ -106,6 +107,7 @@ func testCleanupTemplate(t *testing.T, templateName string) {
 
 	client, ctx := testClient(t)
 	if err := client.DeleteTemplate(ctx, &modelarmorpb.DeleteTemplateRequest{Name: templateName}); err != nil {
+		// Ignore NotFound errors (template may already be deleted)
 		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
 			t.Fatalf("testCleanupTemplate: failed to delete template: %v", err)
 		}
