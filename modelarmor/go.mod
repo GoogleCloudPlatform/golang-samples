@@ -3,11 +3,11 @@ module github.com/GoogleCloudPlatform/golang-samples/modelarmor
 go 1.23.0
 
 require (
-	cloud.google.com/go/modelarmor v0.1.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250404170905-0aca11152736
+	cloud.google.com/go/modelarmor v0.1.1
+	github.com/GoogleCloudPlatform/golang-samples 4e0314cb7519
 	github.com/google/uuid v1.6.0
-	google.golang.org/api v0.226.0
-	google.golang.org/grpc v1.71.0
+	google.golang.org/api v0.229.0
+	google.golang.org/grpc v1.71.1
 )
 
 require (

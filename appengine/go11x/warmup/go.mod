@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/appengine/go11x/warmup
 
 go 1.23.0
 
-require cloud.google.com/go/storage v1.50.0
+require cloud.google.com/go/storage v1.51.0
 
 require (
 	cel.dev/expr v0.19.1 // indirect

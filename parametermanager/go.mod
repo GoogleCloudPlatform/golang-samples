@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/kms v1.21.2
 	cloud.google.com/go/parametermanager v0.2.1
 	cloud.google.com/go/secretmanager v1.14.7
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250417052308-a8d44a62f893
+	github.com/GoogleCloudPlatform/golang-samples 4e0314cb7519
 	github.com/gofrs/uuid v4.4.0+incompatible
 	google.golang.org/api v0.229.0
 	google.golang.org/genproto v0.0.0-20250414145226-207652e42e2e
