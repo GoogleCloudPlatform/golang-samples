@@ -53,9 +53,9 @@ func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
 
 	ctx := context.Background()
 	locationId := testLocation(t)
-
 	// Create option for Model Armor client.
 	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationId))
+	// Create a new client using the regional endpoint
 	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
 		t.Fatalf("testClient: failed to create client: %v", err)
