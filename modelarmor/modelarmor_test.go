@@ -35,36 +35,41 @@ import (
 	grpcstatus "google.golang.org/grpc/status"
 )
 
-// testLocation returns the GOLANG_SAMPLES_LOCATION env var or skips the test.
+// testLocation retrieves the GOLANG_SAMPLES_LOCATION environment variable
+// used to determine the region for running the test.
+// Skips the test if the environment variable is not set.
 func testLocation(t *testing.T) string {
 	t.Helper()
 
 	v := os.Getenv("GOLANG_SAMPLES_LOCATION")
 	if v == "" {
-		t.Skip("testIamUser: missing GOLANG_SAMPLES_LOCATION")
+		t.Skip("testLocation: missing GOLANG_SAMPLES_LOCATION")
 	}
 
 	return v
 }
 
-// testClient creates a Model Armor client for the given test region.
+// testClient initializes and returns a new Model Armor API client and context
+// targeting the endpoint based on the specified location.
 func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
 	t.Helper()
 
 	ctx := context.Background()
 
 	locationId := testLocation(t)
-
+	// Create option for Model Armor client.
 	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationId))
+	// Create Model Armor client.
 	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
-		t.Fatalf("failed to create client: %v", err)
+		t.Fatalf("testClient: failed to create client: %v", err)
 	}
 
 	return client, ctx
 }
 
-// testCleanupTemplate deletes a template if it exists, ignoring not found errors.
+// testCleanupTemplate deletes the specified Model Armor template if it exists,
+// ignoring the error if the template is already deleted.
 func testCleanupTemplate(t *testing.T, templateName string) {
 	t.Helper()
 
@@ -157,7 +162,7 @@ func testSDPTemplate(t *testing.T, projectID string, locationID string) (string,
 	return inspectResponse.Name, deidentifyResponse.Name
 }
 
-// TestCreateModelArmorTemplateWithAdvancedSDP tests creating a 
+// TestCreateModelArmorTemplateWithAdvancedSDP tests creating a
 // Model Armor template with advanced SDP using DLP templates.
 func TestCreateModelArmorTemplateWithAdvancedSDP(t *testing.T) {
 	tc := testutil.SystemTest(t)
