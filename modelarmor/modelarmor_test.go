@@ -168,3 +168,27 @@ func TestCreateModelArmorTemplateWithLabels(t *testing.T) {
 		t.Errorf("createModelArmorTemplateWithLabels: expected %q to contain %q", got, want)
 	}
 }
+
+
+// TestDeleteModelArmorTemplate verifies the deletion of a Model Armor template.
+// It ensures the output contains a confirmation message after deletion.
+func TestDeleteModelArmorTemplate(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
+
+	var buf bytes.Buffer
+	// Create template first to ensure it exists for deletion
+	if err := createModelArmorTemplate(&buf, tc.ProjectID, testLocation(t), templateID); err != nil {
+		t.Fatal(err)
+	}
+
+	// Attempt to delete the template
+	if err := deleteModelArmorTemplate(&buf, tc.ProjectID, testLocation(t), templateID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Successfully deleted Model Armor template:"; !strings.Contains(got, want) {
+		t.Errorf("deleteModelArmorTemplate: expected %q to contain %q", got, want)
+	}
+}
