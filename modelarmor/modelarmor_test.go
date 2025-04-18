@@ -32,6 +32,18 @@ import (
 	grpcstatus "google.golang.org/grpc/status"
 )
 
+// testOrganizationID returns the organization ID.
+func testOrganizationID(t *testing.T) string {
+	orgID := "951890214235"
+	return orgID
+}
+
+// testFolderID returns the folder ID.
+func testFolderID(t *testing.T) string {
+	folderID := "695279264361"
+	return folderID
+}
+
 // testLocation retrieves the GOLANG_SAMPLES_LOCATION environment variable
 // used to determine the region for running the test.
 // Skips the test if the environment variable is not set.
@@ -78,6 +90,38 @@ func testCleanupTemplate(t *testing.T, templateName string) {
 	}
 }
 
+// testDisableFloorSettings disables floor setting enforcement.
+// It sends an update request to Model Armor to turn off 
+// enforcement using the given floorSettingName and location IDs.
+func testDisableFloorSettings(floorSettingName string, locationID string) error {
+	ctx := context.Background()
+
+	client, err := modelarmor.NewClient(ctx,
+		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create client: %w", err)
+	}
+	defer client.Close()
+
+	disable := false
+
+	floorSetting := &modelarmorpb.FloorSetting{
+		Name:                          floorSettingName,
+		EnableFloorSettingEnforcement: &disable,
+	}
+
+	req := &modelarmorpb.UpdateFloorSettingRequest{
+		FloorSetting: floorSetting,
+	}
+
+	_, err = client.UpdateFloorSetting(ctx, req)
+	if err != nil {
+		return fmt.Errorf("failed to disable floor setting: %w", err)
+	}
+	return nil
+}
+
 // TestCreateModelArmorTemplate verifies the creation of a Model Armor template.
 // It ensures the output contains a confirmation message after creation.
 func TestCreateModelArmorTemplate(t *testing.T) {
@@ -116,5 +160,64 @@ func TestDeleteModelArmorTemplate(t *testing.T) {
 
 	if got, want := buf.String(), "Successfully deleted Model Armor template:"; !strings.Contains(got, want) {
 		t.Errorf("deleteModelArmorTemplate: expected %q to contain %q", got, want)
+	}
+}
+
+// TestUpdateFolderFloorSettings tests updating floor settings for a specific folder.
+// It verifies that the output buffer contains a confirmation message indicating a successful update.
+func TestUpdateFolderFloorSettings(t *testing.T) {
+	folderID := testFolderID(t)
+	locationID := testLocation(t)
+	var buf bytes.Buffer
+	if err := updateFolderFloorSettings(&buf, folderID, locationID); err != nil {
+		t.Fatal(err)
+	}
+	// Prepare folder floor setting path/name
+	floorSettingName := fmt.Sprintf("folders/%s/locations/global/floorSetting", folderID)
+	
+	defer testDisableFloorSettings(floorSettingName, locationID)
+
+	if got, want := buf.String(), "Updated folder floor setting: "; !strings.Contains(got, want) {
+		t.Errorf("updateFolderFloorSettings: expected %q to contain %q", got, want)
+	}
+}
+
+// TestUpdateOrganizationFloorSettings tests updating floor settings for a specific organization.
+// It ensures the output buffer includes a success message confirming the update.
+func TestUpdateOrganizationFloorSettings(t *testing.T) {
+	organizationID := testOrganizationID(t)
+	locationID := testLocation(t)
+	var buf bytes.Buffer
+	if err := updateOrganizationFloorSettings(&buf, organizationID, locationID); err != nil {
+		t.Fatal(err)
+	}
+
+	// Prepare organization floor setting path/name
+	floorSettingsName := fmt.Sprintf("organizations/%s/locations/global/floorSetting", organizationID)
+
+	defer testDisableFloorSettings(floorSettingsName, locationID)
+
+	if got, want := buf.String(), "Updated org floor setting: "; !strings.Contains(got, want) {
+		t.Errorf("updateOrganizationFloorSettings: expected %q to contain %q", got, want)
+	}
+}
+
+// TestUpdateProjectFloorSettings tests updating floor settings for a specific project.
+// It checks that the resulting output includes the expected confirmation message.
+func TestUpdateProjectFloorSettings(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	locationID := testLocation(t)
+	var buf bytes.Buffer
+	if err := updateProjectFloorSettings(&buf, tc.ProjectID, locationID); err != nil {
+		t.Fatal(err)
+	}
+
+	// Prepare project floor settings path/name
+	floorSettingsName := fmt.Sprintf("projects/%s/locations/global/floorSetting", tc.ProjectID)
+
+	defer testDisableFloorSettings(floorSettingsName, locationID)
+
+	if got, want := buf.String(), "Updated project floor setting: "; !strings.Contains(got, want) {
+		t.Errorf("updateProjectFloorSettings: expected %q to contain %q", got, want)
 	}
 }
