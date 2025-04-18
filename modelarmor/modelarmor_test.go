@@ -64,6 +64,40 @@ func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
 	return client, ctx
 }
 
+// testModelArmorTemplate creates a new ModelArmor template for use in tests.
+// It returns the created template or an error.
+func testModelArmorTemplate(t *testing.T, templateID string) (*modelarmorpb.Template, error) {
+	t.Helper()
+	tc := testutil.SystemTest(t)
+	locationID := testLocation(t)
+	client, ctx := testClient(t)
+
+	template := &modelarmorpb.Template{
+		FilterConfig: &modelarmorpb.FilterConfig{
+			PiAndJailbreakFilterSettings: &modelarmorpb.PiAndJailbreakFilterSettings{
+				FilterEnforcement: modelarmorpb.PiAndJailbreakFilterSettings_ENABLED,
+				ConfidenceLevel:   modelarmorpb.DetectionConfidenceLevel_MEDIUM_AND_ABOVE,
+			},
+			MaliciousUriFilterSettings: &modelarmorpb.MaliciousUriFilterSettings{
+				FilterEnforcement: modelarmorpb.MaliciousUriFilterSettings_ENABLED,
+			},
+		},
+	}
+
+	req := &modelarmorpb.CreateTemplateRequest{
+		Parent:     fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, locationID),
+		TemplateId: templateID,
+		Template:   template,
+	}
+
+	response, err := client.CreateTemplate(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create template: %w", err)
+	}
+
+	return response, err
+}
+
 // testCleanupTemplate deletes the specified Model Armor template if it exists,
 // ignoring the error if the template is already deleted.
 func testCleanupTemplate(t *testing.T, templateName string) {
@@ -116,5 +150,28 @@ func TestDeleteModelArmorTemplate(t *testing.T) {
 
 	if got, want := buf.String(), "Successfully deleted Model Armor template:"; !strings.Contains(got, want) {
 		t.Errorf("deleteModelArmorTemplate: expected %q to contain %q", got, want)
+	}
+}
+
+// TestScreenPDFFile scrrens the pdf file content and Sanitize 
+// the content with the Model Armor.
+func TestScreenPDFFile(t *testing.T) {
+	pdfFilePath := "test_sample.pdf"
+	tc := testutil.SystemTest(t)
+	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
+	locationID := testLocation(t)
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
+	var buf bytes.Buffer
+	if _, err := testModelArmorTemplate(t, templateID); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupTemplate(t, templateName)
+
+	if err := screenPDFFile(&buf, tc.ProjectID, testLocation(t), templateID, pdfFilePath); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "PDF screening sanitization result: "; !strings.Contains(got, want) {
+		t.Errorf("screenPdf: expected %q to contain %q", got, want)
 	}
 }
