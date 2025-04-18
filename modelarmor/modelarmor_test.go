@@ -32,9 +32,9 @@ import (
 	grpcstatus "google.golang.org/grpc/status"
 )
 
-// testLocation returns the region where the tests should run,
-// based on the GOLANG_SAMPLES_LOCATION environment variable.
-// Skips the test if the variable is not set.
+// testLocation retrieves the GOLANG_SAMPLES_LOCATION environment variable
+// used to determine the region for running the test.
+// Skips the test if the environment variable is not set.
 func testLocation(t *testing.T) string {
 	t.Helper()
 
@@ -46,18 +46,17 @@ func testLocation(t *testing.T) string {
 	return v
 }
 
-// testClient creates a new Model Armor API client using the regional endpoint
-// derived from the environment. It returns the client and the context.
+// testClient initializes and returns a new Model Armor API client and context
+// targeting the endpoint based on the specified location.
 func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
 	t.Helper()
 
 	ctx := context.Background()
 	locationId := testLocation(t)
 
-
-	// Set the endpoint for the regional replica based on location
+	// Create option for Model Armor client.
 	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationId))
-	client, err := modelarmor.NewClient(ctx,opts)
+	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
 		t.Fatalf("testClient: failed to create client: %v", err)
 	}
@@ -106,21 +105,21 @@ func testCleanupTemplate(t *testing.T, templateName string) {
 
 	client, ctx := testClient(t)
 	if err := client.DeleteTemplate(ctx, &modelarmorpb.DeleteTemplateRequest{Name: templateName}); err != nil {
+		// Ignore NotFound errors (template may already be deleted)
 		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
 			t.Fatalf("testCleanupTemplate: failed to delete template: %v", err)
 		}
 	}
 }
 
-// TestCreateModelArmorTemplate tests the creation of a basic Model Armor template.
-// Verifies that the output includes a success message after creation.
+// TestCreateModelArmorTemplate verifies the creation of a Model Armor template.
+// It ensures the output contains a confirmation message after creation.
 func TestCreateModelArmorTemplate(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	locationID := testLocation(t)
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
-	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, testLocation(t), templateID)
 	var b bytes.Buffer
-	if err := createModelArmorTemplate(&b, tc.ProjectID, locationID, templateID); err != nil {
+	if err := createModelArmorTemplate(&b, tc.ProjectID, testLocation(t), templateID); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupTemplate(t, templateName)
@@ -167,7 +166,6 @@ func TestCreateModelArmorTemplateWithLabels(t *testing.T) {
 		t.Errorf("createModelArmorTemplateWithLabels: expected %q to contain %q", got, want)
 	}
 }
-
 
 // TestDeleteModelArmorTemplate verifies the deletion of a Model Armor template.
 // It ensures the output contains a confirmation message after deletion.
