@@ -46,18 +46,16 @@ func testLocation(t *testing.T) string {
 	return v
 }
 
-// testClient initializes and returns a new Model Armor client and context
-// for use in tests. The client is created using the location-specific endpoint.
+// testClient initializes and returns a new Model Armor API client and context
+// targeting the endpoint based on the specified location.
 func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
 	t.Helper()
 
 	ctx := context.Background()
-
-	locationID := testLocation(t)
-
-	// Create options for Model Armor client.
-	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))
-	// Create the Model Armor client.
+	locationId := testLocation(t)
+	// Create option for Model Armor client.
+	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationId))
+	// Create a new client using the regional endpoint
 	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
 		t.Fatalf("testClient: failed to create client: %v", err)
