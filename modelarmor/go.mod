@@ -3,7 +3,6 @@ module github.com/GoogleCloudPlatform/golang-samples/modelarmor
 go 1.23.0
 
 require (
-	cloud.google.com/go/dlp v1.21.0
 	cloud.google.com/go/modelarmor v0.1.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250404170905-0aca11152736
 	github.com/google/uuid v1.6.0

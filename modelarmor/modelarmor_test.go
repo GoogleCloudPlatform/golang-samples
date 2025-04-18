@@ -157,7 +157,8 @@ func testSDPTemplate(t *testing.T, projectID string, locationID string) (string,
 	return inspectResponse.Name, deidentifyResponse.Name
 }
 
-// TestCreateModelArmorTemplateWithAdvancedSDP tests creating a Model Armor template with advanced SDP using DLP templates.
+// TestCreateModelArmorTemplateWithAdvancedSDP tests creating a 
+// Model Armor template with advanced SDP using DLP templates.
 func TestCreateModelArmorTemplateWithAdvancedSDP(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -172,5 +173,46 @@ func TestCreateModelArmorTemplateWithAdvancedSDP(t *testing.T) {
 
 	if got, want := buf.String(), "Created Template with advanced SDP: "; !strings.Contains(got, want) {
 		t.Errorf("createModelArmorTemplateWithAdvancedSDP: expected %q to contain %q", got, want)
+	}
+}
+
+// TestCreateModelArmorTemplate verifies the creation of a Model Armor template.
+// It ensures the output contains a confirmation message after creation.
+func TestCreateModelArmorTemplate(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, testLocation(t), templateID)
+	var b bytes.Buffer
+	if err := createModelArmorTemplate(&b, tc.ProjectID, testLocation(t), templateID); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupTemplate(t, templateName)
+
+	if got, want := b.String(), "Created template:"; !strings.Contains(got, want) {
+		t.Errorf("createModelArmorTemplate: expected %q to contain %q", got, want)
+	}
+}
+
+// TestDeleteModelArmorTemplate verifies the deletion of a Model Armor template.
+// It ensures the output contains a confirmation message after deletion.
+func TestDeleteModelArmorTemplate(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
+
+	var buf bytes.Buffer
+	// Create template first to ensure it exists for deletion
+	if err := createModelArmorTemplate(&buf, tc.ProjectID, testLocation(t), templateID); err != nil {
+		t.Fatal(err)
+	}
+
+	// Attempt to delete the template
+	if err := deleteModelArmorTemplate(&buf, tc.ProjectID, testLocation(t), templateID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Successfully deleted Model Armor template:"; !strings.Contains(got, want) {
+		t.Errorf("deleteModelArmorTemplate: expected %q to contain %q", got, want)
 	}
 }
