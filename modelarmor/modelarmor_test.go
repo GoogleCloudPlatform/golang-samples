@@ -83,8 +83,8 @@ func testCleanupTemplate(t *testing.T, templateName string) {
 
 // testSDPTemplate creates DLP inspect and deidentify templates for use in tests.
 func testSDPTemplate(t *testing.T, projectID string, locationID string) (string, string) {
-	inspectTemplateID := fmt.Sprintf("model-armour-inspect-template-%s", uuid.New().String())
-	deidentifyTemplateID := fmt.Sprintf("model-armour-deidentify-template-%s", uuid.New().String())
+	inspectTemplateID := fmt.Sprintf("model-armor-inspect-template-%s", uuid.New().String())
+	deidentifyTemplateID := fmt.Sprintf("model-armor-deidentify-template-%s", uuid.New().String())
 	apiEndpoint := fmt.Sprintf("dlp.%s.rep.googleapis.com:443", locationID)
 	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
 
