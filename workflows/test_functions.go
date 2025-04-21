@@ -69,16 +69,22 @@ func testCreateWorkflow(t *testing.T, workflowID, projectID, locationID string) 
 	defer cancel()
 
 	// Loop the workflow's creation state until it's different from active.
+	backoffDelay := time.Second * 1
 	for workflow.State != "ACTIVE" {
+		select {
+		case <-time.After(time.Second * 1):
+		case <-timeoutCtx.Done():
+			return timeoutCtx.Err()
+		}
+	
 		workflow, err = service.Get(workflowName).Do()
 		if err != nil {
 			return fmt.Errorf("service.Get.Do error: %w", err)
 		}
 
-		select {
-		case <-time.After(time.Second * 1):
-		case <-timeoutCtx.Done():
-			return timeoutCtx.Err()
+		// Exponential backoff (capped at 16 seconds) 
+		if backoffDelay < time.Second * 16{
+			backoffDelay *= 2
 		}
 	}
 
