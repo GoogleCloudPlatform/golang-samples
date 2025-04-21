@@ -76,14 +76,14 @@ func testCreateWorkflow(t *testing.T, workflowID, projectID, locationID string) 
 		case <-timeoutCtx.Done():
 			return timeoutCtx.Err()
 		}
-	
+
 		workflow, err = service.Get(workflowName).Do()
 		if err != nil {
 			return fmt.Errorf("service.Get.Do error: %w", err)
 		}
 
-		// Exponential backoff (capped at 16 seconds) 
-		if backoffDelay < time.Second * 16{
+		// Exponential backoff (capped at 16 seconds)
+		if backoffDelay < time.Second*16 {
 			backoffDelay *= 2
 		}
 	}
