@@ -101,6 +101,31 @@ func testModelArmorTemplate(t *testing.T, templateID string) (*modelarmorpb.Temp
 	return response, err
 }
 
+// testModelArmorEmptyTemplate creates a new ModelArmor template for use in tests.
+// It returns the empty template or an error.
+func testModelArmorEmptyTemplate(t *testing.T, templateID string) (*modelarmorpb.Template, error) {
+	t.Helper()
+	tc := testutil.SystemTest(t)
+	locationID := testLocation(t)
+	client, ctx := testClient(t)
+
+	template := &modelarmorpb.Template{
+		FilterConfig: &modelarmorpb.FilterConfig{}}
+
+	req := &modelarmorpb.CreateTemplateRequest{
+		Parent:     fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, locationID),
+		TemplateId: templateID,
+		Template:   template,
+	}
+
+	response, err := client.CreateTemplate(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create template: %w", err)
+	}
+
+	return response, err
+}
+
 // testAllFilterTemplate creates a new ModelArmor template with all filters enabled.
 // It returns the template ID and filter config for cleanup.
 func testAllFilterTemplate(t *testing.T, templateID string) (*modelarmorpb.Template, *modelarmorpb.FilterConfig, error) {
@@ -633,5 +658,41 @@ func TestSanitizeUserPromptWithAdvanceSdpTemplate(t *testing.T) {
 	// Check that the email is not present in the deidentified text
 	if strings.Contains(output, "test@dot.com") {
 		t.Errorf("Expected email 'test@dot.com' to be redacted in the output, but it was found: %q", output)
+	}
+}
+
+// TestSanitizeUserPromptWithEmptyTemplate verifies that the sanitizeUserPrompt function
+// It ensures the output contains the expected sanitization result with empty template.
+func TestSanitizeUserPromptWithEmptyTemplate(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	locationID := testLocation(t)
+
+	// Generate a unique template ID
+	templateID := fmt.Sprintf("test-empty-template-%s", uuid.New().String())
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
+	var b bytes.Buffer
+
+	// Create empty template with no filters enabled
+	_, err := testModelArmorEmptyTemplate(t, templateID)
+	if err != nil {
+		t.Fatalf("Failed to create empty template: %v", err)
+	}
+	defer testCleanupTemplate(t, templateName)
+
+	// Define user prompt with a potentially malicious URL
+	// (which won't be flagged because the template is empty)
+	userPrompt := "Can you describe this link? [https://testsafebrowsing.appspot.com/s/malware.html,"
+
+	// Call sanitizeUserPrompt with buffer
+	if err := sanitizeUserPrompt(&b, tc.ProjectID, locationID, templateID, userPrompt); err != nil {
+		t.Fatal(err)
+	}
+
+	// Check that the output contains the expected sanitization result
+	output := b.String()
+
+	// Check for NO_MATCH_FOUND since the template has no filters enabled
+	if !strings.Contains(output, "NO_MATCH_FOUND") {
+		t.Errorf("Expected output to indicate NO_MATCH_FOUND for overall result, got: %q", output)
 	}
 }
