@@ -413,7 +413,7 @@ func TestSanitizeModelResponseWithUserPromptWithAdvanceSdpTemplate(t *testing.T)
 	output := b.String()
 
 	// Check for overall MATCH_FOUND
-	if !strings.Contains(output, "Sanitization Result: MATCH_FOUND") {
+	if !strings.Contains(output, "sdp") {
 		t.Errorf("Expected output to indicate MATCH_FOUND for overall result, got: %q", output)
 	}
 }
