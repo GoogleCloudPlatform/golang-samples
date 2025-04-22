@@ -30,17 +30,17 @@ import (
 func TestExecuteWorkflowWithArguments(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	workflowID := testGenerateWorkflowID()
+	workflowID := generateWorkflowID()
 	locationID := "us-central1"
 
 	var err error
 	var buf bytes.Buffer
 
 	// Create the test workflow that will be cleaned up once the test is done.
-	if err = testCreateWorkflow(t, workflowID, tc.ProjectID, locationID); err != nil {
+	if err = createWorkflow(t, workflowID, tc.ProjectID, locationID); err != nil {
 		t.Fatalf("testCreateWorkflow error: %v\n", err)
 	}
-	defer testCleanup(t, workflowID, tc.ProjectID, locationID)
+	defer cleanup(t, workflowID, tc.ProjectID, locationID)
 
 	// Execute the workflow with a timeout of 10 minutes.
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Minute*10)

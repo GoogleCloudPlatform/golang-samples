@@ -25,8 +25,8 @@ import (
 	"google.golang.org/api/workflows/v1"
 )
 
-// testCreateWorkflow creates a testing workflow by the given name.
-func testCreateWorkflow(t *testing.T, workflowID, projectID, locationID string) error {
+// createWorkflow creates a workflow for testing purposes.
+func createWorkflow(t *testing.T, workflowID, projectID, locationID string) error {
 	t.Helper()
 
 	ctx := context.Background()
@@ -37,13 +37,13 @@ func testCreateWorkflow(t *testing.T, workflowID, projectID, locationID string) 
 	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
 	workflowName := fmt.Sprintf("%s/workflows/%s", parent, workflowID)
 
-	// Create client
+	// Create client.
 	client, err := workflows.NewService(ctx)
 	if err != nil {
 		return fmt.Errorf("workflows.NewService error: %w", err)
 	}
 
-	// Read file's content
+	// Read file's content.
 	content, err := os.ReadFile("myFirstWorkflow.yaml")
 	if err != nil {
 		return fmt.Errorf("os.ReadFile error: %w", err)
@@ -58,7 +58,7 @@ func testCreateWorkflow(t *testing.T, workflowID, projectID, locationID string) 
 	// Get the workflow service for avoiding repetitive code.
 	service := client.Projects.Locations.Workflows
 
-	// Create workflow
+	// Create workflow.
 	_, err = service.Create(parent, workflow).WorkflowId(workflowID).Do()
 	if err != nil {
 		return fmt.Errorf("service.Create failed to create workflow: %v", err)
@@ -82,7 +82,7 @@ func testCreateWorkflow(t *testing.T, workflowID, projectID, locationID string) 
 			return fmt.Errorf("service.Get.Do error: %w", err)
 		}
 
-		// Exponential backoff (capped at 16 seconds)
+		// Exponential backoff (capped at 16 seconds).
 		if backoffDelay < time.Second*16 {
 			backoffDelay *= 2
 		}
@@ -91,10 +91,10 @@ func testCreateWorkflow(t *testing.T, workflowID, projectID, locationID string) 
 	return nil
 }
 
-// testCleanup deletes a workflow to ensure that all resources
+// cleanup deletes a workflow to ensure that all resources
 // created or utilized during the execution of the test are
 // released.
-func testCleanup(t *testing.T, workflowID, projectID, locationID string) error {
+func cleanup(t *testing.T, workflowID, projectID, locationID string) error {
 	t.Helper()
 
 	ctx := context.Background()
@@ -118,8 +118,7 @@ func testCleanup(t *testing.T, workflowID, projectID, locationID string) error {
 	return nil
 }
 
-// testGenerateWorkflowID creates a random string to
-// assign it to a new workflow.
-func testGenerateWorkflowID() string {
+// generateWorkflowID creates a random string to assign as a Workflow ID.
+func generateWorkflowID() string {
 	return fmt.Sprintf("workflow-go-test-%s", uuid.NewString())
 }
