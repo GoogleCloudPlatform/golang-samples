@@ -3,9 +3,10 @@ module github.com/GoogleCloudPlatform/golang-samples/parametermanager
 go 1.23.0
 
 require (
+	cloud.google.com/go/kms v1.21.2
 	cloud.google.com/go/parametermanager v0.2.1
 	cloud.google.com/go/secretmanager v1.14.7
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250416173630-eafea413c9b7
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250417052308-a8d44a62f893
 	github.com/gofrs/uuid v4.4.0+incompatible
 	google.golang.org/api v0.229.0
 	google.golang.org/genproto v0.0.0-20250414145226-207652e42e2e
@@ -19,6 +20,7 @@ require (
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
 	cloud.google.com/go/iam v1.5.0 // indirect
+	cloud.google.com/go/longrunning v0.6.6 // indirect
 	cloud.google.com/go/monitoring v1.24.1 // indirect
 	cloud.google.com/go/storage v1.50.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.25.0 // indirect

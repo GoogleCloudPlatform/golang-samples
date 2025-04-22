@@ -10,6 +10,8 @@ cloud.google.com/go/compute/metadata v0.6.0 h1:A6hENjEsCDtC1k8byVsgwvVcioamEHvZ4
 cloud.google.com/go/compute/metadata v0.6.0/go.mod h1:FjyFAW1MW0C203CEOMDTu3Dk1FlqW3Rga40jzHL4hfg=
 cloud.google.com/go/iam v1.5.0 h1:QlLcVMhbLGOjRcGe6VTGGTyQib8dRLK2B/kYNV0+2xs=
 cloud.google.com/go/iam v1.5.0/go.mod h1:U+DOtKQltF/LxPEtcDLoobcsZMilSRwR7mgNL7knOpo=
+cloud.google.com/go/kms v1.21.2 h1:c/PRUSMNQ8zXrc1sdAUnsenWWaNXN+PzTXfXOcSFdoE=
+cloud.google.com/go/kms v1.21.2/go.mod h1:8wkMtHV/9Z8mLXEXr1GK7xPSBdi6knuLXIhqjuWcI6w=
 cloud.google.com/go/logging v1.13.0 h1:7j0HgAp0B94o1YRDqiqm26w4q1rDMH7XNRU34lJXHYc=
 cloud.google.com/go/logging v1.13.0/go.mod h1:36CoKh6KA/M0PbhPKMq6/qety2DCAErbhXT62TuXALA=
 cloud.google.com/go/longrunning v0.6.6 h1:XJNDo5MUfMM05xK3ewpbSdmt7R2Zw+aQEMbdQR65Rbw=
@@ -24,8 +26,8 @@ cloud.google.com/go/storage v1.50.0 h1:3TbVkzTooBvnZsk7WaAQfOsNrdoM8QHusXA1cpk6Q
 cloud.google.com/go/storage v1.50.0/go.mod h1:l7XeiD//vx5lfqE3RavfmU9yvk5Pp0Zhcv482poyafY=
 cloud.google.com/go/trace v1.11.5 h1:CALS1loyxJMnRiCwZSpdf8ac7iCsjreMxFD2WGxzzHU=
 cloud.google.com/go/trace v1.11.5/go.mod h1:TwblCcqNInriu5/qzaeYEIH7wzUcchSdeY2l5wL3Eec=
-github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250416173630-eafea413c9b7 h1:nUDEfWIscFfFBcNTR5HIA3OswLZEPlGRHhAQ7v+2NEo=
-github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250416173630-eafea413c9b7/go.mod h1:pro/7J5Dd9+sI+NAZUopa1sW4YuthozUkor+3MF6fIU=
+github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250417052308-a8d44a62f893 h1:G6Dsf9L1SxjKpZB2gf4mykaXURpiEf4oJLLn/s170Ds=
+github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250417052308-a8d44a62f893/go.mod h1:pro/7J5Dd9+sI+NAZUopa1sW4YuthozUkor+3MF6fIU=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.25.0 h1:3c8yed4lgqTt+oTQ+JNMDo+F4xprBf+O/il4ZC0nRLw=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.25.0/go.mod h1:obipzmGjfSjam60XLwGfqUkJsfiheAl+TUjG+4yzyPM=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.50.0 h1:5IT7xOdq17MtcdtL/vtl6mGfzhaq4m4vpollPRmlsBQ=
