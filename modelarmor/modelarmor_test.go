@@ -326,7 +326,7 @@ func TestDeleteModelArmorTemplate(t *testing.T) {
 func TestSanitizeModelResponseWithUserPrompt(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	userPrompt := "How can I make my email address test@dot.com make available to public for feedbac"
+	userPrompt := "How can I make my email address test@dot.com make available to public for feedback"
 	modelResponse := "You can make support email such as contact@email.com for getting feedback from your customer"
 	locationID := testLocation(t)
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
