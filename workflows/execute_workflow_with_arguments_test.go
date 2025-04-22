@@ -24,9 +24,8 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-// TestExecuteWorkflowWithArguments tests the executeWorkflowWithArguments
-// function and evaluates the success by comparing if the function's output
-// contains an expected value.
+// TestExecuteWorkflowWithArguments creates a workflow, executes it, and
+// validates whether the execution results are returned correctly.
 func TestExecuteWorkflowWithArguments(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
