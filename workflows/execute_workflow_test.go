@@ -24,10 +24,9 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-// TestExecuteWorkflow tests the executeWorkflow function
-// and evaluates success by comparing the function's output
-// against an expected value.
-
+// TestExecuteWorkflow tests the executeWorkflow function and evaluates
+// the success by comparing whether the function's output contains an
+// expected value.
 func TestExecuteWorkflow(t *testing.T) {
 	tc := testutil.SystemTest(t)
 

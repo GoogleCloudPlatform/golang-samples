@@ -25,7 +25,7 @@ import (
 )
 
 // TestExecuteWorkflowWithArguments tests the executeWorkflowWithArguments
-// function and evaluates the success by comparing if the function's output
+// function and evaluates the success by comparing whether the function's output
 // contains an expected value.
 func TestExecuteWorkflowWithArguments(t *testing.T) {
 	tc := testutil.SystemTest(t)

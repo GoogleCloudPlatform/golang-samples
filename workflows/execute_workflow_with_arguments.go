@@ -14,7 +14,7 @@
 
 package workflows
 
-// [START workflows_execute_workflow_with_arguments]
+// [START workflows_execute_with_arguments]
 import (
 	"context"
 	"encoding/json"
@@ -97,4 +97,4 @@ func executeWorkflowWithArguments(w io.Writer, projectID, workflowID, locationID
 	return nil
 }
 
-// [END workflows_execute_workflow_with_arguments]
+// [END workflows_execute_with_arguments]

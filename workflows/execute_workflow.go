@@ -14,7 +14,7 @@
 
 package workflows
 
-// [START workflows_execute_workflow_without_arguments]
+// [START workflows_execute_without_arguments]
 import (
 	"context"
 	"fmt"
@@ -80,4 +80,4 @@ func executeWorkflow(w io.Writer, projectID, workflowID, locationID string) erro
 	return nil
 }
 
-// [END workflows_execute_workflow_without_arguments]
+// [END workflows_execute_without_arguments]
