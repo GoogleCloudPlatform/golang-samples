@@ -681,7 +681,7 @@ func TestSanitizeUserPromptWithEmptyTemplate(t *testing.T) {
 
 	// Define user prompt with a potentially malicious URL
 	// (which won't be flagged because the template is empty)
-	userPrompt := "Can you describe this link? [https://testsafebrowsing.appspot.com/s/malware.html,"
+	userPrompt := "Can you describe this link? https://testsafebrowsing.appspot.com/s/malware.html"
 
 	// Call sanitizeUserPrompt with buffer
 	if err := sanitizeUserPrompt(&b, tc.ProjectID, locationID, templateID, userPrompt); err != nil {
