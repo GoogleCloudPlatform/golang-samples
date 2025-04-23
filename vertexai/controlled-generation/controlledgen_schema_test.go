@@ -28,7 +28,7 @@ func Test_controlledGenerationResponseSchema6(t *testing.T) {
 	w := new(bytes.Buffer)
 
 	location := "us-central1"
-	modelName := "gemini-1.5-pro-001"
+	modelName := "gemini-2.0-flash-001"
 
 	err := controlledGenerationResponseSchema6(w, tc.ProjectID, location, modelName)
 	if err != nil {
@@ -58,7 +58,7 @@ func Test_controlledGenerationResponseSchemaEnum(t *testing.T) {
 	w := new(bytes.Buffer)
 
 	location := "us-central1"
-	modelName := "gemini-1.5-pro-001"
+	modelName := "gemini-2.0-flash-001"
 
 	err := controlledGenerationResponseSchemaEnum(w, tc.ProjectID, location, modelName)
 	if err != nil {

@@ -33,7 +33,7 @@ import (
 // video is a Google Cloud Storage path starting with "gs://"
 func countTokensMultimodal(w io.Writer, projectID, location, modelName string) error {
 	// location := "us-central1"
-	// modelName := "gemini-1.5-flash-001"
+	// modelName := "gemini-2.0-flash-001"
 	prompt := "Provide a description of the video."
 	video := "gs://cloud-samples-data/generative-ai/video/pixel8.mp4"
 

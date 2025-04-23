@@ -18,13 +18,12 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
-	"strings"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+	"google.golang.org/api/option"
 
 	gateway "cloud.google.com/go/gkeconnect/gateway/apiv1"
 	gatewaypb "cloud.google.com/go/gkeconnect/gateway/apiv1/gatewaypb"
@@ -34,15 +33,14 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-// --- Configuration ---
 var (
 	scopes = "https://www.googleapis.com/auth/cloud-platform"
 )
 
-func listNamespaces(projectID, membershipID, membershipLocation, serviceAccountKeyPath string) (*v1.NamespaceList, error) {
+func getNamespace(membershipName, membershipLocation, serviceAccountKeyPath string) (*v1.Namespace, error) {
 	ctx := context.Background()
 
-	gatewayURL, err := getGatewayURL(ctx, projectID, membershipID, membershipLocation)
+	gatewayURL, err := getGatewayURL(ctx, membershipName, membershipLocation)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching Connect Gateway URL: %v", err)
 	}
@@ -52,48 +50,45 @@ func listNamespaces(projectID, membershipID, membershipLocation, serviceAccountK
 		return nil, fmt.Errorf("error configuring Kubernetes client: %v", err)
 	}
 
-	return callListNamespaces(kubeClient)
+	return callGetNamespace(kubeClient)
 }
 
-func getGatewayURL(ctx context.Context, projectID, membershipID, membershipLocation string) (string, error) {
-	gatewayClient, err := gateway.NewGatewayControlRESTClient(ctx)
+func getGatewayURL(ctx context.Context, membershipName, membershipLocation string) (string, error) {
+	var opts option.ClientOption
+	if membershipLocation != "global" {
+		opts = option.WithEndpoint(fmt.Sprintf("%v-connectgateway.googleapis.com", membershipLocation))
+	}
+	gatewayClient, err := gateway.NewGatewayControlRESTClient(ctx, opts)
 	if err != nil {
 		return "", fmt.Errorf("failed to create Connect Gateway client: %w", err)
 	}
 	defer gatewayClient.Close()
 
 	req := &gatewaypb.GenerateCredentialsRequest{
-		Name: fmt.Sprintf("projects/%s/locations/%s/memberships/%s", projectID, membershipLocation, membershipID),
+		Name: membershipName,
 	}
 
 	resp, err := gatewayClient.GenerateCredentials(ctx, req)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
-			return "", fmt.Errorf("membership not found: %w", err)
-		}
-		return "", fmt.Errorf("failed to fetch Connect Gateway URL for membership %s: %w", membershipID, err)
+		return "", fmt.Errorf("failed to fetch Connect Gateway URL for membership %s: %w", membershipName, err)
 	}
 
 	fmt.Printf("Connect Gateway Endpoint: %s\n", resp.Endpoint)
-	if resp.Endpoint == "" {
-		return "", fmt.Errorf("error: Connect Gateway Endpoint is empty")
-	}
 	return resp.Endpoint, nil
 }
 
 func configureKubernetesClient(ctx context.Context, gatewayURL string, serviceAccountKeyPath string) (*kubernetes.Clientset, error) {
-	// Read the service account key file
+	// Read the service account key file.
 	keyBytes, err := ioutil.ReadFile(serviceAccountKeyPath)
 	if err != nil {
 		return nil, fmt.Errorf("error reading service account key file: %v", err)
 	}
 
-	// Create Google credentials from the service account key
+	// Create Google credentials from the service account key.
 	creds, err := google.CredentialsFromJSON(context.Background(), keyBytes, scopes)
 	if err != nil {
 		return nil, fmt.Errorf("error creating credentials: %v", err)
 	}
-
 	config := &rest.Config{
 		Host: gatewayURL,
 		WrapTransport: func(rt http.RoundTripper) http.RoundTripper {
@@ -108,43 +103,31 @@ func configureKubernetesClient(ctx context.Context, gatewayURL string, serviceAc
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Kubernetes client: %w", err)
 	}
-
 	return clientset, nil
 }
 
-func callListNamespaces(clientset *kubernetes.Clientset) (*v1.NamespaceList, error) {
-	namespaces, err := clientset.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
+func callGetNamespace(clientset *kubernetes.Clientset) (*v1.Namespace, error) {
+	namespace, err := clientset.CoreV1().Namespaces().Get(context.Background(), "default", metav1.GetOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to list namespaces: %w", err)
+		return nil, fmt.Errorf("failed to get namespace: %w", err)
 	}
-	return namespaces, nil
+	return namespace, nil
 }
 
 func main() {
-	if len(os.Args) < 4 {
-		fmt.Println("Usage: list_namespaces must include 4 string arguments for projectID, membershipID, membershipLocation, and serviceAccountKeyPath")
-		os.Exit(1)
-	}
-	projectID := os.Args[1]
-	membershipID := os.Args[2]
-	membershipLocation := os.Args[3]
-	serviceAccountKeyPath := os.Args[4]
+	membershipName := os.Getenv("MEMBERSHIP_NAME")
+	membershipLocation := os.Getenv("MEMBERSHIP_LOCATION")
+	serviceAccountKeyPath := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
 	if _, err := os.Stat(serviceAccountKeyPath); os.IsNotExist(err) {
-		fmt.Printf("Error: service account key file not found at %s\n", serviceAccountKeyPath)
+		fmt.Printf("service account key file not found at %s\n", serviceAccountKeyPath)
 		os.Exit(1)
 	}
 
-	namespaces, err := listNamespaces(projectID, membershipID, membershipLocation, serviceAccountKeyPath)
+	namespace, err := getNamespace(membershipName, membershipLocation, serviceAccountKeyPath)
 	if err != nil {
-		log.Fatalf("listNamespaces: %v", err)
+		fmt.Printf("failed to get namespace: %v", err)
+		os.Exit(1)
 	}
-	if len(namespaces.Items) > 0 {
-		fmt.Println("\n--- List of Namespaces ---")
-		for _, namespace := range namespaces.Items {
-			fmt.Printf("Name: %s\n", namespace.ObjectMeta.Name)
-		}
-	} else {
-		fmt.Println("No namespaces found in the cluster.")
-	}
+	fmt.Printf("\nDefault Namespace:\n%v", namespace)
 }
