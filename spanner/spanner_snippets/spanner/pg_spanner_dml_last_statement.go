@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START pg_spanner_dml_last_statement]
+// [START spanner_postgresql_dml_last_statement]
 
 import (
 	"context"
@@ -63,4 +63,4 @@ func pgInsertAndUpdateDmlWithLastStatement(w io.Writer, db string) error {
 	return nil
 }
 
-// [END pg_spanner_dml_last_statement]
+// [END spanner_postgresql_dml_last_statement]
