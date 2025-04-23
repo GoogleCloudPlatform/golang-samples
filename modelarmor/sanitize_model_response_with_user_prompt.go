@@ -30,14 +30,14 @@ import (
 
 // sanitizeModelResponseWithUserPrompt sanitizes a model response with a user prompt.
 //
-// This method sanitizes a model response based on a user prompt.
-//
 // w io.Writer: The writer to use for logging.
 // projectID string: The ID of the project.
 // locationID string: The ID of the location.
 // templateID string: The ID of the template.
 // modelResponse string: The model response to sanitize.
 // userPrompt string: The user prompt to use for sanitization.
+//
+// The function returns an error if sanitization fails.
 func sanitizeModelResponseWithUserPrompt(w io.Writer, projectID, locationID, templateID, modelResponse, userPrompt string) error {
 	ctx := context.Background()
 
