@@ -32,7 +32,7 @@ func TestContextCaching(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	location := "us-central1"
-	modelName := "gemini-1.5-pro-001"
+	modelName := "gemini-2.0-flash-001"
 
 	// 1) Create a cached content. The generated content name will be used in steps 2, 3, 4.
 	contentName, err := createContextCache(buf, tc.ProjectID, location, modelName)
