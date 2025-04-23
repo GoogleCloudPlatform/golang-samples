@@ -44,7 +44,7 @@ func listNamespaces(projectID, membershipID, membershipLocation, serviceAccountK
 
 	gatewayURL, err := getGatewayURL(ctx, projectID, membershipID, membershipLocation)
 	if err != nil {
-		return nil, fmt.Errorf("error fetching GKE Connect Gateway URL: %v", err)
+		return nil, fmt.Errorf("error fetching Connect Gateway URL: %v", err)
 	}
 
 	kubeClient, err := configureKubernetesClient(ctx, gatewayURL, serviceAccountKeyPath)
@@ -58,7 +58,7 @@ func listNamespaces(projectID, membershipID, membershipLocation, serviceAccountK
 func getGatewayURL(ctx context.Context, projectID, membershipID, membershipLocation string) (string, error) {
 	gatewayClient, err := gateway.NewGatewayControlRESTClient(ctx)
 	if err != nil {
-		return "", fmt.Errorf("failed to create GKE Connect Gateway client: %w", err)
+		return "", fmt.Errorf("failed to create Connect Gateway client: %w", err)
 	}
 	defer gatewayClient.Close()
 
@@ -71,12 +71,12 @@ func getGatewayURL(ctx context.Context, projectID, membershipID, membershipLocat
 		if strings.Contains(err.Error(), "not found") {
 			return "", fmt.Errorf("membership not found: %w", err)
 		}
-		return "", fmt.Errorf("failed to fetch GKE Connect Gateway URL: %w", err)
+		return "", fmt.Errorf("failed to fetch Connect Gateway URL for membership %s: %w", membershipID, err)
 	}
 
-	fmt.Printf("GKE Connect Gateway Endpoint: %s\n", resp.Endpoint)
+	fmt.Printf("Connect Gateway Endpoint: %s\n", resp.Endpoint)
 	if resp.Endpoint == "" {
-		return "", fmt.Errorf("error: GKE Connect Gateway Endpoint is empty")
+		return "", fmt.Errorf("error: Connect Gateway Endpoint is empty")
 	}
 	return resp.Endpoint, nil
 }
@@ -122,15 +122,20 @@ func callListNamespaces(clientset *kubernetes.Clientset) (*v1.NamespaceList, err
 
 func main() {
 	if len(os.Args) < 4 {
-		fmt.Println("Usage: Must include 4 arguments for projectID, membershipID, membershipLocation, and serviceAccountKey")
+		fmt.Println("Usage: list_namespaces must include 4 string arguments for projectID, membershipID, membershipLocation, and serviceAccountKeyPath")
 		os.Exit(1)
 	}
-	projectNumber := os.Args[1]
+	projectID := os.Args[1]
 	membershipID := os.Args[2]
 	membershipLocation := os.Args[3]
 	serviceAccountKeyPath := os.Args[4]
 
-	namespaces, err := listNamespaces(projectNumber, membershipID, membershipLocation, serviceAccountKeyPath)
+	if _, err := os.Stat(serviceAccountKeyPath); os.IsNotExist(err) {
+		fmt.Printf("Error: service account key file not found at %s\n", serviceAccountKeyPath)
+		os.Exit(1)
+	}
+
+	namespaces, err := listNamespaces(projectID, membershipID, membershipLocation, serviceAccountKeyPath)
 	if err != nil {
 		log.Fatalf("listNamespaces: %v", err)
 	}
