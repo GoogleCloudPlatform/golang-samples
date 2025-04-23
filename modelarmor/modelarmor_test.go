@@ -506,7 +506,7 @@ func TestSanitizeModelResponseWithMaliciousUrlTemplate(t *testing.T) {
 	defer testCleanupTemplate(t, templateName)
 
 	// Define a model response with a malicious URL
-	modelResponse := "You can use this to make a cake: https://testsafebrowsing.appspot.com/s/malware.html,"
+	modelResponse := "You can use this to make a cake: https://testsafebrowsing.appspot.com/s/malware.html"
 
 	// Call sanitizeModelResponse with buffer
 	if err := sanitizeModelResponse(&b, tc.ProjectID, locationID, templateID, modelResponse); err != nil {
