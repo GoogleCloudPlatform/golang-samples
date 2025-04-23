@@ -31,7 +31,7 @@ import (
 // the provided io.Writer.
 func generateMultimodalContent(w io.Writer, projectID, location, modelName string) error {
 	// location := "us-central1"
-	// modelName := "gemini-1.5-flash-001"
+	// modelName := "gemini-2.0-flash-001"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
