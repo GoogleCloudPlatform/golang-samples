@@ -22,7 +22,6 @@ import (
 )
 
 func main() {
-
 	// Get environment variables.
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	workflowID := os.Getenv("WORKFLOW")
