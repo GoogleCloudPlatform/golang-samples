@@ -173,9 +173,12 @@ func testCleanupParameter(t *testing.T, name string) {
 	}
 	defer client.Close()
 
-	if err := client.DeleteParameter(ctx, &parametermanagerpb.DeleteParameterRequest{
+	err = client.DeleteParameter(ctx, &parametermanagerpb.DeleteParameterRequest{
 		Name: name,
-	}); err != nil {
+	})
+	if err == nil {
+		return
+	} else {
 		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
 			t.Fatalf("testCleanupParameter: failed to delete parameter: %v", err)
 		}
@@ -197,9 +200,12 @@ func testCleanupParameterVersion(t *testing.T, name string) {
 	}
 	defer client.Close()
 
-	if err := client.DeleteParameterVersion(ctx, &parametermanagerpb.DeleteParameterVersionRequest{
+	err = client.DeleteParameterVersion(ctx, &parametermanagerpb.DeleteParameterVersionRequest{
 		Name: name,
-	}); err != nil {
+	})
+	if err == nil {
+		return
+	} else {
 		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
 			t.Fatalf("testCleanupParameterVersion: failed to delete parameter version: %v", err)
 		}
@@ -305,9 +311,12 @@ func testCleanupSecret(t *testing.T, name string) {
 	}
 	defer client.Close()
 
-	if err := client.DeleteSecret(ctx, &secretmanagerpb.DeleteSecretRequest{
+	err = client.DeleteSecret(ctx, &secretmanagerpb.DeleteSecretRequest{
 		Name: name,
-	}); err != nil {
+	})
+	if err == nil {
+		return
+	} else {
 		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
 			t.Fatalf("testCleanupSecret: failed to delete secret: %v", err)
 		}
@@ -326,9 +335,12 @@ func testCleanupKeyVersions(t *testing.T, name string) {
 	}
 	defer client.Close()
 
-	if _, err := client.DestroyCryptoKeyVersion(ctx, &kmspb.DestroyCryptoKeyVersionRequest{
+	_, err = client.DestroyCryptoKeyVersion(ctx, &kmspb.DestroyCryptoKeyVersionRequest{
 		Name: name,
-	}); err != nil {
+	})
+	if err == nil {
+		return
+	} else {
 		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
 			t.Fatalf("testCleanupKeyVersion: failed to delete key version: %v", err)
 		}
