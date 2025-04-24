@@ -22,12 +22,15 @@ import (
 )
 
 func main() {
+
+	// Get environment variables.
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	workflowID := os.Getenv("WORKFLOW_NAME")
-	locationID := os.Getenv("CLOUD_REGION")
+	workflowID := os.Getenv("WORKFLOW")
+	locationID := os.Getenv("LOCATION")
 
 	buf := bytes.Buffer{}
 
+	// Execute workflow.
 	if err := executeWorkflow(&buf, projectID, workflowID, locationID); err != nil {
 		log.Fatalf("Error when executing workflow: %v", err)
 	}
