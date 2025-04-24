@@ -116,7 +116,7 @@ func main() {
 
 	// Sanitize a model response using the created template
 	modelResponse := "Unsanitized model output"
-	modelSanitizeReq := &modelarmorpb.SanitizeModelResponseRequest{
+	sanitizeModelRespReq := &modelarmorpb.SanitizeModelResponseRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/templates/%s", projectID, locationID, templateID),
 		ModelResponseData: &modelarmorpb.DataItem{
 			DataItem: &modelarmorpb.DataItem_Text{
@@ -126,13 +126,13 @@ func main() {
 	}
 
 	// Sanitize Model Response
-	modelSanitizeResp, err := client.SanitizeModelResponse(ctx, modelSanitizeReq)
+	sanitizeModelRespResp, err := client.SanitizeModelResponse(ctx, sanitizeModelRespReq)
 	if err != nil {
 		wrappedErr := fmt.Errorf("failed to sanitize model response: %w", err)
 		fmt.Println(wrappedErr)
 	}
 
-	fmt.Printf("Result for Model Response Sanitization: %v\n", modelSanitizeResp.SanitizationResult)
+	fmt.Printf("Result for Model Response Sanitization: %v\n", sanitizeModelRespResp.SanitizationResult)
 }
 
 // [END modelarmor_quickstart]
