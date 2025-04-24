@@ -28,7 +28,7 @@ import (
 // createContextCache shows how to create a cached content, and returns its name.
 func createContextCache(w io.Writer, projectID, location, modelName string) (string, error) {
 	// location := "us-central1"
-	// modelName := "gemini-1.5-pro-001"
+	// modelName := "gemini-2.0-flash-001"
 	ctx := context.Background()
 
 	systemInstruction := `
