@@ -221,13 +221,13 @@ func TestCreateModelArmorTemplate(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
 	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, testLocation(t), templateID)
-	var b bytes.Buffer
-	if err := createModelArmorTemplate(&b, tc.ProjectID, testLocation(t), templateID); err != nil {
+	var buf bytes.Buffer
+	if err := createModelArmorTemplate(&buf, tc.ProjectID, testLocation(t), templateID); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupTemplate(t, templateName)
 
-	if got, want := b.String(), "Created template:"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Created template:"; !strings.Contains(got, want) {
 		t.Errorf("createModelArmorTemplate: expected %q to contain %q", got, want)
 	}
 }
@@ -240,13 +240,13 @@ func TestCreateModelArmorTemplateWithMetadata(t *testing.T) {
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
 	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
 
-	var b bytes.Buffer
-	if err := createModelArmorTemplateWithMetadata(&b, tc.ProjectID, locationID, templateID); err != nil {
+	var buf bytes.Buffer
+	if err := createModelArmorTemplateWithMetadata(&buf, tc.ProjectID, locationID, templateID); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupTemplate(t, templateName)
 
-	if got, want := b.String(), "Created Model Armor Template:"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Created Model Armor Template:"; !strings.Contains(got, want) {
 		t.Errorf("createModelArmorTemplateWithMetadata: expected %q to contain %q", got, want)
 	}
 }
@@ -259,13 +259,13 @@ func TestCreateModelArmorTemplateWithLabels(t *testing.T) {
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
 	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
 
-	var b bytes.Buffer
-	if err := createModelArmorTemplateWithLabels(&b, tc.ProjectID, locationID, templateID, map[string]string{"testkey": "testvalue"}); err != nil {
+	var buf bytes.Buffer
+	if err := createModelArmorTemplateWithLabels(&buf, tc.ProjectID, locationID, templateID, map[string]string{"testkey": "testvalue"}); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupTemplate(t, templateName)
 
-	if got, want := b.String(), "Created Template with labels: "; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Created Template with labels: "; !strings.Contains(got, want) {
 		t.Errorf("createModelArmorTemplateWithLabels: expected %q to contain %q", got, want)
 	}
 }
