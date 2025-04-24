@@ -21,7 +21,10 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
+	dlp "cloud.google.com/go/dlp/apiv2"
+	"cloud.google.com/go/dlp/apiv2/dlppb"
 	modelarmor "cloud.google.com/go/modelarmor/apiv1"
 	modelarmorpb "cloud.google.com/go/modelarmor/apiv1/modelarmorpb"
 
@@ -110,6 +113,106 @@ func testCleanupTemplate(t *testing.T, templateName string) {
 		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
 			t.Fatalf("testCleanupTemplate: failed to delete template: %v", err)
 		}
+	}
+}
+
+// testSDPTemplate creates DLP inspect and deidentify templates for use in tests.
+func testSDPTemplate(t *testing.T, projectID string, locationID string) (string, string) {
+	inspectTemplateID := fmt.Sprintf("model-armor-inspect-template-%s", uuid.New().String())
+	deidentifyTemplateID := fmt.Sprintf("model-armor-deidentify-template-%s", uuid.New().String())
+	apiEndpoint := fmt.Sprintf("dlp.%s.rep.googleapis.com:443", locationID)
+	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
+
+	infoTypes := []*dlppb.InfoType{
+		{Name: "EMAIL_ADDRESS"},
+		{Name: "PHONE_NUMBER"},
+		{Name: "US_INDIVIDUAL_TAXPAYER_IDENTIFICATION_NUMBER"},
+	}
+
+	ctx := context.Background()
+	dlpClient, err := dlp.NewClient(ctx, option.WithEndpoint(apiEndpoint))
+	if err != nil {
+		t.Fatalf("Getting error while creating the client: %v", err)
+	}
+	defer dlpClient.Close()
+
+	inspectRequest := &dlppb.CreateInspectTemplateRequest{
+		Parent:     parent,
+		TemplateId: inspectTemplateID,
+		InspectTemplate: &dlppb.InspectTemplate{
+			InspectConfig: &dlppb.InspectConfig{
+				InfoTypes: infoTypes,
+			},
+		},
+	}
+	inspectResponse, err := dlpClient.CreateInspectTemplate(ctx, inspectRequest)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	deidentifyRequest := &dlppb.CreateDeidentifyTemplateRequest{
+		Parent:     parent,
+		TemplateId: deidentifyTemplateID,
+		DeidentifyTemplate: &dlppb.DeidentifyTemplate{
+			DeidentifyConfig: &dlppb.DeidentifyConfig{
+				Transformation: &dlppb.DeidentifyConfig_InfoTypeTransformations{
+					InfoTypeTransformations: &dlppb.InfoTypeTransformations{
+						Transformations: []*dlppb.InfoTypeTransformations_InfoTypeTransformation{
+							{
+								InfoTypes: []*dlppb.InfoType{},
+								PrimitiveTransformation: &dlppb.PrimitiveTransformation{
+									Transformation: &dlppb.PrimitiveTransformation_ReplaceConfig{
+										ReplaceConfig: &dlppb.ReplaceValueConfig{
+											NewValue: &dlppb.Value{
+												Type: &dlppb.Value_StringValue{StringValue: "REDACTED"},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	deidentifyResponse, err := dlpClient.CreateDeidentifyTemplate(ctx, deidentifyRequest)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Cleanup the templates after test.
+	defer func() {
+		time.Sleep(5 * time.Second)
+		err := dlpClient.DeleteInspectTemplate(ctx, &dlppb.DeleteInspectTemplateRequest{Name: inspectResponse.Name})
+		if err != nil {
+			t.Errorf("failed to delete inspect template: %v, err: %v", inspectResponse.Name, err)
+		}
+		err = dlpClient.DeleteDeidentifyTemplate(ctx, &dlppb.DeleteDeidentifyTemplateRequest{Name: deidentifyResponse.Name})
+		if err != nil {
+			t.Errorf("failed to delete deidentify template: %v, err: %v", deidentifyResponse.Name, err)
+		}
+	}()
+
+	return inspectResponse.Name, deidentifyResponse.Name
+}
+
+// TestCreateModelArmorTemplateWithAdvancedSDP tests creating a
+// Model Armor template with advanced SDP using DLP templates.
+func TestCreateModelArmorTemplateWithAdvancedSDP(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
+	inspectTemplateName, deideintifyTemplateName := testSDPTemplate(t, tc.ProjectID, testLocation(t))
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, testLocation(t), templateID)
+	var buf bytes.Buffer
+	if err := createModelArmorTemplateWithAdvancedSDP(&buf, tc.ProjectID, testLocation(t), templateID, inspectTemplateName, deideintifyTemplateName); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupTemplate(t, templateName)
+
+	if got, want := buf.String(), "Created Template with advanced SDP: "; !strings.Contains(got, want) {
+		t.Errorf("createModelArmorTemplateWithAdvancedSDP: expected %q to contain %q", got, want)
 	}
 }
 
