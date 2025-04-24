@@ -85,7 +85,7 @@ func createContentCache(w io.Writer) (string, error) {
 	// {
 	//   "name": "projects/111111111111/locations/us-central1/cachedContents/1111111111111111111",
 	//   "displayName": "example-cache",
-	//   "model": "projects/111111111111/locations/us-central1/publishers/google/models/gemini-1.5-pro-002",
+	//   "model": "projects/111111111111/locations/us-central1/publishers/google/models/gemini-2.0-flash-001",
 	//   "createTime": "2025-02-18T15:05:08.29468Z",
 	//   "updateTime": "2025-02-18T15:05:08.29468Z",
 	//   "expireTime": "2025-02-19T15:05:08.280828Z",
