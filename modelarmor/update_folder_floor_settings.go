@@ -81,7 +81,7 @@ func updateFolderFloorSettings(w io.Writer, folderID, locationID string) error {
 	// Print the updated config
 	fmt.Fprintf(w, "Updated folder floor setting: %v\n", response)
 
-	return err
+	return nil
 
 }
 

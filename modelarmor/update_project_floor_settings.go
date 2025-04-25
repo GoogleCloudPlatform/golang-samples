@@ -79,7 +79,7 @@ func updateProjectFloorSettings(w io.Writer, projectID, locationID string) error
 	// Print the updated config
 	fmt.Fprintf(w, "Updated project floor setting: %+v\n", response)
 
-	return err
+	return nil
 }
 
 // [END modelarmor_update_project_floor_settings]

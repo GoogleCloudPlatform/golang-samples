@@ -81,5 +81,5 @@ func updateOrganizationFloorSettings(w io.Writer, organizationID, locationID str
 
 	// [END modelarmor_update_organization_floor_settings]
 
-	return err
+	return nil
 }
