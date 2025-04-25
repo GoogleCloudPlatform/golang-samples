@@ -1,6 +1,6 @@
 go 1.23.0
 
-toolchain go1.23.4
+toolchain go1.23.5
 
 use (
 	.
@@ -106,8 +106,10 @@ use (
 	./media
 	./memorystore
 	./monitoring
+	./modelarmor
 	./opentelemetry/instrumentation/app
 	./opentelemetry/trace
+	./parametermanager
 	./privateca
 	./profiler
 	./profiler/shakesapp
@@ -145,27 +147,19 @@ use (
 	./trace
 	./translate
 	./vertexai/batch-predict
-	./vertexai/chat
 	./vertexai/context-caching
 	./vertexai/controlled-generation
 	./vertexai/embeddings
 	./vertexai/evaluation
 	./vertexai/function-calling
 	./vertexai/gemma2
-	./vertexai/multimodal
-	./vertexai/multimodal-all
-	./vertexai/multimodal-audio
-	./vertexai/multimodal-multiple
-	./vertexai/multimodal-pdf
-	./vertexai/multimodal-video
 	./vertexai/multimodal-video-with-audio
 	./vertexai/safety-settings
-	./vertexai/safety-settings-multimodal
 	./vertexai/snippets
 	./vertexai/stream-multimodality-basic
 	./vertexai/stream-text-basic
-	./vertexai/system-instruction
 	./vertexai/token-count
 	./videointelligence
 	./vision
+	./workflows/executions
 )
