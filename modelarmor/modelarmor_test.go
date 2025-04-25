@@ -98,7 +98,7 @@ func testModelArmorTemplate(t *testing.T, templateID string) (*modelarmorpb.Temp
 		return nil, fmt.Errorf("failed to create template: %w", err)
 	}
 
-	return response, err
+	return response, nil
 }
 
 // testModelArmorEmptyTemplate creates a new ModelArmor template for use in tests.
@@ -123,7 +123,7 @@ func testModelArmorEmptyTemplate(t *testing.T, templateID string) (*modelarmorpb
 		return nil, fmt.Errorf("failed to create template: %w", err)
 	}
 
-	return response, err
+	return response, nil
 }
 
 // testAllFilterTemplate creates a new ModelArmor template with all filters enabled.
@@ -231,7 +231,7 @@ func testBasicSDPTemplate(t *testing.T, templateID string) (*modelarmorpb.Templa
 		return nil, fmt.Errorf("failed to create template: %w", err)
 	}
 
-	return response, err
+	return response, nil
 }
 
 // testModelArmorAdvancedSDPTemplate creates Model Armor template with Advanced SDP configuration.
@@ -289,7 +289,7 @@ func testModelArmorAdvancedSDPTemplate(t *testing.T, templateID string) (*modela
 		return nil, fmt.Errorf("failed to create template: %w", err)
 	}
 
-	return response, err
+	return response, nil
 
 }
 

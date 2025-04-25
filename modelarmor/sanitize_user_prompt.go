@@ -70,7 +70,7 @@ func sanitizeUserPrompt(w io.Writer, projectID, locationID, templateID, userProm
 	// Sanitization Result.
 	fmt.Fprintf(w, "Sanitization Result: %v\n", response)
 
-	return err
+	return nil
 }
 
 // [END modelarmor_sanitize_user_prompt]
