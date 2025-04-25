@@ -72,7 +72,7 @@ func sanitizeModelResponseWithUserPrompt(w io.Writer, projectID, locationID, tem
 
 	fmt.Fprintf(w, "Sanitized response: %s\n", response)
 
-	return err
+	return nil
 }
 
 // [END modelarmor_sanitize_model_response_with_user_prompt]
