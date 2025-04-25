@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/golang-samples/workflows
+module github.com/GoogleCloudPlatform/golang-samples/workflows/executions
 
 go 1.23.0
 
