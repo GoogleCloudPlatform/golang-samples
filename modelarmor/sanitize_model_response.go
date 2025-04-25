@@ -72,7 +72,7 @@ func sanitizeModelResponse(w io.Writer, projectID, locationID, templateID, model
 	fmt.Fprintf(w, "Sanitization Result: %v\n", response)
 
 
-	return err
+	return nil
 }
 
 // [END modelarmor_sanitize_model_response]
