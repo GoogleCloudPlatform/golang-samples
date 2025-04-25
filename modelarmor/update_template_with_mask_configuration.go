@@ -108,7 +108,7 @@ func updateModelArmorTemplateWithMaskConfiguration(w io.Writer, projectID, locat
 
 	fmt.Fprintf(w, "Updated Model Armor Template: %s\n", response.Name)
 
-	return err
+	return nil
 }
 
 // [END modelarmor_update_template_with_mask_configuration]
