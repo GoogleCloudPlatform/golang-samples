@@ -74,7 +74,7 @@ func listModelArmorTemplatesWithFilter(w io.Writer, projectID, locationID, templ
 	// Print templates name using fmt.Fprintf with the io.Writer
 	fmt.Fprintf(w, "Templates Found: %s\n", strings.Join(templateNames, ", "))
 
-	return err
+	return nil
 }
 
 // [END modelarmor_list_templates_with_filter]

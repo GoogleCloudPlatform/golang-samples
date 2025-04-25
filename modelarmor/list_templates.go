@@ -71,7 +71,7 @@ func listModelArmorTemplates(w io.Writer, projectID, locationID string) error {
 		fmt.Fprintf(w, "Template: %s\n", template.Name)
 	}
 
-	return err
+	return nil
 }
 
 // [END modelarmor_list_templates]
