@@ -14,7 +14,6 @@
 package snippets
 
 // [START generativeaionvertexai_gemini_image]
-// [START aiplatform_gemini_get_started]
 import (
 	"context"
 	"encoding/json"
@@ -26,7 +25,7 @@ import (
 
 func tryGemini(w io.Writer, projectID string, location string, modelName string) error {
 	// location := "us-central1"
-	// modelName := "gemini-1.5-flash-001"
+	// modelName := "gemini-2.0-flash-001"
 
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, projectID, location)
@@ -53,5 +52,4 @@ func tryGemini(w io.Writer, projectID string, location string, modelName string)
 	return nil
 }
 
-// [END aiplatform_gemini_get_started]
 // [END generativeaionvertexai_gemini_image]
