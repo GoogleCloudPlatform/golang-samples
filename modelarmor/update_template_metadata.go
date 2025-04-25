@@ -105,7 +105,7 @@ func updateModelArmorTemplateMetadata(w io.Writer, projectID, locationID, templa
 
 	fmt.Fprintf(w, "Updated Model Armor Template Metadata: %s\n", response.Name)
 
-	return err
+	return nil
 }
 
 // [END modelarmor_update_template_metadata]
