@@ -98,7 +98,7 @@ func testModelArmorTemplate(t *testing.T, templateID string) (*modelarmorpb.Temp
 		return nil, fmt.Errorf("failed to create template: %v", err)
 	}
 
-	return response, err
+	return response, nil
 }
 
 // testCleanupTemplate deletes a Model Armor template by name, used for cleanup

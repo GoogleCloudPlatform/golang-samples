@@ -78,7 +78,7 @@ func updateModelArmorTemplate(w io.Writer, projectID, locationID, templateID str
 	// Print the updated filters in the template.
 	fmt.Fprintf(w, "Updated Filter Config: %+v\n", response.FilterConfig)
 
-	return err
+	return nil
 }
 
 // [END modelarmor_update_template]
