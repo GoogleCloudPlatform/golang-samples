@@ -59,7 +59,7 @@ func getFolderFloorSettings(w io.Writer, folderID string) error {
 	// Print the retrieved floor setting using fmt.Fprintf with the io.Writer.
 	fmt.Fprintf(w, "Retrieved folder floor setting: %v\n", response)
 
-	return err
+	return nil
 }
 
 // [END modelarmor_get_folder_floor_settings]
