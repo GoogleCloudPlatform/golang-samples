@@ -287,7 +287,7 @@ func TestGetModelArmorTemplate(t *testing.T) {
 	if _, err := testModelArmorTemplate(t, templateID); err != nil {
 		t.Fatal(err)
 	}
-	// defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, "us-central1", templateID))
+	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, "us-central1", templateID))
 
 	if err := getModelArmorTemplate(&b, tc.ProjectID, locationID, templateID); err != nil {
 		t.Fatal(err)
