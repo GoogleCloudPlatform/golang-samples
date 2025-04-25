@@ -88,7 +88,7 @@ func createModelArmorTemplateWithLabels(w io.Writer, projectID, locationID, temp
 	// Print the new template name using fmt.Fprintf with the io.Writer.
 	fmt.Fprintf(w, "Created Template with labels: %s\n", response.Name)
 
-	return err
+	return nil
 }
 
 // [END modelarmor_create_template_with_labels]

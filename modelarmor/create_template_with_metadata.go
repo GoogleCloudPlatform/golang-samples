@@ -94,7 +94,7 @@ func createModelArmorTemplateWithMetadata(w io.Writer, projectID, locationID, te
 	// Print the new template name using fmt.Fprintf with the io.Writer.
 	fmt.Fprintf(w, "Created Model Armor Template: %s\n", response.Name)
 
-	return err
+	return nil
 }
 
 // [END modelarmor_create_template_with_metadata]
