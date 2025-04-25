@@ -98,7 +98,7 @@ func testModelArmorTemplate(t *testing.T, templateID string) (*modelarmorpb.Temp
 		return nil, fmt.Errorf("failed to create template: %w", err)
 	}
 
-	return response, err
+	return response, nil
 }
 
 // testCleanupTemplate deletes the specified Model Armor template if it exists,
