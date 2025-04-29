@@ -178,10 +178,9 @@ func testCleanupParameter(t *testing.T, name string) {
 	})
 	if err == nil {
 		return
-	} else {
-		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
-			t.Fatalf("testCleanupParameter: failed to delete parameter: %v", err)
-		}
+	}
+	if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
+		t.Fatalf("testCleanupParameter: failed to delete parameter: %v", err)
 	}
 }
 
@@ -205,10 +204,9 @@ func testCleanupParameterVersion(t *testing.T, name string) {
 	})
 	if err == nil {
 		return
-	} else {
-		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
-			t.Fatalf("testCleanupParameterVersion: failed to delete parameter version: %v", err)
-		}
+	}
+	if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
+		t.Fatalf("testCleanupParameterVersion: failed to delete parameter version: %v", err)
 	}
 }
 
@@ -316,10 +314,9 @@ func testCleanupSecret(t *testing.T, name string) {
 	})
 	if err == nil {
 		return
-	} else {
-		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
-			t.Fatalf("testCleanupSecret: failed to delete secret: %v", err)
-		}
+	}
+	if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
+		t.Fatalf("testCleanupSecret: failed to delete secret: %v", err)
 	}
 }
 
@@ -340,10 +337,9 @@ func testCleanupKeyVersions(t *testing.T, name string) {
 	})
 	if err == nil {
 		return
-	} else {
-		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
-			t.Fatalf("testCleanupKeyVersion: failed to delete key version: %v", err)
-		}
+	}
+	if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
+		t.Fatalf("testCleanupKeyVersion: failed to delete key version: %v", err)
 	}
 }
 
