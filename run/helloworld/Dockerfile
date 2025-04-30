@@ -13,12 +13,11 @@
 # limitations under the License.
 
 # [START cloudrun_helloworld_dockerfile_go]
-# [START cloudrun_helloworld_dockerfile]
 
 # Use the official Go image to create a binary.
 # This is based on Debian and sets the GOPATH to /go.
 # https://hub.docker.com/_/golang
-FROM golang:1.23-bookworm as builder
+FROM golang:1.23-bookworm AS builder
 
 # Create and change to the app directory.
 WORKDIR /app
@@ -49,5 +48,4 @@ COPY --from=builder /app/server /app/server
 # Run the web service on container startup.
 CMD ["/app/server"]
 
-# [END cloudrun_helloworld_dockerfile]
 # [END cloudrun_helloworld_dockerfile_go]

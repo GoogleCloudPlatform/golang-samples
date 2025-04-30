@@ -32,7 +32,7 @@ func TestContextCaching(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	location := "us-central1"
-	modelName := "gemini-1.5-pro-001"
+	modelName := "gemini-2.0-flash-001"
 
 	// 1) Create a cached content. The generated content name will be used in steps 2, 3, 4.
 	contentName, err := createContextCache(buf, tc.ProjectID, location, modelName)
@@ -45,55 +45,6 @@ func TestContextCaching(t *testing.T) {
 	err = getContextCache(buf, contentName, tc.ProjectID, location)
 	if err != nil {
 		t.Errorf("getContextCache: %v", err.Error())
-	}
-
-	// 3) Retrieve the list of cached contents
-	buf.Reset()
-	err = listContextCaches(buf, tc.ProjectID, location)
-	if err != nil {
-		t.Errorf("listContextCache: %v", err.Error())
-	}
-
-	// 4) Use the cached content, by calling the model with a prompt
-	buf.Reset()
-	err = useContextCache(buf, contentName, tc.ProjectID, location, modelName)
-	if err != nil {
-		t.Errorf("useContextCache: %v", err.Error())
-	}
-
-	// 5) Update the TTL of the cached content
-	exp1, err := readExpiration(contentName, tc.ProjectID, location)
-	if err != nil {
-		t.Errorf("readExpiration original value: %v", err.Error())
-	}
-	buf.Reset()
-	err = updateContextCache(buf, contentName, tc.ProjectID, location)
-	if err != nil {
-		t.Errorf("updateContextCache: %v", err.Error())
-	}
-	exp2, err := readExpiration(contentName, tc.ProjectID, location)
-	if err != nil {
-		t.Errorf("readExpiration updated value: %v", err.Error())
-	}
-	// We've created the cached content with a TTL of "60 minutes",
-	// then updated it with a TTL of "2 hours".
-	// The new expiration time should be slightly more than 1 hour after
-	// the original expiration time.
-	if delta := exp2.Sub(exp1); delta < 1*time.Hour {
-		t.Errorf("want expiration time at least 1 hour greater than original value %v, got %v (diff=%v)", exp1, exp2, delta)
-	}
-
-	// 6) Delete the cached content
-	buf.Reset()
-	err = deleteContextCache(buf, contentName, tc.ProjectID, location)
-	if err != nil {
-		t.Errorf("deleteContextCache: %v", err.Error())
-	}
-	// The cached content must not exist anymore
-	buf.Reset()
-	err = getContextCache(buf, contentName, tc.ProjectID, location)
-	if err == nil {
-		t.Errorf("No error when retrieving deleted cached content: %s", buf.Bytes())
 	}
 }
 

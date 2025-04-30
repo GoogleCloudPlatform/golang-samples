@@ -26,7 +26,7 @@ import (
 // generateContent generates text from prompt and configurations provided.
 func generateContent(w io.Writer, projectID, location, modelName string) error {
 	// location := "us-central1"
-	// model := "gemini-1.5-flash-001"
+	// model := "gemini-2.0-flash-001"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, projectID, location)
