@@ -54,7 +54,6 @@ func createTopicWithSMT(w io.Writer, projectID, topicID string) error {
 		return fmt.Errorf("CreateTopic: %w", err)
 	}
 
-	fmt.Printf("Created topic with message transform: %v\n", t)
 	fmt.Fprintf(w, "Created topic with message transform: %v\n", t)
 	return nil
 }
