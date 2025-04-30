@@ -38,10 +38,10 @@ func createTopicWithSMT(w io.Writer, projectID, topicID string) error {
 			const data = JSON.parse(message.data);
 			delete data['ssn'];
 			message.data = JSON.stringify(data);
-			return message;"
+			return message;
 		}`
 	transform := pubsub.MessageTransform{
-		Transform: &pubsub.JavaScriptUDF{
+		Transform: pubsub.JavaScriptUDF{
 			FunctionName: "redactSSN",
 			Code:         code,
 		},
@@ -53,6 +53,8 @@ func createTopicWithSMT(w io.Writer, projectID, topicID string) error {
 	if err != nil {
 		return fmt.Errorf("CreateTopic: %w", err)
 	}
+
+	fmt.Printf("Created topic with message transform: %v\n", t)
 	fmt.Fprintf(w, "Created topic with message transform: %v\n", t)
 	return nil
 }
