@@ -36,7 +36,7 @@ RUN CGO_ENABLED=0 go build -v -o server
 # https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds
 FROM alpine:3
 
-# [START cloudrun_imageproc_dockerfile_go]
+# [START cloudrun_imageproc_imagemagick_dockerfile_go]
 # [START cloudrun_imageproc_dockerfile_imagemagick]
 
 # Install Imagemagick into the container image.
@@ -45,7 +45,7 @@ FROM alpine:3
 RUN apk add --no-cache imagemagick
 
 # [END cloudrun_imageproc_dockerfile_imagemagick]
-# [END cloudrun_imageproc_dockerfile_go]
+# [END cloudrun_imageproc_imagemagick_dockerfile_go]
 
 # Install certificates for secure communication with network services.
 # For production containers, a single RUN statement should install all system packages.

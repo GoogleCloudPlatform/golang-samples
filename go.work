@@ -160,5 +160,5 @@ use (
 	./vertexai/token-count
 	./videointelligence
 	./vision
-	./workflows
+	./workflows/executions
 )
