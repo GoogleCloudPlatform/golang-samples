@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package gateway
+
+// [START connectgateway_get_namespace]
 
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"os"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -36,22 +36,6 @@ import (
 var (
 	scopes = "https://www.googleapis.com/auth/cloud-platform"
 )
-
-func getNamespace(membershipName, membershipLocation, serviceAccountKeyPath string) (*v1.Namespace, error) {
-	ctx := context.Background()
-
-	gatewayURL, err := getGatewayURL(ctx, membershipName, membershipLocation)
-	if err != nil {
-		return nil, fmt.Errorf("error fetching Connect Gateway URL: %v", err)
-	}
-
-	kubeClient, err := configureKubernetesClient(ctx, gatewayURL, serviceAccountKeyPath)
-	if err != nil {
-		return nil, fmt.Errorf("error configuring Kubernetes client: %v", err)
-	}
-
-	return callGetNamespace(kubeClient)
-}
 
 func getGatewayURL(ctx context.Context, membershipName, membershipLocation string) (string, error) {
 	var opts option.ClientOption
@@ -77,23 +61,17 @@ func getGatewayURL(ctx context.Context, membershipName, membershipLocation strin
 	return resp.Endpoint, nil
 }
 
-func configureKubernetesClient(ctx context.Context, gatewayURL string, serviceAccountKeyPath string) (*kubernetes.Clientset, error) {
-	// Read the service account key file.
-	keyBytes, err := ioutil.ReadFile(serviceAccountKeyPath)
-	if err != nil {
-		return nil, fmt.Errorf("error reading service account key file: %v", err)
-	}
-
+func configureKubernetesClient(ctx context.Context, gatewayURL string) (*kubernetes.Clientset, error) {
 	// Create Google credentials from the service account key.
-	creds, err := google.CredentialsFromJSON(context.Background(), keyBytes, scopes)
+	tokenSource, err := google.DefaultTokenSource(ctx, scopes)
 	if err != nil {
-		return nil, fmt.Errorf("error creating credentials: %v", err)
+		return nil, fmt.Errorf("failed to get default credentials: %w", err)
 	}
 	config := &rest.Config{
 		Host: gatewayURL,
 		WrapTransport: func(rt http.RoundTripper) http.RoundTripper {
 			return &oauth2.Transport{
-				Source: creds.TokenSource,
+				Source: tokenSource,
 				Base:   rt,
 			}
 		},
@@ -114,20 +92,27 @@ func callGetNamespace(clientset *kubernetes.Clientset) (*v1.Namespace, error) {
 	return namespace, nil
 }
 
-func main() {
-	membershipName := os.Getenv("MEMBERSHIP_NAME")
-	membershipLocation := os.Getenv("MEMBERSHIP_LOCATION")
-	serviceAccountKeyPath := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
+func getNamespace(membershipName, membershipLocation string) (*v1.Namespace, error) {
+	ctx := context.Background()
 
-	if _, err := os.Stat(serviceAccountKeyPath); os.IsNotExist(err) {
-		fmt.Printf("service account key file not found at %s\n", serviceAccountKeyPath)
-		os.Exit(1)
-	}
-
-	namespace, err := getNamespace(membershipName, membershipLocation, serviceAccountKeyPath)
+	gatewayURL, err := getGatewayURL(ctx, membershipName, membershipLocation)
 	if err != nil {
-		fmt.Printf("failed to get namespace: %v", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("error fetching Connect Gateway URL: %v", err)
 	}
+
+	kubeClient, err := configureKubernetesClient(ctx, gatewayURL)
+	if err != nil {
+		return nil, fmt.Errorf("error configuring Kubernetes client: %v", err)
+	}
+
+	namespace, err := callGetNamespace(kubeClient)
+	if err != nil {
+		return nil, fmt.Errorf("failed to call get namespace: %v", err)
+	}
+
 	fmt.Printf("\nDefault Namespace:\n%v", namespace)
+
+	// [END connectgateway_get_namespace]
+
+	return namespace, nil
 }
