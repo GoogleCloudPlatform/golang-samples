@@ -43,46 +43,36 @@ func pollOperation(ctx context.Context, client *container.ClusterManagerClient, 
 }
 
 func createCluster(projectID, location, clusterName string) error {
-	// ctx := context.Background()
-	getCtx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
-	defer cancel()
-	client, err := container.NewClusterManagerClient(getCtx)
+	ctx := context.Background()
+	client, err := container.NewClusterManagerClient(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to create cluster manager client: %v", err)
 	}
 	defer client.Close()
 
-	_, err = client.GetCluster(getCtx, &containerpb.GetClusterRequest{
-		Name: "projects/hodamo-connect2/locations/us-central1-a/clusters/gke-us-central1", // List from all locations
-	})
-	if err != nil {
-		fmt.Printf("hodaaaaa %v", err)
+	clusterLocation := fmt.Sprintf("projects/%s/locations/%s", projectID, location)
+	clusterDef := &containerpb.Cluster{
+		Name:             clusterName,
+		InitialNodeCount: 1,
+		Fleet: &containerpb.Fleet{
+			Project: projectID,
+		},
 	}
 
-	// clusterLocation := fmt.Sprintf("projects/%s/locations/%s", projectID, location)
-	// clusterDef := &containerpb.Cluster{
-	// 	Name:             clusterName,
-	// 	InitialNodeCount: 1,
-	// 	Fleet: &containerpb.Fleet{
-	// 		Project: projectID,
-	// 	},
-	// }
+	req := &containerpb.CreateClusterRequest{
+		Parent:  clusterLocation,
+		Cluster: clusterDef,
+	}
 
-	// req := &containerpb.CreateClusterRequest{
-	// 	Parent:  clusterLocation,
-	// 	Cluster: clusterDef,
-	// }
+	fmt.Printf("Creating cluster %s in %s...\n", clusterName, clusterLocation)
+	fmt.Printf("cl %+v", clusterDef)
+	resp, err := client.CreateCluster(ctx, req)
+	if err != nil {
+		return fmt.Errorf("failed to create cluster: %v", err)
+	}
 
-	// fmt.Printf("Creating cluster %s in %s...\n", clusterName, clusterLocation)
-	// fmt.Printf("cl %+v", clusterDef)
-	// resp, err := client.CreateCluster(ctx, req)
-	// if err != nil {
-	// 	return fmt.Errorf("failed to create cluster: %v", err)
-	// }
-
-	// opIdentifier := fmt.Sprintf("%s/operations/%s", clusterLocation, resp.Name)
-	// return pollOperation(ctx, client, opIdentifier)
-	return nil
+	opIdentifier := fmt.Sprintf("%s/operations/%s", clusterLocation, resp.Name)
+	return pollOperation(ctx, client, opIdentifier)
 }
 
 func deleteCluster(projectID, location, clusterName string) error {
