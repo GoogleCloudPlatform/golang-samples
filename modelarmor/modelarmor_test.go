@@ -49,6 +49,19 @@ func testLocation(t *testing.T) string {
 	return v
 }
 
+// testOrganizationID returns the organization ID.
+func testOrganizationID(t *testing.T) string {
+	orgID := "951890214235"
+	return orgID
+}
+
+// testFolderID returns the folder ID.
+func testFolderID(t *testing.T) string {
+	folderID := "695279264361"
+	return folderID
+}
+
+
 // testClient initializes and returns a new Model Armor API client and context
 // targeting the endpoint based on the specified location.
 func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
@@ -222,21 +235,49 @@ func TestDeleteModelArmorTemplate(t *testing.T) {
 	}
 }
 
-// TestCreateModelArmorTemplateWithBasicSDP tests the creation of a Model Armor
-// template using a basic Secure Deployment Policy (SDP) and verifies that the
-// operation completes successfully and logs the expected output.
-func TestCreateModelArmorTemplateWithBasicSDP(t *testing.T) {
+
+// TestGetProjectFloorSettings tests the retrieval of floor settings at the project level.
+// It verifies the output contains the expected confirmation string.
+func TestGetProjectFloorSettings(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	locationID := testLocation(t)
-	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
-	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
-	var b bytes.Buffer
-	if err := createModelArmorTemplateWithBasicSDP(&b, tc.ProjectID, locationID, templateID); err != nil {
+
+	var buf bytes.Buffer
+	if err := getProjectFloorSettings(&buf, tc.ProjectID); err != nil {
 		t.Fatal(err)
 	}
-	defer testCleanupTemplate(t, templateName)
 
-	if got, want := b.String(), "Created Template with basic SDP: "; !strings.Contains(got, want) {
-		t.Errorf("createModelArmorTemplateWithBasicSDP: expected %q to contain %q", got, want)
+	if got, want := buf.String(), "Retrieved floor setting:"; !strings.Contains(got, want) {
+		t.Errorf("getFloorSettings: expected %q to contain %q", got, want)
 	}
 }
+
+// TestGetOrganizationFloorSettings tests the retrieval of floor settings at the organization level.
+// It checks that the output includes the expected string indicating success.
+func TestGetOrganizationFloorSettings(t *testing.T) {
+
+	organizationID := testOrganizationID(t)
+	var buf bytes.Buffer
+	if err := getOrganizationFloorSettings(&buf, organizationID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Retrieved org floor setting:"; !strings.Contains(got, want) {
+		t.Errorf("getFloorSettings: expected %q to contain %q", got, want)
+	}
+}
+
+// TestGetFolderFloorSettings tests the retrieval of floor settings at the folder level.
+// It ensures the result contains the expected confirmation message.
+func TestGetFolderFloorSettings(t *testing.T) {
+
+	folderID := testFolderID(t)
+	var buf bytes.Buffer
+	if err := getFolderFloorSettings(&buf, folderID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Retrieved folder floor setting: "; !strings.Contains(got, want) {
+		t.Errorf("getFloorSettings: expected %q to contain %q", got, want)
+	}
+}
+
