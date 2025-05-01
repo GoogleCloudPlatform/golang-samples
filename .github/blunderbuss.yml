@@ -122,3 +122,7 @@ assign_prs_by:
   - "api: securitycenter"
   to:
   - GoogleCloudPlatform/gcp-security-command-center
+- labels:
+  - "api: connectgateway"
+  to:
+  - GoogleCloudPlatform/connectgateway
