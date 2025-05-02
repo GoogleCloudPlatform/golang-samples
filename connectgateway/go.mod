@@ -1,6 +1,6 @@
 module gateway
 
-go 1.25
+go 1.23.0
 
 require (
 	cloud.google.com/go/gkeconnect v0.12.4
