@@ -1,9 +1,11 @@
 package gateway
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -65,10 +67,9 @@ func createCluster(projectID, location, clusterName string) error {
 	}
 
 	fmt.Printf("Creating cluster %s in %s...\n", clusterName, clusterLocation)
-	fmt.Printf("cl %+v", clusterDef)
 	resp, err := client.CreateCluster(ctx, req)
 	if err != nil {
-		return fmt.Errorf("failed to create cluster: %v", err)
+		return fmt.Errorf("failed to create cluster: %v", err.Error())
 	}
 
 	opIdentifier := fmt.Sprintf("%s/operations/%s", clusterLocation, resp.Name)
@@ -98,17 +99,15 @@ func TestGetNamespace(t *testing.T) {
 	}
 	defer deleteCluster(projectid, zone, clusterName)
 
-	membershipName := fmt.Sprintf("projects/%s/locations/%s/memberships/%s", projectid, region, clusterName)
-	results, err := getNamespace(membershipName, region)
+	membershipName := fmt.Sprintf("projects/%s/locations/%s/memberships/%s", projectid, region, "my-cluster3")
+	buf := new(bytes.Buffer)
+	err := getNamespace(buf, membershipName, region)
 	if err != nil {
 		t.Fatalf("getNamespace failed: %v", err)
 	}
 
-	if results == nil {
-		t.Fatalf("getNamespace returned nil results")
-	}
-
-	if results.ObjectMeta.Name != "default" {
-		t.Errorf("expected namespace name 'default', got '%s'", results.ObjectMeta.Name)
+	got := buf.String()
+	if want := "Name:\"default\""; !strings.Contains(got, want) {
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
