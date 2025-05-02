@@ -30,7 +30,6 @@ use (
 	./cloudsql/sqlserver/database-sql
 	./compute
 	./compute/quickstart
-	./connectgateway
 	./container_registry
 	./datacatalog
 	./dataflow
