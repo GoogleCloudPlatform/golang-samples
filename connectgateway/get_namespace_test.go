@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
-	container "cloud.google.com/go/container/apiv1"
-	"cloud.google.com/go/container/apiv1/containerpb"
 	"github.com/google/uuid"
+	gke "google.golang.org/api/container/v1"
 )
 
 var (
@@ -20,86 +20,16 @@ var (
 	clusterName = fmt.Sprintf("cluster-%s", uuid.New().String()[:10])
 )
 
-func pollOperation(ctx context.Context, client *container.ClusterManagerClient, opName string) error {
-	fmt.Printf("Polling operation: %s\n", opName)
-	for {
-		op, err := client.GetOperation(ctx, &containerpb.GetOperationRequest{Name: opName})
-		if err != nil {
-			return fmt.Errorf("failed to get operation %s: %v", opName, err)
-		}
-		fmt.Printf("Operation status: %v\n", op)
-
-		if op.Status == containerpb.Operation_RUNNING {
-			fmt.Println("Waiting 30 seconds before polling again...")
-			time.Sleep(30 * time.Second)
-			continue
-		}
-
-		if op.Status == containerpb.Operation_DONE {
-			fmt.Println("Operation completed successfully.")
-			return nil
-		}
-
-		return fmt.Errorf("operation failed with status %v", op.Status)
-	}
-}
-
-func createCluster(projectID, location, clusterName string) error {
-	ctx := context.Background()
-	client, err := container.NewClusterManagerClient(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to create cluster manager client: %v", err)
-	}
-	defer client.Close()
-
-	clusterLocation := fmt.Sprintf("projects/%s/locations/%s", projectID, location)
-	clusterDef := &containerpb.Cluster{
-		Name:             clusterName,
-		InitialNodeCount: 1,
-		Fleet: &containerpb.Fleet{
-			Project: projectID,
-		},
-	}
-
-	req := &containerpb.CreateClusterRequest{
-		Parent:  clusterLocation,
-		Cluster: clusterDef,
-	}
-
-	fmt.Printf("Creating cluster %s in %s...\n", clusterName, clusterLocation)
-	resp, err := client.CreateCluster(ctx, req)
-	if err != nil {
-		return fmt.Errorf("failed to create cluster: %v", err.Error())
-	}
-
-	opIdentifier := fmt.Sprintf("%s/operations/%s", clusterLocation, resp.Name)
-	return pollOperation(ctx, client, opIdentifier)
-}
-
-func deleteCluster(projectID, location, clusterName string) error {
-	ctx := context.Background()
-	client, err := container.NewClusterManagerClient(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to create cluster manager client: %v", err)
-	}
-	defer client.Close()
-
-	clusterFullName := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectID, location, clusterName)
-
-	fmt.Printf("Deleting cluster %s...\n", clusterFullName)
-	_, err = client.DeleteCluster(ctx, &containerpb.DeleteClusterRequest{Name: clusterFullName})
-	return err
-}
-
 func TestGetNamespace(t *testing.T) {
+	ctx := context.Background()
 	projectid := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 	// Setup cluster.
-	if err := createCluster(projectid, zone, clusterName); err != nil {
+	if err := createCluster(ctx, projectid, zone, clusterName); err != nil {
 		t.Fatalf("failed to create cluster: %v", err)
 	}
-	defer deleteCluster(projectid, zone, clusterName)
+	defer deleteCluster(ctx, projectid, zone, clusterName)
 
-	membershipName := fmt.Sprintf("projects/%s/locations/%s/memberships/%s", projectid, region, "my-cluster3")
+	membershipName := fmt.Sprintf("projects/%s/locations/%s/memberships/%s", projectid, region, clusterName)
 	buf := new(bytes.Buffer)
 	err := getNamespace(buf, membershipName, region)
 	if err != nil {
@@ -110,4 +40,71 @@ func TestGetNamespace(t *testing.T) {
 	if want := "Name:\"default\""; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
+}
+
+func createCluster(ctx context.Context, projectID, location, clusterName string) error {
+	svc, err := gke.NewService(ctx)
+	if err != nil {
+		log.Fatalf("Could not initialize gke client: %v", err)
+	}
+	clusterLocation := fmt.Sprintf("projects/%s/locations/%s", projectID, location)
+
+	req := &gke.CreateClusterRequest{
+		Parent: clusterLocation,
+		Cluster: &gke.Cluster{
+			Name:             clusterName,
+			InitialNodeCount: 1,
+			Fleet: &gke.Fleet{
+				Project: projectID,
+			},
+		},
+	}
+
+	fmt.Printf("Creating cluster %s in %s...\n", clusterName, clusterLocation)
+	resp, err := svc.Projects.Zones.Clusters.Create(projectID, location, req).Do()
+	if err != nil {
+		return fmt.Errorf("failed to create cluster: %v", err.Error())
+	}
+
+	return pollOperation(svc, projectID, resp.Name)
+}
+
+func pollOperation(svc *gke.Service, projectId, opID string) error {
+	fmt.Printf("Polling operation: %s\n", opID)
+	for {
+
+		op, err := svc.Projects.Zones.Operations.Get(projectId, zone, opID).Do()
+		if err != nil {
+			return fmt.Errorf("failed to get operation %s: %v", opID, err)
+		}
+		fmt.Printf("Operation status: %v\n", op)
+
+		if op.Status == "RUNNING" {
+			fmt.Println("Waiting 30 seconds before polling again...")
+			time.Sleep(30 * time.Second)
+			continue
+		}
+
+		if op.Status == "DONE" {
+			fmt.Println("Operation completed successfully.")
+			return nil
+		}
+
+		return fmt.Errorf("operation failed with status %v", op.Status)
+	}
+}
+
+func deleteCluster(ctx context.Context, projectID, location, clusterName string) error {
+	svc, err := gke.NewService(ctx)
+	if err != nil {
+		log.Fatalf("Could not initialize gke client: %v", err)
+	}
+	clusterFullName := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", projectID, location, clusterName)
+
+	fmt.Printf("Deleting cluster %s...\n", clusterFullName)
+	_, err = svc.Projects.Zones.Clusters.Delete(projectID, zone, clusterName).Do()
+	if err != nil {
+		return fmt.Errorf("failed to delete cluster %v: %v", clusterName, err)
+	}
+	return nil
 }
