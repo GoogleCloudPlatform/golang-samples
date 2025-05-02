@@ -1,4 +1,6 @@
-go 1.25
+go 1.23.0
+
+toolchain go1.23.5
 
 use (
 	.
@@ -104,8 +106,8 @@ use (
 	./managedkafka
 	./media
 	./memorystore
-	./modelarmor
 	./monitoring
+	./modelarmor
 	./opentelemetry/instrumentation/app
 	./opentelemetry/trace
 	./parametermanager
