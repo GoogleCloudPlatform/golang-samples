@@ -95,24 +95,35 @@ func testModelArmorTemplate(t *testing.T, templateID string) (*modelarmorpb.Temp
 
 	response, err := client.CreateTemplate(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create template: %v", err)
+		return nil, fmt.Errorf("failed to create template: %w", err)
 	}
 
 	return response, nil
 }
 
-// testCleanupTemplate deletes a given template by name if it exists.
-// Ignores NotFound errors, which means the resource has already been deleted.
-func testCleanupTemplate(t *testing.T, templateName string) {
+// testModelArmorEmptyTemplate creates a new ModelArmor template for use in tests.
+// It returns the empty template or an error.
+func testModelArmorEmptyTemplate(t *testing.T, templateID string) (*modelarmorpb.Template, error) {
 	t.Helper()
-
+	tc := testutil.SystemTest(t)
+	locationID := testLocation(t)
 	client, ctx := testClient(t)
-	if err := client.DeleteTemplate(ctx, &modelarmorpb.DeleteTemplateRequest{Name: templateName}); err != nil {
-		// Ignore NotFound errors (template may already be deleted)
-		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
-			t.Fatalf("testCleanupTemplate: failed to delete template: %v", err)
-		}
+
+	template := &modelarmorpb.Template{
+		FilterConfig: &modelarmorpb.FilterConfig{}}
+
+	req := &modelarmorpb.CreateTemplateRequest{
+		Parent:     fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, locationID),
+		TemplateId: templateID,
+		Template:   template,
 	}
+
+	response, err := client.CreateTemplate(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create template: %w", err)
+	}
+
+	return response, nil
 }
 
 // testSDPTemplate creates DLP inspect and deidentify templates for use in tests.
@@ -194,6 +205,79 @@ func testSDPTemplate(t *testing.T, projectID string, locationID string) (string,
 	}()
 
 	return inspectResponse.Name, deidentifyResponse.Name
+}
+
+// testModelArmorAdvancedSDPTemplate creates Model Armor template with Advanced SDP configuration.
+func testModelArmorAdvancedSDPTemplate(t *testing.T, templateID string) (*modelarmorpb.Template, error) {
+	tc := testutil.SystemTest(t)
+
+	projectID := tc.ProjectID
+	locationID := testLocation(t)
+	inspectResponseName, deidentifyResponseName := testSDPTemplate(t, projectID, locationID)
+	client, ctx := testClient(t)
+
+	// Create template with advanced SDP configuration
+	template := &modelarmorpb.Template{
+		FilterConfig: &modelarmorpb.FilterConfig{
+			RaiSettings: &modelarmorpb.RaiFilterSettings{
+				RaiFilters: []*modelarmorpb.RaiFilterSettings_RaiFilter{
+					{
+						FilterType:      modelarmorpb.RaiFilterType_DANGEROUS,
+						ConfidenceLevel: modelarmorpb.DetectionConfidenceLevel_HIGH,
+					},
+					{
+						FilterType:      modelarmorpb.RaiFilterType_HARASSMENT,
+						ConfidenceLevel: modelarmorpb.DetectionConfidenceLevel_MEDIUM_AND_ABOVE,
+					},
+					{
+						FilterType:      modelarmorpb.RaiFilterType_HATE_SPEECH,
+						ConfidenceLevel: modelarmorpb.DetectionConfidenceLevel_HIGH,
+					},
+					{
+						FilterType:      modelarmorpb.RaiFilterType_SEXUALLY_EXPLICIT,
+						ConfidenceLevel: modelarmorpb.DetectionConfidenceLevel_HIGH,
+					},
+				},
+			},
+			SdpSettings: &modelarmorpb.SdpFilterSettings{
+				SdpConfiguration: &modelarmorpb.SdpFilterSettings_AdvancedConfig{
+					AdvancedConfig: &modelarmorpb.SdpAdvancedConfig{
+						InspectTemplate:    inspectResponseName,
+						DeidentifyTemplate: deidentifyResponseName,
+					},
+				},
+			},
+		},
+	}
+	// Prepare the request for creating the template.
+	req := &modelarmorpb.CreateTemplateRequest{
+		Parent:     fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, locationID),
+		TemplateId: templateID,
+		Template:   template,
+	}
+
+	// Create the template.
+	response, err := client.CreateTemplate(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create template: %w", err)
+	}
+
+	return response, nil
+
+}
+
+// testCleanupTemplate deletes the specified Model Armor template if it exists,
+// ignoring the error if the template is already deleted.
+func testCleanupTemplate(t *testing.T, templateName string) {
+	t.Helper()
+
+	client, ctx := testClient(t)
+	if err := client.DeleteTemplate(ctx, &modelarmorpb.DeleteTemplateRequest{Name: templateName}); err != nil {
+		// Ignore NotFound errors (template may already be deleted)
+		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
+			t.Fatalf("testCleanupTemplate: failed to delete template: %v", err)
+		}
+	}
 }
 
 // TestCreateModelArmorTemplateWithAdvancedSDP tests creating a
@@ -309,5 +393,102 @@ func TestCreateModelArmorTemplateWithBasicSDP(t *testing.T) {
 
 	if got, want := b.String(), "Created Template with basic SDP: "; !strings.Contains(got, want) {
 		t.Errorf("createModelArmorTemplateWithBasicSDP: expected %q to contain %q", got, want)
+	}
+}
+
+// TestSanitizeModelResponseWithUserPrompt checks if the sanitizer correctly processes
+// a harmful user prompt and model response, ensuring unsafe content is handled.
+func TestSanitizeModelResponseWithUserPrompt(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	userPrompt := "How can I make my email address test@dot.com make available to public for feedback"
+	modelResponse := "You can make support email such as contact@email.com for getting feedback from your customer"
+	locationID := testLocation(t)
+	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, "us-central1", templateID)
+	var buf bytes.Buffer
+	if _, err := testModelArmorTemplate(t, templateID); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupTemplate(t, templateName)
+
+	if err := sanitizeModelResponseWithUserPrompt(&buf, tc.ProjectID, locationID, templateID, modelResponse, userPrompt); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Sanitized response:"; !strings.Contains(got, want) {
+		t.Errorf("sanitizeModelResponseWithUserPrompt: expected %q to contain %q", got, want)
+	}
+}
+
+// TestSanitizeModelResponseWithUserPromptWithEmptyTemplate checks if the sanitizer correctly processes
+// a harmful user prompt and model response, ensuring unsafe content is handled.
+func TestSanitizeModelResponseWithUserPromptWithEmptyTemplate(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	locationID := testLocation(t)
+
+	// Generate a unique template ID
+	templateID := fmt.Sprintf("test-empty-template-%s", uuid.New().String())
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
+	var b bytes.Buffer
+
+	// Create empty template with no filters enabled
+	_, err := testModelArmorEmptyTemplate(t, templateID)
+	if err != nil {
+		t.Fatalf("Failed to create empty template: %v", err)
+	}
+	defer testCleanupTemplate(t, templateName)
+
+	// Define user prompt and model response with email addresses
+	userPrompt := "How can I make my email address test@dot.com make available to public for feedback"
+	modelResponse := "You can make support email such as contact@email.com for getting feedback from your customer"
+
+	// Call sanitizeModelResponseWithUserPrompt with buffer
+	if err := sanitizeModelResponseWithUserPrompt(&b, tc.ProjectID, locationID, templateID, modelResponse, userPrompt); err != nil {
+		t.Fatal(err)
+	}
+
+	// Check buffer output
+	output := b.String()
+
+	// Check for NO_MATCH_FOUND
+	if !strings.Contains(output, "NO_MATCH_FOUND") {
+		t.Errorf("Expected output to indicate NO_MATCH_FOUND for overall result, got: %q", output)
+	}
+}
+
+// TestSanitizeModelResponseWithUserPromptWithAdvanceSdpTemplate checks if the sanitizer correctly processes
+// a harmful user prompt and model response, ensuring unsafe content is handled.
+func TestSanitizeModelResponseWithUserPromptWithAdvanceSdpTemplate(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	locationID := testLocation(t)
+
+	// Generate a unique template ID
+	templateID := fmt.Sprintf("test-advance-sdp-%s", uuid.New().String())
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
+	var b bytes.Buffer
+
+	// Create template with advanced SDP configuration
+	_, err := testModelArmorAdvancedSDPTemplate(t, templateID)
+	if err != nil {
+		t.Fatalf("Failed to create template with advanced SDP: %v", err)
+	}
+	defer testCleanupTemplate(t, templateName)
+
+	// Define user prompt and model response with email addresses
+	userPrompt := "How can I make my email address test@dot.com make available to public for feedback"
+	modelResponse := "You can make support email such as contact@email.com for getting feedback from your customer"
+
+	// Call sanitizeModelResponseWithUserPrompt with buffer
+	if err := sanitizeModelResponseWithUserPrompt(&b, tc.ProjectID, locationID, templateID, modelResponse, userPrompt); err != nil {
+		t.Fatal(err)
+	}
+
+	// Check buffer output
+	output := b.String()
+
+	// Check for overall MATCH_FOUND
+	if !strings.Contains(output, "sdp") {
+		t.Errorf("Expected output to indicate MATCH_FOUND for overall result, got: %q", output)
 	}
 }
