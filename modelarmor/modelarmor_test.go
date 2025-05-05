@@ -101,41 +101,6 @@ func testModelArmorTemplate(t *testing.T, templateID string) (*modelarmorpb.Temp
 	return response, nil
 }
 
-
-// testModelArmorTemplate creates a new ModelArmor template for use in tests.
-// It returns the created template or an error.
-func testModelArmorTemplate(t *testing.T, templateID string) (*modelarmorpb.Template, error) {
-	t.Helper()
-	tc := testutil.SystemTest(t)
-	locationID := testLocation(t)
-	client, ctx := testClient(t)
-
-	template := &modelarmorpb.Template{
-		FilterConfig: &modelarmorpb.FilterConfig{
-			PiAndJailbreakFilterSettings: &modelarmorpb.PiAndJailbreakFilterSettings{
-				FilterEnforcement: modelarmorpb.PiAndJailbreakFilterSettings_ENABLED,
-				ConfidenceLevel:   modelarmorpb.DetectionConfidenceLevel_MEDIUM_AND_ABOVE,
-			},
-			MaliciousUriFilterSettings: &modelarmorpb.MaliciousUriFilterSettings{
-				FilterEnforcement: modelarmorpb.MaliciousUriFilterSettings_ENABLED,
-			},
-		},
-	}
-
-	req := &modelarmorpb.CreateTemplateRequest{
-		Parent:     fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, locationID),
-		TemplateId: templateID,
-		Template:   template,
-	}
-
-	response, err := client.CreateTemplate(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create template: %w", err)
-	}
-
-	return response, nil
-}
-
 // testModelArmorEmptyTemplate creates a new ModelArmor template for use in tests.
 // It returns the empty template or an error.
 func testModelArmorEmptyTemplate(t *testing.T, templateID string) (*modelarmorpb.Template, error) {
