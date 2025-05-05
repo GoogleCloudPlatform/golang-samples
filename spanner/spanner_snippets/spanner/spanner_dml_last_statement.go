@@ -24,6 +24,9 @@ import (
 	"cloud.google.com/go/spanner"
 )
 
+// Inserts a record into the Singers table and then updates
+// the row while also setting the update DML as the last
+// statement.
 func insertAndUpdateDmlWithLastStatement(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
@@ -32,24 +35,22 @@ func insertAndUpdateDmlWithLastStatement(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
-	// Insert records into the Singers table and then updates
-	// the row while also setting the update DML as the last
-	// statement.
 	_, err = client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-		insert_stmt := spanner.Statement{
+		insertStmt := spanner.Statement{
 			SQL: `INSERT Singers (SingerId, FirstName, LastName)
 					VALUES (54213, 'John', 'Do')`,
 		}
-		insertRowCount, err := txn.Update(ctx, insert_stmt)
+		insertRowCount, err := txn.Update(ctx, insertStmt)
 		if err != nil {
 			return err
 		}
 		fmt.Fprintf(w, "%d record(s) inserted.\n", insertRowCount)
 
-		update_stmt := spanner.Statement{
+		updateStmt := spanner.Statement{
 			SQL: `UPDATE Singers SET LastName = 'Doe' WHERE SingerId = 54213`,
 		}
-		updateRowCount, err := txn.UpdateWithOptions(context.Background(), update_stmt, spanner.QueryOptions{LastStatement: true})
+		opts := spanner.QueryOptions{LastStatement: true}
+		updateRowCount, err := txn.UpdateWithOptions(ctx, updateStmt, opts)
 		if err != nil {
 			return err
 		}
