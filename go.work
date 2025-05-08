@@ -90,7 +90,6 @@ use (
 	./getting-started/background
 	./getting-started/bookshelf
 	./getting-started/gce
-	./getting-started/gopher-run
 	./getting-started/sessions
 	./healthcare
 	./iam
