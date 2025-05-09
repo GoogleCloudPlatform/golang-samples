@@ -714,3 +714,76 @@ func TestSanitizeModelResponseWithAdvanceSdpTemplate(t *testing.T) {
 		t.Errorf("Expected email to be redacted in the output, but it was found: %q", output)
 	}
 }
+
+// TestSanitizeModelResponseWithUserPromptWithEmptyTemplate checks if the sanitizer correctly processes
+// a harmful user prompt and model response, ensuring unsafe content is handled.
+func TestSanitizeModelResponseWithUserPromptWithEmptyTemplate(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	locationID := testLocation(t)
+
+	// Generate a unique template ID
+	templateID := fmt.Sprintf("test-empty-template-%s", uuid.New().String())
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
+	var b bytes.Buffer
+
+	// Create empty template with no filters enabled
+	_, err := testModelArmorEmptyTemplate(t, templateID)
+	if err != nil {
+		t.Fatalf("Failed to create empty template: %v", err)
+	}
+	defer testCleanupTemplate(t, templateName)
+
+	// Define user prompt and model response with email addresses
+	userPrompt := "How can I make my email address test@dot.com make available to public for feedback"
+	modelResponse := "You can make support email such as contact@email.com for getting feedback from your customer"
+
+	// Call sanitizeModelResponseWithUserPrompt with buffer
+	if err := sanitizeModelResponseWithUserPrompt(&b, tc.ProjectID, locationID, templateID, modelResponse, userPrompt); err != nil {
+		t.Fatal(err)
+	}
+
+	// Check buffer output
+	output := b.String()
+
+	// Check for NO_MATCH_FOUND
+	if !strings.Contains(output, "NO_MATCH_FOUND") {
+		t.Errorf("Expected output to indicate NO_MATCH_FOUND for overall result, got: %q", output)
+	}
+}
+
+// TestSanitizeModelResponseWithUserPromptWithAdvanceSdpTemplate checks if the sanitizer correctly processes
+// a harmful user prompt and model response, ensuring unsafe content is handled.
+func TestSanitizeModelResponseWithUserPromptWithAdvanceSdpTemplate(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	locationID := testLocation(t)
+
+	// Generate a unique template ID
+	templateID := fmt.Sprintf("test-advance-sdp-%s", uuid.New().String())
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
+	var b bytes.Buffer
+
+	// Create template with advanced SDP configuration
+	_, err := testModelArmorAdvancedSDPTemplate(t, templateID)
+	if err != nil {
+		t.Fatalf("Failed to create template with advanced SDP: %v", err)
+	}
+	defer testCleanupTemplate(t, templateName)
+
+	// Define user prompt and model response with email addresses
+	userPrompt := "How can I make my email address test@dot.com make available to public for feedback"
+	modelResponse := "You can make support email such as contact@email.com for getting feedback from your customer"
+
+	// Call sanitizeModelResponseWithUserPrompt with buffer
+	if err := sanitizeModelResponseWithUserPrompt(&b, tc.ProjectID, locationID, templateID, modelResponse, userPrompt); err != nil {
+		t.Fatal(err)
+	}
+
+	// Check buffer output
+	output := b.String()
+
+	// Check for overall MATCH_FOUND
+	if !strings.Contains(output, "sdp") {
+		t.Errorf("Expected output to indicate MATCH_FOUND for overall result, got: %q", output)
+	}
+}
+
