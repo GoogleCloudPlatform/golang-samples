@@ -30,7 +30,9 @@ import (
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
+	"github.com/googleapis/gax-go/v2"
 	"google.golang.org/api/option"
+	"google.golang.org/grpc/codes"
 	grpccodes "google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
 )
@@ -174,18 +176,25 @@ func testAllFilterTemplate(t *testing.T, templateID string) (*modelarmorpb.Templ
 		Template:   template,
 	}
 
+	// When creating the client or making the call
+	retryOpts := []gax.CallOption{
+		gax.WithRetry(func() gax.Retryer {
+			return gax.OnCodes([]codes.Code{
+				codes.Unavailable,
+				codes.DeadlineExceeded,
+			}, gax.Backoff{
+				Initial:    1 * time.Second,
+				Max:        30 * time.Second,
+				Multiplier: 2,
+			})
+		}),
+	}
+
 	// Using retry mechanism similar to retry_ma_create_template
 	var response *modelarmorpb.Template
 	var err error
 
-	// Simple retry logic (you may want to implement more sophisticated retry logic)
-	for attempts := 0; attempts < 3; attempts++ {
-		response, err = client.CreateTemplate(ctx, req)
-		if err == nil {
-			break
-		}
-		time.Sleep(2 * time.Second)
-	}
+	response, err = client.CreateTemplate(ctx, req, retryOpts...)
 
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create template: %w", err)
@@ -380,11 +389,12 @@ func testCleanupTemplate(t *testing.T, templateName string) {
 	t.Helper()
 
 	client, ctx := testClient(t)
-	if err := client.DeleteTemplate(ctx, &modelarmorpb.DeleteTemplateRequest{Name: templateName}); err != nil {
-		// Ignore NotFound errors (template may already be deleted)
-		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
-			t.Fatalf("testCleanupTemplate: failed to delete template: %v", err)
-		}
+	err := client.DeleteTemplate(ctx, &modelarmorpb.DeleteTemplateRequest{Name: templateName})
+	if err == nil {
+		return
+	}
+	if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
+		t.Fatalf("testCleanupTemplate: failed to delete template %v", err)
 	}
 }
 
