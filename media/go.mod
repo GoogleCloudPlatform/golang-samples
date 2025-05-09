@@ -3,13 +3,13 @@ module github.com/GoogleCloudPlatform/golang-samples/media
 go 1.23.0
 
 require (
-	cloud.google.com/go/storage v1.50.0
-	cloud.google.com/go/video v1.23.3
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	cloud.google.com/go/storage v1.53.0
+	cloud.google.com/go/video v1.23.5
+	github.com/GoogleCloudPlatform/golang-samples 53694402ee8a
 	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
-	google.golang.org/api v0.217.0
-	google.golang.org/protobuf v1.36.3
+	google.golang.org/api v0.232.0
+	google.golang.org/protobuf v1.36.6
 )
 
 require (

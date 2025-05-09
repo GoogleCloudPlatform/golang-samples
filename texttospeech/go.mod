@@ -3,8 +3,8 @@ module github.com/GoogleCloudPlatform/golang-samples/texttospeech
 go 1.23.0
 
 require (
-	cloud.google.com/go/texttospeech v1.11.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	cloud.google.com/go/texttospeech v1.13.0
+	github.com/GoogleCloudPlatform/golang-samples 53694402ee8a
 )
 
 require (
