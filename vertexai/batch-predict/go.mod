@@ -3,10 +3,10 @@ module github.com/GoogleCloudPlatform/golang-samples/vertexai/batch-predict
 go 1.23.0
 
 require (
-	cloud.google.com/go/aiplatform v1.70.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20241001164912-66760d064c5e
-	google.golang.org/api v0.217.0
-	google.golang.org/protobuf v1.36.3
+	cloud.google.com/go/aiplatform v1.86.0
+	github.com/GoogleCloudPlatform/golang-samples 53694402ee8a
+	google.golang.org/api v0.232.0
+	google.golang.org/protobuf v1.36.6
 )
 
 require (
