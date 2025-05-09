@@ -101,6 +101,40 @@ func testModelArmorTemplate(t *testing.T, templateID string) (*modelarmorpb.Temp
 	return response, nil
 }
 
+// testCleanupTemplate deletes the specified Model Armor template if it exists,
+// ignoring the error if the template is already deleted.
+func testCleanupTemplate(t *testing.T, templateName string) {
+	t.Helper()
+	tc := testutil.SystemTest(t)
+	locationID := testLocation(t)
+	client, ctx := testClient(t)
+
+	template := &modelarmorpb.Template{
+		FilterConfig: &modelarmorpb.FilterConfig{
+			PiAndJailbreakFilterSettings: &modelarmorpb.PiAndJailbreakFilterSettings{
+				FilterEnforcement: modelarmorpb.PiAndJailbreakFilterSettings_ENABLED,
+				ConfidenceLevel:   modelarmorpb.DetectionConfidenceLevel_MEDIUM_AND_ABOVE,
+			},
+			MaliciousUriFilterSettings: &modelarmorpb.MaliciousUriFilterSettings{
+				FilterEnforcement: modelarmorpb.MaliciousUriFilterSettings_ENABLED,
+			},
+		},
+	}
+
+	req := &modelarmorpb.CreateTemplateRequest{
+		Parent:     fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, locationID),
+		TemplateId: templateID,
+		Template:   template,
+	}
+
+	response, err := client.CreateTemplate(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create template: %w", err)
+	}
+
+	return response, nil
+}
+
 // testModelArmorEmptyTemplate creates a new ModelArmor template for use in tests.
 // It returns the empty template or an error.
 func testModelArmorEmptyTemplate(t *testing.T, templateID string) (*modelarmorpb.Template, error) {
@@ -340,22 +374,26 @@ func TestDeleteModelArmorTemplate(t *testing.T) {
 	}
 }
 
-// TestCreateModelArmorTemplateWithBasicSDP tests the creation of a Model Armor
-// template using a basic Secure Deployment Policy (SDP) and verifies that the
-// operation completes successfully and logs the expected output.
-func TestCreateModelArmorTemplateWithBasicSDP(t *testing.T) {
+// TestScreenPDFFile scrrens the pdf file content and Sanitize 
+// the content with the Model Armor.
+func TestScreenPDFFile(t *testing.T) {
+	pdfFilePath := "test_sample.pdf"
 	tc := testutil.SystemTest(t)
-	locationID := testLocation(t)
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
+	locationID := testLocation(t)
 	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
-	var b bytes.Buffer
-	if err := createModelArmorTemplateWithBasicSDP(&b, tc.ProjectID, locationID, templateID); err != nil {
+	var buf bytes.Buffer
+	if _, err := testModelArmorTemplate(t, templateID); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupTemplate(t, templateName)
 
-	if got, want := b.String(), "Created Template with basic SDP: "; !strings.Contains(got, want) {
-		t.Errorf("createModelArmorTemplateWithBasicSDP: expected %q to contain %q", got, want)
+	if err := screenPDFFile(&buf, tc.ProjectID, testLocation(t), templateID, pdfFilePath); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "PDF screening sanitization result: "; !strings.Contains(got, want) {
+		t.Errorf("screenPdf: expected %q to contain %q", got, want)
 	}
 }
 
