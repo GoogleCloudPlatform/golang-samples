@@ -37,12 +37,15 @@ import (
 // membership. It then creates a kubernetes client using the retrieved Gateway
 // URL to make requests to the underlying cluster.
 func getNamespace(w io.Writer, membershipName, region string) error {
-	// Use Gateway Control to retrieve the Connect Gateway URL to be used as the
-	// host of the kubernetes client.
 	ctx := context.Background()
 	// If the membership location is regional, then the regional endpoint needs to be set for the client.
 	// Global memberships do not require this override as the default endpoint is global.
-	opts := option.WithEndpoint(fmt.Sprintf("%v-connectgateway.googleapis.com", region))
+	var opts option.ClientOption
+	if region != "global" {
+		opts = option.WithEndpoint(fmt.Sprintf("%v-connectgateway.googleapis.com", region))
+	}
+	// Use Gateway Control to retrieve the Connect Gateway URL to be used as the
+	// host of the kubernetes client.
 	gatewayClient, err := gateway.NewGatewayControlRESTClient(ctx, opts)
 	if err != nil {
 		return fmt.Errorf("failed to create Connect Gateway client: %v", err)

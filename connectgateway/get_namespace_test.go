@@ -51,6 +51,7 @@ func TestGetNamespace(t *testing.T) {
 	}
 
 	got := buf.String()
+	fmt.Print(got)
 	if want := "Name:\"default\""; !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
