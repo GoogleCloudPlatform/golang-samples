@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package gateway
+package connectgateway
 
 import (
 	"bytes"
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
 	gke "google.golang.org/api/container/v1"
 )
@@ -36,16 +36,16 @@ var (
 
 func TestGetNamespace(t *testing.T) {
 	ctx := context.Background()
-	projectid := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
+	tc := testutil.EndToEndTest(t)
 	// Setup cluster.
-	if err := createCluster(ctx, projectid, zone, clusterName); err != nil {
+	if err := createCluster(ctx, tc.ProjectID, zone, clusterName); err != nil {
 		t.Fatalf("failed to create cluster: %v", err)
 	}
-	defer deleteCluster(ctx, projectid, zone, clusterName)
+	defer deleteCluster(ctx, tc.ProjectID, zone, clusterName)
 
-	membershipName := fmt.Sprintf("projects/%s/locations/%s/memberships/%s", projectid, region, clusterName)
-	buf := new(bytes.Buffer)
-	err := getNamespace(buf, membershipName, region)
+	membershipName := fmt.Sprintf("projects/%s/locations/%s/memberships/%s", tc.ProjectID, region, clusterName)
+	var buf bytes.Buffer
+	err := getNamespace(&buf, membershipName, region)
 	if err != nil {
 		t.Fatalf("getNamespace failed: %v", err)
 	}
