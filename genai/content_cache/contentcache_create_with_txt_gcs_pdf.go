@@ -48,13 +48,13 @@ func createContentCache(w io.Writer) (string, error) {
 		{
 			Role: "user",
 			Parts: []*genai.Part{
-				{ // Part 1
+				{
 					FileData: &genai.FileData{
 						FileURI:  "gs://cloud-samples-data/generative-ai/pdf/2312.11805v3.pdf",
 						MIMEType: "application/pdf",
 					},
 				},
-				{ // Part 2
+				{
 					FileData: &genai.FileData{
 						FileURI:  "gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf",
 						MIMEType: "application/pdf",
@@ -81,7 +81,7 @@ func createContentCache(w io.Writer) (string, error) {
 		return "", fmt.Errorf("failed to create content cache: %w", err)
 	}
 
-	cachedContent, err := json.MarshalIndent(res, "", "  ") // Use 2 spaces for indent
+	cachedContent, err := json.MarshalIndent(res, "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal cache info: %w", err)
 	}
