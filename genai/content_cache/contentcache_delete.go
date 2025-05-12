@@ -13,41 +13,41 @@
 // limitations under the License.
 
 // Package content_cache shows examples of using content caching with the GenAI SDK.
- package content_cache
+package content_cache
 
 // [START googlegenaisdk_contentcache_delete]
- import (
- 	"context"
- 	"fmt"
- 	"io"
+import (
+	"context"
+	"fmt"
+	"io"
 
- 	genai "google.golang.org/genai"
- )
+	genai "google.golang.org/genai"
+)
 
 // deleteContentCache shows how to delete content cache.
- func deleteContentCache(w io.Writer, cacheName string) error {
- 	ctx := context.Background()
+func deleteContentCache(w io.Writer, cacheName string) error {
+	ctx := context.Background()
 
- 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
- 		HTTPOptions: genai.HTTPOptions{
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{
+		HTTPOptions: genai.HTTPOptions{
 			APIVersion: "v1",
-			},
- 	})
- 	if err != nil {
- 		return fmt.Errorf("failed to create genai client: %w", err)
- 	}
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create genai client: %w", err)
+	}
 
- 	_, err = client.Caches.Delete(ctx, cacheName, &genai.DeleteCachedContentConfig{})
- 	if err != nil {
- 		return fmt.Errorf("failed to delete content cache: %w", err)
- 	}
+	_, err = client.Caches.Delete(ctx, cacheName, &genai.DeleteCachedContentConfig{})
+	if err != nil {
+		return fmt.Errorf("failed to delete content cache: %w", err)
+	}
 
- 	fmt.Fprintf(w, "Deleted cache %q\n", cacheName)
+	fmt.Fprintf(w, "Deleted cache %q\n", cacheName)
 
- 	// Example response:
- 	// Deleted cache "projects/111111111111/locations/us-central1/cachedContents/1111111111111111111"
+	// Example response:
+	// Deleted cache "projects/111111111111/locations/us-central1/cachedContents/1111111111111111111"
 
- 	return nil
- }
+	return nil
+}
 
 // [END googlegenaisdk_contentcache_delete]
