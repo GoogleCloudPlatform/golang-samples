@@ -40,10 +40,8 @@ func getNamespace(w io.Writer, membershipName, region string) error {
 	ctx := context.Background()
 	// If the membership location is regional, then the regional endpoint needs to be set for the client.
 	// Global memberships do not require this override as the default endpoint is global.
-	var opts option.ClientOption
-	if region != "global" {
-		opts = option.WithEndpoint(fmt.Sprintf("%v-connectgateway.googleapis.com", region))
-	}
+	opts := option.WithEndpoint(fmt.Sprintf("%v-connectgateway.googleapis.com", region))
+
 	// Use Gateway Control to retrieve the Connect Gateway URL to be used as the
 	// host of the kubernetes client.
 	gatewayClient, err := gateway.NewGatewayControlRESTClient(ctx, opts)
@@ -85,7 +83,8 @@ func getNamespace(w io.Writer, membershipName, region string) error {
 	}
 
 	// Call GetNamespace using the kubernetes client.
-	namespace, err := kubeClient.CoreV1().Namespaces().Get(context.Background(), "default", metav1.GetOptions{})
+	opt := metav1.GetOptions{}
+	namespace, err := kubeClient.CoreV1().Namespaces().Get(context.Background(), "default", opt)
 	if err != nil {
 		return fmt.Errorf("failed to get namespace: %w", err)
 	}
