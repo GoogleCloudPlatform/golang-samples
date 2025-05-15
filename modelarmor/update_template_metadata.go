@@ -87,8 +87,8 @@ func updateModelArmorTemplateMetadata(w io.Writer, projectID, locationID, templa
 		// For more details on template metadata, please refer to the following doc:
 		// [https://cloud.google.com/security-command-center/docs/reference/model-armor/rest/v1/projects.locations.templates#templatemetadata](https://cloud.google.com/security-command-center/docs/reference/model-armor/rest/v1/projects.locations.templates#templatemetadata)
 		TemplateMetadata: &modelarmorpb.Template_TemplateMetadata{
-			IgnorePartialInvocationFailures: true,
-			LogSanitizeOperations:           true,
+			LogTemplateOperations: true,
+			LogSanitizeOperations: true,
 		},
 	}
 
