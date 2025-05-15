@@ -43,7 +43,7 @@ func createModelArmorTemplateWithMetadata(w io.Writer, projectID, locationID, te
 	endpoint := fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)
 	opts := option.WithEndpoint(endpoint)
 	// Create the Model Armor client.
-	client, err := modelarmor.NewClient(ctx,opts)
+	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
 		return fmt.Errorf("failed to create client for project %s, location %s: %w", projectID, locationID, err)
 	}
@@ -73,8 +73,8 @@ func createModelArmorTemplateWithMetadata(w io.Writer, projectID, locationID, te
 		// For more details on template metadata, please refer to the following doc:
 		// [https://cloud.google.com/security-command-center/docs/reference/model-armor/rest/v1/projects.locations.templates#templatemetadata](https://cloud.google.com/security-command-center/docs/reference/model-armor/rest/v1/projects.locations.templates#templatemetadata)
 		TemplateMetadata: &modelarmorpb.Template_TemplateMetadata{
-			IgnorePartialInvocationFailures: true,
-			LogSanitizeOperations:           true,
+			LogTemplateOperations: true,
+			LogSanitizeOperations: true,
 		},
 	}
 
