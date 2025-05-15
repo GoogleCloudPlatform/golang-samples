@@ -4,7 +4,7 @@ go 1.23.0
 
 require (
 	github.com/stretchr/testify v1.10.0
-	go.mongodb.org/mongo-driver v1.16.0
+	go.mongodb.org/mongo-driver v1.17.3
 )
 
 require (
