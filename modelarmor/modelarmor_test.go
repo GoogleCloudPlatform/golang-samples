@@ -327,31 +327,6 @@ func testCleanupTemplate(t *testing.T, templateName string) {
 	return response, nil
 }
 
-// testModelArmorEmptyTemplate creates a new ModelArmor template for use in tests.
-// It returns the empty template or an error.
-func testModelArmorEmptyTemplate(t *testing.T, templateID string) (*modelarmorpb.Template, error) {
-	t.Helper()
-	tc := testutil.SystemTest(t)
-	locationID := testLocation(t)
-	client, ctx := testClient(t)
-
-	template := &modelarmorpb.Template{
-		FilterConfig: &modelarmorpb.FilterConfig{}}
-
-	req := &modelarmorpb.CreateTemplateRequest{
-		Parent:     fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, locationID),
-		TemplateId: templateID,
-		Template:   template,
-	}
-
-	response, err := client.CreateTemplate(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create template: %w", err)
-	}
-
-	return response, nil
-}
-
 // testSDPTemplate creates DLP inspect and deidentify templates for use in tests.
 func testSDPTemplate(t *testing.T, projectID string, locationID string) (string, string) {
 	inspectTemplateID := fmt.Sprintf("model-armor-inspect-template-%s", uuid.New().String())
