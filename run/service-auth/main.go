@@ -14,11 +14,66 @@
 
 package main
 
+// [START cloudrun_service_to_service_receive]
 import (
+	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strings"
+
+	"google.golang.org/api/idtoken"
+	"google.golang.org/api/option"
 )
+
+func validateToken(token string) (*idtoken.Payload, int, error) {
+	ctx := context.Background()
+
+	// Verify and decode the JWT
+	validator, err := idtoken.NewValidator(ctx, option.WithHTTPClient(http.DefaultClient))
+	if err != nil {
+		return nil, http.StatusInternalServerError, fmt.Errorf("unable to create Validator")
+	}
+
+	payload, err := validator.Validate(ctx, token, "")
+	if err != nil {
+		return nil, http.StatusUnauthorized, fmt.Errorf("invalid token: %v", err)
+	}
+
+	return payload, http.StatusOK, nil
+}
+
+// Parse the authorization header and decode the information beign
+// sent by the Bearer Token
+func receiveAuthorizedRequest(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Attempt to retrieve and validate the Authorization header.
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		w.Write([]byte("Hello, anonymous user\n"))
+		return
+	}
+
+	if len(strings.Split(authHeader, " ")) != 2 {
+		http.Error(w, "Malformed Authorization header", http.StatusBadRequest)
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	token := strings.Split(authHeader, " ")[1]
+
+	payload, status, err := validateToken(token)
+	if err != nil {
+		http.Error(w, err.Error(), status)
+	}
+
+	w.Write(fmt.Appendf(nil, "Hello, %s!\n", payload.Claims["email"]))
+}
 
 func main() {
 	log.Print("starting server...")
@@ -37,3 +92,5 @@ func main() {
 		log.Fatal(err)
 	}
 }
+
+// [END cloudrun_service_to_service_receive]
