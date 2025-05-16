@@ -34,7 +34,7 @@ func receiveAuthorizedRequest(w http.ResponseWriter, r *http.Request) {
 	// Attempt to retrieve and validate the Authorization header.
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
-		w.Write([]byte("Hello, anonymus user\n"))
+		w.Write([]byte("Hello, anonymous user\n"))
 		return
 	}
 
@@ -47,19 +47,19 @@ func receiveAuthorizedRequest(w http.ResponseWriter, r *http.Request) {
 	token := strings.Split(authHeader, " ")[1]
 
 	// Verify and decode the JWT
-	v, err := idtoken.NewValidator(r.Context(), option.WithHTTPClient(http.DefaultClient))
+	validator, err := idtoken.NewValidator(r.Context(), option.WithHTTPClient(http.DefaultClient))
 	if err != nil {
 		http.Error(w, "Unable to create Validator", http.StatusBadRequest)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	payload, err := v.Validate(r.Context(), token, "")
+	payload, err := validator.Validate(r.Context(), token, "")
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Invalid Token: %v", err), http.StatusBadRequest)
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 
-	w.Write([]byte(fmt.Sprintf("Hello, %s!\n", payload.Claims["email"])))
+	w.Write(fmt.Appendf(nil, "Hello, %s!\n", payload.Claims["email"]))
 }
