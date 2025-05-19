@@ -790,4 +790,3 @@ func TestSanitizeModelResponseWithUserPromptWithAdvanceSdpTemplate(t *testing.T)
 		t.Errorf("Expected output to indicate MATCH_FOUND for overall result, got: %q", output)
 	}
 }
-

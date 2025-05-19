@@ -28,8 +28,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-
-// sanitizeModelResponse method sanitizes a model 
+// sanitizeModelResponse method sanitizes a model
 // response based on the project, location, and template settings.
 //
 // w io.Writer: The writer to use for logging.
@@ -43,7 +42,7 @@ func sanitizeModelResponse(w io.Writer, projectID, locationID, templateID, model
 	// Create options for Model Armor client.
 	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))
 	// Create the Model Armor client.
-	client, err := modelarmor.NewClient(ctx,opts)
+	client, err := modelarmor.NewClient(ctx, opts)
 	if err != nil {
 		return fmt.Errorf("failed to create client for location %s: %w", locationID, err)
 	}
@@ -65,12 +64,11 @@ func sanitizeModelResponse(w io.Writer, projectID, locationID, templateID, model
 	// Sanitize the model response.
 	response, err := client.SanitizeModelResponse(ctx, req)
 	if err != nil {
-		return  fmt.Errorf("failed to sanitize model response with user prompt for template %s: %w", templateID, err)
+		return fmt.Errorf("failed to sanitize model response with user prompt for template %s: %w", templateID, err)
 	}
 
 	// Sanitization Result.
 	fmt.Fprintf(w, "Sanitization Result: %v\n", response)
-
 
 	return nil
 }
