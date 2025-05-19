@@ -458,22 +458,26 @@ func TestDeleteModelArmorTemplate(t *testing.T) {
 	}
 }
 
-// TestCreateModelArmorTemplateWithBasicSDP tests the creation of a Model Armor
-// template using a basic Secure Deployment Policy (SDP) and verifies that the
-// operation completes successfully and logs the expected output.
-func TestCreateModelArmorTemplateWithBasicSDP(t *testing.T) {
+// TestScreenPDFFile scrrens the pdf file content and Sanitize
+// the content with the Model Armor.
+func TestScreenPDFFile(t *testing.T) {
+	pdfFilePath := "test_sample.pdf"
 	tc := testutil.SystemTest(t)
-	locationID := testLocation(t)
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
+	locationID := testLocation(t)
 	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
-	var b bytes.Buffer
-	if err := createModelArmorTemplateWithBasicSDP(&b, tc.ProjectID, locationID, templateID); err != nil {
+	var buf bytes.Buffer
+	if _, err := testModelArmorTemplate(t, templateID); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupTemplate(t, templateName)
 
-	if got, want := b.String(), "Created Template with basic SDP: "; !strings.Contains(got, want) {
-		t.Errorf("createModelArmorTemplateWithBasicSDP: expected %q to contain %q", got, want)
+	if err := screenPDFFile(&buf, tc.ProjectID, testLocation(t), templateID, pdfFilePath); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "PDF screening sanitization result: "; !strings.Contains(got, want) {
+		t.Errorf("screenPdf: expected %q to contain %q", got, want)
 	}
 }
 
