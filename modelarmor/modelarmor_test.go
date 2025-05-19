@@ -790,3 +790,25 @@ func TestSanitizeModelResponseWithUserPromptWithAdvanceSdpTemplate(t *testing.T)
 		t.Errorf("Expected output to indicate MATCH_FOUND for overall result, got: %q", output)
 	}
 }
+
+// TestUpdateTemplate verifies that the updateModelArmorTemplate function
+// successfully updates the filter configuration of an existing template.
+func TestUpdateTemplate(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	locationID := testLocation(t)
+	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
+	var buf bytes.Buffer
+	if _, err := testModelArmorTemplate(t, templateID); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupTemplate(t, templateName)
+
+	if err := updateModelArmorTemplate(&buf, tc.ProjectID, locationID, templateID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Updated Filter Config: "; !strings.Contains(got, want) {
+		t.Errorf("updateModelArmorTemplate: expected %q to contain %q", got, want)
+	}
+}
