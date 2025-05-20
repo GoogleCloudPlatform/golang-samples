@@ -105,6 +105,7 @@ func newApp(projectID, collectionID string) (app, error) {
 func (a *app) index(w http.ResponseWriter, r *http.Request) {
 	// Allows requests only for the root path ("/") to prevent duplicate calls.
 	if r.RequestURI != "/" {
+		http.NotFound(w, r)
 		return
 	}
 
