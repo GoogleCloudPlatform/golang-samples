@@ -34,10 +34,11 @@ func TestAuth(t *testing.T) {
 
 	serviceName := testGenerateServiceID()
 
+	//defer testDeleteReceiveService(t, serviceName, tc.ProjectID)
+
 	if err := testDeployReceiveService(t, serviceName, tc.ProjectID); err != nil {
 		t.Fatalf("testDeployReceiveService error: %v\n", err)
 	}
-	defer testDeleteReceiveService(t, serviceName, tc.ProjectID)
 
 	url, err := testGetReceiveServiceURL(t, serviceName, tc.ProjectID)
 	if err != nil {
@@ -82,32 +83,21 @@ func testGetGCPAuthToken(t *testing.T, endpointURL string) (string, error) {
 	t.Helper()
 	ctx := context.Background()
 
-	/*
-		cmd := exec.Command(
-			"gcloud",
-			"auth",
-			"print-identity-token",
-		)
-
-		bytesToken, err := cmd.Output()
-		if err != nil {
-			return "", fmt.Errorf("cmd.Run error: %w", err)
-		}
-
-		token := strings.ReplaceAll(string(bytesToken), "\n", "")
-	*/
-
+	// idtoken.NewTokenSource creates a TokenSource that can provide ID tokens
+	// for the given audience. It handles the underlying fetching and refreshing.
 	tokenSource, err := idtoken.NewTokenSource(ctx, endpointURL)
 	if err != nil {
-		return "", fmt.Errorf("idtoken.NewTokenSource error: %w", err)
+		return "", fmt.Errorf("idtoken.NewTokenSource: %w", err)
 	}
 
-	oauthToken, err := tokenSource.Token()
+	// Call Token() on the tokenSource to get the actual ID token.
+	idToken, err := tokenSource.Token()
 	if err != nil {
-		return "", fmt.Errorf("tokenSource.Token error: %w", err)
+		return "", fmt.Errorf("tokenSource.Token: %w", err)
 	}
 
-	return oauthToken.AccessToken, nil
+	// The ID token string is in the AccessToken field of the oauth2.Token struct.
+	return idToken.AccessToken, nil
 }
 
 func testGetReceiveServiceURL(t *testing.T, serviceName, projectID string) (string, error) {

@@ -18,16 +18,105 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 
+	run "cloud.google.com/go/run/apiv2"
+	"cloud.google.com/go/run/apiv2/runpb"
 	"google.golang.org/api/idtoken"
 	"google.golang.org/api/option"
 )
 
-func validateToken(token string) (*idtoken.Payload, int, error) {
+type app struct {
+	serviceURL string
+}
+
+func newApp() (app, error) {
+	a := app{}
+
+	if err := a.getServiceURL(); err != nil {
+		return app{}, err
+	}
+
+	return a, nil
+}
+
+// getServiceURL assign to internal attribute serviceURL the deployed service URL.
+func (a *app) getServiceURL() error {
+
+	ctx := context.Background()
+
+	// Get the Service Name as found in Cloud Run.
+	serviceName := os.Getenv("K_SERVICE")
+
+	// Get the Project ID.
+	projectRequest, err := http.NewRequest(http.MethodGet, "http://metadata.google.internal/computeMetadata/v1/project/project-id", nil)
+	if err != nil {
+		return fmt.Errorf("http.NewRequest error: %w", err)
+	}
+	projectRequest.Header.Set("Metadata-Flavor", "Google")
+
+	projectResponse, err := http.DefaultClient.Do(projectRequest)
+	if err != nil {
+		return fmt.Errorf("http.DefaultClient.Do error: %w", err)
+	}
+	defer projectResponse.Body.Close()
+
+	resBody, err := io.ReadAll(projectResponse.Body)
+	if err != nil {
+		return fmt.Errorf("io.ReadAll error: %w", err)
+	}
+	projectId := string(resBody)
+
+	// Get the Region.
+	regionRequest, err := http.NewRequest(http.MethodGet, "http://metadata.google.internal/computeMetadata/v1/instance/region", nil)
+	if err != nil {
+		return fmt.Errorf("http.NewRequest error: %w", err)
+	}
+	regionRequest.Header.Set("Metadata-Flavor", "Google")
+
+	regionResponse, err := http.DefaultClient.Do(regionRequest)
+	if err != nil {
+		return fmt.Errorf("http.DefaultClient.Do error: %w", err)
+	}
+	defer regionResponse.Body.Close()
+
+	resBody, err = io.ReadAll(regionResponse.Body)
+	if err != nil {
+		return fmt.Errorf("io.ReadAll error: %w", err)
+	}
+
+	splitBody := strings.Split(string(resBody), "/")
+	region := splitBody[3]
+
+	fullServiceName := fmt.Sprintf("projects/%s/locations/%s/services/%s", projectId, region, serviceName)
+
+	log.Printf("FullServiceName: %v\n", fullServiceName)
+
+	client, err := run.NewServicesClient(ctx)
+	if err != nil {
+		return fmt.Errorf("run.NewServicesClient error: %w", err)
+	}
+
+	service, err := client.GetService(ctx, &runpb.GetServiceRequest{
+		Name: fullServiceName,
+	})
+	if err != nil {
+		return fmt.Errorf("client.GetService error: %w", err)
+	}
+
+	a.serviceURL = service.Uri
+
+	log.Printf("ServiceURL: %v\n", service.Uri)
+
+	return nil
+}
+
+// validateToken is used to validate the provided idToken with a known Google cert URL.
+func (a *app) validateToken(token string) (*idtoken.Payload, int, error) {
 	ctx := context.Background()
 
 	// Verify and decode the JWT
@@ -36,7 +125,8 @@ func validateToken(token string) (*idtoken.Payload, int, error) {
 		return nil, http.StatusInternalServerError, fmt.Errorf("unable to create Validator")
 	}
 
-	payload, err := validator.Validate(ctx, token, "")
+	// validate token.
+	payload, err := validator.Validate(ctx, token, a.serviceURL)
 	if err != nil {
 		return nil, http.StatusUnauthorized, fmt.Errorf("invalid token: %v", err)
 	}
@@ -46,7 +136,7 @@ func validateToken(token string) (*idtoken.Payload, int, error) {
 
 // Parse the authorization header and decode the information beign
 // sent by the Bearer Token
-func receiveAuthorizedRequest(w http.ResponseWriter, r *http.Request) {
+func (a *app) receiveAuthorizedRequest(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 		return
@@ -67,7 +157,7 @@ func receiveAuthorizedRequest(w http.ResponseWriter, r *http.Request) {
 
 	token := strings.Split(authHeader, " ")[1]
 
-	payload, status, err := validateToken(token)
+	payload, status, err := a.validateToken(token)
 	if err != nil {
 		http.Error(w, err.Error(), status)
 	}
@@ -76,8 +166,14 @@ func receiveAuthorizedRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+
+	a, err := newApp()
+	if err != nil {
+		log.Fatalf("newApp error: %v", err)
+	}
+
 	log.Print("starting server...")
-	http.HandleFunc("/", receiveAuthorizedRequest)
+	http.HandleFunc("/", a.receiveAuthorizedRequest)
 
 	// Determine port for HTTP service.
 	port := os.Getenv("PORT")
