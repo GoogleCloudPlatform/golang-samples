@@ -103,6 +103,7 @@ func newApp(projectID, collectionID string) (app, error) {
 // index uses sessions to assign users a random greeting and keep track of
 // views.
 func (a *app) index(w http.ResponseWriter, r *http.Request) {
+	// Allows requests only for the root path ("/") to prevent duplicate calls.
 	if r.RequestURI != "/" {
 		return
 	}
