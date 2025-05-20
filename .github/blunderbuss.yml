@@ -53,15 +53,6 @@ assign_issues_by:
   to:
   - GoogleCloudPlatform/googleapis-dlp
 - labels:
-  - "api: batch"
-  - "api: compute"
-  - "api: cloudkms"
-  - "api: iam"
-  - "api: kms"
-  - "api: privateca"
-  to:
-  - GoogleCloudPlatform/dee-infra
-- labels:
   - "api: parametermanager"
   to:
   - GoogleCloudPlatform/cloud-parameters-team
@@ -97,15 +88,6 @@ assign_prs_by:
   - 'api: dlp'
   to:
   - GoogleCloudPlatform/googleapis-dlp
-- labels:
-  - "api: batch"
-  - "api: compute"
-  - "api: cloudkms"
-  - "api: iam"
-  - "api: kms"
-  - "api: privateca"
-  to:
-  - GoogleCloudPlatform/dee-infra
 - labels:
   - "api: secretmanager"
   to:

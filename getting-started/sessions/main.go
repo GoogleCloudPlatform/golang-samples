@@ -24,20 +24,13 @@ import (
 	"os"
 
 	"cloud.google.com/go/firestore"
+	"github.com/gorilla/sessions"
 )
 
 // app stores a sessions.Store. Create a new app with newApp.
 type app struct {
-	tmpl         *template.Template
-	collectionID string
-	projectID    string
-}
-
-// session stores the client's session information.
-// This type is also used for executing the template.
-type session struct {
-	Greetings string `json:"greeting"`
-	Views     int    `json:"views"`
+	store sessions.Store
+	tmpl  *template.Template
 }
 
 // greetings are the random greetings that will be assigned to sessions.

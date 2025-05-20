@@ -30,7 +30,7 @@ func updateContentCache(w io.Writer, cacheName string) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
-		HTTPOptions: genai.HTTPOptions{APIVersion: "v1beta1"},
+		HTTPOptions: genai.HTTPOptions{APIVersion: "v1"},
 	})
 	if err != nil {
 		return fmt.Errorf("failed to create genai client: %w", err)
