@@ -24,13 +24,20 @@ import (
 	"os"
 
 	"cloud.google.com/go/firestore"
-	"github.com/gorilla/sessions"
 )
 
 // app stores a sessions.Store. Create a new app with newApp.
 type app struct {
-	store sessions.Store
-	tmpl  *template.Template
+	tmpl         *template.Template
+	collectionID string
+	projectID    string
+}
+
+// session stores the client's session information.
+// This type is also used for executing the template.
+type session struct {
+	Greetings string `json:"greeting"`
+	Views     int    `json:"views"`
 }
 
 // greetings are the random greetings that will be assigned to sessions.
@@ -96,7 +103,6 @@ func newApp(projectID, collectionID string) (app, error) {
 // index uses sessions to assign users a random greeting and keep track of
 // views.
 func (a *app) index(w http.ResponseWriter, r *http.Request) {
-	// Allows requests only for the root path ("/") to prevent duplicate calls.
 	if r.RequestURI != "/" {
 		return
 	}
