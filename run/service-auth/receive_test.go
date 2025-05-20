@@ -34,7 +34,7 @@ func TestAuth(t *testing.T) {
 
 	serviceName := testGenerateServiceID()
 
-	//defer testDeleteReceiveService(t, serviceName, tc.ProjectID)
+	defer testDeleteReceiveService(t, serviceName, tc.ProjectID)
 
 	if err := testDeployReceiveService(t, serviceName, tc.ProjectID); err != nil {
 		t.Fatalf("testDeployReceiveService error: %v\n", err)
