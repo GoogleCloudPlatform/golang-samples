@@ -15,6 +15,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -25,6 +26,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
+	"google.golang.org/api/idtoken"
 )
 
 func TestAuth(t *testing.T) {
@@ -42,7 +44,7 @@ func TestAuth(t *testing.T) {
 		t.Fatalf("testGetReceiveServiceURL error: %v\n", err)
 	}
 
-	token, err := testGetGCPAuthToken(t)
+	token, err := testGetGCPAuthToken(t, url)
 	if err != nil {
 		t.Fatalf("testGetGCPAuthToken error: %v\n", err)
 	}
@@ -76,23 +78,36 @@ func TestAuth(t *testing.T) {
 	})
 }
 
-func testGetGCPAuthToken(t *testing.T) (string, error) {
+func testGetGCPAuthToken(t *testing.T, endpointURL string) (string, error) {
 	t.Helper()
+	ctx := context.Background()
 
-	cmd := exec.Command(
-		"gcloud",
-		"auth",
-		"print-identity-token",
-	)
+	/*
+		cmd := exec.Command(
+			"gcloud",
+			"auth",
+			"print-identity-token",
+		)
 
-	bytesToken, err := cmd.Output()
+		bytesToken, err := cmd.Output()
+		if err != nil {
+			return "", fmt.Errorf("cmd.Run error: %w", err)
+		}
+
+		token := strings.ReplaceAll(string(bytesToken), "\n", "")
+	*/
+
+	tokenSource, err := idtoken.NewTokenSource(ctx, endpointURL)
 	if err != nil {
-		return "", fmt.Errorf("cmd.Run error: %w", err)
+		return "", fmt.Errorf("idtoken.NewTokenSource error: %w", err)
 	}
 
-	token := strings.ReplaceAll(string(bytesToken), "\n", "")
+	oauthToken, err := tokenSource.Token()
+	if err != nil {
+		return "", fmt.Errorf("tokenSource.Token error: %w", err)
+	}
 
-	return token, nil
+	return oauthToken.AccessToken, nil
 }
 
 func testGetReceiveServiceURL(t *testing.T, serviceName, projectID string) (string, error) {
