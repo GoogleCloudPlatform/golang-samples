@@ -31,7 +31,7 @@ import (
 )
 
 type app struct {
-	serviceURL string
+	serviceURI string
 }
 
 func newApp() (app, error) {
@@ -92,10 +92,10 @@ func (a *app) getServiceURL() error {
 	splitBody := strings.Split(string(resBody), "/")
 	region := splitBody[3]
 
+	// Build fullServiceName.
 	fullServiceName := fmt.Sprintf("projects/%s/locations/%s/services/%s", projectId, region, serviceName)
 
-	log.Printf("FullServiceName: %v\n", fullServiceName)
-
+	// Get deployed service URI.
 	client, err := run.NewServicesClient(ctx)
 	if err != nil {
 		return fmt.Errorf("run.NewServicesClient error: %w", err)
@@ -108,9 +108,8 @@ func (a *app) getServiceURL() error {
 		return fmt.Errorf("client.GetService error: %w", err)
 	}
 
-	a.serviceURL = service.Uri
-
-	log.Printf("ServiceURL: %v\n", service.Uri)
+	// Assign deployed service's URI to internal attribute serviceURL.
+	a.serviceURI = service.Uri
 
 	return nil
 }
@@ -126,7 +125,7 @@ func (a *app) validateToken(token string) (*idtoken.Payload, int, error) {
 	}
 
 	// validate token.
-	payload, err := validator.Validate(ctx, token, a.serviceURL)
+	payload, err := validator.Validate(ctx, token, a.serviceURI)
 	if err != nil {
 		return nil, http.StatusUnauthorized, fmt.Errorf("invalid token: %v", err)
 	}
