@@ -34,6 +34,7 @@ type app struct {
 	serviceURI string
 }
 
+// newApp returns an app with the serviceURI attribute assigned.
 func newApp() (app, error) {
 	a := app{}
 
@@ -44,7 +45,8 @@ func newApp() (app, error) {
 	return a, nil
 }
 
-// getServiceURL assign to internal attribute serviceURL the deployed service URL.
+// getServiceURL assigns to internal attribute serviceURL the deployed
+// service URL.
 func (a *app) getServiceURL() error {
 
 	ctx := context.Background()
@@ -114,7 +116,8 @@ func (a *app) getServiceURL() error {
 	return nil
 }
 
-// validateToken is used to validate the provided idToken with a known Google cert URL.
+// validateToken is used to validate the provided idToken with a known
+// Google cert URL.
 func (a *app) validateToken(token string) (*idtoken.Payload, int, error) {
 	ctx := context.Background()
 
