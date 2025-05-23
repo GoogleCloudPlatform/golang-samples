@@ -49,7 +49,8 @@ Finally, Saturday rounds off the week with sunny skies, a temperature of 80°F, 
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: prompt},
-		}},
+		},
+			Role: "user"},
 	}
 	config := &genai.GenerateContentConfig{
 		ResponseMIMEType: "application/json",

@@ -43,7 +43,8 @@ func generateWithPDF(w io.Writer) error {
 				FileURI:  "https://storage.googleapis.com/cloud-samples-data/generative-ai/text/inefficient_fibonacci_series_python_code.pdf",
 				MIMEType: "application/pdf",
 			}},
-		}},
+		},
+			Role: "user"},
 	}
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)

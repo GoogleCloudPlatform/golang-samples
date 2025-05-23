@@ -39,7 +39,8 @@ func generateWithGoogleSearch(w io.Writer) error {
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: "When is the next total solar eclipse in the United States?"},
-		}},
+		},
+			Role: "user"},
 	}
 	config := &genai.GenerateContentConfig{
 		Tools: []*genai.Tool{

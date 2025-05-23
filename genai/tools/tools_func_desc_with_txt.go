@@ -59,7 +59,8 @@ func generateWithFuncCall(w io.Writer) error {
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: "What is the weather like in Boston?"},
-		}},
+		},
+			Role: "user"},
 	}
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, config)
@@ -99,7 +100,8 @@ func generateWithFuncCall(w io.Writer) error {
 	contents = []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: "What is the weather like in Boston?"},
-		}},
+		},
+			Role: "user"},
 		{Parts: []*genai.Part{
 			{FunctionCall: funcCall},
 		}},
