@@ -43,7 +43,8 @@ func generateWithYTVideo(w io.Writer) error {
 				FileURI:  "https://www.youtube.com/watch?v=3KtWfp0UopM",
 				MIMEType: "video/mp4",
 			}},
-		}},
+		},
+			Role: "user"},
 	}
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)

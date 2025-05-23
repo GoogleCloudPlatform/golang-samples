@@ -28,17 +28,28 @@ import (
 func generateWithRouting(w io.Writer) error {
 	ctx := context.Background()
 
-	client, err := genai.NewClient(ctx, &genai.ClientConfig{
+	clientConfig := &genai.ClientConfig{
 		HTTPOptions: genai.HTTPOptions{APIVersion: "v1beta1"},
-	})
+	}
+
+	client, err := genai.NewClient(ctx, clientConfig)
+
 	if err != nil {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	generateContentConfig := &genai.GenerateContentConfig{ModelSelectionConfig: &genai.ModelSelectionConfig{FeatureSelectionPreference: genai.FeatureSelectionPreferencePrioritizeQuality}}
+	modelSelectionConfig := &genai.ModelSelectionConfig{
+		FeatureSelectionPreference: genai.FeatureSelectionPreferencePrioritizeQuality,
+	}
+
+	generateContentConfig := &genai.GenerateContentConfig{
+		ModelSelectionConfig: modelSelectionConfig,
+	}
+
+	modelName := "model-optimizer-exp-04-09"
 
 	resp, err := client.Models.GenerateContent(ctx,
-		"model-optimizer-exp-04-09",
+		modelName,
 		genai.Text("How does AI work?"),
 		generateContentConfig,
 	)
@@ -47,9 +58,7 @@ func generateWithRouting(w io.Writer) error {
 	}
 
 	respText := resp.Text()
-	if err != nil {
-		return fmt.Errorf("failed to convert model response to text: %w", err)
-	}
+
 	fmt.Fprintln(w, respText)
 	// Example response:
 	// That's a great question! Understanding how AI works can feel like ...

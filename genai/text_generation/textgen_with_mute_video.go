@@ -43,7 +43,8 @@ func generateWithMuteVideo(w io.Writer) error {
 				FileURI:  "gs://cloud-samples-data/generative-ai/video/ad_copy_from_video.mp4",
 				MIMEType: "video/mp4",
 			}},
-		}},
+		},
+			Role: "user"},
 	}
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)

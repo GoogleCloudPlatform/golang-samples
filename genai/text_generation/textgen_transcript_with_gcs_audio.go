@@ -44,7 +44,8 @@ Use speaker A, speaker B, etc. to identify speakers.`},
 				FileURI:  "gs://cloud-samples-data/generative-ai/audio/pixel.mp3",
 				MIMEType: "audio/mpeg",
 			}},
-		}},
+		},
+			Role: "user"},
 	}
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)

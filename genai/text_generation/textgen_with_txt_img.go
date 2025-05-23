@@ -44,7 +44,8 @@ func generateWithTextImage(w io.Writer) error {
 				FileURI:  "gs://cloud-samples-data/generative-ai/image/scones.jpg",
 				MIMEType: "image/jpeg",
 			}},
-		}},
+		},
+			Role: "user"},
 	}
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)
