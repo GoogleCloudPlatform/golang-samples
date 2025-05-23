@@ -3,14 +3,14 @@ module github.com/GoogleCloudPlatform/golang-samples/parametermanager
 go 1.23.0
 
 require (
-	cloud.google.com/go/kms v1.21.2
+	cloud.google.com/go/kms v1.22.0
 	cloud.google.com/go/parametermanager v0.2.1
 	cloud.google.com/go/secretmanager v1.14.7
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250417052308-a8d44a62f893
+	github.com/GoogleCloudPlatform/golang-samples 1f75b446895d
 	github.com/gofrs/uuid v4.4.0+incompatible
-	google.golang.org/api v0.229.0
-	google.golang.org/genproto v0.0.0-20250414145226-207652e42e2e
-	google.golang.org/grpc v1.71.1
+	google.golang.org/api v0.234.0
+	google.golang.org/genproto 55703ea1f237
+	google.golang.org/grpc v1.72.1
 )
 
 require (
