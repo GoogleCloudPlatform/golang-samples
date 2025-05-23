@@ -28,14 +28,14 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-// embedTexts shows how embeddings are set for text-embedding-005 model
+// embedTexts shows how embeddings are set for gemini-embedding-001 model
 func embedTexts(w io.Writer, project, location string) error {
 	// location := "us-central1"
 	ctx := context.Background()
 
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	dimensionality := 5
-	model := "text-embedding-005"
+	model := "gemini-embedding-001"
 	texts := []string{"banana muffins? ", "banana bread? banana muffins?"}
 
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
