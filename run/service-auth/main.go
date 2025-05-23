@@ -31,6 +31,7 @@ import (
 )
 
 type app struct {
+	// serviceURI will be used as the audience value for validating tokens.
 	serviceURI string
 }
 
@@ -48,7 +49,6 @@ func newApp() (app, error) {
 // getServiceURL assigns to internal attribute serviceURL the deployed
 // service URL.
 func (a *app) getServiceURL() error {
-
 	ctx := context.Background()
 
 	// Get the Service Name as found in Cloud Run.
@@ -127,7 +127,7 @@ func (a *app) validateToken(token string) (*idtoken.Payload, int, error) {
 		return nil, http.StatusInternalServerError, fmt.Errorf("unable to create Validator")
 	}
 
-	// validate token.
+	// Validate token using serviceURI as audience.
 	payload, err := validator.Validate(ctx, token, a.serviceURI)
 	if err != nil {
 		return nil, http.StatusUnauthorized, fmt.Errorf("invalid token: %v", err)
@@ -139,6 +139,13 @@ func (a *app) validateToken(token string) (*idtoken.Payload, int, error) {
 // Parse the authorization header and decode the information beign
 // sent by the Bearer Token
 func (a *app) receiveAuthorizedRequest(w http.ResponseWriter, r *http.Request) {
+	// Allows requests only for the root path ("/") to prevent duplicate calls.
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
+
+	// Request method should be GET.
 	if r.Method != http.MethodGet {
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 		return
@@ -168,7 +175,6 @@ func (a *app) receiveAuthorizedRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-
 	a, err := newApp()
 	if err != nil {
 		log.Fatalf("newApp error: %v", err)
