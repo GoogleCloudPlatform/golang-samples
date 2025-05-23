@@ -66,7 +66,7 @@ func createContentCache(w io.Writer) (string, error) {
 			},
 		},
 		DisplayName: "example-cache",
-		TTL:         time.Duration(86400),
+		TTL:         time.Duration(time.Duration.Seconds(86400)),
 	}
 
 	res, err := client.Caches.Create(ctx, modelName, config)

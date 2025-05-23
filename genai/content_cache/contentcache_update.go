@@ -38,7 +38,7 @@ func updateContentCache(w io.Writer, cacheName string) error {
 
 	// Update expire time using TTL
 	resp, err := client.Caches.Update(ctx, cacheName, &genai.UpdateCachedContentConfig{
-		TTL: time.Duration(36000),
+		TTL: time.Duration(time.Duration.Seconds(36000)),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to update content cache exp. time with TTL: %w", err)
