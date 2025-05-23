@@ -38,26 +38,26 @@ func updateContentCache(w io.Writer, cacheName string) error {
 
 	// Update expire time using TTL
 	resp, err := client.Caches.Update(ctx, cacheName, &genai.UpdateCachedContentConfig{
-		TTL: "36000s",
+		TTL: int64(36000),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to update content cache exp. time with TTL: %w", err)
 	}
 
-	fmt.Fprintf(w, "Cache expires in: %s\n", time.Until(*resp.ExpireTime))
+	fmt.Fprintf(w, "Cache expires in: %s\n", time.Until(resp.ExpireTime))
 	// Example response:
 	// Cache expires in: 10h0m0.005875s
 
 	// Update expire time using specific time stamp
 	inSevenDays := time.Now().Add(7 * 24 * time.Hour)
 	resp, err = client.Caches.Update(ctx, cacheName, &genai.UpdateCachedContentConfig{
-		ExpireTime: &inSevenDays,
+		ExpireTime: inSevenDays,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to update content cache expire time: %w", err)
 	}
 
-	fmt.Fprintf(w, "Cache expires in: %s\n", time.Until(*resp.ExpireTime))
+	fmt.Fprintf(w, "Cache expires in: %s\n", time.Until(resp.ExpireTime))
 	// Example response:
 	// Cache expires in: 167h59m59.80327s
 
