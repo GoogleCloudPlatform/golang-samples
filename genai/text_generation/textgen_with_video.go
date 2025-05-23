@@ -45,7 +45,8 @@ Create a chapter breakdown with timestamps for key sections or topics discussed.
 				FileURI:  "gs://cloud-samples-data/generative-ai/video/pixel8.mp4",
 				MIMEType: "video/mp4",
 			}},
-		}},
+		},
+			Role: "user"},
 	}
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)
