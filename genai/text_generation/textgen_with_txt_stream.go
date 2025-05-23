@@ -43,10 +43,8 @@ func generateWithTextStream(w io.Writer) error {
 			return fmt.Errorf("failed to generate content: %w", err)
 		}
 
-		chunk, err := resp.Text()
-		if err != nil {
-			return fmt.Errorf("failed to convert model response to text: %w", err)
-		}
+		chunk := resp.Text()
+
 		fmt.Fprintln(w, chunk)
 	}
 
