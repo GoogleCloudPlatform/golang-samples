@@ -34,7 +34,7 @@ func embedTexts(w io.Writer, project, location string) error {
 	ctx := context.Background()
 
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
-	dimensionality := 5
+	dimensionality := 3072
 	model := "gemini-embedding-001"
 	texts := []string{"banana muffins? ", "banana bread? banana muffins?"}
 
