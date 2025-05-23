@@ -30,7 +30,6 @@ import (
 
 // getModelArmorTemplate method retrieves a Model Armor template.
 //
-//
 // w io.Writer: The writer to use for logging.
 // projectID string: The ID of the project.
 // locationID string: The location of the template.
