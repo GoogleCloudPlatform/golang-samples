@@ -47,9 +47,7 @@ func generateWithRouting(w io.Writer) error {
 	}
 
 	respText := resp.Text()
-	if err != nil {
-		return fmt.Errorf("failed to convert model response to text: %w", err)
-	}
+
 	fmt.Fprintln(w, respText)
 	// Example response:
 	// That's a great question! Understanding how AI works can feel like ...
