@@ -25,7 +25,7 @@ import (
 )
 
 // queryJobOptional demonstrates issuing a query that doesn't require a
-// a corresponding job.
+// corresponding job.
 func queryJobOptional(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
 	ctx := context.Background()
