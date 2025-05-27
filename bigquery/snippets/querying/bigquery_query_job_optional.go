@@ -29,7 +29,9 @@ import (
 func queryJobOptional(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
 	ctx := context.Background()
-	client, err := bigquery.NewClient(ctx, projectID)
+	client, err := bigquery.NewClient(ctx, projectID,
+		bigquery.WithDefaultJobCreationMode(bigquery.JobCreationModeOptional),
+	)
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
