@@ -14,7 +14,7 @@
 
 package querying
 
-// [START bigquery_query_shortquery]
+// [START bigquery_query_job_optional]
 import (
 	"context"
 	"fmt"
@@ -24,11 +24,9 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// queryShortMode demonstrates issuing a query that may be run in short query mode.
-//
-// To enable the short query mode preview feature, the QUERY_PREVIEW_ENABLED
-// environmental variable should be set to `TRUE`.
-func queryShortMode(w io.Writer, projectID string) error {
+// queryJobOptional demonstrates issuing a query that doesn't require a
+// a corresponding job.
+func queryJobOptional(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
@@ -82,4 +80,4 @@ func queryShortMode(w io.Writer, projectID string) error {
 	return nil
 }
 
-// [END bigquery_query_shortquery]
+// [END bigquery_query_job_optional]
