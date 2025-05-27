@@ -59,7 +59,7 @@ func queryJobOptional(w io.Writer, projectID string) error {
 	// Queries that were run in short query mode will not have the source job
 	// populated.
 	if it.SourceJob() == nil {
-		fmt.Fprintf(w, "Query was run in short mode.  Query ID: %q\n", it.QueryID())
+		fmt.Fprintf(w, "Query was run in optional job mode.  Query ID: %q\n", it.QueryID())
 	} else {
 		j := it.SourceJob()
 		qualifiedJobID := fmt.Sprintf("%s:%s.%s", j.ProjectID(), j.Location(), j.ID())
