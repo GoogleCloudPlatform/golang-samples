@@ -18,7 +18,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -39,78 +38,37 @@ type app struct {
 func newApp() (app, error) {
 	a := app{}
 
-	if err := a.getServiceURL(); err != nil {
+	// Get the full service name from the environment variable
+	// set at the time of deployment.
+	// Format: "projects/PROJECT_ID/locations/REGION/services/SERVICE_NAME"
+	fullServiceName := os.Getenv("FULL_SERVICE_NAME")
+
+	if err := a.getServiceURL(fullServiceName); err != nil {
 		return app{}, err
 	}
 
 	return a, nil
 }
 
-// getServiceURL assigns to internal attribute serviceURL the deployed
-// service URL.
-func (a *app) getServiceURL() error {
+// getServiceURL assigns to internal attribute serviceURL the
+// primary URL for a given Cloud Run service.
+func (a *app) getServiceURL(fullServiceName string) error {
 	ctx := context.Background()
 
-	// Get the Service Name as found in Cloud Run.
-	serviceName := os.Getenv("K_SERVICE")
-
-	// Get the Project ID.
-	projectRequest, err := http.NewRequest(http.MethodGet, "http://metadata.google.internal/computeMetadata/v1/project/project-id", nil)
-	if err != nil {
-		return fmt.Errorf("http.NewRequest error: %w", err)
-	}
-	projectRequest.Header.Set("Metadata-Flavor", "Google")
-
-	projectResponse, err := http.DefaultClient.Do(projectRequest)
-	if err != nil {
-		return fmt.Errorf("http.DefaultClient.Do error: %w", err)
-	}
-	defer projectResponse.Body.Close()
-
-	resBody, err := io.ReadAll(projectResponse.Body)
-	if err != nil {
-		return fmt.Errorf("io.ReadAll error: %w", err)
-	}
-	projectId := string(resBody)
-
-	// Get the Region.
-	regionRequest, err := http.NewRequest(http.MethodGet, "http://metadata.google.internal/computeMetadata/v1/instance/region", nil)
-	if err != nil {
-		return fmt.Errorf("http.NewRequest error: %w", err)
-	}
-	regionRequest.Header.Set("Metadata-Flavor", "Google")
-
-	regionResponse, err := http.DefaultClient.Do(regionRequest)
-	if err != nil {
-		return fmt.Errorf("http.DefaultClient.Do error: %w", err)
-	}
-	defer regionResponse.Body.Close()
-
-	resBody, err = io.ReadAll(regionResponse.Body)
-	if err != nil {
-		return fmt.Errorf("io.ReadAll error: %w", err)
-	}
-
-	splitBody := strings.Split(string(resBody), "/")
-	region := splitBody[3]
-
-	// Build fullServiceName.
-	fullServiceName := fmt.Sprintf("projects/%s/locations/%s/services/%s", projectId, region, serviceName)
-
-	// Get deployed service URI.
-	client, err := run.NewServicesClient(ctx)
+	client, err := run.NewServicesClient(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("run.NewServicesClient error: %w", err)
 	}
 
-	service, err := client.GetService(ctx, &runpb.GetServiceRequest{
+	serviceRequest := &runpb.GetServiceRequest{
 		Name: fullServiceName,
-	})
+	}
+
+	service, err := client.GetService(ctx, serviceRequest, nil)
 	if err != nil {
 		return fmt.Errorf("client.GetService error: %w", err)
 	}
 
-	// Assign deployed service's URI to internal attribute serviceURL.
 	a.serviceURI = service.Uri
 
 	return nil
