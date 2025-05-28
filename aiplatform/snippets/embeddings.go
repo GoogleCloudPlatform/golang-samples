@@ -28,14 +28,14 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-// embedTexts shows how embeddings are set for text-embedding-005 model
+// embedTexts shows how embeddings are set for gemini-embedding-001 model
 func embedTexts(w io.Writer, project, location string) error {
 	// location := "us-central1"
 	ctx := context.Background()
 
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
-	dimensionality := 5
-	model := "text-embedding-005"
+	dimensionality := 3072
+	model := "gemini-embedding-001"
 	texts := []string{"banana muffins? ", "banana bread? banana muffins?"}
 
 	client, err := aiplatform.NewPredictionClient(ctx, option.WithEndpoint(apiEndpoint))
@@ -45,41 +45,54 @@ func embedTexts(w io.Writer, project, location string) error {
 	defer client.Close()
 
 	endpoint := fmt.Sprintf("projects/%s/locations/%s/publishers/google/models/%s", project, location, model)
-	instances := make([]*structpb.Value, len(texts))
-	for i, text := range texts {
-		instances[i] = structpb.NewStructValue(&structpb.Struct{
+	allEmbeddings := make([][]float32, 0, len(texts))
+	// gemini-embedding-001 takes 1 input at a time
+	for _, text := range texts {
+		instances := make([]*structpb.Value, 1)
+		instances[0] = structpb.NewStructValue(&structpb.Struct{
 			Fields: map[string]*structpb.Value{
 				"content":   structpb.NewStringValue(text),
 				"task_type": structpb.NewStringValue("QUESTION_ANSWERING"),
 			},
 		})
-	}
 
-	params := structpb.NewStructValue(&structpb.Struct{
-		Fields: map[string]*structpb.Value{
-			"outputDimensionality": structpb.NewNumberValue(float64(dimensionality)),
-		},
-	})
+		params := structpb.NewStructValue(&structpb.Struct{
+			Fields: map[string]*structpb.Value{
+				"outputDimensionality": structpb.NewNumberValue(float64(dimensionality)),
+			},
+		})
 
-	req := &aiplatformpb.PredictRequest{
-		Endpoint:   endpoint,
-		Instances:  instances,
-		Parameters: params,
-	}
-	resp, err := client.Predict(ctx, req)
-	if err != nil {
-		return err
-	}
-	embeddings := make([][]float32, len(resp.Predictions))
-	for i, prediction := range resp.Predictions {
-		values := prediction.GetStructValue().Fields["embeddings"].GetStructValue().Fields["values"].GetListValue().Values
-		embeddings[i] = make([]float32, len(values))
-		for j, value := range values {
-			embeddings[i][j] = float32(value.GetNumberValue())
+		req := &aiplatformpb.PredictRequest{
+			Endpoint:   endpoint,
+			Instances:  instances,
+			Parameters: params,
 		}
+		resp, err := client.Predict(ctx, req)
+		if err != nil {
+			return err
+		}
+
+		// Process the prediction for the single text
+		// The response will contain one prediction because we sent one instance.
+		if len(resp.Predictions) == 0 {
+			return fmt.Errorf("no predictions returned for text \"%s\"", text)
+		}
+
+		prediction := resp.Predictions[0]
+		embeddingValues := prediction.GetStructValue().Fields["embeddings"].GetStructValue().Fields["values"].GetListValue().Values
+
+		currentEmbedding := make([]float32, len(embeddingValues))
+		for j, value := range embeddingValues {
+			currentEmbedding[j] = float32(value.GetNumberValue())
+		}
+		allEmbeddings = append(allEmbeddings, currentEmbedding)
 	}
 
-	fmt.Fprintf(w, "Dimensionality: %d. Embeddings length: %d", len(embeddings[0]), len(embeddings))
+	if len(allEmbeddings) > 0 {
+		fmt.Fprintf(w, "Dimensionality: %d. Embeddings length: %d", len(allEmbeddings[0]), len(allEmbeddings))
+	} else {
+		fmt.Fprintln(w, "No texts were processed.")
+	}
 	return nil
 }
 
