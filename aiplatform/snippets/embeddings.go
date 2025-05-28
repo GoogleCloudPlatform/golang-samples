@@ -88,8 +88,6 @@ func embedTexts(w io.Writer, project, location string) error {
 		allEmbeddings = append(allEmbeddings, currentEmbedding)
 	}
 
-
-	
 	if len(allEmbeddings) > 0 {
 		fmt.Fprintf(w, "Dimensionality: %d. Embeddings length: %d", len(allEmbeddings[0]), len(allEmbeddings))
 	} else {
