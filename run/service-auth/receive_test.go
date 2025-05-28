@@ -29,10 +29,6 @@ import (
 	"google.golang.org/api/idtoken"
 )
 
-const (
-	REGION string = "us-central1"
-)
-
 func TestAuth(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -114,7 +110,7 @@ func testGetReceiveServiceURL(t *testing.T, serviceName, projectID string) (stri
 		"describe",
 		serviceName,
 		"--project", projectID,
-		"--region="+REGION,
+		"--region=us-central1",
 		"--format",
 		"value(status.url)",
 	)
@@ -139,7 +135,7 @@ func testDeployReceiveService(t *testing.T, serviceName, projectID string) error
 		serviceName,
 		"--project="+projectID,
 		"--source", ".",
-		"--region="+REGION,
+		"--region=us-central1",
 		"--allow-unauthenticated",
 		"--quiet",
 	)
@@ -163,7 +159,7 @@ func testDeleteReceiveService(t *testing.T, serviceName, projectID string) error
 		serviceName,
 		"--project="+projectID,
 		"--async",
-		"--region="+REGION,
+		"--region=us-central1",
 		"--quiet",
 	)
 
