@@ -14,7 +14,7 @@
 
 package querying
 
-// [START bigquery_query_shortquery]
+// [START bigquery_query_job_optional]
 import (
 	"context"
 	"fmt"
@@ -24,14 +24,14 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// queryShortMode demonstrates issuing a query that may be run in short query mode.
-//
-// To enable the short query mode preview feature, the QUERY_PREVIEW_ENABLED
-// environmental variable should be set to `TRUE`.
-func queryShortMode(w io.Writer, projectID string) error {
+// queryJobOptional demonstrates issuing a query that doesn't require a
+// corresponding job.
+func queryJobOptional(w io.Writer, projectID string) error {
 	// projectID := "my-project-id"
 	ctx := context.Background()
-	client, err := bigquery.NewClient(ctx, projectID)
+	client, err := bigquery.NewClient(ctx, projectID,
+		bigquery.WithDefaultJobCreationMode(bigquery.JobCreationModeOptional),
+	)
 	if err != nil {
 		return fmt.Errorf("bigquery.NewClient: %w", err)
 	}
@@ -59,7 +59,7 @@ func queryShortMode(w io.Writer, projectID string) error {
 	// Queries that were run in short query mode will not have the source job
 	// populated.
 	if it.SourceJob() == nil {
-		fmt.Fprintf(w, "Query was run in short mode.  Query ID: %q\n", it.QueryID())
+		fmt.Fprintf(w, "Query was run in optional job mode.  Query ID: %q\n", it.QueryID())
 	} else {
 		j := it.SourceJob()
 		qualifiedJobID := fmt.Sprintf("%s:%s.%s", j.ProjectID(), j.Location(), j.ID())
@@ -82,4 +82,4 @@ func queryShortMode(w io.Writer, projectID string) error {
 	return nil
 }
 
-// [END bigquery_query_shortquery]
+// [END bigquery_query_job_optional]
