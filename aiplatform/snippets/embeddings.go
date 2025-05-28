@@ -47,7 +47,7 @@ func embedTexts(w io.Writer, project, location string) error {
 	endpoint := fmt.Sprintf("projects/%s/locations/%s/publishers/google/models/%s", project, location, model)
 	allEmbeddings := make([][]float32, 0, len(texts))
 	// gemini-embedding-001 takes 1 input at a time
-	for i, text := range texts {
+	for _, text := range texts {
 		instances := make([]*structpb.Value, 1)
 		instances[0] = structpb.NewStructValue(&structpb.Struct{
 			Fields: map[string]*structpb.Value{
