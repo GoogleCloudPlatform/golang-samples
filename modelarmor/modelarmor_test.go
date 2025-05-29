@@ -421,17 +421,54 @@ func TestCreateModelArmorTemplateWithAdvancedSDP(t *testing.T) {
 // It ensures the output contains a confirmation message after creation.
 func TestCreateModelArmorTemplate(t *testing.T) {
 	tc := testutil.SystemTest(t)
-
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
 	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, testLocation(t), templateID)
-	var b bytes.Buffer
-	if err := createModelArmorTemplate(&b, tc.ProjectID, testLocation(t), templateID); err != nil {
+	var buf bytes.Buffer
+	if err := createModelArmorTemplate(&buf, tc.ProjectID, testLocation(t), templateID); err != nil {
 		t.Fatal(err)
 	}
 	defer testCleanupTemplate(t, templateName)
 
-	if got, want := b.String(), "Created template:"; !strings.Contains(got, want) {
+	if got, want := buf.String(), "Created template:"; !strings.Contains(got, want) {
 		t.Errorf("createModelArmorTemplate: expected %q to contain %q", got, want)
+	}
+}
+
+// TestCreateModelArmorTemplateWithMetadata tests the creation of a template with metadata.
+// Verifies the success message is printed after template creation.
+func TestCreateModelArmorTemplateWithMetadata(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	locationID := testLocation(t)
+	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
+
+	var buf bytes.Buffer
+	if err := createModelArmorTemplateWithMetadata(&buf, tc.ProjectID, locationID, templateID); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupTemplate(t, templateName)
+
+	if got, want := buf.String(), "Created Model Armor Template:"; !strings.Contains(got, want) {
+		t.Errorf("createModelArmorTemplateWithMetadata: expected %q to contain %q", got, want)
+	}
+}
+
+// TestCreateModelArmorTemplateWithLabels tests the creation of a template with labels.
+// Verifies the output contains confirmation of successful template creation.
+func TestCreateModelArmorTemplateWithLabels(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	locationID := testLocation(t)
+	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
+
+	var buf bytes.Buffer
+	if err := createModelArmorTemplateWithLabels(&buf, tc.ProjectID, locationID, templateID, map[string]string{"testkey": "testvalue"}); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupTemplate(t, templateName)
+
+	if got, want := buf.String(), "Created Template with labels: "; !strings.Contains(got, want) {
+		t.Errorf("createModelArmorTemplateWithLabels: expected %q to contain %q", got, want)
 	}
 }
 
