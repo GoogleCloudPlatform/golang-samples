@@ -129,6 +129,7 @@ use (
 	./run/markdown-preview/editor
 	./run/markdown-preview/renderer
 	./run/pubsub
+	./run/service-auth
 	./run/sigterm-handler
 	./run/system_package
 	./run/testing
