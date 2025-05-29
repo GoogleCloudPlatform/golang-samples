@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"os/exec"
 	"strings"
 	"testing"
@@ -29,29 +30,40 @@ import (
 	"google.golang.org/api/idtoken"
 )
 
+const REGION string = "us-central1"
+
 func TestAuth(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
+	// Generate Service ID
 	serviceName := testGenerateServiceID()
 
+	// Once the test is done, the created resources are released
 	defer testDeleteReceiveService(t, serviceName, tc.ProjectID)
 
-	if err := testDeployReceiveService(t, serviceName, tc.ProjectID); err != nil {
+	// Get ProjectNumber
+	projectNumber, err := testGetProjectNumber(t, tc.ProjectID)
+	if err != nil {
+		t.Fatalf("testGetProjectNumber error: %v\n", err)
+	}
+
+	// Build serviceURL with expected format.
+	serviceURL := fmt.Sprintf("https://%s-%s.%s.run.app", serviceName, projectNumber, REGION)
+
+	// Deploy service
+	if err := testDeployReceiveService(t, serviceName, tc.ProjectID, serviceURL); err != nil {
 		t.Fatalf("testDeployReceiveService error: %v\n", err)
 	}
 
-	url, err := testGetReceiveServiceURL(t, serviceName, tc.ProjectID)
-	if err != nil {
-		t.Fatalf("testGetReceiveServiceURL error: %v\n", err)
-	}
-
-	token, err := testGetGCPAuthToken(t, url)
+	// Generate authentication token.
+	token, err := testGetGCPAuthToken(t, serviceURL)
 	if err != nil {
 		t.Fatalf("testGetGCPAuthToken error: %v\n", err)
 	}
 
+	// Test deployed service with retry configuration.
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
-		request, err := http.NewRequest(http.MethodGet, url, nil)
+		request, err := http.NewRequest(http.MethodGet, serviceURL, nil)
 		if err != nil {
 			r.Errorf("Attempt %v http.NewRequest error: %v", r.Attempt, err)
 		}
@@ -79,6 +91,7 @@ func TestAuth(t *testing.T) {
 	})
 }
 
+// testGetGCPAuthToken returns an access token with specified audience.
 func testGetGCPAuthToken(t *testing.T, endpointURL string) (string, error) {
 	t.Helper()
 	ctx := context.Background()
@@ -100,19 +113,16 @@ func testGetGCPAuthToken(t *testing.T, endpointURL string) (string, error) {
 	return idToken.AccessToken, nil
 }
 
-func testGetReceiveServiceURL(t *testing.T, serviceName, projectID string) (string, error) {
+// testGetProjectNumber returns formatted Project Number with given projectID.
+func testGetProjectNumber(t *testing.T, projectID string) (string, error) {
 	t.Helper()
 
 	cmd := exec.Command(
 		"gcloud",
-		"run",
-		"services",
+		"projects",
 		"describe",
-		serviceName,
-		"--project", projectID,
-		"--region=us-central1",
-		"--format",
-		"value(status.url)",
+		projectID,
+		"--format=value(projectNumber)",
 	)
 
 	bytesURL, err := cmd.Output()
@@ -120,12 +130,13 @@ func testGetReceiveServiceURL(t *testing.T, serviceName, projectID string) (stri
 		return "", fmt.Errorf("cmd.Run error: %w", err)
 	}
 
-	url := strings.ReplaceAll(string(bytesURL), "\n", "")
+	projectNumber := strings.ReplaceAll(string(bytesURL), "\n", "")
 
-	return url, nil
+	return projectNumber, nil
 }
 
-func testDeployReceiveService(t *testing.T, serviceName, projectID string) error {
+// testDeployReceiveService deploys current source code to CloudRun.
+func testDeployReceiveService(t *testing.T, serviceName, projectID, serviceURL string) error {
 	t.Helper()
 
 	cmd := exec.Command(
@@ -133,12 +144,18 @@ func testDeployReceiveService(t *testing.T, serviceName, projectID string) error
 		"run",
 		"deploy",
 		serviceName,
-		"--project="+projectID,
-		"--source", ".",
-		"--region=us-central1",
+		"--project",
+		projectID,
+		"--source",
+		".",
+		"--region="+REGION,
 		"--allow-unauthenticated",
+		"--set-env-vars=SERVICE_URL="+serviceURL,
 		"--quiet",
 	)
+
+	cmd.Stdout = os.Stdout // or any other io.Writer
+	cmd.Stderr = os.Stderr // or any other io.Writer
 
 	err := cmd.Run()
 	if err != nil {
@@ -148,6 +165,7 @@ func testDeployReceiveService(t *testing.T, serviceName, projectID string) error
 	return nil
 }
 
+// testDeleteReceiveService deletes a deployed project in CloudRun with the given serviceName and projectID.
 func testDeleteReceiveService(t *testing.T, serviceName, projectID string) error {
 	t.Helper()
 
@@ -171,6 +189,7 @@ func testDeleteReceiveService(t *testing.T, serviceName, projectID string) error
 	return nil
 }
 
+// testGenerateServiceID produces an unique ID.
 func testGenerateServiceID() string {
 	return fmt.Sprintf("receive-go-%s", uuid.New().String())
 }

@@ -23,8 +23,6 @@ import (
 	"os"
 	"strings"
 
-	run "cloud.google.com/go/run/apiv2"
-	"cloud.google.com/go/run/apiv2/runpb"
 	"google.golang.org/api/idtoken"
 	"google.golang.org/api/option"
 )
@@ -38,40 +36,11 @@ type app struct {
 func newApp() (app, error) {
 	a := app{}
 
-	// Get the full service name from the environment variable
+	// Get the service URL from the environment variable
 	// set at the time of deployment.
-	// Format: "projects/PROJECT_ID/locations/REGION/services/SERVICE_NAME"
-	fullServiceName := os.Getenv("FULL_SERVICE_NAME")
-
-	if err := a.getServiceURL(fullServiceName); err != nil {
-		return app{}, err
-	}
+	a.serviceURI = os.Getenv("SERVICE_URL")
 
 	return a, nil
-}
-
-// getServiceURL assigns to internal attribute serviceURL the
-// primary URL for a given Cloud Run service.
-func (a *app) getServiceURL(fullServiceName string) error {
-	ctx := context.Background()
-
-	client, err := run.NewServicesClient(ctx, nil)
-	if err != nil {
-		return fmt.Errorf("run.NewServicesClient error: %w", err)
-	}
-
-	serviceRequest := &runpb.GetServiceRequest{
-		Name: fullServiceName,
-	}
-
-	service, err := client.GetService(ctx, serviceRequest, nil)
-	if err != nil {
-		return fmt.Errorf("client.GetService error: %w", err)
-	}
-
-	a.serviceURI = service.Uri
-
-	return nil
 }
 
 // validateToken is used to validate the provided idToken with a known

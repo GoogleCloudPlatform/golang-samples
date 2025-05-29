@@ -3,7 +3,6 @@ module github.com/GoogleCloudPlatform/golang-samples/run/service-auth
 go 1.23.0
 
 require (
-	cloud.google.com/go/run v1.9.3
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250414185348-49adefec1b88
 	github.com/google/uuid v1.6.0
 	google.golang.org/api v0.233.0
@@ -16,7 +15,6 @@ require (
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
 	cloud.google.com/go/iam v1.5.0 // indirect
-	cloud.google.com/go/longrunning v0.6.6 // indirect
 	cloud.google.com/go/monitoring v1.24.0 // indirect
 	cloud.google.com/go/storage v1.50.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.26.0 // indirect
