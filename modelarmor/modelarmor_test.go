@@ -97,7 +97,7 @@ func testModelArmorTemplate(t *testing.T, templateID string) (*modelarmorpb.Temp
 
 	response, err := client.CreateTemplate(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create template: %w", err)
+		return nil, fmt.Errorf("failed to create template: %v", err)
 	}
 
 	return response, nil
@@ -1093,5 +1093,71 @@ func TestSanitizeUserPromptWithEmptyTemplate(t *testing.T) {
 	// Check for NO_MATCH_FOUND since the template has no filters enabled
 	if !strings.Contains(output, "NO_MATCH_FOUND") {
 		t.Errorf("Expected output to indicate NO_MATCH_FOUND for overall result, got: %q", output)
+	}
+}
+
+// TestGetModelArmorTemplate verifies that a created ModelArmor template
+// can be successfully retrieved using the getModelArmorTemplate function.
+func TestGetModelArmorTemplate(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	locationID := testLocation(t)
+	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
+
+	var b bytes.Buffer
+	if _, err := testModelArmorTemplate(t, templateID); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, "us-central1", templateID))
+
+	if err := getModelArmorTemplate(&b, tc.ProjectID, locationID, templateID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Retrieved template: "; !strings.Contains(got, want) {
+		t.Errorf("getModelArmorTemplates: expected %q to contain %q", got, want)
+	}
+}
+
+// TestListModelArmorTemplates verifies that the listModelArmorTemplates
+// function returns the created template in the output.
+func TestListModelArmorTemplates(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	locationID := testLocation(t)
+	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
+
+	var b bytes.Buffer
+	if _, err := testModelArmorTemplate(t, templateID); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupTemplate(t, fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID))
+
+	if err := listModelArmorTemplates(&b, tc.ProjectID, locationID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Template: "; !strings.Contains(got, want) {
+		t.Errorf("listModelArmorTemplates: expected %q to contain %q", got, want)
+	}
+}
+
+// TestListModelArmorTemplatesWithFilter verifies that filtering works as expected
+// when listing templates using listModelArmorTemplatesWithFilter.
+func TestListModelArmorTemplatesWithFilter(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	locationID := testLocation(t)
+	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
+	var buf bytes.Buffer
+	if _, err := testModelArmorTemplate(t, templateID); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupTemplate(t, templateName)
+
+	if err := listModelArmorTemplatesWithFilter(&buf, tc.ProjectID, locationID, templateID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Templates Found: "; !strings.Contains(got, want) {
+		t.Errorf("listModelArmorTemplatesWithFilter: expected %q to contain %q", got, want)
 	}
 }
