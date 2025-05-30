@@ -30,7 +30,7 @@ func TestTranslateText(t *testing.T) {
 	buf := bytes.Buffer{}
 
 	text := "¡Hola amigos y amigas!"
-	err := translateText(&buf, "en", text)
+	err := translateText(&buf, "en", "es", text)
 	if err != nil {
 		t.Fatalf("translateText: %v", err)
 	}

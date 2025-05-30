@@ -24,18 +24,15 @@ import (
 	"golang.org/x/text/language"
 )
 
-// translateText translates the given text into the specified targetLanguage
+// translateText translates the given text into the specified targetLanguage. sourceLanguage
+// is optional. If empty, the API will attempt to detect the source language automatically.
+// targetLanguage and sourceLanguage should follow ISO 639 language code of the input text
+// (e.g., 'fr' for French)
 //
 // Find a list of supported languages and codes here:
 // https://cloud.google.com/translate/docs/languages#nmt
-func translateText(w io.Writer, targetLanguage, text string) error {
+func translateText(w io.Writer, targetLanguage, sourceLanguage, text string) error {
 	ctx := context.Background()
-
-	// Get required tag by parsing the target language.
-	lang, err := language.Parse(targetLanguage)
-	if err != nil {
-		return fmt.Errorf("language.Parse: %w", err)
-	}
 
 	// Create new Translate client.
 	client, err := translate.NewClient(ctx)
@@ -44,9 +41,29 @@ func translateText(w io.Writer, targetLanguage, text string) error {
 	}
 	defer client.Close()
 
+	// Get required tag by parsing the target language.
+	targetLang, err := language.Parse(targetLanguage)
+	if err != nil {
+		return fmt.Errorf("language.Parse: %w", err)
+	}
+
+	options := &translate.Options{}
+
+	if sourceLanguage != "" {
+		sourceLang, err := language.Parse(sourceLanguage)
+		if err != nil {
+			return fmt.Errorf("language.Parse: %w", err)
+		}
+		options = &translate.Options{
+			Source: sourceLang,
+		}
+	} else {
+		options = nil
+	}
+
 	// Find more information about translate function here:
 	// https://pkg.go.dev/cloud.google.com/go/translate#Client.Translate
-	resp, err := client.Translate(ctx, []string{text}, lang, nil)
+	resp, err := client.Translate(ctx, []string{text}, targetLang, options)
 	if err != nil {
 		return fmt.Errorf("client.Translate error: %w", err)
 	}
