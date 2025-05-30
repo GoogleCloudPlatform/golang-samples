@@ -57,7 +57,8 @@ func generateWithRespSchema(w io.Writer) error {
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: "List a few popular cookie recipes."},
-		}},
+		},
+			Role: "user"},
 	}
 	modelName := "gemini-2.0-flash-001"
 
@@ -66,10 +67,8 @@ func generateWithRespSchema(w io.Writer) error {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
 
-	respText, err := resp.Text()
-	if err != nil {
-		return fmt.Errorf("failed to convert model response to text: %w", err)
-	}
+	respText := resp.Text()
+
 	fmt.Fprintln(w, respText)
 
 	// Example response:
