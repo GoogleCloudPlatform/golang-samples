@@ -57,8 +57,6 @@ func translateText(w io.Writer, targetLanguage, sourceLanguage, text string) err
 		options = &translate.Options{
 			Source: sourceLang,
 		}
-	} else {
-		options = nil
 	}
 
 	// Find more information about translate function here:
