@@ -36,7 +36,7 @@ func TestTranslateText(t *testing.T) {
 	}
 
 	if got, want := buf.String(), "Hello friends!"; !strings.Contains(got, want) {
-		t.Errorf("translateText got %q, want %q", got, want)
+		t.Errorf("translateText output %q did not contain expected substring %q", got, want)
 	}
 }
 

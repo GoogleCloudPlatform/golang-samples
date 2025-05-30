@@ -45,7 +45,7 @@ func translateText(w io.Writer, targetLanguage, text string) error {
 	defer client.Close()
 
 	// Find more information about translate function here:
-	// https://cloud.google.com/python/docs/reference/translate/latest/google.cloud.translate_v2.client.Client#google_cloud_translate_v2_client_Client_translate
+	// https://pkg.go.dev/cloud.google.com/go/translate#Client.Translate
 	resp, err := client.Translate(ctx, []string{text}, lang, nil)
 	if err != nil {
 		return fmt.Errorf("client.Translate error: %w", err)
@@ -55,9 +55,8 @@ func translateText(w io.Writer, targetLanguage, text string) error {
 	}
 
 	// Print results to buffer.
-	fmt.Fprintf(w, "Text: %s\n", resp[0].Text)
-	fmt.Fprintf(w, "Translation: %s\n", text)
-	fmt.Fprintf(w, "Detected source language: %s\n", resp[0].Source.String())
+	fmt.Fprintf(w, "Input Text: %s\n", resp[0].Text)
+	fmt.Fprintf(w, "Translated Test: %s\n", text)
 
 	return nil
 }
