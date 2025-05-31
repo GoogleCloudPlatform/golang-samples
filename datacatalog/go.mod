@@ -6,10 +6,10 @@ require (
 	cloud.google.com/go/bigquery v1.69.0
 	cloud.google.com/go/datacatalog v1.26.0
 	cloud.google.com/go/iam v1.5.2
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	github.com/GoogleCloudPlatform/golang-samples/bigquery v0.0.0-00010101000000-000000000000
-	github.com/googleapis/gax-go/v2 v2.14.1
-	google.golang.org/api v0.232.0
+	github.com/GoogleCloudPlatform/golang-samples 3130d1b6263b
+	github.com/GoogleCloudPlatform/golang-samples/bigquery 3130d1b6263b
+	github.com/googleapis/gax-go/v2 v2.14.2
+	google.golang.org/api v0.235.0
 )
 
 require (
