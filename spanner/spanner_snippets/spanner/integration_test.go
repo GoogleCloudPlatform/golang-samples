@@ -1332,6 +1332,44 @@ func TestAddSplitPointsSample(t *testing.T) {
 	assertContains(t, out, "Added split points")
 }
 
+func TestDmlWithLastStatementSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	_, dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	_, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+	mustRunSample(t, createDatabase, dbName, "failed to create a database")
+
+	out := runSample(t, insertAndUpdateDmlWithLastStatement, dbName, "failed to insert and then update using DML with last statement option")
+	assertContains(t, out, "1 record(s) inserted.")
+	assertContains(t, out, "1 record(s) updated.")
+}
+
+func TestPgDmlWithLastStatementSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	_, dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+	dbCleanup, err := createTestPgDatabase(dbName,
+		`CREATE TABLE Singers (
+		   SingerId  bigint NOT NULL PRIMARY KEY,
+		   FirstName varchar(1024),
+		   LastName  varchar(1024)
+		 )`)
+	if err != nil {
+		t.Fatalf("failed to create test database: %v", err)
+	}
+	defer dbCleanup()
+
+	out := runSample(t, pgInsertAndUpdateDmlWithLastStatement, dbName, "failed to insert and then update using DML with last statement option")
+	assertContains(t, out, "1 record(s) inserted.")
+	assertContains(t, out, "1 record(s) updated.")
+}
+
 func maybeCreateKey(projectId, locationId, keyRingId, keyId string) error {
 	client, err := kms.NewKeyManagementClient(context.Background())
 	if err != nil {
