@@ -3,12 +3,12 @@ module github.com/GoogleCloudPlatform/golang-samples/translate
 go 1.23.0
 
 require (
-	cloud.google.com/go/storage v1.50.0
-	cloud.google.com/go/translate v1.12.3
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	cloud.google.com/go/storage v1.55.0
+	cloud.google.com/go/translate v1.12.5
+	github.com/GoogleCloudPlatform/golang-samples 3130d1b6263b
 	github.com/google/uuid v1.6.0
-	golang.org/x/text v0.21.0
-	google.golang.org/api v0.217.0
+	golang.org/x/text v0.25.0
+	google.golang.org/api v0.235.0
 )
 
 require (
