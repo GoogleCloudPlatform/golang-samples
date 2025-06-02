@@ -25,7 +25,7 @@ import (
 func TestGenerateEmbeddings(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	texts := []string{"banana muffins? ", "banana bread? banana muffins?"}
-	dimensionality := 5
+	dimensionality := 3072
 	location := "us-central1"
 	var buf bytes.Buffer
 
