@@ -30,6 +30,7 @@ use (
 	./cloudsql/sqlserver/database-sql
 	./compute
 	./compute/quickstart
+	./connectgateway
 	./container_registry
 	./datacatalog
 	./dataflow
@@ -90,7 +91,6 @@ use (
 	./getting-started/background
 	./getting-started/bookshelf
 	./getting-started/gce
-	./getting-started/gopher-run
 	./getting-started/sessions
 	./healthcare
 	./iam
@@ -129,6 +129,7 @@ use (
 	./run/markdown-preview/editor
 	./run/markdown-preview/renderer
 	./run/pubsub
+	./run/service-auth
 	./run/sigterm-handler
 	./run/system_package
 	./run/testing

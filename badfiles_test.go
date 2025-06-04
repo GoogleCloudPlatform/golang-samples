@@ -130,6 +130,9 @@ var allowList = []string{
 	// document ai sample pdfs
 	"documentai/**/*.pdf",
 
+	// Model Armor sample pdfs
+	"modelarmor/test_sample.pdf",
+
 	// Speech-to-Text audio/video files
 	"speech/resources/commercial_mono.wav",
 
