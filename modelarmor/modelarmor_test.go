@@ -103,38 +103,19 @@ func testModelArmorTemplate(t *testing.T, templateID string) (*modelarmorpb.Temp
 	return response, nil
 }
 
-// testCleanupTemplate deletes a Model Armor template by name, used for cleanup
-// after tests. Ignores errors if the template is already deleted.
+// testCleanupTemplate deletes the specified Model Armor template if it exists,
+// ignoring the error if the template is already deleted.
 func testCleanupTemplate(t *testing.T, templateName string) {
 	t.Helper()
-	tc := testutil.SystemTest(t)
-	locationID := testLocation(t)
+
 	client, ctx := testClient(t)
-
-	template := &modelarmorpb.Template{
-		FilterConfig: &modelarmorpb.FilterConfig{
-			PiAndJailbreakFilterSettings: &modelarmorpb.PiAndJailbreakFilterSettings{
-				FilterEnforcement: modelarmorpb.PiAndJailbreakFilterSettings_ENABLED,
-				ConfidenceLevel:   modelarmorpb.DetectionConfidenceLevel_MEDIUM_AND_ABOVE,
-			},
-			MaliciousUriFilterSettings: &modelarmorpb.MaliciousUriFilterSettings{
-				FilterEnforcement: modelarmorpb.MaliciousUriFilterSettings_ENABLED,
-			},
-		},
+	err := client.DeleteTemplate(ctx, &modelarmorpb.DeleteTemplateRequest{Name: templateName})
+	if err == nil {
+		return
 	}
-
-	req := &modelarmorpb.CreateTemplateRequest{
-		Parent:     fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, locationID),
-		TemplateId: templateID,
-		Template:   template,
+	if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
+		t.Fatalf("testCleanupTemplate: failed to delete template %v", err)
 	}
-
-	response, err := client.CreateTemplate(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create template: %w", err)
-	}
-
-	return response, nil
 }
 
 // testAllFilterTemplate creates a new ModelArmor template with all filters enabled.
@@ -219,12 +200,22 @@ func testModelArmorEmptyTemplate(t *testing.T, templateID string) (*modelarmorpb
 	tc := testutil.SystemTest(t)
 	locationID := testLocation(t)
 	client, ctx := testClient(t)
-	if err := client.DeleteTemplate(ctx, &modelarmorpb.DeleteTemplateRequest{Name: templateName}); err != nil {
-		// Ignore NotFound errors (template may already be deleted)
-		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
-			t.Fatalf("testCleanupTemplate: failed to delete template: %v", err)
-		}
+
+	template := &modelarmorpb.Template{
+		FilterConfig: &modelarmorpb.FilterConfig{}}
+
+	req := &modelarmorpb.CreateTemplateRequest{
+		Parent:     fmt.Sprintf("projects/%s/locations/%s", tc.ProjectID, locationID),
+		TemplateId: templateID,
+		Template:   template,
 	}
+
+	response, err := client.CreateTemplate(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create template: %w", err)
+	}
+
+	return response, nil
 }
 
 // testSDPTemplate creates DLP inspect and deidentify templates for use in tests.
@@ -405,21 +396,6 @@ func testModelArmorAdvancedSDPTemplate(t *testing.T, templateID string) (*modela
 
 	return response, nil
 
-}
-
-// testCleanupTemplate deletes the specified Model Armor template if it exists,
-// ignoring the error if the template is already deleted.
-func testCleanupTemplate(t *testing.T, templateName string) {
-	t.Helper()
-
-	client, ctx := testClient(t)
-	err := client.DeleteTemplate(ctx, &modelarmorpb.DeleteTemplateRequest{Name: templateName})
-	if err == nil {
-		return
-	}
-	if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
-		t.Fatalf("testCleanupTemplate: failed to delete template %v", err)
-	}
 }
 
 // TestCreateModelArmorTemplateWithAdvancedSDP tests creating a
