@@ -35,7 +35,7 @@ func TestStreamingAndBatching(t *testing.T) {
 	project := os.Getenv("GOLANG_SAMPLES_BIGTABLE_PROJECT")
 	instance := os.Getenv("GOLANG_SAMPLES_BIGTABLE_INSTANCE")
 	if project == "" || instance == "" {
-		t.Skip("Skipping bigtable integration test. Set GOLANG_SAMPLES_BIGTABLE_PROJECT and GOLANG_SAMPLES_BIGTABLE_INSTANCE.")
+		t.Fatal("Failed Bigtable integration test. Set GOLANG_SAMPLES_BIGTABLE_PROJECT and GOLANG_SAMPLES_BIGTABLE_INSTANCE.")
 	}
 
 	// Create client

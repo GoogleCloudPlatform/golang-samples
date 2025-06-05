@@ -24,6 +24,7 @@ import (
 	"cloud.google.com/go/bigtable"
 )
 
+// streamingAndBatching starts a stream of data (reading rows), batches them, and then goes through the batch and deletes all the cells in column
 func streamingAndBatching(w io.Writer, projectID, instanceID string, tableName string) error {
 	// projectID := "my-project-id"
 	// instanceID := "my-instance-id"
@@ -58,23 +59,26 @@ func streamingAndBatching(w io.Writer, projectID, instanceID string, tableName s
 		return fmt.Errorf("tbl.ReadRows: %w", err)
 	}
 
+	if len(mutations) == 0 {
+		return nil
+	}
 	// If there are mutations to apply, apply them in a single bulk request.
-	if len(mutations) > 0 {
-		// ApplyBulk returns a slice of errors, one for each mutation.
-		if errs, err := tbl.ApplyBulk(ctx, rowKeys, mutations); err != nil {
-			return fmt.Errorf("tbl.ApplyBulk: %w", err)
-		} else if errs != nil {
-			// Log any individual errors that occurred during the bulk operation.
-			var errorCount int
-			for _, individualErr := range errs {
-				if individualErr != nil {
-					fmt.Fprintf(w, "Error applying mutation: %v\n", individualErr)
-					errorCount++
-				}
+	// ApplyBulk returns a slice of errors, one for each mutation.
+	var errs []error
+	if errs, err = tbl.ApplyBulk(ctx, rowKeys, mutations); err != nil {
+		return fmt.Errorf("tbl.ApplyBulk: %w", err)
+	}
+	if errs != nil {
+		// Log any individual errors that occurred during the bulk operation.
+		var errorCount int
+		for _, individualErr := range errs {
+			if individualErr != nil {
+				fmt.Fprintf(w, "Error applying mutation: %v\n", individualErr)
+				errorCount++
 			}
-			if errorCount > 0 {
-				return fmt.Errorf("encountered %d error(s) out of %d mutations", errorCount, len(errs))
-			}
+		}
+		if errorCount > 0 {
+			return fmt.Errorf("encountered %d error(s) out of %d mutations", errorCount, len(errs))
 		}
 	}
 
