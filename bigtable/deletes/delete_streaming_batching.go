@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package writes
+package deletes
 
 // [START bigtable_streaming_and_batching_asyncio]
 
@@ -65,12 +65,16 @@ func streamingAndBatching(w io.Writer, projectID, instanceID string, tableName s
 			return fmt.Errorf("tbl.ApplyBulk: %w", err)
 		} else if errs != nil {
 			// Log any individual errors that occurred during the bulk operation.
-			for _, err := range errs {
-				if err != nil {
-					fmt.Fprintf(w, "Error applying mutation: %v", err)
+			var errorCount int
+			for _, individualErr := range errs {
+				if individualErr != nil {
+					fmt.Fprintf(w, "Error applying mutation: %v\n", individualErr)
+					errorCount++
 				}
 			}
-			return fmt.Errorf("encountered %d errors during bulk mutation", len(errs))
+			if errorCount > 0 {
+				return fmt.Errorf("encountered %d error(s) out of %d mutations", errorCount, len(errs))
+			}
 		}
 	}
 
