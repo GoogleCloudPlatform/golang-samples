@@ -129,6 +129,7 @@ func TestCreateInstances(t *testing.T) {
 	runCreateAndUpdateInstanceSample(t, createInstanceWithoutDefaultBackupSchedule, updateInstanceDefaultBackupScheduleType)
 	runCreateInstanceSample(t, createInstanceWithProcessingUnits)
 	runCreateInstanceSample(t, createInstanceWithAutoscalingConfig)
+	runCreateInstanceSample(t, createInstanceWithAsymmetricAutoscalingConfig)
 }
 
 func runCreateAndUpdateInstanceSample(t *testing.T, createFunc, updateFunc instanceSampleFunc) {
@@ -331,7 +332,7 @@ func TestSample(t *testing.T) {
 	out = runSample(t, commitStats, dbName, "failed to request commit stats")
 	assertContains(t, out, "4 mutations in transaction")
 
-	out = runSample(t, maxCommitDelay, dbName, "failed to set max commit delay")
+	out = runSample(t, setMaxCommitDelay, dbName, "failed to set max commit delay")
 	assertContains(t, out, "4 mutations in transaction")
 
 	out = runSample(t, queryWithParameter, dbName, "failed to query with parameter")
@@ -438,6 +439,15 @@ func TestSample(t *testing.T) {
 
 	out = runSample(t, directedReadOptions, dbName, "failed to read using directed read options")
 	assertContains(t, out, "1 1 Total Junk")
+
+	out = runSample(t, readWriteTxnExcludedFromChangeStreams, dbName, "failed to commit rw txn excluded from change streams")
+	assertContains(t, out, "New singer inserted.")
+	assertContains(t, out, "Singer first name updated.")
+
+	// Test isolation level functionality
+	out = runSample(t, writeWithTransactionUsingIsolationLevel, dbName, "failed to write with transaction using isolation level")
+	assertContains(t, out, "Current album title: Total Junk")
+	assertContains(t, out, "Updated 1 record(s)")
 }
 
 func TestBackupSample(t *testing.T) {
@@ -1302,6 +1312,24 @@ func TestGraphSample(t *testing.T) {
 	assertContains(t, out, "1 Account record(s) deleted.")
 
 	out = runSample(t, deleteGraphData, dbName, "")
+}
+
+// Testing the AddSplitPoints feature
+func TestAddSplitPointsSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	_, dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	_, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+
+	var out string
+	mustRunSample(t, createDatabase, dbName, "failed to create a database")
+
+	out = runSample(t, addSplitpoints, dbName, "Addsplitpoints sample failed")
+	assertContains(t, out, "Added split points")
 }
 
 func maybeCreateKey(projectId, locationId, keyRingId, keyId string) error {

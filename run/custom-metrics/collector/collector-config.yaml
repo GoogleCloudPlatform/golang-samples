@@ -40,7 +40,7 @@ processors:
 
   resource:
     attributes:
-      # add instance_id as a resource attribute                                                                                                                                                    
+    # add instance_id as a resource attribute
     - key: service.instance.id
       from_attribute: faas.id
       action: upsert
@@ -51,10 +51,10 @@ processors:
 
 exporters:
   googlemanagedprometheus: # Note: this is intentionally left blank   
-  
+
 extensions:
   health_check:
-
+    endpoint: 0.0.0.0:13133
 service:
   extensions: [health_check]
   pipelines:

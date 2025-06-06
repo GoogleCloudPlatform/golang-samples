@@ -40,7 +40,7 @@ func TestHandler(t *testing.T) {
 	}{
 		{
 			name:     "basic test",
-			expected: "Incremented sidecar_sample_counter metric!\n",
+			expected: "Incremented sidecar_sample_counter_total metric!\n",
 		},
 	}
 

@@ -16,7 +16,7 @@ package functions
 
 import (
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
-	cloudsql "github.com/GoogleCloudPlatform/golang-samples/cloudsql/postgres/database-sql"
+	cloudsql "github.com/GoogleCloudPlatform/golang-samples/cloudsql/sqlserver/database-sql"
 )
 
 // TABS vs. SPACES App for Cloud Functions
