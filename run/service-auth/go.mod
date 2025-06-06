@@ -3,9 +3,9 @@ module github.com/GoogleCloudPlatform/golang-samples/run/service-auth
 go 1.23.0
 
 require (
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250414185348-49adefec1b88
+	github.com/GoogleCloudPlatform/golang-samples 99582d91c7e1
 	github.com/google/uuid v1.6.0
-	google.golang.org/api v0.233.0
+	google.golang.org/api v0.236.0
 )
 
 require (
