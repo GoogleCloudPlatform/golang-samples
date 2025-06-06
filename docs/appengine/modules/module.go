@@ -21,7 +21,7 @@ import (
 	"google.golang.org/appengine/log"
 )
 
-// [START communication_between_modules_1]
+// [START gae_communication_between_modules_1]
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
@@ -31,18 +31,18 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	log.Infof(ctx, "Received on module %s; instance %s", module, instance)
 }
 
-// [END communication_between_modules_1]
+// [END gae_communication_between_modules_1]
 
 func handler2(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
-	// [START communication_between_modules_2]
+	// [START gae_communication_between_modules_2]
 	hostname, err := appengine.ModuleHostname(ctx, "my-backend", "", "")
 	if err != nil {
 		// ...
 	}
 	url := "http://" + hostname + "/"
 	// ...
-	// [END communication_between_modules_2]
+	// [END gae_communication_between_modules_2]
 
 	_ = url
 }

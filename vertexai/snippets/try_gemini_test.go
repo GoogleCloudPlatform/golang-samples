@@ -24,7 +24,7 @@ import (
 func Test_tryGemini(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	buf := &bytes.Buffer{}
-	err := tryGemini(buf, tc.ProjectID, "us-central1", "gemini-1.5-flash-001")
+	err := tryGemini(buf, tc.ProjectID, "us-central1", "gemini-2.0-flash-001")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}

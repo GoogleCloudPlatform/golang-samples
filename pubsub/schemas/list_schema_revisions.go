@@ -20,23 +20,28 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	pubsub "cloud.google.com/go/pubsub/v2/apiv1"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 	"google.golang.org/api/iterator"
 )
 
-func listSchemaRevisions(w io.Writer, projectID, schemaID string) ([]*pubsub.SchemaConfig, error) {
+func listSchemaRevisions(w io.Writer, projectID, schemaID string) ([]*pubsubpb.Schema, error) {
 	// projectID := "my-project-id"
 	// schemaID := "my-schema-id"
 	ctx := context.Background()
-	client, err := pubsub.NewSchemaClient(ctx, projectID)
+	client, err := pubsub.NewSchemaClient(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("pubsub.NewSchemaClient: %w", err)
 	}
 	defer client.Close()
 
-	var schemas []*pubsub.SchemaConfig
+	var schemas []*pubsubpb.Schema
 
-	schemaIter := client.ListSchemaRevisions(ctx, schemaID, pubsub.SchemaViewFull)
+	req := &pubsubpb.ListSchemaRevisionsRequest{
+		Name: fmt.Sprintf("projects/%s/schemas/%s", projectID, schemaID),
+		View: pubsubpb.SchemaView_FULL,
+	}
+	schemaIter := client.ListSchemaRevisions(ctx, req)
 	for {
 		sc, err := schemaIter.Next()
 		if err == iterator.Done {

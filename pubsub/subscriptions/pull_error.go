@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 )
 
 func pullMsgsError(w io.Writer, projectID, subID string) error {
@@ -35,7 +35,8 @@ func pullMsgsError(w io.Writer, projectID, subID string) error {
 
 	// If the service returns a non-retryable error, Receive returns that error after
 	// all of the outstanding calls to the handler have returned.
-	err = client.Subscription(subID).Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
+	sub := client.Subscriber(subID)
+	err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		fmt.Fprintf(w, "Got message: %q\n", string(msg.Data))
 		msg.Ack()
 	})

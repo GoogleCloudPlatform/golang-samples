@@ -33,7 +33,7 @@ func batchPredictBQ(w io.Writer, projectID, location string, inputURI string, ou
 	// location  := "us-central1"
 	// inputURI  := "bq://storage-samples.generative_ai.batch_requests_for_multimodal_input"
 	// outputURI := "bq://<cloud-project-name>.<dataset-name>.<table-name>"
-	modelName := "gemini-1.5-pro-002"
+	modelName := "gemini-2.0-flash-001"
 	jobName := "batch-predict-bq-test-001"
 
 	ctx := context.Background()
@@ -89,7 +89,7 @@ func batchPredictBQ(w io.Writer, projectID, location string, inputURI string, ou
 	fmt.Fprintf(w, "job id: %q\n", fullJobId)
 	fmt.Fprintf(w, "job state: %s\n", job.GetState())
 	// Example response:
-	// submitted batch predict job for model "publishers/google/models/gemini-1.5-pro-002"
+	// submitted batch predict job for model "publishers/google/models/gemini-2.0-flash-001"
 	// job id: "projects/.../locations/.../batchPredictionJobs/1234567890000000000"
 	// job state: JOB_STATE_PENDING
 

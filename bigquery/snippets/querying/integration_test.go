@@ -166,10 +166,10 @@ func TestQueries(t *testing.T) {
 				t.Errorf("queryClusteredTable: %v", err)
 			}
 		})
-		t.Run("queryStateless", func(t *testing.T) {
+		t.Run("queryJobOptional", func(t *testing.T) {
 			t.Parallel()
-			if err := queryShortMode(io.Discard, tc.ProjectID); err != nil {
-				t.Errorf("queryStateless: %v", err)
+			if err := queryJobOptional(io.Discard, tc.ProjectID); err != nil {
+				t.Errorf("queryJobOptional: %v", err)
 			}
 		})
 	})

@@ -14,7 +14,7 @@
 
 package sample
 
-// [START overview]
+// [START gae_datastore_overview]
 import (
 	"context"
 	"time"
@@ -45,4 +45,4 @@ func f(ctx context.Context) {
 	// ...
 }
 
-// [END overview]
+// [END gae_datastore_overview]

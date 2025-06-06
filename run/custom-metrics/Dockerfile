@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # [START cloudrun_mc_custom_metrics_dockerfile]
-FROM golang:1.21 as builder
+FROM golang:1.23 as builder
 WORKDIR /app
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o sample-app

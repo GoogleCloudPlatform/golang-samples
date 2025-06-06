@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START using_transactions]
+// [START gae_datastore_using_transactions]
 
 package counter
 
@@ -60,9 +60,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Current count: %d", count.Count)
 }
 
-// [END using_transactions]
+// [END gae_datastore_using_transactions]
 
-// [START uses_for_transactions_1]
+// [START gae_datastore_uses_for_transactions_1]
 func increment(ctx context.Context, key *datastore.Key) error {
 	return datastore.RunInTransaction(ctx, func(ctx context.Context) error {
 		count := new(Counter)
@@ -75,9 +75,9 @@ func increment(ctx context.Context, key *datastore.Key) error {
 	}, nil)
 }
 
-// [END uses_for_transactions_1]
+// [END gae_datastore_uses_for_transactions_1]
 
-// [START uses_for_transactions_2]
+// [START gae_datastore_uses_for_transactions_2]
 type Account struct {
 	Address string
 	Phone   string
@@ -98,11 +98,11 @@ func GetOrUpdate(ctx context.Context, id, addr, phone string) error {
 	}, nil)
 }
 
-// [END uses_for_transactions_2]
+// [END gae_datastore_uses_for_transactions_2]
 
 func example() {
 	var ctx context.Context
-	// [START transactional_task_enqueuing]
+	// [START gae_datastore_transactional_task_enqueuing]
 	datastore.RunInTransaction(ctx, func(ctx context.Context) error {
 		t := &taskqueue.Task{Path: "/path/to/worker"}
 		if _, err := taskqueue.Add(ctx, t, ""); err != nil {
@@ -111,5 +111,5 @@ func example() {
 		// ...
 		return nil
 	}, nil)
-	// [END transactional_task_enqueuing]
+	// [END gae_datastore_transactional_task_enqueuing]
 }

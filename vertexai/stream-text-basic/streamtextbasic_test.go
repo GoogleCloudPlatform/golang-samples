@@ -26,7 +26,7 @@ func Test_generateContent(t *testing.T) {
 
 	var buf bytes.Buffer
 
-	modelName := "gemini-1.5-flash-001"
+	modelName := "gemini-2.0-flash-001"
 
 	if err := generateContent(&buf, tc.ProjectID, modelName); err != nil {
 		t.Fatalf("unexpected error: %v", err)

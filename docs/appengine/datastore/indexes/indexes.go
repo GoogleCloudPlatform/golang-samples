@@ -21,15 +21,15 @@ import (
 	"google.golang.org/appengine/datastore"
 )
 
-// [START unindexed_properties]
+// [START gae_datastore_unindexed_properties]
 type Person struct {
 	Name string
 	Age  int `datastore:",noindex"`
 }
 
-// [END unindexed_properties]
+// [END gae_datastore_unindexed_properties]
 
-// [START exploding_index_example_3]
+// [START gae_datastore_exploding_index_example_3]
 type Widget struct {
 	X    []int
 	Y    []string
@@ -49,4 +49,4 @@ func f(ctx context.Context) {
 	}
 }
 
-// [END exploding_index_example_3]
+// [END gae_datastore_exploding_index_example_3]

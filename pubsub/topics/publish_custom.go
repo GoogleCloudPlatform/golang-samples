@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 )
 
 func publishCustomAttributes(w io.Writer, projectID, topicID string) error {
@@ -33,8 +33,9 @@ func publishCustomAttributes(w io.Writer, projectID, topicID string) error {
 	}
 	defer client.Close()
 
-	t := client.Topic(topicID)
-	result := t.Publish(ctx, &pubsub.Message{
+	// Make sure to reuse this publisher across publishes.
+	p := client.Publisher(topicID)
+	result := p.Publish(ctx, &pubsub.Message{
 		Data: []byte("Hello world!"),
 		Attributes: map[string]string{
 			"origin":   "golang",

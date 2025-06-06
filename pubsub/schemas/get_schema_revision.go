@@ -20,22 +20,27 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	pubsub "cloud.google.com/go/pubsub/v2/apiv1"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 )
 
 func getSchemaRevision(w io.Writer, projectID, schemaID string) error {
 	// projectID := "my-project-id"
-	// schemaID := "my-schema[@my-schema-revision]"
+	// schemaID := my-schema@c7cfa2a8 // with revision
 	ctx := context.Background()
-	client, err := pubsub.NewSchemaClient(ctx, projectID)
+	client, err := pubsub.NewSchemaClient(ctx)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewSchemaClient: %w", err)
 	}
 	defer client.Close()
 
-	s, err := client.Schema(ctx, schemaID, pubsub.SchemaViewFull)
+	req := &pubsubpb.GetSchemaRequest{
+		Name: fmt.Sprintf("projects/%s/schemas/%s", projectID, schemaID),
+		View: pubsubpb.SchemaView_FULL,
+	}
+	s, err := client.GetSchema(ctx, req)
 	if err != nil {
-		return fmt.Errorf("client.Schema revision: %w", err)
+		return fmt.Errorf("client.GetSchema revision: %w", err)
 	}
 	fmt.Fprintf(w, "Got schema revision: %#v\n", s)
 	return nil

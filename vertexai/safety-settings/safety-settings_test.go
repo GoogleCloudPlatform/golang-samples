@@ -26,7 +26,7 @@ func TestGenerateContent(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	location := "us-central1"
-	model := "gemini-1.5-flash-001"
+	model := "gemini-2.0-flash-001"
 
 	var buf bytes.Buffer
 	if err := generateContent(&buf, tc.ProjectID, location, model); err != nil {

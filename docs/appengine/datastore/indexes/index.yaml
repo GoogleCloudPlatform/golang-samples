@@ -12,17 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-// [START exploding_index_example_2]
+// [START gae_datastore_exploding_index_2_yaml_go]
 indexes:
 - kind: Widget
   properties:
   - name: X
   - name: Y
   - name: Date
-// [END exploding_index_example_2]
+// [END gae_datastore_exploding_index_2_yaml_go]
 
 
-// [START exploding_index_example_4]
+// [START gae_datastore_exploding_index_4_yaml_go]
 indexes:
 - kind: Widget
   properties:
@@ -32,5 +32,5 @@ indexes:
   properties:
   - name: Y
   - name: Date
-// [END exploding_index_example_4]
+// [END gae_datastore_exploding_index_4_yaml_go]
 

@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START hotapp]
-
 // Sample hotapp is a synthetic application that exhibits different types of
 // profiling hotspots: CPU, heap allocations, thread contention.
 package main
@@ -184,5 +182,3 @@ func main() {
 	// Simulate CPU load.
 	busyloop()
 }
-
-// [END hotapp]

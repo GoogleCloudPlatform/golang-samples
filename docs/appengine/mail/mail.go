@@ -14,7 +14,7 @@
 
 package sample
 
-// [START intro_1]
+// [START gae_mail_intro]
 import (
 	"bytes"
 	"fmt"
@@ -24,7 +24,14 @@ import (
 	"google.golang.org/appengine/v2/mail"
 )
 
-func confirm(w http.ResponseWriter, r *http.Request) {
+const confirmMessage = `
+Thank you for creating an account!
+Please confirm your email address by clicking on the link below:
+
+%s
+`
+
+func confirm(_ http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	addr := r.FormValue("email")
 	url := createConfirmationURL(r)
@@ -39,27 +46,20 @@ func confirm(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-const confirmMessage = `
-Thank you for creating an account!
-Please confirm your email address by clicking on the link below:
+// [END gae_mail_intro]
 
-%s
-`
-
-// [END intro_1]
-
-func createConfirmationURL(r *http.Request) string {
+func createConfirmationURL(_ *http.Request) string {
 	return ""
 }
 
-// [START intro_3]
+// [START gae_mail_init]
 func init() {
 	http.HandleFunc("/_ah/mail/", incomingMail)
 }
 
-// [END intro_3]
+// [END gae_mail_init]
 
-// [START intro_4]
+// [START gae_mail_incoming_mail]
 func incomingMail(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	defer r.Body.Close()
@@ -71,4 +71,4 @@ func incomingMail(w http.ResponseWriter, r *http.Request) {
 	log.Infof(ctx, "Received mail: %v", b)
 }
 
-// [END intro_4]
+// [END gae_mail_incoming_mail]

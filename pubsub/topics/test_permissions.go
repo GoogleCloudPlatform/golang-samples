@@ -20,7 +20,8 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/iam/apiv1/iampb"
+	"cloud.google.com/go/pubsub/v2"
 )
 
 func testPermissions(w io.Writer, projectID, topicID string) ([]string, error) {
@@ -32,18 +33,21 @@ func testPermissions(w io.Writer, projectID, topicID string) ([]string, error) {
 		return nil, fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 
-	topic := client.Topic(topicID)
-	perms, err := topic.IAM().TestPermissions(ctx, []string{
-		"pubsub.topics.publish",
-		"pubsub.topics.update",
-	})
-	if err != nil {
-		return nil, fmt.Errorf("TestPermissions: %w", err)
+	req := &iampb.TestIamPermissionsRequest{
+		Resource: fmt.Sprintf("projects/%s/topics/%s", projectID, topicID),
+		Permissions: []string{
+			"pubsub.topics.publish",
+			"pubsub.topics.update",
+		},
 	}
-	for _, perm := range perms {
+	resp, err := client.TopicAdminClient.TestIamPermissions(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("error calling TestIamPermissions: %w", err)
+	}
+	for _, perm := range resp.Permissions {
 		fmt.Fprintf(w, "Allowed: %v\n", perm)
 	}
-	return perms, nil
+	return resp.Permissions, nil
 }
 
 // [END pubsub_test_topic_permissions]

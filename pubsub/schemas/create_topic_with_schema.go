@@ -20,10 +20,11 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 )
 
-func createTopicWithSchema(w io.Writer, projectID, topicID, schemaID string, encoding pubsub.SchemaEncoding) error {
+func createTopicWithSchema(w io.Writer, projectID, topicID, schemaID string, encoding pubsubpb.Encoding) error {
 	// projectID := "my-project-id"
 	// topicID := "my-topic"
 	// schemaID := "my-schema-id"
@@ -34,13 +35,14 @@ func createTopicWithSchema(w io.Writer, projectID, topicID, schemaID string, enc
 		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 
-	tc := &pubsub.TopicConfig{
-		SchemaSettings: &pubsub.SchemaSettings{
+	topic := &pubsubpb.Topic{
+		Name: fmt.Sprintf("projects/%s/topics/%s", projectID, topicID),
+		SchemaSettings: &pubsubpb.SchemaSettings{
 			Schema:   fmt.Sprintf("projects/%s/schemas/%s", projectID, schemaID),
 			Encoding: encoding,
 		},
 	}
-	t, err := client.CreateTopicWithConfig(ctx, topicID, tc)
+	t, err := client.TopicAdminClient.CreateTopic(ctx, topic)
 	if err != nil {
 		return fmt.Errorf("CreateTopicWithConfig: %w", err)
 	}

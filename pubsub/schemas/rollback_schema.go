@@ -20,7 +20,8 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	pubsub "cloud.google.com/go/pubsub/v2/apiv1"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 )
 
 // rollbackSchema creates a new schema revision that is a copy of the provided revisionID.
@@ -29,17 +30,21 @@ func rollbackSchema(w io.Writer, projectID, schemaID, revisionID string) error {
 	// schemaID := "my-schema"
 	// revisionID := "a1b2c3d4"
 	ctx := context.Background()
-	client, err := pubsub.NewSchemaClient(ctx, projectID)
+	client, err := pubsub.NewSchemaClient(ctx)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewSchemaClient: %w", err)
 	}
 	defer client.Close()
 
-	s, err := client.RollbackSchema(ctx, schemaID, revisionID)
+	req := &pubsubpb.RollbackSchemaRequest{
+		Name:       fmt.Sprintf("projects/%s/schemas/%s", projectID, schemaID),
+		RevisionId: revisionID,
+	}
+	s, err := client.RollbackSchema(ctx, req)
 	if err != nil {
 		return fmt.Errorf("RollbackSchema: %w", err)
 	}
-	fmt.Fprintf(w, "Rolled back a schema: %#v\n", s)
+	fmt.Fprintf(w, "Rolled back schema: %#v\n", s)
 	return nil
 }
 

@@ -18,34 +18,62 @@ package snippets
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"cloud.google.com/go/translate"
 	"golang.org/x/text/language"
 )
 
-func translateText(targetLanguage, text string) (string, error) {
-	// text := "The Go Gopher is cute"
+// translateText translates the given text into the specified targetLanguage. sourceLanguage
+// is optional. If empty, the API will attempt to detect the source language automatically.
+// targetLanguage and sourceLanguage should follow ISO 639 language code of the input text
+// (e.g., 'fr' for French)
+//
+// Find a list of supported languages and codes here:
+// https://cloud.google.com/translate/docs/languages#nmt
+func translateText(w io.Writer, targetLanguage, sourceLanguage, text string) error {
 	ctx := context.Background()
 
-	lang, err := language.Parse(targetLanguage)
-	if err != nil {
-		return "", fmt.Errorf("language.Parse: %w", err)
-	}
-
+	// Create new Translate client.
 	client, err := translate.NewClient(ctx)
 	if err != nil {
-		return "", err
+		return fmt.Errorf("translate.NewClient error: %w", err)
 	}
 	defer client.Close()
 
-	resp, err := client.Translate(ctx, []string{text}, lang, nil)
+	// Get required tag by parsing the target language.
+	targetLang, err := language.Parse(targetLanguage)
 	if err != nil {
-		return "", fmt.Errorf("Translate: %w", err)
+		return fmt.Errorf("language.Parse: %w", err)
+	}
+
+	options := &translate.Options{}
+
+	if sourceLanguage != "" {
+		sourceLang, err := language.Parse(sourceLanguage)
+		if err != nil {
+			return fmt.Errorf("language.Parse: %w", err)
+		}
+		options = &translate.Options{
+			Source: sourceLang,
+		}
+	}
+
+	// Find more information about translate function here:
+	// https://pkg.go.dev/cloud.google.com/go/translate#Client.Translate
+	resp, err := client.Translate(ctx, []string{text}, targetLang, options)
+	if err != nil {
+		return fmt.Errorf("client.Translate error: %w", err)
 	}
 	if len(resp) == 0 {
-		return "", fmt.Errorf("Translate returned empty response to text: %s", text)
+		return fmt.Errorf("client.Translate returned empty response to text: %s", text)
 	}
-	return resp[0].Text, nil
+
+	// Print results to buffer.
+	fmt.Fprintf(w, "Input Text: %s\n", resp[0].Text)
+	fmt.Fprintf(w, "Translated Test: %s\n", text)
+
+	return nil
 }
 
 // [END translate_translate_text]

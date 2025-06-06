@@ -14,7 +14,7 @@
 
 package sample
 
-// [START intro_1]
+// [START gae_users_auth]
 import (
 	"fmt"
 	"net/http"
@@ -36,4 +36,4 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, `Welcome, %s! (<a href="%s">sign out</a>)`, u, url)
 }
 
-// [END intro_1]
+// [END gae_users_auth]

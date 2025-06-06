@@ -33,7 +33,7 @@ func batchPredictGCS(w io.Writer, projectID, location string, inputURIs []string
 	// location := "us-central1"
 	// inputURIs := []string{"gs://cloud-samples-data/batch/prompt_for_batch_gemini_predict.jsonl"}
 	// outputURI := "gs://<cloud-bucket-name>/<prefix-name>"
-	modelName := "gemini-1.5-pro-002"
+	modelName := "gemini-2.0-flash-001"
 	jobName := "batch-predict-gcs-test-001"
 
 	ctx := context.Background()
@@ -88,7 +88,7 @@ func batchPredictGCS(w io.Writer, projectID, location string, inputURIs []string
 	fmt.Fprintf(w, "job id: %q\n", fullJobId)
 	fmt.Fprintf(w, "job state: %s\n", job.GetState())
 	// Example response:
-	// submitted batch predict job for model "publishers/google/models/gemini-1.5-pro-002"
+	// submitted batch predict job for model "publishers/google/models/gemini-2.0-flash-001"
 	// job id: "projects/.../locations/.../batchPredictionJobs/1234567890000000000"
 	// job state: JOB_STATE_PENDING
 

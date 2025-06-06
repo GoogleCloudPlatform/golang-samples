@@ -1,9 +1,8 @@
 module github.com/GoogleCloudPlatform/golang-samples/docs
 
-go 1.22.0
+go 1.23.0
 
 require (
-	cloud.google.com/go/storage v1.50.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
 	github.com/fluent/fluent-logger-golang v1.9.0
 	github.com/go-sql-driver/mysql v1.8.1
@@ -13,7 +12,6 @@ require (
 	google.golang.org/api v0.217.0
 	google.golang.org/appengine v1.6.8
 	google.golang.org/appengine/v2 v2.0.6
-	gopkg.in/sendgrid/sendgrid-go.v2 v2.0.0
 )
 
 require (
@@ -24,6 +22,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
 	cloud.google.com/go/iam v1.3.1 // indirect
 	cloud.google.com/go/monitoring v1.23.0 // indirect
+	cloud.google.com/go/storage v1.50.0 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.25.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.49.0 // indirect
@@ -48,7 +47,6 @@ require (
 	github.com/philhofer/fwd v1.1.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
-	github.com/sendgrid/smtpapi-go v0.6.7 // indirect
 	github.com/tinylib/msgp v1.1.6 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/contrib/detectors/gcp v1.34.0 // indirect

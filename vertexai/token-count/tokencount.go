@@ -29,7 +29,7 @@ import (
 // countTokens returns the number of tokens for this prompt.
 func countTokens(w io.Writer, projectID, location, modelName string) error {
 	// location := "us-central1"
-	// modelName := "gemini-1.5-flash-001"
+	// modelName := "gemini-2.0-flash-001"
 
 	ctx := context.Background()
 	prompt := genai.Text("Why is the sky blue?")
