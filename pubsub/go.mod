@@ -5,8 +5,8 @@ go 1.23.0
 require (
 	cloud.google.com/go/bigquery v1.66.2
 	cloud.google.com/go/iam v1.5.2
-	cloud.google.com/go/pubsub v1.47.0
-	cloud.google.com/go/pubsub/v2 v2.0.0-alpha
+	cloud.google.com/go/pubsub v1.49.1-0.20250606190241-032846f4b2ed
+	cloud.google.com/go/pubsub/v2 v2.0.0-alpha.2
 	cloud.google.com/go/storage v1.53.0
 	cloud.google.com/go/trace v1.11.3
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240820230436-761d0ae7aeff
@@ -55,7 +55,7 @@ require (
 	github.com/spiffe/go-spiffe/v2 v2.5.0 // indirect
 	github.com/zeebo/errs v1.4.0 // indirect
 	github.com/zeebo/xxh3 v1.0.2 // indirect
-	go.einride.tech/aip v0.68.1 // indirect
+	go.einride.tech/aip v0.70.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/contrib/detectors/gcp v1.35.0 // indirect
@@ -76,6 +76,6 @@ require (
 	golang.org/x/tools v0.29.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/genproto v0.0.0-20250303144028-a0af3efb3deb // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20250425173222-7b384671a197 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20250505200425-f936aa4a68b2 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250505200425-f936aa4a68b2 // indirect
 )
