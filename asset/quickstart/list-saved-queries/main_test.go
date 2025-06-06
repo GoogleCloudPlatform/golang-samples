@@ -88,7 +88,6 @@ func TestMain(m *testing.M) {
 }
 
 func TestListSavedQueries(t *testing.T) {
-	t.Skip("Skipped while investigating https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	buf := new(bytes.Buffer)
 	list_saved_queries_err := listSavedQueries(buf, projectID)
 
