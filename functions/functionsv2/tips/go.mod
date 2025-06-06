@@ -3,8 +3,8 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/tips
 go 1.23.0
 
 require (
-	github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
-	github.com/cloudevents/sdk-go/v2 v2.15.2
+	github.com/GoogleCloudPlatform/functions-framework-go v1.9.2
+	github.com/cloudevents/sdk-go/v2 v2.16.0
 )
 
 require (
