@@ -1205,3 +1205,25 @@ func TestUpdateTemplateLabels(t *testing.T) {
 		t.Errorf("updateModelArmorTemplateLabels: expected %q to contain %q", got, want)
 	}
 }
+
+// TestUpdateTemplateMetadata verifies that the updateModelArmorTemplateMetadata function
+// successfully updates the filter configuration of an existing template.
+func TestUpdateTemplateMetadata(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	locationID := testLocation(t)
+	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
+	var buf bytes.Buffer
+	if _, err := testModelArmorTemplate(t, templateID); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupTemplate(t, templateName)
+
+	if err := updateModelArmorTemplateMetadata(&buf, tc.ProjectID, locationID, templateID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Updated Model Armor Template Metadata: "; !strings.Contains(got, want) {
+		t.Errorf("updateModelArmorTemplateMetadata: expected %q to contain %q", got, want)
+	}
+}
