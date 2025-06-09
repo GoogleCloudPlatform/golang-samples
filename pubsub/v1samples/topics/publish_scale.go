@@ -50,14 +50,12 @@ func publishThatScales(w io.Writer, projectID, topicID string, n int) error {
 			defer wg.Done()
 			// The Get method blocks until a server-generated ID or
 			// an error is returned for the published message.
-			id, err := res.Get(ctx)
+			_, err := res.Get(ctx)
 			if err != nil {
 				// Error handling code can be added here.
-				fmt.Fprintf(w, "Failed to publish: %v", err)
 				atomic.AddUint64(&totalErrors, 1)
 				return
 			}
-			fmt.Fprintf(w, "Published message %d; msg ID: %v\n", i, id)
 		}(i, result)
 	}
 
@@ -66,6 +64,7 @@ func publishThatScales(w io.Writer, projectID, topicID string, n int) error {
 	if totalErrors > 0 {
 		return fmt.Errorf("%d of %d messages did not publish successfully", totalErrors, n)
 	}
+	fmt.Fprintf(w, "finished publishing %d messages", n)
 	return nil
 }
 

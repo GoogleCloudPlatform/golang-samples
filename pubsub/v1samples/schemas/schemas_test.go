@@ -251,8 +251,9 @@ func TestSchemas_Admin(t *testing.T) {
 			if err != nil {
 				r.Errorf("failed to list schemas: %v", err)
 			}
-			if len(schemas) != 2 {
-				r.Errorf("expected 2 schemas, got %d", len(schemas))
+			// Account for more schemas being created because of retries.
+			if len(schemas) < 2 {
+				r.Errorf("expected at least 2 schemas, got %d", len(schemas))
 			}
 		})
 	})

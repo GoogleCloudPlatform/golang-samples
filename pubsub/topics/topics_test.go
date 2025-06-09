@@ -102,6 +102,7 @@ func setup(t *testing.T) *pubsub.Client {
 }
 
 func TestCreate(t *testing.T) {
+	setup(t)
 	tc := testutil.SystemTest(t)
 	if err := create(io.Discard, tc.ProjectID, topicID); err != nil {
 		t.Fatalf("failed to create a topic: %v", err)
