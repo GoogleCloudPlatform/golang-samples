@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 	"google.golang.org/api/option"
 )
 
@@ -39,11 +39,12 @@ func resumePublishWithOrderingKey(w io.Writer, projectID, topicID string) {
 	}
 	defer client.Close()
 
-	t := client.Topic(topicID)
-	t.EnableMessageOrdering = true
+	// Make sure to reuse this publisher across publishes.
+	p := client.Publisher(topicID)
+	p.EnableMessageOrdering = true
 	key := "some-ordering-key"
 
-	res := t.Publish(ctx, &pubsub.Message{
+	res := p.Publish(ctx, &pubsub.Message{
 		Data:        []byte("some-message"),
 		OrderingKey: key,
 	})
@@ -55,7 +56,7 @@ func resumePublishWithOrderingKey(w io.Writer, projectID, topicID string) {
 		// Resume publish on an ordering key that has had unrecoverable errors.
 		// After such an error publishes with this ordering key will fail
 		// until this method is called.
-		t.ResumePublish(key)
+		p.ResumePublish(key)
 	}
 
 	fmt.Fprint(w, "Published a message with ordering key successfully\n")

@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 )
 
 func publishWithCompression(w io.Writer, projectID, topicID string) error {
@@ -34,12 +34,14 @@ func publishWithCompression(w io.Writer, projectID, topicID string) error {
 	}
 	defer client.Close()
 
-	t := client.Topic(topicID)
+	// Make sure to reuse this publisher across publishes.
+	p := client.Publisher(topicID)
+
 	// Enable compression and configure the compression threshold to 10 bytes (default to 240 B).
 	// Publish requests of sizes > 10 B (excluding the request headers) will get compressed.
-	t.PublishSettings.EnableCompression = true
-	t.PublishSettings.CompressionBytesThreshold = 10
-	result := t.Publish(ctx, &pubsub.Message{
+	p.PublishSettings.EnableCompression = true
+	p.PublishSettings.CompressionBytesThreshold = 10
+	result := p.Publish(ctx, &pubsub.Message{
 		Data: []byte("This is a test message"),
 	})
 	// Block until the result is returned and a server-generated
