@@ -22,7 +22,7 @@ import (
 	"strconv"
 	"time"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 )
 
 func publishWithSettings(w io.Writer, projectID, topicID string) error {
@@ -34,15 +34,17 @@ func publishWithSettings(w io.Writer, projectID, topicID string) error {
 		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
+
+	// Make sure to reuse this publisher across publishes.
+	p := client.Publisher(topicID)
+	p.PublishSettings.ByteThreshold = 5000
+	p.PublishSettings.CountThreshold = 10
+	p.PublishSettings.DelayThreshold = 100 * time.Millisecond
+
 	var results []*pubsub.PublishResult
 	var resultErrors []error
-	t := client.Topic(topicID)
-	t.PublishSettings.ByteThreshold = 5000
-	t.PublishSettings.CountThreshold = 10
-	t.PublishSettings.DelayThreshold = 100 * time.Millisecond
-
 	for i := 0; i < 10; i++ {
-		result := t.Publish(ctx, &pubsub.Message{
+		result := p.Publish(ctx, &pubsub.Message{
 			Data: []byte("Message " + strconv.Itoa(i)),
 		})
 		results = append(results, result)

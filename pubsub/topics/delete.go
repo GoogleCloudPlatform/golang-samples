@@ -20,7 +20,8 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 )
 
 func delete(w io.Writer, projectID, topicID string) error {
@@ -33,11 +34,14 @@ func delete(w io.Writer, projectID, topicID string) error {
 	}
 	defer client.Close()
 
-	t := client.Topic(topicID)
-	if err := t.Delete(ctx); err != nil {
-		return fmt.Errorf("Delete: %w", err)
+	req := &pubsubpb.DeleteTopicRequest{
+		Topic: fmt.Sprintf("projects/%s/topics/%s", projectID, topicID),
 	}
-	fmt.Fprintf(w, "Deleted topic: %v\n", t)
+	err = client.TopicAdminClient.DeleteTopic(ctx, req)
+	if err != nil {
+		return fmt.Errorf("failed to delete topic: %w", err)
+	}
+	fmt.Fprintln(w, "Deleted topic")
 	return nil
 }
 

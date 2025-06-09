@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 	"go.opentelemetry.io/otel"
 	"google.golang.org/api/option"
 
@@ -73,8 +73,9 @@ func publishOpenTelemetryTracing(w io.Writer, projectID, topicID string, samplin
 	}
 	defer client.Close()
 
-	t := client.Topic(topicID)
-	result := t.Publish(ctx, &pubsub.Message{
+	// Make sure to reuse this publisher across publishes.
+	p := client.Publisher(topicID)
+	result := p.Publish(ctx, &pubsub.Message{
 		Data: []byte("Publishing message with tracing"),
 	})
 	if _, err := result.Get(ctx); err != nil {

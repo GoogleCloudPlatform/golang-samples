@@ -22,7 +22,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 	"google.golang.org/api/option"
 )
 
@@ -43,8 +43,10 @@ func publishWithOrderingKey(w io.Writer, projectID, topicID string) {
 
 	var wg sync.WaitGroup
 	var totalErrors uint64
-	t := client.Topic(topicID)
-	t.EnableMessageOrdering = true
+
+	// Make sure to reuse this publisher across publishes.
+	p := client.Publisher(topicID)
+	p.EnableMessageOrdering = true
 
 	messages := []struct {
 		message     string
@@ -69,7 +71,7 @@ func publishWithOrderingKey(w io.Writer, projectID, topicID string) {
 	}
 
 	for _, m := range messages {
-		res := t.Publish(ctx, &pubsub.Message{
+		res := p.Publish(ctx, &pubsub.Message{
 			Data:        []byte(m.message),
 			OrderingKey: m.orderingKey,
 		})
