@@ -332,7 +332,7 @@ func TestSample(t *testing.T) {
 	out = runSample(t, commitStats, dbName, "failed to request commit stats")
 	assertContains(t, out, "4 mutations in transaction")
 
-	out = runSample(t, maxCommitDelay, dbName, "failed to set max commit delay")
+	out = runSample(t, setMaxCommitDelay, dbName, "failed to set max commit delay")
 	assertContains(t, out, "4 mutations in transaction")
 
 	out = runSample(t, queryWithParameter, dbName, "failed to query with parameter")
