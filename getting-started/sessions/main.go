@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,14 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START getting_started_sessions_setup]
-
-// Command sessions starts an HTTP server that uses session state.
 package main
 
+// [START getting_started_sessions_setup]
 import (
 	"context"
-	"fmt"
 	"html/template"
 	"log"
 	"math/rand"
@@ -27,14 +24,20 @@ import (
 	"os"
 
 	"cloud.google.com/go/firestore"
-	firestoregorilla "github.com/GoogleCloudPlatform/firestore-gorilla-sessions"
-	"github.com/gorilla/sessions"
 )
 
 // app stores a sessions.Store. Create a new app with newApp.
 type app struct {
-	store sessions.Store
-	tmpl  *template.Template
+	tmpl         *template.Template
+	collectionID string
+	projectID    string
+}
+
+// session stores the client's session information.
+// This type is also used for executing the template.
+type session struct {
+	Greetings string `json:"greeting"`
+	Views     int    `json:"views"`
 }
 
 // greetings are the random greetings that will be assigned to sessions.
@@ -49,18 +52,24 @@ var greetings = []string{
 // [END getting_started_sessions_setup]
 
 // [START getting_started_sessions_main]
-
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
+
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	if projectID == "" {
 		log.Fatal("GOOGLE_CLOUD_PROJECT must be set")
 	}
 
-	a, err := newApp(projectID)
+	// collectionID is a non-empty identifier for this app, it is used as the Firestore
+	// collection name that stores the sessions.
+	//
+	// Set it to something more descriptive for your app.
+	collectionID := "hello-views"
+
+	a, err := newApp(projectID, collectionID)
 	if err != nil {
 		log.Fatalf("newApp: %v", err)
 	}
@@ -74,25 +83,16 @@ func main() {
 }
 
 // newApp creates a new app.
-func newApp(projectID string) (*app, error) {
-	ctx := context.Background()
-	client, err := firestore.NewClient(ctx, projectID)
+func newApp(projectID, collectionID string) (app, error) {
+	tmpl, err := template.New("Index").Parse(`<body>{{.Views}} {{if eq .Views 1}}view{{else}}views{{end}} for "{{.Greetings}}"</body>`)
 	if err != nil {
-		log.Fatalf("firestore.NewClient: %v", err)
-	}
-	store, err := firestoregorilla.New(ctx, client)
-	if err != nil {
-		log.Fatalf("firestoregorilla.New: %v", err)
+		log.Fatalf("template.New: %v", err)
 	}
 
-	tmpl, err := template.New("Index").Parse(`<body>{{.views}} {{if eq .views 1.0}}view{{else}}views{{end}} for "{{.greeting}}"</body>`)
-	if err != nil {
-		return nil, fmt.Errorf("template.New: %w", err)
-	}
-
-	return &app{
-		store: store,
-		tmpl:  tmpl,
+	return app{
+		tmpl:         tmpl,
+		collectionID: collectionID,
+		projectID:    projectID,
 	}, nil
 }
 
@@ -103,33 +103,86 @@ func newApp(projectID string) (*app, error) {
 // index uses sessions to assign users a random greeting and keep track of
 // views.
 func (a *app) index(w http.ResponseWriter, r *http.Request) {
+	// Allows requests only for the root path ("/") to prevent duplicate calls.
 	if r.RequestURI != "/" {
+		http.NotFound(w, r)
 		return
 	}
 
-	// name is a non-empty identifier for this app's sessions. Set it to
-	// something descriptive for your app. It is used as the Firestore
-	// collection name that stores the sessions.
-	name := "hello-views"
-	session, err := a.store.Get(r, name)
+	var session session
+	var doc *firestore.DocumentRef
+
+	isNewSession := false
+
+	ctx := context.Background()
+
+	client, err := firestore.NewClient(ctx, a.projectID)
 	if err != nil {
-		// Could not get the session. Log an error and continue, saving a new
-		// session.
-		log.Printf("store.Get: %v", err)
+		log.Fatalf("firestore.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	// cookieName is a non-empty identifier for this app, it is used as the key name
+	// that contains the session's id value.
+	//
+	// Set it to something more descriptive for your app.
+	cookieName := "session_id"
+
+	// If err is different to nil, it means the cookie has not been set, so it will be created.
+	cookie, err := r.Cookie(cookieName)
+	if err != nil {
+		// isNewSession flag is set to true
+		isNewSession = true
 	}
 
-	if session.IsNew {
-		// firestoregorilla uses JSON, which unmarshals numbers as float64s.
-		session.Values["views"] = float64(0)
-		session.Values["greeting"] = greetings[rand.Intn(len(greetings))]
-	}
-	session.Values["views"] = session.Values["views"].(float64) + 1
-	if err := session.Save(r, w); err != nil {
-		log.Printf("Save: %v", err)
-		// Don't return early so the user still gets a response.
+	// If isNewSession flag is true, the session will be created
+	if isNewSession {
+		// Get unique id for new document
+		doc = client.Collection(a.collectionID).NewDoc()
+
+		session.Greetings = greetings[rand.Intn(len(greetings))]
+		session.Views = 1
+
+		// Cookie is set
+		cookie = &http.Cookie{
+			Name:  cookieName,
+			Value: doc.ID,
+		}
+		http.SetCookie(w, cookie)
+	} else {
+		// The session exists
+
+		// Retrieve document from collection by ID
+		docSnapshot, err := client.Collection(a.collectionID).Doc(cookie.Value).Get(ctx)
+		if err != nil {
+			log.Printf("doc.Get error: %v", err)
+			http.Error(w, "Error getting session", http.StatusInternalServerError)
+			return
+		}
+
+		// Unmarshal documents's content to local type
+		err = docSnapshot.DataTo(&session)
+		if err != nil {
+			log.Printf("doc.DataTo error: %v", err)
+			http.Error(w, "Error parsing session", http.StatusInternalServerError)
+			return
+		}
+
+		doc = docSnapshot.Ref
+
+		// Add 1 to current views value
+		session.Views++
 	}
 
-	if err := a.tmpl.Execute(w, session.Values); err != nil {
+	// The document is created/updated
+	_, err = doc.Set(ctx, session)
+	if err != nil {
+		log.Printf("doc.Set error: %v", err)
+		http.Error(w, "Error creating session", http.StatusInternalServerError)
+		return
+	}
+
+	if err := a.tmpl.Execute(w, session); err != nil {
 		log.Printf("Execute: %v", err)
 	}
 }
