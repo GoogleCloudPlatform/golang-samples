@@ -45,7 +45,8 @@ func testLocation(t *testing.T) string {
 
 	v := os.Getenv("GOLANG_SAMPLES_LOCATION")
 	if v == "" {
-		t.Skip("testLocation: missing GOLANG_SAMPLES_LOCATION")
+		// Default Region if the env GOLANG_SAMPLES_LOCATION is missing
+		v = "us-central1"
 	}
 
 	return v
