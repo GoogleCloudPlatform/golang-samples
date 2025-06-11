@@ -63,7 +63,6 @@ func testFolderID(t *testing.T) string {
 	return folderID
 }
 
-
 // testClient initializes and returns a new Model Armor API client and context
 // targeting the endpoint based on the specified location.
 func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
@@ -1226,10 +1225,11 @@ func TestUpdateTemplateMetadata(t *testing.T) {
 	locationID := testLocation(t)
 	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
 	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
-	var b bytes.Buffer
-	if err := createModelArmorTemplateWithBasicSDP(&b, tc.ProjectID, locationID, templateID); err != nil {
+	var buf bytes.Buffer
+	if _, err := testModelArmorTemplate(t, templateID); err != nil {
 		t.Fatal(err)
 	}
+	defer testCleanupTemplate(t, templateName)
 
 	if err := updateModelArmorTemplateMetadata(&buf, tc.ProjectID, locationID, templateID); err != nil {
 		t.Fatal(err)
@@ -1239,4 +1239,3 @@ func TestUpdateTemplateMetadata(t *testing.T) {
 		t.Errorf("updateModelArmorTemplateMetadata: expected %q to contain %q", got, want)
 	}
 }
-
