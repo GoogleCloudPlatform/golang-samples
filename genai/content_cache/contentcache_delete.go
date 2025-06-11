@@ -15,7 +15,7 @@
 // Package content_cache shows examples of using content caching with the GenAI SDK.
 package content_cache
 
-// [START googlegenaisdk_contentcache_update]
+// [START googlegenaisdk_contentcache_delete]
 import (
 	"context"
 	"fmt"
@@ -29,7 +29,7 @@ func deleteContentCache(w io.Writer, cacheName string) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
-		HTTPOptions: genai.HTTPOptions{APIVersion: "v1beta1"},
+		HTTPOptions: genai.HTTPOptions{APIVersion: "v1"},
 	})
 	if err != nil {
 		return fmt.Errorf("failed to create genai client: %w", err)
@@ -48,4 +48,4 @@ func deleteContentCache(w io.Writer, cacheName string) error {
 	return nil
 }
 
-// [END googlegenaisdk_contentcache_update]
+// [END googlegenaisdk_contentcache_delete]
