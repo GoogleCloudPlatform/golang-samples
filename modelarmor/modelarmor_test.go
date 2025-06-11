@@ -51,17 +51,7 @@ func testLocation(t *testing.T) string {
 	return v
 }
 
-// testOrganizationID returns the organization ID.
-func testOrganizationID(t *testing.T) string {
-	orgID := "951890214235"
-	return orgID
-}
-
-// testFolderID returns the folder ID.
-func testFolderID(t *testing.T) string {
-	folderID := "695279264361"
-	return folderID
-}
+// TODO : Floor Setting Test Will be added later
 
 // testClient initializes and returns a new Model Armor API client and context
 // targeting the endpoint based on the specified location.
