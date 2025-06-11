@@ -45,7 +45,8 @@ func testLocation(t *testing.T) string {
 
 	v := os.Getenv("GOLANG_SAMPLES_LOCATION")
 	if v == "" {
-		t.Skip("testLocation: missing GOLANG_SAMPLES_LOCATION")
+		// Default Region if the env GOLANG_SAMPLES_LOCATION is missing
+		v = "us-central1"
 	}
 
 	return v
@@ -1227,5 +1228,28 @@ func TestUpdateTemplateMetadata(t *testing.T) {
 
 	if got, want := buf.String(), "Updated Model Armor Template Metadata: "; !strings.Contains(got, want) {
 		t.Errorf("updateModelArmorTemplateMetadata: expected %q to contain %q", got, want)
+	}
+}
+
+// TestUpdateTemplateWithMaskConfiguration verifies that a Model Armor template
+// can be updated with a mask configuration. It creates a test template, performs
+// the update, and checks the output for confirmation.
+func TestUpdateTemplateWithMaskConfiguration(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	locationID := testLocation(t)
+	templateID := fmt.Sprintf("test-model-armor-%s", uuid.New().String())
+	templateName := fmt.Sprintf("projects/%s/locations/%s/templates/%s", tc.ProjectID, locationID, templateID)
+	var buf bytes.Buffer
+	if _, err := testModelArmorTemplate(t, templateID); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupTemplate(t, templateName)
+
+	if err := updateModelArmorTemplateWithMaskConfiguration(&buf, tc.ProjectID, locationID, templateID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Updated Model Armor Template: "; !strings.Contains(got, want) {
+		t.Errorf("updateModelArmorTemplateWithMaskConfiguration: expected %q to contain %q", got, want)
 	}
 }
