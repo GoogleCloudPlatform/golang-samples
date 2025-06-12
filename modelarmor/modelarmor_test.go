@@ -52,6 +52,8 @@ func testLocation(t *testing.T) string {
 	return v
 }
 
+// TODO : Floor Setting Test Will be added later
+
 // testClient initializes and returns a new Model Armor API client and context
 // targeting the endpoint based on the specified location.
 func testClient(t *testing.T) (*modelarmor.Client, context.Context) {
