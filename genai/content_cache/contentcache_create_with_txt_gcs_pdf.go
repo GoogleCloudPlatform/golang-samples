@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//    https://www.apache.org/licenses/LICENSE-2.0
+//     https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,7 +30,9 @@ func createContentCache(w io.Writer) (string, error) {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
-		HTTPOptions: genai.HTTPOptions{APIVersion: "v1"},
+		HTTPOptions: genai.HTTPOptions{
+			APIVersion: "v1",
+		},
 	})
 	if err != nil {
 		return "", fmt.Errorf("failed to create genai client: %w", err)
@@ -44,28 +46,34 @@ func createContentCache(w io.Writer) (string, error) {
 
 	cacheContents := []*genai.Content{
 		{
-			Parts: []*genai.Part{
-				{FileData: &genai.FileData{
-					FileURI:  "gs://cloud-samples-data/generative-ai/pdf/2312.11805v3.pdf",
-					MIMEType: "application/pdf",
-				}},
-				{FileData: &genai.FileData{
-					FileURI:  "gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf",
-					MIMEType: "application/pdf",
-				}},
-			},
 			Role: "user",
+			Parts: []*genai.Part{
+				{
+					FileData: &genai.FileData{
+						FileURI:  "gs://cloud-samples-data/generative-ai/pdf/2312.11805v3.pdf",
+						MIMEType: "application/pdf",
+					},
+				},
+				{
+					FileData: &genai.FileData{
+						FileURI:  "gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf",
+						MIMEType: "application/pdf",
+					},
+				},
+			},
 		},
 	}
 	config := &genai.CreateCachedContentConfig{
-		Contents: cacheContents,
-		SystemInstruction: &genai.Content{
-			Parts: []*genai.Part{
-				{Text: systemInstruction},
-			},
-		},
+		Contents:    cacheContents,
 		DisplayName: "example-cache",
 		TTL:         "86400s",
+		SystemInstruction: &genai.Content{
+			Parts: []*genai.Part{
+				{
+					Text: systemInstruction,
+				},
+			},
+		},
 	}
 
 	res, err := client.Caches.Create(ctx, modelName, config)
