@@ -14,8 +14,8 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/googleapis/gax-go/v2 v2.14.1
 	github.com/linkedin/goavro/v2 v2.13.0
-	go.opentelemetry.io/otel v1.35.0
-	go.opentelemetry.io/otel/sdk v1.35.0
+	go.opentelemetry.io/otel v1.36.0
+	go.opentelemetry.io/otel/sdk v1.36.0
 	google.golang.org/api v0.229.0
 	google.golang.org/grpc v1.71.1
 	google.golang.org/protobuf v1.36.6
