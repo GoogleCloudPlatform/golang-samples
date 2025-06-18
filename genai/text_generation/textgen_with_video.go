@@ -45,7 +45,8 @@ Create a chapter breakdown with timestamps for key sections or topics discussed.
 				FileURI:  "gs://cloud-samples-data/generative-ai/video/pixel8.mp4",
 				MIMEType: "video/mp4",
 			}},
-		}},
+		},
+			Role: "user"},
 	}
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)
@@ -53,10 +54,8 @@ Create a chapter breakdown with timestamps for key sections or topics discussed.
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
 
-	respText, err := resp.Text()
-	if err != nil {
-		return fmt.Errorf("failed to convert model response to text: %w", err)
-	}
+	respText := resp.Text()
+
 	fmt.Fprintln(w, respText)
 
 	// Example response:

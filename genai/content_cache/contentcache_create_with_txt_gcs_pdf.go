@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"time"
 
 	genai "google.golang.org/genai"
 )
@@ -65,7 +66,7 @@ func createContentCache(w io.Writer) (string, error) {
 			},
 		},
 		DisplayName: "example-cache",
-		TTL:         "86400s",
+		TTL:         time.Duration(time.Duration.Seconds(86400)),
 	}
 
 	res, err := client.Caches.Create(ctx, modelName, config)
