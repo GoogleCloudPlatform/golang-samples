@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/appengine_flexible/pubsub
 
 go 1.23.0
 
-require cloud.google.com/go/pubsub v1.45.3
+require cloud.google.com/go/pubsub v1.49.0
 
 require (
 	cloud.google.com/go v0.118.0 // indirect
