@@ -36,8 +36,7 @@ func createPushNoWrapperSubscription(w io.Writer, projectID, topic, subscription
 		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
-
-	sub, err := client.SubscriptionAdminClient.CreateSubscription(ctx, &pubsubpb.Subscription{
+	pbSubscription := &pubsubpb.Subscription{
 		Name:               subscription,
 		Topic:              topic,
 		AckDeadlineSeconds: 10,
@@ -51,7 +50,8 @@ func createPushNoWrapperSubscription(w io.Writer, projectID, topic, subscription
 				},
 			},
 		},
-	})
+	}
+	sub, err := client.SubscriptionAdminClient.CreateSubscription(ctx, pbSubscription)
 	if err != nil {
 		return fmt.Errorf("CreateSubscription: %w", err)
 	}
