@@ -14,7 +14,7 @@
 
 package secretmanager
 
-// [START secretmanager_create_secret_with_labels]
+// [START secretmanager_create_secret_with_tags]
 import (
 	"context"
 	"fmt"
@@ -24,8 +24,8 @@ import (
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 )
 
-// createSecretWithTags creates a new secret with the given name and labels.
-func createSecretWithTags(w io.Writer, parent, id string, tagKey string, tagValue string) error {
+// createSecretWithTags creates a new secret with the given name and tags.
+func createSecretWithTags(w io.Writer, parent, id, tagKey, tagValue string) error {
 	// parent := "projects/my-project"
 	// id := "my-secret"
 
@@ -58,7 +58,7 @@ func createSecretWithTags(w io.Writer, parent, id string, tagKey string, tagValu
 	if err != nil {
 		return fmt.Errorf("failed to create secret: %w", err)
 	}
-	fmt.Fprintf(w, "Created secret with labels: %s\n", result.Name)
+	fmt.Fprintf(w, "Created secret with tags: %s\n", result.Name)
 	return nil
 }
 
