@@ -20,14 +20,16 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
 // updateDeadLetter updates an existing subscription with a dead letter policy.
-func updateDeadLetter(w io.Writer, projectID, subID string, fullyQualifiedDeadLetterTopic string) error {
+func updateDeadLetter(w io.Writer, projectID, subscription, deadLetterTopic string) error {
 	// projectID := "my-project-id"
-	// subID := "my-sub"
-	// fullyQualifiedDeadLetterTopic := "projects/my-project/topics/my-dead-letter-topic"
+	// subID := "projects/my-project-id/subscriptions/my-sub"
+	// deadLetterTopic := "projects/my-project-id/topics/my-dead-letter-topic"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -35,18 +37,22 @@ func updateDeadLetter(w io.Writer, projectID, subID string, fullyQualifiedDeadLe
 	}
 	defer client.Close()
 
-	updateConfig := pubsub.SubscriptionConfigToUpdate{
-		DeadLetterPolicy: &pubsub.DeadLetterPolicy{
-			DeadLetterTopic:     fullyQualifiedDeadLetterTopic,
-			MaxDeliveryAttempts: 20,
+	sub, err := client.SubscriptionAdminClient.UpdateSubscription(ctx, &pubsubpb.UpdateSubscriptionRequest{
+		Subscription: &pubsubpb.Subscription{
+			Name: subscription,
+			DeadLetterPolicy: &pubsubpb.DeadLetterPolicy{
+				MaxDeliveryAttempts: 20,
+				DeadLetterTopic:     deadLetterTopic,
+			},
 		},
-	}
-
-	subConfig, err := client.Subscription(subID).Update(ctx, updateConfig)
+		UpdateMask: &fieldmaskpb.FieldMask{
+			Paths: []string{"dead_letter_policy"},
+		},
+	})
 	if err != nil {
 		return fmt.Errorf("Update: %w", err)
 	}
-	fmt.Fprintf(w, "Updated subscription config: %+v\n", subConfig)
+	fmt.Fprintf(w, "Updated subscription: %+v\n", sub)
 	return nil
 }
 

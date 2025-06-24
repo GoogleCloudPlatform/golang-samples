@@ -23,7 +23,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 )
 
 func pullMsgs(w io.Writer, projectID, subID string) error {
@@ -36,7 +36,7 @@ func pullMsgs(w io.Writer, projectID, subID string) error {
 	}
 	defer client.Close()
 
-	sub := client.Subscription(subID)
+	sub := client.Subscriber(subID)
 
 	// Receive messages for 10 seconds, which simplifies testing.
 	// Comment this out in production, since `Receive` should

@@ -22,7 +22,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -73,7 +73,7 @@ func subscribeOpenTelemetryTracing(w io.Writer, projectID, subID string, sampleR
 	}
 	defer client.Close()
 
-	sub := client.Subscription(subID)
+	sub := client.Subscriber(subID)
 
 	// Receive messages for 10 seconds, which simplifies testing.
 	// Comment this out in production, since `Receive` should

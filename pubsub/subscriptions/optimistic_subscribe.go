@@ -22,17 +22,18 @@ import (
 	"io"
 	"time"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 // optimisticSubscribe shows the recommended pattern for optimistically
 // assuming a subscription exists prior to receiving messages.
-func optimisticSubscribe(w io.Writer, projectID, topicID, subID string) error {
+func optimisticSubscribe(w io.Writer, projectID, topic, subscriptionName string) error {
 	// projectID := "my-project-id"
-	// topicID := "my-topic"
-	// subID := "my-sub"
+	// topic := "projects/my-project-id/topics/my-topic"
+	// subscription := "projects/my-project/subscriptions/my-sub"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -40,7 +41,7 @@ func optimisticSubscribe(w io.Writer, projectID, topicID, subID string) error {
 	}
 	defer client.Close()
 
-	sub := client.Subscription(subID)
+	sub := client.Subscriber(subscriptionName)
 
 	// Receive messages for 10 seconds, which simplifies testing.
 	// Comment this out in production, since `Receive` should
@@ -49,7 +50,7 @@ func optimisticSubscribe(w io.Writer, projectID, topicID, subID string) error {
 	defer cancel()
 
 	// Instead of checking if the subscription exists, optimistically try to
-	// receive from the subscription.
+	// receive from the subscription assuming it exists.
 	err = sub.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
 		fmt.Fprintf(w, "Got from existing subscription: %q\n", string(msg.Data))
 		msg.Ack()
@@ -57,17 +58,18 @@ func optimisticSubscribe(w io.Writer, projectID, topicID, subID string) error {
 	if err != nil {
 		if st, ok := status.FromError(err); ok {
 			if st.Code() == codes.NotFound {
-				// Since the subscription does not exist, create the subscription.
-				s, err := client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
-					Topic: client.Topic(topicID),
+				// If the subscription does not exist, then create the subscription.
+				subscription, err := client.SubscriptionAdminClient.CreateSubscription(ctx, &pubsubpb.Subscription{
+					Name:  subscriptionName,
+					Topic: topic,
 				})
 				if err != nil {
 					return err
 				}
-				fmt.Fprintf(w, "Created subscription: %q\n", subID)
+				fmt.Fprintf(w, "Created subscription: %q\n", subscriptionName)
 
-				// Pull from the new subscription.
-				err = s.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
+				sub = client.Subscriber(subscription.GetName())
+				err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 					fmt.Fprintf(w, "Got from new subscription: %q\n", string(msg.Data))
 					msg.Ack()
 				})
