@@ -40,20 +40,21 @@ func updateTopicType(w io.Writer, projectID, topic string) error {
 	}
 	defer client.Close()
 
-	updateReq := &pubsubpb.UpdateTopicRequest{
-		Topic: &pubsubpb.Topic{
-			Name: topic,
-			IngestionDataSourceSettings: &pubsubpb.IngestionDataSourceSettings{
-				Source: &pubsubpb.IngestionDataSourceSettings_AwsKinesis_{
-					AwsKinesis: &pubsubpb.IngestionDataSourceSettings_AwsKinesis{
-						StreamArn:         streamARN,
-						ConsumerArn:       consumerARN,
-						AwsRoleArn:        awsRoleARN,
-						GcpServiceAccount: gcpServiceAccount,
-					},
+	pbTopic := &pubsubpb.Topic{
+		Name: topic,
+		IngestionDataSourceSettings: &pubsubpb.IngestionDataSourceSettings{
+			Source: &pubsubpb.IngestionDataSourceSettings_AwsKinesis_{
+				AwsKinesis: &pubsubpb.IngestionDataSourceSettings_AwsKinesis{
+					StreamArn:         streamARN,
+					ConsumerArn:       consumerARN,
+					AwsRoleArn:        awsRoleARN,
+					GcpServiceAccount: gcpServiceAccount,
 				},
 			},
 		},
+	}
+	updateReq := &pubsubpb.UpdateTopicRequest{
+		Topic: pbTopic,
 		UpdateMask: &fieldmaskpb.FieldMask{
 			Paths: []string{"ingestion_data_source_settings"},
 		},
