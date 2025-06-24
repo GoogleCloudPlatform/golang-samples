@@ -513,9 +513,9 @@ func TestReceiveMessagesWithExactlyOnceDelivery(t *testing.T) {
 
 	createTopic(ctx, client, eodTopic)
 	_, err := client.SubscriptionAdminClient.CreateSubscription(ctx, &pb.Subscription{
-		Name:                  eodSub,
-		Topic:                 eodTopic,
-		EnableMessageOrdering: true,
+		Name:                      eodSub,
+		Topic:                     eodTopic,
+		EnableExactlyOnceDelivery: true,
 	})
 
 	// Publish 1 message. This avoids race conditions
@@ -654,7 +654,7 @@ func createTopic(ctx context.Context, client *pubsub.Client, topic string) error
 		Name: topic,
 	})
 	if err != nil {
-		return fmt.Errorf("failed to create topic (%q): %w", topicID, err)
+		return fmt.Errorf("failed to create topic (%q): %w", topic, err)
 	}
 	return nil
 }

@@ -50,7 +50,7 @@ func updateDeadLetter(w io.Writer, projectID, subscription, deadLetterTopic stri
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("Update: %w", err)
+		return fmt.Errorf("UpdateSubscription: %w", err)
 	}
 	fmt.Fprintf(w, "Updated subscription: %+v\n", sub)
 	return nil

@@ -35,10 +35,12 @@ func createSubscriptionWithExactlyOnceDelivery(w io.Writer, projectID, topic, su
 	}
 	defer client.Close()
 
-	sub, err := client.SubscriptionAdminClient.CreateSubscription(ctx, &pubsubpb.Subscription{
-		Name:  subscription,
-		Topic: topic, EnableExactlyOnceDelivery: true,
-	})
+	pbSub := &pubsubpb.Subscription{
+		Name:                      subscription,
+		Topic:                     topic,
+		EnableExactlyOnceDelivery: true,
+	}
+	sub, err := client.SubscriptionAdminClient.CreateSubscription(ctx, pbSub)
 	if err != nil {
 		return fmt.Errorf("failed to create exactly once sub: %w", err)
 	}
