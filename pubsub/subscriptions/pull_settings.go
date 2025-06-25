@@ -33,6 +33,9 @@ func pullMsgsFlowControlSettings(w io.Writer, projectID, subID string) error {
 	}
 	defer client.Close()
 
+	// client.Subscriber can be passed a subscription ID (e.g. "my-sub") or
+	// a fully qualified name (e.g. "projects/my-project/subscriptions/my-sub").
+	// If a subscription ID is provided, the project ID from the client is used.
 	sub := client.Subscriber(subID)
 	// MaxOutstandingMessages is the maximum number of unprocessed messages the
 	// subscriber client will pull from the server before pausing. This also configures
