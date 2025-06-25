@@ -25,6 +25,8 @@ import (
 
 	"testing"
 
+	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
+	"cloud.google.com/go/resourcemanager/apiv3/resourcemanagerpb"
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -72,6 +74,30 @@ func testRegionalClient(tb testing.TB) (*secretmanager.Client, context.Context) 
 		tb.Fatalf("testRegionalClient: failed to create regional client: %v", err)
 	}
 	return client, ctx
+}
+
+func testResourceManagerTagsKeyClient(tb testing.TB) (*resourcemanager.TagKeysClient, context.Context) {
+	tb.Helper()
+	ctx := context.Background()
+
+	client, err := resourcemanager.NewTagKeysClient(ctx)
+	if err != nil {
+		tb.Fatalf("testResourceManagerTagsKeyClient: failed to create client: %v", err)
+	}
+	return client, ctx
+
+}
+
+func testResourceManagerTagsValueClient(tb testing.TB) (*resourcemanager.TagValuesClient, context.Context) {
+	tb.Helper()
+	ctx := context.Background()
+
+	client, err := resourcemanager.NewTagValuesClient(ctx)
+	if err != nil {
+		tb.Fatalf("testResourceManagerTagsValueClient: failed to create client: %v", err)
+	}
+	return client, ctx
+
 }
 
 func testName(tb testing.TB) string {
@@ -1479,5 +1505,84 @@ func TestUpdateRegionalSecretWithAlias(t *testing.T) {
 
 	if got, want := s.VersionAliases, map[string]int64{"test": 1}; !reflect.DeepEqual(got, want) {
 		t.Errorf("updateRegionalSecret: expected %q to be %q", got, want)
+	}
+}
+
+func testCreateTagKey(tb testing.TB, projectID string) *resourcemanagerpb.TagKey {
+	tb.Helper()
+
+	client, ctx := testResourceManagerTagsKeyClient(tb)
+	parent := fmt.Sprintf("projects/%s", projectID)
+	tagKeyName := "sm_secret_tag_test"
+	tagKeyDescription := "creating tag key for secretmanager tags sample"
+
+	tagKeyOperation, err := client.CreateTagKey(ctx, &resourcemanagerpb.CreateTagKeyRequest{
+		TagKey: &resourcemanagerpb.TagKey{
+			Parent:      parent,
+			ShortName:   tagKeyName,
+			Description: tagKeyDescription,
+		},
+	})
+	if err != nil {
+		tb.Fatalf("testSecret: failed to create secret: %v", err)
+	}
+
+	createdTagKey, err := tagKeyOperation.Wait(ctx)
+	if err != nil {
+		tb.Fatalf("testCreateTagKey: failed to create TagKey after waiting for operation: %v", err)
+	}
+
+	return createdTagKey
+}
+
+func testCreateTagValue(tb testing.TB, tagKeyId string) *resourcemanagerpb.TagValue {
+	tb.Helper()
+
+	client, ctx := testResourceManagerTagsValueClient(tb)
+	parent := fmt.Sprintf("tagKeys/%s", tagKeyId)
+	tagKeyName := "sm_secret_tag_test"
+	tagKeyDescription := "creating TagValue for secretmanager tags sample"
+
+	tagKeyOperation, err := client.CreateTagValue(ctx, &resourcemanagerpb.CreateTagValueRequest{
+		TagValue: &resourcemanagerpb.TagValue{
+			Parent:      parent,
+			ShortName:   tagKeyName,
+			Description: tagKeyDescription,
+		},
+	})
+	if err != nil {
+		tb.Fatalf("testSecret: failed to create secret: %v", err)
+	}
+
+	createdTagValue, err := tagKeyOperation.Wait(ctx)
+	if err != nil {
+		tb.Fatalf("testCreateTagValue: failed to create TagValue after waiting for operation: %v", err)
+	}
+
+	return createdTagValue
+}
+
+func TestCreateSecretWithTags(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secretID := "createSecretWithTags"
+
+	parent := fmt.Sprintf("projects/%s", tc.ProjectID)
+
+	tagKey := testCreateTagKey(t, tc.ProjectID)
+	tagValue := testCreateTagValue(t, tagKey.GetName())
+
+	t.Logf("Secret ID used: %s", secretID)
+	t.Logf("Tag Key used: %s", tagKey.GetName())
+	t.Logf("Tag Value used: %s", tagValue.Name)
+
+	var b bytes.Buffer
+	if err := createSecretWithTags(&b, parent, secretID, tagKey.GetName(), tagValue.Name); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
+
+	if got, want := b.String(), "Created secret with tags:"; !strings.Contains(got, want) {
+		t.Errorf("createSecretWithTags: expected %q to contain %q", got, want)
 	}
 }
