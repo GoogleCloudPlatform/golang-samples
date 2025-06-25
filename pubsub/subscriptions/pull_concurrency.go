@@ -35,6 +35,9 @@ func pullMsgsConcurrencyControl(w io.Writer, projectID, subID string) error {
 	}
 	defer client.Close()
 
+	// client.Subscriber can be passed a subscription ID (e.g. "my-sub") or
+	// a fully qualified name (e.g. "projects/my-project/subscriptions/my-sub").
+	// If a subscription ID is provided, the project ID from the client is used.
 	sub := client.Subscriber(subID)
 	// NumGoroutines determines the number of streams sub.Receive will spawn to pull
 	// messages. It is recommended to set this to 1, unless your throughput

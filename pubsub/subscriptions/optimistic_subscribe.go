@@ -41,6 +41,9 @@ func optimisticSubscribe(w io.Writer, projectID, topic, subscriptionName string)
 	}
 	defer client.Close()
 
+	// client.Subscriber can be passed a subscription ID (e.g. "my-sub") or
+	// a fully qualified name (e.g. "projects/my-project/subscriptions/my-sub").
+	// If a subscription ID is provided, the project ID from the client is used.
 	sub := client.Subscriber(subscriptionName)
 
 	// Receive messages for 10 seconds, which simplifies testing.
@@ -68,6 +71,9 @@ func optimisticSubscribe(w io.Writer, projectID, topic, subscriptionName string)
 				}
 				fmt.Fprintf(w, "Created subscription: %q\n", subscriptionName)
 
+				// client.Subscriber can be passed a subscription ID (e.g. "my-sub") or
+				// a fully qualified name (e.g. "projects/my-project/subscriptions/my-sub").
+				// If a subscription ID is provided, the project ID from the client is used.
 				sub = client.Subscriber(subscription.GetName())
 				err = sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 					fmt.Fprintf(w, "Got from new subscription: %q\n", string(msg.Data))

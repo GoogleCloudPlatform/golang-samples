@@ -43,6 +43,9 @@ func receiveMessagesWithExactlyOnceDeliveryEnabled(w io.Writer, projectID, subID
 	}
 	defer client.Close()
 
+	// client.Subscriber can be passed a subscription ID (e.g. "my-sub") or
+	// a fully qualified name (e.g. "projects/my-project/subscriptions/my-sub").
+	// If a subscription ID is provided, the project ID from the client is used.
 	sub := client.Subscriber(subID)
 	// Set MinDurationPerAckExtension high to avoid any unintentional
 	// acknowledgment expirations (e.g. due to network events).

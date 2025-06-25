@@ -73,6 +73,9 @@ func subscribeOpenTelemetryTracing(w io.Writer, projectID, subID string, sampleR
 	}
 	defer client.Close()
 
+	// client.Subscriber can be passed a subscription ID (e.g. "my-sub") or
+	// a fully qualified name (e.g. "projects/my-project/subscriptions/my-sub").
+	// If a subscription ID is provided, the project ID from the client is used.
 	sub := client.Subscriber(subID)
 
 	// Receive messages for 10 seconds, which simplifies testing.

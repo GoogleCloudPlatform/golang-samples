@@ -40,6 +40,9 @@ func pullMsgsDeadLetterDeliveryAttempt(w io.Writer, projectID, subID string) err
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
+	// client.Subscriber can be passed a subscription ID (e.g. "my-sub") or
+	// a fully qualified name (e.g. "projects/my-project/subscriptions/my-sub").
+	// If a subscription ID is provided, the project ID from the client is used.
 	sub := client.Subscriber(subID)
 	err = sub.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
 		// When dead lettering is enabled, the delivery attempt field is a pointer to the
