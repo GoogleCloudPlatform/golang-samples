@@ -49,3 +49,5 @@ func testPermissions(w io.Writer, projectID, subID string) ([]string, error) {
 	}
 	return resp.Permissions, nil
 }
+
+// [END pubsub_test_subscription_permissions]
