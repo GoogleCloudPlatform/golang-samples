@@ -63,7 +63,7 @@ func subscribeWithAvroSchemaRevisions(w io.Writer, projectID, subID string) erro
 		// shown here in a synchronous way to ease readability.
 		if !ok {
 			s := &pubsubpb.GetSchemaRequest{
-				Name: name,
+				Name: fmt.Sprintf("%s@%s", name, revision),
 				View: pubsubpb.SchemaView_FULL,
 			}
 			schema, err := schemaClient.GetSchema(ctx, s)

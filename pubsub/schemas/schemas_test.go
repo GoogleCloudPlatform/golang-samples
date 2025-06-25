@@ -461,9 +461,7 @@ func TestSchemas_UpdateTopicSchema(t *testing.T) {
 
 	topicID := topicPrefix + uuid.NewString()
 
-	// Switch topic from one schema to another
 	protoSchemaID := schemaPrefix + "proto-" + uuid.NewString()
-	// protoSchemaID2 := schemaPrefix + "proto-" + uuid.NewString()
 
 	protoSource, err := os.ReadFile(protoFilePath)
 	if err != nil {
