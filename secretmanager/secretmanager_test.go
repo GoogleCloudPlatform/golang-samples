@@ -1513,7 +1513,7 @@ func testCreateTagKey(tb testing.TB, projectID string) *resourcemanagerpb.TagKey
 
 	client, ctx := testResourceManagerTagsKeyClient(tb)
 	parent := fmt.Sprintf("projects/%s", projectID)
-	tagKeyName := "sm_secret_tag_test"
+	tagKeyName := "sm_secret_tag_sample_testing"
 	tagKeyDescription := "creating tag key for secretmanager tags sample"
 
 	tagKeyOperation, err := client.CreateTagKey(ctx, &resourcemanagerpb.CreateTagKeyRequest{
@@ -1524,7 +1524,7 @@ func testCreateTagKey(tb testing.TB, projectID string) *resourcemanagerpb.TagKey
 		},
 	})
 	if err != nil {
-		tb.Fatalf("testSecret: failed to create secret: %v", err)
+		tb.Fatalf("testCreateTagKey: failed to create tagKey: %v", err)
 	}
 
 	createdTagKey, err := tagKeyOperation.Wait(ctx)
@@ -1539,19 +1539,18 @@ func testCreateTagValue(tb testing.TB, tagKeyId string) *resourcemanagerpb.TagVa
 	tb.Helper()
 
 	client, ctx := testResourceManagerTagsValueClient(tb)
-	parent := fmt.Sprintf("tagKeys/%s", tagKeyId)
-	tagKeyName := "sm_secret_tag_test"
+	tagValueName := "sm_secret_tag_value_sample_testing"
 	tagKeyDescription := "creating TagValue for secretmanager tags sample"
 
 	tagKeyOperation, err := client.CreateTagValue(ctx, &resourcemanagerpb.CreateTagValueRequest{
 		TagValue: &resourcemanagerpb.TagValue{
-			Parent:      parent,
-			ShortName:   tagKeyName,
+			Parent:      tagKeyId,
+			ShortName:   tagValueName,
 			Description: tagKeyDescription,
 		},
 	})
 	if err != nil {
-		tb.Fatalf("testSecret: failed to create secret: %v", err)
+		tb.Fatalf("testCreateTagValue: failed to create tagValue: %v", err)
 	}
 
 	createdTagValue, err := tagKeyOperation.Wait(ctx)
@@ -1560,6 +1559,44 @@ func testCreateTagValue(tb testing.TB, tagKeyId string) *resourcemanagerpb.TagVa
 	}
 
 	return createdTagValue
+}
+
+func testCleanupTagKey(tb testing.TB, tagKeyName string) {
+	tb.Helper()
+
+	client, ctx := testResourceManagerTagsKeyClient(tb)
+
+	tagKeyOperation, err := client.DeleteTagKey(ctx, &resourcemanagerpb.DeleteTagKeyRequest{
+		Name: tagKeyName,
+	})
+	if err != nil {
+		tb.Fatalf("testCleanupTagKey: failed to delete tagKey: %v", err)
+		return
+	}
+
+	_, err = tagKeyOperation.Wait(ctx)
+	if err != nil {
+		tb.Fatalf("testCleanupTagKey: failed to delete TagKey after waiting for operation: %v", err)
+	}
+}
+
+func testCleanupTagValue(tb testing.TB, tagValueName string) {
+	tb.Helper()
+
+	client, ctx := testResourceManagerTagsValueClient(tb)
+
+	tagKeyOperation, err := client.DeleteTagValue(ctx, &resourcemanagerpb.DeleteTagValueRequest{
+		Name: tagValueName,
+	})
+	if err != nil {
+		tb.Fatalf("testCleanupTagValue: failed to delete tagValue: %v", err)
+		return
+	}
+
+	_, err = tagKeyOperation.Wait(ctx)
+	if err != nil {
+		tb.Fatalf("testCleanupTagValue: failed to delete tagvalue after waiting for operation: %v", err)
+	}
 }
 
 func TestCreateSecretWithTags(t *testing.T) {
@@ -1577,9 +1614,11 @@ func TestCreateSecretWithTags(t *testing.T) {
 	t.Logf("Tag Value used: %s", tagValue.Name)
 
 	var b bytes.Buffer
-	if err := createSecretWithTags(&b, parent, secretID, tagKey.GetName(), tagValue.Name); err != nil {
+	if err := createSecretWithTags(&b, parent, secretID, tagKey.GetName(), tagValue.GetName()); err != nil {
 		t.Fatal(err)
 	}
+	defer testCleanupTagKey(t, tagKey.Name)
+	defer testCleanupTagValue(t, tagValue.Name)
 	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
 
 	if got, want := b.String(), "Created secret with tags:"; !strings.Contains(got, want) {

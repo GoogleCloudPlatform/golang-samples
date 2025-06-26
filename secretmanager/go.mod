@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/golang-samples/secretmanager
 go 1.23.0
 
 require (
-	cloud.google.com/go/secretmanager v1.14.7
+	cloud.google.com/go/secretmanager v1.15.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
 	github.com/gofrs/uuid v4.4.0+incompatible
 	google.golang.org/api v0.232.0
