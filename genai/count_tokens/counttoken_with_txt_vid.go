@@ -43,7 +43,8 @@ func countWithTxtAndVid(w io.Writer) error {
 				FileURI:  "gs://cloud-samples-data/generative-ai/video/pixel8.mp4",
 				MIMEType: "video/mp4",
 			}},
-		}},
+		},
+			Role: "user"},
 	}
 
 	resp, err := client.Models.CountTokens(ctx, modelName, contents, nil)

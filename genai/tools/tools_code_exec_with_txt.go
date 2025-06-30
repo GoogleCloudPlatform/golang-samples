@@ -39,13 +39,14 @@ func generateWithCodeExec(w io.Writer) error {
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: prompt},
-		}},
+		},
+			Role: "user"},
 	}
 	config := &genai.GenerateContentConfig{
 		Tools: []*genai.Tool{
 			{CodeExecution: &genai.ToolCodeExecution{}},
 		},
-		Temperature: genai.Ptr(0.0),
+		Temperature: genai.Ptr(float32(0.0)),
 	}
 	modelName := "gemini-2.0-flash-001"
 

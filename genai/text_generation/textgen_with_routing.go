@@ -15,7 +15,7 @@
 // Package text_generation shows examples of generating text using the GenAI SDK.
 package text_generation
 
-// [START googlegenaisdk_textgen_with_txt]
+// [START googlegenaisdk_textgen_with_routing]
 import (
 	"context"
 	"fmt"
@@ -24,21 +24,34 @@ import (
 	"google.golang.org/genai"
 )
 
-// generateWithText shows how to generate text using a text prompt.
-func generateWithText(w io.Writer) error {
+// generateWithRouting shows how to generate text using a text prompt and routing configuration.
+func generateWithRouting(w io.Writer) error {
 	ctx := context.Background()
 
-	client, err := genai.NewClient(ctx, &genai.ClientConfig{
-		HTTPOptions: genai.HTTPOptions{APIVersion: "v1"},
-	})
+	clientConfig := &genai.ClientConfig{
+		HTTPOptions: genai.HTTPOptions{APIVersion: "v1beta1"},
+	}
+
+	client, err := genai.NewClient(ctx, clientConfig)
+
 	if err != nil {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
+	modelSelectionConfig := &genai.ModelSelectionConfig{
+		FeatureSelectionPreference: genai.FeatureSelectionPreferencePrioritizeQuality,
+	}
+
+	generateContentConfig := &genai.GenerateContentConfig{
+		ModelSelectionConfig: modelSelectionConfig,
+	}
+
+	modelName := "model-optimizer-exp-04-09"
+
 	resp, err := client.Models.GenerateContent(ctx,
-		"gemini-2.0-flash-001",
+		modelName,
 		genai.Text("How does AI work?"),
-		nil,
+		generateContentConfig,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to generate content: %w", err)
@@ -56,4 +69,4 @@ func generateWithText(w io.Writer) error {
 	return nil
 }
 
-// [END googlegenaisdk_textgen_with_txt]
+// [END googlegenaisdk_textgen_with_routing]
