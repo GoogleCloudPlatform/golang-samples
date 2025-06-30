@@ -33,7 +33,9 @@ import (
 	regional_secretmanager "github.com/GoogleCloudPlatform/golang-samples/secretmanager/regional_samples"
 	"github.com/gofrs/uuid"
 	"google.golang.org/api/option"
+	"google.golang.org/grpc/codes"
 	grpccodes "google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	grpcstatus "google.golang.org/grpc/status"
 )
 
@@ -1513,7 +1515,7 @@ func testCreateTagKey(tb testing.TB, projectID string) *resourcemanagerpb.TagKey
 
 	client, ctx := testResourceManagerTagsKeyClient(tb)
 	parent := fmt.Sprintf("projects/%s", projectID)
-	tagKeyName := "sm_secret_tag_sample_testing"
+	tagKeyName := "sm_secret_tag_sample_test2"
 	tagKeyDescription := "creating tag key for secretmanager tags sample"
 
 	tagKeyOperation, err := client.CreateTagKey(ctx, &resourcemanagerpb.CreateTagKeyRequest{
@@ -1539,7 +1541,7 @@ func testCreateTagValue(tb testing.TB, tagKeyId string) *resourcemanagerpb.TagVa
 	tb.Helper()
 
 	client, ctx := testResourceManagerTagsValueClient(tb)
-	tagValueName := "sm_secret_tag_value_sample_testing"
+	tagValueName := "sm_secret_tag_value_sample_test1"
 	tagKeyDescription := "creating TagValue for secretmanager tags sample"
 
 	tagKeyOperation, err := client.CreateTagValue(ctx, &resourcemanagerpb.CreateTagValueRequest{
@@ -1580,23 +1582,70 @@ func testCleanupTagKey(tb testing.TB, tagKeyName string) {
 	}
 }
 
+// Polling to clean up the tag value because, after deleting a secret, it takes some time for the tag value to become unbound.
 func testCleanupTagValue(tb testing.TB, tagValueName string) {
 	tb.Helper()
 
 	client, ctx := testResourceManagerTagsValueClient(tb)
 
-	tagKeyOperation, err := client.DeleteTagValue(ctx, &resourcemanagerpb.DeleteTagValueRequest{
-		Name: tagValueName,
-	})
-	if err != nil {
-		tb.Fatalf("testCleanupTagValue: failed to delete tagValue: %v", err)
+	maxPollingDuration := 10 * time.Minute
+	initialDelay := 2 * time.Second
+	maxBackoffDelay := 30 * time.Second
+
+	startTime := time.Now()
+	attempt := 0
+
+	for time.Since(startTime) < maxPollingDuration {
+		attempt++
+
+		tagValueOperation, err := client.DeleteTagValue(ctx, &resourcemanagerpb.DeleteTagValueRequest{
+			Name: tagValueName,
+		})
+
+		if err != nil {
+			s, ok := status.FromError(err)
+			if ok && s.Code() == codes.NotFound {
+				tb.Logf("Tag value %s already deleted (or never existed) after %v.", tagValueName, time.Since(startTime))
+				return
+			}
+
+			if ok && s.Code() == codes.FailedPrecondition && strings.Contains(s.Message(), "attached to resources") {
+				delay := initialDelay * time.Duration(1<<uint(attempt-1))
+				if delay > maxBackoffDelay {
+					delay = maxBackoffDelay
+				}
+				time.Sleep(delay)
+				continue
+			}
+
+			tb.Errorf("testCleanupTagValue: failed to initiate delete for tag value %s due to unrecoverable error: %v", tagValueName, err)
+			return
+		}
+
+		_, err = tagValueOperation.Wait(ctx)
+		if err != nil {
+			s, ok := status.FromError(err)
+			if ok && s.Code() == codes.NotFound {
+				tb.Logf("Tag value %s was deleted during operation wait (or already gone).", tagValueName)
+				return
+			}
+			if ok && s.Code() == codes.FailedPrecondition && strings.Contains(s.Message(), "attached to resources") {
+				delay := initialDelay * time.Duration(1<<uint(attempt-1))
+				if delay > maxBackoffDelay {
+					delay = maxBackoffDelay
+				}
+				time.Sleep(delay)
+				continue
+			}
+
+			tb.Errorf("testCleanupTagValue: failed to delete tag value %s after waiting for operation due to unrecoverable error: %v", tagValueName, err)
+			return
+		}
+
+		tb.Logf("Successfully deleted tag value %s after %v (attempt %d).", tagValueName, time.Since(startTime), attempt)
 		return
 	}
-
-	_, err = tagKeyOperation.Wait(ctx)
-	if err != nil {
-		tb.Fatalf("testCleanupTagValue: failed to delete tagvalue after waiting for operation: %v", err)
-	}
+	tb.Errorf("testCleanupTagValue: failed to delete tag value %s after %v (max duration reached). It might still be attached.", tagValueName, maxPollingDuration)
 }
 
 func TestCreateSecretWithTags(t *testing.T) {
@@ -1617,11 +1666,15 @@ func TestCreateSecretWithTags(t *testing.T) {
 	if err := createSecretWithTags(&b, parent, secretID, tagKey.GetName(), tagValue.GetName()); err != nil {
 		t.Fatal(err)
 	}
-	defer testCleanupTagKey(t, tagKey.Name)
-	defer testCleanupTagValue(t, tagValue.Name)
-	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
+
+	defer func() {
+		testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
+		testCleanupTagValue(t, tagValue.Name)
+		testCleanupTagKey(t, tagKey.Name)
+	}()
 
 	if got, want := b.String(), "Created secret with tags:"; !strings.Contains(got, want) {
 		t.Errorf("createSecretWithTags: expected %q to contain %q", got, want)
 	}
+
 }
