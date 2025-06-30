@@ -27,13 +27,16 @@ import (
 func TestTranslateText(t *testing.T) {
 	testutil.SystemTest(t)
 
-	in := "The Go Gopher is cute"
-	got, err := translateText("ja", in)
+	buf := bytes.Buffer{}
+
+	text := "¡Hola amigos y amigas!"
+	err := translateText(&buf, "en", "es", text)
 	if err != nil {
 		t.Fatalf("translateText: %v", err)
 	}
-	if jaGo, jaKawaii := "ゴー", "かわいい"; !(strings.Contains(got, jaGo) || strings.Contains(got, jaKawaii)) {
-		t.Errorf("translateText(%q)=%q; want to contain %q or %q", in, got, jaGo, jaKawaii)
+
+	if got, want := buf.String(), "Hello friends!"; !strings.Contains(got, want) {
+		t.Errorf("translateText output %q did not contain expected substring %q", got, want)
 	}
 }
 
