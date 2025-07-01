@@ -23,7 +23,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 )
 
 func publishWithFlowControlSettings(w io.Writer, projectID, topicID string) error {
@@ -36,8 +36,12 @@ func publishWithFlowControlSettings(w io.Writer, projectID, topicID string) erro
 	}
 	defer client.Close()
 
-	t := client.Topic(topicID)
-	t.PublishSettings.FlowControlSettings = pubsub.FlowControlSettings{
+	// client.Publisher can be passed a topic ID (e.g. "my-topic") or
+	// a fully qualified name (e.g. "projects/my-project/topics/my-topic").
+	// If a topic ID is provided, the project ID from the client is used.
+	// Reuse this publisher for all publish calls to send messages in batches.
+	publisher := client.Publisher(topicID)
+	publisher.PublishSettings.FlowControlSettings = pubsub.FlowControlSettings{
 		MaxOutstandingMessages: 100,                     // default 1000
 		MaxOutstandingBytes:    10 * 1024 * 1024,        // default 0 (unlimited)
 		LimitExceededBehavior:  pubsub.FlowControlBlock, // default Ignore, other options: Block and SignalError
@@ -50,7 +54,7 @@ func publishWithFlowControlSettings(w io.Writer, projectID, topicID string) erro
 	// Rapidly publishing 1000 messages in a loop may be constrained by flow control.
 	for i := 0; i < numMsgs; i++ {
 		wg.Add(1)
-		result := t.Publish(ctx, &pubsub.Message{
+		result := publisher.Publish(ctx, &pubsub.Message{
 			Data: []byte("message #" + strconv.Itoa(i)),
 		})
 		go func(i int, res *pubsub.PublishResult) {

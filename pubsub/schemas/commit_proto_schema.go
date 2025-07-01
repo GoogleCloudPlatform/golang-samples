@@ -21,7 +21,8 @@ import (
 	"io"
 	"os"
 
-	"cloud.google.com/go/pubsub"
+	pubsub "cloud.google.com/go/pubsub/v2/apiv1"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 )
 
 // commitProtoSchema commits a new proto schema revision to an existing schema.
@@ -30,7 +31,7 @@ func commitProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error
 	// schemaID := "my-schema"
 	// protoFile = "path/to/a/proto/schema/file(.proto)/formatted/in/protocol/buffers"
 	ctx := context.Background()
-	client, err := pubsub.NewSchemaClient(ctx, projectID)
+	client, err := pubsub.NewSchemaClient(ctx)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewSchemaClient: %w", err)
 	}
@@ -42,12 +43,17 @@ func commitProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error
 		return fmt.Errorf("error reading from file: %s", protoFile)
 	}
 
-	config := pubsub.SchemaConfig{
+	schema := &pubsubpb.Schema{
+		// TODO(hongalex): check if name is necessary here
 		Name:       fmt.Sprintf("projects/%s/schemas/%s", projectID, schemaID),
-		Type:       pubsub.SchemaProtocolBuffer,
+		Type:       pubsubpb.Schema_PROTOCOL_BUFFER,
 		Definition: string(protoSource),
 	}
-	s, err := client.CommitSchema(ctx, schemaID, config)
+	req := &pubsubpb.CommitSchemaRequest{
+		Name:   fmt.Sprintf("projects/%s/schemas/%s", projectID, schemaID),
+		Schema: schema,
+	}
+	s, err := client.CommitSchema(ctx, req)
 	if err != nil {
 		return fmt.Errorf("CommitSchema: %w", err)
 	}

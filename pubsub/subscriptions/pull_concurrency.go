@@ -22,7 +22,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 )
 
 func pullMsgsConcurrencyControl(w io.Writer, projectID, subID string) error {
@@ -35,17 +35,17 @@ func pullMsgsConcurrencyControl(w io.Writer, projectID, subID string) error {
 	}
 	defer client.Close()
 
-	sub := client.Subscription(subID)
-	// Must set ReceiveSettings.Synchronous to false (or leave as default) to enable
-	// concurrency pulling of messages. Otherwise, NumGoroutines will be set to 1.
-	sub.ReceiveSettings.Synchronous = false
-	// NumGoroutines determines the number of goroutines sub.Receive will spawn to pull
-	// messages.
-	sub.ReceiveSettings.NumGoroutines = 16
+	// client.Subscriber can be passed a subscription ID (e.g. "my-sub") or
+	// a fully qualified name (e.g. "projects/my-project/subscriptions/my-sub").
+	// If a subscription ID is provided, the project ID from the client is used.
+	sub := client.Subscriber(subID)
+	// NumGoroutines determines the number of streams sub.Receive will spawn to pull
+	// messages. It is recommended to set this to 1, unless your throughput
+	// is greater than 10 MB/s, as even having 1 stream can still result in
+	// messages being handled asynchronously.
+	sub.ReceiveSettings.NumGoroutines = 1
 	// MaxOutstandingMessages limits the number of concurrent handlers of messages.
 	// In this case, up to 8 unacked messages can be handled concurrently.
-	// Note, even in synchronous mode, messages pulled in a batch can still be handled
-	// concurrently.
 	sub.ReceiveSettings.MaxOutstandingMessages = 8
 
 	// Receive messages for 10 seconds, which simplifies testing.

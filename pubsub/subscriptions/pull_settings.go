@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 )
 
 func pullMsgsFlowControlSettings(w io.Writer, projectID, subID string) error {
@@ -33,7 +33,10 @@ func pullMsgsFlowControlSettings(w io.Writer, projectID, subID string) error {
 	}
 	defer client.Close()
 
-	sub := client.Subscription(subID)
+	// client.Subscriber can be passed a subscription ID (e.g. "my-sub") or
+	// a fully qualified name (e.g. "projects/my-project/subscriptions/my-sub").
+	// If a subscription ID is provided, the project ID from the client is used.
+	sub := client.Subscriber(subID)
 	// MaxOutstandingMessages is the maximum number of unprocessed messages the
 	// subscriber client will pull from the server before pausing. This also configures
 	// the maximum number of concurrent handlers for received messages.

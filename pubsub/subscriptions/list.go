@@ -19,11 +19,12 @@ import (
 	"context"
 	"fmt"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 	"google.golang.org/api/iterator"
 )
 
-func list(projectID string) ([]*pubsub.Subscription, error) {
+func list(projectID string) ([]*pubsubpb.Subscription, error) {
 	// projectID := "my-project-id"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
@@ -32,8 +33,11 @@ func list(projectID string) ([]*pubsub.Subscription, error) {
 	}
 	defer client.Close()
 
-	var subs []*pubsub.Subscription
-	it := client.Subscriptions(ctx)
+	var subs []*pubsubpb.Subscription
+	req := &pubsubpb.ListSubscriptionsRequest{
+		Project: fmt.Sprintf("projects/%s", projectID),
+	}
+	it := client.SubscriptionAdminClient.ListSubscriptions(ctx, req)
 	for {
 		s, err := it.Next()
 		if err == iterator.Done {

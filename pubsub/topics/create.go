@@ -20,7 +20,8 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 )
 
 func create(w io.Writer, projectID, topicID string) error {
@@ -33,7 +34,10 @@ func create(w io.Writer, projectID, topicID string) error {
 	}
 	defer client.Close()
 
-	t, err := client.CreateTopic(ctx, topicID)
+	topic := &pubsubpb.Topic{
+		Name: fmt.Sprintf("projects/%s/topics/%s", projectID, topicID),
+	}
+	t, err := client.TopicAdminClient.CreateTopic(ctx, topic)
 	if err != nil {
 		return fmt.Errorf("CreateTopic: %w", err)
 	}

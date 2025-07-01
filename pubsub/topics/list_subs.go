@@ -18,35 +18,38 @@ package topics
 import (
 	"context"
 	"fmt"
+	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 	"google.golang.org/api/iterator"
 )
 
-func listSubscriptions(projectID, topicID string) ([]*pubsub.Subscription, error) {
+func listSubscriptions(w io.Writer, projectID, topicID string) error {
 	// projectID := "my-project-id"
 	// topicName := "projects/sample-248520/topics/ocr-go-test-topic"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return nil, fmt.Errorf("pubsub.NewClient: %w", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 
-	var subs []*pubsub.Subscription
-
-	it := client.Topic(topicID).Subscriptions(ctx)
+	req := &pubsubpb.ListTopicSubscriptionsRequest{
+		Topic: fmt.Sprintf("projects/%s/topics/%s", projectID, topicID),
+	}
+	it := client.TopicAdminClient.ListTopicSubscriptions(ctx, req)
 	for {
 		sub, err := it.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("Next: %w", err)
+			return fmt.Errorf("error listing topic subscriptions: %w", err)
 		}
-		subs = append(subs, sub)
+		fmt.Fprintf(w, "got subscription: %s\n", sub)
 	}
-	return subs, nil
+	return nil
 }
 
 // [END pubsub_list_topic_subscriptions]

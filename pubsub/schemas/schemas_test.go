@@ -21,17 +21,18 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 	"strings"
 	"sync"
 	"testing"
 	"time"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
+	schema "cloud.google.com/go/pubsub/v2/apiv1"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
-	"google.golang.org/api/iterator"
 )
 
 const (
@@ -49,7 +50,7 @@ const (
 // down every time, so this speeds things up.
 var once sync.Once
 
-func setup(t *testing.T) (*pubsub.Client, *pubsub.SchemaClient) {
+func setup(t *testing.T) (*pubsub.Client, *schema.SchemaClient) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 
@@ -58,72 +59,24 @@ func setup(t *testing.T) (*pubsub.Client, *pubsub.SchemaClient) {
 		t.Fatalf("failed to create client: %v", err)
 	}
 
-	schemaClient, err := pubsub.NewSchemaClient(ctx, tc.ProjectID)
+	schemaClient, err := schema.NewSchemaClient(ctx)
 	if err != nil {
 		t.Fatalf("failed to create schema client: %v", err)
 	}
 
-	// Cleanup resources from the previous tests.
-	// This includes schemas, topics, and subscriptions.
+	// Cleanup schema resources from the previous tests.
 	once.Do(func() {
-		wg := sync.WaitGroup{}
-
-		wg.Add(1)
-		go func() {
-			scs, err := listSchemas(ioutil.Discard, tc.ProjectID)
-			if err != nil {
-				fmt.Printf("failed to list schemas: %v", err)
+		scs, err := listSchemas(io.Discard, tc.ProjectID)
+		if err != nil {
+			fmt.Printf("failed to list schemas: %v", err)
+		}
+		for _, sc := range scs {
+			schemaName := strings.Split(sc.Name, "/")
+			schemaID := schemaName[len(schemaName)-1]
+			if strings.HasPrefix(schemaID, schemaPrefix) {
+				deleteSchema(io.Discard, tc.ProjectID, schemaID)
 			}
-			for _, sc := range scs {
-				schemaName := strings.Split(sc.Name, "/")
-				schemaID := schemaName[len(schemaName)-1]
-				if strings.HasPrefix(schemaID, schemaPrefix) {
-					deleteSchema(ioutil.Discard, tc.ProjectID, schemaID)
-				}
-			}
-			wg.Done()
-		}()
-
-		wg.Add(1)
-		go func() {
-			topicIter := client.Topics(ctx)
-			for {
-				topic, err := topicIter.Next()
-				if err == iterator.Done {
-					break
-				}
-				if err != nil {
-					fmt.Printf("topicIter.Next got err: %v", err)
-				}
-				if strings.HasPrefix(topic.ID(), topicPrefix) {
-					if err := topic.Delete(ctx); err != nil {
-						fmt.Printf("topic.Delete got err: %v", err)
-					}
-				}
-			}
-			wg.Done()
-		}()
-
-		wg.Add(1)
-		go func() {
-			subIter := client.Subscriptions(ctx)
-			for {
-				sub, err := subIter.Next()
-				if err == iterator.Done {
-					break
-				}
-				if err != nil {
-					fmt.Printf("subIter.Next got err: %v", err)
-				}
-				if strings.HasPrefix(sub.ID(), subPrefix) {
-					if err := sub.Delete(ctx); err != nil {
-						fmt.Printf("sub.Delete got err: %v", err)
-					}
-				}
-			}
-			wg.Done()
-		}()
-		wg.Wait()
+		}
 	})
 
 	return client, schemaClient
@@ -163,7 +116,8 @@ func TestSchemas_Admin(t *testing.T) {
 	})
 
 	protoSchemaID := schemaPrefix + "proto-" + uuid.NewString()
-	var protoSchema *pubsub.SchemaConfig
+	protoSchemaName := fmt.Sprintf("projects/%s/schemas/%s", tc.ProjectID, protoSchemaID)
+	var protoSchema *pubsubpb.Schema
 	t.Run("createProtoSchema", func(t *testing.T) {
 		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 			buf := new(bytes.Buffer)
@@ -178,9 +132,13 @@ func TestSchemas_Admin(t *testing.T) {
 
 			ctx := context.Background()
 			var err error
-			protoSchema, err = sc.Schema(ctx, protoSchemaID, pubsub.SchemaViewFull)
+			req := &pubsubpb.GetSchemaRequest{
+				Name: protoSchemaName,
+				View: pubsubpb.SchemaView_FULL,
+			}
+			protoSchema, err = sc.GetSchema(ctx, req)
 			if err != nil {
-				r.Errorf("failed to get schema: %v\n", err)
+				r.Errorf("failed to get proto schema: %v\n", err)
 			}
 		})
 	})
@@ -202,11 +160,11 @@ func TestSchemas_Admin(t *testing.T) {
 	t.Run("rollbackSchema", func(t *testing.T) {
 		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
 			buf := new(bytes.Buffer)
-			if err := rollbackSchema(buf, tc.ProjectID, protoSchemaID, protoSchema.RevisionID); err != nil {
+			if err := rollbackSchema(buf, tc.ProjectID, protoSchemaID, protoSchema.RevisionId); err != nil {
 				r.Errorf("rollbackSchema err: %v\n", err)
 			}
 			got := buf.String()
-			want := "Rolled back a schema"
+			want := "Rolled back schema"
 			if !strings.Contains(got, want) {
 				r.Errorf("rollbackSchema() got: %q\nwant: %q\n", got, want)
 			}
@@ -231,7 +189,7 @@ func TestSchemas_Admin(t *testing.T) {
 	t.Run("getSchemaRevision", func(t *testing.T) {
 		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
 			buf := new(bytes.Buffer)
-			schemaRev := fmt.Sprintf("%s@%s", protoSchemaID, protoSchema.RevisionID)
+			schemaRev := fmt.Sprintf("%s@%s", protoSchemaID, protoSchema.RevisionId)
 			err := getSchemaRevision(buf, tc.ProjectID, schemaRev)
 			if err != nil {
 				r.Errorf("getSchemaRevision err: %v", err)
@@ -276,7 +234,7 @@ func TestSchemas_Admin(t *testing.T) {
 	t.Run("createTopicWithSchemaRevisions", func(t *testing.T) {
 		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
 			buf := new(bytes.Buffer)
-			err := createTopicWithSchemaRevisions(buf, tc.ProjectID, topicID, protoSchemaID, protoSchema.RevisionID, protoSchema.RevisionID, pubsub.EncodingBinary)
+			err := createTopicWithSchemaRevisions(buf, tc.ProjectID, topicID, protoSchemaID, protoSchema.RevisionId, protoSchema.RevisionId)
 			if err != nil {
 				r.Errorf("createTopicWithSchemaRevisions err: %v", err)
 			}
@@ -291,7 +249,7 @@ func TestSchemas_Admin(t *testing.T) {
 	t.Run("deleteSchemaRevision", func(t *testing.T) {
 		testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
 			buf := new(bytes.Buffer)
-			if err := deleteSchemaRevision(buf, tc.ProjectID, protoSchemaID, protoSchema.RevisionID); err != nil {
+			if err := deleteSchemaRevision(buf, tc.ProjectID, protoSchemaID, protoSchema.RevisionId); err != nil {
 				r.Errorf("deleteSchemaRevision err: %v", err)
 			}
 			got := buf.String()
@@ -322,7 +280,7 @@ func TestSchemas_AvroSchemaAll(t *testing.T) {
 
 	topicID := topicPrefix + uuid.NewString()
 	avroSchemaID := schemaPrefix + "avro-" + uuid.NewString()
-	_, err := defaultSchemaConfig(tc.ProjectID, avroSchemaID, avroFilePath, pubsub.SchemaAvro)
+	_, err := defaultSchemaConfig(tc.ProjectID, avroSchemaID, avroFilePath, pubsubpb.Schema_AVRO)
 	if err != nil {
 		t.Fatalf("defaultSchemaConfig err: %v", err)
 	}
@@ -330,12 +288,12 @@ func TestSchemas_AvroSchemaAll(t *testing.T) {
 
 	t.Run("createTopicWithSchema", func(t *testing.T) {
 		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-			if err := createAvroSchema(ioutil.Discard, tc.ProjectID, avroSchemaID, avroFilePath); err != nil {
+			if err := createAvroSchema(io.Discard, tc.ProjectID, avroSchemaID, avroFilePath); err != nil {
 				r.Errorf("createAvroSchema err: %v", err)
 			}
 
 			buf := new(bytes.Buffer)
-			err := createTopicWithSchema(buf, tc.ProjectID, topicID, avroSchemaID, pubsub.EncodingJSON)
+			err := createTopicWithSchema(buf, tc.ProjectID, topicID, avroSchemaID, pubsubpb.Encoding_JSON)
 			if err != nil {
 				r.Errorf("createTopicWithSchema: %v", err)
 			}
@@ -345,10 +303,11 @@ func TestSchemas_AvroSchemaAll(t *testing.T) {
 				r.Errorf("createTopicWithSchema mismatch\ngot: %v\nwant: %v\n", got, want)
 			}
 
-			subCfg := pubsub.SubscriptionConfig{
-				Topic: client.Topic(topicID),
+			sub := &pubsubpb.Subscription{
+				Name:  fmt.Sprintf("projects/%s/subscriptions/%s", tc.ProjectID, subID),
+				Topic: fmt.Sprintf("projects/%s/topics/%s", tc.ProjectID, topicID),
 			}
-			if _, err = client.CreateSubscription(ctx, subID, subCfg); err != nil {
+			if _, err = client.SubscriptionAdminClient.CreateSubscription(ctx, sub); err != nil {
 				r.Errorf("client.CreateSubscription err: %v", err)
 			}
 		})
@@ -391,7 +350,7 @@ func TestSchemas_AvroSchemaAll(t *testing.T) {
 				r.Errorf("publishAvroRecords: %v", err)
 			}
 			buf := new(bytes.Buffer)
-			err = subscribeWithAvroSchemaRevisions(buf, tc.ProjectID, subID, avroFilePath)
+			err = subscribeWithAvroSchemaRevisions(buf, tc.ProjectID, subID)
 			if err != nil {
 				r.Errorf("subscribeWithAvroSchemaRevisions: %v", err)
 			}
@@ -403,9 +362,15 @@ func TestSchemas_AvroSchemaAll(t *testing.T) {
 		})
 	})
 
-	deleteSchema(ioutil.Discard, tc.ProjectID, avroSchemaID)
-	client.Subscription(subID).Delete(ctx)
-	client.Topic(topicID).Delete(ctx)
+	deleteSchema(io.Discard, tc.ProjectID, avroSchemaID)
+	dsr := &pubsubpb.DeleteSubscriptionRequest{
+		Subscription: fmt.Sprintf("projects/%s/subscriptions/%s", tc.ProjectID, subID),
+	}
+	client.SubscriptionAdminClient.DeleteSubscription(ctx, dsr)
+	dtr := &pubsubpb.DeleteTopicRequest{
+		Topic: fmt.Sprintf("projects/%s/topics/%s", tc.ProjectID, topicID),
+	}
+	client.TopicAdminClient.DeleteTopic(ctx, dtr)
 }
 
 func TestSchemas_ProtoSchemaAll(t *testing.T) {
@@ -415,7 +380,7 @@ func TestSchemas_ProtoSchemaAll(t *testing.T) {
 
 	topicID := topicPrefix + uuid.NewString()
 	protoSchemaID := schemaPrefix + "proto-" + uuid.NewString()
-	_, err := defaultSchemaConfig(tc.ProjectID, protoSchemaID, avroFilePath, pubsub.SchemaAvro)
+	_, err := defaultSchemaConfig(tc.ProjectID, protoSchemaID, avroFilePath, pubsubpb.Schema_AVRO)
 	if err != nil {
 		t.Fatalf("defaultSchemaConfig err: %v", err)
 	}
@@ -423,12 +388,12 @@ func TestSchemas_ProtoSchemaAll(t *testing.T) {
 
 	t.Run("createResources", func(t *testing.T) {
 		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-			if err := createProtoSchema(ioutil.Discard, tc.ProjectID, protoSchemaID, protoFilePath); err != nil {
+			if err := createProtoSchema(io.Discard, tc.ProjectID, protoSchemaID, protoFilePath); err != nil {
 				r.Errorf("createProtoSchema err: %v", err)
 			}
 
 			buf := new(bytes.Buffer)
-			err := createTopicWithSchema(buf, tc.ProjectID, topicID, protoSchemaID, pubsub.EncodingJSON)
+			err := createTopicWithSchema(buf, tc.ProjectID, topicID, protoSchemaID, pubsubpb.Encoding_JSON)
 			if err != nil {
 				r.Errorf("createTopicWithSchema: %v", err)
 			}
@@ -438,11 +403,12 @@ func TestSchemas_ProtoSchemaAll(t *testing.T) {
 				r.Errorf("createTopicWithSchema mismatch\ngot: %v\nwant: %v\n", got, want)
 			}
 
-			subCfg := pubsub.SubscriptionConfig{
-				Topic: client.Topic(topicID),
+			sub := &pubsubpb.Subscription{
+				Name:  fmt.Sprintf("projects/%s/subscriptions/%s", tc.ProjectID, subID),
+				Topic: fmt.Sprintf("projects/%s/topics/%s", tc.ProjectID, topicID),
 			}
-			if _, err = client.CreateSubscription(ctx, subID, subCfg); err != nil {
-				r.Errorf("client.CreateSubscription err: %v", err)
+			if _, err = client.SubscriptionAdminClient.CreateSubscription(ctx, sub); err != nil {
+				r.Errorf("failed to create subscription: %v", err)
 			}
 		})
 	})
@@ -465,7 +431,7 @@ func TestSchemas_ProtoSchemaAll(t *testing.T) {
 	t.Run("subscribeProtoMessages", func(t *testing.T) {
 		testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 			buf := new(bytes.Buffer)
-			err := subscribeWithProtoSchema(buf, tc.ProjectID, subID, protoFilePath)
+			err := subscribeWithProtoSchema(buf, tc.ProjectID, subID)
 			if err != nil {
 				r.Errorf("subscribeWithProtoSchema: %v", err)
 			}
@@ -477,59 +443,66 @@ func TestSchemas_ProtoSchemaAll(t *testing.T) {
 		})
 	})
 
-	deleteSchema(ioutil.Discard, tc.ProjectID, protoSchemaID)
-	client.Subscription(subID).Delete(ctx)
-	client.Topic(topicID).Delete(ctx)
+	deleteSchema(io.Discard, tc.ProjectID, protoSchemaID)
+	dsr := &pubsubpb.DeleteSubscriptionRequest{
+		Subscription: fmt.Sprintf("projects/%s/subscriptions/%s", tc.ProjectID, subID),
+	}
+	client.SubscriptionAdminClient.DeleteSubscription(ctx, dsr)
+	dtr := &pubsubpb.DeleteTopicRequest{
+		Topic: fmt.Sprintf("projects/%s/topics/%s", tc.ProjectID, topicID),
+	}
+	client.TopicAdminClient.DeleteTopic(ctx, dtr)
 }
 
 func TestSchemas_UpdateTopicSchema(t *testing.T) {
-	_, schemaClient := setup(t)
+	pubsubClient, schemaClient := setup(t)
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
 	topicID := topicPrefix + uuid.NewString()
-	protoSchemaID := schemaPrefix + "proto-" + uuid.NewString()
-	protoSchemaID2 := schemaPrefix + "proto-" + uuid.NewString()
 
-	protoSource, err := ioutil.ReadFile(protoFilePath)
+	protoSchemaID := schemaPrefix + "proto-" + uuid.NewString()
+
+	protoSource, err := os.ReadFile(protoFilePath)
 	if err != nil {
 		t.Fatalf("error reading from file: %s", protoFilePath)
 	}
-	schema, err := schemaClient.CreateSchema(ctx, protoSchemaID, pubsub.SchemaConfig{
-		Type:       pubsub.SchemaProtocolBuffer,
-		Definition: string(protoSource),
-	})
+	csr := &pubsubpb.CreateSchemaRequest{
+		Parent:   fmt.Sprintf("projects/%s", tc.ProjectID),
+		SchemaId: protoSchemaID,
+		Schema: &pubsubpb.Schema{
+			Type:       pubsubpb.Schema_PROTOCOL_BUFFER,
+			Definition: string(protoSource),
+		},
+	}
+	schema, err := schemaClient.CreateSchema(ctx, csr)
 	if err != nil {
 		t.Fatalf("createProtoSchema err: %v", err)
 	}
 
-	_, err = schemaClient.CreateSchema(ctx, protoSchemaID2, pubsub.SchemaConfig{
-		Type:       pubsub.SchemaProtocolBuffer,
-		Definition: string(protoSource),
+	pubsubClient.TopicAdminClient.CreateTopic(ctx, &pubsubpb.Topic{
+		Name: fmt.Sprintf("projects/%s/topics/%s", tc.ProjectID, topicID),
+		SchemaSettings: &pubsubpb.SchemaSettings{
+			Schema:   schema.GetName(),
+			Encoding: pubsubpb.Encoding_BINARY,
+		},
 	})
-	if err != nil {
-		t.Fatalf("createProtoSchema err: %v", err)
-	}
-
-	if err := createTopicWithSchema(ioutil.Discard, tc.ProjectID, topicID, protoSchemaID, pubsub.EncodingJSON); err != nil {
-		t.Fatalf("createTopicWithSchema: %v", err)
-	}
 
 	buf := new(bytes.Buffer)
-	if err := updateTopicSchema(buf, tc.ProjectID, topicID, schema.RevisionID, schema.RevisionID); err != nil {
+	if err := updateTopicSchema(buf, tc.ProjectID, topicID, schema.RevisionId, schema.RevisionId); err != nil {
 		t.Fatalf("updateTopicSchema err : %v", err)
 	}
 }
 
-func defaultSchemaConfig(projectID, schemaID, schemaFile string, schemaType pubsub.SchemaType) (*pubsub.SchemaConfig, error) {
-	schemaSource, err := ioutil.ReadFile(schemaFile)
+func defaultSchemaConfig(projectID, schemaID, schemaFile string, schemaType pubsubpb.Schema_Type) (*pubsubpb.Schema, error) {
+	schemaSource, err := os.ReadFile(schemaFile)
 	if err != nil {
 		return nil, err
 	}
-	cfg := &pubsub.SchemaConfig{
+	s := &pubsubpb.Schema{
 		Name:       fmt.Sprintf("projects/%s/schemas/%s", projectID, schemaID),
 		Type:       schemaType,
 		Definition: string(schemaSource),
 	}
-	return cfg, nil
+	return s, nil
 }

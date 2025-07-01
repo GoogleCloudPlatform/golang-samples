@@ -21,16 +21,17 @@ import (
 	"io"
 	"time"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 // createCloudStorageSubscription creates a Pub/Sub subscription that exports messages to Cloud Storage.
-func createCloudStorageSubscription(w io.Writer, projectID, subID string, topic *pubsub.Topic, bucket string) error {
+func createCloudStorageSubscription(w io.Writer, projectID, topic, subscription, bucket string) error {
 	// projectID := "my-project-id"
-	// subID := "my-sub"
-	// topic of type https://godoc.org/cloud.google.com/go/pubsub#Topic
-	// note bucket should not have the gs:// prefix
-	// bucket := "my-bucket"
+	// topic := "projects/my-project-id/topics/my-topic"
+	// subscription := "projects/my-project/subscriptions/my-sub"
+	// bucket := "my-bucket" // bucket must not have the gs:// prefix
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -38,19 +39,24 @@ func createCloudStorageSubscription(w io.Writer, projectID, subID string, topic 
 	}
 	defer client.Close()
 
-	sub, err := client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
+	sub, err := client.SubscriptionAdminClient.CreateSubscription(ctx, &pubsubpb.Subscription{
+		Name:  subscription,
 		Topic: topic,
-		CloudStorageConfig: pubsub.CloudStorageConfig{
+		CloudStorageConfig: &pubsubpb.CloudStorageConfig{
 			Bucket:         bucket,
 			FilenamePrefix: "log_events_",
 			FilenameSuffix: ".avro",
-			OutputFormat:   &pubsub.CloudStorageOutputFormatAvroConfig{WriteMetadata: true},
-			MaxDuration:    1 * time.Minute,
-			MaxBytes:       1e8,
+			OutputFormat: &pubsubpb.CloudStorageConfig_AvroConfig_{
+				AvroConfig: &pubsubpb.CloudStorageConfig_AvroConfig{
+					WriteMetadata: true,
+				},
+			},
+			MaxDuration: durationpb.New(1 * time.Minute),
+			MaxBytes:    1e8,
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("client.CreateSubscription: %w", err)
+		return fmt.Errorf("failed to create cloud storage sub: %w", err)
 	}
 	fmt.Fprintf(w, "Created Cloud Storage subscription: %v\n", sub)
 

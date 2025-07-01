@@ -23,7 +23,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 )
 
 func publishThatScales(w io.Writer, projectID, topicID string, n int) error {
@@ -38,10 +38,15 @@ func publishThatScales(w io.Writer, projectID, topicID string, n int) error {
 
 	var wg sync.WaitGroup
 	var totalErrors uint64
-	t := client.Topic(topicID)
+
+	// client.Publisher can be passed a topic ID (e.g. "my-topic") or
+	// a fully qualified name (e.g. "projects/my-project/topics/my-topic").
+	// If a topic ID is provided, the project ID from the client is used.
+	// Reuse this publisher for all publish calls to send messages in batches.
+	publisher := client.Publisher(topicID)
 
 	for i := 0; i < n; i++ {
-		result := t.Publish(ctx, &pubsub.Message{
+		result := publisher.Publish(ctx, &pubsub.Message{
 			Data: []byte("Message " + strconv.Itoa(i)),
 		})
 
