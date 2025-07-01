@@ -42,16 +42,16 @@ func resumePublishWithOrderingKey(w io.Writer, projectID, topicID string) {
 	// client.Publisher can be passed a topic ID (e.g. "my-topic") or
 	// a fully qualified name (e.g. "projects/my-project/topics/my-topic").
 	// If a topic ID is provided, the project ID from the client is used.
-	// Make sure to reuse this publisher for all publish calls.
+	// Reuse this publisher for all publish calls to send messages in batches.
 	publisher := client.Publisher(topicID)
 	publisher.EnableMessageOrdering = true
 	key := "some-ordering-key"
 
-	res := publisher.Publish(ctx, &pubsub.Message{
+	result := publisher.Publish(ctx, &pubsub.Message{
 		Data:        []byte("some-message"),
 		OrderingKey: key,
 	})
-	_, err = res.Get(ctx)
+	_, err = result.Get(ctx)
 	if err != nil {
 		// Error handling code can be added here.
 		fmt.Printf("Failed to publish: %s\n", err)

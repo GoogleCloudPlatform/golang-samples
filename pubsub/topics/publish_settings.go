@@ -38,7 +38,6 @@ func publishWithSettings(w io.Writer, projectID, topicID string) error {
 	// client.Publisher can be passed a topic ID (e.g. "my-topic") or
 	// a fully qualified name (e.g. "projects/my-project/topics/my-topic").
 	// If a topic ID is provided, the project ID from the client is used.
-	// Make sure to reuse this publisher for all publish calls.
 	publisher := client.Publisher(topicID)
 	publisher.PublishSettings.ByteThreshold = 5000
 	publisher.PublishSettings.CountThreshold = 10
