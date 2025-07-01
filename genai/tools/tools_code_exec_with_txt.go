@@ -48,7 +48,7 @@ func generateWithCodeExec(w io.Writer) error {
 		},
 		Temperature: genai.Ptr(float32(0.0)),
 	}
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, config)
 	if err != nil {
