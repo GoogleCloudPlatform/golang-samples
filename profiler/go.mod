@@ -3,10 +3,10 @@ module github.com/GoogleCloudPlatform/golang-samples/profiler
 go 1.23.0
 
 require (
-	cloud.google.com/go/cloudprofiler v0.3.4
-	cloud.google.com/go/profiler v0.4.1
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	google.golang.org/api v0.217.0
+	cloud.google.com/go/cloudprofiler v0.4.5
+	cloud.google.com/go/profiler v0.4.3
+	github.com/GoogleCloudPlatform/golang-samples 08c89d4170c5
+	google.golang.org/api v0.239.0
 )
 
 require github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect

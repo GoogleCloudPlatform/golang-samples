@@ -3,11 +3,11 @@ module github.com/GoogleCloudPlatform/golang-samples/aiplatform
 go 1.23.0
 
 require (
-	cloud.google.com/go/aiplatform v1.70.0
-	cloud.google.com/go/storage v1.50.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	google.golang.org/api v0.217.0
-	google.golang.org/protobuf v1.36.3
+	cloud.google.com/go/aiplatform v1.92.0
+	cloud.google.com/go/storage v1.55.0
+	github.com/GoogleCloudPlatform/golang-samples 08c89d4170c5
+	google.golang.org/api v0.239.0
+	google.golang.org/protobuf v1.36.6
 )
 
 require (
