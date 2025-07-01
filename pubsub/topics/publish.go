@@ -38,8 +38,6 @@ func publish(w io.Writer, projectID, topicID, msg string) error {
 	// a fully qualified name (e.g. "projects/my-project/topics/my-topic").
 	// If a topic ID is provided, the project ID from the client is used.
 	// Reuse this publisher for all publish calls to send messages in batches.
-
-	// Make sure to reuse this publisher for all publish calls.
 	publisher := client.Publisher(topicID)
 	result := publisher.Publish(ctx, &pubsub.Message{
 		Data: []byte(msg),
