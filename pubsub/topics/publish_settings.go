@@ -35,16 +35,18 @@ func publishWithSettings(w io.Writer, projectID, topicID string) error {
 	}
 	defer client.Close()
 
-	// Make sure to reuse this publisher across publishes.
-	p := client.Publisher(topicID)
-	p.PublishSettings.ByteThreshold = 5000
-	p.PublishSettings.CountThreshold = 10
-	p.PublishSettings.DelayThreshold = 100 * time.Millisecond
+	// client.Publisher can be passed a topic ID (e.g. "my-topic") or
+	// a fully qualified name (e.g. "projects/my-project/topics/my-topic").
+	// If a topic ID is provided, the project ID from the client is used.
+	publisher := client.Publisher(topicID)
+	publisher.PublishSettings.ByteThreshold = 5000
+	publisher.PublishSettings.CountThreshold = 10
+	publisher.PublishSettings.DelayThreshold = 100 * time.Millisecond
 
 	var results []*pubsub.PublishResult
 	var resultErrors []error
 	for i := 0; i < 10; i++ {
-		result := p.Publish(ctx, &pubsub.Message{
+		result := publisher.Publish(ctx, &pubsub.Message{
 			Data: []byte("Message " + strconv.Itoa(i)),
 		})
 		results = append(results, result)

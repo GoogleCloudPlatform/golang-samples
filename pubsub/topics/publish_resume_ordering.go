@@ -39,16 +39,19 @@ func resumePublishWithOrderingKey(w io.Writer, projectID, topicID string) {
 	}
 	defer client.Close()
 
-	// Make sure to reuse this publisher across publishes.
-	p := client.Publisher(topicID)
-	p.EnableMessageOrdering = true
+	// client.Publisher can be passed a topic ID (e.g. "my-topic") or
+	// a fully qualified name (e.g. "projects/my-project/topics/my-topic").
+	// If a topic ID is provided, the project ID from the client is used.
+	// Reuse this publisher for all publish calls to send messages in batches.
+	publisher := client.Publisher(topicID)
+	publisher.EnableMessageOrdering = true
 	key := "some-ordering-key"
 
-	res := p.Publish(ctx, &pubsub.Message{
+	result := publisher.Publish(ctx, &pubsub.Message{
 		Data:        []byte("some-message"),
 		OrderingKey: key,
 	})
-	_, err = res.Get(ctx)
+	_, err = result.Get(ctx)
 	if err != nil {
 		// Error handling code can be added here.
 		fmt.Printf("Failed to publish: %s\n", err)
@@ -56,7 +59,7 @@ func resumePublishWithOrderingKey(w io.Writer, projectID, topicID string) {
 		// Resume publish on an ordering key that has had unrecoverable errors.
 		// After such an error publishes with this ordering key will fail
 		// until this method is called.
-		p.ResumePublish(key)
+		publisher.ResumePublish(key)
 	}
 
 	fmt.Fprint(w, "Published a message with ordering key successfully\n")

@@ -34,14 +34,17 @@ func publishWithCompression(w io.Writer, projectID, topicID string) error {
 	}
 	defer client.Close()
 
-	// Make sure to reuse this publisher across publishes.
-	p := client.Publisher(topicID)
+	// client.Publisher can be passed a topic ID (e.g. "my-topic") or
+	// a fully qualified name (e.g. "projects/my-project/topics/my-topic").
+	// If a topic ID is provided, the project ID from the client is used.
+	// Reuse this publisher for all publish calls to send messages in batches.
+	publisher := client.Publisher(topicID)
 
 	// Enable compression and configure the compression threshold to 10 bytes (default to 240 B).
 	// Publish requests of sizes > 10 B (excluding the request headers) will get compressed.
-	p.PublishSettings.EnableCompression = true
-	p.PublishSettings.CompressionBytesThreshold = 10
-	result := p.Publish(ctx, &pubsub.Message{
+	publisher.PublishSettings.EnableCompression = true
+	publisher.PublishSettings.CompressionBytesThreshold = 10
+	result := publisher.Publish(ctx, &pubsub.Message{
 		Data: []byte("This is a test message"),
 	})
 	// Block until the result is returned and a server-generated
