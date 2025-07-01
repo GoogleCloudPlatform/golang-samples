@@ -34,11 +34,14 @@ func publishSingleGoroutine(w io.Writer, projectID, topicID, msg string) error {
 	}
 	defer client.Close()
 
-	// Make sure to reuse this publisher across publishes.
-	p := client.Publisher(topicID)
-	p.PublishSettings.NumGoroutines = 1
+	// client.Publisher can be passed a topic ID (e.g. "my-topic") or
+	// a fully qualified name (e.g. "projects/my-project/topics/my-topic").
+	// If a topic ID is provided, the project ID from the client is used.
+	// Make sure to reuse this publisher for all publish calls.
+	publisher := client.Publisher(topicID)
+	publisher.PublishSettings.NumGoroutines = 1
 
-	result := p.Publish(ctx, &pubsub.Message{Data: []byte(msg)})
+	result := publisher.Publish(ctx, &pubsub.Message{Data: []byte(msg)})
 	// Block until the result is returned and a server-generated
 	// ID is returned for the published message.
 	id, err := result.Get(ctx)

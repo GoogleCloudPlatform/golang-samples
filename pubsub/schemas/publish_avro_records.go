@@ -72,7 +72,10 @@ func publishAvroRecords(w io.Writer, projectID, topicID, avscFile string) error 
 		return fmt.Errorf("invalid encoding: %v", encoding)
 	}
 
-	publisher := client.Publisher(t.GetName())
+	// client.Publisher can be passed a topic ID (e.g. "my-topic") or
+	// a fully qualified name (e.g. "projects/my-project/topics/my-topic").
+	// If a topic ID is provided, the project ID from the client is used.
+	publisher := client.Publisher(topicID)
 	result := publisher.Publish(ctx, &pubsub.Message{
 		Data: msg,
 	})

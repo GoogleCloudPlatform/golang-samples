@@ -39,11 +39,14 @@ func publishThatScales(w io.Writer, projectID, topicID string, n int) error {
 	var wg sync.WaitGroup
 	var totalErrors uint64
 
-	// Make sure to reuse this publisher across publishes.
-	p := client.Publisher(topicID)
+	// client.Publisher can be passed a topic ID (e.g. "my-topic") or
+	// a fully qualified name (e.g. "projects/my-project/topics/my-topic").
+	// If a topic ID is provided, the project ID from the client is used.
+	// Make sure to reuse this publisher for all publish calls.
+	publisher := client.Publisher(topicID)
 
 	for i := 0; i < n; i++ {
-		result := p.Publish(ctx, &pubsub.Message{
+		result := publisher.Publish(ctx, &pubsub.Message{
 			Data: []byte("Message " + strconv.Itoa(i)),
 		})
 

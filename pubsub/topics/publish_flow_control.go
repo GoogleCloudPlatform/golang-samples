@@ -36,7 +36,10 @@ func publishWithFlowControlSettings(w io.Writer, projectID, topicID string) erro
 	}
 	defer client.Close()
 
-	// Make sure to reuse this publisher across publishes.
+	// client.Publisher can be passed a topic ID (e.g. "my-topic") or
+	// a fully qualified name (e.g. "projects/my-project/topics/my-topic").
+	// If a topic ID is provided, the project ID from the client is used.
+	// Make sure to reuse this publisher for all publish calls.
 	publisher := client.Publisher(topicID)
 	publisher.PublishSettings.FlowControlSettings = pubsub.FlowControlSettings{
 		MaxOutstandingMessages: 100,                     // default 1000
