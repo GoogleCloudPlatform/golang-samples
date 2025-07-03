@@ -44,7 +44,8 @@ Use speaker A, speaker B, etc. to identify speakers.`},
 				FileURI:  "gs://cloud-samples-data/generative-ai/audio/pixel.mp3",
 				MIMEType: "audio/mpeg",
 			}},
-		}},
+		},
+			Role: "user"},
 	}
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)
@@ -52,10 +53,8 @@ Use speaker A, speaker B, etc. to identify speakers.`},
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
 
-	respText, err := resp.Text()
-	if err != nil {
-		return fmt.Errorf("failed to convert model response to text: %w", err)
-	}
+	respText := resp.Text()
+
 	fmt.Fprintln(w, respText)
 
 	// Example response:
