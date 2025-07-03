@@ -1656,7 +1656,9 @@ func TestCreateSecretWithTags(t *testing.T) {
 	parent := fmt.Sprintf("projects/%s", tc.ProjectID)
 
 	tagKey := testCreateTagKey(t, tc.ProjectID)
+	defer testCleanupTagKey(t, tagKey.Name)
 	tagValue := testCreateTagValue(t, tagKey.GetName())
+	defer testCleanupTagValue(t, tagValue.Name)
 
 	t.Logf("Secret ID used: %s", secretID)
 	t.Logf("Tag Key used: %s", tagKey.GetName())
@@ -1666,12 +1668,7 @@ func TestCreateSecretWithTags(t *testing.T) {
 	if err := createSecretWithTags(&b, parent, secretID, tagKey.GetName(), tagValue.GetName()); err != nil {
 		t.Fatal(err)
 	}
-
-	defer func() {
-		testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
-		testCleanupTagValue(t, tagValue.Name)
-		testCleanupTagKey(t, tagKey.Name)
-	}()
+	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
 
 	if got, want := b.String(), "Created secret with tags:"; !strings.Contains(got, want) {
 		t.Errorf("createSecretWithTags: expected %q to contain %q", got, want)

@@ -466,18 +466,16 @@ func TestCreateRegionalSecretWithTags(t *testing.T) {
 	locationID := testLocation(t)
 
 	tagKey := testCreateTagKey(t, tc.ProjectID)
+	defer testCleanupTagKey(t, tagKey.Name)
+
 	tagValue := testCreateTagValue(t, tagKey.GetName())
+	defer testCleanupTagValue(t, tagValue.Name)
 
 	var b bytes.Buffer
 	if err := createRegionalSecretWithTags(&b, tc.ProjectID, locationID, secretID, tagKey.GetName(), tagValue.GetName()); err != nil {
 		t.Fatal(err)
 	}
-
-	defer func() {
-		testCleanupRegionalSecret(t, fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID))
-		testCleanupTagValue(t, tagValue.Name)
-		testCleanupTagKey(t, tagKey.Name)
-	}()
+	defer testCleanupRegionalSecret(t, fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID))
 
 	if got, want := b.String(), "Created secret with tags:"; !strings.Contains(got, want) {
 		t.Errorf("createRegionalSecretWithTags: expected %q to contain %q", got, want)
