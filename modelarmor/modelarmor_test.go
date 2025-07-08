@@ -37,8 +37,6 @@ import (
 	grpcstatus "google.golang.org/grpc/status"
 )
 
-// TODO: Floorsettings test cases will be added later
-
 // testLocation retrieves the GOLANG_SAMPLES_LOCATION environment variable
 // used to determine the region for running the test.
 // Skip the test if the environment variable is not set.
@@ -1297,7 +1295,6 @@ func TestUpdateTemplateWithMaskConfiguration(t *testing.T) {
 // TestGetProjectFloorSettings tests the retrieval of floor settings at the project level.
 // It verifies the output contains the expected confirmation string.
 func TestGetProjectFloorSettings(t *testing.T) {
-
 	tc := testutil.SystemTest(t)
 
 	var buf bytes.Buffer
@@ -1313,7 +1310,6 @@ func TestGetProjectFloorSettings(t *testing.T) {
 // TestGetOrganizationFloorSettings tests the retrieval of floor settings at the organization level.
 // It checks that the output includes the expected string indicating success.
 func TestGetOrganizationFloorSettings(t *testing.T) {
-
 	organizationID := testOrganizationID(t)
 	var buf bytes.Buffer
 	if err := getOrganizationFloorSettings(&buf, organizationID); err != nil {
@@ -1328,7 +1324,6 @@ func TestGetOrganizationFloorSettings(t *testing.T) {
 // TestGetFolderFloorSettings tests the retrieval of floor settings at the folder level.
 // It ensures the result contains the expected confirmation message.
 func TestGetFolderFloorSettings(t *testing.T) {
-
 	folderID := testFolderID(t)
 	var buf bytes.Buffer
 	if err := getFolderFloorSettings(&buf, folderID); err != nil {
@@ -1343,7 +1338,6 @@ func TestGetFolderFloorSettings(t *testing.T) {
 // TestUpdateFolderFloorSettings tests updating floor settings for a specific folder.
 // It verifies that the output buffer contains a confirmation message indicating a successful update.
 func TestUpdateFolderFloorSettings(t *testing.T) {
-
 	folderID := testFolderID(t)
 	locationID := testLocation(t)
 	var buf bytes.Buffer
@@ -1363,7 +1357,6 @@ func TestUpdateFolderFloorSettings(t *testing.T) {
 // TestUpdateOrganizationFloorSettings tests updating floor settings for a specific organization.
 // It ensures the output buffer includes a success message confirming the update.
 func TestUpdateOrganizationFloorSettings(t *testing.T) {
-
 	organizationID := testOrganizationID(t)
 	locationID := testLocation(t)
 	var buf bytes.Buffer
@@ -1384,7 +1377,6 @@ func TestUpdateOrganizationFloorSettings(t *testing.T) {
 // TestUpdateProjectFloorSettings tests updating floor settings for a specific project.
 // It checks that the resulting output includes the expected confirmation message.
 func TestUpdateProjectFloorSettings(t *testing.T) {
-
 	tc := testutil.SystemTest(t)
 	locationID := testLocation(t)
 	var buf bytes.Buffer
