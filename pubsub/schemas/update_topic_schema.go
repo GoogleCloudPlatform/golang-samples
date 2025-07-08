@@ -20,12 +20,14 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
 func updateTopicSchema(w io.Writer, projectID, topicID, firstRevisionID, lastRevisionID string) error {
 	// projectID := "my-project-id"
-	// topicID := "my-topic"
+	// topicID := "my-topic" // an existing topic that has schema settings attached to it.
 	// firstRevisionID := "my-revision-id"
 	// lastRevisionID := "my-revision-id"
 	ctx := context.Background()
@@ -33,18 +35,25 @@ func updateTopicSchema(w io.Writer, projectID, topicID, firstRevisionID, lastRev
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
-	t := client.Topic(topicID)
 
 	// This updates the first / last revision ID for the topic's schema.
-	// To clear the schema entirely, use a zero valued (empty) SchemaSettings.
-	tc := pubsub.TopicConfigToUpdate{
-		SchemaSettings: &pubsub.SchemaSettings{
-			FirstRevisionID: firstRevisionID,
-			LastRevisionID:  lastRevisionID,
+	// To clear the schema entirely, use a zero valued (empty) SchemaSettings
+	// with the same field mask.
+	req := &pubsubpb.UpdateTopicRequest{
+		Topic: &pubsubpb.Topic{
+			Name: fmt.Sprintf("projects/%s/topics/%s", projectID, topicID),
+			SchemaSettings: &pubsubpb.SchemaSettings{
+				FirstRevisionId: firstRevisionID,
+				LastRevisionId:  lastRevisionID,
+			},
+		},
+		// Construct a field mask to indicate which field to update in the topic.
+		// Fields are specified relative to the topic
+		UpdateMask: &fieldmaskpb.FieldMask{
+			Paths: []string{"schema_settings.first_revision_id", "schema_settings.last_revision_id"},
 		},
 	}
-
-	gotTopicCfg, err := t.Update(ctx, tc)
+	gotTopicCfg, err := client.TopicAdminClient.UpdateTopic(ctx, req)
 	if err != nil {
 		fmt.Fprintf(w, "topic.Update err: %v\n", gotTopicCfg)
 		return err
