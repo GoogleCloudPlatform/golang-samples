@@ -20,28 +20,33 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/iam"
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/iam/apiv1/iampb"
+	"cloud.google.com/go/pubsub/v2"
 )
 
-func policy(w io.Writer, projectID, topicID string) (*iam.Policy, error) {
+func getIAMPolicy(w io.Writer, projectID, topicID string) error {
 	// projectID := "my-project-id"
 	// topicID := "my-topic"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return nil, fmt.Errorf("pubsub.NewClient: %w", err)
+		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 
-	policy, err := client.Topic(topicID).IAM().Policy(ctx)
+	req := &iampb.GetIamPolicyRequest{
+		Resource: fmt.Sprintf("projects/%s/topics/%s", projectID, topicID),
+	}
+	policy, err := client.TopicAdminClient.GetIamPolicy(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("Policy: %w", err)
+		return fmt.Errorf("Policy: %w", err)
 	}
-	for _, role := range policy.Roles() {
-		fmt.Fprint(w, policy.Members(role))
+	for _, b := range policy.Bindings {
+		for _, m := range b.Members {
+			fmt.Fprintf(w, "role: %s, member: %s\n", b.Role, m)
+		}
 	}
-	return policy, nil
+	return nil
 }
 
 // [END pubsub_get_topic_policy]
