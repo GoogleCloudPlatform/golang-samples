@@ -4,10 +4,10 @@ go 1.23.0
 
 require (
 	cloud.google.com/go/gkeconnect v0.12.4
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250512171409-d5befca4cf89
+	github.com/GoogleCloudPlatform/golang-samples 488f1611608d
 	github.com/google/uuid v1.6.0
-	golang.org/x/oauth2 v0.29.0
-	google.golang.org/api v0.231.0
+	golang.org/x/oauth2 v0.30.0
+	google.golang.org/api v0.240.0
 	k8s.io/apimachinery v0.32.4
 	k8s.io/client-go v0.32.4
 )
