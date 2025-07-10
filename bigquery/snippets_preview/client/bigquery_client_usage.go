@@ -138,8 +138,9 @@ func basicClientUsage(ctx context.Context, w io.Writer, useGRPC bool) error {
 				}
 				// Log basic information about the encountered table.
 				fmt.Fprintf(w, "ListTables: table %q in dataset %q\n",
+					table.GetTableReference().GetTableId(),
 					table.GetTableReference().GetDatasetId(),
-					table.GetTableReference().GetTableId())
+				)
 			}
 		}
 	}
