@@ -20,11 +20,13 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
 	"cloud.google.com/go/spanner/admin/database/apiv1/databasepb"
 	adminpb "cloud.google.com/go/spanner/admin/database/apiv1/databasepb"
 	"google.golang.org/protobuf/types/known/structpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // Adds split points to table and index
@@ -108,10 +110,29 @@ func addSplitpoints(w io.Writer, dbName string) error {
 		Keys:  []*databasepb.SplitPoints_Key{&splitIndexKeyWithIndexKeyPart, &splitIndexKeyWithTableKeyPart},
 	}
 
+	splitTableKeyWithExpire := databasepb.SplitPoints_Key{
+		KeyParts: &structpb.ListValue{
+			Values: []*structpb.Value{
+				structpb.NewStringValue("30"),
+			},
+		},
+	}
+
+	splitForTableWithExpire := databasepb.SplitPoints{
+		Table: "Singers",
+		Keys:  []*databasepb.SplitPoints_Key{&splitTableKeyWithExpire},
+		// A timestamp in the past means immediate expiration.
+		// The maximum value can be 30 days in the future.
+		// Defaults to 10 days in the future if not specified.
+		//
+		// Setting the expiration time to next day
+		ExpireTime: timestamppb.New(time.Now().Add(24 * time.Hour)),
+	}
+
 	// Add split points to table and index
 	req := databasepb.AddSplitPointsRequest{
 		Database:    dbName,
-		SplitPoints: []*databasepb.SplitPoints{&splitForTable, &splitForindex, &splitForindexWithTableKey},
+		SplitPoints: []*databasepb.SplitPoints{&splitForTable, &splitForindex, &splitForindexWithTableKey, &splitForTableWithExpire},
 	}
 
 	res, err := dbAdminClient.AddSplitPoints(ctx, &req)

@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"time"
 
 	genai "google.golang.org/genai"
 )
@@ -30,7 +31,7 @@ func createContentCache(w io.Writer) (string, error) {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
-		HTTPOptions: genai.HTTPOptions{APIVersion: "v1beta1"},
+		HTTPOptions: genai.HTTPOptions{APIVersion: "v1"},
 	})
 	if err != nil {
 		return "", fmt.Errorf("failed to create genai client: %w", err)
@@ -65,7 +66,7 @@ func createContentCache(w io.Writer) (string, error) {
 			},
 		},
 		DisplayName: "example-cache",
-		TTL:         "86400s",
+		TTL:         time.Duration(time.Duration.Seconds(86400)),
 	}
 
 	res, err := client.Caches.Create(ctx, modelName, config)

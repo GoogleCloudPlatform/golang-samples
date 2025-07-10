@@ -44,10 +44,8 @@ func generateWithText(w io.Writer) error {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
 
-	respText, err := resp.Text()
-	if err != nil {
-		return fmt.Errorf("failed to convert model response to text: %w", err)
-	}
+	respText := resp.Text()
+
 	fmt.Fprintln(w, respText)
 	// Example response:
 	// That's a great question! Understanding how AI works can feel like ...

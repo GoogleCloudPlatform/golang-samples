@@ -29,7 +29,7 @@ func useContentCacheWithTxt(w io.Writer, cacheName string) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
-		HTTPOptions: genai.HTTPOptions{APIVersion: "v1beta1"},
+		HTTPOptions: genai.HTTPOptions{APIVersion: "v1"},
 	})
 	if err != nil {
 		return fmt.Errorf("failed to create genai client: %w", err)
@@ -46,10 +46,8 @@ func useContentCacheWithTxt(w io.Writer, cacheName string) error {
 		return fmt.Errorf("failed to use content cache to generate content: %w", err)
 	}
 
-	respText, err := resp.Text()
-	if err != nil {
-		return fmt.Errorf("failed to convert model response to text: %w", err)
-	}
+	respText := resp.Text()
+
 	fmt.Fprintln(w, respText)
 
 	// Example response:

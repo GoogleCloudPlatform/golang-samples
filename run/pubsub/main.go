@@ -44,10 +44,11 @@ func main() {
 
 // [START cloudrun_pubsub_handler]
 
-// PubSubMessage is the payload of a Pub/Sub event.
-// See the documentation for more details:
-// https://cloud.google.com/pubsub/docs/reference/rest/v1/PubsubMessage
-type PubSubMessage struct {
+// WrappedMessage is the payload of a Pub/Sub event.
+//
+// For more information about receiving messages from a Pub/Sub event
+// see: https://cloud.google.com/pubsub/docs/push#receive_push
+type WrappedMessage struct {
 	Message struct {
 		Data []byte `json:"data,omitempty"`
 		ID   string `json:"id"`
@@ -57,7 +58,7 @@ type PubSubMessage struct {
 
 // HelloPubSub receives and processes a Pub/Sub push message.
 func HelloPubSub(w http.ResponseWriter, r *http.Request) {
-	var m PubSubMessage
+	var m WrappedMessage
 	body, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
