@@ -18,19 +18,21 @@ package client
 import (
 	"context"
 	"fmt"
-	"log"
+	"io"
 
-	bigquery "cloud.google.com/go/bigquery/apiv2"
-	"cloud.google.com/go/bigquery/apiv2/bigquerypb"
+	"cloud.google.com/go/bigquery/v2/apiv2/bigquerypb"
+	"cloud.google.com/go/bigquery/v2/apiv2_client"
 
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
 
+const datasetListLimit = 10
+const tableListLimit = 10
+
 // basicClientUsage demonstrates the basic steps of creating BigQuery clients, using them to invoke
 // BQ RPCs, and shutting down.
-func basicClientUsage(useGRPC bool) error {
-	ctx := context.Background()
+func basicClientUsage(ctx context.Context, w io.Writer, useGRPC bool) error {
 
 	// Client instantiation accepts options that affect the behavior of the
 	// generated clients.  See https://pkg.go.dev/google.golang.org/api/option#ClientOption for
@@ -49,58 +51,47 @@ func basicClientUsage(useGRPC bool) error {
 		option.WithUserAgent("my-golang-sample"),
 	}
 
-	// Each RPC service in BigQuery has a dedicated client, so this example will create several of the RPC clients
-	// using the shared set of options.  We'll also
-
-	var datasetClient *bigquery.DatasetClient
-	var tableClient *bigquery.TableClient
+	// Each RPC service in BigQuery has a dedicated client, but for this example we'll
+	// use our aggregated client which exposes access to all the individual services.
+	var bqClient *apiv2_client.Client
 	var err error
 
-	// Create the clients.  Generally, you should favor reuse of clients rather than recreating them frequently
+	// Create the client.  Generally, you should favor reuse of clients rather than recreating them frequently
 	// as they require a bit of setup. It is also important to properly close a client when you're done
 	// using it.  This example uses Go's defer functionality to close the clients when the current
 	// function exits, since the usage here is more trivial.
 	if useGRPC {
 		// Create clients that use gRPC as the underlying transport protocol.
-		datasetClient, err = bigquery.NewDatasetClient(ctx, opts...)
+		bqClient, err = apiv2_client.NewClient(ctx, opts...)
 		if err != nil {
-			return fmt.Errorf("NewDatasetClient: %w", err)
+			return fmt.Errorf("NewClient: %w", err)
 		}
-		defer datasetClient.Close()
-		tableClient, err = bigquery.NewTableClient(ctx, opts...)
-		if err != nil {
-			return fmt.Errorf("NewDatasetClient: %w", err)
-		}
-		defer tableClient.Close()
+		defer bqClient.Close()
 	} else {
 		// Fallback to using HTTP REST as the underlying transport protocol.
-		datasetClient, err = bigquery.NewDatasetRESTClient(ctx, opts...)
+		bqClient, err = apiv2_client.NewRESTClient(ctx, opts...)
 		if err != nil {
-			return fmt.Errorf("NewDatasetClient: %w", err)
+			return fmt.Errorf("NewRESTClient: %w", err)
 		}
-		defer datasetClient.Close()
-
-		tableClient, err = bigquery.NewTableRESTClient(ctx, opts...)
-		if err != nil {
-			return fmt.Errorf("NewDatasetClient: %w", err)
-		}
-		defer tableClient.Close()
+		defer bqClient.Close()
 	}
-	// With the instantiated clients, we can now call the various RPCs defined within the
+	// With the instantiated client, we can now call the various RPCs defined within the
 	// BigQuery service.  We'll use our clients to get information about some of the resources
 	// within BigQuery's public datasets.  More info about public datasets can be found at
 	// https://cloud.google.com/bigquery/public-data
 
 	req := &bigquerypb.ListDatasetsRequest{
-		// This project contains many of the public datasets.
+		// This project contains many of the public datasets hosted within BigQuery.
 		ProjectId: "bigquery-public-data",
 	}
 
 	// haveListedTables keeps track of whether we've listed tables at least once in this example.
 	haveListedTables := false
+	// dsCount and tblCount keep track of how many of each resource this sample has listed.
+	var dsCount, tblCount int
 
-	// Create a dataset iterator, used too process the list of datasets present in the designated project.
-	it := datasetClient.ListDatasets(ctx, req)
+	// Create a dataset iterator, used to process the list of datasets present in the designated project.
+	it := bqClient.ListDatasets(ctx, req)
 	for {
 		dataset, err := it.Next()
 		if err == iterator.Done {
@@ -110,8 +101,12 @@ func basicClientUsage(useGRPC bool) error {
 		if err != nil {
 			return fmt.Errorf("dataset iterator errored: %w", err)
 		}
+		dsCount = dsCount + 1
+		if dsCount > datasetListLimit {
+			break
+		}
 		// Log basic information about the encountered dataset.
-		log.Printf("ListDatasets: dataset %q in location %q\n",
+		fmt.Fprintf(w, "ListDatasets: dataset %q in location %q\n",
 			dataset.GetDatasetReference().GetDatasetId(),
 			dataset.GetLocation())
 
@@ -126,7 +121,7 @@ func basicClientUsage(useGRPC bool) error {
 				ProjectId: dataset.GetDatasetReference().GetProjectId(),
 				DatasetId: dataset.DatasetReference.GetDatasetId(),
 			}
-			tblIt := tableClient.ListTables(ctx, tblReq)
+			tblIt := bqClient.ListTables(ctx, tblReq)
 			haveListedTables = true
 			for {
 				table, err := tblIt.Next()
@@ -137,15 +132,18 @@ func basicClientUsage(useGRPC bool) error {
 				if err != nil {
 					return fmt.Errorf("table iterator errored: %w", err)
 				}
+				tblCount = tblCount + 1
+				if tblCount > tableListLimit {
+					break
+				}
 				// Log basic information about the encountered table.
-				log.Printf("ListTables: table %q in dataset %q\n",
+				fmt.Fprintf(w, "ListTables: table %q in dataset %q\n",
 					table.GetTableReference().GetDatasetId(),
 					table.GetTableReference().GetTableId())
 			}
 		}
 	}
 	return nil
-
 }
 
 // [END bigquery_client_usage]
