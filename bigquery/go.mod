@@ -5,6 +5,7 @@ go 1.23.0
 require (
 	cloud.google.com/go v0.121.3
 	cloud.google.com/go/bigquery v1.69.0
+	cloud.google.com/go/bigquery/v2 v2.0.0-20250710180625-7e28673c9827
 	cloud.google.com/go/iam v1.5.2
 	cloud.google.com/go/storage v1.55.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
@@ -23,7 +24,6 @@ require (
 	cel.dev/expr v0.23.0 // indirect
 	cloud.google.com/go/auth v0.16.2 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
-	cloud.google.com/go/bigquery/v2 v2.0.0-20250710180625-7e28673c9827 // indirect
 	cloud.google.com/go/compute/metadata v0.7.0 // indirect
 	cloud.google.com/go/longrunning v0.6.7 // indirect
 	cloud.google.com/go/monitoring v1.24.2 // indirect
