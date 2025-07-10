@@ -21,15 +21,20 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"time"
 
 	"testing"
 
+	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
+	"cloud.google.com/go/resourcemanager/apiv3/resourcemanagerpb"
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/gofrs/uuid"
 	"google.golang.org/api/option"
+	"google.golang.org/grpc/codes"
 	grpccodes "google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	grpcstatus "google.golang.org/grpc/status"
 )
 
@@ -289,5 +294,190 @@ func TestViewRegionalSecretAnnotations(t *testing.T) {
 
 	if got, want := s.Annotations, map[string]string{"annotationkey": "annotationvalue"}; !reflect.DeepEqual(got, want) {
 		t.Errorf("viewRegionalSecretAnnotations: expected %q to be %q", got, want)
+	}
+}
+
+func testResourceManagerTagsKeyClient(tb testing.TB) (*resourcemanager.TagKeysClient, context.Context) {
+	tb.Helper()
+	ctx := context.Background()
+
+	client, err := resourcemanager.NewTagKeysClient(ctx)
+	if err != nil {
+		tb.Fatalf("testResourceManagerTagsKeyClient: failed to create client: %v", err)
+	}
+	return client, ctx
+
+}
+
+func testResourceManagerTagsValueClient(tb testing.TB) (*resourcemanager.TagValuesClient, context.Context) {
+	tb.Helper()
+	ctx := context.Background()
+
+	client, err := resourcemanager.NewTagValuesClient(ctx)
+	if err != nil {
+		tb.Fatalf("testResourceManagerTagsValueClient: failed to create client: %v", err)
+	}
+	return client, ctx
+
+}
+
+func testCleanupTagKey(tb testing.TB, tagKeyName string) {
+	tb.Helper()
+
+	client, ctx := testResourceManagerTagsKeyClient(tb)
+
+	tagKeyOperation, err := client.DeleteTagKey(ctx, &resourcemanagerpb.DeleteTagKeyRequest{
+		Name: tagKeyName,
+	})
+	if err != nil {
+		tb.Fatalf("testCleanupTagKey: failed to delete tagKey: %v", err)
+		return
+	}
+
+	_, err = tagKeyOperation.Wait(ctx)
+	if err != nil {
+		tb.Fatalf("testCleanupTagKey: failed to delete TagKey after waiting for operation: %v", err)
+	}
+}
+
+// Polling to clean up the tag value because, after deleting a secret, it takes some time for the tag value to become unbound.
+func testCleanupTagValue(tb testing.TB, tagValueName string) {
+	tb.Helper()
+
+	client, ctx := testResourceManagerTagsValueClient(tb)
+
+	maxPollingDuration := 10 * time.Minute
+	initialDelay := 2 * time.Second
+	maxBackoffDelay := 30 * time.Second
+
+	startTime := time.Now()
+	attempt := 0
+
+	for time.Since(startTime) < maxPollingDuration {
+		attempt++
+
+		tagValueOperation, err := client.DeleteTagValue(ctx, &resourcemanagerpb.DeleteTagValueRequest{
+			Name: tagValueName,
+		})
+
+		if err != nil {
+			s, ok := status.FromError(err)
+			if ok && s.Code() == codes.NotFound {
+				tb.Logf("Tag value %s already deleted (or never existed) after %v.", tagValueName, time.Since(startTime))
+				return
+			}
+
+			if ok && s.Code() == codes.FailedPrecondition && strings.Contains(s.Message(), "attached to resources") {
+				delay := initialDelay * time.Duration(1<<uint(attempt-1))
+				if delay > maxBackoffDelay {
+					delay = maxBackoffDelay
+				}
+				time.Sleep(delay)
+				continue
+			}
+
+			tb.Errorf("testCleanupTagValue: failed to initiate delete for tag value %s due to unrecoverable error: %v", tagValueName, err)
+			return
+		}
+
+		_, err = tagValueOperation.Wait(ctx)
+		if err != nil {
+			s, ok := status.FromError(err)
+			if ok && s.Code() == codes.NotFound {
+				tb.Logf("Tag value %s was deleted during operation wait (or already gone).", tagValueName)
+				return
+			}
+			if ok && s.Code() == codes.FailedPrecondition && strings.Contains(s.Message(), "attached to resources") {
+				delay := initialDelay * time.Duration(1<<uint(attempt-1))
+				if delay > maxBackoffDelay {
+					delay = maxBackoffDelay
+				}
+				time.Sleep(delay)
+				continue
+			}
+
+			tb.Errorf("testCleanupTagValue: failed to delete tag value %s after waiting for operation due to unrecoverable error: %v", tagValueName, err)
+			return
+		}
+
+		tb.Logf("Successfully deleted tag value %s after %v (attempt %d).", tagValueName, time.Since(startTime), attempt)
+		return
+	}
+	tb.Errorf("testCleanupTagValue: failed to delete tag value %s after %v (max duration reached). It might still be attached.", tagValueName, maxPollingDuration)
+}
+
+func testCreateTagKey(tb testing.TB, projectID string) *resourcemanagerpb.TagKey {
+	tb.Helper()
+
+	client, ctx := testResourceManagerTagsKeyClient(tb)
+	parent := fmt.Sprintf("projects/%s", projectID)
+	tagKeyName := "sm_secret_regional_tag_key_test"
+	tagKeyDescription := "creating tag key for secretmanager regional tags sample"
+
+	tagKeyOperation, err := client.CreateTagKey(ctx, &resourcemanagerpb.CreateTagKeyRequest{
+		TagKey: &resourcemanagerpb.TagKey{
+			Parent:      parent,
+			ShortName:   tagKeyName,
+			Description: tagKeyDescription,
+		},
+	})
+	if err != nil {
+		tb.Fatalf("testCreateTagKey: failed to create tagKey: %v", err)
+	}
+
+	createdTagKey, err := tagKeyOperation.Wait(ctx)
+	if err != nil {
+		tb.Fatalf("testCreateTagKey: failed to create TagKey after waiting for operation: %v", err)
+	}
+
+	return createdTagKey
+}
+
+func testCreateTagValue(tb testing.TB, tagKeyId string) *resourcemanagerpb.TagValue {
+	tb.Helper()
+
+	client, ctx := testResourceManagerTagsValueClient(tb)
+	tagValueName := "sm_secret_regional_tag_value_test"
+	tagKeyDescription := "creating TagValue for secretmanager regional tags sample"
+
+	tagKeyOperation, err := client.CreateTagValue(ctx, &resourcemanagerpb.CreateTagValueRequest{
+		TagValue: &resourcemanagerpb.TagValue{
+			Parent:      tagKeyId,
+			ShortName:   tagValueName,
+			Description: tagKeyDescription,
+		},
+	})
+	if err != nil {
+		tb.Fatalf("testCreateTagValue: failed to create tagValue: %v", err)
+	}
+
+	createdTagValue, err := tagKeyOperation.Wait(ctx)
+	if err != nil {
+		tb.Fatalf("testCreateTagValue: failed to create TagValue after waiting for operation: %v", err)
+	}
+
+	return createdTagValue
+}
+
+func TestCreateRegionalSecretWithTags(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secretID := "createRegionalSecretWithTags"
+	locationID := testLocation(t)
+
+	tagKey := testCreateTagKey(t, tc.ProjectID)
+	defer testCleanupTagKey(t, tagKey.Name)
+
+	tagValue := testCreateTagValue(t, tagKey.GetName())
+	defer testCleanupTagValue(t, tagValue.Name)
+
+	var b bytes.Buffer
+	if err := createRegionalSecretWithTags(&b, tc.ProjectID, locationID, secretID, tagKey.GetName(), tagValue.GetName()); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupRegionalSecret(t, fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID))
+
+	if got, want := b.String(), "Created secret with tags:"; !strings.Contains(got, want) {
+		t.Errorf("createRegionalSecretWithTags: expected %q to contain %q", got, want)
 	}
 }
