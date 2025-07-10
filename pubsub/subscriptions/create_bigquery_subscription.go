@@ -20,15 +20,14 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub/v2"
-	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
+	"cloud.google.com/go/pubsub"
 )
 
 // createBigQuerySubscription creates a Pub/Sub subscription that exports messages to BigQuery.
-func createBigQuerySubscription(w io.Writer, projectID, topic, subscription, table string) error {
-	// projectID := "my-project"
-	// topic := "projects/my-project-id/topics/my-topic"
-	// subscription := "projects/my-project/subscriptions/my-sub"
+func createBigQuerySubscription(w io.Writer, projectID, subID string, topic *pubsub.Topic, table string) error {
+	// projectID := "my-project-id"
+	// subID := "my-sub"
+	// topic of type https://godoc.org/cloud.google.com/go/pubsub#Topic
 	// table := "my-project-id.dataset_id.table_id"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
@@ -37,16 +36,15 @@ func createBigQuerySubscription(w io.Writer, projectID, topic, subscription, tab
 	}
 	defer client.Close()
 
-	sub, err := client.SubscriptionAdminClient.CreateSubscription(ctx, &pubsubpb.Subscription{
-		Name:  subscription,
+	sub, err := client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
 		Topic: topic,
-		BigqueryConfig: &pubsubpb.BigQueryConfig{
+		BigQueryConfig: pubsub.BigQueryConfig{
 			Table:         table,
 			WriteMetadata: true,
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("failed to create subscription: %w", err)
+		return fmt.Errorf("client.CreateSubscription: %w", err)
 	}
 	fmt.Fprintf(w, "Created BigQuery subscription: %v\n", sub)
 

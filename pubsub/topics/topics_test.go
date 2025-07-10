@@ -20,16 +20,16 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"strconv"
 	"strings"
 	"sync"
 	"testing"
 	"time"
 
+	"cloud.google.com/go/iam"
+	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/pubsub/pstest"
-	"cloud.google.com/go/pubsub/v2"
-	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 	trace "cloud.google.com/go/trace/apiv1"
 	"cloud.google.com/go/trace/apiv1/tracepb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -37,7 +37,6 @@ import (
 )
 
 var topicID string
-var topicName string
 
 const (
 	topicPrefix = "topic"
@@ -60,12 +59,9 @@ func setup(t *testing.T) *pubsub.Client {
 
 	once.Do(func() {
 		topicID = fmt.Sprintf("%s-%d", topicPrefix, time.Now().UnixNano())
-		topicName = fmt.Sprintf("projects/%s/topics/%s", tc.ProjectID, topicID)
 
 		// Cleanup resources from previous tests.
-		it := client.TopicAdminClient.ListTopics(ctx, &pubsubpb.ListTopicsRequest{
-			Project: tc.ProjectID,
-		})
+		it := client.Topics(ctx)
 		for {
 			t, err := it.Next()
 			if err == iterator.Done {
@@ -74,8 +70,7 @@ func setup(t *testing.T) *pubsub.Client {
 			if err != nil {
 				return
 			}
-			tt := strings.Split(t.GetName(), "/")
-			tID := tt[len(tt)-1]
+			tID := t.ID()
 			p := strings.Split(tID, "-")
 
 			// Only delete resources created from these tests.
@@ -87,10 +82,7 @@ func setup(t *testing.T) *pubsub.Client {
 				}
 				timeTCreated := time.Unix(0, timestamp)
 				if time.Since(timeTCreated) > expireAge {
-					req := &pubsubpb.DeleteTopicRequest{
-						Topic: t.GetName(),
-					}
-					if err := client.TopicAdminClient.DeleteTopic(ctx, req); err != nil {
+					if err := t.Delete(ctx); err != nil {
 						fmt.Printf("Delete topic err: %v: %v", t.String(), err)
 					}
 				}
@@ -102,10 +94,18 @@ func setup(t *testing.T) *pubsub.Client {
 }
 
 func TestCreate(t *testing.T) {
-	setup(t)
+	client := setup(t)
 	tc := testutil.SystemTest(t)
-	if err := create(io.Discard, tc.ProjectID, topicID); err != nil {
+	buf := new(bytes.Buffer)
+	if err := create(buf, tc.ProjectID, topicID); err != nil {
 		t.Fatalf("failed to create a topic: %v", err)
+	}
+	ok, err := client.Topic(topicID).Exists(context.Background())
+	if err != nil {
+		t.Fatalf("failed to check if topic exists: %v", err)
+	}
+	if !ok {
+		t.Fatalf("got none; want topic = %q", topicID)
 	}
 }
 
@@ -113,9 +113,22 @@ func TestList(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		if err := listTopics(io.Discard, tc.ProjectID); err != nil {
+		topics, err := list(tc.ProjectID)
+		if err != nil {
 			r.Errorf("failed to list topics: %v", err)
 		}
+
+		for _, t := range topics {
+			if t.ID() == topicID {
+				return // PASS
+			}
+		}
+
+		topicIDs := make([]string, len(topics))
+		for i, t := range topics {
+			topicIDs[i] = t.ID()
+		}
+		r.Errorf("got %+v; want a list with topic = %q", topicIDs, topicID)
 	})
 }
 
@@ -125,8 +138,9 @@ func TestPublish(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	client := setup(t)
-	createTopic(ctx, client, topicName)
-	if err := publish(io.Discard, tc.ProjectID, topicID, "hello world"); err != nil {
+	client.CreateTopic(ctx, topicID)
+	buf := new(bytes.Buffer)
+	if err := publish(buf, tc.ProjectID, topicID, "hello world"); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
@@ -135,8 +149,9 @@ func TestPublishThatScales(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	client := setup(t)
-	createTopic(ctx, client, topicName)
-	if err := publishThatScales(io.Discard, tc.ProjectID, topicID, 10); err != nil {
+	client.CreateTopic(ctx, topicID)
+	buf := new(bytes.Buffer)
+	if err := publishThatScales(buf, tc.ProjectID, topicID, 10); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
@@ -145,8 +160,8 @@ func TestPublishWithSettings(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	client := setup(t)
-	createTopic(ctx, client, topicName)
-	if err := publishWithSettings(io.Discard, tc.ProjectID, topicID); err != nil {
+	client.CreateTopic(ctx, topicID)
+	if err := publishWithSettings(ioutil.Discard, tc.ProjectID, topicID); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
@@ -155,8 +170,9 @@ func TestPublishCustomAttributes(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	client := setup(t)
-	createTopic(ctx, client, topicName)
-	if err := publishCustomAttributes(io.Discard, tc.ProjectID, topicID); err != nil {
+	client.CreateTopic(ctx, topicID)
+	buf := new(bytes.Buffer)
+	if err := publishCustomAttributes(buf, tc.ProjectID, topicID); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
@@ -165,8 +181,9 @@ func TestPublishWithRetrySettings(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	client := setup(t)
-	createTopic(ctx, client, topicName)
-	if err := publishWithRetrySettings(io.Discard, tc.ProjectID, topicID, "hello world"); err != nil {
+	client.CreateTopic(ctx, topicID)
+	buf := new(bytes.Buffer)
+	if err := publishWithRetrySettings(buf, tc.ProjectID, topicID, "hello world"); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
@@ -175,10 +192,11 @@ func TestIAM(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	client := setup(t)
-	createTopic(ctx, client, topicName)
+	client.CreateTopic(ctx, topicID)
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		perms, err := testPermissions(io.Discard, tc.ProjectID, topicID)
+		buf := new(bytes.Buffer)
+		perms, err := testPermissions(buf, tc.ProjectID, topicID)
 		if err != nil {
 			r.Errorf("testPermissions: %v", err)
 		}
@@ -188,20 +206,22 @@ func TestIAM(t *testing.T) {
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		if err := addUsersToTopic(io.Discard, tc.ProjectID, topicID); err != nil {
+		if err := addUsers(tc.ProjectID, topicID); err != nil {
 			r.Errorf("addUsers: %v", err)
 		}
 	})
 
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
-		if err := getIAMPolicy(buf, tc.ProjectID, topicID); err != nil {
-			r.Errorf("getIAMPolicy: %v", err)
+		policy, err := policy(buf, tc.ProjectID, topicID)
+		if err != nil {
+			r.Errorf("policy: %v", err)
 		}
-		got := buf.String()
-
-		if !strings.Contains(got, "role: roles/editor, member: group:cloud-logs@google.com") {
-			r.Errorf("want %s as editor", "group:cloud-logs@google.com")
+		if role, member := iam.Editor, "group:cloud-logs@google.com"; !policy.HasRole(member, role) {
+			r.Errorf("want %q as viewer, policy=%v", member, policy)
+		}
+		if role, member := iam.Viewer, iam.AllUsers; !policy.HasRole(member, role) {
+			r.Errorf("want %q as viewer, policy=%v", member, policy)
 		}
 	})
 }
@@ -210,7 +230,7 @@ func TestPublishWithOrderingKey(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	client := setup(t)
-	createTopic(ctx, client, topicName)
+	client.CreateTopic(ctx, topicID)
 	buf := new(bytes.Buffer)
 	publishWithOrderingKey(buf, tc.ProjectID, topicID)
 
@@ -225,7 +245,7 @@ func TestResumePublishWithOrderingKey(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	client := setup(t)
-	createTopic(ctx, client, topicName)
+	client.CreateTopic(ctx, topicID)
 	buf := new(bytes.Buffer)
 	resumePublishWithOrderingKey(buf, tc.ProjectID, topicID)
 
@@ -240,46 +260,71 @@ func TestPublishWithFlowControl(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	client := setup(t)
-	createTopic(ctx, client, topicName)
-	if err := publishWithFlowControlSettings(io.Discard, tc.ProjectID, topicID); err != nil {
+	client.CreateTopic(ctx, topicID)
+	buf := new(bytes.Buffer)
+	if err := publishWithFlowControlSettings(buf, tc.ProjectID, topicID); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
 }
 
 func TestDelete(t *testing.T) {
+	ctx := context.Background()
 	tc := testutil.SystemTest(t)
+	client := setup(t)
 
-	if err := delete(io.Discard, tc.ProjectID, topicID); err != nil {
+	topic := client.Topic(topicID)
+	ok, err := topic.Exists(ctx)
+	if err != nil {
+		t.Fatalf("failed to check if topic exists: %v", err)
+	}
+	if !ok {
+		_, err := client.CreateTopic(ctx, topicID)
+		if err != nil {
+			t.Fatalf("CreateTopic: %v", err)
+		}
+	}
+
+	buf := new(bytes.Buffer)
+	if err := delete(buf, tc.ProjectID, topicID); err != nil {
 		t.Fatalf("failed to delete topic (%q): %v", topicID, err)
+	}
+	ok, err = client.Topic(topicID).Exists(context.Background())
+	if err != nil {
+		t.Fatalf("failed to check if topic exists: %v", err)
+	}
+	if ok {
+		t.Fatalf("got topic = %q; want none", topicID)
 	}
 }
 
 func TestTopicKinesisIngestion(t *testing.T) {
 	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
 
 	// Use the pstest fake with emulator settings since Pub/Sub service expects real AWS Kinesis
 	// resources, which we cannot provide in a samples test.
 	srv := pstest.NewServer()
 	t.Setenv("PUBSUB_EMULATOR_HOST", srv.Addr)
 
-	if err := createTopicWithKinesisIngestion(io.Discard, tc.ProjectID, topicID); err != nil {
+	if err := createTopicWithKinesisIngestion(buf, tc.ProjectID, topicID); err != nil {
 		t.Fatalf("failed to create a topic with kinesis ingestion: %v", err)
 	}
 
 	// test updateTopicType
-	if err := updateTopicType(io.Discard, tc.ProjectID, topicID); err != nil {
+	if err := updateTopicType(buf, tc.ProjectID, topicID); err != nil {
 		t.Fatalf("failed to update a topic type to kinesis ingestion: %v", err)
 	}
 }
 
 func TestTopicCloudStorageIngestion(t *testing.T) {
 	tc := testutil.SystemTest(t)
+	buf := new(bytes.Buffer)
 
 	srv := pstest.NewServer()
 	t.Setenv("PUBSUB_EMULATOR_HOST", srv.Addr)
 
 	// Test creating a cloud storage ingestion topic with Text input format.
-	if err := createTopicWithCloudStorageIngestion(io.Discard, tc.ProjectID, topicID, "fake-bucket", "**.txt", "2006-01-02T15:04:05Z", ","); err != nil {
+	if err := createTopicWithCloudStorageIngestion(buf, tc.ProjectID, topicID, "fake-bucket", "**.txt", "2006-01-02T15:04:05Z"); err != nil {
 		t.Fatalf("failed to create a topic with cloud storage ingestion: %v", err)
 	}
 }
@@ -344,18 +389,9 @@ func TestPublishWithCompression(t *testing.T) {
 	ctx := context.Background()
 	tc := testutil.SystemTest(t)
 	client := setup(t)
-	createTopic(ctx, client, topicName)
-	if err := publishWithCompression(io.Discard, tc.ProjectID, topicID); err != nil {
+	client.CreateTopic(ctx, topicID)
+	buf := new(bytes.Buffer)
+	if err := publishWithCompression(buf, tc.ProjectID, topicID); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
-}
-
-func createTopic(ctx context.Context, client *pubsub.Client, topicName string) error {
-	_, err := client.TopicAdminClient.CreateTopic(ctx, &pubsubpb.Topic{
-		Name: topicName,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to create topic: %w", err)
-	}
-	return nil
 }

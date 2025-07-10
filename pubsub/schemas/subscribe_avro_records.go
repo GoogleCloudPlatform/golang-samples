@@ -23,7 +23,7 @@ import (
 	"sync"
 	"time"
 
-	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub"
 	"github.com/linkedin/goavro/v2"
 )
 
@@ -46,7 +46,7 @@ func subscribeWithAvroSchema(w io.Writer, projectID, subID, avscFile string) err
 		return fmt.Errorf("goavro.NewCodec err: %w", err)
 	}
 
-	sub := client.Subscriber(subID)
+	sub := client.Subscription(subID)
 	ctx2, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 

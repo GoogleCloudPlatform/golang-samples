@@ -18,13 +18,13 @@ package subscriptions
 import (
 	"context"
 	"fmt"
-	"io"
 
-	"cloud.google.com/go/iam/apiv1/iampb"
-	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/iam"
+	"cloud.google.com/go/pubsub"
 )
 
-func addUsersToSubscription(w io.Writer, projectID, subID string) error {
+// addUsers adds all IAM users to a subscription.
+func addUsers(projectID, subID string) error {
 	// projectID := "my-project-id"
 	// subID := "my-sub"
 	ctx := context.Background()
@@ -34,31 +34,21 @@ func addUsersToSubscription(w io.Writer, projectID, subID string) error {
 	}
 	defer client.Close()
 
-	subName := fmt.Sprintf("projects/%s/subscriptions/%s", projectID, subID)
-	req := &iampb.GetIamPolicyRequest{
-		Resource: subName,
-	}
-	policy, err := client.SubscriptionAdminClient.GetIamPolicy(ctx, req)
+	sub := client.Subscription(subID)
+	policy, err := sub.IAM().Policy(ctx)
 	if err != nil {
-		return fmt.Errorf("error calling GetIamPolicy: %w", err)
+		return fmt.Errorf("err getting IAM Policy: %w", err)
 	}
-	b := &iampb.Binding{
-		Role: "roles/editor",
-		// Other valid prefixes are "serviceAccount:", "user:"
-		// See the documentation for more values.
-		Members: []string{"group:cloud-logs@google.com"},
+	// Other valid prefixes are "serviceAccount:", "user:"
+	// See the documentation for more values.
+	policy.Add(iam.AllUsers, iam.Viewer)
+	policy.Add("group:cloud-logs@google.com", iam.Editor)
+	if err := sub.IAM().SetPolicy(ctx, policy); err != nil {
+		return fmt.Errorf("SetPolicy: %w", err)
 	}
-	policy.Bindings = append(policy.Bindings, b)
-
-	setRequest := &iampb.SetIamPolicyRequest{
-		Resource: subName,
-		Policy:   policy,
-	}
-	_, err = client.SubscriptionAdminClient.SetIamPolicy(ctx, setRequest)
-	if err != nil {
-		return fmt.Errorf("error calling SetIamPolicy: %w", err)
-	}
-	fmt.Fprintln(w, "Added roles to subscription.")
+	// NOTE: It may be necessary to retry this operation if IAM policies are
+	// being modified concurrently. SetPolicy will return an error if the policy
+	// was modified since it was retrieved.
 	return nil
 }
 

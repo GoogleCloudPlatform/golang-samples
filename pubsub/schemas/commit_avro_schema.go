@@ -21,8 +21,7 @@ import (
 	"io"
 	"os"
 
-	pubsub "cloud.google.com/go/pubsub/v2/apiv1"
-	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
+	"cloud.google.com/go/pubsub"
 )
 
 // commitAvroSchema commits a new Avro schema revision to an existing schema.
@@ -31,7 +30,7 @@ func commitAvroSchema(w io.Writer, projectID, schemaID, avscFile string) error {
 	// schemaID := "my-schema-id"
 	// avscFile = "path/to/an/avro/schema/file(.avsc)/formatted/in/json"
 	ctx := context.Background()
-	client, err := pubsub.NewSchemaClient(ctx)
+	client, err := pubsub.NewSchemaClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewSchemaClient: %w", err)
 	}
@@ -43,18 +42,14 @@ func commitAvroSchema(w io.Writer, projectID, schemaID, avscFile string) error {
 		return fmt.Errorf("error reading from file: %s", avscFile)
 	}
 
-	schema := &pubsubpb.Schema{
+	config := pubsub.SchemaConfig{
 		Name:       fmt.Sprintf("projects/%s/schemas/%s", projectID, schemaID),
-		Type:       pubsubpb.Schema_AVRO,
+		Type:       pubsub.SchemaAvro,
 		Definition: string(avscSource),
 	}
-	req := &pubsubpb.CommitSchemaRequest{
-		Name:   fmt.Sprintf("projects/%s/schemas/%s", projectID, schemaID),
-		Schema: schema,
-	}
-	s, err := client.CommitSchema(ctx, req)
+	s, err := client.CommitSchema(ctx, schemaID, config)
 	if err != nil {
-		return fmt.Errorf("error calling CommitSchema: %w", err)
+		return fmt.Errorf("CommitSchema: %w", err)
 	}
 	fmt.Fprintf(w, "Committed a schema using an Avro schema: %#v\n", s)
 	return nil

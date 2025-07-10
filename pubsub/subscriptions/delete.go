@@ -20,8 +20,7 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub/v2"
-	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
+	"cloud.google.com/go/pubsub"
 )
 
 func delete(w io.Writer, projectID, subID string) error {
@@ -34,10 +33,8 @@ func delete(w io.Writer, projectID, subID string) error {
 	}
 	defer client.Close()
 
-	req := &pubsubpb.DeleteSubscriptionRequest{
-		Subscription: fmt.Sprintf("projects/%s/subscriptions/%s", projectID, subID),
-	}
-	if err := client.SubscriptionAdminClient.DeleteSubscription(ctx, req); err != nil {
+	sub := client.Subscription(subID)
+	if err := sub.Delete(ctx); err != nil {
 		return fmt.Errorf("Delete: %w", err)
 	}
 	fmt.Fprintf(w, "Subscription %q deleted.", subID)

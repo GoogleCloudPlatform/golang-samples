@@ -18,38 +18,35 @@ package topics
 import (
 	"context"
 	"fmt"
-	"io"
 
-	"cloud.google.com/go/pubsub/v2"
-	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
+	"cloud.google.com/go/pubsub"
 	"google.golang.org/api/iterator"
 )
 
-func listTopics(w io.Writer, projectID string) error {
+func list(projectID string) ([]*pubsub.Topic, error) {
 	// projectID := "my-project-id"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		return fmt.Errorf("pubsub.NewClient: %w", err)
+		return nil, fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
 
-	req := &pubsubpb.ListTopicsRequest{
-		Project: fmt.Sprintf("projects/%s", projectID),
-	}
-	it := client.TopicAdminClient.ListTopics(ctx, req)
+	var topics []*pubsub.Topic
+
+	it := client.Topics(ctx)
 	for {
 		topic, err := it.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("error listing topics: %w", err)
+			return nil, fmt.Errorf("Next: %w", err)
 		}
-		fmt.Fprintf(w, "got topic: %s\n", topic)
-
+		topics = append(topics, topic)
 	}
-	return nil
+
+	return topics, nil
 }
 
 // [END pubsub_list_topics]

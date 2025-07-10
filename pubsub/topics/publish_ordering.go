@@ -22,7 +22,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub"
 	"google.golang.org/api/option"
 )
 
@@ -43,13 +43,8 @@ func publishWithOrderingKey(w io.Writer, projectID, topicID string) {
 
 	var wg sync.WaitGroup
 	var totalErrors uint64
-
-	// client.Publisher can be passed a topic ID (e.g. "my-topic") or
-	// a fully qualified name (e.g. "projects/my-project/topics/my-topic").
-	// If a topic ID is provided, the project ID from the client is used.
-	// Reuse this publisher for all publish calls to send messages in batches.
-	publisher := client.Publisher(topicID)
-	publisher.EnableMessageOrdering = true
+	t := client.Topic(topicID)
+	t.EnableMessageOrdering = true
 
 	messages := []struct {
 		message     string
@@ -74,7 +69,7 @@ func publishWithOrderingKey(w io.Writer, projectID, topicID string) {
 	}
 
 	for _, m := range messages {
-		result := publisher.Publish(ctx, &pubsub.Message{
+		res := t.Publish(ctx, &pubsub.Message{
 			Data:        []byte(m.message),
 			OrderingKey: m.orderingKey,
 		})
@@ -91,7 +86,7 @@ func publishWithOrderingKey(w io.Writer, projectID, topicID string) {
 				atomic.AddUint64(&totalErrors, 1)
 				return
 			}
-		}(result)
+		}(res)
 	}
 
 	wg.Wait()

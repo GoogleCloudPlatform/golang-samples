@@ -20,33 +20,31 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub/v2"
-	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
+	"cloud.google.com/go/pubsub"
 )
 
-func createTopicWithSchemaRevisions(w io.Writer, projectID, topicID, schemaID, firstRevisionID, lastRevisionID string) error {
+func createTopicWithSchemaRevisions(w io.Writer, projectID, topicID, schemaID, firstRevisionID, lastRevisionID string, encoding pubsub.SchemaEncoding) error {
 	// projectID := "my-project-id"
 	// topicID := "my-topic"
 	// schemaID := "my-schema-id"
 	// firstRevisionID := "my-revision-id"
 	// lastRevisionID := "my-revision-id"
+	// encoding := pubsub.EncodingJSON
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 
-	topic := &pubsubpb.Topic{
-		Name: fmt.Sprintf("projects/%s/topics/%s", projectID, topicID),
-		SchemaSettings: &pubsubpb.SchemaSettings{
+	tc := &pubsub.TopicConfig{
+		SchemaSettings: &pubsub.SchemaSettings{
 			Schema:          fmt.Sprintf("projects/%s/schemas/%s", projectID, schemaID),
-			FirstRevisionId: firstRevisionID,
-			LastRevisionId:  lastRevisionID,
-			// Alternative encoding is pubsubpb.Encoding_JSON
-			Encoding: pubsubpb.Encoding_BINARY,
+			FirstRevisionID: firstRevisionID,
+			LastRevisionID:  lastRevisionID,
+			Encoding:        encoding,
 		},
 	}
-	t, err := client.TopicAdminClient.CreateTopic(ctx, topic)
+	t, err := client.CreateTopicWithConfig(ctx, topicID, tc)
 	if err != nil {
 		return fmt.Errorf("CreateTopicWithConfig: %w", err)
 	}

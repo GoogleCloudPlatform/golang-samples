@@ -19,15 +19,15 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
-	"cloud.google.com/go/pubsub/v2"
-	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
+	"cloud.google.com/go/pubsub"
 )
 
-func createWithOrdering(w io.Writer, projectID, topic, subscription string) error {
+func createWithOrdering(w io.Writer, projectID, subID string, topic *pubsub.Topic) error {
 	// projectID := "my-project-id"
-	// topic := "projects/my-project-id/topics/my-topic"
-	// subscription := "projects/my-project/subscriptions/my-sub"
+	// subID := "my-sub"
+	// topic of type https://godoc.org/cloud.google.com/go/pubsub#Topic
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -36,9 +36,9 @@ func createWithOrdering(w io.Writer, projectID, topic, subscription string) erro
 	defer client.Close()
 
 	// Message ordering can only be set when creating a subscription.
-	sub, err := client.SubscriptionAdminClient.CreateSubscription(ctx, &pubsubpb.Subscription{
-		Name:                  subscription,
+	sub, err := client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
 		Topic:                 topic,
+		AckDeadline:           20 * time.Second,
 		EnableMessageOrdering: true,
 	})
 	if err != nil {

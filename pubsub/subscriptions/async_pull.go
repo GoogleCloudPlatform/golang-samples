@@ -23,7 +23,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub"
 )
 
 func pullMsgs(w io.Writer, projectID, subID string) error {
@@ -36,10 +36,7 @@ func pullMsgs(w io.Writer, projectID, subID string) error {
 	}
 	defer client.Close()
 
-	// client.Subscriber can be passed a subscription ID (e.g. "my-sub") or
-	// a fully qualified name (e.g. "projects/my-project/subscriptions/my-sub").
-	// If a subscription ID is provided, the project ID from the client is used.
-	sub := client.Subscriber(subID)
+	sub := client.Subscription(subID)
 
 	// Receive messages for 10 seconds, which simplifies testing.
 	// Comment this out in production, since `Receive` should

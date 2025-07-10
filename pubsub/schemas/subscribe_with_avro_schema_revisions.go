@@ -19,25 +19,25 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 	"sync"
 	"time"
 
-	"cloud.google.com/go/pubsub/v2"
-	schema "cloud.google.com/go/pubsub/v2/apiv1"
-	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
+	"cloud.google.com/go/pubsub"
 	"github.com/linkedin/goavro/v2"
 )
 
-func subscribeWithAvroSchemaRevisions(w io.Writer, projectID, subID string) error {
+func subscribeWithAvroSchemaRevisions(w io.Writer, projectID, subID, avscFile string) error {
 	// projectID := "my-project-id"
 	// topicID := "my-topic"
+	// avscFile = "path/to/an/avro/schema/file(.avsc)/formatted/in/json"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 
-	schemaClient, err := schema.NewSchemaClient(ctx)
+	schemaClient, err := pubsub.NewSchemaClient(ctx, projectID)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewSchemaClient: %w", err)
 	}
@@ -45,7 +45,7 @@ func subscribeWithAvroSchemaRevisions(w io.Writer, projectID, subID string) erro
 	// Create the cache for the codecs for different revision IDs.
 	revisionCodecs := make(map[string]*goavro.Codec)
 
-	sub := client.Subscriber(subID)
+	sub := client.Subscription(subID)
 	ctx2, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
@@ -62,11 +62,10 @@ func subscribeWithAvroSchemaRevisions(w io.Writer, projectID, subID string) erro
 		// codec. It would be more typical to do this asynchronously, but is
 		// shown here in a synchronous way to ease readability.
 		if !ok {
-			s := &pubsubpb.GetSchemaRequest{
-				Name: fmt.Sprintf("%s@%s", name, revision),
-				View: pubsubpb.SchemaView_FULL,
-			}
-			schema, err := schemaClient.GetSchema(ctx, s)
+			// Extract just the schema resource name
+			path := strings.Split(name, "/")
+			name = path[len(path)-1]
+			schema, err := schemaClient.Schema(ctx, fmt.Sprintf("%s@%s", name, revision), pubsub.SchemaViewFull)
 			if err != nil {
 				fmt.Fprintf(w, "Nacking, cannot read message without schema: %v\n", err)
 				msg.Nack()

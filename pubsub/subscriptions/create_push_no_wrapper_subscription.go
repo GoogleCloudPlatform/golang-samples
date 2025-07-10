@@ -19,16 +19,16 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
-	"cloud.google.com/go/pubsub/v2"
-	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
+	"cloud.google.com/go/pubsub"
 )
 
 // createPushNoWrapperSubscription creates a push subscription where messages are delivered in the HTTP body.
-func createPushNoWrapperSubscription(w io.Writer, projectID, topic, subscription, endpoint string) error {
+func createPushNoWrapperSubscription(w io.Writer, projectID, subID string, topic *pubsub.Topic, endpoint string) error {
 	// projectID := "my-project-id"
-	// topic := "projects/my-project-id/topics/my-topic"
-	// subscription := "projects/my-project/subscriptions/my-sub"
+	// subID := "my-sub"
+	// topic of type https://godoc.org/cloud.google.com/go/pubsub#Topic
 	// endpoint := "https://my-test-project.appspot.com/push"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
@@ -36,22 +36,19 @@ func createPushNoWrapperSubscription(w io.Writer, projectID, topic, subscription
 		return fmt.Errorf("pubsub.NewClient: %w", err)
 	}
 	defer client.Close()
-	pbSubscription := &pubsubpb.Subscription{
-		Name:               subscription,
-		Topic:              topic,
-		AckDeadlineSeconds: 10,
-		PushConfig: &pubsubpb.PushConfig{
-			PushEndpoint: endpoint,
-			Wrapper: &pubsubpb.PushConfig_NoWrapper_{
-				NoWrapper: &pubsubpb.PushConfig_NoWrapper{
-					// Determines if message metadata is added to the HTTP headers of
-					// the delivered message.
-					WriteMetadata: true,
-				},
+
+	sub, err := client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
+		Topic:       topic,
+		AckDeadline: 10 * time.Second,
+		PushConfig: pubsub.PushConfig{
+			Endpoint: endpoint,
+			Wrapper: &pubsub.NoWrapper{
+				// Determines if message metadata is added to the HTTP headers of
+				// the delivered message.
+				WriteMetadata: true,
 			},
 		},
-	}
-	sub, err := client.SubscriptionAdminClient.CreateSubscription(ctx, pbSubscription)
+	})
 	if err != nil {
 		return fmt.Errorf("CreateSubscription: %w", err)
 	}

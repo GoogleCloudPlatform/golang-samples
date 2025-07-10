@@ -19,17 +19,17 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
-	"cloud.google.com/go/pubsub/v2"
-	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
+	"cloud.google.com/go/pubsub"
 )
 
 // createSubWithDeadLetter creates a subscription with a dead letter policy.
-func createSubWithDeadLetter(w io.Writer, projectID, topic, subscription, fullyQualifiedDeadLetterTopic string) error {
+func createSubWithDeadLetter(w io.Writer, projectID, subID string, topicID string, fullyQualifiedDeadLetterTopic string) error {
 	// projectID := "my-project-id"
-	// topic := "projects/my-project-id/topics/my-topic"
-	// subscription := "projects/my-project-id/subscriptions/my-sub"
-	// fullyQualifiedDeadLetterTopic := "projects/my-project-id/topics/my-dead-letter-topic"
+	// subID := "my-sub"
+	// topicID := "my-topic"
+	// fullyQualifiedDeadLetterTopic := "projects/my-project/topics/my-dead-letter-topic"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -37,18 +37,22 @@ func createSubWithDeadLetter(w io.Writer, projectID, topic, subscription, fullyQ
 	}
 	defer client.Close()
 
-	_, err = client.SubscriptionAdminClient.CreateSubscription(ctx, &pubsubpb.Subscription{
-		Name:  subscription,
-		Topic: topic,
-		DeadLetterPolicy: &pubsubpb.DeadLetterPolicy{
+	topic := client.Topic(topicID)
+
+	subConfig := pubsub.SubscriptionConfig{
+		Topic:       topic,
+		AckDeadline: 20 * time.Second,
+		DeadLetterPolicy: &pubsub.DeadLetterPolicy{
 			DeadLetterTopic:     fullyQualifiedDeadLetterTopic,
 			MaxDeliveryAttempts: 10,
 		},
-	})
+	}
+
+	sub, err := client.CreateSubscription(ctx, subID, subConfig)
 	if err != nil {
 		return fmt.Errorf("CreateSubscription: %w", err)
 	}
-	fmt.Fprintf(w, "Created subscription with dead letter topic: (%s)\n", fullyQualifiedDeadLetterTopic)
+	fmt.Fprintf(w, "Created subscription (%s) with dead letter topic (%s)\n", sub.String(), fullyQualifiedDeadLetterTopic)
 	fmt.Fprintln(w, "To process dead letter messages, remember to add a subscription to your dead letter topic.")
 	return nil
 }

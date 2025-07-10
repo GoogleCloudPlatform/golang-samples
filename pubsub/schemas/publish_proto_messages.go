@@ -20,8 +20,7 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub/v2"
-	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
+	"cloud.google.com/go/pubsub"
 	statepb "github.com/GoogleCloudPlatform/golang-samples/internal/pubsub/schemas"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
@@ -42,23 +41,21 @@ func publishProtoMessages(w io.Writer, projectID, topicID string) error {
 	}
 
 	// Get the topic encoding type.
-	req := &pubsubpb.GetTopicRequest{
-		Topic: fmt.Sprintf("projects/%s/topics/%s", projectID, topicID),
-	}
-	t, err := client.TopicAdminClient.GetTopic(ctx, req)
+	t := client.Topic(topicID)
+	cfg, err := t.Config(ctx)
 	if err != nil {
-		return fmt.Errorf("got err in GetTopic: %w", err)
+		return fmt.Errorf("topic.Config err: %w", err)
 	}
-	encoding := t.SchemaSettings.Encoding
+	encoding := cfg.SchemaSettings.Encoding
 
 	var msg []byte
 	switch encoding {
-	case pubsubpb.Encoding_BINARY:
+	case pubsub.EncodingBinary:
 		msg, err = proto.Marshal(state)
 		if err != nil {
 			return fmt.Errorf("proto.Marshal err: %w", err)
 		}
-	case pubsubpb.Encoding_JSON:
+	case pubsub.EncodingJSON:
 		msg, err = protojson.Marshal(state)
 		if err != nil {
 			return fmt.Errorf("protojson.Marshal err: %w", err)
@@ -67,11 +64,7 @@ func publishProtoMessages(w io.Writer, projectID, topicID string) error {
 		return fmt.Errorf("invalid encoding: %v", encoding)
 	}
 
-	// client.Publisher can be passed a topic ID (e.g. "my-topic") or
-	// a fully qualified name (e.g. "projects/my-project/topics/my-topic").
-	// If a topic ID is provided, the project ID from the client is used.
-	publisher := client.Publisher(topicID)
-	result := publisher.Publish(ctx, &pubsub.Message{
+	result := t.Publish(ctx, &pubsub.Message{
 		Data: msg,
 	})
 	_, err = result.Get(ctx)

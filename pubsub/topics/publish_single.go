@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub"
 )
 
 func publishSingleGoroutine(w io.Writer, projectID, topicID, msg string) error {
@@ -34,13 +34,10 @@ func publishSingleGoroutine(w io.Writer, projectID, topicID, msg string) error {
 	}
 	defer client.Close()
 
-	// client.Publisher can be passed a topic ID (e.g. "my-topic") or
-	// a fully qualified name (e.g. "projects/my-project/topics/my-topic").
-	// If a topic ID is provided, the project ID from the client is used.
-	publisher := client.Publisher(topicID)
-	publisher.PublishSettings.NumGoroutines = 1
+	t := client.Topic(topicID)
+	t.PublishSettings.NumGoroutines = 1
 
-	result := publisher.Publish(ctx, &pubsub.Message{Data: []byte(msg)})
+	result := t.Publish(ctx, &pubsub.Message{Data: []byte(msg)})
 	// Block until the result is returned and a server-generated
 	// ID is returned for the published message.
 	id, err := result.Get(ctx)
