@@ -23,7 +23,7 @@ require (
 	cel.dev/expr v0.23.0 // indirect
 	cloud.google.com/go/auth v0.16.2 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
-	cloud.google.com/go/bigquery/v2 v2.0.0-20250710135225-8d76df577127 // indirect
+	cloud.google.com/go/bigquery/v2 v2.0.0-20250710180625-7e28673c9827 // indirect
 	cloud.google.com/go/compute/metadata v0.7.0 // indirect
 	cloud.google.com/go/longrunning v0.6.7 // indirect
 	cloud.google.com/go/monitoring v1.24.2 // indirect

@@ -8,6 +8,8 @@ cloud.google.com/go/bigquery v1.69.0 h1:rZvHnjSUs5sHK3F9awiuFk2PeOaB8suqNuim21Gb
 cloud.google.com/go/bigquery v1.69.0/go.mod h1:TdGLquA3h/mGg+McX+GsqG9afAzTAcldMjqhdjHTLew=
 cloud.google.com/go/bigquery/v2 v2.0.0-20250710135225-8d76df577127 h1:8drzyQebsEXeE1X52a7QNlcoKsgb2SvUEBWRtWlnn+w=
 cloud.google.com/go/bigquery/v2 v2.0.0-20250710135225-8d76df577127/go.mod h1:kNwh1JdK4fHmchulvj5gnpZ5/P6HvtcphH9cRK4cPYM=
+cloud.google.com/go/bigquery/v2 v2.0.0-20250710180625-7e28673c9827 h1:siEeDgnslX1X3xiQMtCRYFhCXQrl9emEnzFKouUae+w=
+cloud.google.com/go/bigquery/v2 v2.0.0-20250710180625-7e28673c9827/go.mod h1:kNwh1JdK4fHmchulvj5gnpZ5/P6HvtcphH9cRK4cPYM=
 cloud.google.com/go/compute/metadata v0.7.0/go.mod h1:j5MvL9PprKL39t166CoB1uVHfQMs4tFQZZcKwksXUjo=
 cloud.google.com/go/iam v1.5.2/go.mod h1:SE1vg0N81zQqLzQEwxL2WI6yhetBdbNQuTvIKCSkUHE=
 cloud.google.com/go/longrunning v0.6.7/go.mod h1:EAFV3IZAKmM56TyiE6VAP3VoTzhZzySwI/YI1s/nRsY=

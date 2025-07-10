@@ -19,26 +19,21 @@ import (
 	"context"
 	"fmt"
 
-	bigquery "cloud.google.com/go/bigquery/apiv2"
-	"cloud.google.com/go/bigquery/apiv2/bigquerypb"
+	"cloud.google.com/go/bigquery/v2/apiv2/bigquerypb"
+	"cloud.google.com/go/bigquery/v2/apiv2_client"
 	"github.com/googleapis/gax-go/v2/apierror"
 
 	"google.golang.org/grpc/codes"
 )
 
 // deleteDataset demonstrates deleting a dataset from BigQuery.
-func deleteDataset(projectID, datasetID string) error {
+func deleteDataset(client *apiv2_client.Client, projectID, datasetID string) error {
+	// client can be instantiated per-RPC service, or use cloud.google.com/v2/apiv2_client to create
+	// an aggregate client.
+	//
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
 	ctx := context.Background()
-
-	// Construct a gRPC-based client.
-	// To construct a REST-based client, use NewDatasetRESTClient instead.
-	dsClient, err := bigquery.NewDatasetClient(ctx)
-	if err != nil {
-		return fmt.Errorf("bigquery.NewDatasetClient: %w", err)
-	}
-	defer dsClient.Close()
 
 	req := &bigquerypb.DeleteDatasetRequest{
 		ProjectId: projectID,
@@ -48,7 +43,7 @@ func deleteDataset(projectID, datasetID string) error {
 	}
 
 	// Deleting a dataset doesn't return information, but it may produce an error.
-	err = dsClient.DeleteDataset(ctx, req)
+	err := client.DeleteDataset(ctx, req)
 	if err != nil {
 		if apierr, ok := apierror.FromError(err); ok {
 			if status := apierr.GRPCStatus(); status.Code() == codes.NotFound {
@@ -58,7 +53,7 @@ func deleteDataset(projectID, datasetID string) error {
 				return nil
 			}
 		}
-		return fmt.Errorf("PatchDataset: %w", err)
+		return fmt.Errorf("DeleteDataset: %w", err)
 	}
 	return nil
 }

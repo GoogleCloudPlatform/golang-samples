@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package client demonstrates basic usage of BigQuery gRPC and REST
-// transport clients.
+// Package client provides some basic snippet examples for working with API clients
+// using the preview BigQuery Cloud Client Library.
 package client
 
 import (

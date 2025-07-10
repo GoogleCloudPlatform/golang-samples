@@ -20,26 +20,21 @@ import (
 	"fmt"
 	"io"
 
-	bigquery "cloud.google.com/go/bigquery/apiv2"
-	"cloud.google.com/go/bigquery/apiv2/bigquerypb"
+	"cloud.google.com/go/bigquery/v2/apiv2/bigquerypb"
+	"cloud.google.com/go/bigquery/v2/apiv2_client"
 
 	"google.golang.org/api/iterator"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 // listDatasets demonstrates iterating through datasets.
-func listDatasets(w io.Writer, projectID string) error {
+func listDatasets(client *apiv2_client.Client, w io.Writer, projectID string) error {
+	// client can be instantiated per-RPC service, or use cloud.google.com/v2/apiv2_client to create
+	// an aggregate client.
+	//
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
 	ctx := context.Background()
-
-	// Construct a gRPC-based client.
-	// To construct a REST-based client, use NewDatasetRESTClient instead.
-	dsClient, err := bigquery.NewDatasetClient(ctx)
-	if err != nil {
-		return fmt.Errorf("bigquery.NewDatasetClient: %w", err)
-	}
-	defer dsClient.Close()
 
 	req := &bigquerypb.ListDatasetsRequest{
 		ProjectId: projectID,
@@ -51,7 +46,7 @@ func listDatasets(w io.Writer, projectID string) error {
 
 	// ListDatasets returns an iterator so users don't have to manage pagination when processing
 	// the results.
-	it := dsClient.ListDatasets(ctx, req)
+	it := client.ListDatasets(ctx, req)
 
 	// Process data from the iterator one result at a time.  The internal implementation of the iterator
 	// is fetching pages at a time.

@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"io"
 
-	bigquery "cloud.google.com/go/bigquery/apiv2"
-	"cloud.google.com/go/bigquery/apiv2/bigquerypb"
+	"cloud.google.com/go/bigquery/v2/apiv2/bigquerypb"
+	"cloud.google.com/go/bigquery/v2/apiv2_client"
 
 	"github.com/googleapis/gax-go/v2/apierror"
 
@@ -31,18 +31,13 @@ import (
 )
 
 // createDataset demonstrates creation of a new dataset using an explicit destination location.
-func createDataset(w io.Writer, projectID, datasetID string) error {
+func createDataset(client *apiv2_client.Client, w io.Writer, projectID, datasetID string) error {
+	// client can be instantiated per-RPC service, or use cloud.google.com/v2/apiv2_client to create
+	// an aggregate client.
+	//
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
 	ctx := context.Background()
-
-	// Construct a gRPC-based client.
-	// To construct a REST-based client, use NewDatasetRESTClient instead.
-	dsClient, err := bigquery.NewDatasetClient(ctx)
-	if err != nil {
-		return fmt.Errorf("bigquery.NewDatasetClient: %w", err)
-	}
-	defer dsClient.Close()
 
 	// Construct a request, populating some of the available configuration
 	// settings.
@@ -61,7 +56,7 @@ func createDataset(w io.Writer, projectID, datasetID string) error {
 			},
 		},
 	}
-	resp, err := dsClient.InsertDataset(ctx, req)
+	resp, err := client.InsertDataset(ctx, req)
 	if err != nil {
 		// Examine the error structure more deeply.
 		if apierr, ok := apierror.FromError(err); ok {

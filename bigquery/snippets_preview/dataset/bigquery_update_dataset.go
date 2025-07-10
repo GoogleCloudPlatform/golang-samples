@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"io"
 
-	bigquery "cloud.google.com/go/bigquery/apiv2"
-	"cloud.google.com/go/bigquery/apiv2/bigquerypb"
+	"cloud.google.com/go/bigquery/v2/apiv2/bigquerypb"
+	"cloud.google.com/go/bigquery/v2/apiv2_client"
 	"github.com/googleapis/gax-go/v2/apierror"
 	"github.com/googleapis/gax-go/v2/callctx"
 
@@ -30,23 +30,18 @@ import (
 )
 
 // updateDataset demonstrates making partial updates to an existing dataset.
-func updateDataset(w io.Writer, projectID, datasetID string) error {
+func updateDataset(client *apiv2_client.Client, w io.Writer, projectID, datasetID string) error {
+	// client can be instantiated per-RPC service, or use cloud.google.com/v2/apiv2_client to create
+	// an aggregate client.
+	//
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
 	ctx := context.Background()
 
-	// Construct a gRPC-based client.
-	// To construct a REST-based client, use NewDatasetRESTClient instead.
-	dsClient, err := bigquery.NewDatasetClient(ctx)
-	if err != nil {
-		return fmt.Errorf("bigquery.NewDatasetClient: %w", err)
-	}
-	defer dsClient.Close()
-
 	// Fetch the existing dataset prior to making any modifications.
 	// This allows us to use optimistic concurrency controls to avoid overwriting
 	// other changes.
-	meta, err := dsClient.GetDataset(ctx, &bigquerypb.GetDatasetRequest{
+	meta, err := client.GetDataset(ctx, &bigquerypb.GetDatasetRequest{
 		ProjectId: projectID,
 		DatasetId: datasetID,
 		// Only fetch dataset metadata, not the permisions.
@@ -73,8 +68,8 @@ func updateDataset(w io.Writer, projectID, datasetID string) error {
 	}
 	// Now, use the ETag from the original metadata to guard against conflicting writes.
 	// The callctx package let's us inject headers in a transport agnostic fashion (gRPC or HTTP).
-	patchCtx := callctx.SetHeaders(ctx, "If-Match", meta.GetEtag())
-	resp, err := dsClient.PatchDataset(patchCtx, req)
+	patchCtx := callctx.SetHeaders(ctx, "if-match", meta.GetEtag())
+	resp, err := client.PatchDataset(patchCtx, req)
 	if err != nil {
 		if apierr, ok := apierror.FromError(err); ok {
 			if status := apierr.GRPCStatus(); status.Code() == codes.FailedPrecondition {
