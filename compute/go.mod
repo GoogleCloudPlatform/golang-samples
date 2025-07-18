@@ -3,13 +3,13 @@ module github.com/GoogleCloudPlatform/golang-samples/compute
 go 1.23.0
 
 require (
-	cloud.google.com/go/compute v1.31.1
-	cloud.google.com/go/storage v1.50.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	cloud.google.com/go/compute v1.41.0
+	cloud.google.com/go/storage v1.55.0
+	github.com/GoogleCloudPlatform/golang-samples a2f0b67f5b39
 	github.com/google/uuid v1.6.0
-	github.com/googleapis/gax-go/v2 v2.14.1
-	google.golang.org/api v0.217.0
-	google.golang.org/protobuf v1.36.3
+	github.com/googleapis/gax-go/v2 v2.15.0
+	google.golang.org/api v0.242.0
+	google.golang.org/protobuf v1.36.6
 )
 
 require (

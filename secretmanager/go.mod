@@ -5,10 +5,10 @@ go 1.23.0
 require (
 	cloud.google.com/go/resourcemanager v1.10.6
 	cloud.google.com/go/secretmanager v1.15.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	github.com/GoogleCloudPlatform/golang-samples a2f0b67f5b39
 	github.com/gofrs/uuid v4.4.0+incompatible
-	google.golang.org/api v0.237.0
-	google.golang.org/genproto v0.0.0-20250505200425-f936aa4a68b2
+	google.golang.org/api v0.242.0
+	google.golang.org/genproto 7130f93afb79
 	google.golang.org/grpc v1.73.0
 	google.golang.org/protobuf v1.36.6
 )
