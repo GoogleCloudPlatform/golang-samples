@@ -745,12 +745,7 @@ func TestCreateSubscriptionWithSMT(t *testing.T) {
 			Name: fmt.Sprintf("projects/%s/topics/%s", tc.ProjectID, smtTopicID),
 		})
 		if err != nil {
-			st, ok := status.FromError(err)
-			if !ok {
-				r.Errorf("CreateTopic failed with unknown err: %v", err)
-			}
-			// Don't return error if topic already exists, just use that for the test.
-			if st.Code() != codes.AlreadyExists {
+			if st, ok := status.FromError(err); !ok || st.Code() != codes.AlreadyExists {
 				r.Errorf("CreateTopic: %v", err)
 			}
 		}
