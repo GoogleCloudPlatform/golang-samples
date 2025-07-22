@@ -53,6 +53,7 @@ func createSubscriptionWithSMT(w io.Writer, projectID, topicID, subID string) er
 	}
 
 	sub := &pubsubpb.Subscription{
+		Name:              fmt.Sprintf("projects/%s/subscriptions/%s", projectID, subID),
 		Topic:             fmt.Sprintf("projects/%s/topics/%s", projectID, topicID),
 		MessageTransforms: []*pubsubpb.MessageTransform{transform},
 	}

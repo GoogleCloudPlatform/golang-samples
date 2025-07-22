@@ -29,7 +29,6 @@ import (
 
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/pubsub/v2"
-	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 	pb "cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 	"cloud.google.com/go/pubsub/v2/pstest"
 	"cloud.google.com/go/storage"
@@ -742,7 +741,7 @@ func TestCreateSubscriptionWithSMT(t *testing.T) {
 	smtSubID := subID + "-smt"
 	smtTopicID := topicID + "-smt"
 	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
-		_, err := client.TopicAdminClient.CreateTopic(ctx, &pubsubpb.Topic{
+		_, err := client.TopicAdminClient.CreateTopic(ctx, &pb.Topic{
 			Name: fmt.Sprintf("projects/%s/topics/%s", tc.ProjectID, smtTopicID),
 		})
 		if err != nil {
