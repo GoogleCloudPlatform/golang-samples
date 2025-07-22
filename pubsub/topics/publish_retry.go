@@ -34,7 +34,7 @@ func publishWithRetrySettings(w io.Writer, projectID, topicID, msg string) error
 	ctx := context.Background()
 
 	config := &pubsub.ClientConfig{
-		PublisherCallOptions: &vkit.TopicAdminCallOptions{
+		TopicAdminCallOptions: &vkit.TopicAdminCallOptions{
 			Publish: []gax.CallOption{
 				gax.WithRetry(func() gax.Retryer {
 					return gax.OnCodes([]codes.Code{
