@@ -350,6 +350,17 @@ func TestPublishWithCompression(t *testing.T) {
 	}
 }
 
+func TestCreateTopicWithSMT(t *testing.T) {
+	setup(t)
+	tc := testutil.SystemTest(t)
+	smtTopicID := topicID + "-smt"
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		if err := createTopicWithSMT(io.Discard, tc.ProjectID, smtTopicID); err != nil {
+			r.Errorf("failed to create topic with SMT: %v", err)
+		}
+	})
+}
+
 func createTopic(ctx context.Context, client *pubsub.Client, topicName string) error {
 	_, err := client.TopicAdminClient.CreateTopic(ctx, &pubsubpb.Topic{
 		Name: topicName,
