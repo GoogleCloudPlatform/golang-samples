@@ -25,9 +25,9 @@ import (
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-// disableSecretDelayedDestroy creates a new secret with the given name
-// and version destroy ttl. A secret is a logical wrapper around a collection
-// of secret versions. Secret versions hold the actual secret material.
+// disableSecretDelayedDestroy disables the delayed destroy configuration on an
+// existing secret. When disabled, secret versions are destroyed immediately
+// upon deletion.
 func disableSecretDelayedDestroy(w io.Writer, name string) error {
 	// name := "projects/my-project/secrets/my-secret"
 

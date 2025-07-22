@@ -493,7 +493,7 @@ func TestCreateRegionalSecretWithDelayedDestroy(t *testing.T) {
 	defer testCleanupRegionalSecret(t, fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID))
 
 	if got, want := b.String(), "Created secret with version destroy ttl:"; !strings.Contains(got, want) {
-		t.Errorf("createSecret: expected %q to contain %q", got, want)
+		t.Errorf("createRegionalSecretWithDelayedDestroy: expected %q to contain %q", got, want)
 	}
 }
 
@@ -510,7 +510,7 @@ func TestUpdateRegionalSecretWithDelayedDestroy(t *testing.T) {
 	defer testCleanupRegionalSecret(t, secret.Name)
 
 	if got, want := b.String(), "Updated secret:"; !strings.Contains(got, want) {
-		t.Errorf("createSecret: expected %q to contain %q", got, want)
+		t.Errorf("updateRegionalSecretWithDelayedDestroy: expected %q to contain %q", got, want)
 	}
 }
 
@@ -527,6 +527,6 @@ func TestDisableRegionalSecretDelayedDestroy(t *testing.T) {
 	defer testCleanupRegionalSecret(t, secret.Name)
 
 	if got, want := b.String(), "Updated secret:"; !strings.Contains(got, want) {
-		t.Errorf("createSecret: expected %q to contain %q", got, want)
+		t.Errorf("disableRegionalSecretDelayedDestroy: expected %q to contain %q", got, want)
 	}
 }

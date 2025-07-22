@@ -26,24 +26,24 @@ import (
 	"google.golang.org/genproto/protobuf/field_mask"
 )
 
-// disableRegionalSecretDelayedDestroy creates a new secret with the given name
-// and version destroy ttl. A secret is a logical wrapper around a collection
-// of secret versions. Secret versions hold the actual secret material.
-func disableRegionalSecretDelayedDestroy(w io.Writer, projectId, locationId, secretId string) error {
-	// projectId := "my-project"
-	// locationId := "us-central1"
-	// secretId := "my-secret"
+// disableRegionalSecretDelayedDestroy disables the delayed destroy configuration on an
+// existing regional secret. When disabled, secret versions are destroyed
+// immediately upon deletion.
+func disableRegionalSecretDelayedDestroy(w io.Writer, projectID, locationID, secretID string) error {
+	// projectID := "my-project"
+	// locationID := "us-central1"
+	// secretID := "my-secret"
 
 	// Create the client.
 	ctx := context.Background()
-	endpoint := fmt.Sprintf("secretmanager.%s.rep.googleapis.com:443", locationId)
+	endpoint := fmt.Sprintf("secretmanager.%s.rep.googleapis.com:443", locationID)
 	client, err := secretmanager.NewClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
 		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
 	defer client.Close()
 
-	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
+	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectID, locationID, secretID)
 
 	// Build the request.
 	req := &secretmanagerpb.UpdateSecretRequest{

@@ -1704,7 +1704,7 @@ func TestUpdateSecretWithDelayedDestroy(t *testing.T) {
 	defer testCleanupSecret(t, secretID)
 
 	if got, want := b.String(), "Updated secret:"; !strings.Contains(got, want) {
-		t.Errorf("createSecretWithDelayedDestroy: expected %q to contain %q", got, want)
+		t.Errorf("updateSecretWithDelayedDestroy: expected %q to contain %q", got, want)
 	}
 }
 
@@ -1721,6 +1721,6 @@ func TestDisableSecretDelayedDestroy(t *testing.T) {
 	defer testCleanupSecret(t, secretID)
 
 	if got, want := b.String(), "Updated secret:"; !strings.Contains(got, want) {
-		t.Errorf("createSecretWithDelayedDestroy: expected %q to contain %q", got, want)
+		t.Errorf("disableSecretDelayedDestroy: expected %q to contain %q", got, want)
 	}
 }

@@ -27,9 +27,8 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 )
 
-// updateSecretWithDelayedDestroy creates a new secret with the given name
-// and version destroy ttl. A secret is a logical wrapper around a collection
-// of secret versions. Secret versions hold the actual secret material.
+// updateSecretWithDelayedDestroy updates the version destroy TTL on an
+// existing secret.
 func updateSecretWithDelayedDestroy(w io.Writer, name string, versionDestroyTtl int) error {
 	// name := "projects/my-project/secrets/my-secret"
 	// versionDestroyTtl := 86400

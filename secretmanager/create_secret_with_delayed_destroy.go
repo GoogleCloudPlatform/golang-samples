@@ -29,9 +29,9 @@ import (
 // createSecretWithDelayedDestroy creates a new secret with the given name
 // and version destroy ttl. A secret is a logical wrapper around a collection
 // of secret versions. Secret versions hold the actual secret material.
-func createSecretWithDelayedDestroy(w io.Writer, parent, secretId string, versionDestroyTtl int) error {
+func createSecretWithDelayedDestroy(w io.Writer, parent, secretID string, versionDestroyTtl int) error {
 	// parent := "projects/my-project"
-	// secretId := "my-secret"
+	// secretID := "my-secret"
 	// versionDestroyTtl := 86400
 
 	// Create the client.
@@ -45,7 +45,7 @@ func createSecretWithDelayedDestroy(w io.Writer, parent, secretId string, versio
 	// Build the request.
 	req := &secretmanagerpb.CreateSecretRequest{
 		Parent:   parent,
-		SecretId: secretId,
+		SecretId: secretID,
 		Secret: &secretmanagerpb.Secret{
 			Replication: &secretmanagerpb.Replication{
 				Replication: &secretmanagerpb.Replication_Automatic_{

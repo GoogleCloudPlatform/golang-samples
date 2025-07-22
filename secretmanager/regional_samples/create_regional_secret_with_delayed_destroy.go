@@ -30,27 +30,27 @@ import (
 // createRegionalSecretWithDelayedDestroy creates a new secret with the given name
 // and version destroy ttl. A secret is a logical wrapper around a collection
 // of secret versions. Secret versions hold the actual secret material.
-func createRegionalSecretWithDelayedDestroy(w io.Writer, projectId, locationId, secretId string, versionDestroyTtl int) error {
-	// projectId := "my-project"
-	// locationId := "us-central1"
-	// secretId := "my-secret"
+func createRegionalSecretWithDelayedDestroy(w io.Writer, projectID, locationID, secretID string, versionDestroyTtl int) error {
+	// projectID := "my-project"
+	// locationID := "us-central1"
+	// secretID := "my-secret"
 	// versionDestroyTtl := 86400
 
 	// Create the client.
 	ctx := context.Background()
-	endpoint := fmt.Sprintf("secretmanager.%s.rep.googleapis.com:443", locationId)
+	endpoint := fmt.Sprintf("secretmanager.%s.rep.googleapis.com:443", locationID)
 	client, err := secretmanager.NewClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
 		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
 	defer client.Close()
 
-	parent := fmt.Sprintf("projects/%s/locations/%s", projectId, locationId)
+	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
 
 	// Build the request.
 	req := &secretmanagerpb.CreateSecretRequest{
 		Parent:   parent,
-		SecretId: secretId,
+		SecretId: secretID,
 		Secret: &secretmanagerpb.Secret{
 			VersionDestroyTtl: durationpb.New(time.Duration(versionDestroyTtl) * time.Second),
 		},
