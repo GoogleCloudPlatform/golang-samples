@@ -33,9 +33,7 @@ import (
 	"github.com/gofrs/uuid"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc/codes"
-	grpccodes "google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	grpcstatus "google.golang.org/grpc/status"
 )
 
 func testLocation(tb testing.TB) string {
@@ -110,7 +108,7 @@ func testCleanupRegionalSecret(tb testing.TB, name string) {
 	if err := client.DeleteSecret(ctx, &secretmanagerpb.DeleteSecretRequest{
 		Name: name,
 	}); err != nil {
-		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
+		if terr, ok := status.FromError(err); !ok || terr.Code() != codes.NotFound {
 			tb.Fatalf("testCleanupSecret: failed to delete regional secret: %v", err)
 		}
 	}
@@ -479,5 +477,56 @@ func TestCreateRegionalSecretWithTags(t *testing.T) {
 
 	if got, want := b.String(), "Created secret with tags:"; !strings.Contains(got, want) {
 		t.Errorf("createRegionalSecretWithTags: expected %q to contain %q", got, want)
+	}
+}
+
+func TestCreateRegionalSecretWithDelayedDestroy(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secretID := testName(t)
+	locationID := testLocation(t)
+
+	var b bytes.Buffer
+	if err := createRegionalSecretWithDelayedDestroy(&b, tc.ProjectID, locationID, secretID, 86400); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupRegionalSecret(t, fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID))
+
+	if got, want := b.String(), "Created secret with version destroy ttl:"; !strings.Contains(got, want) {
+		t.Errorf("createSecret: expected %q to contain %q", got, want)
+	}
+}
+
+func TestUpdateRegionalSecretWithDelayedDestroy(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret, secretID := testRegionalSecret(t, tc.ProjectID)
+	locationID := testLocation(t)
+
+	var b bytes.Buffer
+	if err := updateRegionalSecretWithDelayedDestroy(&b, tc.ProjectID, locationID, secretID, 86400); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupRegionalSecret(t, secret.Name)
+
+	if got, want := b.String(), "Updated secret:"; !strings.Contains(got, want) {
+		t.Errorf("createSecret: expected %q to contain %q", got, want)
+	}
+}
+
+func TestDisableRegionalSecretDelayedDestroy(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret, secretID := testRegionalSecret(t, tc.ProjectID)
+	locationID := testLocation(t)
+
+	var b bytes.Buffer
+	if err := disableRegionalSecretDelayedDestroy(&b, tc.ProjectID, locationID, secretID); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupRegionalSecret(t, secret.Name)
+
+	if got, want := b.String(), "Updated secret:"; !strings.Contains(got, want) {
+		t.Errorf("createSecret: expected %q to contain %q", got, want)
 	}
 }

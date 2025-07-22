@@ -34,9 +34,7 @@ import (
 	"github.com/gofrs/uuid"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc/codes"
-	grpccodes "google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	grpcstatus "google.golang.org/grpc/status"
 )
 
 func testLocation(tb testing.TB) string {
@@ -210,7 +208,7 @@ func testCleanupSecret(tb testing.TB, name string) {
 	if err := client.DeleteSecret(ctx, &secretmanagerpb.DeleteSecretRequest{
 		Name: name,
 	}); err != nil {
-		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
+		if terr, ok := status.FromError(err); !ok || terr.Code() != codes.NotFound {
 			tb.Fatalf("testCleanupSecret: failed to delete secret: %v", err)
 		}
 	}
@@ -224,7 +222,7 @@ func testCleanupRegionalSecret(tb testing.TB, name string) {
 	if err := client.DeleteSecret(ctx, &secretmanagerpb.DeleteSecretRequest{
 		Name: name,
 	}); err != nil {
-		if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
+		if terr, ok := status.FromError(err); !ok || terr.Code() != codes.NotFound {
 			tb.Fatalf("testCleanupSecret: failed to delete regional secret: %v", err)
 		}
 	}
@@ -456,7 +454,7 @@ func TestDeleteSecret(t *testing.T) {
 	_, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
 		Name: secret.Name,
 	})
-	if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
+	if terr, ok := status.FromError(err); !ok || terr.Code() != codes.NotFound {
 		t.Errorf("deleteSecret: expected %v to be not found", err)
 	}
 }
@@ -501,7 +499,7 @@ func TestDeleteRegionalSecret(t *testing.T) {
 	_, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
 		Name: secret.Name,
 	})
-	if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
+	if terr, ok := status.FromError(err); !ok || terr.Code() != codes.NotFound {
 		t.Errorf("deleteRegionalSecret: expected %v to be not found", err)
 	}
 
@@ -521,7 +519,7 @@ func TestDeleteSecretWithEtag(t *testing.T) {
 	_, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
 		Name: secret.Name,
 	})
-	if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
+	if terr, ok := status.FromError(err); !ok || terr.Code() != codes.NotFound {
 		t.Errorf("deleteSecret: expected %v to be not found", err)
 	}
 }
@@ -542,7 +540,7 @@ func TestDeleteRegionalSecretWithEtag(t *testing.T) {
 	_, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
 		Name: secret.Name,
 	})
-	if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
+	if terr, ok := status.FromError(err); !ok || terr.Code() != codes.NotFound {
 		t.Errorf("deleteRegionalSecret: expected %v to be not found", err)
 	}
 }
@@ -1674,4 +1672,55 @@ func TestCreateSecretWithTags(t *testing.T) {
 		t.Errorf("createSecretWithTags: expected %q to contain %q", got, want)
 	}
 
+}
+
+func TestCreateSecretWithDelayedDestroy(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secretID := testName(t)
+	parent := fmt.Sprintf("projects/%s", tc.ProjectID)
+
+	var b bytes.Buffer
+	if err := createSecretWithDelayedDestroy(&b, parent, secretID, 86400); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
+
+	if got, want := b.String(), "Created secret with version destroy ttl:"; !strings.Contains(got, want) {
+		t.Errorf("createSecretWithDelayedDestroy: expected %q to contain %q", got, want)
+	}
+}
+
+func TestUpdateSecretWithDelayedDestroy(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret := testSecret(t, tc.ProjectID)
+	secretID := secret.Name
+
+	var b bytes.Buffer
+	if err := updateSecretWithDelayedDestroy(&b, secretID, 86400); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupSecret(t, secretID)
+
+	if got, want := b.String(), "Updated secret:"; !strings.Contains(got, want) {
+		t.Errorf("createSecretWithDelayedDestroy: expected %q to contain %q", got, want)
+	}
+}
+
+func TestDisableSecretDelayedDestroy(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret := testSecret(t, tc.ProjectID)
+	secretID := secret.Name
+
+	var b bytes.Buffer
+	if err := disableSecretDelayedDestroy(&b, secretID); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupSecret(t, secretID)
+
+	if got, want := b.String(), "Updated secret:"; !strings.Contains(got, want) {
+		t.Errorf("createSecretWithDelayedDestroy: expected %q to contain %q", got, want)
+	}
 }
