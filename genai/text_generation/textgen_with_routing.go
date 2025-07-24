@@ -29,7 +29,7 @@ func generateWithRouting(w io.Writer) error {
 	ctx := context.Background()
 
 	clientConfig := &genai.ClientConfig{
-		HTTPOptions: genai.HTTPOptions{APIVersion: "v1beta1"},
+		HTTPOptions: genai.HTTPOptions{},
 	}
 
 	client, err := genai.NewClient(ctx, clientConfig)
@@ -46,7 +46,7 @@ func generateWithRouting(w io.Writer) error {
 		ModelSelectionConfig: modelSelectionConfig,
 	}
 
-	modelName := "model-optimizer-exp-04-09"
+	modelName := "gemini-2.0-flash-001"
 
 	resp, err := client.Models.GenerateContent(ctx,
 		modelName,
