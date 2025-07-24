@@ -43,8 +43,7 @@ func deleteDataset(client *apiv2_client.Client, projectID, datasetID string) err
 	}
 
 	// Deleting a dataset doesn't return information, but it may produce an error.
-	err := client.DeleteDataset(ctx, req)
-	if err != nil {
+	if err := client.DeleteDataset(ctx, req); err != nil {
 		if apierr, ok := apierror.FromError(err); ok {
 			if status := apierr.GRPCStatus(); status.Code() == codes.NotFound {
 				// The error indicates the dataset isn't present.  Possibly another process removed

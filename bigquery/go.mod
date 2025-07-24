@@ -12,7 +12,7 @@ require (
 	github.com/apache/arrow/go/v10 v10.0.1
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/google/uuid v1.6.0
-	github.com/googleapis/gax-go/v2 v2.14.2
+	github.com/googleapis/gax-go/v2 v2.15.0
 	github.com/linkedin/goavro/v2 v2.13.0
 	google.golang.org/api v0.239.0
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250603155806-513f23925822

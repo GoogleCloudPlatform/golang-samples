@@ -8,7 +8,7 @@ require (
 	cloud.google.com/go/iam v1.5.2
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
 	github.com/GoogleCloudPlatform/golang-samples/bigquery v0.0.0-00010101000000-000000000000
-	github.com/googleapis/gax-go/v2 v2.14.2
+	github.com/googleapis/gax-go/v2 v2.15.0
 	google.golang.org/api v0.239.0
 )
 
