@@ -29,7 +29,7 @@ func generateWithRouting(w io.Writer) error {
 	ctx := context.Background()
 
 	clientConfig := &genai.ClientConfig{
-		HTTPOptions: genai.HTTPOptions{},
+		HTTPOptions: genai.HTTPOptions{APIVersion: "v1beta1"},
 	}
 
 	client, err := genai.NewClient(ctx, clientConfig)
