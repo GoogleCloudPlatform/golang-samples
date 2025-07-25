@@ -28,7 +28,7 @@ import (
 
 // deleteDataset demonstrates deleting a dataset from BigQuery.
 func deleteDataset(client *apiv2_client.Client, projectID, datasetID string) error {
-	// client can be instantiated per-RPC service, or use cloud.google.com/bigquery/v2/apiv2_client to create
+	// client can be instantiated per-RPC service, or use cloud.google.com/go/bigquery/v2/apiv2_client to create
 	// an aggregate client.
 	//
 	// projectID := "my-project-id"
