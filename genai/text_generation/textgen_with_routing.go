@@ -46,7 +46,7 @@ func generateWithRouting(w io.Writer) error {
 		ModelSelectionConfig: modelSelectionConfig,
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	modelName := "model-optimizer-exp-04-09"
 
 	resp, err := client.Models.GenerateContent(ctx,
 		modelName,
