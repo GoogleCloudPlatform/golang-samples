@@ -52,7 +52,7 @@ func TestDatasetSnippets(t *testing.T) {
 			defer client.Close()
 			// Create a dataset.
 			projID := tc.ProjectID
-			dsID := fmt.Sprintf("datasetsnippet_%s_%d", name, time.Now().UnixNano())
+			dsID := fmt.Sprintf("snippettesting_dataset_%s_%d", name, time.Now().UnixNano())
 			if err := createDataset(client, io.Discard, projID, dsID); err != nil {
 				t.Fatalf("createDataset(%q,%q): %v", projID, dsID, err)
 			}

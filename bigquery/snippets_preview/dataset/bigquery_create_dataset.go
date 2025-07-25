@@ -32,7 +32,7 @@ import (
 
 // createDataset demonstrates creation of a new dataset using an explicit destination location.
 func createDataset(client *apiv2_client.Client, w io.Writer, projectID, datasetID string) error {
-	// client can be instantiated per-RPC service, or use cloud.google.com/v2/apiv2_client to create
+	// client can be instantiated per-RPC service, or use cloud.google.com/bigquery/v2/apiv2_client to create
 	// an aggregate client.
 	//
 	// projectID := "my-project-id"
