@@ -200,6 +200,20 @@ func testRegionalSecretVersion(tb testing.TB, parent string, payload []byte) *se
 	return version
 }
 
+func testGetSecret(tb testing.TB, name string) *secretmanagerpb.Secret {
+	tb.Helper()
+
+	client, ctx := testClient(tb)
+
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: name,
+	})
+	if err != nil {
+		tb.Fatalf("testGetSecret: failed to get secret: %v", err)
+	}
+	return secret
+}
+
 func testCleanupSecret(tb testing.TB, name string) {
 	tb.Helper()
 
@@ -1684,10 +1698,18 @@ func TestCreateSecretWithDelayedDestroy(t *testing.T) {
 	if err := createSecretWithDelayedDestroy(&b, parent, secretID, 86400); err != nil {
 		t.Fatal(err)
 	}
-	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
+
+	name := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
+	defer testCleanupSecret(t, name)
 
 	if got, want := b.String(), "Created secret with version destroy ttl:"; !strings.Contains(got, want) {
 		t.Errorf("createSecretWithDelayedDestroy: expected %q to contain %q", got, want)
+	}
+
+	secret := testGetSecret(t, name)
+
+	if got, want := secret.VersionDestroyTtl.Seconds, int64(86400); got != want {
+		t.Errorf("createSecretWithDelayedDestroy: expected %v to be %v", got, want)
 	}
 }
 
@@ -1706,6 +1728,12 @@ func TestUpdateSecretWithDelayedDestroy(t *testing.T) {
 	if got, want := b.String(), "Updated secret:"; !strings.Contains(got, want) {
 		t.Errorf("updateSecretWithDelayedDestroy: expected %q to contain %q", got, want)
 	}
+
+	updatedSecret := testGetSecret(t, secretID)
+
+	if got, want := updatedSecret.VersionDestroyTtl.Seconds, int64(86400); got != want {
+		t.Errorf("updateSecretWithDelayedDestroy: expected %v to be %v", got, want)
+	}
 }
 
 func TestDisableSecretDelayedDestroy(t *testing.T) {
@@ -1722,5 +1750,11 @@ func TestDisableSecretDelayedDestroy(t *testing.T) {
 
 	if got, want := b.String(), "Updated secret:"; !strings.Contains(got, want) {
 		t.Errorf("disableSecretDelayedDestroy: expected %q to contain %q", got, want)
+	}
+
+	updatedSecret := testGetSecret(t, secretID)
+
+	if updatedSecret.VersionDestroyTtl != nil {
+		t.Errorf("disableSecretDelayedDestroy: expected VersionDestroyTtl to be nil, got non-nil")
 	}
 }
