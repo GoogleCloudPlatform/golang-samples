@@ -15,17 +15,8 @@
 // Package text_generation shows examples of generating text using the GenAI SDK.
 package text_generation
 
-// [START googlegenaisdk_textgen_with_routing]
-import (
-	"context"
-	"fmt"
-	"io"
-
-	"google.golang.org/genai"
-)
-
 // generateWithRouting shows how to generate text using a text prompt and routing configuration.
-func generateWithRouting(w io.Writer) error {
+/*func generateWithRouting(w io.Writer) error {
 	ctx := context.Background()
 
 	clientConfig := &genai.ClientConfig{
@@ -67,6 +58,6 @@ func generateWithRouting(w io.Writer) error {
 	// ...
 
 	return nil
-}
+}*/
 
 // [END googlegenaisdk_textgen_with_routing]
