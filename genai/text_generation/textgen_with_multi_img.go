@@ -57,7 +57,7 @@ func generateWithMultiImg(w io.Writer) error {
 			}},
 		}},
 	}
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)
 	if err != nil {
