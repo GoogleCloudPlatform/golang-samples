@@ -35,7 +35,7 @@ func generateWithConfig(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 	contents := genai.Text("Why is the sky blue?")
 	// See the documentation: https://googleapis.github.io/python-genai/genai.html#genai.types.GenerateContentConfig
 	config := &genai.GenerateContentConfig{
