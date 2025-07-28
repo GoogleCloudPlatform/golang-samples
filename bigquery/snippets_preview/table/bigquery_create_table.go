@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dataset
+package table
 
-// [START bigquery_create_dataset_preview]
+// [START bigquery_create_table_preview]
 import (
 	"context"
 	"fmt"
@@ -27,50 +27,70 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-// createDataset demonstrates creation of a new dataset using an explicit destination location.
-func createDataset(client *apiv2_client.Client, w io.Writer, projectID, datasetID string) error {
+// createTable demonstrates creation of a new table with a predefined schema into an existing dataset.
+func createTable(client *apiv2_client.Client, w io.Writer, projectID, datasetID, tableID string) error {
 	// client can be instantiated per-RPC service, or use cloud.google.com/go/bigquery/v2/apiv2_client to create
 	// an aggregate client.
 	//
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
+	// tableID := "mytable"
 	ctx := context.Background()
 
-	// Construct a request, populating some of the available configuration
-	// settings.
-	req := &bigquerypb.InsertDatasetRequest{
-		ProjectId: projectID,
-		Dataset: &bigquerypb.Dataset{
-			Location: "US", // See https://cloud.google.com/bigquery/docs/locations
-			FriendlyName: &wrapperspb.StringValue{
-				Value: "friendly name of the dataset",
+	// Define a very simple schema for the table.
+	schema := &bigquerypb.TableSchema{
+		Fields: []*bigquerypb.TableFieldSchema{
+			{
+				Name: "name",
+				Type: "STRING",
+				Mode: "REQUIRED",
 			},
-			Description: &wrapperspb.StringValue{
-				Value: "Description of the dataset",
+			{
+				Name: "age",
+				Type: "INTEGER",
 			},
-			DatasetReference: &bigquerypb.DatasetReference{
-				DatasetId: datasetID,
+			{
+				Name: "weight",
+				Type: "FLOAT",
+			},
+			{
+				Name: "is_magic",
+				Type: "BOOLEAN",
 			},
 		},
 	}
-	resp, err := client.InsertDataset(ctx, req)
+
+	// Construct a request, populating some of the available configuration
+	// settings.
+	req := &bigquerypb.InsertTableRequest{
+		ProjectId: projectID,
+		DatasetId: datasetID,
+		Table: &bigquerypb.Table{
+			TableReference: &bigquerypb.TableReference{
+				ProjectId: projectID,
+				DatasetId: datasetID,
+				TableId:   tableID,
+			},
+			Schema: schema,
+		},
+	}
+	resp, err := client.InsertTable(ctx, req)
 	if err != nil {
 		// Examine the error structure more deeply.
 		if apierr, ok := apierror.FromError(err); ok {
 			if status := apierr.GRPCStatus(); status.Code() == codes.AlreadyExists {
-				// The error was due to the dataset already existing.  For this sample
+				// The error was due to the table already existing.  For this sample
 				// we don't consider that a failure, so return nil.
 				return nil
 			}
 		}
-		return fmt.Errorf("InsertDataset: %w", err)
+		return fmt.Errorf("InsertTable: %w", err)
 	}
 	// Print the JSON representation of the response to the provided writer.
 	fmt.Fprintf(w, "Response from insert: %s", protojson.Format(resp))
 	return nil
 }
 
-// [END bigquery_create_dataset_preview]
+// [END bigquery_create_table_preview]

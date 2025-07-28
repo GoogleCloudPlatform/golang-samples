@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dataset
+package table
 
-// [START bigquery_delete_dataset_preview]
+// [START bigquery_delete_table_preview]
 import (
 	"context"
 	"fmt"
@@ -26,35 +26,35 @@ import (
 	"google.golang.org/grpc/codes"
 )
 
-// deleteDataset demonstrates deleting a dataset from BigQuery.
-func deleteDataset(client *apiv2_client.Client, projectID, datasetID string) error {
+// deleteTable demonstrates deleting a table from BigQuery.
+func deleteTable(client *apiv2_client.Client, projectID, datasetID, tableID string) error {
 	// client can be instantiated per-RPC service, or use cloud.google.com/go/bigquery/v2/apiv2_client to create
 	// an aggregate client.
 	//
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
+	// tableID := "mytable"
 	ctx := context.Background()
 
-	req := &bigquerypb.DeleteDatasetRequest{
+	req := &bigquerypb.DeleteTableRequest{
 		ProjectId: projectID,
 		DatasetId: datasetID,
-		// Deletion will fail if the dataset is not empty and DeleteContents is false.
-		DeleteContents: true,
+		TableId:   tableID,
 	}
 
-	// Deleting a dataset doesn't return information, but it may produce an error.
-	if err := client.DeleteDataset(ctx, req); err != nil {
+	// Deleting a table doesn't return information, but it may produce an error.
+	if err := client.DeleteTable(ctx, req); err != nil {
 		if apierr, ok := apierror.FromError(err); ok {
 			if status := apierr.GRPCStatus(); status.Code() == codes.NotFound {
-				// The error indicates the dataset isn't present.  Possibly another process removed
-				// the dataset, or perhaps there was a partial failure and this was handled via automatic retry.
+				// The error indicates the table isn't present.  Possibly another process removed
+				// the table, or perhaps there was a partial failure and this was handled via automatic retry.
 				// In any case, treat this as a success.
 				return nil
 			}
 		}
-		return fmt.Errorf("DeleteDataset: %w", err)
+		return fmt.Errorf("DeleteTable: %w", err)
 	}
 	return nil
 }
 
-// [END bigquery_delete_dataset_preview]
+// [END bigquery_delete_table_preview]
