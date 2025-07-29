@@ -59,7 +59,7 @@ func updateFolderFloorSettings(w io.Writer, folderID, locationID string) error {
 				RaiFilters: []*modelarmorpb.RaiFilterSettings_RaiFilter{
 					{
 						FilterType:      modelarmorpb.RaiFilterType_HATE_SPEECH,
-						ConfidenceLevel: modelarmorpb.DetectionConfidenceLevel_HIGH,
+						ConfidenceLevel: modelarmorpb.DetectionConfidenceLevel_LOW_AND_ABOVE,
 					},
 				},
 			},

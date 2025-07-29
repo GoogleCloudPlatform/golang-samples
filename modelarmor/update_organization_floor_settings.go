@@ -62,7 +62,7 @@ func updateOrganizationFloorSettings(w io.Writer, organizationID, locationID str
 					RaiFilters: []*modelarmorpb.RaiFilterSettings_RaiFilter{
 						{
 							FilterType:      modelarmorpb.RaiFilterType_HATE_SPEECH,
-							ConfidenceLevel: modelarmorpb.DetectionConfidenceLevel_HIGH,
+							ConfidenceLevel: modelarmorpb.DetectionConfidenceLevel_LOW_AND_ABOVE,
 						},
 					},
 				},
