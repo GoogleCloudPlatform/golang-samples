@@ -55,7 +55,7 @@ func generateWithFuncCall(w io.Writer) error {
 		Temperature: genai.Ptr(float32(0.0)),
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: "What is the weather like in Boston?"},

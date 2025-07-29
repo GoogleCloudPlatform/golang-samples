@@ -21,7 +21,7 @@ import (
 	"io"
 	"time"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 )
 
 func pullMsgsCustomAttributes(w io.Writer, projectID, subID string) error {
@@ -34,7 +34,10 @@ func pullMsgsCustomAttributes(w io.Writer, projectID, subID string) error {
 	}
 	defer client.Close()
 
-	sub := client.Subscription(subID)
+	// client.Subscriber can be passed a subscription ID (e.g. "my-sub") or
+	// a fully qualified name (e.g. "projects/my-project/subscriptions/my-sub").
+	// If a subscription ID is provided, the project ID from the client is used.
+	sub := client.Subscriber(subID)
 
 	// Receive messages for 10 seconds, which simplifies testing.
 	// Comment this out in production, since `Receive` should
