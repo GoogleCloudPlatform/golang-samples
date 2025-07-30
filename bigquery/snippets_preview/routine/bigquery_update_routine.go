@@ -71,10 +71,10 @@ func updateRoutine(client *apiv2_client.Client, w io.Writer, projectID, datasetI
 				// The error was due to precondition failing (the If-Match constraint).
 				// For this example we're not doing anything overly stateful with the dataset
 				// so we simply return a more readable outer error.
-				return fmt.Errorf("routine etag changed between Get and Patch: %w", err)
+				return fmt.Errorf("routine etag changed between Get and Update: %w", err)
 			}
 		}
-		return fmt.Errorf("PatchRoutine: %w", err)
+		return fmt.Errorf("UpdateRoutine: %w", err)
 	}
 	// Print the values we expected to be modified.
 	fmt.Fprintf(w, "Description: %s\n", resp.GetDescription())

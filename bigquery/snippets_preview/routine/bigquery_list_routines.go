@@ -27,7 +27,7 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-// listRoutines demonstrates iterating through the routines witin a specified dataset.
+// listRoutines demonstrates iterating through the routines within a specified dataset.
 func listRoutines(client *apiv2_client.Client, w io.Writer, projectID, datasetID string) error {
 	// client can be instantiated per-RPC service, or use cloud.google.com/go/bigquery/v2/apiv2_client to create
 	// an aggregate client.
