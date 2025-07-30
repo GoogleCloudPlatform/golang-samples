@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package table
+package routine
 
-// [START bigquery_update_table_preview]
+// [START bigquery_update_routine_preview]
 import (
 	"context"
 	"fmt"
@@ -26,60 +26,59 @@ import (
 	"github.com/googleapis/gax-go/v2/callctx"
 
 	"google.golang.org/grpc/codes"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-// updateTable demonstrates making partial updates to an existing table's metadata.
-func updateTable(client *apiv2_client.Client, w io.Writer, projectID, datasetID, tableID string) error {
+// updateRoutine demonstrates making partial updates to an existing routine's metadata.
+func updateRoutine(client *apiv2_client.Client, w io.Writer, projectID, datasetID, routineID string) error {
 	// client can be instantiated per-RPC service, or use cloud.google.com/go/bigquery/v2/apiv2_client to create
 	// an aggregate client.
 	//
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
-	// tableID := "mytable"
+	// routineID := "myroutine"
 	ctx := context.Background()
 
-	// Fetch the existing table metadata prior to making any modifications.
+	// Fetch the existing routine metadata prior to making any modifications.
 	// This allows us to use optimistic concurrency controls to avoid overwriting
 	// other changes.
-	meta, err := client.GetTable(ctx, &bigquerypb.GetTableRequest{
+	meta, err := client.GetRoutine(ctx, &bigquerypb.GetRoutineRequest{
 		ProjectId: projectID,
 		DatasetId: datasetID,
-		TableId:   tableID,
+		RoutineId: routineID,
 	})
 	if err != nil {
-		return fmt.Errorf("GetTable: %w", err)
+		return fmt.Errorf("GetRoutine: %w", err)
 	}
 
-	// Construct an update request, populating many of the available configurations.
-	req := &bigquerypb.UpdateOrPatchTableRequest{
+	// Construct an update request, copying the current state of the
+	// request since we'll be doing a full update.
+	req := &bigquerypb.UpdateRoutineRequest{
 		ProjectId: projectID,
 		DatasetId: datasetID,
-		TableId:   tableID,
-		Table: &bigquerypb.Table{
-			Description: &wrapperspb.StringValue{
-				Value: "An updated description of the dataset.",
-			},
-		},
+		RoutineId: routineID,
+		Routine:   meta,
 	}
+	// Modify the request to change the description.
+	req.GetRoutine().Description = "Updated description."
+
 	// Now, use the ETag from the original metadata to guard against conflicting writes.
 	// The callctx package let's us inject headers in a transport agnostic fashion (gRPC or HTTP).
 	patchCtx := callctx.SetHeaders(ctx, "if-match", meta.GetEtag())
-	resp, err := client.PatchTable(patchCtx, req)
+	resp, err := client.UpdateRoutine(patchCtx, req)
 	if err != nil {
 		if apierr, ok := apierror.FromError(err); ok {
 			if status := apierr.GRPCStatus(); status.Code() == codes.FailedPrecondition {
 				// The error was due to precondition failing (the If-Match constraint).
 				// For this example we're not doing anything overly stateful with the dataset
 				// so we simply return a more readable outer error.
-				return fmt.Errorf("table etag changed between Get and Patch: %w", err)
+				return fmt.Errorf("routine etag changed between Get and Update: %w", err)
 			}
 		}
-		return fmt.Errorf("PatchTable: %w", err)
+		return fmt.Errorf("UpdateRoutine: %w", err)
 	}
 	// Print the values we expected to be modified.
 	fmt.Fprintf(w, "Description: %s\n", resp.GetDescription())
 	return nil
 }
 
-// [END bigquery_update_table_preview]
+// [END bigquery_update_routine_preview]
