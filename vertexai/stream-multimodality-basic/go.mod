@@ -3,9 +3,9 @@ module github.com/GoogleCloudPlatform/golang-samples/vertexai/stream-multimodali
 go 1.23.0
 
 require (
-	cloud.google.com/go/vertexai v0.13.2
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	google.golang.org/api v0.217.0
+	cloud.google.com/go/vertexai v0.15.0
+	github.com/GoogleCloudPlatform/golang-samples caf23ea7c887
+	google.golang.org/api v0.243.0
 )
 
 require (
