@@ -36,11 +36,12 @@ func computeWithTxt(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: "What's the longest word in the English language?"},
-		}},
+		},
+			Role: "user"},
 	}
 
 	resp, err := client.Models.ComputeTokens(ctx, modelName, contents, nil)

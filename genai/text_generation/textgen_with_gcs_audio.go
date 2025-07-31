@@ -35,7 +35,7 @@ func generateWithAudio(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: `Provide the summary of the audio file.
@@ -45,7 +45,8 @@ Create a chapter breakdown with timestamps for key sections or topics discussed.
 				FileURI:  "gs://cloud-samples-data/generative-ai/audio/pixel.mp3",
 				MIMEType: "audio/mpeg",
 			}},
-		}},
+		},
+			Role: "user"},
 	}
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)
@@ -53,10 +54,8 @@ Create a chapter breakdown with timestamps for key sections or topics discussed.
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
 
-	respText, err := resp.Text()
-	if err != nil {
-		return fmt.Errorf("failed to convert model response to text: %w", err)
-	}
+	respText := resp.Text()
+
 	fmt.Fprintln(w, respText)
 
 	// Example response:

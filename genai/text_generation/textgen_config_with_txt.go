@@ -35,12 +35,12 @@ func generateWithConfig(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 	contents := genai.Text("Why is the sky blue?")
 	// See the documentation: https://googleapis.github.io/python-genai/genai.html#genai.types.GenerateContentConfig
 	config := &genai.GenerateContentConfig{
-		Temperature:      genai.Ptr(0.0),
-		CandidateCount:   genai.Ptr(int64(1)),
+		Temperature:      genai.Ptr(float32(0.0)),
+		CandidateCount:   int32(1),
 		ResponseMIMEType: "application/json",
 	}
 
@@ -49,10 +49,8 @@ func generateWithConfig(w io.Writer) error {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
 
-	respText, err := resp.Text()
-	if err != nil {
-		return fmt.Errorf("failed to convert model response to text: %w", err)
-	}
+	respText := resp.Text()
+
 	fmt.Fprintln(w, respText)
 	// Example response:
 	// {

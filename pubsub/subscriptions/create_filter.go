@@ -20,15 +20,16 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 )
 
-func createWithFilter(w io.Writer, projectID, subID, filter string, topic *pubsub.Topic) error {
+func createWithFilter(w io.Writer, projectID, topic, subscription, filter string) error {
 	// Receive messages with attribute key "author" and value "unknown".
 	// projectID := "my-project-id"
-	// subID := "my-sub"
+	// topic := "projects/my-project-id/topics/my-topic"
+	// subscription := "projects/my-project/subscriptions/my-sub"
 	// filter := "attributes.author=\"unknown\""
-	// topic of type https://godoc.org/cloud.google.com/go/pubsub#Topic
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -36,7 +37,8 @@ func createWithFilter(w io.Writer, projectID, subID, filter string, topic *pubsu
 	}
 	defer client.Close()
 
-	sub, err := client.CreateSubscription(ctx, subID, pubsub.SubscriptionConfig{
+	sub, err := client.SubscriptionAdminClient.CreateSubscription(ctx, &pubsubpb.Subscription{
+		Name:   subscription,
 		Topic:  topic,
 		Filter: filter,
 	})

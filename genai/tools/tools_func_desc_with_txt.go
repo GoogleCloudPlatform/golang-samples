@@ -52,14 +52,15 @@ func generateWithFuncCall(w io.Writer) error {
 		Tools: []*genai.Tool{
 			{FunctionDeclarations: []*genai.FunctionDeclaration{weatherFunc}},
 		},
-		Temperature: genai.Ptr(0.0),
+		Temperature: genai.Ptr(float32(0.0)),
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: "What is the weather like in Boston?"},
-		}},
+		},
+			Role: "user"},
 	}
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, config)
@@ -99,7 +100,8 @@ func generateWithFuncCall(w io.Writer) error {
 	contents = []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: "What is the weather like in Boston?"},
-		}},
+		},
+			Role: "user"},
 		{Parts: []*genai.Part{
 			{FunctionCall: funcCall},
 		}},
@@ -113,10 +115,8 @@ func generateWithFuncCall(w io.Writer) error {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
 
-	respText, err := resp.Text()
-	if err != nil {
-		return fmt.Errorf("failed to convert model response to text: %w", err)
-	}
+	respText := resp.Text()
+
 	fmt.Fprintln(w, respText)
 
 	// Example response:
