@@ -174,7 +174,7 @@ func TestTextGeneration(t *testing.T) {
 	})
 
 	t.Run("generate with routing", func(t *testing.T) {
-		t.Skip("skipping because of model used in this test")
+		t.Skip("skipping because of model used in this test. The model 'model-optimizer-exp-04-09' is not consistently available in all test environments.")
 		buf.Reset()
 		err := generateWithRouting(buf)
 		if err != nil {
