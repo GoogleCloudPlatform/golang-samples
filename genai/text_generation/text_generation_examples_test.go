@@ -187,4 +187,56 @@ func TestTextGeneration(t *testing.T) {
 		}
 	})
 
+	t.Run("generate chat stream with text prompt", func(t *testing.T) {
+		buf.Reset()
+		err := generateChatStreamWithText(buf)
+		if err != nil {
+			t.Fatalf("generateChatStreamWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate Text With PDF", func(t *testing.T) {
+		buf.Reset()
+		err := generateTextWithPDF(buf)
+		if err != nil {
+			t.Fatalf("generateTextWithPDF failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate thinking with text prompt", func(t *testing.T) {
+		buf.Reset()
+		err := generateThinkingWithText(buf)
+		if err != nil {
+			t.Fatalf("generateThinkingWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate with model optimizer", func(t *testing.T) {
+		buf.Reset()
+		err := generateModelOptimizerWithTxt(buf)
+		if err != nil {
+			t.Fatalf("generateModelOptimizerWithTxt failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
 }
