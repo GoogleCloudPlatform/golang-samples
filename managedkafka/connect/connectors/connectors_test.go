@@ -38,6 +38,7 @@ func TestConnectors(t *testing.T) {
 	options := fake.Options(t)
 
 	t.Run("CreateMirrorMakerConnector", func(t *testing.T) {
+		buf.Reset()
 		sourceDNS := "source-cluster-dns:9092"
 		targetDNS := "target-cluster-dns:9092"
 		topicName := "test-topic"
@@ -52,6 +53,7 @@ func TestConnectors(t *testing.T) {
 	})
 
 	t.Run("CreatePubSubSourceConnector", func(t *testing.T) {
+		buf.Reset()
 		topicName := "test-topic"
 		subscription := "test-subscription"
 		if err := createPubSubSourceConnector(buf, tc.ProjectID, region, connectClusterID, connectorID+"-pubsub-source", topicName, subscription, options...); err != nil {
@@ -65,6 +67,7 @@ func TestConnectors(t *testing.T) {
 	})
 
 	t.Run("CreatePubSubSinkConnector", func(t *testing.T) {
+		buf.Reset()
 		topicName := "test-topic"
 		pubsubTopic := "test-pubsub-topic"
 		if err := createPubSubSinkConnector(buf, tc.ProjectID, region, connectClusterID, connectorID+"-pubsub-sink", topicName, pubsubTopic, options...); err != nil {
@@ -78,6 +81,7 @@ func TestConnectors(t *testing.T) {
 	})
 
 	t.Run("CreateGCSSinkConnector", func(t *testing.T) {
+		buf.Reset()
 		topicName := "test-topic"
 		bucketName := "test-bucket"
 		if err := createGCSSinkConnector(buf, tc.ProjectID, region, connectClusterID, connectorID+"-gcs-sink", topicName, bucketName, options...); err != nil {
@@ -91,6 +95,7 @@ func TestConnectors(t *testing.T) {
 	})
 
 	t.Run("CreateBigQuerySinkConnector", func(t *testing.T) {
+		buf.Reset()
 		topicName := "test-topic"
 		datasetID := "test-dataset"
 		if err := createBigQuerySinkConnector(buf, tc.ProjectID, region, connectClusterID, connectorID+"-bq-sink", topicName, datasetID, options...); err != nil {
@@ -104,6 +109,7 @@ func TestConnectors(t *testing.T) {
 	})
 
 	t.Run("GetConnector", func(t *testing.T) {
+		buf.Reset()
 		if err := getConnector(buf, tc.ProjectID, region, connectClusterID, connectorID, options...); err != nil {
 			t.Fatalf("failed to get connector: %v", err)
 		}
@@ -115,6 +121,7 @@ func TestConnectors(t *testing.T) {
 	})
 
 	t.Run("UpdateConnector", func(t *testing.T) {
+		buf.Reset()
 		config := map[string]string{"tasks.max": "2"}
 		if err := updateConnector(buf, tc.ProjectID, region, connectClusterID, connectorID, config, options...); err != nil {
 			t.Fatalf("failed to update connector: %v", err)
@@ -127,6 +134,7 @@ func TestConnectors(t *testing.T) {
 	})
 
 	t.Run("ListConnectors", func(t *testing.T) {
+		buf.Reset()
 		if err := listConnectors(buf, tc.ProjectID, region, connectClusterID, options...); err != nil {
 			t.Fatalf("failed to list connectors: %v", err)
 		}
@@ -138,6 +146,7 @@ func TestConnectors(t *testing.T) {
 	})
 
 	t.Run("PauseConnector", func(t *testing.T) {
+		buf.Reset()
 		if err := pauseConnector(buf, tc.ProjectID, region, connectClusterID, connectorID, options...); err != nil {
 			t.Fatalf("failed to pause connector: %v", err)
 		}
@@ -149,6 +158,7 @@ func TestConnectors(t *testing.T) {
 	})
 
 	t.Run("ResumeConnector", func(t *testing.T) {
+		buf.Reset()
 		if err := resumeConnector(buf, tc.ProjectID, region, connectClusterID, connectorID, options...); err != nil {
 			t.Fatalf("failed to resume connector: %v", err)
 		}
@@ -160,6 +170,7 @@ func TestConnectors(t *testing.T) {
 	})
 
 	t.Run("StopConnector", func(t *testing.T) {
+		buf.Reset()
 		if err := stopConnector(buf, tc.ProjectID, region, connectClusterID, connectorID, options...); err != nil {
 			t.Fatalf("failed to stop connector: %v", err)
 		}
@@ -171,6 +182,7 @@ func TestConnectors(t *testing.T) {
 	})
 
 	t.Run("RestartConnector", func(t *testing.T) {
+		buf.Reset()
 		if err := restartConnector(buf, tc.ProjectID, region, connectClusterID, connectorID, options...); err != nil {
 			t.Fatalf("failed to restart connector: %v", err)
 		}
@@ -182,6 +194,7 @@ func TestConnectors(t *testing.T) {
 	})
 
 	t.Run("DeleteConnector", func(t *testing.T) {
+		buf.Reset()
 		if err := deleteConnector(buf, tc.ProjectID, region, connectClusterID, connectorID, options...); err != nil {
 			t.Fatalf("failed to delete connector: %v", err)
 		}

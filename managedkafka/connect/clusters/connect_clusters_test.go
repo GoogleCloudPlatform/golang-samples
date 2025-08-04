@@ -41,6 +41,7 @@ func TestConnectClusters(t *testing.T) {
 	kafkaClusterPath := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", tc.ProjectID, region, kafkaClusterID)
 
 	t.Run("CreateConnectCluster", func(t *testing.T) {
+		buf.Reset()
 		if err := createConnectCluster(buf, tc.ProjectID, region, connectClusterID, kafkaClusterPath, options...); err != nil {
 			t.Fatalf("failed to create a connect cluster: %v", err)
 		}
@@ -51,6 +52,7 @@ func TestConnectClusters(t *testing.T) {
 		}
 	})
 	t.Run("GetConnectCluster", func(t *testing.T) {
+		buf.Reset()
 		if err := getConnectCluster(buf, tc.ProjectID, region, connectClusterID, options...); err != nil {
 			t.Fatalf("failed to get connect cluster: %v", err)
 		}
@@ -61,6 +63,7 @@ func TestConnectClusters(t *testing.T) {
 		}
 	})
 	t.Run("UpdateConnectCluster", func(t *testing.T) {
+		buf.Reset()
 		memoryBytes := int64(13958643712) // 13 GiB in bytes
 		labels := map[string]string{"environment": "test"}
 		if err := updateConnectCluster(buf, tc.ProjectID, region, connectClusterID, memoryBytes, labels, options...); err != nil {
@@ -73,6 +76,7 @@ func TestConnectClusters(t *testing.T) {
 		}
 	})
 	t.Run("ListConnectClusters", func(t *testing.T) {
+		buf.Reset()
 		if err := listConnectClusters(buf, tc.ProjectID, region, options...); err != nil {
 			t.Fatalf("failed to list connect clusters: %v", err)
 		}
@@ -83,6 +87,7 @@ func TestConnectClusters(t *testing.T) {
 		}
 	})
 	t.Run("DeleteConnectCluster", func(t *testing.T) {
+		buf.Reset()
 		if err := deleteConnectCluster(buf, tc.ProjectID, region, connectClusterID, options...); err != nil {
 			t.Fatalf("failed to delete connect cluster: %v", err)
 		}
