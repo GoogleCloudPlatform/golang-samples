@@ -1,0 +1,85 @@
+// Copyright 2024 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package connectors
+
+// [START managedkafka_create_mirrormaker_connector]
+import (
+	"context"
+	"fmt"
+	"io"
+
+	"cloud.google.com/go/managedkafka/apiv1/managedkafkapb"
+	"google.golang.org/api/option"
+
+	managedkafka "cloud.google.com/go/managedkafka/apiv1"
+)
+
+func createMirrorMakerConnector(w io.Writer, projectID, region, connectClusterID, connectorID, sourceDNS, targetDNS, topicName string, opts ...option.ClientOption) error {
+	// projectID := "my-project-id"
+	// region := "us-central1"
+	// connectClusterID := "my-connect-cluster"
+	// connectorID := "my-mm2-connector"
+	// sourceDNS := "source-cluster-dns:9092"
+	// targetDNS := "target-cluster-dns:9092"
+	// topicName := "my-topic"
+	ctx := context.Background()
+	client, err := managedkafka.NewManagedKafkaConnectClient(ctx, opts...)
+	if err != nil {
+		return fmt.Errorf("managedkafka.NewManagedKafkaConnectClient got err: %w", err)
+	}
+	defer client.Close()
+
+	parent := fmt.Sprintf("projects/%s/locations/%s/connectClusters/%s", projectID, region, connectClusterID)
+
+	// MirrorMaker 2.0 sample connector configuration
+	config := map[string]string{
+		"connector.class":                                  "org.apache.kafka.connect.mirror.MirrorSourceConnector",
+		"name":                                             connectorID,
+		"source.cluster.alias":                             "source",
+		"target.cluster.alias":                             "target",
+		"topics":                                           topicName,
+		"source.cluster.bootstrap.servers":                 sourceDNS,
+		"target.cluster.bootstrap.servers":                 targetDNS,
+		"offset-syncs.topic.replication.factor":            "1",
+		"source.cluster.security.protocol":                 "SASL_SSL",
+		"source.cluster.sasl.mechanism":                    "OAUTHBEARER",
+		"source.cluster.sasl.login.callback.handler.class": "com.google.cloud.hosted.kafka.auth.GcpLoginCallbackHandler",
+		"source.cluster.sasl.jaas.config":                  "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;",
+		"target.cluster.security.protocol":                 "SASL_SSL",
+		"target.cluster.sasl.mechanism":                    "OAUTHBEARER",
+		"target.cluster.sasl.login.callback.handler.class": "com.google.cloud.hosted.kafka.auth.GcpLoginCallbackHandler",
+		"target.cluster.sasl.jaas.config":                  "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;",
+	}
+
+	connector := &managedkafkapb.Connector{
+		Name:    fmt.Sprintf("%s/connectors/%s", parent, connectorID),
+		Configs: config,
+	}
+
+	req := &managedkafkapb.CreateConnectorRequest{
+		Parent:      parent,
+		ConnectorId: connectorID,
+		Connector:   connector,
+	}
+
+	resp, err := client.CreateConnector(ctx, req)
+	if err != nil {
+		return fmt.Errorf("client.CreateConnector got err: %w", err)
+	}
+	fmt.Fprintf(w, "Created MirrorMaker connector: %s\n", resp.Name)
+	return nil
+}
+
+// [END managedkafka_create_mirrormaker_connector]
