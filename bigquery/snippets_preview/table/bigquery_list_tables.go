@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dataset
+package table
 
-// [START bigquery_list_datasets_preview]
+// [START bigquery_list_tables_preview]
 import (
 	"context"
 	"fmt"
@@ -27,8 +27,8 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-// listDatasets demonstrates iterating through datasets.
-func listDatasets(client *apiv2_client.Client, w io.Writer, projectID string) error {
+// listTables demonstrates iterating through the tables witin a specified dataset.
+func listTables(client *apiv2_client.Client, w io.Writer, projectID, datasetID string) error {
 	// client can be instantiated per-RPC service, or use cloud.google.com/go/bigquery/v2/apiv2_client to create
 	// an aggregate client.
 	//
@@ -36,22 +36,24 @@ func listDatasets(client *apiv2_client.Client, w io.Writer, projectID string) er
 	// datasetID := "mydataset"
 	ctx := context.Background()
 
-	req := &bigquerypb.ListDatasetsRequest{
+	req := &bigquerypb.ListTablesRequest{
 		ProjectId: projectID,
+		DatasetId: datasetID,
 		// MaxResults is the per-page threshold (aka page size).  Generally you should only
 		// worry about setting this if you're executing code in a memory constrained environment
-		// and don't want to process large pages of results.
+		// and don't want to process large pages of results.  BigQuery will select a reasonable
+		// page size automatically.
 		MaxResults: &wrapperspb.UInt32Value{Value: 100},
 	}
 
-	// ListDatasets returns an iterator so users don't have to manage pagination when processing
+	// ListTables returns an iterator so users don't have to manage pagination when processing
 	// the results.
-	it := client.ListDatasets(ctx, req)
+	it := client.ListTables(ctx, req)
 
 	// Process data from the iterator one result at a time.  The internal implementation of the iterator
 	// is fetching pages at a time.
 	for {
-		dataset, err := it.Next()
+		table, err := it.Next()
 		if err == iterator.Done {
 			// We're reached the end of the iteration, break the loop.
 			break
@@ -60,9 +62,9 @@ func listDatasets(client *apiv2_client.Client, w io.Writer, projectID string) er
 			return fmt.Errorf("iterator errored: %w", err)
 		}
 		// Print basic information to the provided writer.
-		fmt.Fprintf(w, "dataset %q in location %q\n", dataset.GetDatasetReference().GetDatasetId(), dataset.GetLocation())
+		fmt.Fprintf(w, "table %q reports type %q\n", table.GetTableReference().GetTableId(), table.GetType())
 	}
 	return nil
 }
 
-// [END bigquery_list_datasets_preview]
+// [END bigquery_list_tables_preview]

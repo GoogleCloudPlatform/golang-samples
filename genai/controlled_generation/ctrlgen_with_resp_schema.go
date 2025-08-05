@@ -60,7 +60,7 @@ func generateWithRespSchema(w io.Writer) error {
 		},
 			Role: "user"},
 	}
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, config)
 	if err != nil {

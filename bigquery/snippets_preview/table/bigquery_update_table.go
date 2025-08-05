@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dataset
+package table
 
-// [START bigquery_update_dataset_preview]
+// [START bigquery_update_table_preview]
 import (
 	"context"
 	"fmt"
@@ -29,8 +29,8 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-// updateDataset demonstrates making partial updates to an existing dataset.
-func updateDataset(client *apiv2_client.Client, w io.Writer, projectID, datasetID string) error {
+// updateTable demonstrates making partial updates to an existing table's metadata.
+func updateTable(client *apiv2_client.Client, w io.Writer, projectID, datasetID, tableID string) error {
 	// client can be instantiated per-RPC service, or use cloud.google.com/go/bigquery/v2/apiv2_client to create
 	// an aggregate client.
 	//
@@ -38,55 +38,47 @@ func updateDataset(client *apiv2_client.Client, w io.Writer, projectID, datasetI
 	// datasetID := "mydataset"
 	ctx := context.Background()
 
-	// Fetch the existing dataset prior to making any modifications.
+	// Fetch the existing table metadata prior to making any modifications.
 	// This allows us to use optimistic concurrency controls to avoid overwriting
 	// other changes.
-	meta, err := client.GetDataset(ctx, &bigquerypb.GetDatasetRequest{
+	meta, err := client.GetTable(ctx, &bigquerypb.GetTableRequest{
 		ProjectId: projectID,
 		DatasetId: datasetID,
-		// Only fetch dataset metadata, not the permisions.
-		DatasetView: bigquerypb.GetDatasetRequest_METADATA,
+		TableId:   tableID,
 	})
 	if err != nil {
-		return fmt.Errorf("GetDataset: %w", err)
+		return fmt.Errorf("GetTable: %w", err)
 	}
 
 	// Construct an update request, populating many of the available configurations.
-	req := &bigquerypb.UpdateOrPatchDatasetRequest{
+	req := &bigquerypb.UpdateOrPatchTableRequest{
 		ProjectId: projectID,
 		DatasetId: datasetID,
-		Dataset: &bigquerypb.Dataset{
+		TableId:   tableID,
+		Table: &bigquerypb.Table{
 			Description: &wrapperspb.StringValue{
 				Value: "An updated description of the dataset.",
-			},
-			// Changing DefaultTableExpirationMs does not affect existing tables in the
-			// dataset, but newly created tables will inherit this as defaults.
-			DefaultTableExpirationMs: &wrapperspb.Int64Value{
-				Value: 90 * 86400 * 1000, // 90 days in milliseconds.
 			},
 		},
 	}
 	// Now, use the ETag from the original metadata to guard against conflicting writes.
 	// The callctx package let's us inject headers in a transport agnostic fashion (gRPC or HTTP).
 	patchCtx := callctx.SetHeaders(ctx, "if-match", meta.GetEtag())
-	resp, err := client.PatchDataset(patchCtx, req)
+	resp, err := client.PatchTable(patchCtx, req)
 	if err != nil {
 		if apierr, ok := apierror.FromError(err); ok {
 			if status := apierr.GRPCStatus(); status.Code() == codes.FailedPrecondition {
 				// The error was due to precondition failing (the If-Match constraint).
 				// For this example we're not doing anything overly stateful with the dataset
 				// so we simply return a more readable outer error.
-				return fmt.Errorf("dataset etag changed between Get and Patch: %w", err)
+				return fmt.Errorf("table etag changed between Get and Patch: %w", err)
 			}
 		}
-		return fmt.Errorf("PatchDataset: %w", err)
+		return fmt.Errorf("PatchTable: %w", err)
 	}
 	// Print the values we expected to be modified.
 	fmt.Fprintf(w, "Description: %s\n", resp.GetDescription())
-	if expiration := resp.GetDefaultTableExpirationMs(); expiration != nil {
-		fmt.Fprintf(w, "DefaultTableExpirationMs: %d", expiration.Value)
-	}
 	return nil
 }
 
-// [END bigquery_update_dataset_preview]
+// [END bigquery_update_table_preview]
