@@ -17,14 +17,14 @@
 /testing/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra
 
 # CNDB, Storage, and Infra-DB
-/bigtable/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
+/bigtable/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes @GoogleCloudPlatform/cloud-asset-analysis-team
 /cloudsql/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-sql-connectors
-/datastore/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
-/firestore/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
+/datastore/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes @GoogleCloudPlatform/cloud-asset-analysis-team
+/firestore/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes @GoogleCloudPlatform/cloud-asset-analysis-team
 /memorystore/                         @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
 /spanner/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes
-/storage/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/gcs-sdk-team
-/storagetransfer/                     @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/gcs-sdk-team
+/storage/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes @GoogleCloudPlatform/gcs-sdk-team
+/storagetransfer/                     @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes @GoogleCloudPlatform/gcs-sdk-team
 
 # DEE Infra
 /batch/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers
