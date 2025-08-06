@@ -26,8 +26,8 @@ import (
 	"google.golang.org/genai"
 )
 
-// getContentCache shows how to retrieve details about a specific cached content resource.
-func getContentCache(w io.Writer, cacheName string) error {
+// listContentCache shows how to retrieve details about cached content.
+func listContentCache(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
@@ -38,7 +38,7 @@ func getContentCache(w io.Writer, cacheName string) error {
 	}
 
 	// Retrieve cached content metadata
-	cache, err := client.Caches.Get(ctx, cacheName, &genai.GetCachedContentConfig{
+	cache, err := client.Caches.List(ctx, &genai.ListCachedContentsConfig{
 		HTTPOptions: &genai.HTTPOptions{
 			Headers:    http.Header{"X-Custom-Header": []string{"example"}},
 			APIVersion: "v1",
@@ -50,14 +50,14 @@ func getContentCache(w io.Writer, cacheName string) error {
 
 	// Print basic info about the cached content
 	fmt.Fprintf(w, "Cache name: %s\n", cache.Name)
-	fmt.Fprintf(w, "Display name: %s\n", cache.DisplayName)
-	fmt.Fprintf(w, "Model: %s\n", cache.Model)
-	fmt.Fprintf(w, "Create time: %s\n", cache.CreateTime.Format(time.RFC3339))
-	fmt.Fprintf(w, "Update time: %s\n", cache.UpdateTime.Format(time.RFC3339))
-	fmt.Fprintf(w, "Expire time: %s (in %s)\n", cache.ExpireTime.Format(time.RFC3339), time.Until(cache.ExpireTime).Round(time.Second))
+	fmt.Fprintf(w, "Display name: %s\n", cache.Items[0].DisplayName)
+	fmt.Fprintf(w, "Model: %s\n", cache.Items[0].Model)
+	fmt.Fprintf(w, "Create time: %s\n", cache.Items[0].CreateTime.Format(time.RFC3339))
+	fmt.Fprintf(w, "Update time: %s\n", cache.Items[0].UpdateTime.Format(time.RFC3339))
+	fmt.Fprintf(w, "Expire time: %s (in %s)\n", cache.Items[0].ExpireTime.Format(time.RFC3339), time.Until(cache.Items[0].ExpireTime).Round(time.Second))
 
-	if cache.UsageMetadata != nil {
-		fmt.Fprintf(w, "Usage metadata: %+v\n", cache.UsageMetadata)
+	if cache.Items[0].UsageMetadata != nil {
+		fmt.Fprintf(w, "Usage metadata: %+v\n", cache.Items[0].UsageMetadata)
 	}
 
 	// Example response:
@@ -67,7 +67,7 @@ func getContentCache(w io.Writer, cacheName string) error {
 	// Create time: 2025-04-08T02:15:23Z
 	// Update time: 2025-04-08T03:05:11Z
 	// Expire time: 2025-04-20T03:05:11Z (in 167h59m59s)
-	// Usage metadata: &{LastUsed:2025-08-03 03:04:55 +0000 UTC UsageCount:4}
+	// Usage metadata: &{AudioDurationSeconds:0 ImageCount:167 TextCount:153 TotalTokenCount:43124 VideoDurationSeconds:0}
 
 	return nil
 }

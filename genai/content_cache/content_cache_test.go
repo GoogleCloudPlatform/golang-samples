@@ -45,10 +45,10 @@ func TestContentCaching(t *testing.T) {
 		t.Errorf("updateContentCache: %v", err.Error())
 	}
 
-	// 3) Get and inspect the content cache.
-	err = getContentCache(buf, cacheName)
+	// 3) List and inspect the content cache.
+	err = listContentCache(buf)
 	if err != nil {
-		t.Errorf("getContentCache: %v", err.Error())
+		t.Errorf("listContentCache: %v", err.Error())
 	}
 
 	// 4) Use cached content with a text prompt.
