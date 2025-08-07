@@ -1,9 +1,9 @@
 module github.com/GoogleCloudPlatform/golang-samples/functions/imagemagick
 
 require (
-	cloud.google.com/go/storage v1.50.0
+	cloud.google.com/go/storage v1.56.0
 	cloud.google.com/go/vision v1.2.0
-	cloud.google.com/go/vision/v2 v2.9.3
+	cloud.google.com/go/vision/v2 v2.9.5
 )
 
 require (
