@@ -173,7 +173,8 @@ func TestTextGeneration(t *testing.T) {
 		}
 	})
 
-	/*t.Run("generate with routing", func(t *testing.T) {
+	t.Run("generate with routing", func(t *testing.T) {
+		t.Skip("skipping because of model used in this test. The model 'model-optimizer-exp-04-09' is not consistently available in all test environments.")
 		buf.Reset()
 		err := generateWithRouting(buf)
 		if err != nil {
@@ -184,6 +185,19 @@ func TestTextGeneration(t *testing.T) {
 		if output == "" {
 			t.Error("expected non-empty output, got empty")
 		}
-	})*/
+	})
+
+	t.Run("generate chat with text", func(t *testing.T) {
+		buf.Reset()
+		err := generateChatWithText(buf)
+		if err != nil {
+			t.Fatalf("generateChatWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
 
 }
