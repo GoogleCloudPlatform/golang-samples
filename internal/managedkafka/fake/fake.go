@@ -30,9 +30,11 @@ import (
 )
 
 const (
-	clusterID       = "fake-cluster"
-	topicID         = "fake-topic"
-	consumerGroupID = "fake-consumergroup"
+	clusterID         = "fake-cluster"
+	topicID           = "fake-topic"
+	consumerGroupID   = "fake-consumergroup"
+	connectClusterID  = "fake-connect-cluster"
+	connectorID       = "fake-connector"
 )
 
 // The reason why we have a fake server is because testing end-to-end will exceed the deadline of 10 minutes.
@@ -41,14 +43,20 @@ type fakeManagedKafkaServer struct {
 	managedkafkapb.UnimplementedManagedKafkaServer
 }
 
+type fakeManagedKafkaConnectServer struct {
+	managedkafkapb.UnimplementedManagedKafkaConnectServer
+}
+
 func Options(t *testing.T) []option.ClientOption {
 	server := &fakeManagedKafkaServer{}
+	connectServer := &fakeManagedKafkaConnectServer{}
 	listener, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
 		t.Fatal(err)
 	}
 	gsrv := grpc.NewServer()
 	managedkafkapb.RegisterManagedKafkaServer(gsrv, server)
+	managedkafkapb.RegisterManagedKafkaConnectServer(gsrv, connectServer)
 	fakeServerAddr := listener.Addr().String()
 	go func() {
 		if err := gsrv.Serve(listener); err != nil {
@@ -164,4 +172,105 @@ func (f *fakeManagedKafkaServer) UpdateConsumerGroup(ctx context.Context, req *m
 	return &managedkafkapb.ConsumerGroup{
 		Name: consumerGroupID,
 	}, nil
+}
+
+// Connect server methods
+func (f *fakeManagedKafkaConnectServer) CreateConnectCluster(ctx context.Context, req *managedkafkapb.CreateConnectClusterRequest) (*longrunningpb.Operation, error) {
+	anypb := &anypb.Any{}
+	err := anypb.MarshalFrom(req.ConnectCluster)
+	if err != nil {
+		return nil, fmt.Errorf("anypb.MarshalFrom got err: %w", err)
+	}
+	return &longrunningpb.Operation{
+		Done: true,
+		Result: &longrunningpb.Operation_Response{
+			Response: anypb,
+		},
+	}, nil
+}
+
+func (f *fakeManagedKafkaConnectServer) DeleteConnectCluster(ctx context.Context, req *managedkafkapb.DeleteConnectClusterRequest) (*longrunningpb.Operation, error) {
+	return &longrunningpb.Operation{
+		Done: true,
+		Result: &longrunningpb.Operation_Response{
+			Response: &anypb.Any{},
+		},
+	}, nil
+}
+
+func (f *fakeManagedKafkaConnectServer) GetConnectCluster(ctx context.Context, req *managedkafkapb.GetConnectClusterRequest) (*managedkafkapb.ConnectCluster, error) {
+	return &managedkafkapb.ConnectCluster{
+		Name: connectClusterID,
+	}, nil
+}
+
+func (f *fakeManagedKafkaConnectServer) ListConnectClusters(ctx context.Context, req *managedkafkapb.ListConnectClustersRequest) (*managedkafkapb.ListConnectClustersResponse, error) {
+	return &managedkafkapb.ListConnectClustersResponse{
+		ConnectClusters: []*managedkafkapb.ConnectCluster{{
+			Name: connectClusterID,
+		}},
+	}, nil
+}
+
+func (f *fakeManagedKafkaConnectServer) UpdateConnectCluster(ctx context.Context, req *managedkafkapb.UpdateConnectClusterRequest) (*longrunningpb.Operation, error) {
+	anypb := &anypb.Any{}
+	err := anypb.MarshalFrom(req.ConnectCluster)
+	if err != nil {
+		return nil, fmt.Errorf("anypb.MarshalFrom got err: %w", err)
+	}
+	return &longrunningpb.Operation{
+		Done: true,
+		Result: &longrunningpb.Operation_Response{
+			Response: anypb,
+		},
+	}, nil
+}
+
+// Connector methods
+func (f *fakeManagedKafkaConnectServer) CreateConnector(ctx context.Context, req *managedkafkapb.CreateConnectorRequest) (*managedkafkapb.Connector, error) {
+	return req.Connector, nil
+}
+
+func (f *fakeManagedKafkaConnectServer) GetConnector(ctx context.Context, req *managedkafkapb.GetConnectorRequest) (*managedkafkapb.Connector, error) {
+	return &managedkafkapb.Connector{
+		Name: connectorID,
+		Configs: map[string]string{
+			"connector.class": "test.connector",
+		},
+	}, nil
+}
+
+func (f *fakeManagedKafkaConnectServer) ListConnectors(ctx context.Context, req *managedkafkapb.ListConnectorsRequest) (*managedkafkapb.ListConnectorsResponse, error) {
+	return &managedkafkapb.ListConnectorsResponse{
+		Connectors: []*managedkafkapb.Connector{{
+			Name: connectorID,
+			Configs: map[string]string{
+				"connector.class": "test.connector",
+			},
+		}},
+	}, nil
+}
+
+func (f *fakeManagedKafkaConnectServer) UpdateConnector(ctx context.Context, req *managedkafkapb.UpdateConnectorRequest) (*managedkafkapb.Connector, error) {
+	return req.Connector, nil
+}
+
+func (f *fakeManagedKafkaConnectServer) DeleteConnector(ctx context.Context, req *managedkafkapb.DeleteConnectorRequest) (*emptypb.Empty, error) {
+	return &emptypb.Empty{}, nil
+}
+
+func (f *fakeManagedKafkaConnectServer) PauseConnector(ctx context.Context, req *managedkafkapb.PauseConnectorRequest) (*managedkafkapb.PauseConnectorResponse, error) {
+	return &managedkafkapb.PauseConnectorResponse{}, nil
+}
+
+func (f *fakeManagedKafkaConnectServer) ResumeConnector(ctx context.Context, req *managedkafkapb.ResumeConnectorRequest) (*managedkafkapb.ResumeConnectorResponse, error) {
+	return &managedkafkapb.ResumeConnectorResponse{}, nil
+}
+
+func (f *fakeManagedKafkaConnectServer) StopConnector(ctx context.Context, req *managedkafkapb.StopConnectorRequest) (*managedkafkapb.StopConnectorResponse, error) {
+	return &managedkafkapb.StopConnectorResponse{}, nil
+}
+
+func (f *fakeManagedKafkaConnectServer) RestartConnector(ctx context.Context, req *managedkafkapb.RestartConnectorRequest) (*managedkafkapb.RestartConnectorResponse, error) {
+	return &managedkafkapb.RestartConnectorResponse{}, nil
 }
