@@ -66,9 +66,7 @@ func generateEmbedContentWithText(w io.Writer) error {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
 
-	respText := resp
-
-	fmt.Fprintln(w, respText)
+	fmt.Fprintln(w, resp)
 
 	// Example response:
 	// embeddings=[ContentEmbedding(values=[-0.06302902102470398, 0.00928034819662571, 0.014716853387653828, -0.028747491538524628, ... ],
