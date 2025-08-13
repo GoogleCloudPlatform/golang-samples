@@ -25,7 +25,7 @@ import (
 
 func batchWrite(ctx context.Context, client *firestore.Client) error {
 	// Get a new write batch.
-	batch := client.Batch()
+	batch := client.BulkWriter(ctx)
 
 	// Set the value of "NYC".
 	nycRef := client.Collection("cities").Doc("NYC")
