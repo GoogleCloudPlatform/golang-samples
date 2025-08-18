@@ -81,6 +81,9 @@ func TestTableSnippet(t *testing.T) {
 			if err := createTable(client, io.Discard, projID, dsID, tableID); err != nil {
 				t.Fatalf("createTable(%q,%q,%q): %v", projID, dsID, tableID, err)
 			}
+			if err := getTable(client, io.Discard, projID, dsID, tableID); err != nil {
+				t.Fatalf("getTable(%q,%q,%q): %v", projID, dsID, tableID, err)
+			}
 			if err := updateTable(client, io.Discard, projID, dsID, tableID); err != nil {
 				t.Fatalf("updateTable(%q,%q,%q): %v", projID, dsID, tableID, err)
 			}
