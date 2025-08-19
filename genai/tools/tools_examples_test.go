@@ -72,7 +72,7 @@ func TestTextGeneration(t *testing.T) {
 
 	t.Run("generate with VAIS Search", func(t *testing.T) {
 		buf.Reset()
-		dataStore := fmt.Sprintf("projects/%s/locations/global/collections/default_collection/dataStores/grounding-test-datastore", tc.ProjectID)
+		dataStore := fmt.Sprintf("projects/%s/locations/global/collections/default_collection/dataStores/example-adk-website-datastore_1755611010401", tc.ProjectID)
 		err := generateWithGoogleVAIS(buf, dataStore)
 		if err != nil {
 			t.Fatalf("generateWithGoogleVAIS failed: %v", err)
