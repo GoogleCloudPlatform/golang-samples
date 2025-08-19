@@ -17,16 +17,15 @@ package text_generation
 import (
 	"bytes"
 	"testing"
-
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 func TestTextGeneration(t *testing.T) {
-	tc := testutil.SystemTest(t)
+	//tc := testutil.SystemTest(t)
 
 	t.Setenv("GOOGLE_GENAI_USE_VERTEXAI", "1")
 	t.Setenv("GOOGLE_CLOUD_LOCATION", "us-central1")
-	t.Setenv("GOOGLE_CLOUD_PROJECT", tc.ProjectID)
+	//t.Setenv("GOOGLE_CLOUD_PROJECT", tc.ProjectID)
+	t.Setenv("GOOGLE_CLOUD_PROJECT", "cloud-ai-devrel-softserve")
 
 	buf := new(bytes.Buffer)
 
@@ -192,6 +191,58 @@ func TestTextGeneration(t *testing.T) {
 		err := generateChatWithText(buf)
 		if err != nil {
 			t.Fatalf("generateChatWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate chat stream with text prompt", func(t *testing.T) {
+		buf.Reset()
+		err := generateChatStreamWithText(buf)
+		if err != nil {
+			t.Fatalf("generateChatStreamWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate Text With PDF", func(t *testing.T) {
+		buf.Reset()
+		err := generateTextWithPDF(buf)
+		if err != nil {
+			t.Fatalf("generateTextWithPDF failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate thinking with text prompt", func(t *testing.T) {
+		buf.Reset()
+		err := generateThinkingWithText(buf)
+		if err != nil {
+			t.Fatalf("generateThinkingWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate with model optimizer", func(t *testing.T) {
+		buf.Reset()
+		err := generateModelOptimizerWithTxt(buf)
+		if err != nil {
+			t.Fatalf("generateModelOptimizerWithTxt failed: %v", err)
 		}
 
 		output := buf.String()
