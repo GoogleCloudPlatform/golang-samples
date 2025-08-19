@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang=en>
+
+<head>
+  <meta charset=utf-8>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Cloud Run Service Health / Readiness Probe Demo</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="preload" as="font">
+  <link
+    href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsSAAALEgHS3X78AAAB5klEQVRYha2XMVLDMBBFPxl6qCjciBskNzA3AE5AqrTQuaVVR1pX4QSYGyQ3SGqGATcu3JBUlGGUiTPyeiWvZH6TsSTLb/+XN8nZfr+H0lUBYAvgucySbzBSupoCmJRZ8sTNx2p0vG8J4AHAl9LVQunqmtnPQD4qXa0d81GyARo1IC/2hmWWGIfeAYwBGIi7fwMos2QNYEfmTLWXZKw4fl4AeKOQQxwAcaERrbIg14MjCQKwYrA1KJI+gBtmjLqAIZEcXsNGSlfb42a27sssKaw15lz8ePbcGOdcrzPViFz3uuCIwVZQJBIAbiMuBlviSCQASulqEgjQqPctaQE4+gEiYrDljYQ6AIcLU2ZM6gJ8kUgBxp6uGKJOJFIACJuSRK1IOgCecxDzNrh0iuScW/D7+eG4LxGuk6sDcDVbTZhuCEe1sV/JxuFpnacF5wDX/zsAV7OVOZS3EQ8/tOo6Tw+tWgqwqfN0S8Ziqp/Xedr6SScFWDBjIQAny+lEC8CT/5KsC7G/ZbkXwFF9WefpmoxJq+9YHgMQc/qdlscAhNrvtdwJ4Mh/x1Thq77XcieApHoPgNjyUABJ8wmyfBAAU32w5SyAI/+5p/tFW84CkOpfzb9kaqll/yDLfQDsgy2Z6gdb3hKAP2n+6m+fxBVHAAAAAElFTkSuQmCC"
+    rel="icon" type="image/png" />
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      font-display: fallback;
+      background: url('/assets/cloud_bg.svg');
+      background-size: cover;
+      background-position: center;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    code {
+      font-family: 'Roboto Mono', Courier, monospace;
+      color: #A30038;
+      background-color: #F8F8F8;
+      border: 1px solid #DDD;
+      border-radius: 2px;
+      padding: 0 6px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div style="text-align:center;">
+      <picture>
+        {{if and .ReadinessEnabled .IsHealthy}}
+        <img src="/assets/celebration.svg" alt="A group celebrating">
+        {{else}}
+        <img src="/assets/sad-unicorn.svg" alt="A sad unicorn">
+        {{end}}
+      </picture>
+      <div>
+        <h1>Serving from {{.Region}}</h1>
+        <h2>Readiness probe is {{.HealthStr}} on this instance!</h2>
+      </div>
+    </div>
+
+    <p>
+      Serving instance ID: <code>{{printf "%.15s" .InstanceId}}...</code>,
+      project <code>{{.Project}}</code>,
+      region <code>{{.Region}}</code>,
+      service <code>{{.ServiceName}}</code>,
+      revision <code>{{.Revision}}</code>.
+    </p>
+
+    {{if .ReadinessEnabled}}
+    <p>
+      The readiness probe has the following configuration:
+      timeout seconds: <code>{{.ReadinessProbeConfig.TimeoutSeconds}}</code>,
+      period seconds: <code>{{.ReadinessProbeConfig.PeriodSeconds}}</code>,
+      success threshold: <code>{{.ReadinessProbeConfig.SuccessThreshold}}</code>,
+      failure threshold: <code>{{.ReadinessProbeConfig.FailureThreshold}}</code>,
+      http path: <code>{{.ReadinessProbeConfig.HttpGetAction.Path}}</code>,
+      http port: <code>{{.ReadinessProbeConfig.HttpGetAction.Port}}</code>.
+    </p>
+    {{end}}
+
+    <label for="autoRefreshCheckbox">
+      <input type="checkbox" id="autoRefreshCheckbox">
+      Enable Auto-Refresh (3s)
+    </label>
+
+    <hr>
+    <h3>Serving regions for this service:</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Served By</th>
+          <th>Region</th>
+          <th>Healthy Instances</th>
+          <th>Toggle Healthy</th>
+          <th>Toggle Unhealthy</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{range $key, $value := .Regions}}
+        <tr>
+          <td>
+            {{if eq $.Region $key}}
+            👉
+            {{end}}
+          </td>
+          <td>{{$key}}</td>
+          <td>
+            {{$value.NumHealthy}}/{{$value.Total}}
+          </td>
+          <td>
+            <form action="/set_readiness" method="post">
+              <input type="text" name="region" value="{{$key}}" hidden />
+              <input type="text" name="is_healthy" value="true" hidden />
+              <input type="submit" value="Toggle" />
+            </form>
+          </td>
+          <td>
+            <form action="/set_readiness" method="post">
+              <input type="text" name="region" value="{{$key}}" hidden />
+              <input type="text" name="is_healthy" value="false" hidden />
+              <input type="submit" value="Toggle" />
+            </form>
+          </td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+
+    <hr>
+    <h3>Serving instances for this service:</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Served By</th>
+          <th>Location</th>
+          <th>Revision Name</th>
+          <th>Instance Id</th>
+          <th>Readiness</th>
+          <th>Toggle</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{range .Instances}}
+        <tr>
+          <td>
+            {{if eq $.InstanceId .InstanceId}}
+            👉
+            {{end}}
+          </td>
+          <td>{{.Region}}</td>
+          <td>{{.RevisionName}}</td>
+          <td>{{printf "%.15s" .InstanceId}}...</td>
+          <td>
+            {{.HealthStr}}
+          </td>
+          <td>
+            {{if .ReadinessEnabled}}
+            <form action="/set_readiness" method="post">
+              <input type="text" name="instance_id" value="{{.InstanceId}}" hidden />
+              <input type="submit" value="Toggle" />
+            </form>
+            {{end}}
+          </td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+
+    <hr>
+    The above configuration is written to
+    <a href="https://pantheon.corp.google.com/storage/browser/{{.Bucket}};&project={{.Project}}" target="_blank"
+      rel="noopener">
+      gs://{{.Bucket}}</a>.
+    It's safe to delete the GCS bucket at any time.
+
+    <br>
+    <a href="https://console.cloud.google.com/run/detail/{{.Region}}/{{.ServiceName}}/metrics?project={{.Project}}"
+      target="_blank" rel="noopener">
+      VIEW CLOUD RUN IN CLOUD CONSOLE</a>
+  </div>
+  <script>
+    let reloadInterval;
+    const checkbox = document.getElementById('autoRefreshCheckbox');
+
+    function startAutoRefresh() {
+      if (reloadInterval) return;
+      reloadInterval = setInterval(() => {
+        location.reload();
+      }, 3000);
+      sessionStorage.setItem('autoRefreshState', 'enabled');
+    }
+
+    function stopAutoRefresh() {
+      if (reloadInterval) {
+        clearInterval(reloadInterval);
+        reloadInterval = null;
+      }
+      sessionStorage.setItem('autoRefreshState', 'disabled');
+    }
+
+    checkbox.addEventListener('change', function () {
+      if (this.checked) {
+        startAutoRefresh();
+      } else {
+        stopAutoRefresh();
+      }
+    });
+
+    function initializePage() {
+      const savedState = sessionStorage.getItem('autoRefreshState');
+      if (savedState === 'enabled') {
+        checkbox.checked = true;
+        startAutoRefresh();
+      } else {
+        checkbox.checked = false;
+        stopAutoRefresh();
+      }
+    }
+
+    window.onload = initializePage;
+  </script>
+</body>
+
+</html>
