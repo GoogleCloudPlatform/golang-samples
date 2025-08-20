@@ -16,6 +16,7 @@ package tools
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -61,6 +62,20 @@ func TestTextGeneration(t *testing.T) {
 		err := generateWithGoogleSearch(buf)
 		if err != nil {
 			t.Fatalf("generateWithGoogleSearch failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate with VAIS Search", func(t *testing.T) {
+		buf.Reset()
+		dataStore := fmt.Sprintf("projects/%s/locations/global/collections/default_collection/dataStores/example-adk-website-datastore_1755611010401", tc.ProjectID)
+		err := generateWithGoogleVAIS(buf, dataStore)
+		if err != nil {
+			t.Fatalf("generateWithGoogleVAIS failed: %v", err)
 		}
 
 		output := buf.String()
