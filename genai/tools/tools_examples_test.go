@@ -83,4 +83,17 @@ func TestTextGeneration(t *testing.T) {
 			t.Error("expected non-empty output, got empty")
 		}
 	})
+
+	t.Run("generate with Local img and code exec", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithLocalImgAndCodeExec(buf)
+		if err != nil {
+			t.Fatalf("generateWithLocalImgAndCodeExec failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
 }
