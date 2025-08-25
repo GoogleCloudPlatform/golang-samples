@@ -37,7 +37,7 @@ func generateWithLocalVideo(w io.Writer) error {
 	}
 
 	// Read local video file content
-	data, err := os.ReadFile("test_data/describe_video_content.mp4")
+	data, err := os.ReadFile("testdata/describe_video_content.mp4")
 	if err != nil {
 		return fmt.Errorf("failed to read local video: %w", err)
 	}
