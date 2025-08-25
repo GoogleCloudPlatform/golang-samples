@@ -15,40 +15,45 @@
 // Package text_generation shows examples of generating text using the GenAI SDK.
 package text_generation
 
-// [START googlegenaisdk_textgen_transcript_with_gcs_audio]
+// [START googlegenaisdk_model_optimizer_textgen_with_txt]
 import (
 	"context"
 	"fmt"
 	"io"
 
-	genai "google.golang.org/genai"
+	"google.golang.org/genai"
 )
 
-// generateAudioTranscript shows how to generate an audio transcript.
-func generateAudioTranscript(w io.Writer) error {
+// generateModelOptimizerWithTxt shows how to generate text using a text prompt and model optimizer.
+func generateModelOptimizerWithTxt(w io.Writer) error {
 	ctx := context.Background()
 
-	client, err := genai.NewClient(ctx, &genai.ClientConfig{
-		HTTPOptions: genai.HTTPOptions{APIVersion: "v1"},
-	})
+	clientConfig := &genai.ClientConfig{
+		HTTPOptions: genai.HTTPOptions{APIVersion: "v1beta1"},
+	}
+
+	client, err := genai.NewClient(ctx, clientConfig)
+
 	if err != nil {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.5-flash"
-	contents := []*genai.Content{
-		{Parts: []*genai.Part{
-			{Text: `Transcribe the interview, in the format of timecode, speaker, caption.
-Use speaker A, speaker B, etc. to identify speakers.`},
-			{FileData: &genai.FileData{
-				FileURI:  "gs://cloud-samples-data/generative-ai/audio/pixel.mp3",
-				MIMEType: "audio/mpeg",
-			}},
-		},
-			Role: "user"},
+	modelSelectionConfig := &genai.ModelSelectionConfig{
+		FeatureSelectionPreference: genai.FeatureSelectionPreferenceBalanced,
 	}
 
-	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)
+	generateContentConfig := &genai.GenerateContentConfig{
+		ModelSelectionConfig: modelSelectionConfig,
+	}
+
+	modelName := "gemini-2.5-flash"
+	contents := genai.Text("How does AI work?")
+
+	resp, err := client.Models.GenerateContent(ctx,
+		modelName,
+		contents,
+		generateContentConfig,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
@@ -56,13 +61,13 @@ Use speaker A, speaker B, etc. to identify speakers.`},
 	respText := resp.Text()
 
 	fmt.Fprintln(w, respText)
-
 	// Example response:
-	// 00:00:00, A: your devices are getting better over time.
-	// 00:01:13, A: And so we think about it across the entire portfolio from phones to watch, ...
+	// That's a great question! Understanding how AI works can feel like ...
+	// ...
+	// **1. The Foundation: Data and Algorithms**
 	// ...
 
 	return nil
 }
 
-// [END googlegenaisdk_textgen_transcript_with_gcs_audio]
+// [END googlegenaisdk_model_optimizer_textgen_with_txt]

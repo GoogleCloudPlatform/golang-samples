@@ -15,17 +15,17 @@
 // Package text_generation shows examples of generating text using the GenAI SDK.
 package text_generation
 
-// [START googlegenaisdk_textgen_with_gcs_audio]
+// [START googlegenaisdk_textgen_with_pdf]
 import (
 	"context"
 	"fmt"
 	"io"
 
-	genai "google.golang.org/genai"
+	"google.golang.org/genai"
 )
 
-// generateWithAudio shows how to generate text using an audio input.
-func generateWithAudio(w io.Writer) error {
+// generateTextWithPDF shows how to generate text using a PDF file input.
+func generateTextWithPDF(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
@@ -38,12 +38,12 @@ func generateWithAudio(w io.Writer) error {
 	modelName := "gemini-2.5-flash"
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
-			{Text: `Provide the summary of the audio file.
-Summarize the main points of the audio concisely.
-Create a chapter breakdown with timestamps for key sections or topics discussed.`},
+			{Text: `You are a highly skilled document summarization specialist.
+	Your task is to provide a concise executive summary of no more than 300 words.
+	Please summarize the given document for a general audience.`},
 			{FileData: &genai.FileData{
-				FileURI:  "gs://cloud-samples-data/generative-ai/audio/pixel.mp3",
-				MIMEType: "audio/mpeg",
+				FileURI:  "gs://cloud-samples-data/generative-ai/pdf/1706.03762v7.pdf",
+				MIMEType: "application/pdf",
 			}},
 		},
 			Role: "user"},
@@ -59,18 +59,11 @@ Create a chapter breakdown with timestamps for key sections or topics discussed.
 	fmt.Fprintln(w, respText)
 
 	// Example response:
-	// Here is a summary and chapter breakdown of the audio file:
-	//
-	// **Summary:**
-	//
-	// The audio file is a "Made by Google" podcast episode discussing the Pixel Feature Drops, ...
-	//
-	// **Chapter Breakdown:**
-	//
-	// *   **0:00 - 0:54:** Introduction to the podcast and guests, Aisha Sharif and DeCarlos Love.
+	// "Attention Is All You Need" introduces the Transformer,
+	// a groundbreaking neural network architecture designed for...
 	// ...
 
 	return nil
 }
 
-// [END googlegenaisdk_textgen_with_gcs_audio]
+// [END googlegenaisdk_textgen_with_pdf]

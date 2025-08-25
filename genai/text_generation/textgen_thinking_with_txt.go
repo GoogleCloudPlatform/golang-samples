@@ -15,17 +15,17 @@
 // Package text_generation shows examples of generating text using the GenAI SDK.
 package text_generation
 
-// [START googlegenaisdk_textgen_with_gcs_audio]
+// [START googlegenaisdk_thinking_textgen_with_txt]
 import (
 	"context"
 	"fmt"
 	"io"
 
-	genai "google.golang.org/genai"
+	"google.golang.org/genai"
 )
 
-// generateWithAudio shows how to generate text using an audio input.
-func generateWithAudio(w io.Writer) error {
+// generateThinkingWithText shows how to generate thinking using a text prompt.
+func generateThinkingWithText(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
@@ -35,21 +35,11 @@ func generateWithAudio(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.5-flash"
-	contents := []*genai.Content{
-		{Parts: []*genai.Part{
-			{Text: `Provide the summary of the audio file.
-Summarize the main points of the audio concisely.
-Create a chapter breakdown with timestamps for key sections or topics discussed.`},
-			{FileData: &genai.FileData{
-				FileURI:  "gs://cloud-samples-data/generative-ai/audio/pixel.mp3",
-				MIMEType: "audio/mpeg",
-			}},
-		},
-			Role: "user"},
-	}
-
-	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)
+	resp, err := client.Models.GenerateContent(ctx,
+		"gemini-2.5-flash",
+		genai.Text("solve x^2 + 4x + 4 = 0"),
+		nil,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
@@ -57,20 +47,16 @@ Create a chapter breakdown with timestamps for key sections or topics discussed.
 	respText := resp.Text()
 
 	fmt.Fprintln(w, respText)
-
 	// Example response:
-	// Here is a summary and chapter breakdown of the audio file:
+	// To solve the quadratic equation $x^2 + 4x + 4 = 0$, we can use a few methods:
 	//
-	// **Summary:**
+	// **Method 1: Factoring (Recognizing a Perfect Square Trinomial)**
+	// **1. The Foundation: Data and Algorithms**
 	//
-	// The audio file is a "Made by Google" podcast episode discussing the Pixel Feature Drops, ...
-	//
-	// **Chapter Breakdown:**
-	//
-	// *   **0:00 - 0:54:** Introduction to the podcast and guests, Aisha Sharif and DeCarlos Love.
+	// Notice that the left side of the equation is a perfect square trinomial.
 	// ...
 
 	return nil
 }
 
-// [END googlegenaisdk_textgen_with_gcs_audio]
+// [END googlegenaisdk_thinking_textgen_with_txt]

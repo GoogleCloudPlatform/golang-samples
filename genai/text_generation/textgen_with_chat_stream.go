@@ -15,17 +15,17 @@
 // Package text_generation shows examples of generating text using the GenAI SDK.
 package text_generation
 
-// [START googlegenaisdk_textgen_transcript_with_gcs_audio]
+// [START googlegenaisdk_textgen_chat_stream_with_txt]
 import (
 	"context"
 	"fmt"
 	"io"
 
-	genai "google.golang.org/genai"
+	"google.golang.org/genai"
 )
 
-// generateAudioTranscript shows how to generate an audio transcript.
-func generateAudioTranscript(w io.Writer) error {
+// generateChatStreamWithText shows how to generate chat stream using a text prompt.
+func generateChatStreamWithText(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
@@ -36,33 +36,36 @@ func generateAudioTranscript(w io.Writer) error {
 	}
 
 	modelName := "gemini-2.5-flash"
-	contents := []*genai.Content{
-		{Parts: []*genai.Part{
-			{Text: `Transcribe the interview, in the format of timecode, speaker, caption.
-Use speaker A, speaker B, etc. to identify speakers.`},
-			{FileData: &genai.FileData{
-				FileURI:  "gs://cloud-samples-data/generative-ai/audio/pixel.mp3",
-				MIMEType: "audio/mpeg",
-			}},
-		},
-			Role: "user"},
-	}
 
-	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)
+	chatSession, err := client.Chats.Create(ctx, modelName, nil, nil)
 	if err != nil {
-		return fmt.Errorf("failed to generate content: %w", err)
+		return fmt.Errorf("failed to create genai chat session: %w", err)
 	}
 
-	respText := resp.Text()
+	var streamErr error
+	contents := genai.Part{Text: "Why is the sky blue?"}
 
-	fmt.Fprintln(w, respText)
+	stream := chatSession.SendMessageStream(ctx, contents)
+	stream(func(resp *genai.GenerateContentResponse, err error) bool {
+		if err != nil {
+			streamErr = err
+			return false
+		}
+		for _, cand := range resp.Candidates {
+			for _, part := range cand.Content.Parts {
+				fmt.Fprintln(w, part.Text)
+			}
+		}
+		return true
+	})
 
 	// Example response:
-	// 00:00:00, A: your devices are getting better over time.
-	// 00:01:13, A: And so we think about it across the entire portfolio from phones to watch, ...
+	// The
+	// sky appears blue due to a phenomenon called **Rayleigh scattering**.
+	// Here's a breakdown:
 	// ...
 
-	return nil
+	return streamErr
 }
 
-// [END googlegenaisdk_textgen_transcript_with_gcs_audio]
+// [END googlegenaisdk_textgen_chat_stream_with_txt]
