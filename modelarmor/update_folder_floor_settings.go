@@ -25,7 +25,6 @@ import (
 
 	modelarmor "cloud.google.com/go/modelarmor/apiv1"
 	modelarmorpb "cloud.google.com/go/modelarmor/apiv1/modelarmorpb"
-	"google.golang.org/api/option"
 )
 
 // updateFolderFloorSettings updates floor settings of a folder.
@@ -34,14 +33,11 @@ import (
 //
 // w io.Writer: The writer to use for logging.
 // folderID string: The ID of the folder.
-// locationID string: The ID of the location.
-func updateFolderFloorSettings(w io.Writer, folderID, locationID string) error {
+func updateFolderFloorSettings(w io.Writer, folderID string) error {
 	ctx := context.Background()
 
 	// Create the Model Armor client.
-	client, err := modelarmor.NewClient(ctx,
-		option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID)),
-	)
+	client, err := modelarmor.NewClient(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to create client: %w", err)
 	}

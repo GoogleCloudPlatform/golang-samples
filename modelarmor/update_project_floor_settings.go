@@ -25,7 +25,6 @@ import (
 
 	modelarmor "cloud.google.com/go/modelarmor/apiv1"
 	modelarmorpb "cloud.google.com/go/modelarmor/apiv1/modelarmorpb"
-	"google.golang.org/api/option"
 )
 
 // updateProjectFloorSettings updates the floor settings of a project.
@@ -34,14 +33,11 @@ import (
 //
 // w io.Writer: The writer to use for logging.
 // projectID string: The ID of the project.
-// locationID string: The ID of the location.
-func updateProjectFloorSettings(w io.Writer, projectID, locationID string) error {
+func updateProjectFloorSettings(w io.Writer, projectID string) error {
 	ctx := context.Background()
 
-	// Create options for Model Armor client.
-	opts := option.WithEndpoint(fmt.Sprintf("modelarmor.%s.rep.googleapis.com:443", locationID))
 	// Create the Model Armor client.
-	client, err := modelarmor.NewClient(ctx, opts)
+	client, err := modelarmor.NewClient(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to create client: %w", err)
 	}
