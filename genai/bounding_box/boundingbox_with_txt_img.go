@@ -73,7 +73,6 @@ func plotBoundingBoxes(imageURI string, boundingBoxes []BoundingBox) error {
 			rgba.Set(xMin, y, red)
 			rgba.Set(xMax, y, red)
 		}
-		fmt.Printf("Box: (%d,%d)-(%d,%d) Label: %s\n", xMin, yMin, xMax, yMax, bbox.Label)
 	}
 
 	return nil
@@ -86,7 +85,7 @@ func generateBoundingBoxesWithText(w io.Writer) error {
 		HTTPOptions: genai.HTTPOptions{APIVersion: "v1"},
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
 	imageURI := "https://storage.googleapis.com/generativeai-downloads/images/socks.jpg"
@@ -141,10 +140,10 @@ func generateBoundingBoxesWithText(w io.Writer) error {
 
 	resp, err := client.Models.GenerateContent(ctx, "gemini-2.5-flash", contents, config)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to generate content: %w", err)
 	}
 
-	fmt.Fprintln(w, resp)
+	fmt.Fprintln(w, resp.Text())
 
 	// Parse into []BoundingBox
 	var boxes []BoundingBox

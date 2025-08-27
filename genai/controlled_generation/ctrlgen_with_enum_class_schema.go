@@ -61,7 +61,7 @@ func generateWithEnumClassSchema(w io.Writer) error {
 	config := &genai.GenerateContentConfig{
 		ResponseMIMEType: "text/x.enum",
 		ResponseSchema: &genai.Schema{
-			Type: "STRING",
+			Type: genai.TypeString,
 			Enum: []string{
 				Instruments.Percussion,
 				Instruments.String,
