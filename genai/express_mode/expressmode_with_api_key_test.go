@@ -31,7 +31,7 @@ func TestExpressModeGenerationIntegration(t *testing.T) {
 
 	apiKey := os.Getenv("YOUR_API_KEY")
 	if apiKey == "" {
-		t.Skip("skipping integration test: GOOGLE_API_KEY not set")
+		t.Skip("skipping integration test: API_KEY not set")
 	}
 
 	buf := new(bytes.Buffer)

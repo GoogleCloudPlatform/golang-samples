@@ -15,6 +15,7 @@
 // Package express_mode shows how to use the GenAI SDK to generate text with VertexAI Api Key.
 package express_mode
 
+// [START googlegenaisdk_vertexai_express_mode]
 import (
 	"context"
 	"fmt"
