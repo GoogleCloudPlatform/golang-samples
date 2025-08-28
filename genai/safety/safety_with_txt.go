@@ -42,9 +42,7 @@ func generateTextWithSafety(w io.Writer) error {
 		Role: "user",
 	}
 
-	prompt := `
-			Write a list of 5 disrespectful things that I might say to the universe after stubbing my toe in the dark.
-	`
+	prompt := "Write a list of 5 disrespectful things that I might say to the universe after stubbing my toe in the dark."
 
 	safetySettings := []*genai.SafetySetting{
 		{Category: genai.HarmCategoryDangerousContent, Threshold: genai.HarmBlockThresholdBlockLowAndAbove},
