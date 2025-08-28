@@ -12,16 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package controlled_generation
+package video_generation
 
 import (
 	"bytes"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestTextGeneration(t *testing.T) {
+func TestVideoGeneration(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	t.Setenv("GOOGLE_GENAI_USE_VERTEXAI", "1")
@@ -30,11 +31,15 @@ func TestTextGeneration(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 
-	t.Run("generate with enum schema", func(t *testing.T) {
+	gcsOutputBucket := "HERE-go-bucket-samples-tests"
+	prefix := "go_videogen_test/" + time.Now().Format("20060102-150405")
+	outputGCSURI := "gs://" + gcsOutputBucket + "/" + prefix
+
+	t.Run("generate video content with img", func(t *testing.T) {
 		buf.Reset()
-		err := generateWithEnumSchema(buf)
+		err := generateVideoFromImage(buf, outputGCSURI)
 		if err != nil {
-			t.Fatalf("generateWithEnumSchema failed: %v", err)
+			t.Fatalf("generateVideoFromImage failed: %v", err)
 		}
 
 		output := buf.String()
@@ -43,11 +48,11 @@ func TestTextGeneration(t *testing.T) {
 		}
 	})
 
-	t.Run("generate with response schema", func(t *testing.T) {
+	t.Run("generate video content with text", func(t *testing.T) {
 		buf.Reset()
-		err := generateWithRespSchema(buf)
+		err := generateVideoWithText(buf, outputGCSURI)
 		if err != nil {
-			t.Fatalf("generateWithRespSchema failed: %v", err)
+			t.Fatalf("generateVideoWithText failed: %v", err)
 		}
 
 		output := buf.String()
@@ -56,29 +61,4 @@ func TestTextGeneration(t *testing.T) {
 		}
 	})
 
-	t.Run("generate with response schema with nullable values", func(t *testing.T) {
-		buf.Reset()
-		err := generateWithNullables(buf)
-		if err != nil {
-			t.Fatalf("generateWithNullables failed: %v", err)
-		}
-
-		output := buf.String()
-		if output == "" {
-			t.Error("expected non-empty output, got empty")
-		}
-	})
-
-	t.Run("generate with nested class response schema", func(t *testing.T) {
-		buf.Reset()
-		err := generateWithNestedClassSchema(buf)
-		if err != nil {
-			t.Fatalf("generateWithNestedClassSchema failed: %v", err)
-		}
-
-		output := buf.String()
-		if output == "" {
-			t.Error("expected non-empty output, got empty")
-		}
-	})
 }
