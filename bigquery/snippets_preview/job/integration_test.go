@@ -49,7 +49,7 @@ func TestJobSnippet(t *testing.T) {
 				t.Fatalf("client creation failed: %v", err)
 			}
 			defer client.Close()
-			// Create a dataset.
+
 			projID := tc.ProjectID
 			if err := listJobs(client, io.Discard, projID); err != nil {
 				t.Fatalf("listJobs(%q): %v", projID, err)

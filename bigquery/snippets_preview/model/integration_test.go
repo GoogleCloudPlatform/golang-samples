@@ -81,7 +81,9 @@ func TestModelSnippets(t *testing.T) {
 			if err := createModel(ctx, client, projID, dsID, modelID); err != nil {
 				t.Fatalf("createModel failure: %v", err)
 			}
-
+			if err := getModel(client, io.Discard, projID, dsID, modelID); err != nil {
+				t.Fatalf("getModel(%q,%q,%q): %v", projID, dsID, modelID, err)
+			}
 			if err := updateModel(client, io.Discard, projID, dsID, modelID); err != nil {
 				t.Fatalf("updateModel(%q,%q,%q): %v", projID, dsID, modelID, err)
 			}
