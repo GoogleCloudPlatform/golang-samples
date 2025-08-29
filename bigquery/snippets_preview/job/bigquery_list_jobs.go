@@ -24,7 +24,6 @@ import (
 	"cloud.google.com/go/bigquery/v2/apiv2_client"
 
 	"google.golang.org/api/iterator"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 // listJobs demonstrates iterating through job metadata.
@@ -37,19 +36,23 @@ func listJobs(client *apiv2_client.Client, w io.Writer, projectID string) error 
 
 	req := &bigquerypb.ListJobsRequest{
 		ProjectId: projectID,
-		// MaxResults is the per-page threshold (aka page size).  Generally you should only
-		// worry about setting this if you're executing code in a memory constrained environment
-		// and don't want to process large pages of results.
-		MaxResults: &wrapperspb.Int32Value{Value: 100},
+		// Only list pending or running jobs.
+		StateFilter: []bigquerypb.ListJobsRequest_StateFilter{
+			bigquerypb.ListJobsRequest_PENDING,
+			bigquerypb.ListJobsRequest_RUNNING,
+		},
 	}
 
 	// ListJobs returns an iterator so users don't have to manage pagination when processing
 	// the results.
 	it := client.ListJobs(ctx, req)
 
-	// Process data from the iterator one result at a time.  The internal implementation of the iterator
-	// is fetching pages at a time.
-	for {
+	// Process data from the iterator one result at a time, and stop after we
+	// process a fixed number of jobs.  While the number of inflight
+	// (pending or running) jobs may be more reasonable, listing all jobs can yield
+	// a potentially very large number of results.
+	maxJobs := 10
+	for numJobs := 0; numJobs < maxJobs; numJobs++ {
 		job, err := it.Next()
 		if err == iterator.Done {
 			// We're reached the end of the iteration, break the loop.
@@ -59,10 +62,10 @@ func listJobs(client *apiv2_client.Client, w io.Writer, projectID string) error 
 			return fmt.Errorf("iterator errored: %w", err)
 		}
 		// Print basic information to the provided writer.
-		fmt.Fprintf(w, "job %q in location %q is of type %q\n",
+		fmt.Fprintf(w, "job %q in location %q is in state %q\n",
 			job.GetJobReference().GetJobId(),
 			job.GetJobReference().GetLocation(),
-			job.GetConfiguration().GetJobType())
+			job.GetState())
 	}
 	return nil
 }
