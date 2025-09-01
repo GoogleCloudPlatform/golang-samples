@@ -54,7 +54,7 @@ func generateWithEnumClassSchema(w io.Writer) error {
 	modelName := "gemini-2.5-flash"
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
-			{Text: "What type of instrument is a piano?"},
+			{Text: "What type of instrument is a guitar?"},
 		}, Role: "user"},
 	}
 
