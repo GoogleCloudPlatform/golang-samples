@@ -25,8 +25,8 @@ import (
 	"google.golang.org/genai"
 )
 
-// generateProvisionedThroughputWithText shows how to generate text Provisioned Throughput.
-func generateProvisionedThroughputWithText(w io.Writer) error {
+// generateText shows how to generate text Provisioned Throughput.
+func generateText(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{

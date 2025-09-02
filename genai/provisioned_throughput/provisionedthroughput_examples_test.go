@@ -32,9 +32,9 @@ func TestProvisionedThroughputGeneration(t *testing.T) {
 
 	t.Run("generate Provisioned Throughput with text", func(t *testing.T) {
 		buf.Reset()
-		err := generateProvisionedThroughputWithText(buf)
+		err := generateText(buf)
 		if err != nil {
-			t.Fatalf("generateProvisionedThroughputWithText failed: %v", err)
+			t.Fatalf("generateText failed: %v", err)
 		}
 
 		output := buf.String()
