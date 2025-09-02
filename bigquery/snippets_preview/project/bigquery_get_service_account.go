@@ -14,7 +14,7 @@
 
 package project
 
-// [START bigquery_get_service_account]
+// [START bigquery_get_service_account_preview]
 import (
 	"context"
 	"fmt"
@@ -47,4 +47,4 @@ func getServiceAccount(client *apiv2_client.Client, w io.Writer, projectID strin
 	return nil
 }
 
-// [END bigquery_get_service_account]
+// [END bigquery_get_service_account_preview]

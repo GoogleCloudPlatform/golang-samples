@@ -42,12 +42,12 @@ func deleteModel(client *apiv2_client.Client, projectID, datasetID, modelID stri
 		ModelId:   modelID,
 	}
 
-	// Deleting a dataset doesn't return information, but it may produce an error.
+	// Deleting a model doesn't return information, but it may produce an error.
 	if err := client.DeleteModel(ctx, req); err != nil {
 		if apierr, ok := apierror.FromError(err); ok {
 			if status := apierr.GRPCStatus(); status.Code() == codes.NotFound {
-				// The error indicates the dataset isn't present.  Possibly another process removed
-				// the dataset, or perhaps there was a partial failure and this was handled via automatic retry.
+				// The error indicates the model isn't present.  Possibly another process removed
+				// the model, or perhaps there was a partial failure and this was handled via automatic retry.
 				// In any case, treat this as a success.
 				return nil
 			}
@@ -57,4 +57,4 @@ func deleteModel(client *apiv2_client.Client, projectID, datasetID, modelID stri
 	return nil
 }
 
-// [END bigquery_delete_dataset_preview]
+// [END bigquery_delete_model_preview]

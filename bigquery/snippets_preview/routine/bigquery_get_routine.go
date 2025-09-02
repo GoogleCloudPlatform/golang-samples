@@ -50,7 +50,7 @@ func getRoutine(client *apiv2_client.Client, w io.Writer, projectID, datasetID, 
 		resp.GetRoutineReference().GetRoutineId(),
 		resp.GetDescription())
 	// Alternately, use the protojson package to print a more complete representation
-	// of the dataset using a basic JSON mapping:
+	// of the routine using a basic JSON mapping:
 	fmt.Fprintf(w, "Routine JSON representation:\n%s\n", protojson.Format(resp))
 	return nil
 }

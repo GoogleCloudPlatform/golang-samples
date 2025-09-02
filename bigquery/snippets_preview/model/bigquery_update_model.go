@@ -74,7 +74,8 @@ func updateModel(client *apiv2_client.Client, w io.Writer, projectID, datasetID,
 			}
 			if status.Code() == codes.InvalidArgument {
 				// TODO: this is a known issue with PatchModel + gRPC, so we ignore this
-				// error for the time being.
+				// error for the time being.  This error will not occur using the REST
+				// transport.
 				// Internally, tracked as b/439612831.
 				return nil
 			}

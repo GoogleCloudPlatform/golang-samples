@@ -69,4 +69,4 @@ func getTable(client *apiv2_client.Client, w io.Writer, projectID, datasetID, ta
 	return nil
 }
 
-// [END bigquery_get_model_preview]
+// [END bigquery_get_table_preview]
