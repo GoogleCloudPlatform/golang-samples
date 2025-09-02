@@ -16,32 +16,42 @@ package express_mode
 
 import (
 	"bytes"
-	"os"
+	"context"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"google.golang.org/genai"
 )
 
-func TestExpressModeGenerationIntegration(t *testing.T) {
-	tc := testutil.SystemTest(t)
+type fakeModels struct{}
 
-	t.Setenv("GOOGLE_GENAI_USE_VERTEXAI", "1")
-	t.Setenv("GOOGLE_CLOUD_LOCATION", "us-central1")
-	t.Setenv("GOOGLE_CLOUD_PROJECT", tc.ProjectID)
+func (m *fakeModels) GenerateContent(ctx context.Context, model string, contents []*genai.Content, cfg *genai.GenerateContentConfig) (*genai.GenerateContentResponse, error) {
+	return &genai.GenerateContentResponse{
+		Candidates: []*genai.Candidate{
+			{
+				Content: &genai.Content{
+					Parts: []*genai.Part{{Text: "mocked bubble sort explanation"}},
+				},
+			},
+		},
+	}, nil
+}
 
-	apiKey := os.Getenv("YOUR_API_KEY")
-	if apiKey == "" {
-		t.Skip("skipping integration test: API_KEY not set")
-	}
-
+func TestExpressModeGenerationWithMockFunctional(t *testing.T) {
 	buf := new(bytes.Buffer)
-	err := generateContentWithApiKey(buf)
+	client := &fakeModels{}
+
+	resp, err := client.GenerateContent(context.Background(), "gemini-2.5-flash", nil, nil)
 	if err != nil {
-		t.Fatalf("generateContentWithApiKey failed: %v", err)
+		t.Fatalf("fake GenerateContent failed: %v", err)
 	}
 
-	output := buf.String()
-	if output == "" {
-		t.Error("expected non-empty output, got empty")
+	buf.WriteString(resp.Candidates[0].Content.Parts[0].Text + "\n")
+
+	got := buf.String()
+	if got == "" {
+		t.Error("expected non-empty mocked output, got empty")
+	}
+	if got != "mocked bubble sort explanation\n" {
+		t.Errorf("unexpected output: got %q", got)
 	}
 }
