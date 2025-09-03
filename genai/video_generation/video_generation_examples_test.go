@@ -12,17 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package tools
+package video_generation
 
 import (
 	"bytes"
-	"fmt"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestTextGeneration(t *testing.T) {
+func TestVideoGeneration(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	t.Setenv("GOOGLE_GENAI_USE_VERTEXAI", "1")
@@ -31,11 +31,15 @@ func TestTextGeneration(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 
-	t.Run("generate with code execution tool", func(t *testing.T) {
+	gcsOutputBucket := "HERE-go-bucket-samples-tests"
+	prefix := "go_videogen_test/" + time.Now().Format("20060102-150405")
+	outputGCSURI := "gs://" + gcsOutputBucket + "/" + prefix
+
+	t.Run("generate video content with img", func(t *testing.T) {
 		buf.Reset()
-		err := generateWithCodeExec(buf)
+		err := generateVideoFromImage(buf, outputGCSURI)
 		if err != nil {
-			t.Fatalf("generateWithCodeExec failed: %v", err)
+			t.Fatalf("generateVideoFromImage failed: %v", err)
 		}
 
 		output := buf.String()
@@ -44,11 +48,11 @@ func TestTextGeneration(t *testing.T) {
 		}
 	})
 
-	t.Run("generate with func declaration and func response", func(t *testing.T) {
+	t.Run("generate video content with text", func(t *testing.T) {
 		buf.Reset()
-		err := generateWithFuncCall(buf)
+		err := generateVideoWithText(buf, outputGCSURI)
 		if err != nil {
-			t.Fatalf("generateWithFuncCall failed: %v", err)
+			t.Fatalf("generateVideoWithText failed: %v", err)
 		}
 
 		output := buf.String()
@@ -57,30 +61,4 @@ func TestTextGeneration(t *testing.T) {
 		}
 	})
 
-	t.Run("generate with Google Search", func(t *testing.T) {
-		buf.Reset()
-		err := generateWithGoogleSearch(buf)
-		if err != nil {
-			t.Fatalf("generateWithGoogleSearch failed: %v", err)
-		}
-
-		output := buf.String()
-		if output == "" {
-			t.Error("expected non-empty output, got empty")
-		}
-	})
-
-	t.Run("generate with VAIS Search", func(t *testing.T) {
-		buf.Reset()
-		dataStore := fmt.Sprintf("projects/%s/locations/global/collections/default_collection/dataStores/grounding-test-datastore", tc.ProjectID)
-		err := generateWithGoogleVAIS(buf, dataStore)
-		if err != nil {
-			t.Fatalf("generateWithGoogleVAIS failed: %v", err)
-		}
-
-		output := buf.String()
-		if output == "" {
-			t.Error("expected non-empty output, got empty")
-		}
-	})
 }
