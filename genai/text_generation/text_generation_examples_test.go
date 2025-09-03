@@ -239,6 +239,19 @@ func TestTextGeneration(t *testing.T) {
 		}
 	})
 
+	t.Run("generate text with async stream", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithTextAsyncStream(buf)
+		if err != nil {
+			t.Fatalf("generateWithTextAsyncStream failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
 	t.Run("generate with local video file input", func(t *testing.T) {
 		buf.Reset()
 		err := generateWithLocalVideo(buf)
