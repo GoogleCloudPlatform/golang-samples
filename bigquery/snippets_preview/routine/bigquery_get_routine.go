@@ -45,7 +45,7 @@ func getRoutine(client *apiv2_client.Client, w io.Writer, projectID, datasetID, 
 		return fmt.Errorf("GetDataset: %w", err)
 	}
 
-	// Print some of the information about the dataset to the provided writer.
+	// Print some of the information about the routine to the provided writer.
 	fmt.Fprintf(w, "Routine %q has description %q\n",
 		resp.GetRoutineReference().GetRoutineId(),
 		resp.GetDescription())
