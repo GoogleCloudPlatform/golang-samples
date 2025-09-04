@@ -8,7 +8,7 @@ require (
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/mailgun/mailgun-go/v3 v3.6.4
 	github.com/mailjet/mailjet-apiv3-go v0.0.0-20201009050126-c24bc15a9394
-	golang.org/x/oauth2 v0.25.0
+	golang.org/x/oauth2 v0.27.0
 	google.golang.org/api v0.217.0
 	google.golang.org/appengine v1.6.8
 	google.golang.org/appengine/v2 v2.0.6
