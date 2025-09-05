@@ -57,6 +57,9 @@ var allowList = []string{
 	".gitignore",
 	"**/.gitkeep",
 
+	// Jujutsu repo files (for local https://jj-vcs.github.io/ users)
+	".jj/**",
+
 	// Primarily ML APIs.
 	"**/testdata/**/*.jpg",
 	"**/testdata/**/*.wav",
