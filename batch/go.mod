@@ -7,7 +7,7 @@ require (
 	cloud.google.com/go/compute v1.45.0
 	cloud.google.com/go/logging v1.13.0
 	cloud.google.com/go/storage v1.56.1
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250904195011-af70992085d2
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0
 	google.golang.org/api v0.248.0
 	google.golang.org/protobuf v1.36.8
 )
@@ -60,3 +60,5 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250818200422-3122310a409c // indirect
 	google.golang.org/grpc v1.74.2 // indirect
 )
+
+replace github.com/GoogleCloudPlatform/golang-samples => ../
