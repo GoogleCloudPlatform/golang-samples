@@ -28,7 +28,7 @@ import (
 
 // generateBatchPredictWithBQ shows how to run a batch prediction job with BigQuery input/output.
 func generateBatchPredictWithBQ(w io.Writer, outputURI string) error {
-	// output_uri = "bq://your-project.your_dataset.your_table"
+	// outputURI = "bq://your-project.your_dataset.your_table"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{

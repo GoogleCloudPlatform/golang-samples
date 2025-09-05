@@ -26,6 +26,7 @@ import (
 
 // generateWithGoogleVAIS shows how to generate text using VAIS Search.
 func generateWithGoogleVAIS(w io.Writer, datastore string) error {
+	//datastore = "gs://your-datastore/your-prefix"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{

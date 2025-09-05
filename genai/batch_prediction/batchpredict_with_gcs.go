@@ -28,7 +28,7 @@ import (
 
 // generateBatchPredict runs a batch prediction job using GCS input/output.
 func generateBatchPredict(w io.Writer, outputURI string) error {
-	// output_uri = "gs://your-bucket/your-prefix"
+	// outputURI = "gs://your-bucket/your-prefix"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{

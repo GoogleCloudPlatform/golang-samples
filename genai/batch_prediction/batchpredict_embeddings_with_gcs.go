@@ -28,7 +28,7 @@ import (
 
 // generateBatchEmbeddings shows how to run a batch embeddings prediction job.
 func generateBatchEmbeddings(w io.Writer, outputURI string) error {
-	// output_uri = "gs://your-bucket/your-prefix"
+	// outputURI = "gs://your-bucket/your-prefix"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{

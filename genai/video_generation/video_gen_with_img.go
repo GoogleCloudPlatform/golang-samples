@@ -27,6 +27,7 @@ import (
 
 // generateVideoFromImage shows how to gen video from img.
 func generateVideoFromImage(w io.Writer, outputGCSURI string) error {
+	//outputGCSURI = "gs://your-bucket/your-prefix"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
