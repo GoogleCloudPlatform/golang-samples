@@ -19,7 +19,7 @@ import (
 	"testing"
 )
 
-func TestStyleCustomization(t *testing.T) {
+func TestImageGeneration(t *testing.T) {
 	buf := new(bytes.Buffer)
 
 	t.Run("style customization with style reference", func(t *testing.T) {

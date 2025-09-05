@@ -60,7 +60,7 @@ func generateBatchEmbeddings(w io.Writer, outputURI string) error {
 	fmt.Fprintf(w, "Job name: %s\n", job.Name)
 	fmt.Fprintf(w, "Job state: %s\n", job.State)
 	// Example response:
-	//  Job name: projects/%PROJECT_ID%/locations/us-central1/batchPredictionJobs/9876453210000000000
+	//  Job name: projects/{PROJECT_ID}/locations/us-central1/batchPredictionJobs/9876453210000000000
 	//  Job state: JOB_STATE_PENDING
 
 	// See the documentation: https://googleapis.github.io/python-genai/genai.html#genai.types.BatchJob

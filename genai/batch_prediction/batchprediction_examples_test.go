@@ -25,7 +25,7 @@ import (
 
 const gcsOutputBucket = "golang-docs-samples-tests"
 
-func TestGenerateBatchEmbeddings(t *testing.T) {
+func TestBatchPrediction(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	t.Setenv("GOOGLE_GENAI_USE_VERTEXAI", "1")
