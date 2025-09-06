@@ -3,9 +3,9 @@ module github.com/GoogleCloudPlatform/golang-samples/workflows/executions
 go 1.23.0
 
 require (
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250401180849-ee847a2eb967
+	github.com/GoogleCloudPlatform/golang-samples 2a913619abad
 	github.com/google/uuid v1.6.0
-	google.golang.org/api v0.228.0
+	google.golang.org/api v0.248.0
 )
 
 require (

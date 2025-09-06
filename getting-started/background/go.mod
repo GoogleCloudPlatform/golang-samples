@@ -4,10 +4,10 @@ go 1.23.0
 
 require (
 	cloud.google.com/go/firestore v1.18.0
-	cloud.google.com/go/pubsub v1.45.3
-	cloud.google.com/go/translate v1.12.3
-	golang.org/x/text v0.21.0
-	google.golang.org/grpc v1.69.4
+	cloud.google.com/go/pubsub v1.50.1
+	cloud.google.com/go/translate v1.12.6
+	golang.org/x/text v0.28.0
+	google.golang.org/grpc v1.75.0
 )
 
 require (
