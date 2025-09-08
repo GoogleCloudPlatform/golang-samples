@@ -64,7 +64,7 @@ func setup(t *testing.T, projectID string) {
 
 	w := obj.NewWriter(ctx)
 
-	if _, err := fmt.Fprintf(w, code); err != nil {
+	if _, err := fmt.Fprint(w, code); err != nil {
 		if err2 := w.Close(); err != nil {
 			t.Errorf("Error writing to file and closing it: %v", err2)
 		}

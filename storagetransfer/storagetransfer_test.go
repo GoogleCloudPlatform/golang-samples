@@ -404,23 +404,23 @@ func TestCreateEventDrivenGCSTransfer(t *testing.T) {
 
 	pubsubClient, err := pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
-		log.Fatalf("Coudln't create pubsub client: " + err.Error())
+		log.Fatal("Coudln't create pubsub client: " + err.Error())
 	}
 	defer pubsubClient.Close()
 
 	topic, err := pubsubClient.CreateTopic(ctx, pubSubTopicId)
 	if err != nil {
-		log.Fatalf("Coudln't create pubsub topic: " + err.Error())
+		log.Fatal("Coudln't create pubsub topic: " + err.Error())
 	}
 	defer topic.Delete(ctx)
 
 	policy, err := topic.IAM().Policy(ctx)
 	if err != nil {
-		log.Fatalf("Couldn't get pubsub topic policy: " + err.Error())
+		log.Fatal("Couldn't get pubsub topic policy: " + err.Error())
 	}
 	policy.Add("serviceAccount:"+stsServiceAccountEmail, "roles/pubsub.subscriber")
 	if err := topic.IAM().SetPolicy(ctx, policy); err != nil {
-		log.Fatalf("Couldn't set pubsub topic policy: " + err.Error())
+		log.Fatal("Couldn't set pubsub topic policy: " + err.Error())
 	}
 
 	subId := testutil.UniqueBucketName("pubsubsubscription")
@@ -430,7 +430,7 @@ func TestCreateEventDrivenGCSTransfer(t *testing.T) {
 		AckDeadline: 20 * time.Second,
 	})
 	if err != nil {
-		log.Fatalf("Couldn't create pubsub subscription: " + err.Error())
+		log.Fatal("Couldn't create pubsub subscription: " + err.Error())
 	}
 
 	pubSubSubscriptionID := sub.String()
