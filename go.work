@@ -22,6 +22,7 @@ use (
 	./asset
 	./auth
 	./automl
+	./batch
 	./bigquery
 	./bigtable
 	./cdn
@@ -105,8 +106,8 @@ use (
 	./managedkafka
 	./media
 	./memorystore
-	./monitoring
 	./modelarmor
+	./monitoring
 	./opentelemetry/instrumentation/app
 	./opentelemetry/trace
 	./parametermanager
