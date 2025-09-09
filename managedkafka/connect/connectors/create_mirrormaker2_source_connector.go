@@ -49,9 +49,9 @@ func createMirrorMaker2SourceConnector(w io.Writer, projectID, region, connectCl
 	parent := fmt.Sprintf("projects/%s/locations/%s/connectClusters/%s", projectID, region, connectClusterID)
 
 	config := map[string]string{
-		"connector.class": "org.apache.kafka.connect.mirror.MirrorSourceConnector",
-		"name":            connectorID,
-		"tasks.max":       tasksMax,
+		"connector.class":      "org.apache.kafka.connect.mirror.MirrorSourceConnector",
+		"name":                 connectorID,
+		"tasks.max":            tasksMax,
 		"source.cluster.alias": sourceClusterAlias,
 		"target.cluster.alias": targetClusterAlias, // This is usually the primary cluster.
 		// Replicate all topics from the source
@@ -63,6 +63,7 @@ func createMirrorMaker2SourceConnector(w io.Writer, projectID, region, connectCl
 		"target.cluster.bootstrap.servers": targetBootstrapServers,
 		// You can define an exclusion policy for topics as follows:
 		// To exclude internal MirrorMaker 2 topics, internal topics and replicated topics.
+		// topicsExclude := "mm2.*.internal,.*.replica,__.*"
 		"topics.exclude": topicsExclude,
 	}
 
