@@ -47,6 +47,16 @@ func createConnectCluster(w io.Writer, projectID, region, clusterID, kafkaCluste
 		MemoryBytes: 12884901888, // 12 GiB in bytes
 	}
 
+	// Optionally, you can also specify accessible subnets and resolvable DNS
+	// domains as part of your network configuration. For example:
+	// networkConfigs := []*managedkafkapb.ConnectNetworkConfig{
+	// 	{
+	// 		PrimarySubnet:      primarySubnet,
+	// 		AdditionalSubnets:  []string{"subnet-1", "subnet-2"},
+	// 		DnsDomainNames:     []string{"domain-1", "domain-2"},
+	// 	},
+	// }
+
 	connectCluster := &managedkafkapb.ConnectCluster{
 		Name:           clusterPath,
 		KafkaCluster:   kafkaCluster,
