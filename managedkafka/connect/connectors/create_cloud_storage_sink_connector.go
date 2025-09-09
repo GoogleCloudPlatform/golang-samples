@@ -14,25 +14,31 @@
 
 package connectors
 
-// [START managedkafka_create_gcs_sink_connector]
+// [START managedkafka_create_cloud_storage_sink_connector]
 import (
 	"context"
 	"fmt"
 	"io"
 
+	managedkafka "cloud.google.com/go/managedkafka/apiv1"
 	"cloud.google.com/go/managedkafka/apiv1/managedkafkapb"
 	"google.golang.org/api/option"
-
-	managedkafka "cloud.google.com/go/managedkafka/apiv1"
 )
 
-func createGCSSinkConnector(w io.Writer, projectID, region, connectClusterID, connectorID, topicName, bucketName string, opts ...option.ClientOption) error {
+// createCloudStorageSinkConnector creates a Cloud Storage Sink connector.
+func createCloudStorageSinkConnector(w io.Writer, projectID, region, connectClusterID, connectorID, topics, gcsBucketName, tasksMax, formatOutputType, valueConverter, valueConverterSchemasEnable, keyConverter string, opts ...option.ClientOption) error {
+	// TODO(developer): Update with your config values. Here is a sample configuration:
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// connectClusterID := "my-connect-cluster"
-	// connectorID := "my-gcs-sink-connector"
-	// topicName := "my-kafka-topic"
-	// bucketName := "my-gcs-bucket"
+	// connectorID := "GCS_SINK_CONNECTOR_ID"
+	// topics := "GMK_TOPIC_ID"
+	// gcsBucketName := "GCS_BUCKET_NAME"
+	// tasksMax := "3"
+	// formatOutputType := "json"
+	// valueConverter := "org.apache.kafka.connect.json.JsonConverter"
+	// valueConverterSchemasEnable := "false"
+	// keyConverter := "org.apache.kafka.connect.storage.StringConverter"
 	ctx := context.Background()
 	client, err := managedkafka.NewManagedKafkaConnectClient(ctx, opts...)
 	if err != nil {
@@ -42,18 +48,17 @@ func createGCSSinkConnector(w io.Writer, projectID, region, connectClusterID, co
 
 	parent := fmt.Sprintf("projects/%s/locations/%s/connectClusters/%s", projectID, region, connectClusterID)
 
-	// Cloud Storage Sink sample connector configuration
 	config := map[string]string{
 		"connector.class":                "io.aiven.kafka.connect.gcs.GcsSinkConnector",
-		"tasks.max":                      "1",
-		"topics":                         topicName,
-		"gcs.bucket.name":                bucketName,
+		"tasks.max":                      tasksMax,
+		"topics":                         topics,
+		"gcs.bucket.name":                gcsBucketName,
 		"gcs.credentials.default":        "true",
-		"format.output.type":             "json",
+		"format.output.type":             formatOutputType,
 		"name":                           connectorID,
-		"value.converter":                "org.apache.kafka.connect.json.JsonConverter",
-		"value.converter.schemas.enable": "false",
-		"key.converter":                  "org.apache.kafka.connect.storage.StringConverter",
+		"value.converter":                valueConverter,
+		"value.converter.schemas.enable": valueConverterSchemasEnable,
+		"key.converter":                  keyConverter,
 	}
 
 	connector := &managedkafkapb.Connector{
@@ -75,4 +80,4 @@ func createGCSSinkConnector(w io.Writer, projectID, region, connectClusterID, co
 	return nil
 }
 
-// [END managedkafka_create_gcs_sink_connector]
+// [END managedkafka_create_cloud_storage_sink_connector]

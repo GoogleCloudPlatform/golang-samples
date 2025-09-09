@@ -37,26 +37,33 @@ func TestConnectors(t *testing.T) {
 	connectorID := fmt.Sprintf("%s-%d", connectorPrefix, time.Now().UnixNano())
 	options := fake.Options(t)
 
-	t.Run("CreateMirrorMakerConnector", func(t *testing.T) {
+	t.Run("CreateMirrorMaker2SourceConnector", func(t *testing.T) {
 		buf.Reset()
-		sourceDNS := "source-cluster-dns:9092"
-		targetDNS := "target-cluster-dns:9092"
-		topicName := "test-topic"
-		if err := createMirrorMakerConnector(buf, tc.ProjectID, region, connectClusterID, connectorID+"-mm2", sourceDNS, targetDNS, topicName, options...); err != nil {
-			t.Fatalf("failed to create MirrorMaker connector: %v", err)
+		sourceBootstrapServers := "source-dns:9092"
+		targetBootstrapServers := "target-dns:9092"
+		tasksMax := "3"
+		sourceClusterAlias := "source"
+		targetClusterAlias := "target"
+		topics := ".*"
+		topicsExclude := "mm2.*.internal,.*.replica,__.*"
+		if err := createMirrorMaker2SourceConnector(buf, tc.ProjectID, region, connectClusterID, connectorID+"-mm2", sourceBootstrapServers, targetBootstrapServers, tasksMax, sourceClusterAlias, targetClusterAlias, topics, topicsExclude, options...); err != nil {
+			t.Fatalf("failed to create MirrorMaker 2.0 source connector: %v", err)
 		}
 		got := buf.String()
-		want := "Created MirrorMaker connector"
+		want := "Created MirrorMaker 2.0 Source connector"
 		if !strings.Contains(got, want) {
-			t.Fatalf("createMirrorMakerConnector() mismatch got: %s\nwant: %s", got, want)
+			t.Fatalf("createMirrorMaker2SourceConnector() mismatch got: %s\nwant: %s", got, want)
 		}
 	})
 
 	t.Run("CreatePubSubSourceConnector", func(t *testing.T) {
 		buf.Reset()
-		topicName := "test-topic"
-		subscription := "test-subscription"
-		if err := createPubSubSourceConnector(buf, tc.ProjectID, region, connectClusterID, connectorID+"-pubsub-source", topicName, subscription, options...); err != nil {
+		kafkaTopic := "test-topic"
+		cpsSubscription := "test-subscription"
+		tasksMax := "3"
+		valueConverter := "org.apache.kafka.connect.converters.ByteArrayConverter"
+		keyConverter := "org.apache.kafka.connect.storage.StringConverter"
+		if err := createPubSubSourceConnector(buf, tc.ProjectID, region, connectClusterID, connectorID+"-pubsub-source", kafkaTopic, cpsSubscription, tc.ProjectID, tasksMax, valueConverter, keyConverter, options...); err != nil {
 			t.Fatalf("failed to create Pub/Sub source connector: %v", err)
 		}
 		got := buf.String()
@@ -68,9 +75,12 @@ func TestConnectors(t *testing.T) {
 
 	t.Run("CreatePubSubSinkConnector", func(t *testing.T) {
 		buf.Reset()
-		topicName := "test-topic"
-		pubsubTopic := "test-pubsub-topic"
-		if err := createPubSubSinkConnector(buf, tc.ProjectID, region, connectClusterID, connectorID+"-pubsub-sink", topicName, pubsubTopic, options...); err != nil {
+		topics := "test-topic"
+		valueConverter := "org.apache.kafka.connect.storage.StringConverter"
+		keyConverter := "org.apache.kafka.connect.storage.StringConverter"
+		cpsTopic := "test-pubsub-topic"
+		tasksMax := "3"
+		if err := createPubSubSinkConnector(buf, tc.ProjectID, region, connectClusterID, connectorID+"-pubsub-sink", topics, valueConverter, keyConverter, cpsTopic, tc.ProjectID, tasksMax, options...); err != nil {
 			t.Fatalf("failed to create Pub/Sub sink connector: %v", err)
 		}
 		got := buf.String()
@@ -80,25 +90,34 @@ func TestConnectors(t *testing.T) {
 		}
 	})
 
-	t.Run("CreateGCSSinkConnector", func(t *testing.T) {
+	t.Run("CreateCloudStorageSinkConnector", func(t *testing.T) {
 		buf.Reset()
-		topicName := "test-topic"
-		bucketName := "test-bucket"
-		if err := createGCSSinkConnector(buf, tc.ProjectID, region, connectClusterID, connectorID+"-gcs-sink", topicName, bucketName, options...); err != nil {
-			t.Fatalf("failed to create GCS sink connector: %v", err)
+		topics := "test-topic"
+		gcsBucketName := "test-bucket"
+		tasksMax := "3"
+		formatOutputType := "json"
+		valueConverter := "org.apache.kafka.connect.json.JsonConverter"
+		valueConverterSchemasEnable := "false"
+		keyConverter := "org.apache.kafka.connect.storage.StringConverter"
+		if err := createCloudStorageSinkConnector(buf, tc.ProjectID, region, connectClusterID, connectorID+"-gcs-sink", topics, gcsBucketName, tasksMax, formatOutputType, valueConverter, valueConverterSchemasEnable, keyConverter, options...); err != nil {
+			t.Fatalf("failed to create Cloud Storage sink connector: %v", err)
 		}
 		got := buf.String()
 		want := "Created Cloud Storage sink connector"
 		if !strings.Contains(got, want) {
-			t.Fatalf("createGCSSinkConnector() mismatch got: %s\nwant: %s", got, want)
+			t.Fatalf("createCloudStorageSinkConnector() mismatch got: %s\nwant: %s", got, want)
 		}
 	})
 
 	t.Run("CreateBigQuerySinkConnector", func(t *testing.T) {
 		buf.Reset()
-		topicName := "test-topic"
-		datasetID := "test-dataset"
-		if err := createBigQuerySinkConnector(buf, tc.ProjectID, region, connectClusterID, connectorID+"-bq-sink", topicName, datasetID, options...); err != nil {
+		topics := "test-topic"
+		tasksMax := "3"
+		keyConverter := "org.apache.kafka.connect.storage.StringConverter"
+		valueConverter := "org.apache.kafka.connect.json.JsonConverter"
+		valueConverterSchemasEnable := "false"
+		defaultDataset := "test-dataset"
+		if err := createBigQuerySinkConnector(buf, tc.ProjectID, region, connectClusterID, connectorID+"-bq-sink", topics, tasksMax, keyConverter, valueConverter, valueConverterSchemasEnable, defaultDataset, options...); err != nil {
 			t.Fatalf("failed to create BigQuery sink connector: %v", err)
 		}
 		got := buf.String()

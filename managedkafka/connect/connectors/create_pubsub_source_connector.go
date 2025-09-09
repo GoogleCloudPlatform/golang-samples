@@ -20,19 +20,24 @@ import (
 	"fmt"
 	"io"
 
+	managedkafka "cloud.google.com/go/managedkafka/apiv1"
 	"cloud.google.com/go/managedkafka/apiv1/managedkafkapb"
 	"google.golang.org/api/option"
-
-	managedkafka "cloud.google.com/go/managedkafka/apiv1"
 )
 
-func createPubSubSourceConnector(w io.Writer, projectID, region, connectClusterID, connectorID, topicName, subscription string, opts ...option.ClientOption) error {
+// createPubSubSourceConnector creates a Pub/Sub Source connector.
+func createPubSubSourceConnector(w io.Writer, projectID, region, connectClusterID, connectorID, kafkaTopic, cpsSubscription, cpsProject, tasksMax, valueConverter, keyConverter string, opts ...option.ClientOption) error {
+	// TODO(developer): Update with your config values. Here is a sample configuration:
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// connectClusterID := "my-connect-cluster"
-	// connectorID := "my-pubsub-source-connector"
-	// topicName := "my-kafka-topic"
-	// subscription := "my-pubsub-subscription"
+	// connectorID := "CPS_SOURCE_CONNECTOR_ID"
+	// kafkaTopic := "GMK_TOPIC_ID"
+	// cpsSubscription := "CPS_SUBSCRIPTION_ID"
+	// cpsProject := "GCP_PROJECT_ID"
+	// tasksMax := "3"
+	// valueConverter := "org.apache.kafka.connect.converters.ByteArrayConverter"
+	// keyConverter := "org.apache.kafka.connect.storage.StringConverter"
 	ctx := context.Background()
 	client, err := managedkafka.NewManagedKafkaConnectClient(ctx, opts...)
 	if err != nil {
@@ -46,12 +51,12 @@ func createPubSubSourceConnector(w io.Writer, projectID, region, connectClusterI
 	config := map[string]string{
 		"connector.class":  "com.google.pubsub.kafka.source.CloudPubSubSourceConnector",
 		"name":             connectorID,
-		"tasks.max":        "1",
-		"kafka.topic":      topicName,
-		"cps.subscription": subscription,
-		"cps.project":      projectID,
-		"value.converter":  "org.apache.kafka.connect.converters.ByteArrayConverter",
-		"key.converter":    "org.apache.kafka.connect.storage.StringConverter",
+		"tasks.max":        tasksMax,
+		"kafka.topic":      kafkaTopic,
+		"cps.subscription": cpsSubscription,
+		"cps.project":      cpsProject,
+		"value.converter":  valueConverter,
+		"key.converter":    keyConverter,
 	}
 
 	connector := &managedkafkapb.Connector{
@@ -74,3 +79,4 @@ func createPubSubSourceConnector(w io.Writer, projectID, region, connectClusterI
 }
 
 // [END managedkafka_create_pubsub_source_connector]
+

@@ -14,26 +14,31 @@
 
 package connectors
 
-// [START managedkafka_create_mirrormaker_connector]
+// [START managedkafka_create_mirrormaker2_source_connector]
 import (
 	"context"
 	"fmt"
 	"io"
 
+	managedkafka "cloud.google.com/go/managedkafka/apiv1"
 	"cloud.google.com/go/managedkafka/apiv1/managedkafkapb"
 	"google.golang.org/api/option"
-
-	managedkafka "cloud.google.com/go/managedkafka/apiv1"
 )
 
-func createMirrorMakerConnector(w io.Writer, projectID, region, connectClusterID, connectorID, sourceDNS, targetDNS, topicName string, opts ...option.ClientOption) error {
+// createMirrorMaker2SourceConnector creates a MirrorMaker 2.0 Source connector.
+func createMirrorMaker2SourceConnector(w io.Writer, projectID, region, connectClusterID, connectorID, sourceBootstrapServers, targetBootstrapServers, tasksMax, sourceClusterAlias, targetClusterAlias, topics, topicsExclude string, opts ...option.ClientOption) error {
+	// TODO(developer): Update with your config values. Here is a sample configuration:
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// connectClusterID := "my-connect-cluster"
-	// connectorID := "my-mm2-connector"
-	// sourceDNS := "source-cluster-dns:9092"
-	// targetDNS := "target-cluster-dns:9092"
-	// topicName := "my-topic"
+	// connectorID := "mm2-source-to-target-connector-id"
+	// sourceBootstrapServers := "source_cluster_dns"
+	// targetBootstrapServers := "target_cluster_dns"
+	// tasksMax := "3"
+	// sourceClusterAlias := "source"
+	// targetClusterAlias := "target"
+	// topics := ".*"
+	// topicsExclude := "mm2.*.internal,.*.replica,__.*"
 	ctx := context.Background()
 	client, err := managedkafka.NewManagedKafkaConnectClient(ctx, opts...)
 	if err != nil {
@@ -43,24 +48,22 @@ func createMirrorMakerConnector(w io.Writer, projectID, region, connectClusterID
 
 	parent := fmt.Sprintf("projects/%s/locations/%s/connectClusters/%s", projectID, region, connectClusterID)
 
-	// MirrorMaker 2.0 sample connector configuration
 	config := map[string]string{
-		"connector.class":                                  "org.apache.kafka.connect.mirror.MirrorSourceConnector",
-		"name":                                             connectorID,
-		"source.cluster.alias":                             "source",
-		"target.cluster.alias":                             "target",
-		"topics":                                           topicName,
-		"source.cluster.bootstrap.servers":                 sourceDNS,
-		"target.cluster.bootstrap.servers":                 targetDNS,
-		"offset-syncs.topic.replication.factor":            "1",
-		"source.cluster.security.protocol":                 "SASL_SSL",
-		"source.cluster.sasl.mechanism":                    "OAUTHBEARER",
-		"source.cluster.sasl.login.callback.handler.class": "com.google.cloud.hosted.kafka.auth.GcpLoginCallbackHandler",
-		"source.cluster.sasl.jaas.config":                  "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;",
-		"target.cluster.security.protocol":                 "SASL_SSL",
-		"target.cluster.sasl.mechanism":                    "OAUTHBEARER",
-		"target.cluster.sasl.login.callback.handler.class": "com.google.cloud.hosted.kafka.auth.GcpLoginCallbackHandler",
-		"target.cluster.sasl.jaas.config":                  "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;",
+		"connector.class": "org.apache.kafka.connect.mirror.MirrorSourceConnector",
+		"name":            connectorID,
+		"tasks.max":       tasksMax,
+		"source.cluster.alias": sourceClusterAlias,
+		"target.cluster.alias": targetClusterAlias, // This is usually the primary cluster.
+		// Replicate all topics from the source
+		"topics": topics,
+		// The value for bootstrap.servers is a hostname:port pair for the Kafka broker in
+		// the source/target cluster.
+		// For example: "kafka-broker:9092"
+		"source.cluster.bootstrap.servers": sourceBootstrapServers,
+		"target.cluster.bootstrap.servers": targetBootstrapServers,
+		// You can define an exclusion policy for topics as follows:
+		// To exclude internal MirrorMaker 2 topics, internal topics and replicated topics.
+		"topics.exclude": topicsExclude,
 	}
 
 	connector := &managedkafkapb.Connector{
@@ -78,8 +81,8 @@ func createMirrorMakerConnector(w io.Writer, projectID, region, connectClusterID
 	if err != nil {
 		return fmt.Errorf("client.CreateConnector got err: %w", err)
 	}
-	fmt.Fprintf(w, "Created MirrorMaker connector: %s\n", resp.Name)
+	fmt.Fprintf(w, "Created MirrorMaker 2.0 Source connector: %s\n", resp.Name)
 	return nil
 }
 
-// [END managedkafka_create_mirrormaker_connector]
+// [END managedkafka_create_mirrormaker2_source_connector]

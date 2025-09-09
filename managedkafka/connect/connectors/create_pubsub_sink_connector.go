@@ -6,7 +6,7 @@
 //
 //     https://www.apache.org/licenses/LICENSE-2.0
 //
-// Unless required by applicable law or agreed to in writing, software
+// Unless required by applicable law of agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
@@ -20,19 +20,24 @@ import (
 	"fmt"
 	"io"
 
+	managedkafka "cloud.google.com/go/managedkafka/apiv1"
 	"cloud.google.com/go/managedkafka/apiv1/managedkafkapb"
 	"google.golang.org/api/option"
-
-	managedkafka "cloud.google.com/go/managedkafka/apiv1"
 )
 
-func createPubSubSinkConnector(w io.Writer, projectID, region, connectClusterID, connectorID, topicName, pubsubTopic string, opts ...option.ClientOption) error {
+// createPubSubSinkConnector creates a Pub/Sub Sink connector.
+func createPubSubSinkConnector(w io.Writer, projectID, region, connectClusterID, connectorID, topics, valueConverter, keyConverter, cpsTopic, cpsProject, tasksMax string, opts ...option.ClientOption) error {
+	// TODO(developer): Update with your config values. Here is a sample configuration:
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// connectClusterID := "my-connect-cluster"
-	// connectorID := "my-pubsub-sink-connector"
-	// topicName := "my-kafka-topic"
-	// pubsubTopic := "my-pubsub-topic"
+	// connectorID := "CPS_SINK_CONNECTOR_ID"
+	// topics := "GMK_TOPIC_ID"
+	// valueConverter := "org.apache.kafka.connect.storage.StringConverter"
+	// keyConverter := "org.apache.kafka.connect.storage.StringConverter"
+	// cpsTopic := "CPS_TOPIC_ID"
+	// cpsProject := "GCP_PROJECT_ID"
+	// tasksMax := "3"
 	ctx := context.Background()
 	client, err := managedkafka.NewManagedKafkaConnectClient(ctx, opts...)
 	if err != nil {
@@ -46,12 +51,12 @@ func createPubSubSinkConnector(w io.Writer, projectID, region, connectClusterID,
 	config := map[string]string{
 		"connector.class": "com.google.pubsub.kafka.sink.CloudPubSubSinkConnector",
 		"name":            connectorID,
-		"tasks.max":       "1",
-		"topics":          topicName,
-		"value.converter": "org.apache.kafka.connect.storage.StringConverter",
-		"key.converter":   "org.apache.kafka.connect.storage.StringConverter",
-		"cps.topic":       pubsubTopic,
-		"cps.project":     projectID,
+		"tasks.max":       tasksMax,
+		"topics":          topics,
+		"value.converter": valueConverter,
+		"key.converter":   keyConverter,
+		"cps.topic":       cpsTopic,
+		"cps.project":     cpsProject,
 	}
 
 	connector := &managedkafkapb.Connector{

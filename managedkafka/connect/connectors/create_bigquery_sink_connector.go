@@ -20,19 +20,24 @@ import (
 	"fmt"
 	"io"
 
+	managedkafka "cloud.google.com/go/managedkafka/apiv1"
 	"cloud.google.com/go/managedkafka/apiv1/managedkafkapb"
 	"google.golang.org/api/option"
-
-	managedkafka "cloud.google.com/go/managedkafka/apiv1"
 )
 
-func createBigQuerySinkConnector(w io.Writer, projectID, region, connectClusterID, connectorID, topicName, datasetID string, opts ...option.ClientOption) error {
+// createBigQuerySinkConnector creates a BigQuery Sink connector.
+func createBigQuerySinkConnector(w io.Writer, projectID, region, connectClusterID, connectorID, topics, tasksMax, keyConverter, valueConverter, valueConverterSchemasEnable, defaultDataset string, opts ...option.ClientOption) error {
+	// TODO(developer): Update with your config values. Here is a sample configuration:
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// connectClusterID := "my-connect-cluster"
-	// connectorID := "my-bigquery-sink-connector"
-	// topicName := "my-kafka-topic"
-	// datasetID := "my-bigquery-dataset"
+	// connectorID := "BQ_SINK_CONNECTOR_ID"
+	// topics := "GMK_TOPIC_ID"
+	// tasksMax := "3"
+	// keyConverter := "org.apache.kafka.connect.storage.StringConverter"
+	// valueConverter := "org.apache.kafka.connect.json.JsonConverter"
+	// valueConverterSchemasEnable := "false"
+	// defaultDataset := "BQ_DATASET_ID"
 	ctx := context.Background()
 	client, err := managedkafka.NewManagedKafkaConnectClient(ctx, opts...)
 	if err != nil {
@@ -46,13 +51,13 @@ func createBigQuerySinkConnector(w io.Writer, projectID, region, connectClusterI
 	config := map[string]string{
 		"name":                           connectorID,
 		"project":                        projectID,
-		"topics":                         topicName,
-		"tasks.max":                      "3",
+		"topics":                         topics,
+		"tasks.max":                      tasksMax,
 		"connector.class":                "com.wepay.kafka.connect.bigquery.BigQuerySinkConnector",
-		"key.converter":                  "org.apache.kafka.connect.storage.StringConverter",
-		"value.converter":                "org.apache.kafka.connect.json.JsonConverter",
-		"value.converter.schemas.enable": "false",
-		"defaultDataset":                 datasetID,
+		"key.converter":                  keyConverter,
+		"value.converter":                valueConverter,
+		"value.converter.schemas.enable": valueConverterSchemasEnable,
+		"defaultDataset":                 defaultDataset,
 	}
 
 	connector := &managedkafkapb.Connector{
