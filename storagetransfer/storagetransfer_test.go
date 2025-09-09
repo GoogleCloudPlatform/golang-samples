@@ -420,7 +420,7 @@ func TestCreateEventDrivenGCSTransfer(t *testing.T) {
 	}
 	policy.Add("serviceAccount:"+stsServiceAccountEmail, "roles/pubsub.subscriber")
 	if err := topic.IAM().SetPolicy(ctx, policy); err != nil {
-		log.Fatal("Couldn't set pubsub topic policy: " + err.Error())
+        log.Fatalf("Couldn't set pubsub topic policy: %v", err)
 	}
 
 	subId := testutil.UniqueBucketName("pubsubsubscription")
