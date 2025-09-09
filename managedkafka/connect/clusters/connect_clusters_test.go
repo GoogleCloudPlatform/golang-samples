@@ -64,7 +64,7 @@ func TestConnectClusters(t *testing.T) {
 	})
 	t.Run("UpdateConnectCluster", func(t *testing.T) {
 		buf.Reset()
-		memoryBytes := int64(13958643712) // 13 GiB in bytes
+		memoryBytes := int64(25769803776) // 24 GiB in bytes
 		labels := map[string]string{"environment": "test"}
 		if err := updateConnectCluster(buf, tc.ProjectID, region, connectClusterID, memoryBytes, labels, options...); err != nil {
 			t.Fatalf("failed to update connect cluster: %v", err)

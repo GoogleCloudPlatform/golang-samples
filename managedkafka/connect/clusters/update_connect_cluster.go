@@ -31,7 +31,7 @@ func updateConnectCluster(w io.Writer, projectID, region, clusterID string, memo
 	// projectID := "my-project-id"
 	// region := "us-central1"
 	// clusterID := "my-connect-cluster"
-	// memoryBytes := 13958643712 // 13 GiB in bytes
+	// memoryBytes := 25769803776 // 24 GiB in bytes
 	// labels := map[string]string{"environment": "production"}
 	ctx := context.Background()
 	client, err := managedkafka.NewManagedKafkaConnectClient(ctx, opts...)
@@ -41,12 +41,12 @@ func updateConnectCluster(w io.Writer, projectID, region, clusterID string, memo
 	defer client.Close()
 
 	clusterPath := fmt.Sprintf("projects/%s/locations/%s/connectClusters/%s", projectID, region, clusterID)
-	
+
 	// Capacity configuration update
 	capacityConfig := &managedkafkapb.CapacityConfig{
 		MemoryBytes: memoryBytes,
 	}
-	
+
 	connectCluster := &managedkafkapb.ConnectCluster{
 		Name:           clusterPath,
 		CapacityConfig: capacityConfig,
