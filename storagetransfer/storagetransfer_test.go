@@ -410,7 +410,7 @@ func TestCreateEventDrivenGCSTransfer(t *testing.T) {
 
 	topic, err := pubsubClient.CreateTopic(ctx, pubSubTopicId)
 	if err != nil {
-		log.Fatal("Coudln't create pubsub topic: " + err.Error())
+        log.Fatalf("Couldn't create pubsub topic: %v", err)
 	}
 	defer topic.Delete(ctx)
 
