@@ -430,7 +430,7 @@ func TestCreateEventDrivenGCSTransfer(t *testing.T) {
 		AckDeadline: 20 * time.Second,
 	})
 	if err != nil {
-		log.Fatal("Couldn't create pubsub subscription: " + err.Error())
+        log.Fatalf("Couldn't create pubsub subscription: %v", err)
 	}
 
 	pubSubSubscriptionID := sub.String()
