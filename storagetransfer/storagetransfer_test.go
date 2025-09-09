@@ -404,7 +404,7 @@ func TestCreateEventDrivenGCSTransfer(t *testing.T) {
 
 	pubsubClient, err := pubsub.NewClient(ctx, tc.ProjectID)
 	if err != nil {
-		log.Fatal("Coudln't create pubsub client: " + err.Error())
+        log.Fatalf("Couldn't create pubsub client: %v", err)
 	}
 	defer pubsubClient.Close()
 
