@@ -69,4 +69,20 @@ func TestImageGeneration(t *testing.T) {
 			t.Error("expected non-empty output, got empty")
 		}
 	})
+
+	t.Run("subject customization with control reference", func(t *testing.T) {
+		buf.Reset()
+		// TODO(developer): update with your bucket
+		outputGCSURI := "gs://your-bucket/your-prefix"
+
+		err := generateSubjRefCtrlReferWithText(buf, outputGCSURI)
+		if err != nil {
+			t.Fatalf("generateSubjRefCtrlReferWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
 }
