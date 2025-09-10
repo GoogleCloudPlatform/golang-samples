@@ -32,7 +32,7 @@ func updateConnector(w io.Writer, projectID, region, connectClusterID, connector
 	// region := "us-central1"
 	// connectClusterID := "my-connect-cluster"
 	// connectorID := "my-connector"
-	// config := map[string]string{"tasks.max": "2"}
+	// config := map[string]string{"tasks.max": "6"}
 	ctx := context.Background()
 	client, err := managedkafka.NewManagedKafkaConnectClient(ctx, opts...)
 	if err != nil {

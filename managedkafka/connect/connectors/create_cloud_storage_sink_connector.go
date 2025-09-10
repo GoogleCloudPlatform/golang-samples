@@ -26,7 +26,7 @@ import (
 )
 
 // createCloudStorageSinkConnector creates a Cloud Storage Sink connector.
-func createCloudStorageSinkConnector(w io.Writer, projectID, region, connectClusterID, connectorID, topics, gcsBucketName, tasksMax, formatOutputType, valueConverter, valueConverterSchemasEnable, keyConverter string, opts ...option.ClientOption) error {
+func createCloudStorageSinkConnector(w io.Writer, projectID, region, connectClusterID, connectorID, topics, gcsBucketName, tasksMax, formatOutputType, valueConverter, valueConverterSchemasEnable, keyConverter, gcsCredentialsDefault string, opts ...option.ClientOption) error {
 	// TODO(developer): Update with your config values. Here is a sample configuration:
 	// projectID := "my-project-id"
 	// region := "us-central1"
@@ -39,6 +39,7 @@ func createCloudStorageSinkConnector(w io.Writer, projectID, region, connectClus
 	// valueConverter := "org.apache.kafka.connect.json.JsonConverter"
 	// valueConverterSchemasEnable := "false"
 	// keyConverter := "org.apache.kafka.connect.storage.StringConverter"
+	// gcsCredentialsDefault := "true"
 	ctx := context.Background()
 	client, err := managedkafka.NewManagedKafkaConnectClient(ctx, opts...)
 	if err != nil {
@@ -53,7 +54,7 @@ func createCloudStorageSinkConnector(w io.Writer, projectID, region, connectClus
 		"tasks.max":                      tasksMax,
 		"topics":                         topics,
 		"gcs.bucket.name":                gcsBucketName,
-		"gcs.credentials.default":        "true",
+		"gcs.credentials.default":        gcsCredentialsDefault,
 		"format.output.type":             formatOutputType,
 		"name":                           connectorID,
 		"value.converter":                valueConverter,
