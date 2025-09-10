@@ -36,7 +36,7 @@ func TestUpdateTrigger(t *testing.T) {
 		t.Fatalf("createTrigger: %v", err)
 	}
 
-	fullID := fmt.Sprintf("projects/" + tc.ProjectID + "/locations/global/jobTriggers/" + triggerID)
+	fullID := fmt.Sprintf("projects/%s/locations/global/jobTriggers/%s", tc.ProjectID, triggerID)
 
 	if err := updateTrigger(&buf, fullID); err != nil {
 		t.Errorf("UpdateTrigger: %v", err)
