@@ -68,4 +68,30 @@ func TestTextGeneration(t *testing.T) {
 			t.Error("expected non-empty output, got empty")
 		}
 	})
+
+	t.Run("generate with response class schema", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithClassSchema(buf)
+		if err != nil {
+			t.Fatalf("generateWithClassSchema failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate with response enum class schema", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithEnumClassSchema(buf)
+		if err != nil {
+			t.Fatalf("generateWithEnumClassSchema failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
 }

@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package dataset provides some basic snippet examples for working with datasets using
-// the preview BigQuery Cloud Client Library.
-package dataset
+// Package job provides some basic snippet examples for working with job
+// metadata using the preview BigQuery Cloud Client Library.
+package job
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"testing"
 	"time"
@@ -29,7 +28,7 @@ import (
 
 const testTimeout = 30 * time.Second
 
-func TestDatasetSnippets(t *testing.T) {
+func TestJobSnippet(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	names := []string{"gRPC", "REST"}
 
@@ -50,25 +49,11 @@ func TestDatasetSnippets(t *testing.T) {
 				t.Fatalf("client creation failed: %v", err)
 			}
 			defer client.Close()
-			// Create a dataset.
-			projID := tc.ProjectID
-			dsID := fmt.Sprintf("snippettesting_dataset_%s_%d", name, time.Now().UnixNano())
-			if err := createDataset(client, io.Discard, projID, dsID); err != nil {
-				t.Fatalf("createDataset(%q,%q): %v", projID, dsID, err)
-			}
-			if err := getDataset(client, io.Discard, projID, dsID); err != nil {
-				t.Fatalf("getDataset(%q,%q): %v", projID, dsID, err)
-			}
-			if err := updateDataset(client, io.Discard, projID, dsID); err != nil {
-				t.Fatalf("updateDataset(%q,%q): %v", projID, dsID, err)
-			}
-			if err := listDatasets(client, io.Discard, projID); err != nil {
-				t.Fatalf("listDatasets(%q): %v", projID, err)
-			}
-			if err := deleteDataset(client, projID, dsID); err != nil {
-				t.Fatalf("deleteDataset(%q,%q): %v", projID, dsID, err)
-			}
 
+			projID := tc.ProjectID
+			if err := listJobs(client, io.Discard, projID); err != nil {
+				t.Fatalf("listJobs(%q): %v", projID, err)
+			}
 		})
 	}
 }

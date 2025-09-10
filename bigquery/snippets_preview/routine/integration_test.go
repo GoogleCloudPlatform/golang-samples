@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package table provides some basic snippet examples for working with tables using
+// Package routine provides some basic snippet examples for working with routines using
 // the preview BigQuery Cloud Client Library.
-package table
+package routine
 
 import (
 	"context"
@@ -31,7 +31,7 @@ import (
 const testTimeout = 30 * time.Second
 const testLocation = "us-west1"
 
-func TestTableSnippet(t *testing.T) {
+func TestRoutineSnippet(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	names := []string{"gRPC", "REST"}
 
@@ -55,7 +55,7 @@ func TestTableSnippet(t *testing.T) {
 
 			// Create a test dataset.
 			projID := tc.ProjectID
-			dsID := fmt.Sprintf("snippettesting_tables_%s_%d", name, time.Now().UnixNano())
+			dsID := fmt.Sprintf("snippettesting_routines_%s_%d", name, time.Now().UnixNano())
 
 			_, err = client.InsertDataset(ctx, &bigquerypb.InsertDatasetRequest{
 				ProjectId: projID,
@@ -76,22 +76,22 @@ func TestTableSnippet(t *testing.T) {
 				DeleteContents: true,
 			})
 
-			tableID := fmt.Sprintf("tablesnippet_%s_%d", name, time.Now().UnixNano())
+			routineID := fmt.Sprintf("routinesnippet_%s_%d", name, time.Now().UnixNano())
 
-			if err := createTable(client, io.Discard, projID, dsID, tableID); err != nil {
-				t.Fatalf("createTable(%q,%q,%q): %v", projID, dsID, tableID, err)
+			if err := createRoutine(client, io.Discard, projID, dsID, routineID); err != nil {
+				t.Fatalf("createRoutine(%q,%q,%q): %v", projID, dsID, routineID, err)
 			}
-			if err := getTable(client, io.Discard, projID, dsID, tableID); err != nil {
-				t.Fatalf("getTable(%q,%q,%q): %v", projID, dsID, tableID, err)
+			if err := getRoutine(client, io.Discard, projID, dsID, routineID); err != nil {
+				t.Fatalf("getRoutine(%q,%q,%q): %v", projID, dsID, routineID, err)
 			}
-			if err := updateTable(client, io.Discard, projID, dsID, tableID); err != nil {
-				t.Fatalf("updateTable(%q,%q,%q): %v", projID, dsID, tableID, err)
+			if err := updateRoutine(client, io.Discard, projID, dsID, routineID); err != nil {
+				t.Fatalf("updateRoutine(%q,%q,%q): %v", projID, dsID, routineID, err)
 			}
-			if err := listTables(client, io.Discard, projID, dsID); err != nil {
-				t.Fatalf("listTables(%q,%q): %v", projID, dsID, err)
+			if err := listRoutines(client, io.Discard, projID, dsID); err != nil {
+				t.Fatalf("listRoutines(%q,%q): %v", projID, dsID, err)
 			}
-			if err := deleteTable(client, projID, dsID, tableID); err != nil {
-				t.Fatalf("deleteTable(%q,%q,%q): %v", projID, dsID, tableID, err)
+			if err := deleteRoutine(client, projID, dsID, routineID); err != nil {
+				t.Fatalf("deleteRoutine(%q,%q,%q): %v", projID, dsID, routineID, err)
 			}
 		})
 	}
