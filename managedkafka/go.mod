@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/managedkafka
 
-go 1.23.0
+go 1.24.0
 
 require (
 	cloud.google.com/go/managedkafka v0.7.0
