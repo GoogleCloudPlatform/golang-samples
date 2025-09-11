@@ -38,6 +38,6 @@ func TestCreateTemplate(t *testing.T) {
 	if got, want := buf.String(), "Successfully created inspect template"; !strings.Contains(got, want) {
 		t.Errorf("createInspectTemplate got\n----\n%v\n----\nWant to contain:\n----\n%v\n----", got, want)
 	}
-	fullID := fmt.Sprintf("projects/" + tc.ProjectID + "/locations/global/inspectTemplates/" + templateID)
+	fullID := fmt.Sprintf("projects/%s/locations/global/inspectTemplates/%s", tc.ProjectID, templateID)
 	defer cleeanUpTemplates(t, tc.ProjectID, fullID)
 }

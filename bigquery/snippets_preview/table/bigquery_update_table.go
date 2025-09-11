@@ -36,6 +36,7 @@ func updateTable(client *apiv2_client.Client, w io.Writer, projectID, datasetID,
 	//
 	// projectID := "my-project-id"
 	// datasetID := "mydataset"
+	// tableID := "mytable"
 	ctx := context.Background()
 
 	// Fetch the existing table metadata prior to making any modifications.

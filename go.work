@@ -1,6 +1,6 @@
 go 1.24.0
 
-toolchain go1.24.2
+toolchain go1.24.7
 
 use (
 	.
@@ -22,6 +22,7 @@ use (
 	./asset
 	./auth
 	./automl
+	./batch
 	./bigquery
 	./bigtable
 	./cdn

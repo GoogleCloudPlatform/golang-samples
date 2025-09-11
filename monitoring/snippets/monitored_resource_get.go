@@ -37,7 +37,7 @@ func getMonitoredResource(w io.Writer, resource string) error {
 	}
 	defer c.Close()
 	req := &monitoringpb.GetMonitoredResourceDescriptorRequest{
-		Name: fmt.Sprintf(resource),
+		Name: resource,
 	}
 	resp, err := c.GetMonitoredResourceDescriptor(ctx, req)
 	if err != nil {
