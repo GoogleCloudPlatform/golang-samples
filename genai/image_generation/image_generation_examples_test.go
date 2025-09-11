@@ -85,4 +85,20 @@ func TestImageGeneration(t *testing.T) {
 			t.Error("expected non-empty output, got empty")
 		}
 	})
+
+	t.Run("generate style transfer customization with raw reference", func(t *testing.T) {
+		buf.Reset()
+		// TODO(developer): update with your bucket
+		outputGCSURI := "gs://your-bucket/your-prefix"
+
+		err := generateRawReferWithText(buf, outputGCSURI)
+		if err != nil {
+			t.Fatalf("generateRawReferWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
 }
