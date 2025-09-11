@@ -42,4 +42,17 @@ func TestGenerateMMFlashWithText(t *testing.T) {
 			t.Error("expected non-empty output, got empty")
 		}
 	})
+
+	t.Run("generate mmflash text and image recipe", func(t *testing.T) {
+		buf.Reset()
+		err := generateMMFlashTxtImgWithText(buf)
+		if err != nil {
+			t.Fatalf("generateMMFlashTxtImgWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
 }

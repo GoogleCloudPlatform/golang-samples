@@ -15,18 +15,20 @@
 // Package image_generation shows how to use the GenAI SDK to generate images and text.
 package image_generation
 
-// [START googlegenaisdk_imggen_mmflash_with_txt]
+// [START googlegenaisdk_imggen_mmflash_txt_and_img_with_txt]
 import (
 	"context"
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"google.golang.org/genai"
 )
 
-// generateMMFlashWithText demonstrates how to generate both text and image outputs.
-func generateMMFlashWithText(w io.Writer) error {
+// generateMMFlashTxtImgWithText demonstrates how to generate an illustrated recipe
+// combining text and image outputs into a markdown file.
+func generateMMFlashTxtImgWithText(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
@@ -40,7 +42,8 @@ func generateMMFlashWithText(w io.Writer) error {
 	contents := []*genai.Content{
 		{
 			Parts: []*genai.Part{
-				{Text: "Generate an image of the Eiffel tower with fireworks in the background."},
+				{Text: "Generate an illustrated recipe for a paella. " +
+					"Create images to go alongside the text as you generate the recipe."},
 			},
 			Role: "user",
 		},
@@ -55,11 +58,6 @@ func generateMMFlashWithText(w io.Writer) error {
 				string(genai.ModalityImage),
 			},
 			CandidateCount: int32(1),
-			SafetySettings: []*genai.SafetySetting{
-				{Method: genai.HarmBlockMethodProbability},
-				{Category: genai.HarmCategoryDangerousContent},
-				{Threshold: genai.HarmBlockThresholdBlockMediumAndAbove},
-			},
 		},
 	)
 	if err != nil {
@@ -69,24 +67,39 @@ func generateMMFlashWithText(w io.Writer) error {
 	if len(resp.Candidates) == 0 || resp.Candidates[0].Content == nil {
 		return fmt.Errorf("no candidates returned")
 	}
-	var fileName string
-	for _, part := range resp.Candidates[0].Content.Parts {
+
+	outputFolder := "testdata"
+
+	// Create the markdown file
+	mdFile := filepath.Join(outputFolder, "paella-recipe.md")
+	fp, err := os.Create(mdFile)
+	if err != nil {
+		return fmt.Errorf("failed to create markdown file: %w", err)
+	}
+	defer fp.Close()
+
+	for i, part := range resp.Candidates[0].Content.Parts {
 		if part.Text != "" {
-			fmt.Fprintln(w, part.Text)
+			if _, err := fp.WriteString(part.Text); err != nil {
+				return fmt.Errorf("failed to write text: %w", err)
+			}
 		} else if part.InlineData != nil {
-			fileName = "testdata/example-image-eiffel-tower.png"
-			if err := os.WriteFile(fileName, part.InlineData.Data, 0o644); err != nil {
+			imgFile := filepath.Join(outputFolder, fmt.Sprintf("example-image-%d.png", i+1))
+			if err := os.WriteFile(imgFile, part.InlineData.Data, 0644); err != nil {
 				return fmt.Errorf("failed to save image: %w", err)
+			}
+			if _, err := fp.WriteString(fmt.Sprintf("![image](%s)", filepath.Base(imgFile))); err != nil {
+				return fmt.Errorf("failed to write image reference: %w", err)
 			}
 		}
 	}
-	fmt.Fprintln(w, fileName)
+
+	fmt.Fprintln(w, mdFile)
 
 	// Example response:
-	// I will generate an image of the Eiffel Tower at night, with a vibrant display of
-	// colorful fireworks exploding in the dark sky behind it.
-	// ....
+	//  A markdown page for a Paella recipe (`paella-recipe.md`) has been generated.
+	//  It includes detailed steps and several images illustrating the cooking process.
 	return nil
 }
 
-// [END googlegenaisdk_imggen_mmflash_with_txt]
+// [END googlegenaisdk_imggen_mmflash_txt_and_img_with_txt]
