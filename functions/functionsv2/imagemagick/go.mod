@@ -64,4 +64,4 @@ require (
 	google.golang.org/grpc v1.69.4 // indirect
 )
 
-go 1.23.0
+go 1.24.0

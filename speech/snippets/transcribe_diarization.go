@@ -95,7 +95,7 @@ func transcribe_diarization_gcs_beta(w io.Writer) error {
 			currentSpeakerTag = wordInfo.GetSpeakerTag()
 		}
 	}
-	fmt.Fprintf(w, speakerWords.String())
+	fmt.Fprint(w, speakerWords.String())
 	return nil
 }
 
