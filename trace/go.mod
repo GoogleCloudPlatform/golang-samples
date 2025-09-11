@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/trace
 
-go 1.23.0
+go 1.24.0
 
 require (
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.15-0.20230702191903-2de6d2748484

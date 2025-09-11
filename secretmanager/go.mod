@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/secretmanager
 
-go 1.23.0
+go 1.24.0
 
 require (
 	cloud.google.com/go/resourcemanager v1.10.6
