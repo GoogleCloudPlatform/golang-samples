@@ -21,7 +21,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestGenerateMMFlashWithText(t *testing.T) {
+func TestImageGeneration(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	t.Setenv("GOOGLE_GENAI_USE_VERTEXAI", "1")
