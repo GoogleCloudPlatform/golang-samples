@@ -99,7 +99,8 @@ func TestConnectors(t *testing.T) {
 		valueConverter := "org.apache.kafka.connect.json.JsonConverter"
 		valueConverterSchemasEnable := "false"
 		keyConverter := "org.apache.kafka.connect.storage.StringConverter"
-		if err := createCloudStorageSinkConnector(buf, tc.ProjectID, region, connectClusterID, connectorID+"-gcs-sink", topics, gcsBucketName, tasksMax, formatOutputType, valueConverter, valueConverterSchemasEnable, keyConverter, options...); err != nil {
+		gcsCredentialsDefault := "true"
+		if err := createCloudStorageSinkConnector(buf, tc.ProjectID, region, connectClusterID, connectorID+"-gcs-sink", topics, gcsBucketName, tasksMax, formatOutputType, valueConverter, valueConverterSchemasEnable, keyConverter, gcsCredentialsDefault, options...); err != nil {
 			t.Fatalf("failed to create Cloud Storage sink connector: %v", err)
 		}
 		got := buf.String()
