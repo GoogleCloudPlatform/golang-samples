@@ -85,6 +85,21 @@ type Service struct {
 
 	// Location to deploy the Service, and related artifacts
 	Location string
+
+	Readiness *struct {
+		TimeoutSeconds   int
+		PeriodSeconds    int
+		SuccessThreshold int
+		FailureThreshold int
+		HttpGet          *struct {
+			Path string
+			Port int
+		}
+		GRPC *struct {
+			Port    int
+			Service string
+		}
+	}
 }
 
 // runID is an identifier that changes between runs.
@@ -272,7 +287,7 @@ func (s *Service) validate() error {
 
 // revision returns the revision that the service will be deployed to.
 // NOTE: Until traffic splitting is available, this will be used as the service name.
-func (s *Service) version() string {
+func (s *Service) Version() string {
 	return s.Name + "-" + runID
 }
 
@@ -293,7 +308,7 @@ func (s *Service) Deploy() error {
 	}
 
 	if _, err := gcloud(s.operationLabel(labelOperationDeploy), s.deployCmd()); err != nil {
-		return fmt.Errorf("gcloud: %s: %q", s.version(), err)
+		return fmt.Errorf("gcloud: %s: %q", s.Version(), err)
 	}
 
 	s.deployed = true
@@ -339,7 +354,7 @@ func (s *Service) Clean() error {
 	}
 
 	if _, err := gcloud(s.operationLabel(labelOperationDeleteService), s.deleteServiceCmd()); err != nil {
-		return fmt.Errorf("gcloud: %v: %q", s.version(), err)
+		return fmt.Errorf("gcloud: %v: %q", s.Version(), err)
 	}
 	s.deployed = false
 
@@ -347,7 +362,7 @@ func (s *Service) Clean() error {
 	if s.built {
 		_, err := gcloud(s.operationLabel("delete container image"), s.deleteImageCmd())
 		if err != nil {
-			return fmt.Errorf("gcloud: %v: %q", s.version(), err)
+			return fmt.Errorf("gcloud: %v: %q", s.Version(), err)
 		}
 		s.built = false
 	}
@@ -365,7 +380,7 @@ func (s *Service) deployCmd() *exec.Cmd {
 		"alpha", // TODO until --use-http2 goes GA
 		"run",
 		"deploy",
-		s.version(),
+		s.Version(),
 		"--project",
 		s.ProjectID,
 		"--image",
@@ -382,6 +397,22 @@ func (s *Service) deployCmd() *exec.Cmd {
 	}
 	if s.HTTP2 {
 		args = append(args, "--use-http2")
+	}
+
+	if s.Readiness != nil {
+		var readinessProbeParts []string
+		readinessProbeParts = append(readinessProbeParts, fmt.Sprintf("timeoutSeconds=%d", s.Readiness.TimeoutSeconds))
+		readinessProbeParts = append(readinessProbeParts, fmt.Sprintf("periodSeconds=%d", s.Readiness.PeriodSeconds))
+		readinessProbeParts = append(readinessProbeParts, fmt.Sprintf("successThreshold=%d", s.Readiness.SuccessThreshold))
+		readinessProbeParts = append(readinessProbeParts, fmt.Sprintf("failureThreshold=%d", s.Readiness.FailureThreshold))
+		if s.Readiness.HttpGet != nil {
+			readinessProbeParts = append(readinessProbeParts, fmt.Sprintf("httpGet.path=%s", s.Readiness.HttpGet.Path))
+			readinessProbeParts = append(readinessProbeParts, fmt.Sprintf("httpGet.port=%d", s.Readiness.HttpGet.Port))
+		} else if s.Readiness.GRPC != nil {
+			readinessProbeParts = append(readinessProbeParts, fmt.Sprintf("grpc.port=%d", s.Readiness.GRPC.Port))
+			readinessProbeParts = append(readinessProbeParts, fmt.Sprintf("grpc.service=%s", s.Readiness.GRPC.Service))
+		}
+		args = append(args, "--readiness-probe="+strings.Join(readinessProbeParts, ","))
 	}
 
 	// NOTE: if the "beta" component is not available, and this is run in parallel,
@@ -439,7 +470,7 @@ func (s *Service) deleteServiceCmd() *exec.Cmd {
 		"run",
 		"services",
 		"delete",
-		s.version(),
+		s.Version(),
 		"--project",
 		s.ProjectID,
 	}, s.Platform.CommandFlags()...)
@@ -458,7 +489,7 @@ func (s *Service) urlCmd() *exec.Cmd {
 		"run",
 		"services",
 		"describe",
-		s.version(),
+		s.Version(),
 		"--project",
 		s.ProjectID,
 		"--format",
@@ -481,7 +512,7 @@ func (s *Service) LogEntries(filter string, find string, maxAttempts int) (bool,
 	}
 	defer client.Close()
 
-	preparedFilter := fmt.Sprintf(`resource.type="cloud_run_revision" resource.labels.service_name="%s" %s`, s.version(), filter)
+	preparedFilter := fmt.Sprintf(`resource.type="cloud_run_revision" resource.labels.service_name="%s" %s`, s.Version(), filter)
 	log.Printf("Using log filter: %s\n", preparedFilter)
 
 	log.Println("Waiting for logs...")
