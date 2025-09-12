@@ -117,9 +117,8 @@ func TestConnectors(t *testing.T) {
 		keyConverter := "org.apache.kafka.connect.storage.StringConverter"
 		valueConverter := "org.apache.kafka.connect.json.JsonConverter"
 		valueConverterSchemasEnable := "false"
-		gcsCredentialsDefault := "true"
 		defaultDataset := "test-dataset"
-		if err := createBigQuerySinkConnector(buf, tc.ProjectID, region, connectClusterID, connectorID+"-bq-sink", topics, tasksMax, keyConverter, gcsCredentialsDefault, valueConverter, valueConverterSchemasEnable, defaultDataset, options...); err != nil {
+		if err := createBigQuerySinkConnector(buf, tc.ProjectID, region, connectClusterID, connectorID+"-bq-sink", topics, tasksMax, keyConverter, valueConverter, valueConverterSchemasEnable, defaultDataset, options...); err != nil {
 			t.Fatalf("failed to create BigQuery sink connector: %v", err)
 		}
 		got := buf.String()
