@@ -1,0 +1,81 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law of agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package connectors
+
+// [START managedkafka_create_pubsub_sink_connector]
+import (
+	"context"
+	"fmt"
+	"io"
+
+	managedkafka "cloud.google.com/go/managedkafka/apiv1"
+	"cloud.google.com/go/managedkafka/apiv1/managedkafkapb"
+	"google.golang.org/api/option"
+)
+
+// createPubSubSinkConnector creates a Pub/Sub Sink connector.
+func createPubSubSinkConnector(w io.Writer, projectID, region, connectClusterID, connectorID, topics, valueConverter, keyConverter, cpsTopic, cpsProject, tasksMax string, opts ...option.ClientOption) error {
+	// TODO(developer): Update with your config values. Here is a sample configuration:
+	// projectID := "my-project-id"
+	// region := "us-central1"
+	// connectClusterID := "my-connect-cluster"
+	// connectorID := "CPS_SINK_CONNECTOR_ID"
+	// topics := "GMK_TOPIC_ID"
+	// valueConverter := "org.apache.kafka.connect.storage.StringConverter"
+	// keyConverter := "org.apache.kafka.connect.storage.StringConverter"
+	// cpsTopic := "CPS_TOPIC_ID"
+	// cpsProject := "GCP_PROJECT_ID"
+	// tasksMax := "3"
+	ctx := context.Background()
+	client, err := managedkafka.NewManagedKafkaConnectClient(ctx, opts...)
+	if err != nil {
+		return fmt.Errorf("managedkafka.NewManagedKafkaConnectClient got err: %w", err)
+	}
+	defer client.Close()
+
+	parent := fmt.Sprintf("projects/%s/locations/%s/connectClusters/%s", projectID, region, connectClusterID)
+
+	// Pub/Sub Sink sample connector configuration
+	config := map[string]string{
+		"connector.class": "com.google.pubsub.kafka.sink.CloudPubSubSinkConnector",
+		"name":            connectorID,
+		"tasks.max":       tasksMax,
+		"topics":          topics,
+		"value.converter": valueConverter,
+		"key.converter":   keyConverter,
+		"cps.topic":       cpsTopic,
+		"cps.project":     cpsProject,
+	}
+
+	connector := &managedkafkapb.Connector{
+		Name:    fmt.Sprintf("%s/connectors/%s", parent, connectorID),
+		Configs: config,
+	}
+
+	req := &managedkafkapb.CreateConnectorRequest{
+		Parent:      parent,
+		ConnectorId: connectorID,
+		Connector:   connector,
+	}
+
+	resp, err := client.CreateConnector(ctx, req)
+	if err != nil {
+		return fmt.Errorf("client.CreateConnector got err: %w", err)
+	}
+	fmt.Fprintf(w, "Created Pub/Sub sink connector: %s\n", resp.Name)
+	return nil
+}
+
+// [END managedkafka_create_pubsub_sink_connector]
