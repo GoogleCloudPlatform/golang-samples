@@ -79,4 +79,3 @@ func createPubSubSourceConnector(w io.Writer, projectID, region, connectClusterI
 }
 
 // [END managedkafka_create_pubsub_source_connector]
-

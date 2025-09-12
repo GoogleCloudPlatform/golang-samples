@@ -30,11 +30,11 @@ import (
 )
 
 const (
-	clusterID         = "fake-cluster"
-	topicID           = "fake-topic"
-	consumerGroupID   = "fake-consumergroup"
-	connectClusterID  = "fake-connect-cluster"
-	connectorID       = "fake-connector"
+	clusterID        = "fake-cluster"
+	topicID          = "fake-topic"
+	consumerGroupID  = "fake-consumergroup"
+	connectClusterID = "fake-connect-cluster"
+	connectorID      = "fake-connector"
 )
 
 // The reason why we have a fake server is because testing end-to-end will exceed the deadline of 10 minutes.
