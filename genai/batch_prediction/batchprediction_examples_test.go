@@ -12,30 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package tools
+package batch_prediction
 
 import (
 	"bytes"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestTextGeneration(t *testing.T) {
+const gcsOutputBucket = "golang-docs-samples-tests"
+
+func TestBatchPrediction(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	t.Setenv("GOOGLE_GENAI_USE_VERTEXAI", "1")
 	t.Setenv("GOOGLE_CLOUD_LOCATION", "us-central1")
 	t.Setenv("GOOGLE_CLOUD_PROJECT", tc.ProjectID)
 
+	prefix := fmt.Sprintf("embeddings_output/%d", time.Now().UnixNano())
+	outputURI := fmt.Sprintf("gs://%s/%s", gcsOutputBucket, prefix)
 	buf := new(bytes.Buffer)
 
-	t.Run("generate with code execution tool", func(t *testing.T) {
+	t.Run("generate batch embeddings with GCS", func(t *testing.T) {
 		buf.Reset()
-		err := generateWithCodeExec(buf)
+		err := generateBatchEmbeddings(buf, outputURI)
 		if err != nil {
-			t.Fatalf("generateWithCodeExec failed: %v", err)
+			t.Fatalf("generateBatchEmbeddings failed: %v", err)
 		}
 
 		output := buf.String()
@@ -44,38 +49,27 @@ func TestTextGeneration(t *testing.T) {
 		}
 	})
 
-	t.Run("generate with func declaration and func response", func(t *testing.T) {
+	t.Run("generate batch predict with gcs input/output", func(t *testing.T) {
 		buf.Reset()
-		err := generateWithFuncCall(buf)
+		err := generateBatchPredict(buf, outputURI)
 		if err != nil {
-			t.Fatalf("generateWithFuncCall failed: %v", err)
+			t.Fatalf("generateBatchPredict failed: %v", err)
 		}
 
 		output := buf.String()
 		if output == "" {
 			t.Error("expected non-empty output, got empty")
 		}
+
 	})
 
-	t.Run("generate with Google Search", func(t *testing.T) {
+	t.Run("generate batch predict with BigQuery", func(t *testing.T) {
 		buf.Reset()
-		err := generateWithGoogleSearch(buf)
-		if err != nil {
-			t.Fatalf("generateWithGoogleSearch failed: %v", err)
-		}
+		outputURIBQ := "bq://your-project.your_dataset.your_table"
 
-		output := buf.String()
-		if output == "" {
-			t.Error("expected non-empty output, got empty")
-		}
-	})
-
-	t.Run("generate with VAIS Search", func(t *testing.T) {
-		buf.Reset()
-		dataStore := fmt.Sprintf("projects/%s/locations/global/collections/default_collection/dataStores/grounding-test-datastore", tc.ProjectID)
-		err := generateWithGoogleVAIS(buf, dataStore)
+		err := generateBatchPredictWithBQ(buf, outputURIBQ)
 		if err != nil {
-			t.Fatalf("generateWithGoogleVAIS failed: %v", err)
+			t.Fatalf("generateBatchPredictWithBQ failed: %v", err)
 		}
 
 		output := buf.String()
