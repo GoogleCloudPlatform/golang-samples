@@ -3,11 +3,11 @@ module github.com/GoogleCloudPlatform/golang-samples/managedkafka
 go 1.24.0
 
 require (
-	cloud.google.com/go/managedkafka v0.7.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	github.com/GoogleCloudPlatform/golang-samples/internal/managedkafka v0.0.0-00010101000000-000000000000
-	google.golang.org/api v0.239.0
-	google.golang.org/protobuf v1.36.6
+	cloud.google.com/go/managedkafka v0.8.0
+	github.com/GoogleCloudPlatform/golang-samples ff48a3f744f6
+	github.com/GoogleCloudPlatform/golang-samples/internal/managedkafka ff48a3f744f6
+	google.golang.org/api v0.249.0
+	google.golang.org/protobuf v1.36.9
 )
 
 require (

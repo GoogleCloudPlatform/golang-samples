@@ -3,13 +3,13 @@ module github.com/GoogleCloudPlatform/golang-samples/jobs
 go 1.24.0
 
 require (
-	cloud.google.com/go/talent v1.8.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	cloud.google.com/go/talent v1.8.3
+	github.com/GoogleCloudPlatform/golang-samples ff48a3f744f6
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/golang/protobuf v1.5.4
 	golang.org/x/oauth2 v0.25.0
-	google.golang.org/api v0.217.0
-	google.golang.org/genproto v0.0.0-20250115164207-1a7da9e5054f
+	google.golang.org/api v0.249.0
+	google.golang.org/genproto 97024824d090
 )
 
 require (

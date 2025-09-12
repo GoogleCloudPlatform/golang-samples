@@ -3,9 +3,9 @@ module github.com/GoogleCloudPlatform/golang-samples/routeoptimization
 go 1.24.0
 
 require (
-	cloud.google.com/go/maps v1.17.1
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	google.golang.org/genproto v0.0.0-20250115164207-1a7da9e5054f
+	cloud.google.com/go/maps v1.23.0
+	github.com/GoogleCloudPlatform/golang-samples ff48a3f744f6
+	google.golang.org/genproto 97024824d090
 )
 
 require (
