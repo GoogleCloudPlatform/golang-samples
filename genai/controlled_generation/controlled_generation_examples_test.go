@@ -94,4 +94,17 @@ func TestTextGeneration(t *testing.T) {
 			t.Error("expected non-empty output, got empty")
 		}
 	})
+
+	t.Run("generate with nested class response schema", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithNestedClassSchema(buf)
+		if err != nil {
+			t.Fatalf("generateWithNestedClassSchema failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
 }
