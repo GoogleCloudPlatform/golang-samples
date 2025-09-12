@@ -7,7 +7,7 @@ require (
 	cloud.google.com/go/storage v1.50.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
 	github.com/google/uuid v1.6.0
-	golang.org/x/oauth2 v0.25.0
+	golang.org/x/oauth2 v0.27.0
 	google.golang.org/api v0.217.0
 )
 
