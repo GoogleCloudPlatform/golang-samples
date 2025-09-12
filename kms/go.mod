@@ -3,14 +3,14 @@ module github.com/GoogleCloudPlatform/golang-samples/kms
 go 1.24.0
 
 require (
-	cloud.google.com/go/kms v1.20.5
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	cloud.google.com/go/kms v1.23.0
+	github.com/GoogleCloudPlatform/golang-samples ff48a3f744f6
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/google/tink/go v1.7.0
-	google.golang.org/api v0.217.0
-	google.golang.org/genproto v0.0.0-20250115164207-1a7da9e5054f
-	google.golang.org/grpc v1.69.4
-	google.golang.org/protobuf v1.36.3
+	google.golang.org/api v0.249.0
+	google.golang.org/genproto 97024824d090
+	google.golang.org/grpc v1.75.1
+	google.golang.org/protobuf v1.36.9
 )
 
 require (
@@ -63,7 +63,7 @@ require (
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
 	github.com/lestrrat-go/httprc v1.0.5 // indirect
 	github.com/lestrrat-go/iter v1.0.2 // indirect
-	github.com/lestrrat-go/jwx/v2 v2.1.0
+	github.com/lestrrat-go/jwx/v2 v2.1.6
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/net v0.34.0 // indirect

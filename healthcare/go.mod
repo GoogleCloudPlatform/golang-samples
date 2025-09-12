@@ -3,9 +3,9 @@ module github.com/GoogleCloudPlatform/golang-samples/healthcare
 go 1.24.0
 
 require (
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	github.com/GoogleCloudPlatform/golang-samples ff48a3f744f6
 	golang.org/x/oauth2 v0.25.0
-	google.golang.org/api v0.217.0
+	google.golang.org/api v0.249.0
 )
 
 require (

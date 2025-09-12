@@ -3,10 +3,10 @@ module github.com/GoogleCloudPlatform/golang-samples/privateca
 go 1.24.0
 
 require (
-	cloud.google.com/go/security v1.18.3
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	google.golang.org/api v0.217.0
-	google.golang.org/protobuf v1.36.3
+	cloud.google.com/go/security v1.19.1
+	github.com/GoogleCloudPlatform/golang-samples ff48a3f744f6
+	google.golang.org/api v0.249.0
+	google.golang.org/protobuf v1.36.9
 )
 
 require (
