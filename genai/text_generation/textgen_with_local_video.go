@@ -47,9 +47,7 @@ func generateWithLocalVideo(w io.Writer) error {
 		{
 			Role: "user",
 			Parts: []*genai.Part{
-				{Text: `Analyze the provided local video file, including its audio.
-Summarize the main points of the video concisely.
-Create a chapter breakdown with timestamps for key sections or topics discussed.`},
+				{Text: `Write a short and engaging blog post based on this video.`},
 				{InlineData: &genai.Blob{
 					MIMEType: "video/mp4",
 					Data:     data,
@@ -67,19 +65,13 @@ Create a chapter breakdown with timestamps for key sections or topics discussed.
 	fmt.Fprintln(w, respText)
 
 	// Example response:
-	// The video features a male climber engaged in lead rock climbing at an indoor gym. He is shown ascending a vertical wall adorned with various colored holds, demonstrating fluid movements and proper technique. During his ascent, he clips his rope into a quickdraw for safety and manages the rope for continued climbing. The video is silent.
+	// Finding Your Flow: The Focused Ascent
 	//
-	// **Summary of Main Points:**
+	// Ever watched someone scale an indoor climbing wall and been captivated by their precision and power? This video perfectly captures that intense focus and calculated movement.
 	//
-	// The video shows an indoor rock climber, equipped with a harness and chalk bag, efficiently ascending a climbing wall. He skillfully clips...
+	// Our climber isn't just pulling himself up; he's engaging in a dynamic dance with gravity. Every reach, every foot placement, every clip of the rope is a deliberate part of solving the route's puzzle. You can almost feel the concentration as his eyes scan for the next optimal hold, his muscles working in unison to propel him upwards.
 	//
-	// **Chapter Breakdown**
-	//
-	// *  **0:00 - Beginning of Ascent:** The climber starts his ascent, moving gracefully between holds.
-	//*   **0:01 - Clipping the Rope into a Quickdraw:** The climber pauses to clip his safety rope into a quickdraw, securing his position.
-	//*   **0:03 - Continued Climbing and Technique Display:** The climber resumes his upward movement, demonstrating his climbing technique and body control.
-	//*   **0:08 - Rope Management / Preparing for Next Moves:** The climber adjusts the rope, taking up slack, and surveys the next section of the climb.
-	//*   **0:13 - Video End:** The video concludes with the climber still in the process of ascending the wall.
+	// Indoor climbing....
 	// ...
 
 	return nil
