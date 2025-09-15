@@ -1,11 +1,9 @@
 module github.com/GoogleCloudPlatform/golang-samples
 
-go 1.23.0
+go 1.24.0
 
 require (
-	cloud.google.com/go/batch v1.11.5
 	cloud.google.com/go/bigquery v1.65.0
-	cloud.google.com/go/compute v1.31.1
 	cloud.google.com/go/errorreporting v0.3.2
 	cloud.google.com/go/logging v1.13.0
 	cloud.google.com/go/storage v1.50.0

@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/healthcare
 
-go 1.23.0
+go 1.24.0
 
 require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
