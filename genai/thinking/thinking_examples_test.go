@@ -16,7 +16,6 @@ package thinking
 
 import (
 	"bytes"
-	"fmt"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -39,7 +38,6 @@ func TestThinkingGeneration(t *testing.T) {
 		}
 
 		output := buf.String()
-		fmt.Println(output)
 		if output == "" {
 			t.Error("expected non-empty output, got empty")
 		}

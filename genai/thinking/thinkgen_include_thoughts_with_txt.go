@@ -62,10 +62,15 @@ func generateContentWithThoughts(w io.Writer) error {
 		return fmt.Errorf("no candidates returned")
 	}
 
-	fmt.Fprintln(w, resp.Text())
-	// Example response:
-	// Of course. The solution is x = -2.
-
+	// The response may contain both the final answer and the model's thoughts.
+	// Iterate through the parts to print them separately.
+	fmt.Fprintln(w, "Answer:")
+	for _, part := range resp.Candidates[0].Content.Parts {
+		if part.Text != "" && !part.Thought {
+			fmt.Fprintln(w, part.Text)
+		}
+	}
+	fmt.Fprintln(w, "\nThoughts:")
 	for _, part := range resp.Candidates[0].Content.Parts {
 		if part.Thought {
 			fmt.Fprintln(w, part.Text)
@@ -73,7 +78,8 @@ func generateContentWithThoughts(w io.Writer) error {
 	}
 
 	// Example response:
-	// Here are two common ways to solve the equation `x² + 4x + 4 = 0`.
+	//  Answer:
+	//	Of course! We can solve this quadratic equation in a couple of ways.
 	//
 	//### Method 1: Factoring (the easiest method for this problem)
 	//
