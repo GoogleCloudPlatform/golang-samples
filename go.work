@@ -131,6 +131,7 @@ use (
 	./run/markdown-preview/renderer
 	./run/pubsub
 	./run/service-auth
+	./run/service-health
 	./run/sigterm-handler
 	./run/system_package
 	./run/testing
