@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/golang-samples/iap
 
 go 1.24.0
 
-require google.golang.org/api v0.217.0
+require google.golang.org/api v0.249.0
 
 require (
 	cloud.google.com/go/auth v0.14.0 // indirect

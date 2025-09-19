@@ -3,9 +3,9 @@ module github.com/GoogleCloudPlatform/golang-samples/vertexai/evaluation
 go 1.24.0
 
 require (
-	cloud.google.com/go/aiplatform v1.70.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20241105165834-22a9877b4bac
-	google.golang.org/api v0.217.0
+	cloud.google.com/go/aiplatform v1.102.0
+	github.com/GoogleCloudPlatform/golang-samples c6d32a6fcca9
+	google.golang.org/api v0.249.0
 )
 
 require (
