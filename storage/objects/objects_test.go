@@ -220,6 +220,7 @@ func TestObjects(t *testing.T) {
 		t.Errorf("getMetadata: %v", err)
 	}
 	t.Run("publicFile", func(t *testing.T) {
+		t.Skip("Skipping due to project permissions changes, see: b/445769988")
 		if err := makePublic(io.Discard, bucket, object1); err != nil {
 			t.Errorf("makePublic: %v", err)
 		}
@@ -376,6 +377,7 @@ func TestKMSObjects(t *testing.T) {
 }
 
 func TestV4SignedURL(t *testing.T) {
+	t.Skip("Skipping due to project permissions changes, see: b/445769988")
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)

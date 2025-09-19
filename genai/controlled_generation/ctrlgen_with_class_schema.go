@@ -26,7 +26,7 @@ import (
 )
 
 // Recipe represents the schema for a recipe response.
-type Recipe struct {
+type RecipeClass struct {
 	RecipeName  string   `json:"recipe_name"`
 	Ingredients []string `json:"ingredients"`
 }
@@ -81,7 +81,7 @@ func generateWithClassSchema(w io.Writer) error {
 	fmt.Fprintln(w, resp.Text())
 
 	// Parse JSON into Go structs
-	var recipes []Recipe
+	var recipes []RecipeClass
 	if err := json.Unmarshal([]byte(resp.Text()), &recipes); err != nil {
 		return fmt.Errorf("failed to parse response JSON: %w", err)
 	}
