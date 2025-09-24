@@ -114,7 +114,6 @@ var allowList = []string{
 	"storage/objects/notes.txt",
 
 	// GitHub configuration.
-	".github/blunderbuss.yml",
 	".github/renovate.json",
 	".github/CODEOWNERS",
 
