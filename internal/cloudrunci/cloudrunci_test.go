@@ -111,6 +111,46 @@ func TestDeployArgs(t *testing.T) {
 	}
 }
 
+func TestDeployArgsReadinessProbe(t *testing.T) {
+	tests := []struct {
+		name      string
+		readiness *ReadinessProbe
+		wantArgs  []string // Expected arguments in the gcloud command
+	}{
+		{
+			name: "HTTPGet probe",
+			readiness: &ReadinessProbe{
+				TimeoutSeconds: 10, PeriodSeconds: 5, SuccessThreshold: 1, FailureThreshold: 3,
+				HttpGet: &HTTPGetProbe{Path: "/healthz", Port: 8080},
+			},
+			wantArgs: []string{"--readiness-probe=timeoutSeconds=10,periodSeconds=5,successThreshold=1,failureThreshold=3,httpGet.path=/healthz,httpGet.port=8080"},
+		},
+		{
+			name: "GRPC probe",
+			readiness: &ReadinessProbe{
+				TimeoutSeconds: 10, PeriodSeconds: 5, SuccessThreshold: 1, FailureThreshold: 3,
+				GRPC: &GRPCProbe{Port: 50051, Service: "myservice"},
+			},
+			wantArgs: []string{"--readiness-probe=timeoutSeconds=10,periodSeconds=5,successThreshold=1,failureThreshold=3,grpc.service=myservice,grpc.port=50051"},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			service := NewService("my-service", "my-project")
+			service.Image = "gcr.io/my-project/my-service"
+			service.Readiness = test.readiness
+
+			cmd := service.deployCmd()
+			for _, wantArg := range test.wantArgs {
+				if !contains(cmd.Args, wantArg) {
+					t.Errorf("deployCmd() args missing expected readiness probe arg: %s, got: %v", wantArg, cmd.Args)
+				}
+			}
+		})
+	}
+}
+
 // contains searches for a string value in a string slice.
 func contains(haystack []string, needle string) bool {
 	for _, i := range haystack {
