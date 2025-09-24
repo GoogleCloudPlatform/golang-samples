@@ -81,6 +81,9 @@ func TestRoutineSnippet(t *testing.T) {
 			if err := createRoutine(client, io.Discard, projID, dsID, routineID); err != nil {
 				t.Fatalf("createRoutine(%q,%q,%q): %v", projID, dsID, routineID, err)
 			}
+			if err := getRoutine(client, io.Discard, projID, dsID, routineID); err != nil {
+				t.Fatalf("getRoutine(%q,%q,%q): %v", projID, dsID, routineID, err)
+			}
 			if err := updateRoutine(client, io.Discard, projID, dsID, routineID); err != nil {
 				t.Fatalf("updateRoutine(%q,%q,%q): %v", projID, dsID, routineID, err)
 			}

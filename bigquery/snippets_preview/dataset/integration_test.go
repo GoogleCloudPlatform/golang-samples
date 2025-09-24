@@ -56,6 +56,9 @@ func TestDatasetSnippets(t *testing.T) {
 			if err := createDataset(client, io.Discard, projID, dsID); err != nil {
 				t.Fatalf("createDataset(%q,%q): %v", projID, dsID, err)
 			}
+			if err := getDataset(client, io.Discard, projID, dsID); err != nil {
+				t.Fatalf("getDataset(%q,%q): %v", projID, dsID, err)
+			}
 			if err := updateDataset(client, io.Discard, projID, dsID); err != nil {
 				t.Fatalf("updateDataset(%q,%q): %v", projID, dsID, err)
 			}

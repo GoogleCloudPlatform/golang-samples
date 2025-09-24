@@ -19,6 +19,7 @@ package subscriptions
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"strconv"
@@ -483,7 +484,7 @@ func TestCreateCloudStorageSubscription(t *testing.T) {
 	// and this makes us not have to do bucket cleanups.
 	bucketID := fmt.Sprintf("%s-%s", tc.ProjectID, "pubsub-storage-sub-sink")
 	if err := createOrGetStorageBucket(tc.ProjectID, bucketID); err != nil {
-		t.Fatalf("failed to get or create storage bucket: %v", err)
+		t.Fatalf("failed to get or create storage bucket (%v): %v", bucketID, err)
 	}
 
 	if err := createCloudStorageSubscription(io.Discard, tc.ProjectID, topicName, storageSubName, bucketID); err != nil {
@@ -722,7 +723,7 @@ func createOrGetStorageBucket(projectID, bucketID string) error {
 	}
 	b := c.Bucket(bucketID)
 	_, err = b.Attrs(ctx)
-	if err == storage.ErrBucketNotExist {
+	if errors.Is(err, storage.ErrBucketNotExist) {
 		if err := b.Create(ctx, projectID, nil); err != nil {
 			return fmt.Errorf("error creating bucket: %w", err)
 		}
