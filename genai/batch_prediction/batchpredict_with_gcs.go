@@ -55,7 +55,7 @@ func generateBatchPredict(w io.Writer, outputURI string) error {
 	// To use a tuned model, set the model param to your tuned model using the following format:
 	//  modelName:= "projects/{PROJECT_ID}/locations/{LOCATION}/models/{MODEL_ID}
 	modelName := "gemini-2.5-flash"
-	// See the documentation: https://googleapis.github.io/python-genai/genai.html#genai.batches.Batches.create
+	// See the documentation: https://pkg.go.dev/google.golang.org/genai#Batches.Create
 	job, err := client.Batches.Create(ctx, modelName, src, config)
 	if err != nil {
 		return fmt.Errorf("failed to create batch job: %w", err)
@@ -67,7 +67,7 @@ func generateBatchPredict(w io.Writer, outputURI string) error {
 	//   Job name: projects/{PROJECT_ID}/locations/us-central1/batchPredictionJobs/9876453210000000000
 	//   Job state: JOB_STATE_PENDING
 
-	// See the documentation: https://googleapis.github.io/python-genai/genai.html#genai.types.BatchJob
+	// See the documentation: https://pkg.go.dev/google.golang.org/genai#BatchJob
 	completedStates := map[genai.JobState]bool{
 		genai.JobStateSucceeded: true,
 		genai.JobStateFailed:    true,

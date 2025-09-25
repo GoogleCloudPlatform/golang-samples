@@ -66,7 +66,7 @@ func generateBatchPredictWithBQ(w io.Writer, outputURI string) error {
 	//  Job name: projects/{PROJECT_ID}/locations/us-central1/batchPredictionJobs/9876453210000000000
 	//  Job state: JOB_STATE_PENDING
 
-	// See the documentation: https://googleapis.github.io/python-genai/genai.html#genai.types.BatchJob
+	// See the documentation: https://pkg.go.dev/google.golang.org/genai#BatchJob
 	completedStates := map[genai.JobState]bool{
 		genai.JobStateSucceeded: true,
 		genai.JobStateFailed:    true,
