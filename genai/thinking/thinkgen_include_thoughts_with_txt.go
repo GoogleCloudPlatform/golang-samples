@@ -59,7 +59,7 @@ func generateContentWithThoughts(w io.Writer) error {
 	}
 
 	if len(resp.Candidates) == 0 || resp.Candidates[0].Content == nil {
-		return fmt.Errorf("no candidates returned")
+		return fmt.Errorf("no content was generated")
 	}
 
 	// The response may contain both the final answer and the model's thoughts.

@@ -73,7 +73,7 @@ func generateImageMMFlashEditWithTextImg(w io.Writer) error {
 	}
 
 	if len(resp.Candidates) == 0 || resp.Candidates[0].Content == nil {
-		return fmt.Errorf("no candidates returned")
+		return fmt.Errorf("no content was generated")
 	}
 
 	for _, part := range resp.Candidates[0].Content.Parts {
