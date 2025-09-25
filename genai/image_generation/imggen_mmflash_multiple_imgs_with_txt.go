@@ -62,6 +62,10 @@ func generateMMFlashMultipleImgsWithText(w io.Writer) error {
 		return fmt.Errorf("generate content failed: %w", err)
 	}
 
+	if len(resp.Candidates) == 0 || resp.Candidates[0].Content == nil {
+		return fmt.Errorf("no content was generated")
+	}
+
 	outputDir := filepath.Join("testdata")
 
 	imageCounter := 1

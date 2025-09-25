@@ -62,6 +62,10 @@ func generateMMFlashLocaleAwareWithText(w io.Writer) error {
 		return fmt.Errorf("generate content failed: %w", err)
 	}
 
+	if len(resp.Candidates) == 0 || resp.Candidates[0].Content == nil {
+		return fmt.Errorf("no content was generated")
+	}
+
 	outputPath := filepath.Join("testdata", "example-breakfast-meal.png")
 
 	for _, part := range resp.Candidates[0].Content.Parts {
