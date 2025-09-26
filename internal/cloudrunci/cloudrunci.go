@@ -108,6 +108,7 @@ type Service struct {
 	// Location to deploy the Service, and related artifacts
 	Location string
 
+	// ReadinessProbe description
 	Readiness *ReadinessProbe
 }
 
