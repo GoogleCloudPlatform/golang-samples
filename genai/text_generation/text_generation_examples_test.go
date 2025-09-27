@@ -265,4 +265,30 @@ func TestTextGeneration(t *testing.T) {
 		}
 	})
 
+	t.Run("generate with local video file input", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithLocalVideo(buf)
+		if err != nil {
+			t.Fatalf("generateWithLocalVideo failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate with local multi local images input", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithMultiLocalImages(buf)
+		if err != nil {
+			t.Fatalf("generateWithMultiLocalImages failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
 }
