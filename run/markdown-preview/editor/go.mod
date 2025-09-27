@@ -3,8 +3,8 @@ module github.com/GoogleCloudPlatform/golang-samples/run/markdown-preview/editor
 go 1.24.0
 
 require (
-	golang.org/x/oauth2 v0.27.0
-	google.golang.org/api v0.217.0
+	golang.org/x/oauth2 v0.31.0
+	google.golang.org/api v0.250.0
 )
 
 require (
