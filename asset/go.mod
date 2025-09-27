@@ -3,15 +3,15 @@ module github.com/GoogleCloudPlatform/golang-samples/asset
 go 1.24.0
 
 require (
-	cloud.google.com/go/asset v1.20.4
-	cloud.google.com/go/bigquery v1.65.0
-	cloud.google.com/go/pubsub v1.45.3
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	cloud.google.com/go/asset v1.21.1
+	cloud.google.com/go/bigquery v1.70.0
+	cloud.google.com/go/pubsub v1.50.1
+	github.com/GoogleCloudPlatform/golang-samples 1ed9bcd03570
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/golang/protobuf v1.5.4
-	google.golang.org/api v0.217.0
-	google.golang.org/genproto v0.0.0-20250115164207-1a7da9e5054f
-	google.golang.org/grpc v1.69.4
+	google.golang.org/api v0.250.0
+	google.golang.org/genproto 9219d122eba9
+	google.golang.org/grpc v1.75.1
 )
 
 require (
