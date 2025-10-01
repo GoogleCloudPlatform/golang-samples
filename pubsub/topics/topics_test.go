@@ -34,6 +34,8 @@ import (
 	"cloud.google.com/go/trace/apiv1/tracepb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"google.golang.org/api/iterator"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var topicID string
@@ -348,6 +350,30 @@ func TestPublishWithCompression(t *testing.T) {
 	if err := publishWithCompression(io.Discard, tc.ProjectID, topicID); err != nil {
 		t.Errorf("failed to publish message: %v", err)
 	}
+}
+
+func TestCreateTopicWithSMT(t *testing.T) {
+	setup(t)
+	tc := testutil.SystemTest(t)
+	smtTopicID := topicID + "-smt"
+	testutil.Retry(t, 10, time.Second, func(r *testutil.R) {
+		buf := new(bytes.Buffer)
+		err := createTopicWithSMT(buf, tc.ProjectID, smtTopicID)
+		if err != nil {
+			st, ok := status.FromError(err)
+			if ok && st.Code() == codes.AlreadyExists {
+				return // This is expected on a retry.
+			}
+			r.Errorf("failed to create topic with SMT: %v", err)
+			return
+		}
+
+		got := buf.String()
+		want := "Created topic with message transform"
+		if !strings.Contains(got, want) {
+			r.Errorf("got %q, want to contain %q", got, want)
+		}
+	})
 }
 
 func createTopic(ctx context.Context, client *pubsub.Client, topicName string) error {
