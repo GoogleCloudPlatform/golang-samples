@@ -1332,6 +1332,20 @@ func TestAddSplitPointsSample(t *testing.T) {
 	assertContains(t, out, "Added split points")
 }
 
+func TestTxWithLargeMessageSize(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	_, dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	log.Printf("Starting TestTxWithLargeMessageSize: dbName: %s\n", dbName)
+
+	mustRunSample(t, createDatabase, dbName, "failed to create a database")
+
+	runSample(t, writeLargeData, dbName, "failed to write large data")
+}
+
 func maybeCreateKey(projectId, locationId, keyRingId, keyId string) error {
 	client, err := kms.NewKeyManagementClient(context.Background())
 	if err != nil {
