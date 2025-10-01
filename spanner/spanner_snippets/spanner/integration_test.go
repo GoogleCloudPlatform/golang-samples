@@ -1339,10 +1339,7 @@ func TestTxWithLargeMessageSize(t *testing.T) {
 	_, dbName, cleanup := initTest(t, randomID())
 	defer cleanup()
 
-	log.Printf("Starting TestTxWithLargeMessageSize: dbName: %s\n", dbName)
-
 	mustRunSample(t, createDatabase, dbName, "failed to create a database")
-
 	runSample(t, writeLargeData, dbName, "failed to write large data")
 }
 
