@@ -58,7 +58,7 @@ func updateOrganizationFloorSettings(w io.Writer, organizationID string) error {
 					RaiFilters: []*modelarmorpb.RaiFilterSettings_RaiFilter{
 						{
 							FilterType:      modelarmorpb.RaiFilterType_HATE_SPEECH,
-							ConfidenceLevel: modelarmorpb.DetectionConfidenceLevel_LOW_AND_ABOVE,
+							ConfidenceLevel: modelarmorpb.DetectionConfidenceLevel_HIGH,
 						},
 					},
 				},
