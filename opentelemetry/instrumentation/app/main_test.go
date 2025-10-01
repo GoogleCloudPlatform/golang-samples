@@ -97,7 +97,7 @@ func TestWriteTelemetry(t *testing.T) {
 	testutil.Retry(t, 2*timeoutSeconds, 500*time.Millisecond, func(r *testutil.R) {
 		resp, err := http.Get("http://localhost:8080/multi")
 		if err != nil {
-			r.Errorf(err.Error())
+			r.Errorf("%v", err.Error())
 			r.Fail()
 		} else if resp == nil {
 			r.Errorf("status code was nil")
