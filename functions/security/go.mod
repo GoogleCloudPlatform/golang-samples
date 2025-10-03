@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/security
 
 go 1.24.0
 
-require google.golang.org/api v0.217.0
+require google.golang.org/api v0.251.0
 
 require (
 	cel.dev/expr v0.19.1 // indirect
@@ -39,7 +39,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
 	cloud.google.com/go/iam v1.3.1 // indirect
 	cloud.google.com/go/storage v1.50.0 // indirect
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	github.com/GoogleCloudPlatform/golang-samples f9e8e87dda87
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/uuid v1.6.0 // indirect

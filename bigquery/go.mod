@@ -3,21 +3,21 @@ module github.com/GoogleCloudPlatform/golang-samples/bigquery
 go 1.24.0
 
 require (
-	cloud.google.com/go v0.121.3
-	cloud.google.com/go/bigquery v1.69.0
-	cloud.google.com/go/bigquery/v2 v2.0.0-20250710180625-7e28673c9827
+	cloud.google.com/go v0.123.0
+	cloud.google.com/go/bigquery v1.71.0
+	cloud.google.com/go/bigquery/v2 v2.0.0-20251003182950-4750d78c8df9
 	cloud.google.com/go/iam v1.5.2
-	cloud.google.com/go/storage v1.55.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	cloud.google.com/go/storage v1.57.0
+	github.com/GoogleCloudPlatform/golang-samples f9e8e87dda87
 	github.com/apache/arrow/go/v10 v10.0.1
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/googleapis/gax-go/v2 v2.15.0
-	github.com/linkedin/goavro/v2 v2.13.0
-	google.golang.org/api v0.239.0
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250603155806-513f23925822
-	google.golang.org/grpc v1.73.0
-	google.golang.org/protobuf v1.36.6
+	github.com/linkedin/goavro/v2 v2.14.0
+	google.golang.org/api v0.251.0
+	google.golang.org/genproto/googleapis/rpc 7c0ddcbb5797
+	google.golang.org/grpc v1.75.1
+	google.golang.org/protobuf v1.36.10
 )
 
 require (

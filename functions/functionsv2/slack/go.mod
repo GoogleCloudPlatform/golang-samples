@@ -3,8 +3,8 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/slack
 go 1.24.0
 
 require (
-	github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
-	google.golang.org/api v0.217.0
+	github.com/GoogleCloudPlatform/functions-framework-go v1.9.2
+	google.golang.org/api v0.251.0
 )
 
 require (

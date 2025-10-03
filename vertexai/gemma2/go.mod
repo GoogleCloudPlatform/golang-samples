@@ -3,10 +3,10 @@ module github.com/GoogleCloudPlatform/golang-samples/gemma2
 go 1.24.0
 
 require (
-	cloud.google.com/go/aiplatform v1.70.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240918200157-a00ca430a14b
-	github.com/googleapis/gax-go/v2 v2.14.1
-	google.golang.org/protobuf v1.36.3
+	cloud.google.com/go/aiplatform v1.103.0
+	github.com/GoogleCloudPlatform/golang-samples f9e8e87dda87
+	github.com/googleapis/gax-go/v2 v2.15.0
+	google.golang.org/protobuf v1.36.10
 )
 
 require (
