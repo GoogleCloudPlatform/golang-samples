@@ -3,13 +3,13 @@ module github.com/GoogleCloudPlatform/golang-samples/pubsublite
 go 1.24.0
 
 require (
-	cloud.google.com/go/pubsub v1.45.3
+	cloud.google.com/go/pubsub v1.50.1
 	cloud.google.com/go/pubsublite v1.8.2
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	github.com/google/go-cmp v0.6.0
+	github.com/GoogleCloudPlatform/golang-samples f9e8e87dda87
+	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
-	golang.org/x/sync v0.10.0
-	google.golang.org/api v0.217.0
+	golang.org/x/sync v0.17.0
+	google.golang.org/api v0.251.0
 )
 
 require (

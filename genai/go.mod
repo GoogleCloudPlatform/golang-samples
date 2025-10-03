@@ -3,8 +3,8 @@ module github.com/GoogleCloudPlatform/golang-samples/genai
 go 1.24.0
 
 require (
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250201051611-5fb145d1e974
-	google.golang.org/genai v1.17.0
+	github.com/GoogleCloudPlatform/golang-samples f9e8e87dda87
+	google.golang.org/genai v1.28.0
 )
 
 require (
