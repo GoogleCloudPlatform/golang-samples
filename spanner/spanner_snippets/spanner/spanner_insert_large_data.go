@@ -19,14 +19,13 @@ package spanner
 import (
 	"context"
 	"io"
-	"math/rand"
+	"crypto/rand"
 	"time"
 
 	"cloud.google.com/go/spanner"
 )
 
 func writeLargeData(w io.Writer, db string) error {
-	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 	client, err := spanner.NewClient(ctx, db)
@@ -37,8 +36,10 @@ func writeLargeData(w io.Writer, db string) error {
 
 	singerColumns := []string{"SingerId", "FirstName", "LastName", "SingerInfo"}
 	token := make([]byte, 10000000)
-	rand.Read(token)
-	// Mution is under the 100MB limit
+	if _, err := rand.Read(token); err != nil {
+		return err
+	}
+	// Mutation is under the 100MB limit
 	m := []*spanner.Mutation{
 		spanner.InsertOrUpdate("Singers", singerColumns, []interface{}{1, "Marc", "Richards", token}),
 		spanner.InsertOrUpdate("Singers", singerColumns, []interface{}{2, "Catalina", "Smith", token}),
