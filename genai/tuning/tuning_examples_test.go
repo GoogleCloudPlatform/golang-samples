@@ -16,14 +16,10 @@ package tuning
 
 import (
 	"bytes"
-	"fmt"
 	"testing"
-	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
-
-const gcsOutputBucket = "genai-tests"
 
 func TestTuningGeneration(t *testing.T) {
 	tc := testutil.SystemTest(t)
@@ -32,13 +28,11 @@ func TestTuningGeneration(t *testing.T) {
 	t.Setenv("GOOGLE_CLOUD_LOCATION", "us-central1")
 	t.Setenv("GOOGLE_CLOUD_PROJECT", tc.ProjectID)
 
-	prefix := fmt.Sprintf("tuning-output/%d", time.Now().UnixNano())
-	outputURI := fmt.Sprintf("gs://%s/%s", gcsOutputBucket, prefix)
 	buf := new(bytes.Buffer)
 
 	t.Run("create tuning job in project", func(t *testing.T) {
 		buf.Reset()
-		err := createTuningJob(buf, outputURI)
+		err := createTuningJob(buf)
 		if err != nil {
 			t.Fatalf("createTuningJob failed: %v", err)
 		}

@@ -26,8 +26,7 @@ import (
 )
 
 // createTuningJob creates a supervised tuning job using training and validation datasets.
-func createTuningJob(w io.Writer, outputGCSURI string) error {
-	// outputURI = "gs://your-bucket/your-prefix"
+func createTuningJob(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
