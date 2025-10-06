@@ -18,8 +18,8 @@ package spanner
 
 import (
 	"context"
-	"io"
 	"crypto/rand"
+	"io"
 	"time"
 
 	"cloud.google.com/go/spanner"
