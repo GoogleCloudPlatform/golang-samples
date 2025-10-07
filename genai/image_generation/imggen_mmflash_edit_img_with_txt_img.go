@@ -44,7 +44,7 @@ func generateImageMMFlashEditWithTextImg(w io.Writer) error {
 		return fmt.Errorf("failed to read image: %w", err)
 	}
 
-	modelName := "gemini-2.5-flash-image-preview"
+	modelName := "gemini-2.5-flash-image"
 	prompt := "Edit this image to make it look like a cartoon."
 	contents := []*genai.Content{
 		{
