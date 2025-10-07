@@ -36,7 +36,7 @@ func generateMMFlashWithText(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.5-flash-image-preview"
+	modelName := "gemini-2.5-flash-image"
 	contents := []*genai.Content{
 		{
 			Parts: []*genai.Part{
