@@ -37,7 +37,7 @@ func generateMMFlashMultipleImgsWithText(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.5-flash-image-preview"
+	modelName := "gemini-2.5-flash-image"
 	prompt := "Generate 3 images a cat sitting on a chair."
 	contents := []*genai.Content{
 		{
