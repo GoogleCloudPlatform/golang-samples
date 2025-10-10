@@ -58,6 +58,7 @@ func generateLiveFuncCallWithTxt(w io.Writer) error {
 	if err != nil {
 		return fmt.Errorf("failed to connect live session: %w", err)
 	}
+	defer session.Close()
 
 	textInput := "Turn on the lights please"
 	fmt.Fprintf(w, "> %s\n\n", textInput)
@@ -75,8 +76,6 @@ func generateLiveFuncCallWithTxt(w io.Writer) error {
 	}); err != nil {
 		return fmt.Errorf("failed to send client content: %w", err)
 	}
-
-	var functionResponses []*genai.FunctionResponse
 
 	for {
 		chunk, err := session.Receive()
@@ -98,6 +97,7 @@ func generateLiveFuncCallWithTxt(w io.Writer) error {
 
 		// Handle tool (function) calls
 		if chunk.ToolCall != nil {
+			var functionResponses []*genai.FunctionResponse
 			for _, fc := range chunk.ToolCall.FunctionCalls {
 				functionResponse := &genai.FunctionResponse{
 					Name: fc.Name,

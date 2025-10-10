@@ -77,11 +77,6 @@ func generateGroundSearchWithTxt(w io.Writer) error {
 			return fmt.Errorf("error receiving stream: %w", err)
 		}
 
-		// Server setup ready
-		if chunk.SetupComplete != nil {
-			fmt.Println("Server setup complete")
-		}
-
 		// Handle the main model output
 		if chunk.ServerContent != nil {
 			if chunk.ServerContent.ModelTurn != nil {
@@ -90,35 +85,13 @@ func generateGroundSearchWithTxt(w io.Writer) error {
 						continue
 					}
 					if part.Text != "" {
-						fmt.Print(part.Text)
 						response += part.Text
-					}
-					if part.ExecutableCode != nil {
-						fmt.Println("\n[Executable code]:")
-						fmt.Println(part.ExecutableCode.Code)
-					}
-					if part.CodeExecutionResult != nil {
-						fmt.Println("\n[Execution result]:")
-						fmt.Println(part.CodeExecutionResult.Output)
 					}
 				}
 			}
-
-			if chunk.ServerContent.GenerationComplete {
-				fmt.Println("\n[Generation complete]")
-			}
-
-			if chunk.ServerContent.Interrupted {
-				fmt.Println("\n[Generation interrupted]")
-			}
-		}
-
-		if chunk.ToolCall != nil {
-			fmt.Println("[ToolCall received]", chunk.ToolCall)
 		}
 
 		if chunk.GoAway != nil {
-			fmt.Println("[Server requested session end]")
 			break
 		}
 	}

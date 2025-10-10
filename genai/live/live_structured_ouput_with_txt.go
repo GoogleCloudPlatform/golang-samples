@@ -112,8 +112,7 @@ func generateStructuredOutputWithTxt(w io.Writer) error {
 	// Try to parse the JSON into our struct.
 	var event CalendarEvent
 	if err := json.Unmarshal([]byte(respText), &event); err != nil {
-		fmt.Fprintf(w, "Model output was not valid JSON. Raw output:\n%s\n", respText)
-		return nil
+		return fmt.Errorf("Model output was not valid JSON. Raw output:\n%s\n", respText)
 	}
 
 	// Print parsed struct in the same friendly format.

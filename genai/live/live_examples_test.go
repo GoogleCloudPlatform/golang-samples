@@ -16,7 +16,6 @@ package live
 
 import (
 	"bytes"
-	"fmt"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -51,7 +50,6 @@ func TestLiveGeneration(t *testing.T) {
 		}
 
 		output := buf.String()
-		fmt.Printf("output::%+v", output)
 		if output == "" {
 			t.Error("expected non-empty output, got empty")
 		}
