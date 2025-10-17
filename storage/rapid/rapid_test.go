@@ -42,6 +42,11 @@ var (
 func TestMain(m *testing.M) {
 	ctx := context.Background()
 
+	// Skip tests by default for now, until b/452725162 is resolved
+	if os.Getenv("STORAGE_RUN_RAPID_TESTS") == "" {
+		os.Exit(0)
+	}
+
 	// Create fixture client & bucket to use across tests.
 	tc, _ := testutil.ContextMain(m)
 	var err error
