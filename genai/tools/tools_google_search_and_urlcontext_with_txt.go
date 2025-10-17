@@ -24,9 +24,9 @@ import (
 	"google.golang.org/genai"
 )
 
-// generateGoogleSearchAndUrlContextWithTxt demonstrates using both
+// generateGoogleSearchURLContextWithText demonstrates using both
 // the Google Search Tool and the URL Context Tool with Gemini.
-func generateGSearchURLContentWithText(w io.Writer) error {
+func generateGoogleSearchURLContextWithText(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{

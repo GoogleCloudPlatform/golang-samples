@@ -71,7 +71,7 @@ func TestTextGeneration(t *testing.T) {
 
 	t.Run("generate content with maps coordinates", func(t *testing.T) {
 		buf.Reset()
-		if err := generateGmapsCoordinatesWithText(buf); err != nil {
+		if err := generateGoogleMapsCoordinatesWithText(buf); err != nil {
 			t.Fatalf("generateGmapsCoordinatesWithText failed: %v", err)
 		}
 
@@ -95,7 +95,7 @@ func TestTextGeneration(t *testing.T) {
 
 	t.Run("generate content with google search and url context", func(t *testing.T) {
 		buf.Reset()
-		if err := generateGSearchURLContentWithText(buf); err != nil {
+		if err := generateGoogleSearchURLContextWithText(buf); err != nil {
 			t.Fatalf("generateGSearchURLContentWithText failed: %v", err)
 		}
 

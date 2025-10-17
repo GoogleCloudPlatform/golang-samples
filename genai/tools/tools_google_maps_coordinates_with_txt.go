@@ -24,9 +24,9 @@ import (
 	"google.golang.org/genai"
 )
 
-// generateMapsCoordinatesWithTxt demonstrates using the Google Maps tool
+// generateGoogleMapsCoordinatesWithText demonstrates using the Google Maps tool
 // to get responses localized to specific coordinates.
-func generateGmapsCoordinatesWithText(w io.Writer) error {
+func generateGoogleMapsCoordinatesWithText(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
