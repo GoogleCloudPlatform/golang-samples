@@ -53,7 +53,7 @@ func pauseAndResumeAppendableUpload(w io.Writer, bucket, object string) error {
 	if err := writer.Close(); err != nil {
 		return fmt.Errorf("Writer.Close: %w", err)
 	}
-	fmt.Fprintf(w, "Uploaded unfinalize object %v\n", object)
+	fmt.Fprintf(w, "Uploaded unfinalized object %v\n", object)
 
 	// To resume the upload we need the object's generation. We can get this
 	// from the previous Writer after close.
