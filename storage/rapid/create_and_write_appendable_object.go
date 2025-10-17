@@ -54,7 +54,7 @@ func createAndWriteAppendableObject(w io.Writer, bucket, object string) error {
 	if err != nil {
 		return fmt.Errorf("Writer.Flush: %w", err)
 	}
-	fmt.Fprintf(w, "Flush completed. Persisted size is now %d", size)
+	fmt.Fprintf(w, "Flush completed. Persisted size is now %d\n", size)
 
 	// The Writer is still open. We can write more data.
 	if _, err := writer.Write([]byte("Some more data\n")); err != nil {
@@ -67,7 +67,7 @@ func createAndWriteAppendableObject(w io.Writer, bucket, object string) error {
 	if err := writer.Close(); err != nil {
 		return fmt.Errorf("Writer.Close: %w", err)
 	}
-	fmt.Fprintf(w, "Uploaded object %v", object)
+	fmt.Fprintf(w, "Uploaded object %v\n", object)
 
 	return nil
 }

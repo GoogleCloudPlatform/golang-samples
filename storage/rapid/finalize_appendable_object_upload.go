@@ -55,7 +55,7 @@ func finalizeAppendableObject(w io.Writer, bucket, object string) error {
 	if err := writer.Close(); err != nil {
 		return fmt.Errorf("Writer.Close: %w", err)
 	}
-	fmt.Fprintf(w, "Uploaded and finalized object %v", object)
+	fmt.Fprintf(w, "Uploaded and finalized object %v\n", object)
 
 	return nil
 }

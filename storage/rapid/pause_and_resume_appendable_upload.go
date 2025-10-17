@@ -53,7 +53,7 @@ func pauseAndResumeAppendableUpload(w io.Writer, bucket, object string) error {
 	if err := writer.Close(); err != nil {
 		return fmt.Errorf("Writer.Close: %w", err)
 	}
-	fmt.Fprintf(w, "Uploaded unfinalize object %v", object)
+	fmt.Fprintf(w, "Uploaded unfinalize object %v\n", object)
 
 	// To resume the upload we need the object's generation. We can get this
 	// from the previous Writer after close.
@@ -69,7 +69,7 @@ func pauseAndResumeAppendableUpload(w io.Writer, bucket, object string) error {
 	if err != nil {
 		return fmt.Errorf("NewWriterFromAppendableObject: %v", err)
 	}
-	fmt.Fprintf(w, "Resuming upload from offset %v", offset)
+	fmt.Fprintf(w, "Resuming upload from offset %v\n", offset)
 
 	// Append the rest of the data and close the Writer to finalize.
 	if _, err := appendWriter.Write([]byte("resumed data\n")); err != nil {
@@ -78,7 +78,7 @@ func pauseAndResumeAppendableUpload(w io.Writer, bucket, object string) error {
 	if err := appendWriter.Close(); err != nil {
 		return fmt.Errorf("Writer.Close: %w", err)
 	}
-	fmt.Fprintf(w, "Uploaded and finalized object %v", object)
+	fmt.Fprintf(w, "Uploaded and finalized object %v\n", object)
 	return nil
 }
 

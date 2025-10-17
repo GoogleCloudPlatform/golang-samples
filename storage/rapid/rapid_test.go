@@ -78,7 +78,7 @@ func TestMain(m *testing.M) {
 
 func TestCreateAndWriteAppendableObject(t *testing.T) {
 	var b bytes.Buffer
-	object := "obj1"
+	object := "obj-appendable"
 	if err := createAndWriteAppendableObject(&b, zonalBucketName, object); err != nil {
 		t.Fatalf("running sample: %v, output: %v", err, b.String())
 	}
@@ -95,7 +95,7 @@ func TestCreateAndWriteAppendableObject(t *testing.T) {
 
 func TestFinalizeAppendableObject(t *testing.T) {
 	var b bytes.Buffer
-	object := "obj2"
+	object := "obj-finalize"
 	if err := finalizeAppendableObject(&b, zonalBucketName, object); err != nil {
 		t.Fatalf("running sample: %v, output: %v", err, b.String())
 	}
@@ -112,7 +112,7 @@ func TestFinalizeAppendableObject(t *testing.T) {
 
 func TestPauseAndResumeAppendableUpload(t *testing.T) {
 	var b bytes.Buffer
-	object := "obj2"
+	object := "obj-pause"
 	if err := pauseAndResumeAppendableUpload(&b, zonalBucketName, object); err != nil {
 		t.Fatalf("running sample: %v, output: %v", err, b.String())
 	}
