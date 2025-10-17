@@ -17,8 +17,11 @@ package rapid
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
+	"io"
 	"log"
 	"os"
+	"slices"
 	"strings"
 	"testing"
 
@@ -32,11 +35,13 @@ const (
 	testPrefix        = "storage-objects-test"
 	testZonalLocation = "us-west4"
 	testZonalZone     = "us-west4-a"
+	downloadObject    = "obj-download"
 )
 
 var (
 	zonalBucketName string
 	client          *storage.Client
+	downloadData    []byte
 )
 
 func TestMain(m *testing.M) {
@@ -71,6 +76,18 @@ func TestMain(m *testing.M) {
 		log.Fatalf("BucketHandle.Create: %v", err)
 
 	}
+
+	// Create object fixture for download tests
+	w := client.Bucket(zonalBucketName).Object(downloadObject).If(storage.Conditions{DoesNotExist: true}).NewWriter(ctx)
+	downloadData = make([]byte, 4*1024*1024)
+	_, _ = rand.Read(downloadData)
+	if _, err := io.Copy(w, bytes.NewReader(downloadData)); err != nil {
+		log.Fatalf("uploading object: %v", err)
+	}
+	if err := w.Close(); err != nil {
+		log.Fatalf("closing writer: %v", err)
+	}
+
 	// Run tests.
 	exit := m.Run()
 
@@ -129,5 +146,39 @@ func TestPauseAndResumeAppendableUpload(t *testing.T) {
 	}
 	if attrs.Finalized.IsZero() {
 		t.Errorf("got unfinalized object, want finalized")
+	}
+}
+
+func TestOpenObjectSingleRangedRead(t *testing.T) {
+	var b bytes.Buffer
+	data, err := openObjectSingleRangedRead(&b, zonalBucketName, downloadObject)
+	if err != nil {
+		t.Fatalf("running sample: %v, output: %v", err, b.String())
+	}
+	if !bytes.Equal(data, downloadData[:1024]) {
+		t.Errorf("downloaded %v bytes, does not match expected bytes", len(data))
+	}
+}
+
+func TestOpenObjectReadFullObject(t *testing.T) {
+	var b bytes.Buffer
+	data, err := openObjectReadFullObject(&b, zonalBucketName, downloadObject)
+	if err != nil {
+		t.Fatalf("running sample: %v, output: %v", err, b.String())
+	}
+	if !bytes.Equal(data, downloadData) {
+		t.Errorf("downloaded %v bytes, does not match expected bytes", len(data))
+	}
+}
+
+func TestOpenObjectMultipleRangedRead(t *testing.T) {
+	var b bytes.Buffer
+	dataSlices, err := openObjectMultipleRangedRead(&b, zonalBucketName, downloadObject)
+	if err != nil {
+		t.Fatalf("running sample: %v, output: %v", err, b.String())
+	}
+	data := slices.Concat(dataSlices...)
+	if !bytes.Equal(data, downloadData[:3*1024]) {
+		t.Errorf("downloaded %v bytes, does not match expected bytes, output: %v", len(data), b.String())
 	}
 }
