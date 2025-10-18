@@ -3,9 +3,9 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/respo
 go 1.24.0
 
 require (
-	cloud.google.com/go/bigquery v1.65.0
-	github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
-	google.golang.org/api v0.217.0
+	cloud.google.com/go/bigquery v1.71.0
+	github.com/GoogleCloudPlatform/functions-framework-go v1.9.2
+	google.golang.org/api v0.252.0
 )
 
 require (

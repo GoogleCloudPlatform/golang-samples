@@ -4,8 +4,8 @@ go 1.24.0
 
 require (
 	cloud.google.com/go/datastore v1.20.0
-	cloud.google.com/go/pubsub v1.45.3
-	cloud.google.com/go/storage v1.50.0
+	cloud.google.com/go/pubsub v1.50.1
+	cloud.google.com/go/storage v1.57.0
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/gorilla/websocket v1.5.3

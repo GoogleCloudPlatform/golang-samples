@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/golang-samples/getting-started/sessions
 
 go 1.24.0
 
-require cloud.google.com/go/firestore v1.18.0
+require cloud.google.com/go/firestore v1.19.0
 
 require (
 	cloud.google.com/go v0.118.0 // indirect
