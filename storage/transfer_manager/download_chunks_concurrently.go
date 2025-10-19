@@ -36,9 +36,9 @@ func downloadChunksConcurrently(w io.Writer, bucketName, blobName, filename stri
 	// maximum of 5 GiB.
 	chunkSize := 32 * 1024 * 1024 // 32 MiB
 
-	// The maximum number of processes to use for the operation. The performance
+	// The maximum number of workers to use for the operation. The performance
 	// impact of this value depends on the use case, but smaller files usually
-	// benefit from a higher number of processes. Each additional process
+	// benefit from a higher number of workers. Each additional worker
 	// occupies some CPU and memory resources until finished.
 	workers := 8
 

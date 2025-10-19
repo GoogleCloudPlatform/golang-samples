@@ -24,7 +24,6 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"google.golang.org/api/iterator"
 )
 
 func TestDownloadChunksConcurrently(t *testing.T) {
@@ -44,8 +43,6 @@ func TestDownloadChunksConcurrently(t *testing.T) {
 	if err := bucket.Create(ctx, tc.ProjectID, nil); err != nil {
 		t.Fatalf("Bucket(%q).Create: %v", bucketName, err)
 	}
-	defer deleteBucket(ctx, t, bucket)
-
 	obj := bucket.Object(blobName)
 	w := obj.NewWriter(ctx)
 	if _, err := fmt.Fprint(w, "hello world"); err != nil {
@@ -64,25 +61,9 @@ func TestDownloadChunksConcurrently(t *testing.T) {
 	if got, want := buf.String(), fmt.Sprintf("Downloaded %v to %v", blobName, fileName); !strings.Contains(got, want) {
 		t.Errorf("got %q, want to contain %q", got, want)
 	}
-}
 
-func deleteBucket(ctx context.Context, t *testing.T, bucket *storage.BucketHandle) {
-	t.Helper()
-	it := bucket.Objects(ctx, nil)
-	for {
-		attrs, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			t.Logf("Bucket(%v).Objects: %v", bucket, err)
-			break
-		}
-		if err := bucket.Object(attrs.Name).Delete(ctx); err != nil {
-			t.Logf("Bucket(%v).Object(%q).Delete: %v", bucket, attrs.Name, err)
-		}
-	}
-	if err := bucket.Delete(ctx); err != nil {
-		t.Logf("Bucket(%v).Delete: %v", bucket, err)
+	// Clean up.
+	if err := testutil.DeleteBucketIfExists(ctx, client, bucketName); err != nil {
+		t.Fatalf("testutil.DeleteBucketIfExists: %v", err)
 	}
 }
