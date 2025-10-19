@@ -17,16 +17,21 @@ package transfermanager
 import (
 	"bytes"
 	"context"
+<<<<<<< HEAD
 	"crypto/rand"
 	"fmt"
 	"io"
 	"log"
+=======
+	"fmt"
+>>>>>>> df0f473c (Add sample download_chunks_concurrently with test.)
 	"os"
 	"strings"
 	"testing"
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+<<<<<<< HEAD
 	"github.com/google/uuid"
 )
 
@@ -94,15 +99,52 @@ func TestDownloadChunksConcurrently(t *testing.T) {
 	fileName := f.Name()
 	f.Close() // Close the file so the download can write to it.
 	defer os.Remove(fileName)
+=======
+	"google.golang.org/api/iterator"
+)
+
+func TestDownloadChunksConcurrently(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	bucketName := tc.ProjectID + "-tm-bucket-test"
+	blobName := "tm-blob-test"
+	fileName := "tm-file-test"
+
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	bucket := client.Bucket(bucketName)
+	if err := bucket.Create(ctx, tc.ProjectID, nil); err != nil {
+		t.Fatalf("Bucket(%q).Create: %v", bucketName, err)
+	}
+	defer deleteBucket(ctx, t, bucket)
+
+	obj := bucket.Object(blobName)
+	w := obj.NewWriter(ctx)
+	if _, err := fmt.Fprint(w, "hello world"); err != nil {
+		t.Fatalf("Writer.Write: %v", err)
+	}
+	if err := w.Close(); err != nil {
+		t.Fatalf("Writer.Close: %v", err)
+	}
+>>>>>>> df0f473c (Add sample download_chunks_concurrently with test.)
 
 	var buf bytes.Buffer
 	if err := downloadChunksConcurrently(&buf, bucketName, blobName, fileName); err != nil {
 		t.Errorf("downloadChunksConcurrently: %v", err)
 	}
+<<<<<<< HEAD
+=======
+	defer os.Remove(fileName)
+>>>>>>> df0f473c (Add sample download_chunks_concurrently with test.)
 
 	if got, want := buf.String(), fmt.Sprintf("Downloaded %v to %v", blobName, fileName); !strings.Contains(got, want) {
 		t.Errorf("got %q, want to contain %q", got, want)
 	}
+<<<<<<< HEAD
 
 	// Verify that the downloaded data is the same as the uploaded data.
 	downloadedBytes, err := os.ReadFile(fileName)
@@ -112,5 +154,27 @@ func TestDownloadChunksConcurrently(t *testing.T) {
 
 	if !bytes.Equal(downloadedBytes, downloadData) {
 		t.Errorf("downloaded data does not match uploaded data. got %d bytes, want %d bytes", len(downloadedBytes), len(downloadData))
+=======
+}
+
+func deleteBucket(ctx context.Context, t *testing.T, bucket *storage.BucketHandle) {
+	t.Helper()
+	it := bucket.Objects(ctx, nil)
+	for {
+		attrs, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			t.Logf("Bucket(%v).Objects: %v", bucket, err)
+			break
+		}
+		if err := bucket.Object(attrs.Name).Delete(ctx); err != nil {
+			t.Logf("Bucket(%v).Object(%q).Delete: %v", bucket, attrs.Name, err)
+		}
+	}
+	if err := bucket.Delete(ctx); err != nil {
+		t.Logf("Bucket(%v).Delete: %v", bucket, err)
+>>>>>>> df0f473c (Add sample download_chunks_concurrently with test.)
 	}
 }
