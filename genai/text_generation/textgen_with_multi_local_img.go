@@ -37,11 +37,11 @@ func generateWithMultiLocalImages(w io.Writer) error {
 	}
 
 	// Read local image files
-	image1, err := os.ReadFile("testdata/latte.jpg")
+	image1, err := os.ReadFile("latte.jpg")
 	if err != nil {
 		return fmt.Errorf("failed to read image1: %w", err)
 	}
-	image2, err := os.ReadFile("testdata/scones.jpg")
+	image2, err := os.ReadFile("scones.jpg")
 	if err != nil {
 		return fmt.Errorf("failed to read image2: %w", err)
 	}
