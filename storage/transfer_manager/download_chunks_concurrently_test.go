@@ -123,6 +123,13 @@ func TestDownloadChunksConcurrently(t *testing.T) {
 	if err := bucket.Create(ctx, tc.ProjectID, nil); err != nil {
 		t.Fatalf("Bucket(%q).Create: %v", bucketName, err)
 	}
+	// Clean up the bucket at the end of the test.
+	defer func() {
+		if err := testutil.DeleteBucketIfExists(ctx, client, bucketName); err != nil {
+			t.Logf("testutil.DeleteBucketIfExists: %v", err)
+		}
+	}()
+
 	obj := bucket.Object(blobName)
 	w := obj.NewWriter(ctx)
 	if _, err := fmt.Fprint(w, "hello world"); err != nil {
@@ -138,13 +145,23 @@ func TestDownloadChunksConcurrently(t *testing.T) {
 		t.Errorf("downloadChunksConcurrently: %v", err)
 	}
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 	defer os.Remove(fileName)
 >>>>>>> df0f473c (Add sample download_chunks_concurrently with test.)
+=======
+	// Clean up the file at the end of the test.
+	defer func() {
+		if err := os.Remove(fileName); err != nil {
+			t.Logf("os.Remove: %v", err)
+		}
+	}()
+>>>>>>> e5956298 (Improve cleanup in download_chunks_concurrently_test.go)
 
 	if got, want := buf.String(), fmt.Sprintf("Downloaded %v to %v", blobName, fileName); !strings.Contains(got, want) {
 		t.Errorf("got %q, want to contain %q", got, want)
 	}
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 
@@ -185,4 +202,6 @@ func deleteBucket(ctx context.Context, t *testing.T, bucket *storage.BucketHandl
 		t.Fatalf("testutil.DeleteBucketIfExists: %v", err)
 >>>>>>> 2ed49f9f (Improve test and comments.)
 	}
+=======
+>>>>>>> e5956298 (Improve cleanup in download_chunks_concurrently_test.go)
 }
