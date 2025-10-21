@@ -43,6 +43,13 @@ func TestDownloadChunksConcurrently(t *testing.T) {
 	if err := bucket.Create(ctx, tc.ProjectID, nil); err != nil {
 		t.Fatalf("Bucket(%q).Create: %v", bucketName, err)
 	}
+	// Clean up the bucket at the end of the test.
+	defer func() {
+		if err := testutil.DeleteBucketIfExists(ctx, client, bucketName); err != nil {
+			t.Logf("testutil.DeleteBucketIfExists: %v", err)
+		}
+	}()
+
 	obj := bucket.Object(blobName)
 	w := obj.NewWriter(ctx)
 	if _, err := fmt.Fprint(w, "hello world"); err != nil {
@@ -56,14 +63,14 @@ func TestDownloadChunksConcurrently(t *testing.T) {
 	if err := downloadChunksConcurrently(&buf, bucketName, blobName, fileName); err != nil {
 		t.Errorf("downloadChunksConcurrently: %v", err)
 	}
-	defer os.Remove(fileName)
+	// Clean up the file at the end of the test.
+	defer func() {
+		if err := os.Remove(fileName); err != nil {
+			t.Logf("os.Remove: %v", err)
+		}
+	}()
 
 	if got, want := buf.String(), fmt.Sprintf("Downloaded %v to %v", blobName, fileName); !strings.Contains(got, want) {
 		t.Errorf("got %q, want to contain %q", got, want)
-	}
-
-	// Clean up.
-	if err := testutil.DeleteBucketIfExists(ctx, client, bucketName); err != nil {
-		t.Fatalf("testutil.DeleteBucketIfExists: %v", err)
 	}
 }
