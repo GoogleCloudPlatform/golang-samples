@@ -43,7 +43,7 @@ func openMultipleObjectsRangedRead(w io.Writer, bucket string, objects []string)
 
 	// Initialize a transfermanager Downloader and add individual objects, downloading
 	// the first KiB of each.
-	var databufs []*transfermanager.DownloadBuffer
+	databufs := make([]*transfermanager.DownloadBuffer, 0, len(objects))
 	d, err := transfermanager.NewDownloader(client, transfermanager.WithWorkers(16))
 	if err != nil {
 		return nil, fmt.Errorf("NewDownloader: %w", err)

@@ -18,6 +18,7 @@ package rapid
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"time"
@@ -83,7 +84,16 @@ func readAppendableObjectTail(w io.Writer, bucket, object string) ([]byte, error
 				currOff += length
 				rangeDownloaded <- true
 			})
-			<-rangeDownloaded
+			// Wait for the range download to complete with a timeout of 10s.
+			select {
+			case <-rangeDownloaded:
+			case <-time.After(10 * time.Second):
+				mrdErr = mrd.Error()
+				if mrdErr == nil {
+					mrdErr = errors.New("range request timed out after 10s")
+				}
+			}
+
 			if mrdErr != nil {
 				break
 			}
