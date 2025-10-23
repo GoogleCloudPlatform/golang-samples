@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/golang-samples/dataflow
 
 go 1.24.0
 
-require github.com/apache/beam/sdks/v2 v2.57.0
+require github.com/apache/beam/sdks/v2 v2.68.0
 
 require (
 	cel.dev/expr v0.19.1 // indirect

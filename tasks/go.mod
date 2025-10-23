@@ -3,8 +3,8 @@ module github.com/GoogleCloudPlatform/golang-samples/tasks
 go 1.24.0
 
 require (
-	cloud.google.com/go/cloudtasks v1.13.3
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	cloud.google.com/go/cloudtasks v1.13.7
+	github.com/GoogleCloudPlatform/golang-samples e85b2541e904
 )
 
 require (

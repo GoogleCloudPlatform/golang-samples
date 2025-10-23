@@ -3,21 +3,21 @@ module github.com/GoogleCloudPlatform/golang-samples/spanner
 go 1.24.0
 
 require (
-	cloud.google.com/go v0.120.0
-	cloud.google.com/go/iam v1.4.2
-	cloud.google.com/go/kms v1.21.0
-	cloud.google.com/go/longrunning v0.6.6
-	cloud.google.com/go/spanner v1.78.0
+	cloud.google.com/go v0.123.0
+	cloud.google.com/go/iam v1.5.3
+	cloud.google.com/go/kms v1.23.2
+	cloud.google.com/go/longrunning v0.7.0
+	cloud.google.com/go/spanner v1.86.1
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.15-0.20230702191903-2de6d2748484
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	github.com/GoogleCloudPlatform/golang-samples e85b2541e904
 	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
-	github.com/googleapis/gax-go/v2 v2.14.1
+	github.com/googleapis/gax-go/v2 v2.15.0
 	go.opencensus.io v0.24.0
-	google.golang.org/api v0.227.0
-	google.golang.org/genproto v0.0.0-20250303144028-a0af3efb3deb
-	google.golang.org/grpc v1.71.0
-	google.golang.org/protobuf v1.36.6
+	google.golang.org/api v0.253.0
+	google.golang.org/genproto 3a174f9686a8
+	google.golang.org/grpc v1.76.0
+	google.golang.org/protobuf v1.36.10
 )
 
 require (
