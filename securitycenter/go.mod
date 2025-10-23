@@ -3,17 +3,17 @@ module github.com/GoogleCloudPlatform/golang-samples/securitycenter
 go 1.24.0
 
 require (
-	cloud.google.com/go/iam v1.3.1
-	cloud.google.com/go/pubsub v1.45.3
-	cloud.google.com/go/securitycenter v1.35.3
-	cloud.google.com/go/securitycentermanagement v1.1.1
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	cloud.google.com/go/iam v1.5.3
+	cloud.google.com/go/pubsub v1.50.1
+	cloud.google.com/go/securitycenter v1.38.1
+	cloud.google.com/go/securitycentermanagement v1.1.6
+	github.com/GoogleCloudPlatform/golang-samples e85b2541e904
 	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
-	google.golang.org/api v0.217.0
-	google.golang.org/genproto v0.0.0-20250115164207-1a7da9e5054f
-	google.golang.org/grpc v1.69.4
-	google.golang.org/protobuf v1.36.3
+	google.golang.org/api v0.253.0
+	google.golang.org/genproto 3a174f9686a8
+	google.golang.org/grpc v1.76.0
+	google.golang.org/protobuf v1.36.10
 )
 
 require (

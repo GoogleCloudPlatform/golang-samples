@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/golang-samples/testing/gimmeproj
 
 go 1.24.0
 
-require cloud.google.com/go/datastore v1.20.0
+require cloud.google.com/go/datastore v1.21.0
 
 require (
 	cloud.google.com/go v0.118.0 // indirect
