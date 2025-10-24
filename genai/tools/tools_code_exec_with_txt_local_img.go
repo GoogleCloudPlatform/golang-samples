@@ -38,7 +38,7 @@ func generateWithLocalImgAndCodeExec(w io.Writer) error {
 	}
 
 	// Read local image
-	imgBytes, err := os.ReadFile("640px-Monty_open_door.svg.png")
+	imgBytes, err := os.ReadFile("testdata/640px-Monty_open_door.svg.png")
 	if err != nil {
 		return fmt.Errorf("failed to read image: %w", err)
 	}

@@ -82,6 +82,9 @@ var allowList = []string{
 	// DLP data
 	"dlp/snippets/**/testdata/*",
 
+	// genai data
+	"genai/**/testdata/*",
+
 	// Endpoints samples.
 	"endpoints/**/*.proto",
 
