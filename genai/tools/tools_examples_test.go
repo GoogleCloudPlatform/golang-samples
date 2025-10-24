@@ -69,6 +69,42 @@ func TestTextGeneration(t *testing.T) {
 		}
 	})
 
+	t.Run("generate content with maps coordinates", func(t *testing.T) {
+		buf.Reset()
+		if err := generateGoogleMapsCoordinatesWithText(buf); err != nil {
+			t.Fatalf("generateGmapsCoordinatesWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate content with url context", func(t *testing.T) {
+		buf.Reset()
+		if err := generateURLContentWithText(buf); err != nil {
+			t.Fatalf("generateURLContentWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate content with google search and url context", func(t *testing.T) {
+		buf.Reset()
+		if err := generateGoogleSearchURLContextWithText(buf); err != nil {
+			t.Fatalf("generateGSearchURLContentWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
 	t.Run("generate with Local img and code exec", func(t *testing.T) {
 		buf.Reset()
 		err := generateWithLocalImgAndCodeExec(buf)
