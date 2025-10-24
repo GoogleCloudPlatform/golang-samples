@@ -29,17 +29,18 @@ import (
 func downloadChunksConcurrently(w io.Writer, bucketName, blobName, filename string) error {
 	// bucketName := "your-bucket-name"
 	// blobName := "target-file"
-	// filename := ""
+	// filename := "path/to/your/local/file.txt"
 
-	// The size of each chunk. The performance impact of this value depends on
-	// the use case. The remote service has a minimum of 5 MiB and a
-	// maximum of 5 GiB.
-	chunkSize := 32 * 1024 * 1024 // 32 MiB
+	// The chunkSize is the size of each chunk to be downloaded.
+	// The performance impact of this value depends on the use case.
+	// For example, for a slow network, using a smaller chunkSize may be better.
+	// Providing this parameter is optional and the default value is 32 MiB.
+	chunkSize := 16 * 1024 * 1024 // 16 MiB
 
-	// The maximum number of workers to use for the operation. The performance
-	// impact of this value depends on the use case, but smaller files usually
-	// benefit from a higher number of workers. Each additional worker
-	// occupies some CPU and memory resources until finished.
+	// The maximum number of workers to use for the operation.
+	// Please note, providing this parameter is optional.
+	// The performance impact of this value depends on the use case.
+	// To download one large file, the default value: NumCPU / 2 is usually fine.
 	workers := 8
 
 	ctx := context.Background()
@@ -74,14 +75,13 @@ func downloadChunksConcurrently(w io.Writer, bucketName, blobName, filename stri
 		return fmt.Errorf("d.WaitAndClose: %w", err)
 	}
 
-	// Iterate through completed downloads and process results.
-	for _, out := range results {
-		if out.Err != nil {
-			fmt.Fprintf(w, "download of %v failed with error %v\n", out.Object, out.Err)
-		} else {
-			fmt.Fprintf(w, "Downloaded %v to %v.\n", blobName, filename)
-		}
+	// Process the downloader result.
+	result := results[0]
+	if result.Err != nil {
+		fmt.Fprintf(w, "download of %v failed with error %v\n", result.Object, result.Err)
 	}
+	fmt.Fprintf(w, "Downloaded %v to %v.\n", blobName, filename)
+
 	return nil
 }
 
