@@ -70,12 +70,17 @@ func downloadChunksConcurrently(w io.Writer, bucketName, blobName, filename stri
 		return fmt.Errorf("d.DownloadObject: %w", err)
 	}
 
+	// Wait for all downloads to complete and close the downloader.
+	// This allows to synchronize the download processes.
 	results, err := d.WaitAndClose()
 	if err != nil {
 		return fmt.Errorf("d.WaitAndClose: %w", err)
 	}
 
 	// Process the downloader result.
+	if len(results) != 1 {
+		return fmt.Errorf("expected 1 result, got %d", len(results))
+	}
 	result := results[0]
 	if result.Err != nil {
 		fmt.Fprintf(w, "download of %v failed with error %v\n", result.Object, result.Err)
