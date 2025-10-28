@@ -69,8 +69,18 @@
       period seconds: <code>{{.ReadinessProbeConfig.PeriodSeconds}}</code>,
       success threshold: <code>{{.ReadinessProbeConfig.SuccessThreshold}}</code>,
       failure threshold: <code>{{.ReadinessProbeConfig.FailureThreshold}}</code>,
-      http path: <code>{{.ReadinessProbeConfig.HttpGetAction.Path}}</code>,
-      http port: <code>{{.ReadinessProbeConfig.HttpGetAction.Port}}</code>.
+      {{if .ReadinessProbeConfig.HttpGetAction.Path}}
+        http path: <code>{{.ReadinessProbeConfig.HttpGetAction.Path}}</code>,
+      {{end}}
+      {{if .ReadinessProbeConfig.HttpGetAction.Port}}
+        http port: <code>{{.ReadinessProbeConfig.HttpGetAction.Port}}</code>.
+      {{end}}
+      {{if .ReadinessProbeConfig.GrpcAction.Service}}
+        grpc path: <code>{{.ReadinessProbeConfig.GrpcAction.Service}}</code>,
+      {{end}}
+      {{if .ReadinessProbeConfig.GrpcAction.Port}}
+        grpc port: <code>{{.ReadinessProbeConfig.GrpcAction.Port}}</code>.
+      {{end}}
     </p>
     {{end}}
 
