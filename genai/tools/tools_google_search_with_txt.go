@@ -44,7 +44,7 @@ func generateWithGoogleSearch(w io.Writer) error {
 	}
 	config := &genai.GenerateContentConfig{
 		Tools: []*genai.Tool{
-			{GoogleSearch: &genai.GoogleSearch{}},
+			{GoogleSearch: &genai.GoogleSearch{ExcludeDomains: []string{"example.com", "example.org"}}},
 		},
 	}
 
