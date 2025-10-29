@@ -12,7 +12,7 @@ require (
 	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
 	github.com/h2non/filetype v1.1.3
-	golang.org/x/oauth2 v0.25.0
+	golang.org/x/oauth2 v0.27.0
 	google.golang.org/api v0.217.0
 	google.golang.org/protobuf v1.36.3
 	gopkg.in/yaml.v2 v2.4.0
