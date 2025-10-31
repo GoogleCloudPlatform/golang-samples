@@ -3,16 +3,16 @@ module github.com/GoogleCloudPlatform/golang-samples/bigtable
 go 1.24.0
 
 require (
-	cloud.google.com/go/bigtable v1.34.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	github.com/google/go-cmp v0.6.0
+	cloud.google.com/go/bigtable v1.40.1
+	github.com/GoogleCloudPlatform/golang-samples 7bee9ae50de4
+	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
 )
 
 require (
-	google.golang.org/api v0.217.0
+	google.golang.org/api v0.254.0
 	google.golang.org/appengine v1.6.8
-	google.golang.org/grpc v1.69.4
+	google.golang.org/grpc v1.76.0
 )
 
 require (
