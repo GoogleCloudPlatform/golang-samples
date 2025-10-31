@@ -3,8 +3,8 @@ module servicehealth
 go 1.23.0
 
 require (
-	cloud.google.com/go/storage v1.55.0
-	google.golang.org/api v0.235.0
+	cloud.google.com/go/storage v1.57.1
+	google.golang.org/api v0.254.0
 )
 
 require (
