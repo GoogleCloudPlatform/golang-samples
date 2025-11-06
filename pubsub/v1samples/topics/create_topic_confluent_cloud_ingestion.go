@@ -60,4 +60,4 @@ func createTopicWithConfluentCloudIngestion(w io.Writer, projectID, topicID, boo
 	return nil
 }
 
-// [END pubsub_create_topic_with_confluent_cloud_ingestion]
+// [END pubsub_old_version_create_topic_with_confluent_cloud_ingestion]

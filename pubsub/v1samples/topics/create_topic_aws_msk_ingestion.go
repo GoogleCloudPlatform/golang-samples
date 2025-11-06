@@ -58,4 +58,4 @@ func createTopicWithAWSMSKIngestion(w io.Writer, projectID, topicID, clusterARN,
 	return nil
 }
 
-// [END pubsub_create_topic_with_aws_msk_ingestion]
+// [END pubsub_old_version_create_topic_with_aws_msk_ingestion]
