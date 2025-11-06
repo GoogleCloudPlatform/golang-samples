@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_create_topic_with_aws_msk_ingestion]
+// [START pubsub_old_version_create_topic_with_aws_msk_ingestion]
 import (
 	"context"
 	"fmt"
