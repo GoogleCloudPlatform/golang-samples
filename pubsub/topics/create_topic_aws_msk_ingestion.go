@@ -42,6 +42,7 @@ func createTopicWithAWSMSKIngestion(w io.Writer, projectID, topicID, clusterARN,
 	defer client.Close()
 
 	topicpb := &pubsubpb.Topic{
+		Name: fmt.Sprintf("projects/%s/topics/%s", projectID, topicID),
 		IngestionDataSourceSettings: &pubsubpb.IngestionDataSourceSettings{
 			Source: &pubsubpb.IngestionDataSourceSettings_AwsMsk_{
 				AwsMsk: &pubsubpb.IngestionDataSourceSettings_AwsMsk{

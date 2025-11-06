@@ -43,6 +43,7 @@ func createTopicWithConfluentCloudIngestion(w io.Writer, projectID, topicID, boo
 	defer client.Close()
 
 	topicpb := &pubsubpb.Topic{
+		Name: fmt.Sprintf("projects/%s/topics/%s", projectID, topicID),
 		IngestionDataSourceSettings: &pubsubpb.IngestionDataSourceSettings{
 			Source: &pubsubpb.IngestionDataSourceSettings_ConfluentCloud_{
 				ConfluentCloud: &pubsubpb.IngestionDataSourceSettings_ConfluentCloud{

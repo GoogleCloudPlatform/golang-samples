@@ -45,6 +45,7 @@ func createTopicWithAzureEventHubsIngestion(w io.Writer, projectID, topicID, res
 	defer client.Close()
 
 	topicpb := &pubsubpb.Topic{
+		Name: fmt.Sprintf("projects/%s/topics/%s", projectID, topicID),
 		IngestionDataSourceSettings: &pubsubpb.IngestionDataSourceSettings{
 			Source: &pubsubpb.IngestionDataSourceSettings_AzureEventHubs_{
 				AzureEventHubs: &pubsubpb.IngestionDataSourceSettings_AzureEventHubs{
@@ -63,7 +64,7 @@ func createTopicWithAzureEventHubsIngestion(w io.Writer, projectID, topicID, res
 	if err != nil {
 		return fmt.Errorf("CreateTopic: %w", err)
 	}
-	fmt.Fprintf(w, "Created topic with azure event hubs ingestion: %v\n", topic)
+	fmt.Fprintf(w, "Created topic with Azure Event Hubs ingestion: %v\n", topic)
 	return nil
 }
 
