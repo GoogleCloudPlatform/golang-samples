@@ -159,6 +159,29 @@ func TestListBuckets(t *testing.T) {
 	})
 }
 
+func TestListBucketsPartialSuccess(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	// This test will run the listBucketsPartialSuccess function against the live service.
+	// However, it's highly unlikely to encounter any "unreachable" buckets
+	// in a normal test environment. Thus, this test mainly verifies that the call
+	// doesn't fail, but not the core functionality of reporting unreachable buckets.
+
+	var buf bytes.Buffer
+	if err := listBucketsPartialSuccess(&buf, tc.ProjectID); err != nil {
+		t.Fatalf("listBucketsPartialSuccess failed: %v", err)
+	}
+
+	got := buf.String()
+	if !strings.Contains(got, "Reachable buckets:") {
+		t.Errorf("Output missing 'Reachable buckets:' section, got:\n%s", got)
+	}
+
+	// In a live test, we expect no unreachable buckets.
+	if !strings.Contains(got, "No unreachable buckets.") {
+		t.Errorf("Output missing 'No unreachable buckets.' section when no buckets were unreachable, got:\n%s", got)
+	}
+}
+
 func TestGetBucketMetadata(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
