@@ -30,6 +30,32 @@ func TestImageGeneration(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 
+	t.Run("generate multimodal flash content with text and image", func(t *testing.T) {
+		buf.Reset()
+		err := generateMMFlashWithText(buf)
+		if err != nil {
+			t.Fatalf("generateMMFlashWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate mmflash text and image recipe", func(t *testing.T) {
+		buf.Reset()
+		err := generateMMFlashTxtImgWithText(buf)
+		if err != nil {
+			t.Fatalf("generateMMFlashTxtImgWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
 	t.Run("generate mmflash locale aware image content with text", func(t *testing.T) {
 		buf.Reset()
 		err := generateMMFlashLocaleAwareWithText(buf)
