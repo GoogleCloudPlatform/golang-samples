@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package image_generation
+package thinking
 
 import (
 	"bytes"
@@ -21,33 +21,20 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestImageGeneration(t *testing.T) {
+func TestThinkingGeneration(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	t.Setenv("GOOGLE_GENAI_USE_VERTEXAI", "1")
-	t.Setenv("GOOGLE_CLOUD_LOCATION", "global")
+	t.Setenv("GOOGLE_CLOUD_LOCATION", "us-central1")
 	t.Setenv("GOOGLE_CLOUD_PROJECT", tc.ProjectID)
 
 	buf := new(bytes.Buffer)
 
-	t.Run("generate multimodal flash content with text and image", func(t *testing.T) {
+	t.Run("generate content including with text", func(t *testing.T) {
 		buf.Reset()
-		err := generateMMFlashWithText(buf)
+		err := generateContentWithTxt(buf)
 		if err != nil {
-			t.Fatalf("generateMMFlashWithText failed: %v", err)
-		}
-
-		output := buf.String()
-		if output == "" {
-			t.Error("expected non-empty output, got empty")
-		}
-	})
-
-	t.Run("generate mmflash text and image recipe", func(t *testing.T) {
-		buf.Reset()
-		err := generateMMFlashTxtImgWithText(buf)
-		if err != nil {
-			t.Fatalf("generateMMFlashTxtImgWithText failed: %v", err)
+			t.Fatalf("generateContentWithTxt failed: %v", err)
 		}
 
 		output := buf.String()

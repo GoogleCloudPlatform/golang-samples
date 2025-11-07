@@ -25,7 +25,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-// createSecretWithLabels creates a new secret with the given name and labels.
+// createSecretWithTags creates a new regional secret with the given name and tags.
 func createRegionalSecretWithTags(w io.Writer, projectId, locationId, secretId, tagKey, tagValue string) error {
 	parent := fmt.Sprintf("projects/%s/locations/%s", projectId, locationId)
 
