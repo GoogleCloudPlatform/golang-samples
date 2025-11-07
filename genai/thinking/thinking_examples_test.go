@@ -42,4 +42,17 @@ func TestThinkingGeneration(t *testing.T) {
 			t.Error("expected non-empty output, got empty")
 		}
 	})
+
+	t.Run("generate content including with text", func(t *testing.T) {
+		buf.Reset()
+		err := generateContentWithTxt(buf)
+		if err != nil {
+			t.Fatalf("generateContentWithTxt failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
 }
