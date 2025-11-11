@@ -59,6 +59,7 @@ func downloadChunksConcurrently(w io.Writer, bucketName, blobName, filename stri
 	if err != nil {
 		return fmt.Errorf("os.Create: %w", err)
 	}
+	defer f.Close()
 
 	in := &transfermanager.DownloadObjectInput{
 		Bucket:      bucketName,
@@ -84,6 +85,7 @@ func downloadChunksConcurrently(w io.Writer, bucketName, blobName, filename stri
 	result := results[0]
 	if result.Err != nil {
 		fmt.Fprintf(w, "download of %v failed with error %v\n", result.Object, result.Err)
+		return result.Err
 	}
 	fmt.Fprintf(w, "Downloaded %v to %v.\n", blobName, filename)
 
