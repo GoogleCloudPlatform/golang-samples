@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START storage_download_chunks_concurrently]
+// [START storage_transfer_manager_download_chunks_concurrently]
 package transfermanager
 
 import (
@@ -90,4 +90,4 @@ func downloadChunksConcurrently(w io.Writer, bucketName, blobName, filename stri
 	return nil
 }
 
-// [END storage_download_chunks_concurrently]
+// [END storage_transfer_manager_download_chunks_concurrently]
