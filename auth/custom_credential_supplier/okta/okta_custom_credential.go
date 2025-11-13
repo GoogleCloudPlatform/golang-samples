@@ -115,13 +115,12 @@ func authenticateWithOktaCredentials(w io.Writer, bucketName, audience, domain, 
 	// clientSecret := "00124cas62huads68755"
 	// [Optional] impersonationURL := "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/myserviceaccount@iam.gserviceaccount.com:generateAccessToken"
 
-
 	ctx := context.Background()
 
 	// 1. Instantiate the custom supplier
 	// Note: Adjust the URL path if your Okta org uses a different auth server (e.g., not 'default')
 	oktaTokenURL := fmt.Sprintf("%s/oauth2/default/v1/token", strings.TrimRight(domain, "/"))
-	
+
 	supplier := &oktaClientCredentialsSupplier{
 		TokenURL:     oktaTokenURL,
 		ClientID:     clientID,

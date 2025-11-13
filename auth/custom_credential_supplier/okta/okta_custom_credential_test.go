@@ -33,7 +33,7 @@ func TestOktaClientCredentialsSupplier_SubjectToken(t *testing.T) {
 	mockClientID := "client-id"
 	mockClientSecret := "client-secret"
 	expectedToken := "mock-okta-jwt-token"
-	
+
 	// We count how many times the server is hit to verify caching
 	serverHitCount := 0
 
@@ -122,7 +122,7 @@ func TestOktaClientCredentialsSupplier_ExpiredCache(t *testing.T) {
 		// The logic has a 60s buffer, so anything < 60s should be treated as expired immediately for next call
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"access_token": fmt.Sprintf("token-%d", serverHitCount),
-			"expires_in":   30, 
+			"expires_in":   30,
 		})
 	}))
 	defer ts.Close()

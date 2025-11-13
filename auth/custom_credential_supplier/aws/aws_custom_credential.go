@@ -84,7 +84,7 @@ func authenticateWithAwsCredentials(w io.Writer, bucketName, audience, impersona
 	// bucketName := "sample-bucket"
 	// audience := "//iam.googleapis.com/projects/sample-project/locations/global/workloadIdentityPools/sample-pool/providers/sample-provider"
 	// [Optional] impersonationURL := "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/myserviceaccount@iam.gserviceaccount.com:generateAccessToken"
-	
+
 	ctx := context.Background()
 
 	// 1. Initialize Custom AWS Supplier
