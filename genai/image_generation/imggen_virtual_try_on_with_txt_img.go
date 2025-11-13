@@ -40,7 +40,7 @@ func generateImgVirtualTryOnWithTextImg(w io.Writer) error {
 	modelName := "virtual-try-on-preview-08-04"
 
 	// Load local person image
-	personBytes, err := os.ReadFile("testdata/man.png")
+	personBytes, err := os.ReadFile("man.png")
 	if err != nil {
 		return fmt.Errorf("failed to read person image: %w", err)
 	}
@@ -50,7 +50,7 @@ func generateImgVirtualTryOnWithTextImg(w io.Writer) error {
 	}
 
 	// Load local product image
-	productBytes, err := os.ReadFile("testdata/sweater.jpg")
+	productBytes, err := os.ReadFile("sweater.jpg")
 	if err != nil {
 		return fmt.Errorf("failed to read product image: %w", err)
 	}
@@ -78,7 +78,7 @@ func generateImgVirtualTryOnWithTextImg(w io.Writer) error {
 	}
 
 	// TODO(developer): Update below lines
-	path := "testdata"
+	path := ""
 	outputFile := "man_in_sweater.png"
 
 	// Save output
