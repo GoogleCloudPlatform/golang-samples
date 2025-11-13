@@ -28,8 +28,8 @@ import (
 // generateImageMMFlashEditWithTextImg demonstrates editing an image with text and image inputs.
 func generateImageMMFlashEditWithTextImg(w io.Writer) error {
 	// TODO(developer): Update below lines
-	outputFile := "testdata/bw-example-image.png"
-	inputFile := "testdata/example-image-eiffel-tower.png"
+	outputFile := "bw-example-image.png"
+	inputFile := "example-image-eiffel-tower.png"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{

@@ -28,7 +28,7 @@ import (
 // generateImageWithText demonstrates how to generate an image from a text prompt.
 func generateImageWithText(w io.Writer) error {
 	// TODO(developer): Update below line
-	outputFile := "testdata/dog_newspaper.png"
+	outputFile := "dog_newspaper.png"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
