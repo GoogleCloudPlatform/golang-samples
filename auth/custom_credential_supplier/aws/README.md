@@ -1,21 +1,24 @@
 # Running the Custom Credential Supplier Sample
 
+If you want to use AWS security credentials that cannot be retrieved using methods supported natively by the [google-cloud-go/auth](https://github.com/vverman/google-cloud-go/tree/main/auth) library, a custom AwsSecurityCredentialsProvider implementation may be specified when creating an AWS client. The supplier must return valid, unexpired AWS security credentials when called by the GCP credential. Currently, using ADC with your AWS workloads is only supported with EC2. An example of a good use case for using a custom credential suppliers is when your workloads are running in other AWS environments, such as ECS, EKS, Fargate, etc.
+
+
 This document provides instructions on how to run the custom credential supplier sample in different environments.
 
 ## Running Locally
 
-To run the sample on your local system, you need to configure your AWS credentials as environment variables.
+To run the sample on your local system, you need to configure your AWS and GCP credentials as environment variables.
 
 ```bash
 export AWS_ACCESS_KEY_ID="YOUR_AWS_ACCESS_KEY_ID"
 export AWS_SECRET_ACCESS_KEY="YOUR_AWS_SECRET_ACCESS_KEY"
 export GCP_WORKLOAD_AUDIENCE="YOUR_GCP_WORKLOAD_AUDIENCE"
-export GOOGLE_CLOUD_PROJECT="YOUR_GOOGLE_CLOUD_PROJECT"
+export GCS_BUCKET_NAME="YOUR_GCS_BUCKET_NAME"
 
 # Optional: If you want to use service account impersonation
 export GCP_SERVICE_ACCOUNT_IMPERSONATION_URL="YOUR_GCP_SERVICE_ACCOUNT_IMPERSONATION_URL"
 
-go run ./aws
+go run .
 ```
 
 ## Running in a Containerized Environment (EKS)

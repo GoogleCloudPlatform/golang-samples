@@ -1,5 +1,7 @@
 # Running the Custom Okta Credential Supplier Sample
 
+If you want to use OIDC or SAML2.0 that cannot be retrieved using methods supported natively by the [google-cloud-go/auth](https://github.com/vverman/google-cloud-go/tree/main/auth) library, a custom SubjectTokenProvider implementation may be specified when creating an identity pool client. The supplier must return a valid, unexpired subject token when called by the GCP credential.
+
 This document provides instructions on how to run the custom Okta credential supplier sample.
 
 ## 1. Okta Configuration
