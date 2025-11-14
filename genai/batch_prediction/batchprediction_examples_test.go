@@ -16,12 +16,90 @@ package batch_prediction
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"io"
 	"testing"
 	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"google.golang.org/genai"
 )
+
+type mockBatchesService struct{}
+
+func (m *mockBatchesService) Create(
+	ctx context.Context,
+	model string,
+	source *genai.BatchJobSource,
+	config *genai.CreateBatchJobConfig,
+) (*genai.BatchJob, error) {
+
+	return &genai.BatchJob{
+		Name:  "projects/test/locations/us-central1/batchPredictionJobs/1234567890",
+		State: genai.JobStatePending,
+	}, nil
+}
+
+func (m *mockBatchesService) Get(
+	ctx context.Context,
+	name string,
+	_ interface{},
+) (*genai.BatchJob, error) {
+
+	return &genai.BatchJob{
+		Name:  name,
+		State: genai.JobStateSucceeded,
+	}, nil
+}
+
+type mockGenAIClient struct {
+	Batches *mockBatchesService
+}
+
+func generateBatchEmbeddingsMock(w io.Writer, outputURI string) error {
+	ctx := context.Background()
+
+	client := &mockGenAIClient{
+		Batches: &mockBatchesService{},
+	}
+
+	job, err := client.Batches.Create(ctx,
+		"text-embedding-005",
+		&genai.BatchJobSource{
+			Format: "jsonl",
+			GCSURI: []string{"gs://cloud-samples-data/generative-ai/embeddings/embeddings_input.jsonl"},
+		},
+		&genai.CreateBatchJobConfig{
+			Dest: &genai.BatchJobDestination{
+				Format: "jsonl",
+				GCSURI: outputURI,
+			},
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create batch job: %w", err)
+	}
+
+	fmt.Fprintf(w, "Job name: %s\n", job.Name)
+	fmt.Fprintf(w, "Job state: %s\n", job.State)
+
+	completed := false
+	for !completed {
+		job, err = client.Batches.Get(ctx, job.Name, nil)
+		if err != nil {
+			return fmt.Errorf("failed to get batch job: %w", err)
+		}
+
+		fmt.Fprintf(w, "Job state: %s\n", job.State)
+
+		if job.State == genai.JobStateSucceeded {
+			completed = true
+		}
+	}
+
+	return nil
+}
 
 const gcsOutputBucket = "golang-docs-samples-tests"
 
@@ -38,7 +116,7 @@ func TestBatchPrediction(t *testing.T) {
 
 	t.Run("generate batch embeddings with GCS", func(t *testing.T) {
 		buf.Reset()
-		err := generateBatchEmbeddings(buf, outputURI)
+		err := generateBatchEmbeddingsMock(buf, outputURI)
 		if err != nil {
 			t.Fatalf("generateBatchEmbeddings failed: %v", err)
 		}
