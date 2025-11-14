@@ -14,13 +14,14 @@
 
 package topics
 
-// [START pubsub_old_version_create_topic_with_azure_event_hubs_ingestion]
+// [START pubsub_create_topic_with_azure_event_hubs_ingestion]
 import (
 	"context"
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 )
 
 func createTopicWithAzureEventHubsIngestion(w io.Writer, projectID, topicID, resourceGroup, namespace, eventHub, clientID, tenantID, subID, gcpSA string) error {
@@ -43,25 +44,28 @@ func createTopicWithAzureEventHubsIngestion(w io.Writer, projectID, topicID, res
 	}
 	defer client.Close()
 
-	cfg := &pubsub.TopicConfig{
-		IngestionDataSourceSettings: &pubsub.IngestionDataSourceSettings{
-			Source: &pubsub.IngestionDataSourceAzureEventHubs{
-				ResourceGroup:     resourceGroup,
-				Namespace:         namespace,
-				EventHub:          eventHub,
-				ClientID:          clientID,
-				TenantID:          tenantID,
-				SubscriptionID:    subID,
-				GCPServiceAccount: gcpSA,
+	topicpb := &pubsubpb.Topic{
+		Name: fmt.Sprintf("projects/%s/topics/%s", projectID, topicID),
+		IngestionDataSourceSettings: &pubsubpb.IngestionDataSourceSettings{
+			Source: &pubsubpb.IngestionDataSourceSettings_AzureEventHubs_{
+				AzureEventHubs: &pubsubpb.IngestionDataSourceSettings_AzureEventHubs{
+					ResourceGroup:     resourceGroup,
+					Namespace:         namespace,
+					EventHub:          eventHub,
+					ClientId:          clientID,
+					TenantId:          tenantID,
+					SubscriptionId:    subID,
+					GcpServiceAccount: gcpSA,
+				},
 			},
 		},
 	}
-	t, err := client.CreateTopicWithConfig(ctx, topicID, cfg)
+	topic, err := client.TopicAdminClient.CreateTopic(ctx, topicpb)
 	if err != nil {
 		return fmt.Errorf("CreateTopic: %w", err)
 	}
-	fmt.Fprintf(w, "Created topic with azure event hubs ingestion: %v\n", t)
+	fmt.Fprintf(w, "Created topic with Azure Event Hubs ingestion: %v\n", topic)
 	return nil
 }
 
-// [END pubsub_old_version_create_topic_with_azure_event_hubs_ingestion]
+// [END pubsub_create_topic_with_azure_event_hubs_ingestion]
