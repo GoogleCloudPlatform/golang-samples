@@ -12,20 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package text_generation shows examples of generating text using the GenAI SDK.
-package text_generation
+// Package tools shows examples of various tools that Gemini model can use to generate text.
+package tools
 
-// [START googlegenaisdk_textgen_config_with_txt]
+// [START googlegenaisdk_tools_vais_with_txt]
 import (
 	"context"
 	"fmt"
 	"io"
 
-	genai "google.golang.org/genai"
+	"google.golang.org/genai"
 )
 
-// generateWithConfig shows how to generate text using a text prompt and custom configuration.
-func generateWithConfig(w io.Writer) error {
+// generateWithGoogleVAIS shows how to generate text using VAIS Search.
+func generateWithGoogleVAIS(w io.Writer, datastore string) error {
+	//datastore = "gs://your-datastore/your-prefix"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
@@ -36,12 +37,17 @@ func generateWithConfig(w io.Writer) error {
 	}
 
 	modelName := "gemini-2.5-flash"
-	contents := genai.Text("Why is the sky blue?")
-	// See the documentation: https://pkg.go.dev/google.golang.org/genai#GenerateContentConfig
+	contents := genai.Text("How do I make an appointment to renew my driver's license?")
 	config := &genai.GenerateContentConfig{
-		Temperature:      genai.Ptr(float32(0.0)),
-		CandidateCount:   int32(1),
-		ResponseMIMEType: "application/json",
+		Tools: []*genai.Tool{
+			{
+				Retrieval: &genai.Retrieval{
+					VertexAISearch: &genai.VertexAISearch{
+						Datastore: datastore,
+					},
+				},
+			},
+		},
 	}
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, config)
@@ -52,12 +58,11 @@ func generateWithConfig(w io.Writer) error {
 	respText := resp.Text()
 
 	fmt.Fprintln(w, respText)
+
 	// Example response:
-	// {
-	//   "explanation": "The sky is blue due to a phenomenon called Rayleigh scattering ...
-	// }
+	// 'The process for making an appointment to renew your driver's license varies depending on your location. To provide you with the most accurate instructions...'
 
 	return nil
 }
 
-// [END googlegenaisdk_textgen_config_with_txt]
+// [END googlegenaisdk_tools_vais_with_txt]
