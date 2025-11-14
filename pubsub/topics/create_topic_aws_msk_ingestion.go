@@ -14,13 +14,14 @@
 
 package topics
 
-// [START pubsub_old_version_create_topic_with_aws_msk_ingestion]
+// [START pubsub_create_topic_with_aws_msk_ingestion]
 import (
 	"context"
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 )
 
 func createTopicWithAWSMSKIngestion(w io.Writer, projectID, topicID, clusterARN, mskTopic, awsRoleARN, gcpSA string) error {
@@ -40,22 +41,25 @@ func createTopicWithAWSMSKIngestion(w io.Writer, projectID, topicID, clusterARN,
 	}
 	defer client.Close()
 
-	cfg := &pubsub.TopicConfig{
-		IngestionDataSourceSettings: &pubsub.IngestionDataSourceSettings{
-			Source: &pubsub.IngestionDataSourceAmazonMSK{
-				ClusterARN:        clusterARN,
-				Topic:             mskTopic,
-				AWSRoleARN:        awsRoleARN,
-				GCPServiceAccount: gcpSA,
+	topicpb := &pubsubpb.Topic{
+		Name: fmt.Sprintf("projects/%s/topics/%s", projectID, topicID),
+		IngestionDataSourceSettings: &pubsubpb.IngestionDataSourceSettings{
+			Source: &pubsubpb.IngestionDataSourceSettings_AwsMsk_{
+				AwsMsk: &pubsubpb.IngestionDataSourceSettings_AwsMsk{
+					ClusterArn:        clusterARN,
+					Topic:             mskTopic,
+					AwsRoleArn:        awsRoleARN,
+					GcpServiceAccount: gcpSA,
+				},
 			},
 		},
 	}
-	t, err := client.CreateTopicWithConfig(ctx, topicID, cfg)
+	topic, err := client.TopicAdminClient.CreateTopic(ctx, topicpb)
 	if err != nil {
 		return fmt.Errorf("CreateTopic: %w", err)
 	}
-	fmt.Fprintf(w, "Created topic with AWS MSK ingestion settings: %v\n", t)
+	fmt.Fprintf(w, "Created topic with AWS MSK ingestion settings: %v\n", topic)
 	return nil
 }
 
-// [END pubsub_old_version_create_topic_with_aws_msk_ingestion]
+// [END pubsub_create_topic_with_aws_msk_ingestion]
