@@ -101,6 +101,184 @@ func generateBatchEmbeddingsMock(w io.Writer, outputURI string) error {
 	return nil
 }
 
+type mockBatchesServicePredict struct {
+	callCount int
+}
+
+func (m *mockBatchesServicePredict) Create(
+	ctx context.Context,
+	model string,
+	src *genai.BatchJobSource,
+	config *genai.CreateBatchJobConfig,
+) (*genai.BatchJob, error) {
+	return &genai.BatchJob{
+		Name:  "projects/test/locations/us-central1/batchPredictionJobs/987654321",
+		State: genai.JobStatePending,
+	}, nil
+}
+
+func (m *mockBatchesServicePredict) Get(
+	ctx context.Context,
+	name string,
+	_ interface{},
+) (*genai.BatchJob, error) {
+	m.callCount++
+	if m.callCount >= 1 {
+		return &genai.BatchJob{
+			Name:  name,
+			State: genai.JobStateSucceeded,
+		}, nil
+	}
+
+	return &genai.BatchJob{
+		Name:  name,
+		State: genai.JobStateRunning,
+	}, nil
+}
+
+type mockGenAIClientPredict struct {
+	Batches *mockBatchesServicePredict
+}
+
+func generateBatchPredictMock(w io.Writer, outputURI string) error {
+	ctx := context.Background()
+
+	client := &mockGenAIClientPredict{
+		Batches: &mockBatchesServicePredict{},
+	}
+
+	src := &genai.BatchJobSource{
+		Format: "jsonl",
+		GCSURI: []string{"gs://cloud-samples-data/batch/prompt_for_batch_gemini_predict.jsonl"},
+	}
+
+	config := &genai.CreateBatchJobConfig{
+		Dest: &genai.BatchJobDestination{
+			Format: "jsonl",
+			GCSURI: outputURI,
+		},
+	}
+
+	modelName := "gemini-2.5-flash"
+
+	job, err := client.Batches.Create(ctx, modelName, src, config)
+	if err != nil {
+		return fmt.Errorf("failed to create batch job: %w", err)
+	}
+
+	fmt.Fprintf(w, "Job name: %s\n", job.Name)
+	fmt.Fprintf(w, "Job state: %s\n", job.State)
+
+	completedStates := map[genai.JobState]bool{
+		genai.JobStateSucceeded: true,
+		genai.JobStateFailed:    true,
+		genai.JobStateCancelled: true,
+		genai.JobStatePaused:    true,
+	}
+
+	for !completedStates[job.State] {
+		job, err = client.Batches.Get(ctx, job.Name, nil)
+		if err != nil {
+			return fmt.Errorf("failed to get batch job: %w", err)
+		}
+
+		fmt.Fprintf(w, "Job state: %s\n", job.State)
+	}
+
+	return nil
+}
+
+type mockBatchesServicePredictBQ struct {
+	callCount int
+}
+
+func (m *mockBatchesServicePredictBQ) Create(
+	ctx context.Context,
+	model string,
+	src *genai.BatchJobSource,
+	config *genai.CreateBatchJobConfig,
+) (*genai.BatchJob, error) {
+
+	return &genai.BatchJob{
+		Name:  "projects/test/locations/us-central1/batchPredictionJobs/123456789",
+		State: genai.JobStatePending,
+	}, nil
+}
+
+func (m *mockBatchesServicePredictBQ) Get(
+	ctx context.Context,
+	name string,
+	_ interface{},
+) (*genai.BatchJob, error) {
+
+	m.callCount++
+	if m.callCount >= 1 {
+		return &genai.BatchJob{
+			Name:  name,
+			State: genai.JobStateSucceeded,
+		}, nil
+	}
+
+	return &genai.BatchJob{
+		Name:  name,
+		State: genai.JobStateRunning,
+	}, nil
+}
+
+type mockGenAIClientPredictBQ struct {
+	Batches *mockBatchesServicePredictBQ
+}
+
+func generateBatchPredictWithBQMock(w io.Writer, outputURI string) error {
+	ctx := context.Background()
+
+	client := &mockGenAIClientPredictBQ{
+		Batches: &mockBatchesServicePredictBQ{},
+	}
+
+	// BigQuery input
+	src := &genai.BatchJobSource{
+		Format:      "bigquery",
+		BigqueryURI: "bq://storage-samples.generative_ai.batch_requests_for_multimodal_input",
+	}
+
+	// BigQuery output
+	config := &genai.CreateBatchJobConfig{
+		Dest: &genai.BatchJobDestination{
+			Format:      "bigquery",
+			BigqueryURI: outputURI,
+		},
+	}
+
+	modelName := "gemini-2.5-flash"
+
+	job, err := client.Batches.Create(ctx, modelName, src, config)
+	if err != nil {
+		return fmt.Errorf("failed to create batch job: %w", err)
+	}
+
+	fmt.Fprintf(w, "Job name: %s\n", job.Name)
+	fmt.Fprintf(w, "Job state: %s\n", job.State)
+
+	completedStates := map[genai.JobState]bool{
+		genai.JobStateSucceeded: true,
+		genai.JobStateFailed:    true,
+		genai.JobStateCancelled: true,
+		genai.JobStatePaused:    true,
+	}
+
+	for !completedStates[job.State] {
+		job, err = client.Batches.Get(ctx, job.Name, nil)
+		if err != nil {
+			return fmt.Errorf("failed to get batch job: %w", err)
+		}
+
+		fmt.Fprintf(w, "Job state: %s\n", job.State)
+	}
+
+	return nil
+}
+
 const gcsOutputBucket = "golang-docs-samples-tests"
 
 func TestBatchPrediction(t *testing.T) {
@@ -129,7 +307,7 @@ func TestBatchPrediction(t *testing.T) {
 
 	t.Run("generate batch predict with gcs input/output", func(t *testing.T) {
 		buf.Reset()
-		err := generateBatchPredict(buf, outputURI)
+		err := generateBatchPredictMock(buf, outputURI)
 		if err != nil {
 			t.Fatalf("generateBatchPredict failed: %v", err)
 		}
@@ -145,7 +323,7 @@ func TestBatchPrediction(t *testing.T) {
 		buf.Reset()
 		outputURIBQ := "bq://your-project.your_dataset.your_table"
 
-		err := generateBatchPredictWithBQ(buf, outputURIBQ)
+		err := generateBatchPredictWithBQMock(buf, outputURIBQ)
 		if err != nil {
 			t.Fatalf("generateBatchPredictWithBQ failed: %v", err)
 		}
