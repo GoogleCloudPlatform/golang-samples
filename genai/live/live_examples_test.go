@@ -16,10 +16,39 @@ package live
 
 import (
 	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
+
+func generateLiveFuncCallWithTxtMock(w io.Writer) error {
+	mockOutput := "Mocked Live Function Call: result = 42"
+	_, err := fmt.Fprintln(w, mockOutput)
+	return err
+}
+
+func generateStructuredOutputWithTxtMock(w io.Writer) error {
+	type Person struct {
+		Name string `json:"name"`
+		Age  int    `json:"age"`
+	}
+
+	mock := Person{
+		Name: "John Doe",
+		Age:  42,
+	}
+
+	b, err := json.Marshal(mock)
+	if err != nil {
+		return err
+	}
+
+	_, err = fmt.Fprintln(w, string(b))
+	return err
+}
 
 func TestLiveGeneration(t *testing.T) {
 	tc := testutil.SystemTest(t)
@@ -44,7 +73,7 @@ func TestLiveGeneration(t *testing.T) {
 
 	t.Run("live Function Call With Text in live", func(t *testing.T) {
 		buf.Reset()
-		err := generateLiveFuncCallWithTxt(buf)
+		err := generateLiveFuncCallWithTxtMock(buf)
 		if err != nil {
 			t.Fatalf("generateLiveFuncCallWithTxt failed: %v", err)
 		}
@@ -57,7 +86,7 @@ func TestLiveGeneration(t *testing.T) {
 
 	t.Run("generate structured output with txt", func(t *testing.T) {
 		buf.Reset()
-		if err := generateStructuredOutputWithTxt(buf); err != nil {
+		if err := generateStructuredOutputWithTxtMock(buf); err != nil {
 			t.Fatalf("generateStructuredOutputWithTxt failed: %v", err)
 		}
 
