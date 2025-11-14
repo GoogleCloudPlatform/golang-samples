@@ -5,6 +5,7 @@ go 1.24.0
 require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250201051611-5fb145d1e974
 	google.golang.org/genai v1.25.0
+	golang.org/x/oauth2 v0.25.0
 )
 
 require (
@@ -44,7 +45,6 @@ require (
 	go.opentelemetry.io/otel/trace v1.34.0 // indirect
 	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/net v0.34.0 // indirect
-	golang.org/x/oauth2 v0.25.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
