@@ -5,7 +5,7 @@ go 1.24.0
 require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250201051611-5fb145d1e974
 	golang.org/x/oauth2 v0.25.0
-	google.golang.org/genai v1.17.0
+	google.golang.org/genai v1.25.0
 )
 
 require (
