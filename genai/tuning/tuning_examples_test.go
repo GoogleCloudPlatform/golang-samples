@@ -152,4 +152,17 @@ func TestTuningGeneration(t *testing.T) {
 			t.Error("expected non-empty output, got empty")
 		}
 	})
+
+	t.Run("list tuning jobs in project", func(t *testing.T) {
+		buf.Reset()
+		err := listTuningJobs(buf)
+		if err != nil {
+			t.Fatalf("listTuningJobs failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
 }
