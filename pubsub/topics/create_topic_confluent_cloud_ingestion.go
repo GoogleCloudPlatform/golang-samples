@@ -14,13 +14,14 @@
 
 package topics
 
-// [START pubsub_old_version_create_topic_with_confluent_cloud_ingestion]
+// [START pubsub_create_topic_with_confluent_cloud_ingestion]
 import (
 	"context"
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 )
 
 func createTopicWithConfluentCloudIngestion(w io.Writer, projectID, topicID, bootstrapServer, clusterID, confluentTopic, poolID, gcpSA string) error {
@@ -41,23 +42,26 @@ func createTopicWithConfluentCloudIngestion(w io.Writer, projectID, topicID, boo
 	}
 	defer client.Close()
 
-	cfg := &pubsub.TopicConfig{
-		IngestionDataSourceSettings: &pubsub.IngestionDataSourceSettings{
-			Source: &pubsub.IngestionDataSourceConfluentCloud{
-				BootstrapServer:   bootstrapServer,
-				ClusterID:         clusterID,
-				Topic:             confluentTopic,
-				IdentityPoolID:    poolID,
-				GCPServiceAccount: gcpSA,
+	topicpb := &pubsubpb.Topic{
+		Name: fmt.Sprintf("projects/%s/topics/%s", projectID, topicID),
+		IngestionDataSourceSettings: &pubsubpb.IngestionDataSourceSettings{
+			Source: &pubsubpb.IngestionDataSourceSettings_ConfluentCloud_{
+				ConfluentCloud: &pubsubpb.IngestionDataSourceSettings_ConfluentCloud{
+					BootstrapServer:   bootstrapServer,
+					ClusterId:         clusterID,
+					Topic:             confluentTopic,
+					IdentityPoolId:    poolID,
+					GcpServiceAccount: gcpSA,
+				},
 			},
 		},
 	}
-	t, err := client.CreateTopicWithConfig(ctx, topicID, cfg)
+	topic, err := client.TopicAdminClient.CreateTopic(ctx, topicpb)
 	if err != nil {
 		return fmt.Errorf("CreateTopic: %w", err)
 	}
-	fmt.Fprintf(w, "Created topic with Confluent Cloud ingestion: %v\n", t)
+	fmt.Fprintf(w, "Created topic with Confluent Cloud ingestion: %v\n", topic)
 	return nil
 }
 
-// [END pubsub_old_version_create_topic_with_confluent_cloud_ingestion]
+// [END pubsub_create_topic_with_confluent_cloud_ingestion]
