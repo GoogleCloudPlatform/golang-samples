@@ -37,7 +37,6 @@ func generateLiveCodeExecWithTxt(w io.Writer) error {
 	}
 
 	modelName := "gemini-2.0-flash-live-preview-04-09"
-	//modelName := "gemini-2.5-flash"
 
 	config := &genai.LiveConnectConfig{
 		ResponseModalities: []genai.Modality{genai.ModalityText},
