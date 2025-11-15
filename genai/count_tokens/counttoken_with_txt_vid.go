@@ -44,7 +44,7 @@ func countWithTxtAndVid(w io.Writer) error {
 				MIMEType: "video/mp4",
 			}},
 		},
-			Role: "user"},
+			Role: genai.RoleUser},
 	}
 
 	resp, err := client.Models.CountTokens(ctx, modelName, contents, nil)

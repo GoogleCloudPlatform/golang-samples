@@ -45,7 +45,7 @@ func generateWithTextImage(w io.Writer) error {
 				MIMEType: "image/jpeg",
 			}},
 		},
-			Role: "user"},
+			Role: genai.RoleUser},
 	}
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)

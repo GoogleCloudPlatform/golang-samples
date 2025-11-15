@@ -40,7 +40,7 @@ func generateWithGoogleSearch(w io.Writer) error {
 		{Parts: []*genai.Part{
 			{Text: "When is the next total solar eclipse in the United States?"},
 		},
-			Role: "user"},
+			Role: genai.RoleUser},
 	}
 	config := &genai.GenerateContentConfig{
 		Tools: []*genai.Tool{

@@ -15,7 +15,7 @@
 // Package live shows how to use the GenAI SDK to generate text with live resources.
 package live
 
-// [START googlegenaisdk_live_ground_googsearch_with_txt]
+// [START googlegenaisdk_live_code_exec_with_txt]
 import (
 	"context"
 	"fmt"
@@ -24,8 +24,9 @@ import (
 	"google.golang.org/genai"
 )
 
-// generateGroundSearchWithTxt demonstrates using a live Gemini model with Google Search grounded responses.
-func generateGroundSearchWithTxt(w io.Writer) error {
+// generateLiveCodeExecWithTxt demonstrates using a live Gemini model
+// that performs code exec with text calls and handles responses.
+func generateLiveCodeExecWithTxt(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
@@ -36,11 +37,14 @@ func generateGroundSearchWithTxt(w io.Writer) error {
 	}
 
 	modelName := "gemini-2.0-flash-live-preview-04-09"
+	//modelName := "gemini-2.5-flash"
 
 	config := &genai.LiveConnectConfig{
 		ResponseModalities: []genai.Modality{genai.ModalityText},
 		Tools: []*genai.Tool{
-			{GoogleSearch: &genai.GoogleSearch{}},
+			{
+				CodeExecution: &genai.ToolCodeExecution{},
+			},
 		},
 	}
 
@@ -50,18 +54,20 @@ func generateGroundSearchWithTxt(w io.Writer) error {
 	}
 	defer session.Close()
 
-	textInput := "When did the last Brazil vs. Argentina soccer match happen?"
+	textInput := "Compute the largest prime palindrome under 10"
+	fmt.Fprintf(w, "> %s\n\n", textInput)
 
-	// Send user input
-	userContent := &genai.Content{
-		Role: genai.RoleUser,
-		Parts: []*genai.Part{
-			{Text: textInput},
+	err = session.SendClientContent(genai.LiveClientContentInput{
+		Turns: []*genai.Content{
+			{
+				Role: genai.RoleUser,
+				Parts: []*genai.Part{
+					{Text: textInput},
+				},
+			},
 		},
-	}
-	if err := session.SendClientContent(genai.LiveClientContentInput{
-		Turns: []*genai.Content{userContent},
-	}); err != nil {
+	})
+	if err != nil {
 		return fmt.Errorf("failed to send client content: %w", err)
 	}
 
@@ -84,25 +90,22 @@ func generateGroundSearchWithTxt(w io.Writer) error {
 					if part == nil {
 						continue
 					}
-					if part.Text != "" {
-						response += part.Text
+					if part.ExecutableCode != nil {
+						fmt.Fprint(w, part.ExecutableCode.Code)
+					}
+					if part.CodeExecutionResult != nil {
+						response += part.CodeExecutionResult.Output
 					}
 				}
+
 			}
 		}
-
-		if chunk.GoAway != nil {
-			break
-		}
 	}
-
-	fmt.Fprintln(w, response)
-
 	// Example output:
-	// > When did the last Brazil vs. Argentina soccer match happen?
-	// The most recent match between Argentina and Brazil took place on March 25, 2025, as part of the 2026 World Cup qualifiers. Argentina won 4-1.
-
+	//  > Compute the largest prime palindrome under 10
+	//  Final Answer: The final answer is $\boxed{7}$
+	fmt.Fprintln(w, response)
 	return nil
 }
 
-// [END googlegenaisdk_live_ground_googsearch_with_txt]
+// [END googlegenaisdk_live_code_exec_with_txt]
