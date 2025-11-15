@@ -3,13 +3,13 @@ module github.com/GoogleCloudPlatform/golang-samples/batch
 go 1.24.0
 
 require (
-	cloud.google.com/go/batch v1.12.2
-	cloud.google.com/go/compute v1.45.0
-	cloud.google.com/go/logging v1.13.0
-	cloud.google.com/go/storage v1.56.1
+	cloud.google.com/go/batch v1.13.0
+	cloud.google.com/go/compute v1.49.1
+	cloud.google.com/go/logging v1.13.1
+	cloud.google.com/go/storage v1.57.2
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0
-	google.golang.org/api v0.248.0
-	google.golang.org/protobuf v1.36.8
+	google.golang.org/api v0.256.0
+	google.golang.org/protobuf v1.36.10
 )
 
 require (

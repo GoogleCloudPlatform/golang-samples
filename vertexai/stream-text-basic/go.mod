@@ -3,9 +3,9 @@ module github.com/GoogleCloudPlatform/golang-samples/vertexai/stream-text-basic
 go 1.24.0
 
 require (
-	cloud.google.com/go/vertexai v0.13.2
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	google.golang.org/api v0.217.0
+	cloud.google.com/go/vertexai v0.15.0
+	github.com/GoogleCloudPlatform/golang-samples 2c9f7d4fe3c1
+	google.golang.org/api v0.256.0
 )
 
 require (

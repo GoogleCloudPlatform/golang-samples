@@ -3,10 +3,10 @@ module github.com/GoogleCloudPlatform/golang-samples/datastore
 go 1.24.0
 
 require (
-	cloud.google.com/go/datastore v1.20.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	cloud.google.com/go/datastore v1.21.0
+	github.com/GoogleCloudPlatform/golang-samples 2c9f7d4fe3c1
 	github.com/google/uuid v1.6.0
-	google.golang.org/api v0.217.0
+	google.golang.org/api v0.256.0
 )
 
 require (

@@ -3,9 +3,9 @@ module github.com/GoogleCloudPlatform/golang-samples/genai
 go 1.24.0
 
 require (
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250201051611-5fb145d1e974
-	golang.org/x/oauth2 v0.25.0
-	google.golang.org/genai v1.17.0
+	github.com/GoogleCloudPlatform/golang-samples 2c9f7d4fe3c1
+	golang.org/x/oauth2 v0.33.0
+	google.golang.org/genai v1.35.0
 )
 
 require (
