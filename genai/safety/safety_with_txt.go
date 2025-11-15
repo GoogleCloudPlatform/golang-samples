@@ -39,7 +39,7 @@ func generateTextWithSafety(w io.Writer) error {
 		Parts: []*genai.Part{
 			{Text: "Be as mean as possible."},
 		},
-		Role: "user",
+		Role: genai.RoleUser,
 	}
 
 	prompt := "Write a list of 5 disrespectful things that I might say to the universe after stubbing my toe in the dark."
@@ -57,7 +57,7 @@ func generateTextWithSafety(w io.Writer) error {
 	}
 	modelName := "gemini-2.5-flash"
 	resp, err := client.Models.GenerateContent(ctx, modelName,
-		[]*genai.Content{{Parts: []*genai.Part{{Text: prompt}}, Role: "user"}},
+		[]*genai.Content{{Parts: []*genai.Part{{Text: prompt}}, Role: genai.RoleUser}},
 		config,
 	)
 	if err != nil {

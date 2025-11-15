@@ -62,7 +62,7 @@ func generateGoogleMapsCoordinatesWithText(w io.Writer) error {
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, []*genai.Content{
 		{
-			Role: "user",
+			Role: genai.RoleUser,
 			Parts: []*genai.Part{
 				{Text: prompt},
 			},

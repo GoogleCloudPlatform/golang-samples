@@ -55,7 +55,7 @@ func generateEmbedContentWithText(w io.Writer) error {
 					Text: "Driver's knowledge test study guide",
 				},
 			},
-			Role: "user",
+			Role: genai.RoleUser,
 		},
 	}
 
