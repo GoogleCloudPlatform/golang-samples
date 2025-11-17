@@ -29,7 +29,7 @@ func countTokenLocalWithTxt(w io.Writer) error {
 	modelName := "gemini-2.5-flash"
 	client, err := tokenizer.NewLocalTokenizer(modelName)
 	if err != nil {
-		return fmt.Errorf("failed to create genai client: %w", err)
+		return fmt.Errorf("failed to create local tokenizer: %w", err)
 	}
 
 	contents := []*genai.Content{
@@ -40,7 +40,7 @@ func countTokenLocalWithTxt(w io.Writer) error {
 
 	resp, err := client.CountTokens(contents, nil)
 	if err != nil {
-		return fmt.Errorf("failed to generate content: %w", err)
+		return fmt.Errorf("failed to count tokens: %w", err)
 	}
 
 	fmt.Fprintf(w, "Total: %d\n", resp.TotalTokens)
