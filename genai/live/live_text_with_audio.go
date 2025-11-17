@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"google.golang.org/genai"
 )
@@ -76,7 +77,7 @@ func generateLiveTextWithAudio(w io.Writer) error {
 	}
 
 	// Stream the response
-	var response string
+	var response strings.Builder
 	for {
 		chunk, err := session.Receive()
 		if err != nil {
@@ -94,13 +95,13 @@ func generateLiveTextWithAudio(w io.Writer) error {
 		if chunk.ServerContent.ModelTurn != nil {
 			for _, part := range chunk.ServerContent.ModelTurn.Parts {
 				if part != nil && part.Text != "" {
-					response += part.Text
+					response.WriteString(part.Text)
 				}
 			}
 		}
 	}
 
-	fmt.Fprintln(w, response)
+	fmt.Fprintln(w, response.String())
 
 	// Example output:
 	// > Answer to this audio url: https://storage.googleapis.com/generativeai-downloads/data/16000.wav

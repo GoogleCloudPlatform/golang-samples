@@ -129,7 +129,7 @@ func TestLiveGeneration(t *testing.T) {
 		}
 	})
 
-	t.Run("generate RAG with txt", func(t *testing.T) {
+	t.Run("generate text with audio", func(t *testing.T) {
 		buf.Reset()
 		if err := generateLiveTextWithAudioMock(buf); err != nil {
 			t.Fatalf("generateLiveTextWithAudio failed: %v", err)

@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 
 	"google.golang.org/genai"
 )
@@ -83,7 +84,7 @@ func generateLiveRAGWithText(w io.Writer, memoryCorpus string) error {
 	}
 
 	// Stream the response
-	var response string
+	var response strings.Builder
 	for {
 		chunk, err := session.Receive()
 		if err != nil {
@@ -104,13 +105,13 @@ func generateLiveRAGWithText(w io.Writer, memoryCorpus string) error {
 					continue
 				}
 				if part.Text != "" {
-					response += part.Text
+					response.WriteString(part.Text)
 				}
 			}
 		}
 	}
 
-	fmt.Fprintln(w, response)
+	fmt.Fprintln(w, response.String())
 
 	// Example output:
 	// > What are the newest Gemini models?

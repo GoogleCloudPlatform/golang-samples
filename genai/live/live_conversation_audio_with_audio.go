@@ -17,6 +17,7 @@ package live
 
 // [START googlegenaisdk_live_conversation_audio_with_audio]
 import (
+	"bytes"
 	"context"
 	"encoding/binary"
 	"fmt"
@@ -65,7 +66,7 @@ func generateLiveAudioConversation(w io.Writer, audioFilePath string) error {
 	fmt.Fprintf(w, "> Streaming audio from %s to the model\n\n", audioFilePath)
 
 	// Send audio data to the model
-	err = session.SendRealtimeInput(genai.LiveSendRealtimeInputParameters{
+	err = session.SendRealtimeInput(genai.LiveRealtimeInput{
 		Media: &genai.Blob{
 			Data:     audioBytes,
 			MIMEType: mimeType,
@@ -156,10 +157,7 @@ func loadAudioAsPCMBytes(path string) ([]byte, string, error) {
 
 // saveAudioFramesAsWAV writes audio frames (PCM bytes) to a WAV file.
 func saveAudioFramesAsWAV(filePath string, frames [][]byte, sampleRate int) error {
-	audioData := []byte{}
-	for _, f := range frames {
-		audioData = append(audioData, f...)
-	}
+	audioData := bytes.Join(frames, nil)
 
 	// Create buffer
 	intData := audio.IntBuffer{
