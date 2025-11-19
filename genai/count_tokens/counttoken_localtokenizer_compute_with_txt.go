@@ -19,6 +19,7 @@ package count_tokens
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	"google.golang.org/genai"
 	"google.golang.org/genai/tokenizer"
@@ -46,15 +47,23 @@ func countTokenLocalComputeWithTxt(w io.Writer) error {
 	for _, tokenInfo := range resp.TokensInfo {
 		fmt.Fprintf(w, "Role: %s\n", tokenInfo.Role)
 		fmt.Fprintf(w, "Token IDs: %v\n", tokenInfo.TokenIDs)
-		fmt.Fprintf(w, "Tokens: %v\n", tokenInfo.Tokens)
+		fmt.Fprintf(w, "Tokens: [%s]\n", formatTokens(tokenInfo.Tokens))
 	}
 
 	// Example response:
 	// Role: user
 	// Token IDs: [3689 236789 236751 506 27801 3658 528 506 5422 5192 236881]
-	// Tokens: [[87 104 97 116] [39] [115] ...
+	// Tokens: [[What, ', s, ▁the, ▁longest, ▁word, ▁in, ▁the, ▁English, ▁language, ?]] ...
 
 	return nil
+}
+
+func formatTokens(tokens [][]byte) string {
+	parts := make([]string, len(tokens))
+	for i, t := range tokens {
+		parts[i] = fmt.Sprintf("%s", t)
+	}
+	return fmt.Sprintf("[%s]", strings.Join(parts, ", "))
 }
 
 // [END googlegenaisdk_counttoken_localtokenizer_compute_with_txt]
