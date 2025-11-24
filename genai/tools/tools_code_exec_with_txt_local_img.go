@@ -38,21 +38,21 @@ func generateWithLocalImgAndCodeExec(w io.Writer) error {
 	}
 
 	// Read local image
-	imgBytes, err := os.ReadFile("640px-Monty_open_door.svg.png")
+	imgBytes, err := os.ReadFile("640px-Monty_open_door.png")
 	if err != nil {
 		return fmt.Errorf("failed to read image: %w", err)
 	}
 
 	// Define the prompt
-	prompt := "Run a simulation of the Monty Hall Problem with 1,000 trials.\n" +
-		"Here's how this works as a reminder. In the Monty Hall Problem, you're on a game\n" +
-		"show with three doors. Behind one is a car, and behind the others are goats. You\n" +
-		"pick a door. The host, who knows what's behind the doors, opens a different door\n" +
-		"to reveal a goat. Should you switch to the remaining unopened door?\n" +
-		"The answer has always been a little difficult for me to understand when people\n" +
-		"solve it with math - so please run a simulation with Python to show me what the\n" +
-		"best strategy is.\n" +
-		"Thank you!"
+	prompt := `Run a simulation of the Monty Hall Problem with 1,000 trials.
+			Here's how this works as a reminder. In the Monty Hall Problem, you're on a game
+			show with three doors. Behind one is a car, and behind the others are goats. You
+			pick a door. The host, who knows what's behind the doors, opens a different door
+			to reveal a goat. Should you switch to the remaining unopened door?
+			The answer has always been a little difficult for me to understand when people
+			solve it with math - so please run a simulation with Python to show me what the
+			best strategy is.
+			Thank you!`
 
 	// Enable the code execution tool
 	tools := []*genai.Tool{
