@@ -70,6 +70,17 @@ exporters:
   # Export metrics to Google Managed service for Prometheus
   googlemanagedprometheus:
     project: ${GOOGLE_CLOUD_PROJECT}
+  otlphttp:
+    encoding: proto
+    endpoint: https://telemetry.googleapis.com
+    # Use the googleclientauth extension to authenticate with Google credentials
+    auth:
+      authenticator: googleclientauth
+
+extensions:
+  googleclientauth:
+    project: ${GOOGLE_CLOUD_PROJECT}
+    quota_project: ${GOOGLE_CLOUD_PROJECT}
 
 processors:
   # Batch telemetry together to more efficiently send to GCP
@@ -88,8 +99,14 @@ processors:
   # If running on GCP (e.g. on GKE), detect resource attributes from the environment.
   resourcedetection:
     detectors: ["env", "gcp"]
+  resource/gcp_project_id:
+    attributes:
+    - key: gcp.project_id
+      value: ${GOOGLE_CLOUD_PROJECT}
+      action: insert
 
 service:
+  extensions: [googleclientauth]
   telemetry:
     metrics:
       readers:
@@ -101,8 +118,8 @@ service:
   pipelines:
     traces:
       receivers: ["otlp"]
-      processors: ["batch", "resourcedetection"]
-      exporters: ["googlecloud"]
+      processors: ["batch", "resourcedetection", resource/gcp_project_id]
+      exporters: ["otlphttp"]
     metrics:
       receivers: ["otlp"]
       processors: ["batch", "resourcedetection", "resource"]

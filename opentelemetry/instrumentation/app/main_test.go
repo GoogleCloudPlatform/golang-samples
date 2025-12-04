@@ -68,7 +68,13 @@ func TestWriteTelemetry(t *testing.T) {
 		t:               t,
 		expectationsMet: make(chan struct{}),
 		expectations: []*metricExpectation{
-			{name: "http.server.duration"},
+			{name: "http.client.request.body.size"},
+			{name: "http.client.request.duration"},
+			{name: "http.server.request.body.size"},
+			{name: "http.server.response.body.size"},
+			{name: "http.server.request.duration"},
+			{name: "example.subrequests"},
+			{name: "example.sleep.duration"},
 		},
 	}
 	http.HandleFunc("/v1/metrics", ms.handleMetrics)
