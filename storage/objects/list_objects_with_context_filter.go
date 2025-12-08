@@ -25,7 +25,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// listObjectsWithFilter lists objects using a context filter.
+// listObjectsWithContextFilter lists objects using a context filter.
 func listObjectsWithContextFilter(w io.Writer, bucket, filter string) error {
 	// bucket := "bucket-name"
 	// filter := "contexts.\"keyA\"=\"valueA\""
@@ -35,7 +35,7 @@ func listObjectsWithContextFilter(w io.Writer, bucket, filter string) error {
 	 * List any object that has a context with the specified key attached
 	 * filter := "contexts.\"KEY\":*";
 	 *
-	 * List any object that that does not have a context with the specified key attached
+	 * List any object that does not have a context with the specified key attached
 	 * filter := "-contexts.\"KEY\":*";
 	 *
 	 * List any object that has a context with the specified key and value attached
