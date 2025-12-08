@@ -842,3 +842,50 @@ func TestListSoftDeletedVersionsOfObject(t *testing.T) {
 		t.Errorf("Output mismatch: got %q, want %q", got, want)
 	}
 }
+
+func TestObjectContexts(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	t.Cleanup(func() { client.Close() })
+
+	bucketName := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	objectName := "context-object.txt"
+
+	if err := uploadFile(io.Discard, bucketName, objectName); err != nil {
+		t.Fatalf("uploadFile(%q): %v", objectName, err)
+	}
+
+	if err := setObjectContexts(io.Discard, bucketName, objectName); err != nil {
+		t.Fatalf("setObjectContexts: %v", err)
+	}
+
+	var getBuf bytes.Buffer
+	if err := getObjectContexts(&getBuf, bucketName, objectName); err != nil {
+		t.Fatalf("getObjectContexts: %v", err)
+	}
+
+	gotGet := getBuf.String()
+	wantGet1 := "key1 = value1"
+	if !strings.Contains(gotGet, wantGet1) {
+		t.Errorf("getObjectContexts() got %q; want to contain %q", gotGet, wantGet1)
+	}
+	wantGet2 := "key2 = value2"
+	if !strings.Contains(gotGet, wantGet2) {
+		t.Errorf("getObjectContexts() got %q; want to contain %q", gotGet, wantGet2)
+	}
+
+	var listBuf bytes.Buffer
+	filter := "contexts.\"key1\"=\"value1\""
+	if err := listObjectsWithContextFilter(&listBuf, bucketName, filter); err != nil {
+		t.Fatalf("listObjectsWithFilter: %v", err)
+	}
+	gotList := listBuf.String()
+	wantList := objectName
+	if !strings.Contains(gotList, wantList) {
+		t.Errorf("listObjectsWithFilter() got %q; want to contain %q", gotList, wantList)
+	}
+}
