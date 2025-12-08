@@ -1,2 +1,4 @@
 cloud.google.com/go/functions v1.19.7 h1:7LcOD18euIVGRUPaeCmgO6vfWSLNIsi6STWRQcdANG8=
+cloud.google.com/go/functions v1.19.7/go.mod h1:xbcKfS7GoIcaXr2FSwmtn9NXal1JR4TV6iYZlgXffwA=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
+github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU=
