@@ -42,6 +42,6 @@ func TestListTemplate(t *testing.T) {
 	if got := buf.String(); !strings.Contains(got, templateID) {
 		t.Errorf("listInspectTemplates got\n----\n%v\n----\nWant to contain:\n----\n%v\n----", got, templateID)
 	}
-	fullID := fmt.Sprintf("projects/" + tc.ProjectID + "/locations/global/inspectTemplates/" + templateID)
+	fullID := fmt.Sprintf("projects/%s/locations/global/inspectTemplates/%s", tc.ProjectID, templateID)
 	defer cleeanUpTemplates(t, tc.ProjectID, fullID)
 }

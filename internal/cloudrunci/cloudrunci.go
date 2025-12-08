@@ -27,6 +27,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"os/exec"
@@ -47,6 +48,28 @@ const (
 	labelOperationGetURL        = "get url"
 	defaultRegistryName         = "cloudrunci"
 )
+
+// HTTPGetProbe describes a probe definition using HTTP Get.
+type HTTPGetProbe struct {
+	Path string
+	Port int
+}
+
+// GRPCProbe describes a probe definition using gRPC.
+type GRPCProbe struct {
+	Port    int
+	Service string
+}
+
+// ReadinessProbe describes the readiness probe for a Cloud Run service.
+type ReadinessProbe struct {
+	TimeoutSeconds   int
+	PeriodSeconds    int
+	SuccessThreshold int
+	FailureThreshold int
+	HttpGet          *HTTPGetProbe
+	GRPC             *GRPCProbe
+}
 
 // Service describes a Cloud Run service
 type Service struct {
@@ -84,6 +107,9 @@ type Service struct {
 
 	// Location to deploy the Service, and related artifacts
 	Location string
+
+	// Readiness probe definition for the containers in this service.
+	Readiness *ReadinessProbe
 }
 
 // runID is an identifier that changes between runs.
@@ -271,7 +297,7 @@ func (s *Service) validate() error {
 
 // revision returns the revision that the service will be deployed to.
 // NOTE: Until traffic splitting is available, this will be used as the service name.
-func (s *Service) version() string {
+func (s *Service) Version() string {
 	return s.Name + "-" + runID
 }
 
@@ -292,7 +318,7 @@ func (s *Service) Deploy() error {
 	}
 
 	if _, err := gcloud(s.operationLabel(labelOperationDeploy), s.deployCmd()); err != nil {
-		return fmt.Errorf("gcloud: %s: %q", s.version(), err)
+		return fmt.Errorf("gcloud: %s: %q", s.Version(), err)
 	}
 
 	s.deployed = true
@@ -320,7 +346,7 @@ func (s *Service) Build() error {
 	}
 
 	if out, err := gcloud(s.operationLabel(labelOperationBuild), s.buildCmd()); err != nil {
-		fmt.Print(string(out))
+		log.Print(string(out))
 		return fmt.Errorf("gcloud: %s: %q", s.Image, err)
 	}
 	s.built = true
@@ -338,7 +364,7 @@ func (s *Service) Clean() error {
 	}
 
 	if _, err := gcloud(s.operationLabel(labelOperationDeleteService), s.deleteServiceCmd()); err != nil {
-		return fmt.Errorf("gcloud: %v: %q", s.version(), err)
+		return fmt.Errorf("gcloud: %v: %q", s.Version(), err)
 	}
 	s.deployed = false
 
@@ -346,7 +372,7 @@ func (s *Service) Clean() error {
 	if s.built {
 		_, err := gcloud(s.operationLabel("delete container image"), s.deleteImageCmd())
 		if err != nil {
-			return fmt.Errorf("gcloud: %v: %q", s.version(), err)
+			return fmt.Errorf("gcloud: %v: %q", s.Version(), err)
 		}
 		s.built = false
 	}
@@ -364,7 +390,7 @@ func (s *Service) deployCmd() *exec.Cmd {
 		"alpha", // TODO until --use-http2 goes GA
 		"run",
 		"deploy",
-		s.version(),
+		s.Version(),
 		"--project",
 		s.ProjectID,
 		"--image",
@@ -381,6 +407,40 @@ func (s *Service) deployCmd() *exec.Cmd {
 	}
 	if s.HTTP2 {
 		args = append(args, "--use-http2")
+	}
+
+	if s.Readiness != nil {
+		var readinessProbeParts []string
+		if s.Readiness.TimeoutSeconds > 0 {
+			readinessProbeParts = append(readinessProbeParts, fmt.Sprintf("timeoutSeconds=%d", s.Readiness.TimeoutSeconds))
+		}
+		if s.Readiness.PeriodSeconds > 0 {
+			readinessProbeParts = append(readinessProbeParts, fmt.Sprintf("periodSeconds=%d", s.Readiness.PeriodSeconds))
+		}
+		if s.Readiness.SuccessThreshold > 0 {
+			readinessProbeParts = append(readinessProbeParts, fmt.Sprintf("successThreshold=%d", s.Readiness.SuccessThreshold))
+		}
+		if s.Readiness.FailureThreshold > 0 {
+			readinessProbeParts = append(readinessProbeParts, fmt.Sprintf("failureThreshold=%d", s.Readiness.FailureThreshold))
+		}
+		if s.Readiness.HttpGet != nil {
+			if s.Readiness.HttpGet.Path != "" {
+				readinessProbeParts = append(readinessProbeParts, fmt.Sprintf("httpGet.path=%s", s.Readiness.HttpGet.Path))
+			}
+			if s.Readiness.HttpGet.Port > 0 {
+				readinessProbeParts = append(readinessProbeParts, fmt.Sprintf("httpGet.port=%d", s.Readiness.HttpGet.Port))
+			}
+		} else if s.Readiness.GRPC != nil {
+			if s.Readiness.GRPC.Service != "" {
+				readinessProbeParts = append(readinessProbeParts, fmt.Sprintf("grpc.service=%s", s.Readiness.GRPC.Service))
+			}
+			if s.Readiness.GRPC.Port > 0 {
+				readinessProbeParts = append(readinessProbeParts, fmt.Sprintf("grpc.port=%d", s.Readiness.GRPC.Port))
+			}
+		}
+		if len(readinessProbeParts) > 0 {
+			args = append(args, "--readiness-probe="+strings.Join(readinessProbeParts, ","))
+		}
 	}
 
 	// NOTE: if the "beta" component is not available, and this is run in parallel,
@@ -438,7 +498,7 @@ func (s *Service) deleteServiceCmd() *exec.Cmd {
 		"run",
 		"services",
 		"delete",
-		s.version(),
+		s.Version(),
 		"--project",
 		s.ProjectID,
 	}, s.Platform.CommandFlags()...)
@@ -457,7 +517,7 @@ func (s *Service) urlCmd() *exec.Cmd {
 		"run",
 		"services",
 		"describe",
-		s.version(),
+		s.Version(),
 		"--project",
 		s.ProjectID,
 		"--format",
@@ -480,14 +540,14 @@ func (s *Service) LogEntries(filter string, find string, maxAttempts int) (bool,
 	}
 	defer client.Close()
 
-	preparedFilter := fmt.Sprintf(`resource.type="cloud_run_revision" resource.labels.service_name="%s" %s`, s.version(), filter)
-	fmt.Printf("Using log filter: %s\n", preparedFilter)
+	preparedFilter := fmt.Sprintf(`resource.type="cloud_run_revision" resource.labels.service_name="%s" %s`, s.Version(), filter)
+	log.Printf("Using log filter: %s\n", preparedFilter)
 
-	fmt.Println("Waiting for logs...")
+	log.Println("Waiting for logs...")
 	time.Sleep(3 * time.Minute)
 
 	for i := 1; i < maxAttempts; i++ {
-		fmt.Printf("Attempt #%d\n", i)
+		log.Printf("Attempt #%d\n", i)
 		it := client.Entries(ctx, logadmin.Filter(preparedFilter))
 		for {
 			entry, err := it.Next()
@@ -499,10 +559,10 @@ func (s *Service) LogEntries(filter string, find string, maxAttempts int) (bool,
 			}
 			payload := fmt.Sprintf("%v", entry.Payload)
 			if len(payload) > 0 {
-				fmt.Printf("entry.Payload: %v\n", entry.Payload)
+				log.Printf("entry.Payload: %v\n", entry.Payload)
 			}
 			if strings.Contains(payload, find) {
-				fmt.Printf("%q log entry found.\n", find)
+				log.Printf("%q log entry found.\n", find)
 				return true, nil
 			}
 		}

@@ -20,9 +20,11 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"regexp"
 
 	securitycentermanagement "cloud.google.com/go/securitycentermanagement/apiv1"
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
+	"github.com/google/uuid"
 	expr "google.golang.org/genproto/googleapis/type/expr"
 )
 
@@ -39,6 +41,15 @@ func createSecurityHealthAnalyticsCustomModule(w io.Writer, parent string) error
 		return fmt.Errorf("securitycentermanagement.NewClient: %w", err)
 	}
 	defer client.Close()
+
+	uniqueSuffix := uuid.New().String()
+
+	// Remove invalid characters (anything that isn't alphanumeric or an underscore)
+	re := regexp.MustCompile(`[^a-zA-Z0-9_]`)
+	uniqueSuffix = re.ReplaceAllString(uniqueSuffix, "_")
+
+	// Create unique display name
+	displayName := fmt.Sprintf("go_sample_sha_custom_module_%s", uniqueSuffix)
 
 	// Define the custom module configuration
 	customModule := &securitycentermanagementpb.SecurityHealthAnalyticsCustomModule{
@@ -68,7 +79,8 @@ func createSecurityHealthAnalyticsCustomModule(w io.Writer, parent string) error
 			},
 			Severity: securitycentermanagementpb.CustomConfig_CRITICAL,
 		},
-		DisplayName:     "go_sample_custom_module", //Replace with desired Display Name.
+		//Replace with desired Display Name.
+		DisplayName:     displayName,
 		EnablementState: securitycentermanagementpb.SecurityHealthAnalyticsCustomModule_ENABLED,
 	}
 

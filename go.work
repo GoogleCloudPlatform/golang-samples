@@ -1,4 +1,6 @@
-go 1.21.1
+go 1.24.0
+
+toolchain go1.24.7
 
 use (
 	.
@@ -20,6 +22,7 @@ use (
 	./asset
 	./auth
 	./automl
+	./batch
 	./bigquery
 	./bigtable
 	./cdn
@@ -28,6 +31,7 @@ use (
 	./cloudsql/sqlserver/database-sql
 	./compute
 	./compute/quickstart
+	./connectgateway
 	./container_registry
 	./datacatalog
 	./dataflow
@@ -80,15 +84,14 @@ use (
 	./functions/slack
 	./functions/spanner
 	./functions/tips
-	./functions/tips/contexttip
 	./functions/tips/infinite_retries
 	./functions/typed/greeting
+	./genai
 	./getting-started
 	./getting-started/authenticating-users
 	./getting-started/background
 	./getting-started/bookshelf
 	./getting-started/gce
-	./getting-started/gopher-run
 	./getting-started/sessions
 	./healthcare
 	./iam
@@ -103,10 +106,11 @@ use (
 	./managedkafka
 	./media
 	./memorystore
+	./modelarmor
 	./monitoring
-	./opencensus
 	./opentelemetry/instrumentation/app
 	./opentelemetry/trace
+	./parametermanager
 	./privateca
 	./profiler
 	./profiler/shakesapp
@@ -126,6 +130,8 @@ use (
 	./run/markdown-preview/editor
 	./run/markdown-preview/renderer
 	./run/pubsub
+	./run/service-auth
+	./run/service-health
 	./run/sigterm-handler
 	./run/system_package
 	./run/testing
@@ -144,25 +150,19 @@ use (
 	./trace
 	./translate
 	./vertexai/batch-predict
-	./vertexai/chat
 	./vertexai/context-caching
 	./vertexai/controlled-generation
+	./vertexai/embeddings
+	./vertexai/evaluation
 	./vertexai/function-calling
 	./vertexai/gemma2
-	./vertexai/multimodal
-	./vertexai/multimodal-all
-	./vertexai/multimodal-audio
-	./vertexai/multimodal-multiple
-	./vertexai/multimodal-pdf
-	./vertexai/multimodal-video
 	./vertexai/multimodal-video-with-audio
 	./vertexai/safety-settings
-	./vertexai/safety-settings-multimodal
 	./vertexai/snippets
 	./vertexai/stream-multimodality-basic
 	./vertexai/stream-text-basic
-	./vertexai/system-instruction
 	./vertexai/token-count
 	./videointelligence
 	./vision
+	./workflows/executions
 )

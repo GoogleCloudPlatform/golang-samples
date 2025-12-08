@@ -37,7 +37,13 @@ func HelloStorage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var so storagedata.StorageObjectData
-	err = protojson.Unmarshal(ce.Data(), &so)
+
+	// If you omit `DiscardUnknown`, then protojson.Unmarshal returns an error
+	// when encountering a new or unknown field.
+	options := protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+	}
+	err = options.Unmarshal(ce.Data(), &so)
 	if err != nil {
 		log.Printf("failed to unmarshal: %v", err)
 		http.Error(w, "Bad Request: expected Cloud Storage event", http.StatusBadRequest)

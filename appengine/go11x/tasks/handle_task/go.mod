@@ -1,3 +1,3 @@
 module github.com/GoogleCloudPlatform/appengine/go11x/tasks/handle_task
 
-go 1.21
+go 1.24.0

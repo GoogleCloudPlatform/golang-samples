@@ -294,7 +294,7 @@ func (b *Bookshelf) sendLog(w http.ResponseWriter, r *http.Request) *appError {
 func (b *Bookshelf) sendError(w http.ResponseWriter, r *http.Request) *appError {
 	msg := `<html>Logging an error. Check <a href="http://console.cloud.google.com/errors">Error Reporting</a> (it may take a minute or two for the error to appear).</html>`
 	err := errors.New("uh oh! an error occurred")
-	return b.appErrorf(r, err, msg)
+	return b.appErrorf(r, err, "%v", msg)
 }
 
 // https://blog.golang.org/error-handling-and-go

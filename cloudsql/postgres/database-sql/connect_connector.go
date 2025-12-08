@@ -57,6 +57,11 @@ func connectWithConnector() (*sql.DB, error) {
 	if usePrivate != "" {
 		opts = append(opts, cloudsqlconn.WithDefaultDialOptions(cloudsqlconn.WithPrivateIP()))
 	}
+	// WithLazyRefresh() Option is used to perform refresh
+	// when needed, rather than on a scheduled interval.
+	// This is recommended for serverless environments to
+	// avoid background refreshes from throttling CPU.
+	opts = append(opts, cloudsqlconn.WithLazyRefresh())
 	d, err := cloudsqlconn.NewDialer(context.Background(), opts...)
 	if err != nil {
 		return nil, err

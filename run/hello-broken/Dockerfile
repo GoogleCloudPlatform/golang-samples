@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START cloudrun_broken_dockerfile]
-# [START run_broken_dockerfile]
+# [START cloudrun_broken_dockerfile_go]
 
-# Use the offical golang image to create a binary.
+# Use the official Go image to create a binary.
 # This is based on Debian and sets the GOPATH to /go.
 # https://hub.docker.com/_/golang
-FROM golang:1.21-bookworm as builder
+FROM golang:1.24-bookworm as builder
 
 # Create and change to the app directory.
 WORKDIR /app
@@ -49,5 +48,4 @@ COPY --from=builder /app/server /server
 # Run the web service on container startup.
 CMD ["/server"]
 
-# [END run_broken_dockerfile]
-# [END cloudrun_broken_dockerfile]
+# [END cloudrun_broken_dockerfile_go]

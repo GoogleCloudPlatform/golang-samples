@@ -16,17 +16,14 @@
 package snippets
 
 import (
+	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 	"strings"
-
-	// [START imports]
-	"context"
 
 	speech "cloud.google.com/go/speech/apiv1"
 	"cloud.google.com/go/speech/apiv1/speechpb"
-	// [END imports]
 )
 
 // [START speech_transcribe_enhanced_model]
@@ -40,7 +37,7 @@ func enhancedModel(w io.Writer) error {
 	}
 	defer client.Close()
 
-	data, err := ioutil.ReadFile("../testdata/commercial_mono.wav")
+	data, err := os.ReadFile("../testdata/commercial_mono.wav")
 	if err != nil {
 		return fmt.Errorf("ReadFile: %w", err)
 	}
@@ -59,7 +56,7 @@ func enhancedModel(w io.Writer) error {
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("Recognize: %w", err)
+		return fmt.Errorf("client.Recognize: %w", err)
 	}
 
 	for i, result := range resp.Results {

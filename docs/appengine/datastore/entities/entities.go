@@ -30,7 +30,7 @@ type T struct{}
 type Address struct{}
 
 func example() {
-	// [START batch]
+	// [START gae_datastore_batch]
 	// A batch put.
 	_, err = datastore.PutMulti(ctx, []*datastore.Key{k1, k2, k3}, []interface{}{e1, e2, e3})
 
@@ -40,38 +40,38 @@ func example() {
 
 	// A batch delete.
 	err = datastore.DeleteMulti(ctx, []*datastore.Key{k1, k2, k3})
-	// [END batch]
+	// [END gae_datastore_batch]
 	_ = err
 }
 
 func example2() {
-	// [START delete]
+	// [START gae_datastore_delete]
 	key := datastore.NewKey(ctx, "Employee", "asalieri", 0, nil)
 	err = datastore.Delete(ctx, key)
-	// [END delete]
+	// [END gae_datastore_delete]
 }
 
 func example3() {
-	// [START get_key]
+	// [START gae_datastore_get_key]
 	employeeKey := datastore.NewKey(ctx, "Employee", "asalieri", 0, nil)
 	addressKey := datastore.NewKey(ctx, "Address", "", 1, employeeKey)
 	var addr Address
 	err = datastore.Get(ctx, addressKey, &addr)
-	// [END get_key]
+	// [END gae_datastore_get_key]
 }
 
 func example4() {
-	// [START key_id]
+	// [START gae_datastore_key_id]
 	// Create a key such as Employee:8261.
 	key := datastore.NewKey(ctx, "Employee", "", 0, nil)
 	// This is equivalent:
 	key = datastore.NewIncompleteKey(ctx, "Employee", nil)
-	// [END key_id]
+	// [END gae_datastore_key_id]
 	_ = key
 }
 
 func example5() {
-	// [START key_name]
+	// [START gae_datastore_key_name]
 	// Create a key with a key name "asalieri".
 	key := datastore.NewKey(
 		ctx,        // context.Context
@@ -80,12 +80,12 @@ func example5() {
 		0,          // Integer ID; if 0, generate automatically. Ignored if string ID specified.
 		nil,        // Parent Key; nil means no parent
 	)
-	// [END key_name]
+	// [END gae_datastore_key_name]
 	_ = key
 }
 
 func example6() {
-	// [START parent]
+	// [START gae_datastore_parent]
 	// Create Employee entity
 	employee := &Employee{ /* ... */ }
 	employeeKey, err := datastore.Put(ctx, datastore.NewIncompleteKey(ctx, "Employee", nil), employee)
@@ -95,12 +95,12 @@ func example6() {
 	address := &Address{ /* ... */ }
 	addressKey := datastore.NewIncompleteKey(ctx, "Address", employeeKey)
 	_, err = datastore.Put(ctx, addressKey, address)
-	// [END parent]
+	// [END gae_datastore_parent]
 	_ = err
 }
 
 func example7() {
-	// [START put_with_keyname]
+	// [START gae_datastore_put_with_keyname]
 	employee := &Employee{
 		FirstName: "Antonio",
 		LastName:  "Salieri",
@@ -109,11 +109,11 @@ func example7() {
 	employee.AttendedHRTraining = true
 	key := datastore.NewKey(ctx, "Employee", "asalieri", 0, nil)
 	_, err = datastore.Put(ctx, key, employee)
-	// [END put_with_keyname]
+	// [END gae_datastore_put_with_keyname]
 }
 
 func example8() {
-	// [START put_without_keyname]
+	// [START gae_datastore_put_without_keyname]
 	employee := &Employee{
 		FirstName: "Antonio",
 		LastName:  "Salieri",
@@ -122,5 +122,5 @@ func example8() {
 	employee.AttendedHRTraining = true
 	key := datastore.NewIncompleteKey(ctx, "Employee", nil)
 	_, err = datastore.Put(ctx, key, employee)
-	// [END put_without_keyname]
+	// [END gae_datastore_put_without_keyname]
 }

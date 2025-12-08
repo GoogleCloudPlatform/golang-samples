@@ -126,8 +126,10 @@ func TestCreateInstances(t *testing.T) {
 	t.Parallel()
 
 	runCreateAndUpdateInstanceSample(t, createInstance, updateInstance)
+	runCreateAndUpdateInstanceSample(t, createInstanceWithoutDefaultBackupSchedule, updateInstanceDefaultBackupScheduleType)
 	runCreateInstanceSample(t, createInstanceWithProcessingUnits)
 	runCreateInstanceSample(t, createInstanceWithAutoscalingConfig)
+	runCreateInstanceSample(t, createInstanceWithAsymmetricAutoscalingConfig)
 }
 
 func runCreateAndUpdateInstanceSample(t *testing.T, createFunc, updateFunc instanceSampleFunc) {
@@ -330,7 +332,7 @@ func TestSample(t *testing.T) {
 	out = runSample(t, commitStats, dbName, "failed to request commit stats")
 	assertContains(t, out, "4 mutations in transaction")
 
-	out = runSample(t, maxCommitDelay, dbName, "failed to set max commit delay")
+	out = runSample(t, setMaxCommitDelay, dbName, "failed to set max commit delay")
 	assertContains(t, out, "4 mutations in transaction")
 
 	out = runSample(t, queryWithParameter, dbName, "failed to query with parameter")
@@ -437,6 +439,15 @@ func TestSample(t *testing.T) {
 
 	out = runSample(t, directedReadOptions, dbName, "failed to read using directed read options")
 	assertContains(t, out, "1 1 Total Junk")
+
+	out = runSample(t, readWriteTxnExcludedFromChangeStreams, dbName, "failed to commit rw txn excluded from change streams")
+	assertContains(t, out, "New singer inserted.")
+	assertContains(t, out, "Singer first name updated.")
+
+	// Test isolation level functionality
+	out = runSample(t, writeWithTransactionUsingIsolationLevel, dbName, "failed to write with transaction using isolation level")
+	assertContains(t, out, "Current album title: Total Junk")
+	assertContains(t, out, "Updated 1 record(s)")
 }
 
 func TestBackupSample(t *testing.T) {
@@ -608,6 +619,82 @@ func TestCustomerManagedEncryptionKeys(t *testing.T) {
 	out = runBackupSampleWithRetry(ctx, t, restoreFunc, restoredName, backupId, "failed to restore database with customer managed encryption key", 10)
 	assertContains(t, out, fmt.Sprintf("Database %s restored", dbName))
 	assertContains(t, out, fmt.Sprintf("using encryption key %s", kmsKeyName))
+	t.Logf("restore backup operation took: %v\n", time.Since(startTime))
+}
+
+func TestCustomerManagedMultiRegionEncryptionKeys(t *testing.T) {
+	if os.Getenv("GOLANG_SAMPLES_E2E_TEST") == "" {
+		t.Skip("GOLANG_SAMPLES_E2E_TEST not set")
+	}
+	tc := testutil.SystemTest(t)
+	t.Parallel()
+	startTime := time.Now()
+	instName, dbName, cleanup := initTestWithConfig(t, randomID(), "nam3")
+	defer cleanup()
+
+	projectID, instanceID, databaseID, err := parseDatabaseName(dbName)
+	if err != nil {
+		t.Errorf("failed to parse database name: %v", err)
+	}
+	var b bytes.Buffer
+	var kmsKeyNames []string
+	keyRingId := "spanner-test-keyring"
+	keyId := "spanner-test-cmek"
+	for _, locationId := range []string{"us-central1", "us-east1", "us-east4"} {
+		// Create an encryption key if it does not already exist.
+		if err := maybeCreateKey(tc.ProjectID, locationId, keyRingId, keyId); err != nil {
+			t.Errorf("failed to create encryption key: %v", err)
+		}
+		kmsKeyNames = append(kmsKeyNames, fmt.Sprintf(
+			"projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
+			tc.ProjectID,
+			locationId,
+			keyRingId,
+			keyId,
+		))
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Minute)
+	defer cancel()
+
+	// Create an encrypted database. The database is automatically deleted by the cleanup function.
+	if err := createDatabaseWithCustomerManagedMultiRegionEncryptionKey(ctx, &b, projectID, instanceID, databaseID, kmsKeyNames); err != nil {
+		t.Errorf("failed to create database with customer managed multi-region encryption keys: %v", err)
+	}
+	out := b.String()
+	assertContains(t, out, fmt.Sprintf("Created database [%s] using multi-region encryption keys %q", dbName, kmsKeyNames))
+	t.Logf("create database operation took: %v\n", time.Since(startTime))
+
+	// Try to create a backup of the encrypted database and delete it after the test.
+	backupId := fmt.Sprintf("enc-backup-%s", randomID())
+	b.Reset()
+	if err := createBackupWithCustomerManagedMultiRegionEncryptionKey(ctx, &b, projectID, instanceID, databaseID, backupId, kmsKeyNames); err != nil {
+		t.Errorf("failed to create backup with customer managed multi-region encryption keys: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, fmt.Sprintf("backups/%s", backupId))
+	assertContains(t, out, fmt.Sprintf("using multi-region encryption keys %q", kmsKeyNames))
+	t.Logf("create backup operation took: %v\n", time.Since(startTime))
+
+	// Try to create copy of a backup of the encrypted database and delete it after the test.
+	copyBackupId := fmt.Sprintf("copy-enc-backup-%s", randomID())
+	b.Reset()
+	if err := copyBackupWithMultiRegionEncryptionKey(&b, instName, copyBackupId, fmt.Sprintf("%s/backups/%s", instName, backupId), kmsKeyNames); err != nil {
+		t.Errorf("failed to copy backup with customer managed multi-region encryption keys: %v", err)
+	}
+	out = b.String()
+	assertContains(t, out, fmt.Sprintf("backups/%s", copyBackupId))
+	assertContains(t, out, "multi-region encryption keys\n")
+	t.Logf("copy backup operation took: %v\n", time.Since(startTime))
+
+	// Try to restore the encrypted database and delete the restored database after the test.
+	restoredName := fmt.Sprintf("rest-enc-%s", randomID())
+	restoreFunc := func(ctx context.Context, w io.Writer, dbName, backupID string) error {
+		return restoreBackupWithCustomerManagedMultiRegionEncryptionKey(ctx, w, instName, dbName, backupId, kmsKeyNames)
+	}
+	out = runBackupSampleWithRetry(ctx, t, restoreFunc, restoredName, backupId, "failed to restore database with customer managed multi-region encryption keys", 10)
+	assertContains(t, out, fmt.Sprintf("Database %s restored", dbName))
+	assertContains(t, out, "using multi-region encryption keys")
 	t.Logf("restore backup operation took: %v\n", time.Since(startTime))
 }
 
@@ -1225,6 +1312,35 @@ func TestGraphSample(t *testing.T) {
 	assertContains(t, out, "1 Account record(s) deleted.")
 
 	out = runSample(t, deleteGraphData, dbName, "")
+}
+
+// Testing the AddSplitPoints feature
+func TestAddSplitPointsSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	_, dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	_, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+
+	var out string
+	mustRunSample(t, createDatabase, dbName, "failed to create a database")
+
+	out = runSample(t, addSplitpoints, dbName, "Addsplitpoints sample failed")
+	assertContains(t, out, "Added split points")
+}
+
+func TestTxWithLargeMessageSize(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	t.Parallel()
+
+	_, dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	mustRunSample(t, createDatabase, dbName, "failed to create a database")
+	runSample(t, writeLargeData, dbName, "failed to write large data")
 }
 
 func maybeCreateKey(projectId, locationId, keyRingId, keyId string) error {

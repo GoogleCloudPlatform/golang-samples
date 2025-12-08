@@ -34,7 +34,7 @@ func TestCreateStoredInfoType(t *testing.T) {
 	defer client.Close()
 
 	bucketName := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
-	outputPath := fmt.Sprintf("gs://" + bucketName + "/")
+	outputPath := fmt.Sprintf("gs://%s/", bucketName)
 	var buf bytes.Buffer
 
 	if err := createStoredInfoType(&buf, tc.ProjectID, outputPath); err != nil {

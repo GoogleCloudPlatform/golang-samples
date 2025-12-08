@@ -27,7 +27,7 @@ func Test_generateMultimodalContent(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	location := "us-central1"
-	modelName := "gemini-1.5-flash-001"
+	modelName := "gemini-2.0-flash-001"
 
 	err := generateMultimodalContent(buf, tc.ProjectID, location, modelName)
 	if err != nil {
