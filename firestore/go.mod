@@ -3,10 +3,10 @@ module github.com/GoogleCloudPlatform/golang-samples/firestore
 go 1.24.0
 
 require (
-	cloud.google.com/go/firestore v1.18.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	google.golang.org/api v0.217.0
-	google.golang.org/grpc v1.69.4
+	cloud.google.com/go/firestore v1.20.0
+	github.com/GoogleCloudPlatform/golang-samples e22d91ba61f7
+	google.golang.org/api v0.257.0
+	google.golang.org/grpc v1.77.0
 )
 
 require (

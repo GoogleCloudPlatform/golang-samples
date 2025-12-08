@@ -3,10 +3,10 @@ module github.com/GoogleCloudPlatform/golang-samples/vertexai/embeddings
 go 1.24.0
 
 require (
-	cloud.google.com/go/aiplatform v1.70.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20241115184038-424e8c898d67
-	google.golang.org/api v0.217.0
-	google.golang.org/protobuf v1.36.3
+	cloud.google.com/go/aiplatform v1.110.0
+	github.com/GoogleCloudPlatform/golang-samples e22d91ba61f7
+	google.golang.org/api v0.257.0
+	google.golang.org/protobuf v1.36.10
 )
 
 require (

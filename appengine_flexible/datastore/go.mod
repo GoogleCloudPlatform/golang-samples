@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/appengine_flexible/datastore
 go 1.24.0
 
 require (
-	cloud.google.com/go/datastore v1.20.0
+	cloud.google.com/go/datastore v1.21.0
 	google.golang.org/appengine v1.6.8
 )
 
