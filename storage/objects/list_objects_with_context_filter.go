@@ -31,7 +31,7 @@ func listObjectsWithContextFilter(w io.Writer, bucket, filter string) error {
 	// filter := "contexts.\"keyA\"=\"valueA\""
 
 	/*
-	 * More examples of filters:
+	 * More examples of filters. See https://docs.cloud.google.com/storage/docs/listing-objects#filter-by-object-contexts:
 	 * List any object that has a context with the specified key attached
 	 * filter := "contexts.\"KEY\":*";
 	 *

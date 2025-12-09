@@ -14,7 +14,7 @@
 
 package objects
 
-// [START storage_get_object_contexts]
+// [START storage_upload_with_object_contexts]
 import (
 	"context"
 	"fmt"
@@ -24,8 +24,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// getObjectContexts gets an object's contexts.
-func getObjectContexts(w io.Writer, bucket, object string) error {
+// uploadWithObjectContexts sets an object's contexts.
+func uploadWithObjectContexts(w io.Writer, bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
@@ -39,20 +39,25 @@ func getObjectContexts(w io.Writer, bucket, object string) error {
 	defer cancel()
 
 	o := client.Bucket(bucket).Object(object)
-	attrs, err := o.Attrs(ctx)
-	if err != nil {
-		return fmt.Errorf("Object(%q).Attrs: %w", object, err)
+
+	// To set contexts on a new object during write:
+	writer := o.NewWriter(ctx)
+	writer.Contexts = &storage.ObjectContexts{
+		Custom: map[string]storage.ObjectCustomContextPayload{
+			"key1": {Value: "value1"},
+			"key2": {Value: "value2"},
+		},
+	}
+	if _, err := writer.Write([]byte("test")); err != nil {
+		return fmt.Errorf("Writer.Write: %w", err)
+	}
+	if err := writer.Close(); err != nil {
+		return fmt.Errorf("Writer.Close: %w", err)
 	}
 
-	if attrs.Contexts != nil && len(attrs.Contexts.Custom) > 0 {
-		fmt.Fprintf(w, "Object contexts for %v:\n", attrs.Name)
-		for key, payload := range attrs.Contexts.Custom {
-			fmt.Fprintf(w, "\t%v = %v\n", key, payload.Value)
-		}
-	} else {
-		fmt.Fprintf(w, "No contexts found for %v\n", attrs.Name)
-	}
+	fmt.Fprintf(w, "Added new contexts to object %v in bucket %v.\n", object, bucket)
+
 	return nil
 }
 
-// [END storage_get_object_contexts]
+// [END storage_upload_with_object_contexts]

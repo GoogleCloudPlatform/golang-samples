@@ -14,7 +14,7 @@
 
 package objects
 
-// [START storage_set_object_contexts]
+// [START storage_patch_object_contexts]
 import (
 	"context"
 	"fmt"
@@ -24,8 +24,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// setObjectContexts sets an object's contexts.
-func setObjectContexts(w io.Writer, bucket, object string) error {
+// patchObjectContexts patches an object's contexts.
+func patchObjectContexts(w io.Writer, bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
@@ -39,17 +39,6 @@ func setObjectContexts(w io.Writer, bucket, object string) error {
 	defer cancel()
 
 	o := client.Bucket(bucket).Object(object)
-
-	// To set contexts on a new object during write (followed by writing
-	// data and closing the writer to set contexts):
-	//
-	// writer := o.NewWriter(ctx)
-	// writer.Contexts = &storage.ObjectContexts{
-	// 	Custom: map[string]storage.ObjectCustomContextPayload{
-	// 		"keyOnWrite": {Value: "valueOnWrite"},
-	// 	},
-	// }
-
 	// Optional: set a metageneration-match precondition to avoid potential race
 	// conditions and data corruptions. The request to update is aborted if the
 	// object's metageneration does not match your precondition.
@@ -60,37 +49,33 @@ func setObjectContexts(w io.Writer, bucket, object string) error {
 	o = o.If(storage.Conditions{MetagenerationMatch: attrs.Metageneration})
 
 	// Upsert a context (value is replaced if key already exists;
-	// otherwise, a new key-value pair is added):
+	// otherwise, a new key-value pair is added).
+	// To delete a key, mark it as delete in payload.
 	objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
 		Contexts: &storage.ObjectContexts{
 			Custom: map[string]storage.ObjectCustomContextPayload{
-				"key1": {Value: "value1"},
-				"key2": {Value: "value2"},
+				"key1": {Value: "newValue1"},
+				"key2": {Delete: true},
+				"key3": {Value: "value3"},
 			},
 		},
 	}
-
-	// To delete all existing contexts:
-	// objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
-	// 	Contexts: &storage.ObjectContexts{
-	// 		Custom: map[string]storage.ObjectCustomContextPayload{},
-	// 	},
-	// }
-
-	// To delete a specific key from the context:
-	// objectAttrsToUpdate := storage.ObjectAttrsToUpdate{
-	// 	Contexts: &storage.ObjectContexts{
-	// 		Custom: map[string]storage.ObjectCustomContextPayload{
-	// 			"keyToBeDeleted": {Delete: true},
-	// 		},
-	// 	},
-	// }
-
-	if _, err := o.Update(ctx, objectAttrsToUpdate); err != nil {
+	updatedAttrs, err := o.Update(ctx, objectAttrsToUpdate)
+	if err != nil {
 		return fmt.Errorf("ObjectHandle(%q).Update: %w", object, err)
 	}
+
 	fmt.Fprintf(w, "Updated object contexts for object %v in bucket %v.\n", object, bucket)
+
+	if updatedAttrs.Contexts != nil && len(updatedAttrs.Contexts.Custom) > 0 {
+		fmt.Fprintf(w, "Object contexts for %v:\n", updatedAttrs.Name)
+		for key, payload := range updatedAttrs.Contexts.Custom {
+			fmt.Fprintf(w, "\t%v = %v\n", key, payload.Value)
+		}
+	} else {
+		fmt.Fprintf(w, "No contexts found for %v\n", updatedAttrs.Name)
+	}
 	return nil
 }
 
-// [END storage_set_object_contexts]
+// [END storage_patch_object_contexts]
