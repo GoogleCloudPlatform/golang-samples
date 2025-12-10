@@ -55,4 +55,30 @@ func TestImageGeneration(t *testing.T) {
 			t.Error("expected non-empty output, got empty")
 		}
 	})
+
+	t.Run("generate image content with text", func(t *testing.T) {
+		buf.Reset()
+		err := generateImageWithText(buf)
+		if err != nil {
+			t.Fatalf("generateImageWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate mmflash image content with text and image", func(t *testing.T) {
+		buf.Reset()
+		err := generateImageMMFlashEditWithTextImg(buf)
+		if err != nil {
+			t.Fatalf("generateImageMMFlashEditWithTextImg failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
 }

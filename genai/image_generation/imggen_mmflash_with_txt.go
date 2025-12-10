@@ -74,7 +74,7 @@ func generateMMFlashWithText(w io.Writer) error {
 		if part.Text != "" {
 			fmt.Fprintln(w, part.Text)
 		} else if part.InlineData != nil {
-			fileName = "testdata/example-image-eiffel-tower.png"
+			fileName = "example-image-eiffel-tower.png"
 			if err := os.WriteFile(fileName, part.InlineData.Data, 0o644); err != nil {
 				return fmt.Errorf("failed to save image: %w", err)
 			}
