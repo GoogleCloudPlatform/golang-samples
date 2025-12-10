@@ -842,3 +842,81 @@ func TestListSoftDeletedVersionsOfObject(t *testing.T) {
 		t.Errorf("Output mismatch: got %q, want %q", got, want)
 	}
 }
+
+func TestObjectContexts(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	t.Cleanup(func() { client.Close() })
+
+	bucketName := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, testPrefix)
+	objectName := "context-object.txt"
+
+	// Set new contexts on object.
+	if err := uploadWithObjectContexts(io.Discard, bucketName, objectName); err != nil {
+		t.Fatalf("setObjectContexts: %v", err)
+	}
+
+	var getBuf bytes.Buffer
+	if err := getObjectContexts(&getBuf, bucketName, objectName); err != nil {
+		t.Fatalf("getObjectContexts: %v", err)
+	}
+	// Check for new object contexts.
+	got := getBuf.String()
+	wantGet1 := "key1 = value1"
+	if !strings.Contains(got, wantGet1) {
+		t.Errorf("getObjectContexts() got %q; want to contain %q", got, wantGet1)
+	}
+	wantGet2 := "key2 = value2"
+	if !strings.Contains(got, wantGet2) {
+		t.Errorf("getObjectContexts() got %q; want to contain %q", got, wantGet2)
+	}
+
+	// Patch contexts on existing object.
+	var patchBuf bytes.Buffer
+	if err := setObjectContexts(&patchBuf, bucketName, objectName); err != nil {
+		t.Fatalf("setObjectContexts: %v", err)
+	}
+	gotPatch := patchBuf.String()
+	wantGet1 = "key1 = newValue1"
+	if !strings.Contains(gotPatch, wantGet1) {
+		t.Errorf("setObjectContexts() got %q; want to contain %q", gotPatch, wantGet1)
+	}
+	wantGet2 = "key3 = value3"
+	if !strings.Contains(gotPatch, wantGet2) {
+		t.Errorf("setObjectContexts() got %q; want to contain %q", gotPatch, wantGet2)
+	}
+	// Object should not contain deleted key.
+	absentKey := "key2"
+	if strings.Contains(gotPatch, absentKey) {
+		t.Errorf("setObjectContexts() got %q; should not contain %q", gotPatch, absentKey)
+	}
+
+	var listBuf bytes.Buffer
+	filter := "contexts.\"key1\"=\"newValue1\""
+	if err := listObjectContexts(&listBuf, bucketName, filter); err != nil {
+		t.Fatalf("listObjectContexts: %v", err)
+	}
+	gotList := listBuf.String()
+	if !strings.Contains(gotList, objectName) {
+		t.Errorf("listObjectContexts() got %q; want to contain %q", gotList, objectName)
+	}
+
+	// Delete all contexts of an object.
+	if err := deleteObjectContexts(io.Discard, bucketName, objectName); err != nil {
+		t.Fatalf("setObjectContexts: %v", err)
+	}
+
+	var getBufAfterDelete bytes.Buffer
+	if err := getObjectContexts(&getBufAfterDelete, bucketName, objectName); err != nil {
+		t.Fatalf("getObjectContexts: %v", err)
+	}
+	gotAfterDelete := getBufAfterDelete.String()
+	wantAfterDelete := fmt.Sprintf("No contexts found for %v", objectName)
+	if !strings.Contains(gotAfterDelete, wantAfterDelete) {
+		t.Errorf("getObjectContexts() got %q; want %q", gotAfterDelete, wantAfterDelete)
+	}
+}
