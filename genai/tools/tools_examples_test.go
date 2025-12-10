@@ -16,10 +16,53 @@ package tools
 
 import (
 	"bytes"
+	"context"
+	"fmt"
+	"io"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"google.golang.org/genai"
 )
+
+type mockModels struct{}
+
+// Mock Vertex AI Search (VAIS) response
+func (m *mockModels) GenerateContentMock(ctx context.Context, model string, contents []*genai.Content, cfg *genai.GenerateContentConfig) (*genai.GenerateContentResponse, error) {
+	return &genai.GenerateContentResponse{
+		Candidates: []*genai.Candidate{
+			{
+				Content: &genai.Content{
+					Parts: []*genai.Part{{Text: "Mocked VAIS search result: Found relevant content for your query."}},
+				},
+			},
+		},
+	}, nil
+}
+
+func generateWithGoogleVAISMock(w io.Writer, dataStore string) error {
+	models := &mockModels{}
+	ctx := context.Background()
+
+	resp, err := models.GenerateContentMock(ctx,
+		"google/gemini-2.0-flash",
+		[]*genai.Content{
+			{
+				Role: "user",
+				Parts: []*genai.Part{
+					{Text: fmt.Sprintf("Search for insights using datastore: %s", dataStore)},
+				},
+			},
+		},
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to generate content: %w", err)
+	}
+
+	fmt.Fprintln(w, resp.Text())
+	return nil
+}
 
 func TestTextGeneration(t *testing.T) {
 	tc := testutil.SystemTest(t)
@@ -61,6 +104,21 @@ func TestTextGeneration(t *testing.T) {
 		err := generateWithGoogleSearch(buf)
 		if err != nil {
 			t.Fatalf("generateWithGoogleSearch failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate with VAIS Search", func(t *testing.T) {
+		buf.Reset()
+		dataStore := fmt.Sprintf("projects/%s/locations/global/collections/default_collection/dataStores/grounding-test-datastore", tc.ProjectID)
+
+		err := generateWithGoogleVAISMock(buf, dataStore)
+		if err != nil {
+			t.Fatalf("generateWithGoogleVAIS failed: %v", err)
 		}
 
 		output := buf.String()
