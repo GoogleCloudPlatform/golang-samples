@@ -81,4 +81,30 @@ func TestTextGeneration(t *testing.T) {
 			t.Error("expected non-empty output, got empty")
 		}
 	})
+
+	t.Run("count local tokens with text input", func(t *testing.T) {
+		buf.Reset()
+		err := countTokenLocalWithTxt(buf)
+		if err != nil {
+			t.Fatalf("countTokenLocalWithTxt failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("compute local tokens with text input", func(t *testing.T) {
+		buf.Reset()
+		err := countTokenLocalComputeWithTxt(buf)
+		if err != nil {
+			t.Fatalf("countTokenLocalComputeWithTxt failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
 }
