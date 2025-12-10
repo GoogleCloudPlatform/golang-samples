@@ -14,7 +14,7 @@
 
 package objects
 
-// [START storage_list_objects_with_context_filter]
+// [START storage_list_object_contexts]
 import (
 	"context"
 	"fmt"
@@ -26,7 +26,7 @@ import (
 )
 
 // listObjectsWithContextFilter lists objects using a context filter.
-func listObjectsWithContextFilter(w io.Writer, bucket, filter string) error {
+func listObjectContexts(w io.Writer, bucket, filter string) error {
 	// bucket := "bucket-name"
 	// filter := "contexts.\"keyA\"=\"valueA\""
 
@@ -72,4 +72,4 @@ func listObjectsWithContextFilter(w io.Writer, bucket, filter string) error {
 	return nil
 }
 
-// [END storage_list_objects_with_context_filter]
+// [END storage_list_object_contexts]

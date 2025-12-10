@@ -897,12 +897,12 @@ func TestObjectContexts(t *testing.T) {
 
 	var listBuf bytes.Buffer
 	filter := "contexts.\"key1\"=\"newValue1\""
-	if err := listObjectsWithContextFilter(&listBuf, bucketName, filter); err != nil {
-		t.Fatalf("listObjectsWithFilter: %v", err)
+	if err := listObjectContexts(&listBuf, bucketName, filter); err != nil {
+		t.Fatalf("listObjectContexts: %v", err)
 	}
 	gotList := listBuf.String()
 	if !strings.Contains(gotList, objectName) {
-		t.Errorf("listObjectsWithFilter() got %q; want to contain %q", gotList, objectName)
+		t.Errorf("listObjectContexts() got %q; want to contain %q", gotList, objectName)
 	}
 
 	// Delete all contexts of an object.
