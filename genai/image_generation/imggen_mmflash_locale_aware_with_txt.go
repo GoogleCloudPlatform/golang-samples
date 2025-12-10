@@ -15,18 +15,19 @@
 // Package image_generation shows how to use the GenAI SDK to generate images and text.
 package image_generation
 
-// [START googlegenaisdk_imggen_mmflash_with_txt]
+// [START googlegenaisdk_imggen_mmflash_locale_aware_with_txt]
 import (
 	"context"
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"google.golang.org/genai"
 )
 
-// generateMMFlashWithText demonstrates how to generate both text and image outputs.
-func generateMMFlashWithText(w io.Writer) error {
+// generateMMFlashLocaleAwareWithText demonstrates how to generate an image with locale awareness.
+func generateMMFlashLocaleAwareWithText(w io.Writer) error {
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
@@ -37,10 +38,11 @@ func generateMMFlashWithText(w io.Writer) error {
 	}
 
 	modelName := "gemini-2.5-flash-image"
+	prompt := "Generate a photo of a breakfast meal."
 	contents := []*genai.Content{
 		{
 			Parts: []*genai.Part{
-				{Text: "Generate an image of the Eiffel tower with fireworks in the background."},
+				{Text: prompt},
 			},
 			Role: "user",
 		},
@@ -54,39 +56,34 @@ func generateMMFlashWithText(w io.Writer) error {
 				string(genai.ModalityText),
 				string(genai.ModalityImage),
 			},
-			CandidateCount: int32(1),
-			SafetySettings: []*genai.SafetySetting{
-				{Method: genai.HarmBlockMethodProbability},
-				{Category: genai.HarmCategoryDangerousContent},
-				{Threshold: genai.HarmBlockThresholdBlockMediumAndAbove},
-			},
 		},
 	)
 	if err != nil {
-		return fmt.Errorf("failed to generate content: %w", err)
+		return fmt.Errorf("generate content failed: %w", err)
 	}
 
 	if len(resp.Candidates) == 0 || resp.Candidates[0].Content == nil {
-		return fmt.Errorf("no candidates returned")
+		return fmt.Errorf("no content was generated")
 	}
-	var fileName string
+
+	outputPath := filepath.Join("", "example-breakfast-meal.png")
+
 	for _, part := range resp.Candidates[0].Content.Parts {
-		if part.Text != "" {
+		switch {
+		case part.Text != "":
 			fmt.Fprintln(w, part.Text)
-		} else if part.InlineData != nil {
-			fileName = "example-image-eiffel-tower.png"
-			if err := os.WriteFile(fileName, part.InlineData.Data, 0o644); err != nil {
-				return fmt.Errorf("failed to save image: %w", err)
+		case part.InlineData != nil:
+			if err := os.WriteFile(outputPath, part.InlineData.Data, 0o644); err != nil {
+				return fmt.Errorf("failed to save generated image: %w", err)
 			}
 		}
 	}
-	fmt.Fprintln(w, fileName)
+	fmt.Fprintln(w, outputPath)
 
 	// Example response:
-	// I will generate an image of the Eiffel Tower at night, with a vibrant display of
-	// colorful fireworks exploding in the dark sky behind it.
-	// ....
+	//  Here is a photo of a delicious breakfast meal for you! ...
+
 	return nil
 }
 
-// [END googlegenaisdk_imggen_mmflash_with_txt]
+// [END googlegenaisdk_imggen_mmflash_locale_aware_with_txt]
