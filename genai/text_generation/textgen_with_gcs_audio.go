@@ -46,7 +46,7 @@ Create a chapter breakdown with timestamps for key sections or topics discussed.
 				MIMEType: "audio/mpeg",
 			}},
 		},
-			Role: "user"},
+			Role: genai.RoleUser},
 	}
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)

@@ -58,7 +58,7 @@ func generateWithRespSchema(w io.Writer) error {
 		{Parts: []*genai.Part{
 			{Text: "List a few popular cookie recipes."},
 		},
-			Role: "user"},
+			Role: genai.RoleUser},
 	}
 	modelName := "gemini-2.5-flash"
 

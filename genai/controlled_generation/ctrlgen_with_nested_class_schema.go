@@ -55,7 +55,7 @@ func generateWithNestedClassSchema(w io.Writer) error {
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: "List about 10 home-baked cookies and give them grades based on tastiness."},
-		}, Role: "user"},
+		}, Role: genai.RoleUser},
 	}
 
 	config := &genai.GenerateContentConfig{

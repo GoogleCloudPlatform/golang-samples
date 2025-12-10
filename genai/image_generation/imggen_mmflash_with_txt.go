@@ -42,7 +42,7 @@ func generateMMFlashWithText(w io.Writer) error {
 			Parts: []*genai.Part{
 				{Text: "Generate an image of the Eiffel tower with fireworks in the background."},
 			},
-			Role: "user",
+			Role: genai.RoleUser,
 		},
 	}
 

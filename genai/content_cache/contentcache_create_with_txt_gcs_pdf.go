@@ -55,7 +55,7 @@ func createContentCache(w io.Writer) (string, error) {
 					MIMEType: "application/pdf",
 				}},
 			},
-			Role: "user",
+			Role: genai.RoleUser,
 		},
 	}
 	config := &genai.CreateCachedContentConfig{

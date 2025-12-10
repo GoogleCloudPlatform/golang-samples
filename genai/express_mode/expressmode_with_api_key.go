@@ -46,7 +46,7 @@ func generateContentWithApiKey(w io.Writer) error {
 		[]*genai.Content{
 			{Parts: []*genai.Part{
 				{Text: "Explain bubble sort to me."},
-			}, Role: "user"},
+			}, Role: genai.RoleUser},
 		},
 		nil,
 	)

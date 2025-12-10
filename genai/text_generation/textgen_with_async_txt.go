@@ -39,7 +39,7 @@ func generateWithTextAsyncStream(w io.Writer) error {
 
 	contents := []*genai.Content{
 		{
-			Role: "user",
+			Role: genai.RoleUser,
 			Parts: []*genai.Part{
 				{Text: "Compose a song about the adventures of a time-traveling squirrel."},
 			},
