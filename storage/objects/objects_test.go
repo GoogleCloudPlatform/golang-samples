@@ -877,22 +877,22 @@ func TestObjectContexts(t *testing.T) {
 
 	// Patch contexts on existing object.
 	var patchBuf bytes.Buffer
-	if err := patchObjectContexts(&patchBuf, bucketName, objectName); err != nil {
-		t.Fatalf("patchObjectContexts: %v", err)
+	if err := setObjectContexts(&patchBuf, bucketName, objectName); err != nil {
+		t.Fatalf("setObjectContexts: %v", err)
 	}
 	gotPatch := patchBuf.String()
 	wantGet1 = "key1 = newValue1"
 	if !strings.Contains(gotPatch, wantGet1) {
-		t.Errorf("patchObjectContexts() got %q; want to contain %q", gotPatch, wantGet1)
+		t.Errorf("setObjectContexts() got %q; want to contain %q", gotPatch, wantGet1)
 	}
 	wantGet2 = "key3 = value3"
 	if !strings.Contains(gotPatch, wantGet2) {
-		t.Errorf("patchObjectContexts() got %q; want to contain %q", gotPatch, wantGet2)
+		t.Errorf("setObjectContexts() got %q; want to contain %q", gotPatch, wantGet2)
 	}
 	// Object should not contain deleted key.
 	absentKey := "key2"
 	if strings.Contains(gotPatch, absentKey) {
-		t.Errorf("patchObjectContexts() got %q; should not contain %q", gotPatch, absentKey)
+		t.Errorf("setObjectContexts() got %q; should not contain %q", gotPatch, absentKey)
 	}
 
 	var listBuf bytes.Buffer

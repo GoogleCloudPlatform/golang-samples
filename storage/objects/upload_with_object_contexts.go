@@ -14,7 +14,7 @@
 
 package objects
 
-// [START storage_upload_with_object_contexts]
+// [START storage_set_object_contexts]
 import (
 	"context"
 	"fmt"
@@ -60,4 +60,4 @@ func uploadWithObjectContexts(w io.Writer, bucket, object string) error {
 	return nil
 }
 
-// [END storage_upload_with_object_contexts]
+// [END storage_set_object_contexts]

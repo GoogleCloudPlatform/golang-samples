@@ -14,7 +14,7 @@
 
 package objects
 
-// [START storage_patch_object_contexts]
+// [START storage_set_object_contexts]
 import (
 	"context"
 	"fmt"
@@ -24,8 +24,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// patchObjectContexts patches an object's contexts.
-func patchObjectContexts(w io.Writer, bucket, object string) error {
+// setObjectContexts patches an object's contexts.
+func setObjectContexts(w io.Writer, bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
@@ -78,4 +78,4 @@ func patchObjectContexts(w io.Writer, bucket, object string) error {
 	return nil
 }
 
-// [END storage_patch_object_contexts]
+// [END storage_set_object_contexts]
