@@ -1,25 +1,47 @@
-# Running the Custom Credential Supplier Sample
+# Running the Custom AWS Credential Supplier Sample (Go)
 
-If you want to use AWS security credentials that cannot be retrieved using methods supported natively by the [google-cloud-go/auth](https://github.com/vverman/google-cloud-go/tree/main/auth) library, a custom AwsSecurityCredentialsProvider implementation may be specified when creating an AWS client. The supplier must return valid, unexpired AWS security credentials when called by the GCP credential. Currently, using ADC with your AWS workloads is only supported with EC2. An example of a good use case for using a custom credential suppliers is when your workloads are running in other AWS environments, such as ECS, EKS, Fargate, etc.
+This sample demonstrates how to use a custom AWS security credential supplier to authenticate with Google Cloud using AWS as an external identity provider. It uses the **AWS SDK for Go v2** to fetch credentials from sources like Amazon Elastic Kubernetes Service (EKS) with IAM Roles for Service Accounts (IRSA), Elastic Container Service (ECS), or Fargate.
 
+## Prerequisites
 
-This document provides instructions on how to run the custom credential supplier sample in different environments.
+*   An AWS account.
+*   A Google Cloud project with the IAM API enabled.
+*   A Google Cloud Storage bucket.
+*   **Go 1.21** or later installed.
+
+If you want to use AWS security credentials that cannot be retrieved using methods supported natively by the Google Auth library, a custom `AwsSecurityCredentialsProvider` implementation may be specified.
 
 ## Running Locally
 
-To run the sample on your local system, you need to configure your AWS and GCP credentials as environment variables.
+For local development, you can provide credentials and configuration in a JSON file.
+
+### 1. Install Dependencies
+
+Initialize the module and download required packages:
 
 ```bash
-export AWS_ACCESS_KEY_ID="YOUR_AWS_ACCESS_KEY_ID"
-export AWS_SECRET_ACCESS_KEY="YOUR_AWS_SECRET_ACCESS_KEY"
-export GCP_WORKLOAD_AUDIENCE="YOUR_GCP_WORKLOAD_AUDIENCE"
-export GCS_BUCKET_NAME="YOUR_GCS_BUCKET_NAME"
+go mod tidy
+```
 
-# Optional: If you want to use service account impersonation
-export GCP_SERVICE_ACCOUNT_IMPERSONATION_URL="YOUR_GCP_SERVICE_ACCOUNT_IMPERSONATION_URL"
+### 2. Configure Credentials
 
+1.  Copy the example secrets file to a new file named `custom-credentials-aws-secrets.json` in the project root:
+    ```bash
+    cp custom-credentials-aws-secrets.json.example custom-credentials-aws-secrets.json
+    ```
+2.  Open `custom-credentials-aws-secrets.json` and fill in the required values for your AWS and Google Cloud configuration. Do not check your `custom-credentials-aws-secrets.json` file into version control.
+
+**Note:** Do not check your secrets file into version control. 
+
+### 3. Run the Application
+
+Execute the Go program:
+
+```bash
 go run .
 ```
+
+The application will detect the `custom-credentials-aws-secrets.json` file, use the AWS SDK to resolve credentials, exchange them for a Google Cloud token, and retrieve metadata for your GCS bucket using the Google Cloud Storage Client Library.
 
 ## Running in a Containerized Environment (EKS)
 
@@ -31,66 +53,50 @@ First, you need an EKS cluster. You can create one using `eksctl` or the AWS Man
 
 ### 2. Configure IAM Roles for Service Accounts (IRSA)
 
-IRSA allows you to associate an IAM role with a Kubernetes service account. This provides a secure way for your pods to access AWS services.
+IRSA allows you to associate an IAM role with a Kubernetes service account. This provides a secure way for your pods to access AWS services without hardcoding long-lived credentials.
 
-- Create an IAM OIDC provider for your cluster.
-- Create an IAM role and policy that grants the necessary AWS permissions.
-- Associate the IAM role with a Kubernetes service account.
+Run the following command to create the IAM role and bind it to a Kubernetes Service Account:
+
+```bash
+eksctl create iamserviceaccount \
+  --name your-k8s-service-account \
+  --namespace default \
+  --cluster your-cluster-name \
+  --region your-aws-region \
+  --role-name your-role-name \
+  --attach-policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess \
+  --approve
+```
+
+> **Note**: The `--attach-policy-arn` flag is used here to demonstrate attaching permissions. Update this with the specific AWS policy ARN your application requires.
 
 For detailed steps, see the [IAM Roles for Service Accounts](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) documentation.
 
-### 3. Configure GCP to Trust the AWS Role
+### 3. Configure Google Cloud to Trust the AWS Role
 
-You need to configure your GCP project to trust the AWS IAM role you created. This is done by creating a Workload Identity Pool and Provider in GCP.
+You need to configure your Google Cloud project to trust the AWS IAM role you created.
 
-- Create a Workload Identity Pool.
-- Create a Workload Identity Provider that trusts the AWS role ARN.
-- Grant the GCP service account the necessary permissions.
+1.  **Create a Workload Identity Pool and Provider** that trusts your AWS account.
+2.  **Bind the AWS Role to a Google Cloud Service Account** (or grant permissions directly to the federated identity).
+
+For detailed steps, see [Configuring Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation-with-other-clouds).
 
 ### 4. Containerize and Package the Application
 
-Build a Docker image of the Go application and push it to a container registry (e.g., Amazon ECR) that your EKS cluster can access.
+Create a `Dockerfile` for the Go application. See the [`Dockerfile`](Dockerfile) file for an example.
 
-```Dockerfile
-FROM golang:1.21
+Build and push the image to your registry (e.g., Amazon ECR):
 
-WORKDIR /app
-
-COPY go.mod go.sum ./
-RUN go mod download
-
-COPY . .
-
-CMD ["go", "run", "./aws"]
+```bash
+docker build -t your-container-image:latest .
+docker push your-container-image:latest
 ```
 
 ### 5. Deploy to EKS
 
-Create a Kubernetes deployment manifest (`pod.yaml`) to deploy your application to the EKS cluster.
+Create a Kubernetes deployment manifest to deploy your application to the EKS cluster. See the [`pod.yaml`](pod.yaml) file for an example.
 
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: custom-credential-pod
-spec:
-  serviceAccountName: your-k8s-service-account # The service account associated with the IAM role
-  containers:
-  - name: gcp-auth-sample
-    image: your-container-image:latest # Your image from ECR
-    env:
-    - name: AWS_REGION
-      value: "your-aws-region"
-    - name: GCP_WORKLOAD_AUDIENCE
-      value: "your-gcp-workload-audience"
-    - name: GOOGLE_CLOUD_PROJECT
-      value: "your-google-cloud-project"
-    # Optional: If you want to use service account impersonation
-    # - name: GCP_SERVICE_ACCOUNT_IMPERSONATION_URL
-    #   value: "your-gcp-service-account-impersonation-url"
-    - name: GCS_BUCKET_NAME
-      value: "your-gcs-bucket-name"
-```
+**Note:** The provided [`pod.yaml`](pod.yaml) is an example and may need to be modified for your specific needs.
 
 Deploy the pod:
 

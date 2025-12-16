@@ -15,7 +15,10 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"os"
+	"strings"
 	"testing"
 
 	"cloud.google.com/go/auth/credentials/externalaccount"
@@ -101,5 +104,69 @@ func TestCustomAwsSupplier_AwsSecurityCredentials(t *testing.T) {
 	}
 	if creds.SessionToken != expectedToken {
 		t.Errorf("SessionToken = %v, want %v", creds.SessionToken, expectedToken)
+	}
+}
+
+// TestSystem_AuthenticateWithAwsCredentials runs the end-to-end authentication flow
+// using values from 'custom-credentials-aws-secrets.json' if present.
+func TestSystem_AuthenticateWithAwsCredentials(t *testing.T) {
+	const secretsFile = "custom-credentials-aws-secrets.json"
+
+	// Check if secrets file exists; skip if not.
+	if _, err := os.Stat(secretsFile); os.IsNotExist(err) {
+		t.Skipf("Skipping system test: %s not found", secretsFile)
+	}
+
+	// Setup cleanup to restore environment variables after test
+	// We capture the current state of the vars we intend to modify.
+	envVars := []string{
+		"GCP_WORKLOAD_AUDIENCE",
+		"GCS_BUCKET_NAME",
+		"GCP_SERVICE_ACCOUNT_IMPERSONATION_URL",
+		"AWS_ACCESS_KEY_ID",
+		"AWS_SECRET_ACCESS_KEY",
+		"AWS_REGION",
+	}
+	originalEnv := make(map[string]string)
+	for _, k := range envVars {
+		originalEnv[k] = os.Getenv(k)
+	}
+	defer func() {
+		for k, v := range originalEnv {
+			if v == "" {
+				os.Unsetenv(k)
+			} else {
+				os.Setenv(k, v)
+			}
+		}
+	}()
+
+	// Load the config from file
+	loadConfigFromFile()
+
+	// Verify requirements
+	audience := os.Getenv("GCP_WORKLOAD_AUDIENCE")
+	bucketName := os.Getenv("GCS_BUCKET_NAME")
+
+	if audience == "" || bucketName == "" {
+		t.Skip("Skipping system test: Required configuration (Audience/Bucket) missing in secrets file")
+	}
+
+	// Run the main authentication logic
+	var buf bytes.Buffer
+	impersonationURL := os.Getenv("GCP_SERVICE_ACCOUNT_IMPERSONATION_URL")
+
+	err := authenticateWithAwsCredentials(&buf, bucketName, audience, impersonationURL)
+	if err != nil {
+		t.Fatalf("System test failed: %v", err)
+	}
+
+	// Verify Output
+	output := buf.String()
+	if !strings.Contains(output, "Success") {
+		t.Errorf("Expected output to contain 'Success', got: %s", output)
+	}
+	if !strings.Contains(output, bucketName) {
+		t.Errorf("Expected output to contain bucket name '%s', got: %s", bucketName, output)
 	}
 }

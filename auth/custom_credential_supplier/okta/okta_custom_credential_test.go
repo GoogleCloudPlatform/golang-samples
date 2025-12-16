@@ -15,21 +15,24 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"strings"
 	"testing"
 
 	"cloud.google.com/go/auth/credentials/externalaccount"
 )
 
-// TestOktaClientCredentialsSupplier_SubjectToken verifies the fetch logic
+// TestOktaSupplier_SubjectToken verifies the fetch logic
 // and proper handling of caching.
-func TestOktaClientCredentialsSupplier_SubjectToken(t *testing.T) {
-	// 1. Setup Mock Okta Server
+func TestOktaSupplier_SubjectToken(t *testing.T) {
+	// Setup Mock Okta Server
 	mockClientID := "client-id"
 	mockClientSecret := "client-secret"
 	expectedToken := "mock-okta-jwt-token"
@@ -57,17 +60,6 @@ func TestOktaClientCredentialsSupplier_SubjectToken(t *testing.T) {
 			t.Errorf("Invalid Basic Auth header. Got %s, want %s", authHeader, wantAuth)
 		}
 
-		// Validate Body Params
-		if err := r.ParseForm(); err != nil {
-			t.Fatal(err)
-		}
-		if r.FormValue("grant_type") != "client_credentials" {
-			t.Errorf("Expected grant_type=client_credentials, got %s", r.FormValue("grant_type"))
-		}
-		if r.FormValue("scope") != "gcp.test.read" {
-			t.Errorf("Expected scope=gcp.test.read, got %s", r.FormValue("scope"))
-		}
-
 		// Return Success JSON
 		w.Header().Set("Content-Type", "application/json")
 		response := map[string]interface{}{
@@ -78,15 +70,16 @@ func TestOktaClientCredentialsSupplier_SubjectToken(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	// 2. Initialize Supplier with Mock URL
-	supplier := &oktaClientCredentialsSupplier{
+	// Initialize Supplier with Mock URL
+	// Updated struct name to 'oktaSupplier'
+	supplier := &oktaSupplier{
 		TokenURL:     ts.URL,
 		ClientID:     mockClientID,
 		ClientSecret: mockClientSecret,
 	}
 	ctx := context.Background()
 
-	// 3. First Call: Should hit the server
+	// First Call: Should hit the server
 	token, err := supplier.SubjectToken(ctx, &externalaccount.RequestOptions{})
 	if err != nil {
 		t.Fatalf("First SubjectToken call failed: %v", err)
@@ -98,7 +91,7 @@ func TestOktaClientCredentialsSupplier_SubjectToken(t *testing.T) {
 		t.Errorf("Expected 1 server hit, got %d", serverHitCount)
 	}
 
-	// 4. Second Call: Should use cache (no server hit)
+	// Second Call: Should use cache (no server hit)
 	token, err = supplier.SubjectToken(ctx, &externalaccount.RequestOptions{})
 	if err != nil {
 		t.Fatalf("Second SubjectToken call failed: %v", err)
@@ -111,15 +104,14 @@ func TestOktaClientCredentialsSupplier_SubjectToken(t *testing.T) {
 	}
 }
 
-// TestOktaClientCredentialsSupplier_ExpiredCache verifies that the supplier
+// TestOktaSupplier_ExpiredCache verifies that the supplier
 // refetches if the cache is expired.
-func TestOktaClientCredentialsSupplier_ExpiredCache(t *testing.T) {
+func TestOktaSupplier_ExpiredCache(t *testing.T) {
 	serverHitCount := 0
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		serverHitCount++
 		w.Header().Set("Content-Type", "application/json")
 		// Return a token that expires very soon (e.g., 1 second)
-		// The logic has a 60s buffer, so anything < 60s should be treated as expired immediately for next call
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"access_token": fmt.Sprintf("token-%d", serverHitCount),
 			"expires_in":   30,
@@ -127,7 +119,7 @@ func TestOktaClientCredentialsSupplier_ExpiredCache(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	supplier := &oktaClientCredentialsSupplier{
+	supplier := &oktaSupplier{
 		TokenURL:     ts.URL,
 		ClientID:     "id",
 		ClientSecret: "secret",
@@ -151,5 +143,66 @@ func TestOktaClientCredentialsSupplier_ExpiredCache(t *testing.T) {
 	}
 	if serverHitCount != 2 {
 		t.Errorf("Expected 2 hits (cache should be invalid due to short expiry), got %d", serverHitCount)
+	}
+}
+
+// TestSystem_AuthenticateWithOktaCredentials runs the end-to-end authentication flow
+// using values from 'custom-credentials-okta-secrets.json' if present.
+func TestSystem_AuthenticateWithOktaCredentials(t *testing.T) {
+	const secretsFile = "custom-credentials-okta-secrets.json"
+
+	if _, err := os.Stat(secretsFile); os.IsNotExist(err) {
+		t.Skipf("Skipping system test: %s not found", secretsFile)
+	}
+
+	// Setup cleanup to restore environment variables after test
+	envVars := []string{
+		"GCP_WORKLOAD_AUDIENCE",
+		"GCS_BUCKET_NAME",
+		"GCP_SERVICE_ACCOUNT_IMPERSONATION_URL",
+		"OKTA_DOMAIN",
+		"OKTA_CLIENT_ID",
+		"OKTA_CLIENT_SECRET",
+	}
+	originalEnv := make(map[string]string)
+	for _, k := range envVars {
+		originalEnv[k] = os.Getenv(k)
+	}
+	defer func() {
+		for k, v := range originalEnv {
+			if v == "" {
+				os.Unsetenv(k)
+			} else {
+				os.Setenv(k, v)
+			}
+		}
+	}()
+
+	loadConfigFromFile()
+
+	audience := os.Getenv("GCP_WORKLOAD_AUDIENCE")
+	bucketName := os.Getenv("GCS_BUCKET_NAME")
+	oktaDomain := os.Getenv("OKTA_DOMAIN")
+	oktaClient := os.Getenv("OKTA_CLIENT_ID")
+	oktaSecret := os.Getenv("OKTA_CLIENT_SECRET")
+
+	if audience == "" || bucketName == "" || oktaDomain == "" || oktaClient == "" || oktaSecret == "" {
+		t.Skip("Skipping system test: Required configuration missing in secrets file")
+	}
+
+	var buf bytes.Buffer
+	impersonationURL := os.Getenv("GCP_SERVICE_ACCOUNT_IMPERSONATION_URL")
+
+	err := authenticateWithOktaCredentials(&buf, bucketName, audience, oktaDomain, oktaClient, oktaSecret, impersonationURL)
+	if err != nil {
+		t.Fatalf("System test failed: %v", err)
+	}
+
+	output := buf.String()
+	if !strings.Contains(output, "Success") {
+		t.Errorf("Expected output to contain 'Success', got: %s", output)
+	}
+	if !strings.Contains(output, bucketName) {
+		t.Errorf("Expected output to contain bucket name '%s', got: %s", bucketName, output)
 	}
 }

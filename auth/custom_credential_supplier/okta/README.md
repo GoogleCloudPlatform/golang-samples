@@ -1,10 +1,18 @@
-# Running the Custom Okta Credential Supplier Sample
+Here is the updated `README.md` for the Go Okta sample. It includes the instructions for the secrets file, local execution, and containerization, matching the structure of the other languages and the AWS sample.
 
-If you want to use OIDC or SAML2.0 that cannot be retrieved using methods supported natively by the [google-cloud-go/auth](https://github.com/vverman/google-cloud-go/tree/main/auth) library, a custom SubjectTokenProvider implementation may be specified when creating an identity pool client. The supplier must return a valid, unexpired subject token when called by the GCP credential.
+```markdown
+# Running the Custom Okta Credential Supplier Sample (Go)
 
-This document provides instructions on how to run the custom Okta credential supplier sample.
+This sample demonstrates how to use a custom subject token supplier to authenticate with Google Cloud using Okta as an external identity provider. It uses the Client Credentials flow for machine-to-machine (M2M) authentication.
 
-## 1. Okta Configuration
+## Prerequisites
+
+*   An Okta developer account.
+*   A Google Cloud project with the IAM API enabled.
+*   A Google Cloud Storage bucket.
+*   **Go 1.21** or later installed.
+
+## Okta Configuration
 
 Before running the sample, you need to configure an Okta application for Machine-to-Machine (M2M) communication.
 
@@ -19,15 +27,15 @@ Before running the sample, you need to configure an Okta application for Machine
 
 Once the application is created, you will find the following information in the **General** tab:
 
-*   **Okta Domain**: Your Okta developer domain (e.g., `dev-123456.okta.com`).
+*   **Okta Domain**: Your Okta developer domain (e.g., `https://dev-123456.okta.com`).
 *   **Client ID**: The client ID for your application.
 *   **Client Secret**: The client secret for your application.
 
 You will need these values to configure the sample.
 
-## 2. GCP Configuration
+## Google Cloud Configuration
 
-You need to configure a Workload Identity Pool in GCP to trust the Okta application.
+You need to configure a Workload Identity Pool in Google Cloud to trust the Okta application.
 
 ### Set up Workload Identity Federation
 
@@ -39,24 +47,38 @@ You need to configure a Workload Identity Pool in GCP to trust the Okta applicat
 
 For detailed instructions, refer to the [Workload Identity Federation documentation](https://cloud.google.com/iam/docs/workload-identity-federation).
 
-### GCS Bucket
+## Running the Sample
 
-Ensure you have a GCS bucket that the authenticated user will have access to. You will need the name of this bucket to run the sample.
+To run the sample on your local system, you need to install dependencies and configure your credentials.
 
-## 3. Running the Script
+### 1. Install Dependencies
 
-To run the sample, set the following environment variables:
+Initialize the module and download required packages:
 
 ```bash
-export OKTA_DOMAIN="your-okta-domain"
-export OKTA_CLIENT_ID="your-okta-client-id"
-export OKTA_CLIENT_SECRET="your-okta-client-secret"
-export GCP_WORKLOAD_IDENTITY_POOL="your-gcp-workload-identity-pool"
-export GCP_WORKLOAD_IDENTITY_PROVIDER="your-gcp-workload-identity-provider"
-export GCS_BUCKET_NAME="your-gcs-bucket-name"
-export GOOGLE_CLOUD_PROJECT="your-google-cloud-project"
+go mod tidy
+```
 
+### 2. Configure Credentials for Local Development
+
+1.  Copy the example secrets file to a new file named `custom-credentials-okta-secrets.json` in the project root:
+    ```bash
+    cp custom-credentials-okta-secrets.json.example custom-credentials-okta-secrets.json
+    ```
+2.  Open `custom-credentials-okta-secrets.json` and fill in the required values for your AWS and Google Cloud configuration. Do not check your `custom-credentials-okta-secrets.json` file into version control.
+
+
+### 3. Run the Application
+
+Execute the Go program:
+
+```bash
 go run .
 ```
 
-The script will then authenticate with Okta, exchange the Okta token for a GCP token, and use the GCP token to list the objects in the specified GCS bucket.
+The script authenticates with Okta to get an OIDC token, exchanges that token for a Google Cloud federated token, and uses it to list metadata for the specified Google Cloud Storage bucket.
+
+## Testing
+
+This sample is not continuously tested. It is provided for instructional purposes and may require modifications to work in your environment.
+```
