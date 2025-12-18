@@ -80,7 +80,7 @@ func predictWithTunedEndpointMock(w io.Writer, tuningJobName string) error {
 
 	contents := []*genai.Content{
 		{
-			Role: "user",
+			Role: genai.RoleUser,
 			Parts: []*genai.Part{
 				{Text: "Why is the sky blue?"},
 			},

@@ -12,20 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package count_tokens shows examples of counting tokens using the GenAI SDK.
-package count_tokens
+// Package tools shows examples of various tools that Gemini model can use to generate text.
+package tools
 
-// [START googlegenaisdk_counttoken_with_txt_vid]
+// [START googlegenaisdk_tools_vais_with_txt]
 import (
 	"context"
 	"fmt"
 	"io"
 
-	genai "google.golang.org/genai"
+	"google.golang.org/genai"
 )
 
-// countWithTxtAndVid shows how to count tokens with text and video inputs.
-func countWithTxtAndVid(w io.Writer) error {
+// generateWithGoogleVAIS shows how to generate text using VAIS Search.
+func generateWithGoogleVAIS(w io.Writer, datastore string) error {
+	//datastore = "gs://your-datastore/your-prefix"
 	ctx := context.Background()
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
@@ -36,29 +37,32 @@ func countWithTxtAndVid(w io.Writer) error {
 	}
 
 	modelName := "gemini-2.5-flash"
-	contents := []*genai.Content{
-		{Parts: []*genai.Part{
-			{Text: "Provide a description of the video."},
-			{FileData: &genai.FileData{
-				FileURI:  "gs://cloud-samples-data/generative-ai/video/pixel8.mp4",
-				MIMEType: "video/mp4",
-			}},
+	contents := genai.Text("How do I make an appointment to renew my driver's license?")
+	config := &genai.GenerateContentConfig{
+		Tools: []*genai.Tool{
+			{
+				Retrieval: &genai.Retrieval{
+					VertexAISearch: &genai.VertexAISearch{
+						Datastore: datastore,
+					},
+				},
+			},
 		},
-			Role: genai.RoleUser},
 	}
 
-	resp, err := client.Models.CountTokens(ctx, modelName, contents, nil)
+	resp, err := client.Models.GenerateContent(ctx, modelName, contents, config)
 	if err != nil {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
 
-	fmt.Fprintf(w, "Total: %d\nCached: %d\n", resp.TotalTokens, resp.CachedContentTokenCount)
+	respText := resp.Text()
+
+	fmt.Fprintln(w, respText)
 
 	// Example response:
-	// Total: 16252
-	// Cached: 0
+	// 'The process for making an appointment to renew your driver's license varies depending on your location. To provide you with the most accurate instructions...'
 
 	return nil
 }
 
-// [END googlegenaisdk_counttoken_with_txt_vid]
+// [END googlegenaisdk_tools_vais_with_txt]

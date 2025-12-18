@@ -45,7 +45,7 @@ Use speaker A, speaker B, etc. to identify speakers.`},
 				MIMEType: "audio/mpeg",
 			}},
 		},
-			Role: "user"},
+			Role: genai.RoleUser},
 	}
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)
