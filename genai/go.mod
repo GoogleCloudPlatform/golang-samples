@@ -4,6 +4,8 @@ go 1.24.0
 
 require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20250201051611-5fb145d1e974
+	github.com/go-audio/audio v1.0.0
+	github.com/go-audio/wav v1.1.0
 	golang.org/x/oauth2 v0.25.0
 	google.golang.org/genai v1.25.0
 )
@@ -25,6 +27,7 @@ require (
 	github.com/envoyproxy/go-control-plane/envoy v1.32.3 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.1.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
+	github.com/go-audio/riff v1.0.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
