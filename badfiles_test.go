@@ -86,7 +86,6 @@ var allowList = []string{
 	"genai/**/*.mp4",
 	"genai/**/*.jpg",
 	"genai/**/*.png",
-	"genai/**/*.md",
 
 	// Endpoints samples.
 	"endpoints/**/*.proto",
