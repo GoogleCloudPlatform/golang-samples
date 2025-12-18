@@ -68,7 +68,7 @@ func generateMMFlashTxtImgWithText(w io.Writer) error {
 		return fmt.Errorf("no candidates returned")
 	}
 
-	outputFolder := "testdata"
+	outputFolder := ""
 
 	// Create the markdown file
 	mdFile := filepath.Join(outputFolder, "paella-recipe.md")
