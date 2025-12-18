@@ -46,7 +46,7 @@ func generateTextWithPDF(w io.Writer) error {
 				MIMEType: "application/pdf",
 			}},
 		},
-			Role: "user"},
+			Role: genai.RoleUser},
 	}
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)

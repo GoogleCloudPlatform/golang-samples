@@ -67,7 +67,7 @@ func generateLiveFuncCallWithTxt(w io.Writer) error {
 	if err := session.SendClientContent(genai.LiveClientContentInput{
 		Turns: []*genai.Content{
 			{
-				Role: "user",
+				Role: genai.RoleUser,
 				Parts: []*genai.Part{
 					{Text: textInput},
 				},
