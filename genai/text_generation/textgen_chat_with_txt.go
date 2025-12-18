@@ -37,7 +37,7 @@ func generateChatWithText(w io.Writer) error {
 	modelName := "gemini-2.5-flash"
 	history := []*genai.Content{
 		{
-			Role: "user",
+			Role: genai.RoleUser,
 			Parts: []*genai.Part{
 				{Text: "Hello there"},
 			},

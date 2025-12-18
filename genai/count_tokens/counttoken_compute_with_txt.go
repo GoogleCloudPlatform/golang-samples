@@ -41,7 +41,7 @@ func computeWithTxt(w io.Writer) error {
 		{Parts: []*genai.Part{
 			{Text: "What's the longest word in the English language?"},
 		},
-			Role: "user"},
+			Role: genai.RoleUser},
 	}
 
 	resp, err := client.Models.ComputeTokens(ctx, modelName, contents, nil)

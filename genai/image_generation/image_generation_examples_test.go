@@ -530,4 +530,84 @@ func TestImageGeneration(t *testing.T) {
 			t.Error("expected non-empty output, got empty")
 		}
 	})
+
+	t.Run("style customization with style reference", func(t *testing.T) {
+		buf.Reset()
+		// TODO(developer): update with your bucket
+		outputGCSURI := "gs://your-bucket/your-prefix"
+
+		err := generateStyleRefWithTextMock(buf, outputGCSURI)
+		if err != nil {
+			t.Fatalf("generateStyleRefWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected printed output, got empty")
+		}
+	})
+
+	t.Run("canny edge customization with text+image", func(t *testing.T) {
+		buf.Reset()
+		// TODO(developer): update with your bucket
+		outputGCSURI := "gs://your-bucket/your-prefix"
+
+		err := generateCannyCtrlTypeWithTextMock(buf, outputGCSURI)
+		if err != nil {
+			t.Fatalf("generateCannyCtrlTypeWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate image with scribble control type", func(t *testing.T) {
+		buf.Reset()
+		// TODO(developer): update with your bucket
+		outputGCSURI := "gs://your-bucket/your-prefix"
+
+		err := generateScribbleCtrlTypeWithTextMock(buf, outputGCSURI)
+		if err != nil {
+			t.Fatalf("generateScribbleCtrlTypeWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("subject customization with control reference", func(t *testing.T) {
+		buf.Reset()
+		// TODO(developer): update with your bucket
+		outputGCSURI := "gs://your-bucket/your-prefix"
+
+		err := generateSubjRefCtrlReferWithTextMock(buf, outputGCSURI)
+		if err != nil {
+			t.Fatalf("generateSubjRefCtrlReferWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate style transfer customization with raw reference", func(t *testing.T) {
+		buf.Reset()
+		// TODO(developer): update with your bucket
+		outputGCSURI := "gs://your-bucket/your-prefix"
+
+		err := generateRawReferWithTextMock(buf, outputGCSURI)
+		if err != nil {
+			t.Fatalf("generateRawReferWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
 }

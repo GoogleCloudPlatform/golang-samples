@@ -83,7 +83,7 @@ func generateStructuredOutputWithTxt(w io.Writer) error {
 			},
 		},
 		{
-			Role: "user",
+			Role: genai.RoleUser,
 			Parts: []*genai.Part{
 				{Text: "Alice and Bob are going to a science fair on Friday."},
 			},
