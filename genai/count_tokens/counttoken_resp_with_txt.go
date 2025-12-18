@@ -41,7 +41,7 @@ func generateTextAndCount(w io.Writer) error {
 		{Parts: []*genai.Part{
 			{Text: "Why is the sky blue?"},
 		},
-			Role: "user"},
+			Role: genai.RoleUser},
 	}
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)

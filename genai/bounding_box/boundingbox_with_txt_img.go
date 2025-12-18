@@ -125,7 +125,7 @@ func generateBoundingBoxesWithText(w io.Writer) error {
 
 	contents := []*genai.Content{
 		{
-			Role: "user",
+			Role: genai.RoleUser,
 			Parts: []*genai.Part{
 				{
 					FileData: &genai.FileData{
