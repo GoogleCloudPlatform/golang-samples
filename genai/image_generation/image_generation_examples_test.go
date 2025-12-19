@@ -425,6 +425,45 @@ func TestImageGeneration(t *testing.T) {
 		}
 	})
 
+	t.Run("generate mmflash locale aware image content with text", func(t *testing.T) {
+		buf.Reset()
+		err := generateMMFlashLocaleAwareWithText(buf)
+		if err != nil {
+			t.Fatalf("generateMMFlashLocaleAwareWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate mmflash multiple images with text", func(t *testing.T) {
+		buf.Reset()
+		err := generateMMFlashMultipleImgsWithText(buf)
+		if err != nil {
+			t.Fatalf("generateMMFlashMultipleImgsWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("virtual try-on generation", func(t *testing.T) {
+		buf.Reset()
+		err := generateImgVirtualTryOnWithTextImg(buf)
+		if err != nil {
+			t.Fatalf("generateImgVirtualTryOnWithTextImg failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
 	t.Run("style customization with style reference", func(t *testing.T) {
 		buf.Reset()
 		// TODO(developer): update with your bucket
