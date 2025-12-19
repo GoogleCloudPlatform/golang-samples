@@ -30,6 +30,19 @@ func TestThinkingGeneration(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 
+	t.Run("generate content including thoughts", func(t *testing.T) {
+		buf.Reset()
+		err := generateContentWithThoughts(buf)
+		if err != nil {
+			t.Fatalf("generateContentWithThoughts failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
 	t.Run("generate content including with text", func(t *testing.T) {
 		buf.Reset()
 		err := generateContentWithTxt(buf)
