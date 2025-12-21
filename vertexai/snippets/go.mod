@@ -3,9 +3,9 @@ module github.com/GoogleCloudPlatform/golang-samples/vertexai/snippets
 go 1.24.0
 
 require (
-	cloud.google.com/go/vertexai v0.13.2
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	google.golang.org/protobuf v1.36.3
+	cloud.google.com/go/vertexai v0.15.0
+	github.com/GoogleCloudPlatform/golang-samples 56b9c2b71564
+	google.golang.org/protobuf v1.36.11
 )
 
 require (

@@ -3,18 +3,18 @@ module github.com/GoogleCloudPlatform/golang-samples/dlp
 go 1.24.0
 
 require (
-	cloud.google.com/go/bigquery v1.65.0
-	cloud.google.com/go/datastore v1.20.0
-	cloud.google.com/go/dlp v1.20.1
-	cloud.google.com/go/kms v1.20.5
-	cloud.google.com/go/pubsub v1.45.3
-	cloud.google.com/go/storage v1.50.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	cloud.google.com/go/bigquery v1.72.0
+	cloud.google.com/go/datastore v1.21.0
+	cloud.google.com/go/dlp v1.28.0
+	cloud.google.com/go/kms v1.23.2
+	cloud.google.com/go/pubsub v1.50.1
+	cloud.google.com/go/storage v1.58.0
+	github.com/GoogleCloudPlatform/golang-samples 56b9c2b71564
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
-	google.golang.org/api v0.217.0
-	google.golang.org/protobuf v1.36.3
+	google.golang.org/api v0.258.0
+	google.golang.org/protobuf v1.36.11
 )
 
 require (
