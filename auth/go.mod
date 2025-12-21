@@ -3,12 +3,12 @@ module github.com/GoogleCloudPlatform/golang-samples/auth
 go 1.24.0
 
 require (
-	cloud.google.com/go/pubsub v1.45.3
-	cloud.google.com/go/storage v1.50.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	cloud.google.com/go/pubsub v1.50.1
+	cloud.google.com/go/storage v1.58.0
+	github.com/GoogleCloudPlatform/golang-samples 56b9c2b71564
 	github.com/google/uuid v1.6.0
-	golang.org/x/oauth2 v0.25.0
-	google.golang.org/api v0.217.0
+	golang.org/x/oauth2 v0.34.0
+	google.golang.org/api v0.258.0
 )
 
 require (
@@ -34,7 +34,7 @@ require (
 	cloud.google.com/go/auth/oauth2adapt v0.2.7 // indirect
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
 	cloud.google.com/go/iam v1.3.1 // indirect
-	cloud.google.com/go/language v1.14.3
+	cloud.google.com/go/language v1.14.6
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect

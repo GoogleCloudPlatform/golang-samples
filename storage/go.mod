@@ -6,12 +6,12 @@ require (
 	cloud.google.com/go/iam v1.5.3
 	cloud.google.com/go/pubsub v1.50.1
 	cloud.google.com/go/storage v1.58.0
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+	github.com/GoogleCloudPlatform/golang-samples 56b9c2b71564
 	github.com/aws/aws-sdk-go v1.55.8
 	github.com/google/uuid v1.6.0
-	github.com/googleapis/gax-go/v2 v2.15.0
-	google.golang.org/api v0.256.0
-	google.golang.org/genproto v0.0.0-20250922171735-9219d122eba9
+	github.com/googleapis/gax-go/v2 v2.16.0
+	google.golang.org/api v0.258.0
+	google.golang.org/genproto 97cd9d5aeac2
 )
 
 require (
