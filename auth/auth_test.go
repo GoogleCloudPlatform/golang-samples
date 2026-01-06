@@ -121,3 +121,43 @@ func TestAuthenticateWithAPIKey(t *testing.T) {
 		t.Errorf("authenticateWithAPIKey got %q, want %q", got, want)
 	}
 }
+
+func TestValidateServiceAccountKey(t *testing.T) {
+	testutil.SystemTest(t)
+	keyPath := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
+	if keyPath == "" {
+		t.Skip("GOOGLE_APPLICATION_CREDENTIALS not set")
+	}
+
+	buf := &bytes.Buffer{}
+
+	if err := validateServiceAccountKey(buf, keyPath); err != nil {
+		t.Errorf("validateServiceAccountKey(valid) got err: %v", err)
+	}
+
+	want := "Successfully validated service account key"
+	if got := buf.String(); !strings.Contains(got, want) {
+		t.Errorf("validateServiceAccountKey(valid) got %q, want %q", got, want)
+	}
+
+	buf.Reset()
+
+	tmpFile, err := os.CreateTemp("", "invalid-key-*.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(tmpFile.Name())
+
+	// A valid JSON but wrong type ("authorized_user" instead of "service_account").
+	content := []byte(`{"type": "authorized_user"}`)
+	if _, err := tmpFile.Write(content); err != nil {
+		t.Fatal(err)
+	}
+	tmpFile.Close()
+
+	// The function should return an error because JWTConfigFromJSON
+	// specifically expects the "service_account" type.
+	if err := validateServiceAccountKey(buf, tmpFile.Name()); err == nil {
+		t.Error("validateServiceAccountKey(invalid) expected error for 'authorized_user' type, got nil")
+	}
+}
