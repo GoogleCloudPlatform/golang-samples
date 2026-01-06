@@ -35,7 +35,7 @@ func validateServiceAccountKey(w io.Writer, keyPath string) error {
 		return fmt.Errorf("os.ReadFile: %w", err)
 	}
 
-	scope := "https://www.googleapis.com/auth/datastore"
+	scope := "https://www.googleapis.com/auth/cloud-platform"
 
 	// Use a type-specific credential loader to validate the service account key.
 	// google.JWTConfigFromJSON returns an error if the 'type' field in the JSON
