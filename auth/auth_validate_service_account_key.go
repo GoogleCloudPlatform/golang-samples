@@ -31,8 +31,8 @@ import (
 func validateServiceAccountKey(w io.Writer, keyPath string) error {
 	keyBytes, err := os.ReadFile(keyPath)
 	if err != nil {
-		fmt.Fprintf(w, "os.ReadFile: %v", err)
-		return fmt.Errorf("os.ReadFile: %w", err)
+		fmt.Fprintf(w, "failed to read service account key file: %v", err)
+		return fmt.Errorf("failed to read service account key file %q: %w", keyPath, err)
 	}
 
 	scope := "https://www.googleapis.com/auth/cloud-platform"
