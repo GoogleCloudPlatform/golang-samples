@@ -45,8 +45,8 @@ func validateServiceAccountKey(w io.Writer, keyPath string) error {
 	config, err := google.JWTConfigFromJSON(keyBytes, scope)
 
 	if err != nil {
-		fmt.Fprintf(w, "google.JWTConfigFromJSON: %v", err)
-		return fmt.Errorf("google.JWTConfigFromJSON: %w", err)
+		fmt.Fprintf(w, "invalid service account key: %v", err)
+		return fmt.Errorf("invalid service account key: %w", err)
 	}
 
 	fmt.Fprintf(w, "Successfully validated service account key for: %s\n", config.Email)
