@@ -35,7 +35,7 @@ func generateWithNullables(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 	prompt := `
 The week ahead brings a mix of weather conditions.
 Sunday is expected to be sunny with a temperature of 77°F and a humidity level of 50%. Winds will be light at around 10 km/h.
@@ -49,7 +49,8 @@ Finally, Saturday rounds off the week with sunny skies, a temperature of 80°F, 
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: prompt},
-		}},
+		},
+			Role: genai.RoleUser},
 	}
 	config := &genai.GenerateContentConfig{
 		ResponseMIMEType: "application/json",
@@ -63,11 +64,11 @@ Finally, Saturday rounds off the week with sunny skies, a temperature of 80°F, 
 					Items: &genai.Schema{
 						Type: "object",
 						Properties: map[string]*genai.Schema{
-							"Day":         {Type: "string", Nullable: true},
-							"Forecast":    {Type: "string", Nullable: true},
-							"Temperature": {Type: "integer", Nullable: true},
-							"Humidity":    {Type: "string", Nullable: true},
-							"Wind Speed":  {Type: "integer", Nullable: true},
+							"Day":         {Type: "string", Nullable: genai.Ptr(true)},
+							"Forecast":    {Type: "string", Nullable: genai.Ptr(true)},
+							"Temperature": {Type: "integer", Nullable: genai.Ptr(true)},
+							"Humidity":    {Type: "string", Nullable: genai.Ptr(true)},
+							"Wind Speed":  {Type: "integer", Nullable: genai.Ptr(true)},
 						},
 						Required: []string{"Day", "Temperature", "Forecast", "Wind Speed"},
 					},
@@ -81,10 +82,8 @@ Finally, Saturday rounds off the week with sunny skies, a temperature of 80°F, 
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
 
-	respText, err := resp.Text()
-	if err != nil {
-		return fmt.Errorf("failed to convert model response to text: %w", err)
-	}
+	respText := resp.Text()
+
 	fmt.Fprintln(w, respText)
 
 	// Example response:

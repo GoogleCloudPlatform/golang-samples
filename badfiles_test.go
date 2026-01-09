@@ -57,6 +57,9 @@ var allowList = []string{
 	".gitignore",
 	"**/.gitkeep",
 
+	// Jujutsu repo files (for local https://jj-vcs.github.io/ users)
+	".jj/**",
+
 	// Primarily ML APIs.
 	"**/testdata/**/*.jpg",
 	"**/testdata/**/*.wav",
@@ -78,6 +81,11 @@ var allowList = []string{
 
 	// DLP data
 	"dlp/snippets/**/testdata/*",
+
+	// genai data
+	"genai/**/*.mp4",
+	"genai/**/*.jpg",
+	"genai/**/*.png",
 
 	// Endpoints samples.
 	"endpoints/**/*.proto",
@@ -111,7 +119,6 @@ var allowList = []string{
 	"storage/objects/notes.txt",
 
 	// GitHub configuration.
-	".github/blunderbuss.yml",
 	".github/renovate.json",
 	".github/CODEOWNERS",
 

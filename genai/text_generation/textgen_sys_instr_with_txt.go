@@ -35,7 +35,7 @@ func generateWithSystem(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 	contents := genai.Text("Why is the sky blue?")
 	config := &genai.GenerateContentConfig{
 		SystemInstruction: &genai.Content{
@@ -50,10 +50,8 @@ func generateWithSystem(w io.Writer) error {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
 
-	respText, err := resp.Text()
-	if err != nil {
-		return fmt.Errorf("failed to convert model response to text: %w", err)
-	}
+	respText := resp.Text()
+
 	fmt.Fprintln(w, respText)
 
 	// Example response:

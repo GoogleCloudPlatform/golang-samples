@@ -64,7 +64,7 @@ func HandleCloudEvent(w http.ResponseWriter, r *http.Request) {
 	keypath := logentry.ProtoPayload.GetResponse().AsMap()["name"]
 
 	s := fmt.Sprintf("New Service Account Key created for %s by %s: %v", principal, actor, keypath)
-	log.Printf(s)
+	log.Print(s)
 	fmt.Fprintln(w, s)
 }
 
