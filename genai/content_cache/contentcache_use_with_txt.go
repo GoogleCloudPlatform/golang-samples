@@ -36,7 +36,7 @@ func useContentCacheWithTxt(w io.Writer, cacheName string) error {
 	}
 
 	resp, err := client.Models.GenerateContent(ctx,
-		"gemini-2.0-flash-001",
+		"gemini-2.5-flash",
 		genai.Text("Summarize the pdfs"),
 		&genai.GenerateContentConfig{
 			CachedContent: cacheName,
@@ -46,10 +46,8 @@ func useContentCacheWithTxt(w io.Writer, cacheName string) error {
 		return fmt.Errorf("failed to use content cache to generate content: %w", err)
 	}
 
-	respText, err := resp.Text()
-	if err != nil {
-		return fmt.Errorf("failed to convert model response to text: %w", err)
-	}
+	respText := resp.Text()
+
 	fmt.Fprintln(w, respText)
 
 	// Example response:

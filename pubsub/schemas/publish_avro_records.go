@@ -21,7 +21,8 @@ import (
 	"io"
 	"os"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 	"github.com/linkedin/goavro/v2"
 )
 
@@ -46,21 +47,23 @@ func publishAvroRecords(w io.Writer, projectID, topicID, avscFile string) error 
 	record := map[string]interface{}{"name": "Alaska", "post_abbr": "AK"}
 
 	// Get the topic encoding type.
-	t := client.Topic(topicID)
-	cfg, err := t.Config(ctx)
-	if err != nil {
-		return fmt.Errorf("topic.Config err: %w", err)
+	req := &pubsubpb.GetTopicRequest{
+		Topic: fmt.Sprintf("projects/%s/topics/%s", projectID, topicID),
 	}
-	encoding := cfg.SchemaSettings.Encoding
+	t, err := client.TopicAdminClient.GetTopic(ctx, req)
+	if err != nil {
+		return fmt.Errorf("got err in GetTopic: %w", err)
+	}
+	encoding := t.SchemaSettings.Encoding
 
 	var msg []byte
 	switch encoding {
-	case pubsub.EncodingBinary:
+	case pubsubpb.Encoding_BINARY:
 		msg, err = codec.BinaryFromNative(nil, record)
 		if err != nil {
 			return fmt.Errorf("codec.BinaryFromNative err: %w", err)
 		}
-	case pubsub.EncodingJSON:
+	case pubsubpb.Encoding_JSON:
 		msg, err = codec.TextualFromNative(nil, record)
 		if err != nil {
 			return fmt.Errorf("codec.TextualFromNative err: %w", err)
@@ -69,7 +72,11 @@ func publishAvroRecords(w io.Writer, projectID, topicID, avscFile string) error 
 		return fmt.Errorf("invalid encoding: %v", encoding)
 	}
 
-	result := t.Publish(ctx, &pubsub.Message{
+	// client.Publisher can be passed a topic ID (e.g. "my-topic") or
+	// a fully qualified name (e.g. "projects/my-project/topics/my-topic").
+	// If a topic ID is provided, the project ID from the client is used.
+	publisher := client.Publisher(topicID)
+	result := publisher.Publish(ctx, &pubsub.Message{
 		Data: msg,
 	})
 	_, err = result.Get(ctx)

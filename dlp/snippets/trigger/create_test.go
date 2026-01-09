@@ -39,6 +39,6 @@ func TestCreateTrigger(t *testing.T) {
 		t.Errorf("createTrigger got\n----\n%v\n----\nWant to contain:\n----\n%v\n----", got, want)
 	}
 
-	fullID := fmt.Sprintf("projects/" + tc.ProjectID + "/locations/global/jobTriggers/" + triggerID)
+	fullID := fmt.Sprintf("projects/%s/locations/global/jobTriggers/%s", tc.ProjectID, triggerID)
 	cleanUpTrigger(t, tc.ProjectID, fullID)
 }
