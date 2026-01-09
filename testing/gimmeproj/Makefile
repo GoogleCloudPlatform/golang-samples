@@ -14,4 +14,4 @@ cross:
 	GOOS=windows GOARCH=amd64 go build ${LDFLAGS} -o bin/windows_amd64/gimmeproj.exe
 
 upload: cross
-	gsutil -m cp -a public-read -r bin/* gs://gimme-proj/
+	gcloud storage cp --predefined-acl=public-read --recursive bin/* gs://gimme-proj/
