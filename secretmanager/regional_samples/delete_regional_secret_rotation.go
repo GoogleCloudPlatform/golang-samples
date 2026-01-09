@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
 import (
 	"context"
@@ -20,18 +20,21 @@ import (
 	"io"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
-	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
+	secretmanagerpb "cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
+	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// [START secretmanager_delete_secret_expiration]
+// [START secretmanager_delete_regional_secret_rotation]
 
-// removeExpiration removes the expiration time from a secret.
-func removeExpiration(w io.Writer, secretName string) error {
-	// secretName := "projects/my-project/secrets/my-secret"
+// deleteRegionalSecretRotation removes the rotation configuration from a regional secret.
+func deleteRegionalSecretRotation(w io.Writer, secretName, locationID string) error {
+	// secretName := "projects/my-project/locations/us-central1/secrets/my-secret-with-rotation"
+	// locationID := "us-central1"
 
 	ctx := context.Background()
-	client, err := secretmanager.NewClient(ctx)
+	endpoint := fmt.Sprintf("secretmanager.%s.rep.googleapis.com:443", locationID)
+	client, err := secretmanager.NewClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
 		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
@@ -42,17 +45,17 @@ func removeExpiration(w io.Writer, secretName string) error {
 			Name: secretName,
 		},
 		UpdateMask: &fieldmaskpb.FieldMask{
-			Paths: []string{"expire_time"},
+			Paths: []string{"rotation"},
 		},
 	}
 
-	secret, err := client.UpdateSecret(ctx, req)
+	result, err := client.UpdateSecret(ctx, req)
 	if err != nil {
 		return fmt.Errorf("failed to update secret: %w", err)
 	}
 
-	fmt.Fprintf(w, "Removed expiration from secret %s\n", secret.Name)
+	fmt.Fprintf(w, "Removed rotation from secret %s\n", result.Name)
 	return nil
 }
 
-// [END secretmanager_delete_secret_expiration]
+// [END secretmanager_delete_regional_secret_rotation]

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
 import (
 	"context"
@@ -21,35 +21,33 @@ import (
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	secretmanagerpb "cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
+	"google.golang.org/api/option"
 )
 
-// [START secretmanager_create_secret_with_cmek]
+// [START secretmanager_create_regional_secret_with_cmek]
 
 // createSecretWithCMEK creates a new secret encrypted with a customer-managed key.
-func createSecretWithCMEK(w io.Writer, projectID, secretID, kmsKeyName string) error {
+func createRegionalSecretWithCMEK(w io.Writer, projectID, secretID, locationID, kmsKeyName string) error {
 	// projectID := "my-project"
 	// secretID := "my-secret-with-cmek"
-	// kmsKeyName := "projects/my-project/locations/global/keyRings/{keyringname}/cryptoKeys/{keyname}"
+	// kmsKeyName := "projects/my-project/locations/{locationID}/keyRings/{keyringname}/cryptoKeys/{keyname}"
 
 	ctx := context.Background()
-	client, err := secretmanager.NewClient(ctx)
+	endpoint := fmt.Sprintf("secretmanager.%s.rep.googleapis.com:443", locationID)
+	client, err := secretmanager.NewClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
 		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
 	defer client.Close()
 
+	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
+
 	req := &secretmanagerpb.CreateSecretRequest{
-		Parent:   fmt.Sprintf("projects/%s", projectID),
+		Parent:   parent,
 		SecretId: secretID,
 		Secret: &secretmanagerpb.Secret{
-			Replication: &secretmanagerpb.Replication{
-				Replication: &secretmanagerpb.Replication_Automatic_{
-					Automatic: &secretmanagerpb.Replication_Automatic{
-						CustomerManagedEncryption: &secretmanagerpb.CustomerManagedEncryption{
-							KmsKeyName: kmsKeyName,
-						},
-					},
-				},
+			CustomerManagedEncryption: &secretmanagerpb.CustomerManagedEncryption{
+				KmsKeyName: kmsKeyName,
 			},
 		},
 	}
@@ -63,4 +61,4 @@ func createSecretWithCMEK(w io.Writer, projectID, secretID, kmsKeyName string) e
 	return nil
 }
 
-// [END secretmanager_create_secret_with_cmek]
+// [END secretmanager_create_regional_secret_with_cmek]

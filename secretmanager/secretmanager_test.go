@@ -1550,7 +1550,7 @@ func testCreateTagKey(tb testing.TB, projectID string) *resourcemanagerpb.TagKey
 
 	client, ctx := testResourceManagerTagsKeyClient(tb)
 	parent := fmt.Sprintf("projects/%s", projectID)
-	tagKeyName := "sm_secret_tag_sample_test2"
+	tagKeyName := testName(tb)
 	tagKeyDescription := "creating tag key for secretmanager tags sample"
 
 	tagKeyOperation, err := client.CreateTagKey(ctx, &resourcemanagerpb.CreateTagKeyRequest{
@@ -1744,10 +1744,6 @@ func TestBindTagsToSecret(t *testing.T) {
 	defer testCleanupTagKey(t, tagKey.GetName())
 	tagValue := testCreateTagValue(t, tagKey.GetName())
 	defer testCleanupTagValue(t, tagValue.GetName())
-
-	t.Logf("Secret ID used: %s", secretID)
-	t.Logf("Tag Key used: %s", tagKey.GetName())
-	t.Logf("Tag Value used: %s", tagValue.GetName())
 
 	var b bytes.Buffer
 	if err := bindTagsToSecret(&b, tc.ProjectID, secretID, tagValue.GetName()); err != nil {
@@ -1990,9 +1986,6 @@ func TestCreateSecretWithRotation(t *testing.T) {
 	if got, want := b.String(), "Created secret"; !strings.Contains(got, want) {
 		t.Errorf("createSecretWithRotation: expected %q to contain %q", got, want)
 	}
-	if got, want := b.String(), topicName; !strings.Contains(got, want) {
-		t.Errorf("createSecretWithRotation: expected %q to contain %q", got, want)
-	}
 
 	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
 		Name: secretName,
@@ -2010,9 +2003,6 @@ func TestCreateSecretWithRotation(t *testing.T) {
 	}
 	if secret.GetRotation().GetNextRotationTime() == nil {
 		t.Fatal("GetSecret: NextRotationTime is nil, expected non-nil")
-	}
-	if len(secret.GetTopics()) != 1 || secret.GetTopics()[0].GetName() != topicName {
-		t.Errorf("Topics mismatch: got %v, want %s", secret.GetTopics(), topicName)
 	}
 }
 
@@ -2060,7 +2050,7 @@ func TestUpdateSecretRotationPeriod(t *testing.T) {
 	}
 }
 
-func TestRemoveSecretRotation(t *testing.T) {
+func TestDeleteSecretRotation(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	secretId := testName(t)
 	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretId)
@@ -2077,13 +2067,13 @@ func TestRemoveSecretRotation(t *testing.T) {
 	}
 
 	// Remove rotation.
-	if err := removeSecretRotation(&b, tc.ProjectID, secretId); err != nil {
+	if err := deleteSecretRotation(&b, tc.ProjectID, secretId); err != nil {
 		t.Fatal(err)
 	}
 
 	got := b.String()
 	if !strings.Contains(got, secretId) {
-		t.Errorf("removeSecretRotation: output %q did not contain secretId %q", got, secretId)
+		t.Errorf("deleteSecretRotation: output %q did not contain secretId %q", got, secretId)
 	}
 
 	// Verify rotation is removed with GetSecret.

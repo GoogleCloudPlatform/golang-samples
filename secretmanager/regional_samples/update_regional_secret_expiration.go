@@ -12,26 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
 import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
-	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
+	secretmanagerpb "cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
+	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// [START secretmanager_delete_secret_expiration]
+// [START secretmanager_update_regional_secret_expiration]
 
-// removeExpiration removes the expiration time from a secret.
-func removeExpiration(w io.Writer, secretName string) error {
-	// secretName := "projects/my-project/secrets/my-secret"
+// updateRegionalSecretExpiration updates the expiration time of a regional secret.
+func updateRegionalSecretExpiration(w io.Writer, secretName, locationID string, expireTime time.Time) error {
+	// secretName := "projects/my-project/locations/us-central1/secrets/my-secret"
+	// locationID := "us-central1"
+	// expireTime := time.Now().Add(time.Hour * 24 * 7)
 
 	ctx := context.Background()
-	client, err := secretmanager.NewClient(ctx)
+	endpoint := fmt.Sprintf("secretmanager.%s.rep.googleapis.com:443", locationID)
+	client, err := secretmanager.NewClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
 		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
@@ -40,6 +46,9 @@ func removeExpiration(w io.Writer, secretName string) error {
 	req := &secretmanagerpb.UpdateSecretRequest{
 		Secret: &secretmanagerpb.Secret{
 			Name: secretName,
+			Expiration: &secretmanagerpb.Secret_ExpireTime{
+				ExpireTime: timestamppb.New(expireTime),
+			},
 		},
 		UpdateMask: &fieldmaskpb.FieldMask{
 			Paths: []string{"expire_time"},
@@ -51,8 +60,8 @@ func removeExpiration(w io.Writer, secretName string) error {
 		return fmt.Errorf("failed to update secret: %w", err)
 	}
 
-	fmt.Fprintf(w, "Removed expiration from secret %s\n", secret.Name)
+	fmt.Fprintf(w, "Updated secret %s expiration time to %v\n", secret.Name, expireTime)
 	return nil
 }
 
-// [END secretmanager_delete_secret_expiration]
+// [END secretmanager_update_regional_secret_expiration]

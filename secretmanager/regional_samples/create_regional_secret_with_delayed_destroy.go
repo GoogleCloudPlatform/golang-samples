@@ -12,45 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
 import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	secretmanagerpb "cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
+	"google.golang.org/api/option"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
-// [START secretmanager_create_secret_with_cmek]
+// [START secretmanager_create_regional_secret_with_delayed_destroy]
 
-// createSecretWithCMEK creates a new secret encrypted with a customer-managed key.
-func createSecretWithCMEK(w io.Writer, projectID, secretID, kmsKeyName string) error {
+// createRegionalSecretWithDelayedDestroy creates a new regional secret with a version destroy TTL.
+func createRegionalSecretWithDelayedDestroy(w io.Writer, projectID, secretID, locationID string, ttl time.Duration) error {
 	// projectID := "my-project"
-	// secretID := "my-secret-with-cmek"
-	// kmsKeyName := "projects/my-project/locations/global/keyRings/{keyringname}/cryptoKeys/{keyname}"
+	// secretID := "my-secret-with-ttl"
+	// locationID := "us-central1"
+	// ttl := time.Hour * 24
 
 	ctx := context.Background()
-	client, err := secretmanager.NewClient(ctx)
+	endpoint := fmt.Sprintf("secretmanager.%s.rep.googleapis.com:443", locationID)
+	client, err := secretmanager.NewClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
 		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
 	defer client.Close()
 
 	req := &secretmanagerpb.CreateSecretRequest{
-		Parent:   fmt.Sprintf("projects/%s", projectID),
+		Parent:   fmt.Sprintf("projects/%s/locations/%s", projectID, locationID),
 		SecretId: secretID,
 		Secret: &secretmanagerpb.Secret{
-			Replication: &secretmanagerpb.Replication{
-				Replication: &secretmanagerpb.Replication_Automatic_{
-					Automatic: &secretmanagerpb.Replication_Automatic{
-						CustomerManagedEncryption: &secretmanagerpb.CustomerManagedEncryption{
-							KmsKeyName: kmsKeyName,
-						},
-					},
-				},
-			},
+			VersionDestroyTtl: durationpb.New(ttl),
 		},
 	}
 
@@ -59,8 +56,8 @@ func createSecretWithCMEK(w io.Writer, projectID, secretID, kmsKeyName string) e
 		return fmt.Errorf("failed to create secret: %w", err)
 	}
 
-	fmt.Fprintf(w, "Created secret %s with CMEK key %s\n", secret.Name, kmsKeyName)
+	fmt.Fprintf(w, "Created secret %s with version delayed destruction %v\n", secret.Name, ttl)
 	return nil
 }
 
-// [END secretmanager_create_secret_with_cmek]
+// [END secretmanager_create_regional_secret_with_delayed_destroy]

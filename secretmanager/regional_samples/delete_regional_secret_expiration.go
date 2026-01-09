@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
 import (
 	"context"
@@ -21,17 +21,20 @@ import (
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
+	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// [START secretmanager_delete_secret_expiration]
+// [START secretmanager_delete_regional_secret_expiration]
 
-// removeExpiration removes the expiration time from a secret.
-func removeExpiration(w io.Writer, secretName string) error {
-	// secretName := "projects/my-project/secrets/my-secret"
+// removeRegionalExpiration removes the expiration time from a regional secret.
+func removeRegionalExpiration(w io.Writer, secretName, locationID string) error {
+	// secretName := "projects/my-project/locations/us-central1/secrets/my-secret"
+	// locationID := "us-central1"
 
 	ctx := context.Background()
-	client, err := secretmanager.NewClient(ctx)
+	endpoint := fmt.Sprintf("secretmanager.%s.rep.googleapis.com:443", locationID)
+	client, err := secretmanager.NewClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
 		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
@@ -55,4 +58,4 @@ func removeExpiration(w io.Writer, secretName string) error {
 	return nil
 }
 
-// [END secretmanager_delete_secret_expiration]
+// [END secretmanager_delete_regional_secret_expiration]

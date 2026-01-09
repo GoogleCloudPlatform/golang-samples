@@ -12,48 +12,58 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
 import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	secretmanagerpb "cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
+	"google.golang.org/api/option"
+	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// [START secretmanager_delete_secret_rotation]
+// [START secretmanager_update_regional_secret_rotation_period]
+// updateRegionalSecretRotationPeriod updates the rotation period of a regional secret.
+func updateRegionalSecretRotationPeriod(w io.Writer, secretName, locationID string, rotationPeriod time.Duration) error {
+	// secretName := "projects/my-project/locations/us-central1/secrets/my-secret"
+	// locationID := "us-central1"
+	// rotationPeriod := time.Hour * 24 * 7
 
-// deleteSecretRotation removes the rotation configuration from a secret.
-func deleteSecretRotation(w io.Writer, projectID, secretID string) error {
-	// projectID := "my-project"
-	// secretID := "my-secret-with-rotation"
-
+	// Create the client.
 	ctx := context.Background()
-	client, err := secretmanager.NewClient(ctx)
+	endpoint := fmt.Sprintf("secretmanager.%s.rep.googleapis.com:443", locationID)
+	client, err := secretmanager.NewClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
 		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
 	defer client.Close()
 
+	// Build the request.
 	req := &secretmanagerpb.UpdateSecretRequest{
 		Secret: &secretmanagerpb.Secret{
-			Name: fmt.Sprintf("projects/%s/secrets/%s", projectID, secretID),
+			Name: secretName,
+			Rotation: &secretmanagerpb.Rotation{
+				RotationPeriod: durationpb.New(rotationPeriod),
+			},
 		},
 		UpdateMask: &fieldmaskpb.FieldMask{
-			Paths: []string{"rotation"},
+			Paths: []string{"rotation.rotation_period"},
 		},
 	}
 
+	// Call the API.
 	result, err := client.UpdateSecret(ctx, req)
 	if err != nil {
 		return fmt.Errorf("failed to update secret: %w", err)
 	}
 
-	fmt.Fprintf(w, "Removed rotation from secret %s\n", result.Name)
+	fmt.Fprintf(w, "Updated secret %s rotation period to %v\n", result.Name, result.Rotation.RotationPeriod.AsDuration())
 	return nil
 }
 
-// [END secretmanager_delete_secret_rotation]
+// [END secretmanager_update_regional_secret_rotation_period]

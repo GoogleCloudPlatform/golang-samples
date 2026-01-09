@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secretmanager
+package regional_secretmanager
 
 import (
 	"context"
@@ -21,38 +21,45 @@ import (
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
+	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// [START secretmanager_delete_secret_expiration]
+// [START secretmanager_delete_regional_secret_version_destroy_ttl]
 
-// removeExpiration removes the expiration time from a secret.
-func removeExpiration(w io.Writer, secretName string) error {
-	// secretName := "projects/my-project/secrets/my-secret"
+// deleteRegionalSecretVersionDestroyTTL removes the TTL config from a regional secret.
+func deleteRegionalSecretVersionDestroyTTL(w io.Writer, projectID, secretID, locationID string) error {
+	// projectID := "my-project"
+	// secretID := "my-secret"
+	// locationID := "us-central1"
 
+	// Create the client.
 	ctx := context.Background()
-	client, err := secretmanager.NewClient(ctx)
+	endpoint := fmt.Sprintf("secretmanager.%s.rep.googleapis.com:443", locationID)
+	client, err := secretmanager.NewClient(ctx, option.WithEndpoint(endpoint))
 	if err != nil {
 		return fmt.Errorf("failed to create secretmanager client: %w", err)
 	}
 	defer client.Close()
 
+	// Build the request.
 	req := &secretmanagerpb.UpdateSecretRequest{
 		Secret: &secretmanagerpb.Secret{
-			Name: secretName,
+			Name: fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectID, locationID, secretID),
 		},
 		UpdateMask: &fieldmaskpb.FieldMask{
-			Paths: []string{"expire_time"},
+			Paths: []string{"version_destroy_ttl"},
 		},
 	}
 
-	secret, err := client.UpdateSecret(ctx, req)
+	// Call the API.
+	result, err := client.UpdateSecret(ctx, req)
 	if err != nil {
 		return fmt.Errorf("failed to update secret: %w", err)
 	}
 
-	fmt.Fprintf(w, "Removed expiration from secret %s\n", secret.Name)
+	fmt.Fprintf(w, "Updated secret %s, removed version_destroy_ttl\n", result.Name)
 	return nil
 }
 
-// [END secretmanager_delete_secret_expiration]
+// [END secretmanager_delete_regional_secret_version_destroy_ttl]
