@@ -36,7 +36,7 @@ func TestDeleteTemplate(t *testing.T) {
 		t.Fatalf("createInspectTemplate: %v", err)
 	}
 
-	fullID := fmt.Sprintf("projects/" + tc.ProjectID + "/locations/global/inspectTemplates/" + templateID)
+	fullID := fmt.Sprintf("projects/%s/locations/global/inspectTemplates/%s", tc.ProjectID, templateID)
 
 	if err := deleteInspectTemplate(&buf, fullID); err != nil {
 		t.Fatalf("deleteInspectTemplate: %v", err)

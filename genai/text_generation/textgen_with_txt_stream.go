@@ -35,7 +35,7 @@ func generateWithTextStream(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 	contents := genai.Text("Why is the sky blue?")
 
 	for resp, err := range client.Models.GenerateContentStream(ctx, modelName, contents, nil) {
@@ -43,10 +43,8 @@ func generateWithTextStream(w io.Writer) error {
 			return fmt.Errorf("failed to generate content: %w", err)
 		}
 
-		chunk, err := resp.Text()
-		if err != nil {
-			return fmt.Errorf("failed to convert model response to text: %w", err)
-		}
+		chunk := resp.Text()
+
 		fmt.Fprintln(w, chunk)
 	}
 

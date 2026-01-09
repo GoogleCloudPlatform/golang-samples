@@ -35,7 +35,7 @@ func countWithTxt(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: "What's the highest mountain in Africa?"},

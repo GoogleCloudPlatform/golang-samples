@@ -35,7 +35,7 @@ func generateWithMuteVideo(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: "What is in the video?"},
@@ -43,7 +43,8 @@ func generateWithMuteVideo(w io.Writer) error {
 				FileURI:  "gs://cloud-samples-data/generative-ai/video/ad_copy_from_video.mp4",
 				MIMEType: "video/mp4",
 			}},
-		}},
+		},
+			Role: genai.RoleUser},
 	}
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, nil)
@@ -51,10 +52,8 @@ func generateWithMuteVideo(w io.Writer) error {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
 
-	respText, err := resp.Text()
-	if err != nil {
-		return fmt.Errorf("failed to convert model response to text: %w", err)
-	}
+	respText := resp.Text()
+
 	fmt.Fprintln(w, respText)
 
 	// Example response:

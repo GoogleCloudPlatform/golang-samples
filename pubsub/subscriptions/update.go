@@ -20,12 +20,14 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-func updateEndpoint(w io.Writer, projectID, subID string, endpoint string) error {
+func updateEndpoint(w io.Writer, projectID, subscriptionName, endpoint string) error {
 	// projectID := "my-project-id"
-	// subID := "my-sub"
+	// subscriptionName := "projects/my-project/subscriptions/my-sub"
 	// endpoint := "https://my-test-project.appspot.com/push"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
@@ -34,9 +36,18 @@ func updateEndpoint(w io.Writer, projectID, subID string, endpoint string) error
 	}
 	defer client.Close()
 
-	subConfig, err := client.Subscription(subID).Update(ctx, pubsub.SubscriptionConfigToUpdate{
-		PushConfig: &pubsub.PushConfig{Endpoint: endpoint},
-	})
+	req := &pubsubpb.UpdateSubscriptionRequest{
+		Subscription: &pubsubpb.Subscription{
+			Name: subscriptionName,
+			PushConfig: &pubsubpb.PushConfig{
+				PushEndpoint: endpoint,
+			},
+		},
+		UpdateMask: &fieldmaskpb.FieldMask{
+			Paths: []string{"push_config"},
+		},
+	}
+	subConfig, err := client.SubscriptionAdminClient.UpdateSubscription(ctx, req)
 	if err != nil {
 		return fmt.Errorf("Update: %w", err)
 	}
