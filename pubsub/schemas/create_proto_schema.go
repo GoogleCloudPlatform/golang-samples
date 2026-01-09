@@ -21,7 +21,8 @@ import (
 	"io"
 	"os"
 
-	"cloud.google.com/go/pubsub"
+	pubsub "cloud.google.com/go/pubsub/v2/apiv1"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 )
 
 // createProtoSchema creates a schema resource from a schema proto file.
@@ -30,7 +31,7 @@ func createProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error
 	// schemaID := "my-schema"
 	// protoFile = "path/to/a/proto/schema/file(.proto)/formatted/in/protocol/buffers"
 	ctx := context.Background()
-	client, err := pubsub.NewSchemaClient(ctx, projectID)
+	client, err := pubsub.NewSchemaClient(ctx)
 	if err != nil {
 		return fmt.Errorf("pubsub.NewSchemaClient: %w", err)
 	}
@@ -41,13 +42,17 @@ func createProtoSchema(w io.Writer, projectID, schemaID, protoFile string) error
 		return fmt.Errorf("error reading from file: %s", protoFile)
 	}
 
-	config := pubsub.SchemaConfig{
-		Type:       pubsub.SchemaProtocolBuffer,
-		Definition: string(protoSource),
+	req := &pubsubpb.CreateSchemaRequest{
+		Parent: fmt.Sprintf("projects/%s", projectID),
+		Schema: &pubsubpb.Schema{
+			Type:       pubsubpb.Schema_PROTOCOL_BUFFER,
+			Definition: string(protoSource),
+		},
+		SchemaId: schemaID,
 	}
-	s, err := client.CreateSchema(ctx, schemaID, config)
+	s, err := client.CreateSchema(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateSchema: %w", err)
+		return fmt.Errorf("error calling CreateSchema: %w", err)
 	}
 	fmt.Fprintf(w, "Schema created: %#v\n", s)
 	return nil

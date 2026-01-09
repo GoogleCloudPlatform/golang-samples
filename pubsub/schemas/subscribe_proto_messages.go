@@ -22,16 +22,15 @@ import (
 	"sync"
 	"time"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 	statepb "github.com/GoogleCloudPlatform/golang-samples/internal/pubsub/schemas"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
 
-func subscribeWithProtoSchema(w io.Writer, projectID, subID, protoFile string) error {
+func subscribeWithProtoSchema(w io.Writer, projectID, subID string) error {
 	// projectID := "my-project-id"
 	// subID := "my-sub"
-	// protoFile = "path/to/a/proto/schema/file(.proto)/formatted/in/protocol/buffers"
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
@@ -41,7 +40,7 @@ func subscribeWithProtoSchema(w io.Writer, projectID, subID, protoFile string) e
 	// Create an instance of the message to be decoded (a single U.S. state).
 	state := &statepb.State{}
 
-	sub := client.Subscription(subID)
+	sub := client.Subscriber(subID)
 	ctx2, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 

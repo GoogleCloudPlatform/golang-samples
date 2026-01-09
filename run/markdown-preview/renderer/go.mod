@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/run/markdown-preview/render
 
-go 1.23.0
+go 1.24.0
 
 require (
 	github.com/microcosm-cc/bluemonday v1.0.27

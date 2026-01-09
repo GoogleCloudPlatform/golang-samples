@@ -37,7 +37,7 @@ func TestUpdateStoredInfoType(t *testing.T) {
 	defer client.Close()
 	outputBucket := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
 
-	outputPath := fmt.Sprintf("gs://" + outputBucket + "/")
+	outputPath := fmt.Sprintf("gs://%s/", outputBucket)
 
 	bucketName := testutil.CreateTestBucket(ctx, t, client, tc.ProjectID, bucket_prefix)
 

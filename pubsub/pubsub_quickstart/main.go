@@ -22,7 +22,8 @@ import (
 	"fmt"
 	"log"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 )
 
 func main() {
@@ -40,9 +41,12 @@ func main() {
 
 	// Sets the id for the new topic.
 	topicID := "my-topic"
+	pbTopic := &pubsubpb.Topic{
+		Name: fmt.Sprintf("projects/%s/topics/%s", projectID, topicID),
+	}
 
 	// Creates the new topic.
-	topic, err := client.CreateTopic(ctx, topicID)
+	topic, err := client.TopicAdminClient.CreateTopic(ctx, pbTopic)
 	if err != nil {
 		log.Fatalf("Failed to create topic: %v", err)
 	}
