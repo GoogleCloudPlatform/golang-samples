@@ -66,7 +66,7 @@ func TestFirewallSnippets(t *testing.T) {
 	}
 
 	if firewallBefore.GetPriority() != 1000 {
-		t.Errorf(fmt.Sprintf("Got: %q; want %q", firewallBefore.GetPriority(), 1000))
+		t.Errorf("Got: %q; want %q", firewallBefore.GetPriority(), 1000)
 	}
 
 	var newFirewallPriority int32 = 500
@@ -85,7 +85,7 @@ func TestFirewallSnippets(t *testing.T) {
 	}
 
 	if firewallAfter.GetPriority() != newFirewallPriority {
-		t.Errorf(fmt.Sprintf("Got: %q; want %q", firewallAfter.GetPriority(), newFirewallPriority))
+		t.Errorf("Got: %q; want %q", firewallAfter.GetPriority(), newFirewallPriority)
 	}
 
 	buf.Reset()

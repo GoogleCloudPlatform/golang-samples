@@ -35,11 +35,11 @@ func generateWithEnumSchema(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: "What type of instrument is an oboe?"},
-		}},
+		}, Role: genai.RoleUser},
 	}
 	config := &genai.GenerateContentConfig{
 		ResponseMIMEType: "text/x.enum",
@@ -54,10 +54,8 @@ func generateWithEnumSchema(w io.Writer) error {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
 
-	respText, err := resp.Text()
-	if err != nil {
-		return fmt.Errorf("failed to convert model response to text: %w", err)
-	}
+	respText := resp.Text()
+
 	fmt.Fprintln(w, respText)
 
 	// Example response:

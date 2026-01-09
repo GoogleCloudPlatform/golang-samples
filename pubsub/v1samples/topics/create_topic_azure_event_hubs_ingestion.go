@@ -14,7 +14,7 @@
 
 package topics
 
-// [START pubsub_create_topic_with_azure_event_hubs_ingestion]
+// [START pubsub_old_version_create_topic_with_azure_event_hubs_ingestion]
 import (
 	"context"
 	"fmt"
@@ -64,4 +64,4 @@ func createTopicWithAzureEventHubsIngestion(w io.Writer, projectID, topicID, res
 	return nil
 }
 
-// [END pubsub_create_topic_with_azure_event_hubs_ingestion]
+// [END pubsub_old_version_create_topic_with_azure_event_hubs_ingestion]

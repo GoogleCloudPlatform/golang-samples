@@ -49,7 +49,7 @@ func HelloEventsPubSub(w http.ResponseWriter, r *http.Request) {
 		name = "World"
 	}
 	s := fmt.Sprintf("Hello, %s! ID: %s", name, string(r.Header.Get("Ce-Id")))
-	log.Printf(s)
+	log.Print(s)
 	fmt.Fprintln(w, s)
 }
 

@@ -98,7 +98,7 @@ func createSource(w io.Writer, orgId string) error {
 	if err != nil {
 		return fmt.Errorf("CreateSource: %w", err)
 	}
-	fmt.Fprintf(w, source.Name)
+	fmt.Fprint(w, source.Name)
 	return nil
 }
 
