@@ -172,4 +172,123 @@ func TestTextGeneration(t *testing.T) {
 			t.Error("expected non-empty output, got empty")
 		}
 	})
+
+	t.Run("generate with routing", func(t *testing.T) {
+		t.Skip("skipping because of model used in this test. The model 'model-optimizer-exp-04-09' is not consistently available in all test environments.")
+		buf.Reset()
+		err := generateWithRouting(buf)
+		if err != nil {
+			t.Fatalf("generateWithRouting failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate chat stream with text prompt", func(t *testing.T) {
+		buf.Reset()
+		err := generateChatStreamWithText(buf)
+		if err != nil {
+			t.Fatalf("generateChatStreamWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate Text With PDF", func(t *testing.T) {
+		buf.Reset()
+		err := generateTextWithPDF(buf)
+		if err != nil {
+			t.Fatalf("generateTextWithPDF failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate thinking with text prompt", func(t *testing.T) {
+		buf.Reset()
+		err := generateThinkingWithText(buf)
+		if err != nil {
+			t.Fatalf("generateThinkingWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate with model optimizer", func(t *testing.T) {
+		buf.Reset()
+		err := generateModelOptimizerWithTxt(buf)
+		if err != nil {
+			t.Fatalf("generateModelOptimizerWithTxt failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate chat with text", func(t *testing.T) {
+		buf.Reset()
+		err := generateChatWithText(buf)
+		if err != nil {
+			t.Fatalf("generateChatWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate text with async stream", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithTextAsyncStream(buf)
+		if err != nil {
+			t.Fatalf("generateWithTextAsyncStream failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate with local video file input", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithLocalVideo(buf)
+		if err != nil {
+			t.Fatalf("generateWithLocalVideo failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate with local multi local images input", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithMultiLocalImages(buf)
+		if err != nil {
+			t.Fatalf("generateWithMultiLocalImages failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
 }

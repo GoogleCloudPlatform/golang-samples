@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 	"go.opentelemetry.io/otel"
 	"google.golang.org/api/option"
 
@@ -73,8 +73,12 @@ func publishOpenTelemetryTracing(w io.Writer, projectID, topicID string, samplin
 	}
 	defer client.Close()
 
-	t := client.Topic(topicID)
-	result := t.Publish(ctx, &pubsub.Message{
+	// client.Publisher can be passed a topic ID (e.g. "my-topic") or
+	// a fully qualified name (e.g. "projects/my-project/topics/my-topic").
+	// If a topic ID is provided, the project ID from the client is used.
+	// Reuse this publisher for all publish calls to send messages in batches.
+	publisher := client.Publisher(topicID)
+	result := publisher.Publish(ctx, &pubsub.Message{
 		Data: []byte("Publishing message with tracing"),
 	})
 	if _, err := result.Get(ctx); err != nil {

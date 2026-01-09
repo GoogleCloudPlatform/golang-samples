@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"time"
 
 	genai "google.golang.org/genai"
 )
@@ -36,7 +37,7 @@ func createContentCache(w io.Writer) (string, error) {
 		return "", fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 
 	systemInstruction := "You are an expert researcher. You always stick to the facts " +
 		"in the sources provided, and never make up new facts. " +
@@ -54,7 +55,7 @@ func createContentCache(w io.Writer) (string, error) {
 					MIMEType: "application/pdf",
 				}},
 			},
-			Role: "user",
+			Role: genai.RoleUser,
 		},
 	}
 	config := &genai.CreateCachedContentConfig{
@@ -65,7 +66,7 @@ func createContentCache(w io.Writer) (string, error) {
 			},
 		},
 		DisplayName: "example-cache",
-		TTL:         "86400s",
+		TTL:         time.Duration(time.Duration.Seconds(86400)),
 	}
 
 	res, err := client.Caches.Create(ctx, modelName, config)
@@ -85,7 +86,7 @@ func createContentCache(w io.Writer) (string, error) {
 	// {
 	//   "name": "projects/111111111111/locations/us-central1/cachedContents/1111111111111111111",
 	//   "displayName": "example-cache",
-	//   "model": "projects/111111111111/locations/us-central1/publishers/google/models/gemini-2.0-flash-001",
+	//   "model": "projects/111111111111/locations/us-central1/publishers/google/models/gemini-2.5-flash",
 	//   "createTime": "2025-02-18T15:05:08.29468Z",
 	//   "updateTime": "2025-02-18T15:05:08.29468Z",
 	//   "expireTime": "2025-02-19T15:05:08.280828Z",

@@ -35,7 +35,7 @@ func countWithTxtAndVid(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: "Provide a description of the video."},
@@ -43,7 +43,8 @@ func countWithTxtAndVid(w io.Writer) error {
 				FileURI:  "gs://cloud-samples-data/generative-ai/video/pixel8.mp4",
 				MIMEType: "video/mp4",
 			}},
-		}},
+		},
+			Role: genai.RoleUser},
 	}
 
 	resp, err := client.Models.CountTokens(ctx, modelName, contents, nil)

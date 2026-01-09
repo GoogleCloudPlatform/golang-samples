@@ -68,7 +68,13 @@ func TestWriteTelemetry(t *testing.T) {
 		t:               t,
 		expectationsMet: make(chan struct{}),
 		expectations: []*metricExpectation{
-			{name: "http.server.duration"},
+			{name: "http.client.request.body.size"},
+			{name: "http.client.request.duration"},
+			{name: "http.server.request.body.size"},
+			{name: "http.server.response.body.size"},
+			{name: "http.server.request.duration"},
+			{name: "example.subrequests"},
+			{name: "example.sleep.duration"},
 		},
 	}
 	http.HandleFunc("/v1/metrics", ms.handleMetrics)
@@ -97,7 +103,7 @@ func TestWriteTelemetry(t *testing.T) {
 	testutil.Retry(t, 2*timeoutSeconds, 500*time.Millisecond, func(r *testutil.R) {
 		resp, err := http.Get("http://localhost:8080/multi")
 		if err != nil {
-			r.Errorf(err.Error())
+			r.Errorf("%v", err.Error())
 			r.Fail()
 		} else if resp == nil {
 			r.Errorf("status code was nil")

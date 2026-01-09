@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/appengine_flexible/go115_and_earlier
 
-go 1.23.0
+go 1.24.0
 
 require (
 	cloud.google.com/go/datastore v1.20.0

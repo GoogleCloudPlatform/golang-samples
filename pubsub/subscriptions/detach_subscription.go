@@ -20,7 +20,8 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 )
 
 func detachSubscription(w io.Writer, projectID, subName string) error {
@@ -38,8 +39,12 @@ func detachSubscription(w io.Writer, projectID, subName string) error {
 
 	// Call DetachSubscription, which detaches a subscription from
 	// a topic. This can only be done if you have the
-	// `pubsub.topics.detachSubscription` role on the topic.
-	_, err = client.DetachSubscription(ctx, subName)
+	// `pubsub.topics.detachSubscription` role on the topic the
+	// subscription is attached to.
+	req := &pubsubpb.DetachSubscriptionRequest{
+		Subscription: subName,
+	}
+	_, err = client.TopicAdminClient.DetachSubscription(ctx, req)
 	if err != nil {
 		return fmt.Errorf("detach subscription failed: %w", err)
 	}
