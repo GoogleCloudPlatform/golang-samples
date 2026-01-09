@@ -76,7 +76,7 @@ func NewBookshelf(projectID string, db BookDatabase) (*Bookshelf, error) {
 	// This Cloud Storage bucket must exist to be able to upload book pictures.
 	// You can create it and make it public by running:
 	//     gcloud storage buckets create gs://my-project_bucket
-	//     gcloud storage buckets update gs://my-project_bucket --predefined-default-object-acl=public-read
+	//     gcloud storage buckets update gs://my-project_bucket --predefined-default-object-acl=publicRead
 	// replacing my-project with your project ID.
 	bucketName := projectID + "_bucket"
 	storageClient, err := storage.NewClient(ctx)
