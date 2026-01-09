@@ -10,7 +10,7 @@ import (
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// deleteSecretVersionDestroyTTL removes the TTL config from a secret.
+// deleteSecretVersionDestroyTTL removes the version destroy TTL config from a secret.
 func deleteSecretVersionDestroyTTL(w io.Writer, projectID, secretID string) error {
 	// Create the client.
 	ctx := context.Background()

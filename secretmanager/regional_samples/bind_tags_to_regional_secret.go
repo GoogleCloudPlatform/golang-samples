@@ -71,13 +71,9 @@ func bindTagToRegionalSecret(w io.Writer, projectID, secretID, locationID, tagVa
 		},
 	}
 
-	op, err := tagBindingsClient.CreateTagBinding(ctx, bindingReq)
+	_, err = tagBindingsClient.CreateTagBinding(ctx, bindingReq)
 	if err != nil {
 		return fmt.Errorf("failed to start create tag binding operation: %w", err)
-	}
-
-	if _, err = op.Wait(ctx); err != nil {
-		return fmt.Errorf("failed to wait for tag binding operation: %w", err)
 	}
 
 	fmt.Fprintf(w, "Tag binding created for secret %s with tag value %s\n", secret.Name, tagValue)

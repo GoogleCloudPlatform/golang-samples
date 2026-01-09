@@ -30,6 +30,7 @@ import (
 func createRegionalSecretWithCMEK(w io.Writer, projectID, secretID, locationID, kmsKeyName string) error {
 	// projectID := "my-project"
 	// secretID := "my-secret-with-cmek"
+	// locationID := "us-central1"
 	// kmsKeyName := "projects/my-project/locations/{locationID}/keyRings/{keyringname}/cryptoKeys/{keyname}"
 
 	ctx := context.Background()

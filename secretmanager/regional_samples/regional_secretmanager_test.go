@@ -461,7 +461,7 @@ func testCreateTagValue(tb testing.TB, tagKeyId string) *resourcemanagerpb.TagVa
 	tb.Helper()
 
 	client, ctx := testResourceManagerTagsValueClient(tb)
-	tagValueName := "sm_secret_regional_tag_value_test"
+	tagValueName := testName(tb)
 	tagKeyDescription := "creating TagValue for secretmanager regional tags sample"
 
 	tagKeyOperation, err := client.CreateTagValue(ctx, &resourcemanagerpb.CreateTagValueRequest{
@@ -785,12 +785,12 @@ func TestRemoveRegionalExpiration(t *testing.T) {
 
 	// Remove expire time.
 	b.Reset()
-	if err := removeRegionalExpiration(&b, secretName, locationID); err != nil {
+	if err := deleteRegionalExpiration(&b, secretName, locationID); err != nil {
 		t.Fatal(err)
 	}
 
 	if got, want := b.String(), "Removed expiration"; !strings.Contains(got, want) {
-		t.Errorf("removeRegionalExpiration: expected %q to contain %q", got, want)
+		t.Errorf("deleteRegionalExpiration: expected %q to contain %q", got, want)
 	}
 
 	// Verify expire time is removed with GetSecret.

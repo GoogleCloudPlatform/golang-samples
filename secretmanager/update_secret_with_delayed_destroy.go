@@ -28,7 +28,7 @@ import (
 
 // [START secretmanager_update_secret_with_delayed_destroy]
 
-// updateSecretWithDelayedDestroy updates the TTL of an existing secret.
+// updateSecretWithDelayedDestroy updates the version destroy TTL of an existing secret.
 func updateSecretWithDelayedDestroy(w io.Writer, projectID, secretID string, delayedDestroy time.Duration) error {
 	// projectID := "my-project"
 	// secretID := "my-secret-with-ttl"

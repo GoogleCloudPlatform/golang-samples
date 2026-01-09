@@ -27,7 +27,7 @@ import (
 
 // [START secretmanager_delete_regional_secret_version_destroy_ttl]
 
-// deleteRegionalSecretVersionDestroyTTL removes the TTL config from a regional secret.
+// deleteRegionalSecretVersionDestroyTTL removes the version destroy TTL config from a regional secret.
 func deleteRegionalSecretVersionDestroyTTL(w io.Writer, projectID, secretID, locationID string) error {
 	// projectID := "my-project"
 	// secretID := "my-secret"

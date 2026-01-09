@@ -26,6 +26,7 @@ import (
 
 // [START secretmanager_detach_tag_binding]
 
+// detachTag removes tag value attached to secret
 func detachTag(w io.Writer, secretName, tagValue string) error {
 	// secretName := "projects/my-project/secrets/my-secret"
 	// tagValue := "tagValues/123456789012"

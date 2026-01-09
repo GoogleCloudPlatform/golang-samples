@@ -30,6 +30,7 @@ import (
 // deleteRegionalSecretAnnotation deletes an annotation on the given secret.
 func deleteRegionalSecretAnnotation(w io.Writer, secretName, locationID, annotationKey string) error {
 	// secretName := "projects/my-project/locations/my-location/secrets/my-secret"
+	// locationID := "us-central1"
 	// annotationKey := "annotationkey"
 
 	// Create the client.

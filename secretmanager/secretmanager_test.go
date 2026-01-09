@@ -1576,7 +1576,7 @@ func testCreateTagValue(tb testing.TB, tagKeyId string) *resourcemanagerpb.TagVa
 	tb.Helper()
 
 	client, ctx := testResourceManagerTagsValueClient(tb)
-	tagValueName := "sm_secret_tag_value_sample_test1"
+	tagValueName := testName(tb)
 	tagKeyDescription := "creating TagValue for secretmanager tags sample"
 
 	tagKeyOperation, err := client.CreateTagValue(ctx, &resourcemanagerpb.CreateTagValueRequest{
@@ -1945,12 +1945,12 @@ func TestRemoveExpiration(t *testing.T) {
 
 	// Remove expire time.
 	b.Reset()
-	if err := removeExpiration(&b, secretName); err != nil {
+	if err := deleteExpiration(&b, secretName); err != nil {
 		t.Fatal(err)
 	}
 
 	if got, want := b.String(), "Removed expiration"; !strings.Contains(got, want) {
-		t.Errorf("removeExpiration: expected %q to contain %q", got, want)
+		t.Errorf("deleteExpiration: expected %q to contain %q", got, want)
 	}
 
 	// Verify expire time is removed with GetSecret.

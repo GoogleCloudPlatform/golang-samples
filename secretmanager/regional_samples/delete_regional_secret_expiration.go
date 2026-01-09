@@ -27,8 +27,8 @@ import (
 
 // [START secretmanager_delete_regional_secret_expiration]
 
-// removeRegionalExpiration removes the expiration time from a regional secret.
-func removeRegionalExpiration(w io.Writer, secretName, locationID string) error {
+// deleteRegionalExpiration removes the expiration time from a regional secret.
+func deleteRegionalExpiration(w io.Writer, secretName, locationID string) error {
 	// secretName := "projects/my-project/locations/us-central1/secrets/my-secret"
 	// locationID := "us-central1"
 

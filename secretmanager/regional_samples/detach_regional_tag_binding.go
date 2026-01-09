@@ -27,7 +27,7 @@ import (
 
 // [START secretmanager_detach_regional_tag_binding]
 
-// detachRegionalTag detaches a tag from a regional secret.
+// detachRegionalTag detaches a tag value from a regional secret.
 func detachRegionalTag(w io.Writer, secretName, locationID, tagValue string) error {
 	// secretName := "projects/my-project/locations/us-central1/secrets/my-secret"
 	// locationID := "us-central1"

@@ -26,8 +26,8 @@ import (
 
 // [START secretmanager_delete_secret_expiration]
 
-// removeExpiration removes the expiration time from a secret.
-func removeExpiration(w io.Writer, secretName string) error {
+// deleteExpiration removes the expiration time from a secret.
+func deleteExpiration(w io.Writer, secretName string) error {
 	// secretName := "projects/my-project/secrets/my-secret"
 
 	ctx := context.Background()

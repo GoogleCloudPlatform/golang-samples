@@ -29,7 +29,7 @@ import (
 
 // [START secretmanager_update_regional_secret_with_delayed_destroy]
 
-// updateRegionalSecretWithDelayedDestroy updates the TTL of an existing regional secret.
+// updateRegionalSecretWithDelayedDestroy updates the version destroy TTL of an existing regional secret.
 func updateRegionalSecretWithDelayedDestroy(w io.Writer, projectID, secretID, locationID string, delayedDestroy time.Duration) error {
 	// projectID := "my-project"
 	// secretID := "my-secret-with-ttl"
