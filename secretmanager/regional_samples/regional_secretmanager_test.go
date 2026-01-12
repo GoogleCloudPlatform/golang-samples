@@ -76,6 +76,17 @@ func testName(tb testing.TB) string {
 	return u.String()
 }
 
+func testTopic(tb testing.TB) string {
+	tb.Helper()
+
+	v := os.Getenv("GOLANG_SAMPLES_TOPIC_NAME")
+	if v == "" {
+		tb.Skip("testTopic: missing GOLANG_SAMPLES_TOPIC_NAME")
+	}
+
+	return v
+}
+
 func testRegionalSecret(tb testing.TB, projectID string) (*secretmanagerpb.Secret, string) {
 	tb.Helper()
 
@@ -411,7 +422,7 @@ func testCreateTagKey(tb testing.TB, projectID string) *resourcemanagerpb.TagKey
 
 	client, ctx := testResourceManagerTagsKeyClient(tb)
 	parent := fmt.Sprintf("projects/%s", projectID)
-	tagKeyName := "sm_secret_regional_tag_key_test"
+	tagKeyName := testName(tb)
 	tagKeyDescription := "creating tag key for secretmanager regional tags sample"
 
 	tagKeyOperation, err := client.CreateTagKey(ctx, &resourcemanagerpb.CreateTagKeyRequest{
@@ -437,7 +448,7 @@ func testCreateTagValue(tb testing.TB, tagKeyId string) *resourcemanagerpb.TagVa
 	tb.Helper()
 
 	client, ctx := testResourceManagerTagsValueClient(tb)
-	tagValueName := "sm_secret_regional_tag_value_test"
+	tagValueName := testName(tb)
 	tagKeyDescription := "creating TagValue for secretmanager regional tags sample"
 
 	tagKeyOperation, err := client.CreateTagValue(ctx, &resourcemanagerpb.CreateTagValueRequest{
@@ -479,5 +490,158 @@ func TestCreateRegionalSecretWithTags(t *testing.T) {
 
 	if got, want := b.String(), "Created secret with tags:"; !strings.Contains(got, want) {
 		t.Errorf("createRegionalSecretWithTags: expected %q to contain %q", got, want)
+	}
+}
+
+func TestCreateRegionalSecretWithRotation(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	locationID := testLocation(t)
+	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
+	defer testCleanupRegionalSecret(t, secretName)
+
+	topicName := testTopic(t)
+	rotationPeriod := 24 * time.Hour
+
+	var b bytes.Buffer
+	if err := createRegionalSecretWithRotation(&b, tc.ProjectID, secretID, locationID, topicName); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := b.String(), "Created secret"; !strings.Contains(got, want) {
+		t.Errorf("createRegionalSecretWithRotation: expected %q to contain %q", got, want)
+	}
+
+	client, ctx := testRegionalClient(t)
+
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetRotation() == nil {
+		t.Fatal("GetSecret: Rotation is nil, expected non-nil")
+	}
+	if secret.GetRotation().GetRotationPeriod().AsDuration() != rotationPeriod {
+		t.Errorf("RotationPeriod mismatch: got %v, want %v", secret.GetRotation().GetRotationPeriod().AsDuration(), rotationPeriod)
+	}
+	if secret.GetRotation().GetNextRotationTime() == nil {
+		t.Fatal("GetSecret: NextRotationTime is nil, expected non-nil")
+	}
+}
+
+func TestUpdateRegionalSecretRotationPeriod(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	locationID := testLocation(t)
+	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
+	defer testCleanupRegionalSecret(t, secretName)
+
+	topicName := testTopic(t)
+
+	var b bytes.Buffer
+	if err := createRegionalSecretWithRotation(&b, tc.ProjectID, secretID, locationID, topicName); err != nil {
+		t.Fatal(err)
+	}
+
+	// Update rotation period.
+	updatedRotationPeriod := 48 * time.Hour
+	b.Reset()
+	if err := updateRegionalSecretRotationPeriod(&b, secretName, locationID); err != nil {
+		t.Fatal(err)
+	}
+
+	got := b.String()
+	if !strings.Contains(got, secretID) {
+		t.Errorf("updateRegionalSecretRotationPeriod: output %q did not contain secretId %q", got, secretID)
+	}
+
+	// Verify rotation period with GetSecret.
+	client, ctx := testRegionalClient(t)
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetRotation() == nil {
+		t.Fatal("GetSecret: Rotation is nil, expected non-nil")
+	}
+	if secret.GetRotation().GetRotationPeriod().AsDuration() != updatedRotationPeriod {
+		t.Errorf("RotationPeriod mismatch: got %v, want %v", secret.GetRotation().GetRotationPeriod().AsDuration(), updatedRotationPeriod)
+	}
+}
+
+func TestDeleteRegionalSecretRotation(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	locationID := testLocation(t)
+	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
+	defer testCleanupRegionalSecret(t, secretName)
+
+	topicName := testTopic(t)
+
+	var b bytes.Buffer
+	if err := createRegionalSecretWithRotation(&b, tc.ProjectID, secretID, locationID, topicName); err != nil {
+		t.Fatal(err)
+	}
+
+	// Remove rotation.
+	if err := deleteRegionalSecretRotation(&b, secretName, locationID); err != nil {
+		t.Fatal(err)
+	}
+
+	got := b.String()
+	if !strings.Contains(got, secretID) {
+		t.Errorf("deleteRegionalSecretRotation: output %q did not contain secretId %q", got, secretID)
+	}
+
+	// Verify rotation is removed with GetSecret.
+	client, ctx := testRegionalClient(t)
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetRotation() != nil {
+		t.Errorf("Rotation mismatch: got %v, want nil", secret.GetRotation())
+	}
+}
+
+func TestCreateRegionalSecretWithTopic(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	locationID := testLocation(t)
+	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
+	// defer testCleanupRegionalSecret(t, secretName)
+
+	topicName := testTopic(t)
+
+	var b bytes.Buffer
+	if err := createRegionalSecretWithTopic(&b, tc.ProjectID, secretID, locationID, topicName); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := b.String(), "Created secret"; !strings.Contains(got, want) {
+		t.Errorf("createRegionalSecretWithTopic: expected %q to contain %q", got, want)
+	}
+	if got, want := b.String(), topicName; !strings.Contains(got, want) {
+		t.Errorf("createRegionalSecretWithTopic: expected %q to contain %q", got, want)
+	}
+
+	client, ctx := testRegionalClient(t)
+
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if len(secret.GetTopics()) != 1 || secret.GetTopics()[0].GetName() != topicName {
+		t.Errorf("Topics mismatch: got %v, want %s", secret.GetTopics(), topicName)
 	}
 }
