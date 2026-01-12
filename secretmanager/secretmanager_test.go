@@ -1675,3 +1675,115 @@ func TestCreateSecretWithTags(t *testing.T) {
 	}
 
 }
+
+func TestCreateSecretWithExpireTime(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretId := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretId)
+	defer testCleanupSecret(t, secretName)
+
+	// Expire time in 1 hour.
+	expire := time.Now().Add(time.Hour)
+
+	var b bytes.Buffer
+	if err := createSecretWithExpireTime(&b, tc.ProjectID, secretId); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Created secret"; !strings.Contains(got, want) {
+		t.Errorf("createSecretWithExpireTime: expected %q to contain %q", got, want)
+	}
+
+	// Verify expire time with GetSecret.
+	client, ctx := testClient(t)
+
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetExpireTime() == nil {
+		t.Fatal("GetSecret: ExpireTime is nil, expected non-nil")
+	}
+
+	if diff := secret.GetExpireTime().AsTime().Unix() - expire.Unix(); diff > 1 || diff < -1 {
+		t.Errorf("ExpireTime mismatch: got %v, want %v", secret.GetExpireTime().AsTime(), expire)
+	}
+}
+
+func TestUpdateSecretExpiration(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretId := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretId)
+	defer testCleanupSecret(t, secretName)
+
+	// Create with expire time in 1 hour.
+	var b bytes.Buffer
+	if err := createSecretWithExpireTime(&b, tc.ProjectID, secretId); err != nil {
+		t.Fatal(err)
+	}
+
+	// Update expire time to 2 hours.
+	newExpire := time.Now().Add(2 * time.Hour)
+	if err := updateSecretExpiration(&b, secretName); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := b.String(), "Updated secret"; !strings.Contains(got, want) {
+		t.Errorf("updateSecretExpiration: expected %q to contain %q", got, want)
+	}
+
+	// Verify expire time with GetSecret.
+	client, ctx := testClient(t)
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetExpireTime() == nil {
+		t.Fatal("GetSecret: ExpireTime is nil, expected non-nil")
+	}
+
+	if diff := secret.GetExpireTime().AsTime().Unix() - newExpire.Unix(); diff > 1 || diff < -1 {
+		t.Errorf("ExpireTime mismatch: got %v, want %v", secret.GetExpireTime().AsTime(), newExpire)
+	}
+}
+
+func TestRemoveExpiration(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretId := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretId)
+	defer testCleanupSecret(t, secretName)
+
+	var b bytes.Buffer
+	if err := createSecretWithExpireTime(&b, tc.ProjectID, secretId); err != nil {
+		t.Fatal(err)
+	}
+
+	// Remove expire time.
+	b.Reset()
+	if err := deleteExpiration(&b, secretName); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Removed expiration"; !strings.Contains(got, want) {
+		t.Errorf("deleteExpiration: expected %q to contain %q", got, want)
+	}
+
+	// Verify expire time is removed with GetSecret.
+	client, ctx := testClient(t)
+
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetExpireTime() != nil {
+		t.Errorf("GetSecret: ExpireTime is %v, expected nil", secret.GetExpireTime())
+	}
+}
