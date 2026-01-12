@@ -66,6 +66,17 @@ func testRegionalClient(tb testing.TB) (*secretmanager.Client, context.Context) 
 	return client, ctx
 }
 
+func testKmsKey(tb testing.TB) string {
+	tb.Helper()
+
+	v := os.Getenv("GOLANG_REGIONAL_SAMPLES_KMS_KEY")
+	if v == "" {
+		tb.Skip("testKmsKey: missing GOLANG_REGIONAL_SAMPLES_KMS_KEY")
+	}
+
+	return v
+}
+
 func testName(tb testing.TB) string {
 	tb.Helper()
 
@@ -479,5 +490,40 @@ func TestCreateRegionalSecretWithTags(t *testing.T) {
 
 	if got, want := b.String(), "Created secret with tags:"; !strings.Contains(got, want) {
 		t.Errorf("createRegionalSecretWithTags: expected %q to contain %q", got, want)
+	}
+}
+
+func TestCreateRegionalSecretWithCMEK(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	kmsKeyName := testKmsKey(t)
+
+	secretId := testName(t)
+	locationID := testLocation(t)
+	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretId)
+	defer testCleanupRegionalSecret(t, secretName)
+
+	var b bytes.Buffer
+	if err := createRegionalSecretWithCMEK(&b, tc.ProjectID, secretId, locationID, kmsKeyName); err != nil {
+		t.Fatal(err)
+	}
+	got := b.String()
+	if !strings.Contains(got, secretId) {
+		t.Errorf("createRegionalSecretWithCMEK: output %q did not contain secretId %q", got, secretId)
+	}
+	if !strings.Contains(got, kmsKeyName) {
+		t.Errorf("createRegionalSecretWithCMEK: output %q did not contain kmsKeyName %q", got, kmsKeyName)
+	}
+
+	// Verify CMEK key with GetSecret.
+	client, ctx := testRegionalClient(t)
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetCustomerManagedEncryption().GetKmsKeyName() != kmsKeyName {
+		t.Errorf("CMEK key name mismatch: got %q, want %q", secret.GetCustomerManagedEncryption().GetKmsKeyName(), kmsKeyName)
 	}
 }

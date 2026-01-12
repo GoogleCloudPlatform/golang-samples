@@ -102,6 +102,17 @@ func testResourceManagerTagsValueClient(tb testing.TB) (*resourcemanager.TagValu
 
 }
 
+func testKmsKey(tb testing.TB) string {
+	tb.Helper()
+
+	v := os.Getenv("GOLANG_SAMPLES_KMS_KEY")
+	if v == "" {
+		tb.Skip("testKmsKey: missing GOLANG_SAMPLES_KMS_KEY")
+	}
+
+	return v
+}
+
 func testName(tb testing.TB) string {
 	tb.Helper()
 
@@ -1674,4 +1685,38 @@ func TestCreateSecretWithTags(t *testing.T) {
 		t.Errorf("createSecretWithTags: expected %q to contain %q", got, want)
 	}
 
+}
+
+func TestCreateSecretWithCMEK(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	kmsKeyName := testKmsKey(t)
+
+	secretId := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretId)
+	defer testCleanupSecret(t, secretName)
+
+	var b bytes.Buffer
+	if err := createSecretWithCMEK(&b, tc.ProjectID, secretId, kmsKeyName); err != nil {
+		t.Fatal(err)
+	}
+	got := b.String()
+	if !strings.Contains(got, secretId) {
+		t.Errorf("createSecretWithCMEK: output %q did not contain secretId %q", got, secretId)
+	}
+	if !strings.Contains(got, kmsKeyName) {
+		t.Errorf("createSecretWithCMEK: output %q did not contain kmsKeyName %q", got, kmsKeyName)
+	}
+
+	// Verify CMEK key with GetSecret.
+	client, ctx := testClient(t)
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetReplication().GetAutomatic().GetCustomerManagedEncryption().GetKmsKeyName() != kmsKeyName {
+		t.Errorf("CMEK key name mismatch: got %q, want %q", secret.GetReplication().GetAutomatic().GetCustomerManagedEncryption().GetKmsKeyName(), kmsKeyName)
+	}
 }
