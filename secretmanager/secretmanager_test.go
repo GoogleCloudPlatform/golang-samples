@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path"
 	"reflect"
 	"strings"
 	"time"
@@ -32,6 +33,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	regional_secretmanager "github.com/GoogleCloudPlatform/golang-samples/secretmanager/regional_samples"
 	"github.com/gofrs/uuid"
+	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc/codes"
 	grpccodes "google.golang.org/grpc/codes"
@@ -100,6 +102,17 @@ func testResourceManagerTagsValueClient(tb testing.TB) (*resourcemanager.TagValu
 	}
 	return client, ctx
 
+}
+
+func testResourceManagerTagBindingsClient(tb testing.TB) (*resourcemanager.TagBindingsClient, context.Context) {
+	tb.Helper()
+	ctx := context.Background()
+
+	client, err := resourcemanager.NewTagBindingsClient(ctx)
+	if err != nil {
+		tb.Fatalf("testResourceManagerTagBindingsClient: failed to create client: %v", err)
+	}
+	return client, ctx
 }
 
 func testName(tb testing.TB) string {
@@ -1515,7 +1528,7 @@ func testCreateTagKey(tb testing.TB, projectID string) *resourcemanagerpb.TagKey
 
 	client, ctx := testResourceManagerTagsKeyClient(tb)
 	parent := fmt.Sprintf("projects/%s", projectID)
-	tagKeyName := "sm_secret_tag_sample_test2"
+	tagKeyName := testName(tb)
 	tagKeyDescription := "creating tag key for secretmanager tags sample"
 
 	tagKeyOperation, err := client.CreateTagKey(ctx, &resourcemanagerpb.CreateTagKeyRequest{
@@ -1541,7 +1554,7 @@ func testCreateTagValue(tb testing.TB, tagKeyId string) *resourcemanagerpb.TagVa
 	tb.Helper()
 
 	client, ctx := testResourceManagerTagsValueClient(tb)
-	tagValueName := "sm_secret_tag_value_sample_test1"
+	tagValueName := testName(tb)
 	tagKeyDescription := "creating TagValue for secretmanager tags sample"
 
 	tagKeyOperation, err := client.CreateTagValue(ctx, &resourcemanagerpb.CreateTagValueRequest{
@@ -1674,4 +1687,115 @@ func TestCreateSecretWithTags(t *testing.T) {
 		t.Errorf("createSecretWithTags: expected %q to contain %q", got, want)
 	}
 
+}
+
+func TestBindTagsToSecret(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+
+	tagKey := testCreateTagKey(t, tc.ProjectID)
+	defer testCleanupTagKey(t, tagKey.GetName())
+	tagValue := testCreateTagValue(t, tagKey.GetName())
+	defer testCleanupTagValue(t, tagValue.GetName())
+
+	var b bytes.Buffer
+	if err := bindTagsToSecret(&b, tc.ProjectID, secretID, tagValue.GetName()); err != nil {
+		t.Fatal(err)
+	}
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
+	defer testCleanupSecret(t, secretName)
+
+	if got, want := b.String(), "Tag binding created"; !strings.Contains(got, want) {
+		t.Errorf("bindTagsToSecret: expected %q to contain %q", got, want)
+	}
+
+	// Verify binding exists with API
+	ctx := context.Background()
+	tagBindingsClient, ctx := testResourceManagerTagBindingsClient(t)
+	defer tagBindingsClient.Close()
+
+	parent := "//secretmanager.googleapis.com/" + secretName
+	it := tagBindingsClient.ListTagBindings(ctx, &resourcemanagerpb.ListTagBindingsRequest{
+		Parent: parent,
+	})
+
+	found := false
+	for {
+		binding, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			t.Fatalf("Failed to list tag bindings for verification: %v", err)
+		}
+		if binding.TagValue == tagValue.GetName() && path.Base(binding.GetParent()) == path.Base(secretName) {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		t.Errorf("Tag binding for %s with value %s not found after creation", secretName, tagValue.GetName())
+	}
+}
+
+func TestListTagBindings(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	tagKey := testCreateTagKey(t, tc.ProjectID)
+	defer testCleanupTagKey(t, tagKey.GetName())
+	tagValue := testCreateTagValue(t, tagKey.GetName())
+	defer testCleanupTagValue(t, tagValue.GetName())
+
+	secretID := testName(t)
+
+	var b bytes.Buffer
+	if err := bindTagsToSecret(&b, tc.ProjectID, secretID, tagValue.GetName()); err != nil {
+		t.Fatal(err)
+	}
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
+	defer testCleanupSecret(t, secretName)
+
+	b.Reset()
+	if err := listTagBindings(&b, secretName); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), tagValue.GetName(); !strings.Contains(got, want) {
+		t.Errorf("listTagBindings: expected %q to contain %q", got, want)
+	}
+}
+
+func TestDetachTag(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	tagKey := testCreateTagKey(t, tc.ProjectID)
+	defer testCleanupTagKey(t, tagKey.GetName())
+	tagValue := testCreateTagValue(t, tagKey.GetName())
+	defer testCleanupTagValue(t, tagValue.GetName())
+
+	secretId := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretId)
+	defer testCleanupSecret(t, secretName)
+
+	var b bytes.Buffer
+	if err := bindTagsToSecret(&b, tc.ProjectID, secretId, tagValue.GetName()); err != nil {
+		t.Fatal(err)
+	}
+
+	b.Reset()
+	if err := detachTag(&b, secretName, tagValue.GetName()); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := b.String(), "Detached tag value"; !strings.Contains(got, want) {
+		t.Errorf("detachTag: expected %q to contain %q", got, want)
+	}
+
+	b.Reset()
+	if err := listTagBindings(&b, secretName); err != nil {
+		t.Fatal(err)
+	}
+	if got, dontwant := b.String(), tagValue.GetName(); strings.Contains(got, dontwant) {
+		t.Errorf("listTagBindings after detach: expected %q not to contain %q", got, dontwant)
+	}
 }
