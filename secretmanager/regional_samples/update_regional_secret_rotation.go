@@ -29,10 +29,10 @@ import (
 
 // [START secretmanager_update_regional_secret_rotation_period]
 // updateRegionalSecretRotationPeriod updates the rotation period of a regional secret.
-func updateRegionalSecretRotationPeriod(w io.Writer, secretName, locationID string, rotationPeriod time.Duration) error {
+func updateRegionalSecretRotationPeriod(w io.Writer, secretName, locationID string) error {
 	// secretName := "projects/my-project/locations/us-central1/secrets/my-secret"
 	// locationID := "us-central1"
-	// rotationPeriod := time.Hour * 24 * 7
+	updatedRotationPeriod := 48 * time.Hour
 
 	// Create the client.
 	ctx := context.Background()
@@ -48,7 +48,7 @@ func updateRegionalSecretRotationPeriod(w io.Writer, secretName, locationID stri
 		Secret: &secretmanagerpb.Secret{
 			Name: secretName,
 			Rotation: &secretmanagerpb.Rotation{
-				RotationPeriod: durationpb.New(rotationPeriod),
+				RotationPeriod: durationpb.New(updatedRotationPeriod),
 			},
 		},
 		UpdateMask: &fieldmaskpb.FieldMask{

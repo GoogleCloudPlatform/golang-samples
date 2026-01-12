@@ -29,11 +29,11 @@ import (
 // [START secretmanager_create_secret_with_rotation]
 
 // createSecretWithRotation creates a new secret with rotation configured.
-func createSecretWithRotation(w io.Writer, projectID, secretID, topicName string, rotationPeriod time.Duration) error {
+func createSecretWithRotation(w io.Writer, projectID, secretID, topicName string) error {
 	// projectID := "my-project"
 	// secretID := "my-secret-with-rotation"
 	// topicName := "projects/my-project/topics/my-topic"
-	// rotationPeriod := 24 * time.Hour
+	rotationPeriod := 24 * time.Hour
 
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)

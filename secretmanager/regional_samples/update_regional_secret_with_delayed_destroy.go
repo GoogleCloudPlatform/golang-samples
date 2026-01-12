@@ -30,11 +30,11 @@ import (
 // [START secretmanager_update_regional_secret_with_delayed_destroy]
 
 // updateRegionalSecretWithDelayedDestroy updates the version destroy TTL of an existing regional secret.
-func updateRegionalSecretWithDelayedDestroy(w io.Writer, projectID, secretID, locationID string, delayedDestroy time.Duration) error {
+func updateRegionalSecretWithDelayedDestroy(w io.Writer, projectID, secretID, locationID string) error {
 	// projectID := "my-project"
 	// secretID := "my-secret-with-ttl"
 	// locationID := "us-central1"
-	// delayedDestroy := time.Hour * 24
+	newDelayedDestroy := time.Hour * 48
 
 	ctx := context.Background()
 	endpoint := fmt.Sprintf("secretmanager.%s.rep.googleapis.com:443", locationID)
@@ -47,7 +47,7 @@ func updateRegionalSecretWithDelayedDestroy(w io.Writer, projectID, secretID, lo
 	req := &secretmanagerpb.UpdateSecretRequest{
 		Secret: &secretmanagerpb.Secret{
 			Name:              fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectID, locationID, secretID),
-			VersionDestroyTtl: durationpb.New(delayedDestroy),
+			VersionDestroyTtl: durationpb.New(newDelayedDestroy),
 		},
 		UpdateMask: &fieldmaskpb.FieldMask{
 			Paths: []string{"version_destroy_ttl"},
@@ -59,7 +59,7 @@ func updateRegionalSecretWithDelayedDestroy(w io.Writer, projectID, secretID, lo
 		return fmt.Errorf("failed to update secret: %w", err)
 	}
 
-	fmt.Fprintf(w, "Updated secret %s with version destroy TTL %v\n", secret.Name, delayedDestroy)
+	fmt.Fprintf(w, "Updated secret %s with version destroy TTL %v\n", secret.Name, newDelayedDestroy)
 	return nil
 }
 

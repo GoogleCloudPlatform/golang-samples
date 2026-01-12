@@ -29,9 +29,9 @@ import (
 // [START secretmanager_update_secret_expiration]
 
 // updateSecretExpiration updates the expiration time of a secret.
-func updateSecretExpiration(w io.Writer, secretName string, expireTime time.Time) error {
+func updateSecretExpiration(w io.Writer, secretName string) error {
 	// secretName := "projects/my-project/secrets/my-secret"
-	// expireTime := time.Now().Add(time.Hour * 24 * 7)
+	newExpire := time.Now().Add(2 * time.Hour)
 
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)
@@ -44,7 +44,7 @@ func updateSecretExpiration(w io.Writer, secretName string, expireTime time.Time
 		Secret: &secretmanagerpb.Secret{
 			Name: secretName,
 			Expiration: &secretmanagerpb.Secret_ExpireTime{
-				ExpireTime: timestamppb.New(expireTime),
+				ExpireTime: timestamppb.New(newExpire),
 			},
 		},
 		UpdateMask: &fieldmaskpb.FieldMask{
@@ -57,7 +57,7 @@ func updateSecretExpiration(w io.Writer, secretName string, expireTime time.Time
 		return fmt.Errorf("failed to update secret: %w", err)
 	}
 
-	fmt.Fprintf(w, "Updated secret %s expiration time to %v\n", secret.Name, expireTime)
+	fmt.Fprintf(w, "Updated secret %s expiration time to %v\n", secret.Name, newExpire)
 	return nil
 }
 

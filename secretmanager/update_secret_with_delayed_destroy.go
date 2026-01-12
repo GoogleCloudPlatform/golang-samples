@@ -29,10 +29,10 @@ import (
 // [START secretmanager_update_secret_with_delayed_destroy]
 
 // updateSecretWithDelayedDestroy updates the version destroy TTL of an existing secret.
-func updateSecretWithDelayedDestroy(w io.Writer, projectID, secretID string, delayedDestroy time.Duration) error {
+func updateSecretWithDelayedDestroy(w io.Writer, projectID, secretID string) error {
 	// projectID := "my-project"
 	// secretID := "my-secret-with-ttl"
-	// delayedDestroy := time.Hour * 24
+	newDelayedDestroy := time.Hour * 48
 
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)
@@ -44,7 +44,7 @@ func updateSecretWithDelayedDestroy(w io.Writer, projectID, secretID string, del
 	req := &secretmanagerpb.UpdateSecretRequest{
 		Secret: &secretmanagerpb.Secret{
 			Name:              fmt.Sprintf("projects/%s/secrets/%s", projectID, secretID),
-			VersionDestroyTtl: durationpb.New(delayedDestroy),
+			VersionDestroyTtl: durationpb.New(newDelayedDestroy),
 		},
 		UpdateMask: &fieldmaskpb.FieldMask{
 			Paths: []string{"version_destroy_ttl"},
@@ -56,7 +56,7 @@ func updateSecretWithDelayedDestroy(w io.Writer, projectID, secretID string, del
 		return fmt.Errorf("failed to update secret: %w", err)
 	}
 
-	fmt.Fprintf(w, "Updated secret %s with version destroy TTL %v\n", secret.Name, delayedDestroy)
+	fmt.Fprintf(w, "Updated secret %s with version destroy TTL %v\n", secret.Name, newDelayedDestroy)
 	return nil
 }
 

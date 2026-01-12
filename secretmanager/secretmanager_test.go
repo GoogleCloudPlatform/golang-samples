@@ -1861,7 +1861,7 @@ func TestCreateSecretWithExpireTime(t *testing.T) {
 	expire := time.Now().Add(time.Hour)
 
 	var b bytes.Buffer
-	if err := createSecretWithExpireTime(&b, tc.ProjectID, secretId, expire); err != nil {
+	if err := createSecretWithExpireTime(&b, tc.ProjectID, secretId); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1883,7 +1883,6 @@ func TestCreateSecretWithExpireTime(t *testing.T) {
 		t.Fatal("GetSecret: ExpireTime is nil, expected non-nil")
 	}
 
-	// Allow 1 second difference for precision.
 	if diff := secret.GetExpireTime().AsTime().Unix() - expire.Unix(); diff > 1 || diff < -1 {
 		t.Errorf("ExpireTime mismatch: got %v, want %v", secret.GetExpireTime().AsTime(), expire)
 	}
@@ -1896,15 +1895,14 @@ func TestUpdateSecretExpiration(t *testing.T) {
 	defer testCleanupSecret(t, secretName)
 
 	// Create with expire time in 1 hour.
-	initialExpire := time.Now().Add(time.Hour)
 	var b bytes.Buffer
-	if err := createSecretWithExpireTime(&b, tc.ProjectID, secretId, initialExpire); err != nil {
+	if err := createSecretWithExpireTime(&b, tc.ProjectID, secretId); err != nil {
 		t.Fatal(err)
 	}
 
 	// Update expire time to 2 hours.
 	newExpire := time.Now().Add(2 * time.Hour)
-	if err := updateSecretExpiration(&b, secretName, newExpire); err != nil {
+	if err := updateSecretExpiration(&b, secretName); err != nil {
 		t.Fatal(err)
 	}
 	if got, want := b.String(), "Updated secret"; !strings.Contains(got, want) {
@@ -1924,7 +1922,6 @@ func TestUpdateSecretExpiration(t *testing.T) {
 		t.Fatal("GetSecret: ExpireTime is nil, expected non-nil")
 	}
 
-	// Allow 1 second difference for precision.
 	if diff := secret.GetExpireTime().AsTime().Unix() - newExpire.Unix(); diff > 1 || diff < -1 {
 		t.Errorf("ExpireTime mismatch: got %v, want %v", secret.GetExpireTime().AsTime(), newExpire)
 	}
@@ -1936,10 +1933,8 @@ func TestRemoveExpiration(t *testing.T) {
 	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretId)
 	defer testCleanupSecret(t, secretName)
 
-	// Create with expire time in 1 hour.
-	initialExpire := time.Now().Add(time.Hour)
 	var b bytes.Buffer
-	if err := createSecretWithExpireTime(&b, tc.ProjectID, secretId, initialExpire); err != nil {
+	if err := createSecretWithExpireTime(&b, tc.ProjectID, secretId); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1980,7 +1975,7 @@ func TestCreateSecretWithRotation(t *testing.T) {
 	rotationPeriod := 24 * time.Hour
 
 	var b bytes.Buffer
-	if err := createSecretWithRotation(&b, tc.ProjectID, secretId, topicName, rotationPeriod); err != nil {
+	if err := createSecretWithRotation(&b, tc.ProjectID, secretId, topicName); err != nil {
 		t.Fatal(err)
 	}
 	if got, want := b.String(), "Created secret"; !strings.Contains(got, want) {
@@ -2015,17 +2010,15 @@ func TestUpdateSecretRotationPeriod(t *testing.T) {
 	topicName := testTopic(t)
 	client, ctx := testClient(t)
 
-	rotationPeriod := 24 * time.Hour
-
 	var b bytes.Buffer
-	if err := createSecretWithRotation(&b, tc.ProjectID, secretId, topicName, rotationPeriod); err != nil {
+	if err := createSecretWithRotation(&b, tc.ProjectID, secretId, topicName); err != nil {
 		t.Fatal(err)
 	}
 
 	// Update rotation period.
 	updatedRotationPeriod := 48 * time.Hour
 	b.Reset()
-	if err := updateSecretRotationPeriod(&b, tc.ProjectID, secretId, updatedRotationPeriod); err != nil {
+	if err := updateSecretRotationPeriod(&b, tc.ProjectID, secretId); err != nil {
 		t.Fatal(err)
 	}
 
@@ -2059,10 +2052,8 @@ func TestDeleteSecretRotation(t *testing.T) {
 	topicName := testTopic(t)
 	client, ctx := testClient(t)
 
-	rotationPeriod := 24 * time.Hour
-
 	var b bytes.Buffer
-	if err := createSecretWithRotation(&b, tc.ProjectID, secretId, topicName, rotationPeriod); err != nil {
+	if err := createSecretWithRotation(&b, tc.ProjectID, secretId, topicName); err != nil {
 		t.Fatal(err)
 	}
 
@@ -2128,7 +2119,7 @@ func TestCreateSecretWithDealayedDestroy(t *testing.T) {
 	ttl := 24 * time.Hour
 
 	var b bytes.Buffer
-	if err := createSecretWithDelayedDestroy(&b, tc.ProjectID, secretId, ttl); err != nil {
+	if err := createSecretWithDelayedDestroy(&b, tc.ProjectID, secretId); err != nil {
 		t.Fatal(err)
 	}
 
@@ -2162,15 +2153,13 @@ func TestUpdateSecretWithDelayedDestroy(t *testing.T) {
 
 	client, ctx := testClient(t)
 
-	delayedDestroy := 24 * time.Hour
-
 	var b bytes.Buffer
-	if err := createSecretWithDelayedDestroy(&b, tc.ProjectID, secretId, delayedDestroy); err != nil {
+	if err := createSecretWithDelayedDestroy(&b, tc.ProjectID, secretId); err != nil {
 		t.Fatal(err)
 	}
 
 	newDelayedDestroy := 48 * time.Hour
-	if err := updateSecretWithDelayedDestroy(&b, tc.ProjectID, secretId, newDelayedDestroy); err != nil {
+	if err := updateSecretWithDelayedDestroy(&b, tc.ProjectID, secretId); err != nil {
 		t.Fatal(err)
 	}
 
@@ -2202,10 +2191,8 @@ func TestDeleteSecretVersionDestroyTTL(t *testing.T) {
 
 	client, ctx := testClient(t)
 
-	delayedDestroy := 24 * time.Hour
-
 	var b bytes.Buffer
-	if err := createSecretWithDelayedDestroy(&b, tc.ProjectID, secretId, delayedDestroy); err != nil {
+	if err := createSecretWithDelayedDestroy(&b, tc.ProjectID, secretId); err != nil {
 		t.Fatal(err)
 	}
 

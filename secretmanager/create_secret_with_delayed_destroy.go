@@ -28,10 +28,10 @@ import (
 // [START secretmanager_create_secret_with_delayed_destroy]
 
 // createSecretWithDelayedDestroy creates a new secret with a version destroy TTL.
-func createSecretWithDelayedDestroy(w io.Writer, projectID, secretID string, ttl time.Duration) error {
+func createSecretWithDelayedDestroy(w io.Writer, projectID, secretID string) error {
 	// projectID := "my-project"
 	// secretID := "my-secret-with-ttl"
-	// ttl := time.Hour * 24
+	ttl := time.Hour * 24
 
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)

@@ -29,11 +29,11 @@ import (
 // [START secretmanager_create_regional_secret_with_expire_time]
 
 // createRegionalSecretWithExpireTime creates a new regional secret with an expiration time.
-func createRegionalSecretWithExpireTime(w io.Writer, projectID, secretID, locationID string, expireTime time.Time) error {
+func createRegionalSecretWithExpireTime(w io.Writer, projectID, secretID, locationID string) error {
 	// projectID := "my-project"
 	// secretID := "my-secret-with-expiry"
 	// locationID := "us-central1"
-	// expireTime := time.Now().Add(time.Hour * 24)
+	expireTime := time.Now().Add(time.Hour)
 
 	ctx := context.Background()
 	endpoint := fmt.Sprintf("secretmanager.%s.rep.googleapis.com:443", locationID)

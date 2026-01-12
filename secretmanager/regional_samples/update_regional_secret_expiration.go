@@ -30,10 +30,10 @@ import (
 // [START secretmanager_update_regional_secret_expiration]
 
 // updateRegionalSecretExpiration updates the expiration time of a regional secret.
-func updateRegionalSecretExpiration(w io.Writer, secretName, locationID string, expireTime time.Time) error {
+func updateRegionalSecretExpiration(w io.Writer, secretName, locationID string) error {
 	// secretName := "projects/my-project/locations/us-central1/secrets/my-secret"
 	// locationID := "us-central1"
-	// expireTime := time.Now().Add(time.Hour * 24 * 7)
+	newExpire := time.Now().Add(2 * time.Hour)
 
 	ctx := context.Background()
 	endpoint := fmt.Sprintf("secretmanager.%s.rep.googleapis.com:443", locationID)
@@ -47,7 +47,7 @@ func updateRegionalSecretExpiration(w io.Writer, secretName, locationID string, 
 		Secret: &secretmanagerpb.Secret{
 			Name: secretName,
 			Expiration: &secretmanagerpb.Secret_ExpireTime{
-				ExpireTime: timestamppb.New(expireTime),
+				ExpireTime: timestamppb.New(newExpire),
 			},
 		},
 		UpdateMask: &fieldmaskpb.FieldMask{
@@ -60,7 +60,7 @@ func updateRegionalSecretExpiration(w io.Writer, secretName, locationID string, 
 		return fmt.Errorf("failed to update secret: %w", err)
 	}
 
-	fmt.Fprintf(w, "Updated secret %s expiration time to %v\n", secret.Name, expireTime)
+	fmt.Fprintf(w, "Updated secret %s expiration time to %v\n", secret.Name, newExpire)
 	return nil
 }
 

@@ -30,12 +30,12 @@ import (
 // [START secretmanager_create_regional_secret_with_rotation]
 
 // createRegionalSecretWithRotation creates a new regional secret with rotation configured.
-func createRegionalSecretWithRotation(w io.Writer, projectID, secretID, locationID, topicName string, rotationPeriod time.Duration) error {
+func createRegionalSecretWithRotation(w io.Writer, projectID, secretID, locationID, topicName string) error {
 	// projectID := "my-project"
 	// secretID := "my-secret-with-rotation"
 	// locationID := "us-central1"
 	// topicName := "projects/my-project/topics/my-topic"
-	// rotationPeriod := 24 * time.Hour
+	rotationPeriod := 24 * time.Hour
 
 	ctx := context.Background()
 	endpoint := fmt.Sprintf("secretmanager.%s.rep.googleapis.com:443", locationID)

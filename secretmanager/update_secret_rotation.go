@@ -29,10 +29,10 @@ import (
 // [START secretmanager_update_secret_rotation_period]
 
 // updateSecretRotationPeriod updates the rotation period of a secret.
-func updateSecretRotationPeriod(w io.Writer, projectID, secretID string, rotationPeriod time.Duration) error {
+func updateSecretRotationPeriod(w io.Writer, projectID, secretID string) error {
 	// projectID := "my-project"
 	// secretID := "my-secret"
-	// rotationPeriod := time.Hour * 24 * 7
+	updatedRotationPeriod := 48 * time.Hour
 
 	// Create the client.
 	ctx := context.Background()
@@ -47,7 +47,7 @@ func updateSecretRotationPeriod(w io.Writer, projectID, secretID string, rotatio
 		Secret: &secretmanagerpb.Secret{
 			Name: fmt.Sprintf("projects/%s/secrets/%s", projectID, secretID),
 			Rotation: &secretmanagerpb.Rotation{
-				RotationPeriod: durationpb.New(rotationPeriod),
+				RotationPeriod: durationpb.New(updatedRotationPeriod),
 			},
 		},
 		UpdateMask: &fieldmaskpb.FieldMask{

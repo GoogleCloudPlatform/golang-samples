@@ -698,7 +698,7 @@ func TestCreateRegionalSecretWithExpireTime(t *testing.T) {
 	expire := time.Now().Add(time.Hour)
 
 	var b bytes.Buffer
-	if err := createRegionalSecretWithExpireTime(&b, tc.ProjectID, secretID, locationID, expire); err != nil {
+	if err := createRegionalSecretWithExpireTime(&b, tc.ProjectID, secretID, locationID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -733,16 +733,14 @@ func TestUpdateRegionalSecretExpiration(t *testing.T) {
 	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
 	defer testCleanupRegionalSecret(t, secretName)
 
-	// Create with expire time in 1 hour.
-	initialExpire := time.Now().Add(time.Hour)
 	var b bytes.Buffer
-	if err := createRegionalSecretWithExpireTime(&b, tc.ProjectID, secretID, locationID, initialExpire); err != nil {
+	if err := createRegionalSecretWithExpireTime(&b, tc.ProjectID, secretID, locationID); err != nil {
 		t.Fatal(err)
 	}
 
 	// Update expire time to 2 hours.
 	newExpire := time.Now().Add(2 * time.Hour)
-	if err := updateRegionalSecretExpiration(&b, secretName, locationID, newExpire); err != nil {
+	if err := updateRegionalSecretExpiration(&b, secretName, locationID); err != nil {
 		t.Fatal(err)
 	}
 	if got, want := b.String(), "Updated secret"; !strings.Contains(got, want) {
@@ -776,10 +774,8 @@ func TestRemoveRegionalExpiration(t *testing.T) {
 	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
 	defer testCleanupRegionalSecret(t, secretName)
 
-	// Create with expire time in 1 hour.
-	initialExpire := time.Now().Add(time.Hour)
 	var b bytes.Buffer
-	if err := createRegionalSecretWithExpireTime(&b, tc.ProjectID, secretID, locationID, initialExpire); err != nil {
+	if err := createRegionalSecretWithExpireTime(&b, tc.ProjectID, secretID, locationID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -819,7 +815,7 @@ func TestCreateRegionalSecretWithRotation(t *testing.T) {
 	rotationPeriod := 24 * time.Hour
 
 	var b bytes.Buffer
-	if err := createRegionalSecretWithRotation(&b, tc.ProjectID, secretID, locationID, topicName, rotationPeriod); err != nil {
+	if err := createRegionalSecretWithRotation(&b, tc.ProjectID, secretID, locationID, topicName); err != nil {
 		t.Fatal(err)
 	}
 	if got, want := b.String(), "Created secret"; !strings.Contains(got, want) {
@@ -854,17 +850,16 @@ func TestUpdateRegionalSecretRotationPeriod(t *testing.T) {
 	defer testCleanupRegionalSecret(t, secretName)
 
 	topicName := testTopic(t)
-	rotationPeriod := 24 * time.Hour
 
 	var b bytes.Buffer
-	if err := createRegionalSecretWithRotation(&b, tc.ProjectID, secretID, locationID, topicName, rotationPeriod); err != nil {
+	if err := createRegionalSecretWithRotation(&b, tc.ProjectID, secretID, locationID, topicName); err != nil {
 		t.Fatal(err)
 	}
 
 	// Update rotation period.
 	updatedRotationPeriod := 48 * time.Hour
 	b.Reset()
-	if err := updateRegionalSecretRotationPeriod(&b, secretName, locationID, updatedRotationPeriod); err != nil {
+	if err := updateRegionalSecretRotationPeriod(&b, secretName, locationID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -898,10 +893,9 @@ func TestDeleteRegionalSecretRotation(t *testing.T) {
 	defer testCleanupRegionalSecret(t, secretName)
 
 	topicName := testTopic(t)
-	rotationPeriod := 24 * time.Hour
 
 	var b bytes.Buffer
-	if err := createRegionalSecretWithRotation(&b, tc.ProjectID, secretID, locationID, topicName, rotationPeriod); err != nil {
+	if err := createRegionalSecretWithRotation(&b, tc.ProjectID, secretID, locationID, topicName); err != nil {
 		t.Fatal(err)
 	}
 
@@ -939,7 +933,7 @@ func TestCreateRegionalSecretWithDelayedDestroy(t *testing.T) {
 	ttl := 24 * time.Hour
 
 	var b bytes.Buffer
-	if err := createRegionalSecretWithDelayedDestroy(&b, tc.ProjectID, secretID, locationID, ttl); err != nil {
+	if err := createRegionalSecretWithDelayedDestroy(&b, tc.ProjectID, secretID, locationID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -972,17 +966,15 @@ func TestUpdateRegionalSecretWithDelayedDestroy(t *testing.T) {
 	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
 	defer testCleanupRegionalSecret(t, secretName)
 
-	ttl := 24 * time.Hour
-
 	var b bytes.Buffer
-	if err := createRegionalSecretWithDelayedDestroy(&b, tc.ProjectID, secretID, locationID, ttl); err != nil {
+	if err := createRegionalSecretWithDelayedDestroy(&b, tc.ProjectID, secretID, locationID); err != nil {
 		t.Fatal(err)
 	}
 
 	// Update TTL to 48 hours.
 	updatedTTL := 48 * time.Hour
 	b.Reset()
-	if err := updateRegionalSecretWithDelayedDestroy(&b, tc.ProjectID, secretID, locationID, updatedTTL); err != nil {
+	if err := updateRegionalSecretWithDelayedDestroy(&b, tc.ProjectID, secretID, locationID); err != nil {
 		t.Fatal(err)
 	}
 	if got, want := b.String(), "Updated secret"; !strings.Contains(got, want) {
@@ -1014,10 +1006,8 @@ func TestDeleteRegionalSecretVersionDestroyTTL(t *testing.T) {
 	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
 	defer testCleanupRegionalSecret(t, secretName)
 
-	delayedDestroy := 24 * time.Hour
-
 	var b bytes.Buffer
-	if err := createRegionalSecretWithDelayedDestroy(&b, tc.ProjectID, secretID, locationID, delayedDestroy); err != nil {
+	if err := createRegionalSecretWithDelayedDestroy(&b, tc.ProjectID, secretID, locationID); err != nil {
 		t.Fatal(err)
 	}
 

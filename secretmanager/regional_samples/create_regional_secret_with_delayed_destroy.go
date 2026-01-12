@@ -29,11 +29,11 @@ import (
 // [START secretmanager_create_regional_secret_with_delayed_destroy]
 
 // createRegionalSecretWithDelayedDestroy creates a new regional secret with a version destroy TTL.
-func createRegionalSecretWithDelayedDestroy(w io.Writer, projectID, secretID, locationID string, ttl time.Duration) error {
+func createRegionalSecretWithDelayedDestroy(w io.Writer, projectID, secretID, locationID string) error {
 	// projectID := "my-project"
 	// secretID := "my-secret-with-ttl"
 	// locationID := "us-central1"
-	// ttl := time.Hour * 24
+	ttl := time.Hour * 24
 
 	ctx := context.Background()
 	endpoint := fmt.Sprintf("secretmanager.%s.rep.googleapis.com:443", locationID)

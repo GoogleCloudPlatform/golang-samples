@@ -28,10 +28,10 @@ import (
 // [START secretmanager_create_secret_with_expire_time]
 
 // createSecretWithExpireTime creates a new secret with an expiration time.
-func createSecretWithExpireTime(w io.Writer, projectID, secretID string, expireTime time.Time) error {
+func createSecretWithExpireTime(w io.Writer, projectID, secretID string) error {
 	// projectID := "my-project"
 	// secretID := "my-secret-with-expiry"
-	// expireTime := time.Now().Add(time.Hour * 24)
+	expireTime := time.Now().Add(time.Hour)
 
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)
