@@ -1689,6 +1689,10 @@ func TestDeleteSecretAnnotation(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if got, want := b.String(), "Deleted annotation"; !strings.Contains(got, want) {
+		t.Errorf("deleteSecretAnnotation: expected %q to contain %q", got, want)
+	}
+
 	client, ctx := testClient(t)
 	s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
 		Name: secret.Name,

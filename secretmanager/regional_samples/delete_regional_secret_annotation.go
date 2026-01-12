@@ -72,10 +72,11 @@ func deleteRegionalSecretAnnotation(w io.Writer, secretName, locationID string) 
 		},
 	}
 
-	if _, err := client.UpdateSecret(ctx, updateRequest); err != nil {
+	updateResult, err := client.UpdateSecret(ctx, updateRequest)
+	if err != nil {
 		return fmt.Errorf("failed to update secret: %w", err)
 	}
-	fmt.Fprintf(w, "Deleted annotation %s from secret %s\n", annotationKey, secretName)
+	fmt.Fprintf(w, "Deleted annotation %s from secret %s\n", annotationKey, updateResult.Name)
 	return nil
 }
 
