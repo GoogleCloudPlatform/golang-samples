@@ -14,6 +14,8 @@
 
 package regional_secretmanager
 
+// [START secretmanager_create_regional_secret_with_rotation]
+
 import (
 	"context"
 	"fmt"
@@ -26,8 +28,6 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
-
-// [START secretmanager_create_regional_secret_with_rotation]
 
 // createRegionalSecretWithRotation creates a new regional secret with rotation configured.
 func createRegionalSecretWithRotation(w io.Writer, projectID, secretID, locationID, topicName string) error {

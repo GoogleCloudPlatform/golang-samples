@@ -14,6 +14,8 @@
 
 package secretmanager
 
+// [START secretmanager_update_secret_with_delayed_destroy]
+
 import (
 	"context"
 	"fmt"
@@ -26,12 +28,9 @@ import (
 	fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// [START secretmanager_update_secret_with_delayed_destroy]
-
 // updateSecretWithDelayedDestroy updates the version destroy TTL of an existing secret.
-func updateSecretWithDelayedDestroy(w io.Writer, projectID, secretID string) error {
-	// projectID := "my-project"
-	// secretID := "my-secret-with-ttl"
+func updateSecretWithDelayedDestroy(w io.Writer, secretName string) error {
+	// secretName := "projects/my-project/secrets/my-secret"
 	newDelayedDestroy := time.Hour * 48
 
 	ctx := context.Background()
@@ -43,7 +42,7 @@ func updateSecretWithDelayedDestroy(w io.Writer, projectID, secretID string) err
 
 	req := &secretmanagerpb.UpdateSecretRequest{
 		Secret: &secretmanagerpb.Secret{
-			Name:              fmt.Sprintf("projects/%s/secrets/%s", projectID, secretID),
+			Name:              secretName,
 			VersionDestroyTtl: durationpb.New(newDelayedDestroy),
 		},
 		UpdateMask: &fieldmaskpb.FieldMask{

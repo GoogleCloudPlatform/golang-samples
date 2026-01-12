@@ -14,6 +14,8 @@
 
 package secretmanager
 
+// [START secretmanager_update_secret_rotation_period]
+
 import (
 	"context"
 	"fmt"
@@ -26,12 +28,9 @@ import (
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// [START secretmanager_update_secret_rotation_period]
-
 // updateSecretRotationPeriod updates the rotation period of a secret.
-func updateSecretRotationPeriod(w io.Writer, projectID, secretID string) error {
-	// projectID := "my-project"
-	// secretID := "my-secret"
+func updateSecretRotationPeriod(w io.Writer, secretName string) error {
+	// secretName := "projects/my-project/secrets/my-secret"
 	updatedRotationPeriod := 48 * time.Hour
 
 	// Create the client.
@@ -45,7 +44,7 @@ func updateSecretRotationPeriod(w io.Writer, projectID, secretID string) error {
 	// Build the request.
 	req := &secretmanagerpb.UpdateSecretRequest{
 		Secret: &secretmanagerpb.Secret{
-			Name: fmt.Sprintf("projects/%s/secrets/%s", projectID, secretID),
+			Name: secretName,
 			Rotation: &secretmanagerpb.Rotation{
 				RotationPeriod: durationpb.New(updatedRotationPeriod),
 			},

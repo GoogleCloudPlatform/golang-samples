@@ -14,6 +14,8 @@
 
 package regional_secretmanager
 
+// [START secretmanager_update_regional_secret_rotation_period]
+
 import (
 	"context"
 	"fmt"
@@ -27,7 +29,6 @@ import (
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// [START secretmanager_update_regional_secret_rotation_period]
 // updateRegionalSecretRotationPeriod updates the rotation period of a regional secret.
 func updateRegionalSecretRotationPeriod(w io.Writer, secretName, locationID string) error {
 	// secretName := "projects/my-project/locations/us-central1/secrets/my-secret"

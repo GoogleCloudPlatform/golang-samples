@@ -14,6 +14,8 @@
 
 package secretmanager
 
+// [START secretmanager_create_secret_with_expire_time]
+
 import (
 	"context"
 	"fmt"
@@ -24,8 +26,6 @@ import (
 	secretmanagerpb "cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
-
-// [START secretmanager_create_secret_with_expire_time]
 
 // createSecretWithExpireTime creates a new secret with an expiration time.
 func createSecretWithExpireTime(w io.Writer, projectID, secretID string) error {

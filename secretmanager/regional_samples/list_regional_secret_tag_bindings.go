@@ -14,6 +14,8 @@
 
 package regional_secretmanager
 
+// [START secretmanager_list_regional_secret_tag_bindings]
+
 import (
 	"context"
 	"fmt"
@@ -24,8 +26,6 @@ import (
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
-
-// [START secretmanager_list_regional_secret_tag_bindings]
 
 // listRegionalSecretTagBindings lists tag bindings for a regional secret.
 func listRegionalSecretTagBindings(w io.Writer, secretName, locationID string) error {

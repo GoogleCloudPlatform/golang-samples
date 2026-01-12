@@ -14,6 +14,8 @@
 
 package secretmanager
 
+// [START secretmanager_create_secret_with_topic]
+
 import (
 	"context"
 	"fmt"
@@ -22,8 +24,6 @@ import (
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	secretmanagerpb "cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 )
-
-// [START secretmanager_create_secret_with_topic]
 
 // createSecretWithRotation creates a new secret with rotation configured.
 func createSecretWithTopic(w io.Writer, projectID, secretID, topicName string) error {

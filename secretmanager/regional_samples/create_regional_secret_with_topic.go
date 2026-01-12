@@ -14,6 +14,8 @@
 
 package regional_secretmanager
 
+// [START secretmanager_create_regional_secret_with_topic]
+
 import (
 	"context"
 	"fmt"
@@ -23,8 +25,6 @@ import (
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"google.golang.org/api/option"
 )
-
-// [START secretmanager_create_regional_secret_with_topic]
 
 // createRegionalSecretWithTopic creates a new regional secret with a topic configured.
 func createRegionalSecretWithTopic(w io.Writer, projectID, secretID, locationID, topicName string) error {

@@ -14,6 +14,8 @@
 
 package regional_secretmanager
 
+// [START secretmanager_delete_regional_secret_expiration]
+
 import (
 	"context"
 	"fmt"
@@ -24,8 +26,6 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
-
-// [START secretmanager_delete_regional_secret_expiration]
 
 // deleteRegionalExpiration removes the expiration time from a regional secret.
 func deleteRegionalExpiration(w io.Writer, secretName, locationID string) error {

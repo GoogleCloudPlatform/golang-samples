@@ -14,6 +14,8 @@
 
 package regional_secretmanager
 
+// [START secretmanager_bind_tag_to_regional_secret]
+
 import (
 	"context"
 	"fmt"
@@ -25,8 +27,6 @@ import (
 	secretmanagerpb "cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"google.golang.org/api/option"
 )
-
-// [START secretmanager_bind_tag_to_regional_secret]
 
 // bindTagToRegionalSecret creates a regional secret and binds a tag to it.
 func bindTagToRegionalSecret(w io.Writer, projectID, secretID, locationID, tagValue string) error {

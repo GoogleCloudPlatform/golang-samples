@@ -14,6 +14,8 @@
 
 package secretmanager
 
+// [START secretmanager_delete_secret_expiration]
+
 import (
 	"context"
 	"fmt"
@@ -23,8 +25,6 @@ import (
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
-
-// [START secretmanager_delete_secret_expiration]
 
 // deleteExpiration removes the expiration time from a secret.
 func deleteExpiration(w io.Writer, secretName string) error {

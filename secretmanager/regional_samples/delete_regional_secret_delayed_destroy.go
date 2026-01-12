@@ -14,6 +14,8 @@
 
 package regional_secretmanager
 
+// [START secretmanager_delete_regional_secret_version_destroy_ttl]
+
 import (
 	"context"
 	"fmt"
@@ -25,12 +27,9 @@ import (
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// [START secretmanager_delete_regional_secret_version_destroy_ttl]
-
 // deleteRegionalSecretVersionDestroyTTL removes the version destroy TTL config from a regional secret.
-func deleteRegionalSecretVersionDestroyTTL(w io.Writer, projectID, secretID, locationID string) error {
-	// projectID := "my-project"
-	// secretID := "my-secret"
+func deleteRegionalSecretVersionDestroyTTL(w io.Writer, secretName, locationID string) error {
+	// secretName := "projects/my-project/locations/us-central1/secrets/my-secret"
 	// locationID := "us-central1"
 
 	// Create the client.
@@ -45,7 +44,7 @@ func deleteRegionalSecretVersionDestroyTTL(w io.Writer, projectID, secretID, loc
 	// Build the request.
 	req := &secretmanagerpb.UpdateSecretRequest{
 		Secret: &secretmanagerpb.Secret{
-			Name: fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectID, locationID, secretID),
+			Name: secretName,
 		},
 		UpdateMask: &fieldmaskpb.FieldMask{
 			Paths: []string{"version_destroy_ttl"},

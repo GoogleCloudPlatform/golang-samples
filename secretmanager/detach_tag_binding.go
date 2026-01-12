@@ -14,6 +14,8 @@
 
 package secretmanager
 
+// [START secretmanager_detach_tag_binding]
+
 import (
 	"context"
 	"fmt"
@@ -23,8 +25,6 @@ import (
 	resourcemanagerpb "cloud.google.com/go/resourcemanager/apiv3/resourcemanagerpb"
 	"google.golang.org/api/iterator"
 )
-
-// [START secretmanager_detach_tag_binding]
 
 // detachTag removes tag value attached to secret
 func detachTag(w io.Writer, secretName, tagValue string) error {

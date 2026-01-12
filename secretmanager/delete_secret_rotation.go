@@ -14,6 +14,8 @@
 
 package secretmanager
 
+// [START secretmanager_delete_secret_rotation]
+
 import (
 	"context"
 	"fmt"
@@ -24,12 +26,9 @@ import (
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// [START secretmanager_delete_secret_rotation]
-
 // deleteSecretRotation removes the rotation configuration from a secret.
-func deleteSecretRotation(w io.Writer, projectID, secretID string) error {
-	// projectID := "my-project"
-	// secretID := "my-secret-with-rotation"
+func deleteSecretRotation(w io.Writer, secretName string) error {
+	// secretName := "projects/my-project/secrets/my-secret"
 
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)
@@ -40,7 +39,7 @@ func deleteSecretRotation(w io.Writer, projectID, secretID string) error {
 
 	req := &secretmanagerpb.UpdateSecretRequest{
 		Secret: &secretmanagerpb.Secret{
-			Name: fmt.Sprintf("projects/%s/secrets/%s", projectID, secretID),
+			Name: secretName,
 		},
 		UpdateMask: &fieldmaskpb.FieldMask{
 			Paths: []string{"rotation"},

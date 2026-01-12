@@ -2018,7 +2018,7 @@ func TestUpdateSecretRotationPeriod(t *testing.T) {
 	// Update rotation period.
 	updatedRotationPeriod := 48 * time.Hour
 	b.Reset()
-	if err := updateSecretRotationPeriod(&b, tc.ProjectID, secretId); err != nil {
+	if err := updateSecretRotationPeriod(&b, secretName); err != nil {
 		t.Fatal(err)
 	}
 
@@ -2058,7 +2058,7 @@ func TestDeleteSecretRotation(t *testing.T) {
 	}
 
 	// Remove rotation.
-	if err := deleteSecretRotation(&b, tc.ProjectID, secretId); err != nil {
+	if err := deleteSecretRotation(&b, secretName); err != nil {
 		t.Fatal(err)
 	}
 
@@ -2159,7 +2159,7 @@ func TestUpdateSecretWithDelayedDestroy(t *testing.T) {
 	}
 
 	newDelayedDestroy := 48 * time.Hour
-	if err := updateSecretWithDelayedDestroy(&b, tc.ProjectID, secretId); err != nil {
+	if err := updateSecretWithDelayedDestroy(&b, secretName); err != nil {
 		t.Fatal(err)
 	}
 
@@ -2196,7 +2196,7 @@ func TestDeleteSecretVersionDestroyTTL(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := deleteSecretVersionDestroyTTL(&b, tc.ProjectID, secretId); err != nil {
+	if err := deleteSecretVersionDestroyTTL(&b, secretName); err != nil {
 		t.Fatal(err)
 	}
 

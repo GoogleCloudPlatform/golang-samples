@@ -14,6 +14,8 @@
 
 package regional_secretmanager
 
+// [START secretmanager_update_regional_secret_expiration]
+
 import (
 	"context"
 	"fmt"
@@ -26,8 +28,6 @@ import (
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
-
-// [START secretmanager_update_regional_secret_expiration]
 
 // updateRegionalSecretExpiration updates the expiration time of a regional secret.
 func updateRegionalSecretExpiration(w io.Writer, secretName, locationID string) error {

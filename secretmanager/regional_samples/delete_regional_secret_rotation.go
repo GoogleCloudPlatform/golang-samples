@@ -14,6 +14,8 @@
 
 package regional_secretmanager
 
+// [START secretmanager_delete_regional_secret_rotation]
+
 import (
 	"context"
 	"fmt"
@@ -24,8 +26,6 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
-
-// [START secretmanager_delete_regional_secret_rotation]
 
 // deleteRegionalSecretRotation removes the rotation configuration from a regional secret.
 func deleteRegionalSecretRotation(w io.Writer, secretName, locationID string) error {

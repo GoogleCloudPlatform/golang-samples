@@ -14,6 +14,8 @@
 
 package regional_secretmanager
 
+// [START secretmanager_create_regional_secret_with_delayed_destroy]
+
 import (
 	"context"
 	"fmt"
@@ -25,8 +27,6 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/durationpb"
 )
-
-// [START secretmanager_create_regional_secret_with_delayed_destroy]
 
 // createRegionalSecretWithDelayedDestroy creates a new regional secret with a version destroy TTL.
 func createRegionalSecretWithDelayedDestroy(w io.Writer, projectID, secretID, locationID string) error {

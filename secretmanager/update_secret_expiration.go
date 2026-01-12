@@ -14,6 +14,8 @@
 
 package secretmanager
 
+// [START secretmanager_update_secret_expiration]
+
 import (
 	"context"
 	"fmt"
@@ -25,8 +27,6 @@ import (
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
-
-// [START secretmanager_update_secret_expiration]
 
 // updateSecretExpiration updates the expiration time of a secret.
 func updateSecretExpiration(w io.Writer, secretName string) error {

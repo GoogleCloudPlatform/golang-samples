@@ -14,6 +14,8 @@
 
 package secretmanager
 
+// [START secretmanager_list_tag_bindings]
+
 import (
 	"context"
 	"fmt"
@@ -23,8 +25,6 @@ import (
 	resourcemanagerpb "cloud.google.com/go/resourcemanager/apiv3/resourcemanagerpb"
 	"google.golang.org/api/iterator"
 )
-
-// [START secretmanager_list_tag_bindings]
 
 // listTagBindings lists tag bindings attached to a secret.
 func listTagBindings(w io.Writer, secretName string) error {

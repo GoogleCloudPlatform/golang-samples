@@ -14,6 +14,8 @@
 
 package secretmanager
 
+// [START secretmanager_bind_tags_to_secret]
+
 import (
 	"context"
 	"fmt"
@@ -24,8 +26,6 @@ import (
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 )
-
-// [START secretmanager_bind_tags_to_secret]
 
 // bindTagsToSecret creates a secret and binds a tag to it.
 func bindTagsToSecret(w io.Writer, projectID, secretID, tagValue string) error {

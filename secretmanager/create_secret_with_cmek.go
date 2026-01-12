@@ -14,6 +14,8 @@
 
 package secretmanager
 
+// [START secretmanager_create_secret_with_cmek]
+
 import (
 	"context"
 	"fmt"
@@ -22,8 +24,6 @@ import (
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	secretmanagerpb "cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 )
-
-// [START secretmanager_create_secret_with_cmek]
 
 // createSecretWithCMEK creates a new secret encrypted with a customer-managed key.
 func createSecretWithCMEK(w io.Writer, projectID, secretID, kmsKeyName string) error {

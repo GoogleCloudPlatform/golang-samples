@@ -14,6 +14,8 @@
 
 package regional_secretmanager
 
+// [START secretmanager_create_regional_secret_with_expire_time]
+
 import (
 	"context"
 	"fmt"
@@ -25,8 +27,6 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
-
-// [START secretmanager_create_regional_secret_with_expire_time]
 
 // createRegionalSecretWithExpireTime creates a new regional secret with an expiration time.
 func createRegionalSecretWithExpireTime(w io.Writer, projectID, secretID, locationID string) error {

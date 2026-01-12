@@ -14,6 +14,8 @@
 
 package regional_secretmanager
 
+// [START secretmanager_detach_regional_tag_binding]
+
 import (
 	"context"
 	"fmt"
@@ -24,8 +26,6 @@ import (
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
-
-// [START secretmanager_detach_regional_tag_binding]
 
 // detachRegionalTag detaches a tag value from a regional secret.
 func detachRegionalTag(w io.Writer, secretName, locationID, tagValue string) error {

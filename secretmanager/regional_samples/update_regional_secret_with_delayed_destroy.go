@@ -14,6 +14,8 @@
 
 package regional_secretmanager
 
+// [START secretmanager_update_regional_secret_with_delayed_destroy]
+
 import (
 	"context"
 	"fmt"
@@ -27,12 +29,9 @@ import (
 	fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-// [START secretmanager_update_regional_secret_with_delayed_destroy]
-
 // updateRegionalSecretWithDelayedDestroy updates the version destroy TTL of an existing regional secret.
-func updateRegionalSecretWithDelayedDestroy(w io.Writer, projectID, secretID, locationID string) error {
-	// projectID := "my-project"
-	// secretID := "my-secret-with-ttl"
+func updateRegionalSecretWithDelayedDestroy(w io.Writer, secretName, locationID string) error {
+	// secretName := "projects/my-project/secrets/my-secret"
 	// locationID := "us-central1"
 	newDelayedDestroy := time.Hour * 48
 
@@ -46,7 +45,7 @@ func updateRegionalSecretWithDelayedDestroy(w io.Writer, projectID, secretID, lo
 
 	req := &secretmanagerpb.UpdateSecretRequest{
 		Secret: &secretmanagerpb.Secret{
-			Name:              fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectID, locationID, secretID),
+			Name:              secretName,
 			VersionDestroyTtl: durationpb.New(newDelayedDestroy),
 		},
 		UpdateMask: &fieldmaskpb.FieldMask{
