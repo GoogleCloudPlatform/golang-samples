@@ -14,6 +14,8 @@
 
 package secretmanager
 
+// [START secretmanager_delete_secret_annotation]
+
 import (
 	"context"
 	"fmt"
@@ -23,8 +25,6 @@ import (
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
-
-// [START secretmanager_delete_secret_annotation]
 
 // deleteSecretAnnotation deletes an annotation on the given secret.
 func deleteSecretAnnotation(w io.Writer, secretName string) error {
