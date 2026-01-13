@@ -1678,15 +1678,15 @@ func TestCreateSecretWithTags(t *testing.T) {
 
 func TestCreateSecretWithExpireTime(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	secretId := testName(t)
-	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretId)
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
 	defer testCleanupSecret(t, secretName)
 
 	// Expire time in 1 hour.
 	expire := time.Now().Add(time.Hour)
 
 	var b bytes.Buffer
-	if err := createSecretWithExpireTime(&b, tc.ProjectID, secretId); err != nil {
+	if err := createSecretWithExpireTime(&b, tc.ProjectID, secretID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1715,13 +1715,13 @@ func TestCreateSecretWithExpireTime(t *testing.T) {
 
 func TestUpdateSecretExpiration(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	secretId := testName(t)
-	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretId)
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
 	defer testCleanupSecret(t, secretName)
 
 	// Create with expire time in 1 hour.
 	var b bytes.Buffer
-	if err := createSecretWithExpireTime(&b, tc.ProjectID, secretId); err != nil {
+	if err := createSecretWithExpireTime(&b, tc.ProjectID, secretID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1754,12 +1754,12 @@ func TestUpdateSecretExpiration(t *testing.T) {
 
 func TestRemoveExpiration(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	secretId := testName(t)
-	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretId)
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
 	defer testCleanupSecret(t, secretName)
 
 	var b bytes.Buffer
-	if err := createSecretWithExpireTime(&b, tc.ProjectID, secretId); err != nil {
+	if err := createSecretWithExpireTime(&b, tc.ProjectID, secretID); err != nil {
 		t.Fatal(err)
 	}
 
