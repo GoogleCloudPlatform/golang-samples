@@ -14,7 +14,7 @@
 
 package regional_secretmanager
 
-// [START secretmanager_delete_regional_secret_version_destroy_ttl]
+// [START secretmanager_delete_regional_secret_delayed_destroy]
 
 import (
 	"context"
@@ -61,4 +61,4 @@ func deleteRegionalSecretVersionDestroyTTL(w io.Writer, secretName, locationID s
 	return nil
 }
 
-// [END secretmanager_delete_regional_secret_version_destroy_ttl]
+// [END secretmanager_delete_regional_secret_delayed_destroy]

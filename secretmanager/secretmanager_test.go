@@ -1676,16 +1676,16 @@ func TestCreateSecretWithTags(t *testing.T) {
 
 }
 
-func TestCreateSecretWithDealayedDestroy(t *testing.T) {
+func TestCreateSecretWithDelayedDestroy(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	secretId := testName(t)
-	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretId)
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
 	defer testCleanupSecret(t, secretName)
 
 	ttl := 24 * time.Hour
 
 	var b bytes.Buffer
-	if err := createSecretWithDelayedDestroy(&b, tc.ProjectID, secretId); err != nil {
+	if err := createSecretWithDelayedDestroy(&b, tc.ProjectID, secretID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1713,14 +1713,14 @@ func TestCreateSecretWithDealayedDestroy(t *testing.T) {
 
 func TestUpdateSecretWithDelayedDestroy(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	secretId := testName(t)
-	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretId)
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
 	defer testCleanupSecret(t, secretName)
 
 	client, ctx := testClient(t)
 
 	var b bytes.Buffer
-	if err := createSecretWithDelayedDestroy(&b, tc.ProjectID, secretId); err != nil {
+	if err := createSecretWithDelayedDestroy(&b, tc.ProjectID, secretID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1751,14 +1751,14 @@ func TestUpdateSecretWithDelayedDestroy(t *testing.T) {
 
 func TestDeleteSecretVersionDestroyTTL(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	secretId := testName(t)
-	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretId)
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
 	defer testCleanupSecret(t, secretName)
 
 	client, ctx := testClient(t)
 
 	var b bytes.Buffer
-	if err := createSecretWithDelayedDestroy(&b, tc.ProjectID, secretId); err != nil {
+	if err := createSecretWithDelayedDestroy(&b, tc.ProjectID, secretID); err != nil {
 		t.Fatal(err)
 	}
 

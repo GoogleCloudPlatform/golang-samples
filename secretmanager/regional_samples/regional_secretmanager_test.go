@@ -532,7 +532,6 @@ func TestUpdateRegionalSecretWithDelayedDestroy(t *testing.T) {
 
 	// Update TTL to 48 hours.
 	updatedTTL := 48 * time.Hour
-	b.Reset()
 	if err := updateRegionalSecretWithDelayedDestroy(&b, secretName, locationID); err != nil {
 		t.Fatal(err)
 	}
@@ -570,7 +569,6 @@ func TestDeleteRegionalSecretVersionDestroyTTL(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	b.Reset()
 	if err := deleteRegionalSecretVersionDestroyTTL(&b, secretName, locationID); err != nil {
 		t.Fatal(err)
 	}
