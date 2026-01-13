@@ -1689,8 +1689,8 @@ func TestCreateSecretWithTags(t *testing.T) {
 
 func TestCreateSecretWithRotation(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	secretId := testName(t)
-	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretId)
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
 	defer testCleanupSecret(t, secretName)
 
 	topicName := testTopic(t)
@@ -1699,7 +1699,7 @@ func TestCreateSecretWithRotation(t *testing.T) {
 	rotationPeriod := 24 * time.Hour
 
 	var b bytes.Buffer
-	if err := createSecretWithRotation(&b, tc.ProjectID, secretId, topicName); err != nil {
+	if err := createSecretWithRotation(&b, tc.ProjectID, secretID, topicName); err != nil {
 		t.Fatal(err)
 	}
 	if got, want := b.String(), "Created secret"; !strings.Contains(got, want) {
@@ -1727,15 +1727,15 @@ func TestCreateSecretWithRotation(t *testing.T) {
 
 func TestUpdateSecretRotationPeriod(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	secretId := testName(t)
-	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretId)
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
 	defer testCleanupSecret(t, secretName)
 
 	topicName := testTopic(t)
 	client, ctx := testClient(t)
 
 	var b bytes.Buffer
-	if err := createSecretWithRotation(&b, tc.ProjectID, secretId, topicName); err != nil {
+	if err := createSecretWithRotation(&b, tc.ProjectID, secretID, topicName); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1747,8 +1747,8 @@ func TestUpdateSecretRotationPeriod(t *testing.T) {
 	}
 
 	got := b.String()
-	if !strings.Contains(got, secretId) {
-		t.Errorf("updateSecretRotationPeriod: output %q did not contain secretId %q", got, secretId)
+	if !strings.Contains(got, secretID) {
+		t.Errorf("updateSecretRotationPeriod: output %q did not contain secretID %q", got, secretID)
 	}
 
 	// Verify rotation period with GetSecret.
@@ -1769,15 +1769,15 @@ func TestUpdateSecretRotationPeriod(t *testing.T) {
 
 func TestDeleteSecretRotation(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	secretId := testName(t)
-	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretId)
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
 	defer testCleanupSecret(t, secretName)
 
 	topicName := testTopic(t)
 	client, ctx := testClient(t)
 
 	var b bytes.Buffer
-	if err := createSecretWithRotation(&b, tc.ProjectID, secretId, topicName); err != nil {
+	if err := createSecretWithRotation(&b, tc.ProjectID, secretID, topicName); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1787,8 +1787,8 @@ func TestDeleteSecretRotation(t *testing.T) {
 	}
 
 	got := b.String()
-	if !strings.Contains(got, secretId) {
-		t.Errorf("deleteSecretRotation: output %q did not contain secretId %q", got, secretId)
+	if !strings.Contains(got, secretID) {
+		t.Errorf("deleteSecretRotation: output %q did not contain secretID %q", got, secretID)
 	}
 
 	// Verify rotation is removed with GetSecret.
@@ -1806,15 +1806,15 @@ func TestDeleteSecretRotation(t *testing.T) {
 
 func TestCreateSecretWithTopic(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	secretId := testName(t)
-	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretId)
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
 	defer testCleanupSecret(t, secretName)
 
 	topicName := testTopic(t)
 	client, ctx := testClient(t)
 
 	var b bytes.Buffer
-	if err := createSecretWithTopic(&b, tc.ProjectID, secretId, topicName); err != nil {
+	if err := createSecretWithTopic(&b, tc.ProjectID, secretID, topicName); err != nil {
 		t.Fatal(err)
 	}
 	if got, want := b.String(), "Created secret"; !strings.Contains(got, want) {

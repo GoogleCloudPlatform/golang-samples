@@ -617,7 +617,7 @@ func TestCreateRegionalSecretWithTopic(t *testing.T) {
 	secretID := testName(t)
 	locationID := testLocation(t)
 	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
-	// defer testCleanupRegionalSecret(t, secretName)
+	defer testCleanupRegionalSecret(t, secretName)
 
 	topicName := testTopic(t)
 

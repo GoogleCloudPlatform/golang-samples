@@ -25,10 +25,10 @@ import (
 	secretmanagerpb "cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 )
 
-// createSecretWithRotation creates a new secret with rotation configured.
+// createSecretWithTopic creates a new secret with topic configured.
 func createSecretWithTopic(w io.Writer, projectID, secretID, topicName string) error {
 	// projectID := "my-project"
-	// secretID := "my-secret-with-rotation"
+	// secretID := "my-secret-with-topic"
 	// topicName := "projects/my-project/topics/my-topic"
 
 	ctx := context.Background()
