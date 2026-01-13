@@ -26,7 +26,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-// createSecretWithCMEK creates a new secret encrypted with a customer-managed key.
+// createRegionalSecretWithCMEK creates a new secret encrypted with a customer-managed key.
 func createRegionalSecretWithCMEK(w io.Writer, projectID, secretID, locationID, kmsKeyName string) error {
 	// projectID := "my-project"
 	// secretID := "my-secret-with-cmek"
