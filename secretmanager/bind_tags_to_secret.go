@@ -73,9 +73,9 @@ func bindTagsToSecret(w io.Writer, projectID, secretID, tagValue string) error {
 		},
 	}
 
-	_, err = tagBindingsClient.CreateTagBinding(ctx, bindingReq)
-	if err != nil {
-		return fmt.Errorf("failed to start create tag binding operation: %w", err)
+	tagBindingsOperation, err := tagBindingsClient.CreateTagBinding(ctx, bindingReq)
+	if _, err := tagBindingsOperation.Wait(ctx); err != nil {
+		return fmt.Errorf("failed to create tag binding: %w", err)
 	}
 
 	fmt.Fprintf(w, "Tag binding created for secret %s with tag value %s\n", secret.Name, tagValue)
