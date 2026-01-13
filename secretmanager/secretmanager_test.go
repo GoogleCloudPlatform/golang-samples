@@ -1774,12 +1774,12 @@ func TestDetachTag(t *testing.T) {
 	tagValue := testCreateTagValue(t, tagKey.GetName())
 	defer testCleanupTagValue(t, tagValue.GetName())
 
-	secretId := testName(t)
-	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretId)
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
 	defer testCleanupSecret(t, secretName)
 
 	var b bytes.Buffer
-	if err := bindTagsToSecret(&b, tc.ProjectID, secretId, tagValue.GetName()); err != nil {
+	if err := bindTagsToSecret(&b, tc.ProjectID, secretID, tagValue.GetName()); err != nil {
 		t.Fatal(err)
 	}
 
