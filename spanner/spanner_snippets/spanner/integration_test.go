@@ -448,6 +448,11 @@ func TestSample(t *testing.T) {
 	out = runSample(t, writeWithTransactionUsingIsolationLevel, dbName, "failed to write with transaction using isolation level")
 	assertContains(t, out, "Current album title: Total Junk")
 	assertContains(t, out, "Updated 1 record(s)")
+
+	// Test read lock mode functionality
+	out = runSample(t, writeWithTransactionUsingReadLockMode, dbName, "failed to write with transaction using read lock mode")
+	assertContains(t, out, "Current album title: Go, Go, Go")
+	assertContains(t, out, "Updated 1 record(s)")
 }
 
 func TestBackupSample(t *testing.T) {
