@@ -61,7 +61,7 @@ func generateGoogleSearchURLContextWithText(w io.Writer) error {
 	// Call the model
 	resp, err := client.Models.GenerateContent(ctx, modelName, []*genai.Content{
 		{
-			Role: "user",
+			Role: genai.RoleUser,
 			Parts: []*genai.Part{
 				{Text: prompt},
 			},

@@ -49,6 +49,56 @@ func generateStructuredOutputWithTxtMock(w io.Writer) error {
 	_, err = fmt.Fprintln(w, string(b))
 	return err
 }
+func generateLiveRAGWithTextMock(w io.Writer, memoryCorpus string) error {
+	mockOutput := "> What are the newest Gemini models?\n\nGemini 2.0 Flash and Gemini 2.5 Ultra are among the latest models released by Google."
+	_, err := fmt.Fprintln(w, mockOutput)
+	return err
+}
+
+// Mock function simulating generateLiveTextWithAudio without API/WebSocket.
+func generateLiveTextWithAudioMock(w io.Writer) error {
+	audioURL := "https://storage.googleapis.com/generativeai-downloads/data/16000.wav"
+	mockResponse := fmt.Sprintf("> Answer to this audio url: %s\n\nMocked transcript response: Hello from mock!", audioURL)
+	_, err := fmt.Fprintln(w, mockResponse)
+	return err
+}
+
+// Mock version of generateLiveAudioConversation
+func generateLiveAudioConversationMock(w io.Writer, audioFile string) error {
+	// Simulating behavior: write the audioFile name and a processed message
+	mockOutput := fmt.Sprintf("> Received audio file: %s\nProcessed mock response: Hello from mock audio!", audioFile)
+	_, err := fmt.Fprintln(w, mockOutput)
+	return err
+}
+
+func generateLiveCodeExecMock(w io.Writer) error {
+	mockOutput := "Mocked Live Code Exec: final answer is 7"
+	_, err := fmt.Fprintln(w, mockOutput)
+	return err
+}
+
+func generateLiveTranscribeWithAudioMock(w io.Writer) error {
+	mock := `> Hello? Gemini are you there?
+Model turn: <mocked>
+Input transcript: hello gemini are you there
+Yes, I'm here. What would you like to talk about?`
+
+	_, err := fmt.Fprintln(w, mock)
+	return err
+}
+
+func generateLiveWithTextMock(w io.Writer) error {
+	mockOutput := `> Hello? Gemini, are you there?
+Yes, I'm here. What would you like to talk about?`
+	_, err := fmt.Fprintln(w, mockOutput)
+	return err
+}
+
+func generateLiveAudioWithTextMock(w io.Writer) error {
+	mockOutput := "Mocked Live Response: Received audio answer saved to..."
+	_, err := fmt.Fprintln(w, mockOutput)
+	return err
+}
 
 func TestLiveGeneration(t *testing.T) {
 	tc := testutil.SystemTest(t)
@@ -96,4 +146,96 @@ func TestLiveGeneration(t *testing.T) {
 		}
 	})
 
+	t.Run("generate RAG with txt", func(t *testing.T) {
+		buf.Reset()
+		if err := generateLiveRAGWithTextMock(buf, "test"); err != nil {
+			t.Fatalf("generateLiveRAGWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate text with audio", func(t *testing.T) {
+		buf.Reset()
+		if err := generateLiveTextWithAudioMock(buf); err != nil {
+			t.Fatalf("generateLiveTextWithAudio failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate live audio conversation", func(t *testing.T) {
+		buf.Reset()
+		err := generateLiveAudioConversationMock(buf, "sample_audio.wav")
+		if err != nil {
+			t.Fatalf("generateLiveAudioConversation failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate live Code Exec with txt", func(t *testing.T) {
+		buf.Reset()
+
+		err := generateLiveCodeExecMock(buf)
+		if err != nil {
+			t.Fatalf("generateLiveCodeExec failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate live transcribe with audio", func(t *testing.T) {
+		buf.Reset()
+
+		err := generateLiveTranscribeWithAudioMock(buf)
+		if err != nil {
+			t.Fatalf("generateLiveTranscribeWithAudio failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate live with text", func(t *testing.T) {
+		buf.Reset()
+
+		err := generateLiveWithTextMock(buf)
+		if err != nil {
+			t.Fatalf("generateLiveWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("generate live audio with text", func(t *testing.T) {
+		buf.Reset()
+
+		err := generateLiveAudioWithTextMock(buf)
+		if err != nil {
+			t.Fatalf("generateLiveAudioWithText failed: %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
 }

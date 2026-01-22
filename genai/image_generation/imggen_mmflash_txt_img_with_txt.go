@@ -45,7 +45,7 @@ func generateMMFlashTxtImgWithText(w io.Writer) error {
 				{Text: "Generate an illustrated recipe for a paella. " +
 					"Create images to go alongside the text as you generate the recipe."},
 			},
-			Role: "user",
+			Role: genai.RoleUser,
 		},
 	}
 
@@ -68,7 +68,7 @@ func generateMMFlashTxtImgWithText(w io.Writer) error {
 		return fmt.Errorf("no candidates returned")
 	}
 
-	outputFolder := "testdata"
+	outputFolder := ""
 
 	// Create the markdown file
 	mdFile := filepath.Join(outputFolder, "paella-recipe.md")

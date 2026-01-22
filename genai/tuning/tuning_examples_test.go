@@ -80,7 +80,7 @@ func predictWithTunedEndpointMock(w io.Writer, tuningJobName string) error {
 
 	contents := []*genai.Content{
 		{
-			Role: "user",
+			Role: genai.RoleUser,
 			Parts: []*genai.Part{
 				{Text: "Why is the sky blue?"},
 			},
@@ -105,6 +105,40 @@ func getTuningJobMock(w io.Writer, tuningJobName string) error {
 		return fmt.Errorf("mock get tuning job failed: %w", err)
 	}
 	fmt.Fprintf(w, "Job %s found, state: %s\n", job.Name, job.State)
+	return nil
+}
+
+type TuningJob struct {
+	Name  string
+	State string
+}
+
+func (m *mockTunings) ListMock(ctx context.Context) ([]TuningJob, error) {
+	return []TuningJob{
+		{
+			Name:  "projects/123/locations/us-central1/tuningJobs/job-1",
+			State: "SUCCEEDED",
+		},
+		{
+			Name:  "projects/123/locations/us-central1/tuningJobs/job-2",
+			State: "RUNNING",
+		},
+	}, nil
+}
+
+func listTuningJobsMock(w io.Writer) error {
+	tunings := &mockTunings{}
+	ctx := context.Background()
+
+	jobs, err := tunings.ListMock(ctx)
+	if err != nil {
+		return fmt.Errorf("mock list tuning jobs failed: %w", err)
+	}
+
+	for _, job := range jobs {
+		fmt.Fprintln(w, job.Name)
+	}
+
 	return nil
 }
 
@@ -147,6 +181,19 @@ func TestTuningGeneration(t *testing.T) {
 		if err != nil {
 			t.Fatalf("getTuningJob failed: %v", err)
 		}
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
+	t.Run("list tuning jobs in project", func(t *testing.T) {
+		buf.Reset()
+		err := listTuningJobsMock(buf)
+		if err != nil {
+			t.Fatalf("listTuningJobs failed: %v", err)
+		}
+
 		output := buf.String()
 		if output == "" {
 			t.Error("expected non-empty output, got empty")

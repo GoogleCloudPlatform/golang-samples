@@ -46,7 +46,7 @@ func generateWithClassSchema(w io.Writer) error {
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: "List a few popular cookie recipes."},
-		}, Role: "user"},
+		}, Role: genai.RoleUser},
 	}
 	// JSON Schema for []Recipe
 	schema := &genai.Schema{

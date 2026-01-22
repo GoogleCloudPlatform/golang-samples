@@ -54,7 +54,7 @@ func generateGroundSearchWithTxt(w io.Writer) error {
 
 	// Send user input
 	userContent := &genai.Content{
-		Role: "user",
+		Role: genai.RoleUser,
 		Parts: []*genai.Part{
 			{Text: textInput},
 		},

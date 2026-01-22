@@ -41,7 +41,7 @@ func generateContentWithTxt(w io.Writer) error {
 			Parts: []*genai.Part{
 				{Text: "solve x^2 + 4x + 4 = 0"},
 			},
-			Role: "user",
+			Role: genai.RoleUser,
 		},
 	}
 

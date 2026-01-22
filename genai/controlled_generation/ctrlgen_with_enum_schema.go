@@ -39,7 +39,7 @@ func generateWithEnumSchema(w io.Writer) error {
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: "What type of instrument is an oboe?"},
-		}, Role: "user"},
+		}, Role: genai.RoleUser},
 	}
 	config := &genai.GenerateContentConfig{
 		ResponseMIMEType: "text/x.enum",

@@ -40,7 +40,7 @@ func generateWithCodeExec(w io.Writer) error {
 		{Parts: []*genai.Part{
 			{Text: prompt},
 		},
-			Role: "user"},
+			Role: genai.RoleUser},
 	}
 	config := &genai.GenerateContentConfig{
 		Tools: []*genai.Tool{

@@ -55,7 +55,7 @@ func generateWithEnumClassSchema(w io.Writer) error {
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: "What type of instrument is a guitar?"},
-		}, Role: "user"},
+		}, Role: genai.RoleUser},
 	}
 
 	config := &genai.GenerateContentConfig{
