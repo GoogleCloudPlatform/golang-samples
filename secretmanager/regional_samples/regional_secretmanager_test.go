@@ -609,3 +609,34 @@ func TestDetachRegionalTag(t *testing.T) {
 		t.Errorf("listRegionalSecretTagBindings after detach: expected %q not to contain %q", got, dontwant)
 	}
 }
+
+func TestDeleteRegionalSecretAnnotation(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret, _ := testRegionalSecret(t, tc.ProjectID)
+	defer testCleanupRegionalSecret(t, secret.Name)
+
+	locationID := testLocation(t)
+	annotationKey := "annotationkey"
+
+	var b bytes.Buffer
+	if err := deleteRegionalSecretAnnotation(&b, secret.Name, locationID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Deleted annotation"; !strings.Contains(got, want) {
+		t.Errorf("deleteSecretAnnotation: expected %q to contain %q", got, want)
+	}
+
+	client, ctx := testRegionalClient(t)
+	s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secret.Name,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, ok := s.Annotations[annotationKey]; ok {
+		t.Errorf("deleteRegionalSecretAnnotation: key %q still present after deletion", annotationKey)
+	}
+}
