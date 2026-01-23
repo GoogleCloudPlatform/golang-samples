@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path"
 	"reflect"
 	"strings"
 	"time"
@@ -31,6 +32,7 @@ import (
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/gofrs/uuid"
+	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc/codes"
 	grpccodes "google.golang.org/grpc/codes"
@@ -66,6 +68,17 @@ func testRegionalClient(tb testing.TB) (*secretmanager.Client, context.Context) 
 	return client, ctx
 }
 
+func testResourceManagerTagBindingsClient(tb testing.TB, endpoint string) (*resourcemanager.TagBindingsClient, context.Context) {
+	tb.Helper()
+	ctx := context.Background()
+
+	client, err := resourcemanager.NewTagBindingsClient(ctx, option.WithEndpoint(endpoint))
+	if err != nil {
+		tb.Fatalf("testResourceManagerTagBindingsClient: failed to create client: %v", err)
+	}
+	return client, ctx
+}
+
 func testName(tb testing.TB) string {
 	tb.Helper()
 
@@ -74,6 +87,17 @@ func testName(tb testing.TB) string {
 		tb.Fatalf("testName: failed to generate uuid: %v", err)
 	}
 	return u.String()
+}
+
+func testTopic(tb testing.TB) string {
+	tb.Helper()
+
+	v := os.Getenv("GOLANG_SAMPLES_TOPIC_NAME")
+	if v == "" {
+		tb.Skip("testTopic: missing GOLANG_SAMPLES_TOPIC_NAME")
+	}
+
+	return v
 }
 
 func testRegionalSecret(tb testing.TB, projectID string) (*secretmanagerpb.Secret, string) {
@@ -411,7 +435,7 @@ func testCreateTagKey(tb testing.TB, projectID string) *resourcemanagerpb.TagKey
 
 	client, ctx := testResourceManagerTagsKeyClient(tb)
 	parent := fmt.Sprintf("projects/%s", projectID)
-	tagKeyName := "sm_secret_regional_tag_key_test"
+	tagKeyName := testName(tb)
 	tagKeyDescription := "creating tag key for secretmanager regional tags sample"
 
 	tagKeyOperation, err := client.CreateTagKey(ctx, &resourcemanagerpb.CreateTagKeyRequest{
@@ -437,7 +461,7 @@ func testCreateTagValue(tb testing.TB, tagKeyId string) *resourcemanagerpb.TagVa
 	tb.Helper()
 
 	client, ctx := testResourceManagerTagsValueClient(tb)
-	tagValueName := "sm_secret_regional_tag_value_test"
+	tagValueName := testName(tb)
 	tagKeyDescription := "creating TagValue for secretmanager regional tags sample"
 
 	tagKeyOperation, err := client.CreateTagValue(ctx, &resourcemanagerpb.CreateTagValueRequest{
@@ -587,5 +611,421 @@ func TestDeleteRegionalSecretVersionDestroyTTL(t *testing.T) {
 
 	if secret.GetVersionDestroyTtl() != nil {
 		t.Fatal("GetSecret: VersionDestroyTtl is not nil, expected nil")
+	}
+}
+
+func TestCreateRegionalSecretWithRotation(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	locationID := testLocation(t)
+	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
+	defer testCleanupRegionalSecret(t, secretName)
+
+	topicName := testTopic(t)
+	rotationPeriod := 24 * time.Hour
+
+	var b bytes.Buffer
+	if err := createRegionalSecretWithRotation(&b, tc.ProjectID, secretID, locationID, topicName); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := b.String(), "Created secret"; !strings.Contains(got, want) {
+		t.Errorf("createRegionalSecretWithRotation: expected %q to contain %q", got, want)
+	}
+
+	client, ctx := testRegionalClient(t)
+
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetRotation() == nil {
+		t.Fatal("GetSecret: Rotation is nil, expected non-nil")
+	}
+	if secret.GetRotation().GetRotationPeriod().AsDuration() != rotationPeriod {
+		t.Errorf("RotationPeriod mismatch: got %v, want %v", secret.GetRotation().GetRotationPeriod().AsDuration(), rotationPeriod)
+	}
+	if secret.GetRotation().GetNextRotationTime() == nil {
+		t.Fatal("GetSecret: NextRotationTime is nil, expected non-nil")
+	}
+}
+
+func TestUpdateRegionalSecretRotationPeriod(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	locationID := testLocation(t)
+	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
+	defer testCleanupRegionalSecret(t, secretName)
+
+	topicName := testTopic(t)
+
+	var b bytes.Buffer
+	if err := createRegionalSecretWithRotation(&b, tc.ProjectID, secretID, locationID, topicName); err != nil {
+		t.Fatal(err)
+	}
+
+	// Update rotation period.
+	updatedRotationPeriod := 48 * time.Hour
+	b.Reset()
+	if err := updateRegionalSecretRotationPeriod(&b, secretName, locationID); err != nil {
+		t.Fatal(err)
+	}
+
+	got := b.String()
+	if !strings.Contains(got, secretID) {
+		t.Errorf("updateRegionalSecretRotationPeriod: output %q did not contain secretId %q", got, secretID)
+	}
+
+	// Verify rotation period with GetSecret.
+	client, ctx := testRegionalClient(t)
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetRotation() == nil {
+		t.Fatal("GetSecret: Rotation is nil, expected non-nil")
+	}
+	if secret.GetRotation().GetRotationPeriod().AsDuration() != updatedRotationPeriod {
+		t.Errorf("RotationPeriod mismatch: got %v, want %v", secret.GetRotation().GetRotationPeriod().AsDuration(), updatedRotationPeriod)
+	}
+}
+
+func TestDeleteRegionalSecretRotation(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	locationID := testLocation(t)
+	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
+	defer testCleanupRegionalSecret(t, secretName)
+
+	topicName := testTopic(t)
+
+	var b bytes.Buffer
+	if err := createRegionalSecretWithRotation(&b, tc.ProjectID, secretID, locationID, topicName); err != nil {
+		t.Fatal(err)
+	}
+
+	// Remove rotation.
+	if err := deleteRegionalSecretRotation(&b, secretName, locationID); err != nil {
+		t.Fatal(err)
+	}
+
+	got := b.String()
+	if !strings.Contains(got, secretID) {
+		t.Errorf("deleteRegionalSecretRotation: output %q did not contain secretId %q", got, secretID)
+	}
+
+	// Verify rotation is removed with GetSecret.
+	client, ctx := testRegionalClient(t)
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetRotation() != nil {
+		t.Errorf("Rotation mismatch: got %v, want nil", secret.GetRotation())
+	}
+}
+
+func TestCreateRegionalSecretWithTopic(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	locationID := testLocation(t)
+	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
+	defer testCleanupRegionalSecret(t, secretName)
+
+	topicName := testTopic(t)
+
+	var b bytes.Buffer
+	if err := createRegionalSecretWithTopic(&b, tc.ProjectID, secretID, locationID, topicName); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := b.String(), "Created secret"; !strings.Contains(got, want) {
+		t.Errorf("createRegionalSecretWithTopic: expected %q to contain %q", got, want)
+	}
+	if got, want := b.String(), topicName; !strings.Contains(got, want) {
+		t.Errorf("createRegionalSecretWithTopic: expected %q to contain %q", got, want)
+	}
+
+	client, ctx := testRegionalClient(t)
+
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if len(secret.GetTopics()) != 1 || secret.GetTopics()[0].GetName() != topicName {
+		t.Errorf("Topics mismatch: got %v, want %s", secret.GetTopics(), topicName)
+	}
+}
+
+func TestCreateRegionalSecretWithExpireTime(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	locationID := testLocation(t)
+	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
+	defer testCleanupRegionalSecret(t, secretName)
+
+	// Expire time in 1 hour.
+	expire := time.Now().Add(time.Hour)
+
+	var b bytes.Buffer
+	if err := createRegionalSecretWithExpireTime(&b, tc.ProjectID, secretID, locationID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Created secret"; !strings.Contains(got, want) {
+		t.Errorf("createRegionalSecretWithExpireTime: expected %q to contain %q", got, want)
+	}
+
+	// Verify expire time with GetSecret.
+	client, ctx := testRegionalClient(t)
+
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetExpireTime() == nil {
+		t.Fatal("GetSecret: ExpireTime is nil, expected non-nil")
+	}
+
+	// Allow 1 second difference for precision.
+	if diff := secret.GetExpireTime().AsTime().Unix() - expire.Unix(); diff > 1 || diff < -1 {
+		t.Errorf("ExpireTime mismatch: got %v, want %v", secret.GetExpireTime().AsTime(), expire)
+	}
+}
+
+func TestUpdateRegionalSecretExpiration(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	locationID := testLocation(t)
+	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
+	defer testCleanupRegionalSecret(t, secretName)
+
+	var b bytes.Buffer
+	if err := createRegionalSecretWithExpireTime(&b, tc.ProjectID, secretID, locationID); err != nil {
+		t.Fatal(err)
+	}
+
+	// Update expire time to 2 hours.
+	newExpire := time.Now().Add(2 * time.Hour)
+	if err := updateRegionalSecretExpiration(&b, secretName, locationID); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := b.String(), "Updated secret"; !strings.Contains(got, want) {
+		t.Errorf("updateRegionalSecretExpiration: expected %q to contain %q", got, want)
+	}
+
+	// Verify expire time with GetSecret.
+	client, ctx := testRegionalClient(t)
+
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetExpireTime() == nil {
+		t.Fatal("GetSecret: ExpireTime is nil, expected non-nil")
+	}
+
+	// Allow 1 second difference for precision.
+	if diff := secret.GetExpireTime().AsTime().Unix() - newExpire.Unix(); diff > 1 || diff < -1 {
+		t.Errorf("ExpireTime mismatch: got %v, want %v", secret.GetExpireTime().AsTime(), newExpire)
+	}
+}
+
+func TestRemoveRegionalExpiration(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	locationID := testLocation(t)
+	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
+	defer testCleanupRegionalSecret(t, secretName)
+
+	var b bytes.Buffer
+	if err := createRegionalSecretWithExpireTime(&b, tc.ProjectID, secretID, locationID); err != nil {
+		t.Fatal(err)
+	}
+
+	// Remove expire time.
+	b.Reset()
+	if err := deleteRegionalExpiration(&b, secretName, locationID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Removed expiration"; !strings.Contains(got, want) {
+		t.Errorf("deleteRegionalExpiration: expected %q to contain %q", got, want)
+	}
+
+	// Verify expire time is removed with GetSecret.
+	client, ctx := testRegionalClient(t)
+
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetExpireTime() != nil {
+		t.Errorf("GetSecret: ExpireTime is %v, expected nil", secret.GetExpireTime())
+	}
+}
+
+func TestBindTagToRegionalSecret(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	locationID := testLocation(t)
+
+	tagKey := testCreateTagKey(t, tc.ProjectID)
+	defer testCleanupTagKey(t, tagKey.GetName())
+	tagValue := testCreateTagValue(t, tagKey.GetName())
+	defer testCleanupTagValue(t, tagValue.GetName())
+
+	var b bytes.Buffer
+	if err := bindTagToRegionalSecret(&b, tc.ProjectID, secretID, locationID, tagValue.GetName()); err != nil {
+		t.Fatal(err)
+	}
+	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
+	defer testCleanupRegionalSecret(t, secretName)
+
+	if got, want := b.String(), "Tag binding created"; !strings.Contains(got, want) {
+		t.Errorf("bindTagToRegionalSecret: expected %q to contain %q", got, want)
+	}
+
+	// Verify binding exists with API
+	ctx := context.Background()
+	rmEndpoint := fmt.Sprintf("%s-cloudresourcemanager.googleapis.com:443", locationID)
+	tagBindingsClient, ctx := testResourceManagerTagBindingsClient(t, rmEndpoint)
+	defer tagBindingsClient.Close()
+
+	parent := "//secretmanager.googleapis.com/" + secretName
+	it := tagBindingsClient.ListTagBindings(ctx, &resourcemanagerpb.ListTagBindingsRequest{
+		Parent: parent,
+	})
+
+	found := false
+	for {
+		binding, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			t.Fatalf("Failed to list tag bindings for verification: %v", err)
+		}
+		if binding.TagValue == tagValue.GetName() && path.Base(binding.GetParent()) == path.Base(secretName) {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		t.Errorf("Tag binding for %s with value %s not found after creation", secretName, tagValue.GetName())
+	}
+}
+
+func TestListRegionalSecretTagBindings(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	locationID := testLocation(t)
+
+	tagKey := testCreateTagKey(t, tc.ProjectID)
+	defer testCleanupTagKey(t, tagKey.GetName())
+	tagValue := testCreateTagValue(t, tagKey.GetName())
+	defer testCleanupTagValue(t, tagValue.GetName())
+
+	// Create a secret and bind the tag to it for testing list.
+	var b bytes.Buffer
+	if err := createRegionalSecretWithTags(&b, tc.ProjectID, locationID, secretID, tagKey.GetName(), tagValue.GetName()); err != nil {
+		t.Fatal(err)
+	}
+	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
+	defer testCleanupRegionalSecret(t, secretName)
+
+	b.Reset()
+	if err := listRegionalSecretTagBindings(&b, secretName, locationID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), tagValue.GetName(); !strings.Contains(got, want) {
+		t.Errorf("listRegionalSecretTagBindings: expected %q to contain %q", got, want)
+	}
+}
+
+func TestDetachRegionalTag(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	locationID := testLocation(t)
+
+	tagKey := testCreateTagKey(t, tc.ProjectID)
+	defer testCleanupTagKey(t, tagKey.GetName())
+	tagValue := testCreateTagValue(t, tagKey.GetName())
+	defer testCleanupTagValue(t, tagValue.GetName())
+
+	// Create a secret and bind the tag to it for testing detach.
+	var b bytes.Buffer
+	if err := createRegionalSecretWithTags(&b, tc.ProjectID, locationID, secretID, tagKey.GetName(), tagValue.GetName()); err != nil {
+		t.Fatal(err)
+	}
+	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
+	defer testCleanupRegionalSecret(t, secretName)
+
+	b.Reset()
+	if err := detachRegionalTag(&b, secretName, locationID, tagValue.GetName()); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := b.String(), "Detached tag value"; !strings.Contains(got, want) {
+		t.Errorf("detachRegionalTag: expected %q to contain %q", got, want)
+	}
+
+	b.Reset()
+	if err := listRegionalSecretTagBindings(&b, secretName, locationID); err != nil {
+		t.Fatal(err)
+	}
+	if got, dontwant := b.String(), tagValue.GetName(); strings.Contains(got, dontwant) {
+		t.Errorf("listRegionalSecretTagBindings after detach: expected %q not to contain %q", got, dontwant)
+	}
+}
+
+func TestDeleteRegionalSecretAnnotation(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret, _ := testRegionalSecret(t, tc.ProjectID)
+	defer testCleanupRegionalSecret(t, secret.Name)
+
+	locationID := testLocation(t)
+	annotationKey := "annotationkey"
+
+	var b bytes.Buffer
+	if err := deleteRegionalSecretAnnotation(&b, secret.Name, locationID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Deleted annotation"; !strings.Contains(got, want) {
+		t.Errorf("deleteSecretAnnotation: expected %q to contain %q", got, want)
+	}
+
+	client, ctx := testRegionalClient(t)
+	s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secret.Name,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, ok := s.Annotations[annotationKey]; ok {
+		t.Errorf("deleteRegionalSecretAnnotation: key %q still present after deletion", annotationKey)
 	}
 }
