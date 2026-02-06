@@ -14,6 +14,11 @@
 
 package spanner
 
+// writeWithTransactionUsingReadLockMode demonstrates how to set the
+// ReadLockMode for Cloud Spanner transactions. It shows how to configure a
+// default mode at the client level and how to override it for specific
+// transactions.
+
 // [START spanner_read_lock_mode]
 
 import (
@@ -37,7 +42,7 @@ func writeWithTransactionUsingReadLockMode(w io.Writer, db string) error {
 	}
 	client, err := spanner.NewClientWithConfig(ctx, db, cfg)
 	if err != nil {
-		return fmt.Errorf("failed to create client: %v", err)
+		return fmt.Errorf("failed to create client: %w", err)
 	}
 	defer client.Close()
 
@@ -49,15 +54,17 @@ func writeWithTransactionUsingReadLockMode(w io.Writer, db string) error {
 	}
 
 	_, err = client.ReadWriteTransactionWithOptions(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-		// Read the current album title
+		// Since PESSIMISTIC lock mode with the default isolation level
+		// (SERIALIZABLE) is used here, the lock will be acquired immediately after
+		// this read.
 		key := spanner.Key{1, 2}
 		row, err := txn.ReadRow(ctx, "Albums", key, []string{"AlbumTitle"})
 		if err != nil {
-			return fmt.Errorf("failed to read album: %v", err)
+			return fmt.Errorf("failed to read album: %w", err)
 		}
 		var title string
 		if err := row.Column(0, &title); err != nil {
-			return fmt.Errorf("failed to get album title: %v", err)
+			return fmt.Errorf("failed to get album title: %w", err)
 		}
 		fmt.Fprintf(w, "Current album title: %s\n", title)
 
@@ -74,14 +81,14 @@ func writeWithTransactionUsingReadLockMode(w io.Writer, db string) error {
 		}
 		count, err := txn.Update(ctx, stmt)
 		if err != nil {
-			return fmt.Errorf("failed to update album: %v", err)
+			return fmt.Errorf("failed to update album: %w", err)
 		}
 		fmt.Fprintf(w, "Updated %d record(s).\n", count)
 		return nil
 	}, txnOpts)
 
 	if err != nil {
-		return fmt.Errorf("transaction failed: %v", err)
+		return fmt.Errorf("transaction failed: %w", err)
 	}
 	return nil
 }
