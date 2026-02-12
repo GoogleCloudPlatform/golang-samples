@@ -6,9 +6,11 @@ require (
 	cloud.google.com/go/bigquery v1.65.0
 	cloud.google.com/go/errorreporting v0.3.2
 	cloud.google.com/go/logging v1.13.0
+	cloud.google.com/go/redis v1.17.3
 	cloud.google.com/go/storage v1.50.0
 	cloud.google.com/go/vision v1.2.0
 	github.com/bmatcuk/doublestar/v2 v2.0.4
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
 	github.com/h2non/filetype v1.1.3
@@ -33,6 +35,7 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.49.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cncf/xds/go v0.0.0-20250121191232-2f005788dc42 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/envoyproxy/go-control-plane/envoy v1.32.3 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.1.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
