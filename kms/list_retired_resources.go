@@ -28,12 +28,6 @@ import (
 // listRetiredResources lists retired resources.
 func listRetiredResources(w io.Writer, parent string) error {
 	// parent := "projects/my-project/locations/us-east1"
-	//
-	// You can also list retired resources from a key ring:
-	// parent := "projects/my-project/locations/us-east1/keyRings/my-key-ring"
-	//
-	// Or from a crypto key:
-	// parent := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key"
 
 	ctx := context.Background()
 	client, err := kms.NewKeyManagementClient(ctx)

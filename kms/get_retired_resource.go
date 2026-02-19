@@ -26,9 +26,6 @@ import (
 
 // getRetiredResource gets a retired resource.
 func getRetiredResource(w io.Writer, name string) error {
-	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key/cryptoKeyVersions/123"
-	//
-	// You can also get a retired resource by its retired resource name:
 	// name := "projects/my-project/locations/us-east1/retiredResources/my-retired-resource"
 
 	ctx := context.Background()
