@@ -105,7 +105,7 @@ use (
 	./logging
 	./managedkafka
 	./media
-	./memorystore
+	./memorystore/redis
 	./modelarmor
 	./monitoring
 	./opentelemetry/instrumentation/app
