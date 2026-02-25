@@ -3,11 +3,11 @@ module github.com/GoogleCloudPlatform/golang-samples/genai
 go 1.24.0
 
 require (
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20251210094219-afaa7f40a550
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20260225204627-323d864f1330
 	github.com/go-audio/audio v1.0.0
 	github.com/go-audio/wav v1.1.0
-	golang.org/x/oauth2 v0.34.0
-	google.golang.org/genai v1.40.0
+	golang.org/x/oauth2 v0.35.0
+	google.golang.org/genai v1.47.0
 )
 
 require (
