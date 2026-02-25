@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/kms/apiv1/kmspb"
 )
 
-// deleteCryptoKeyVersion deletes a crypto key version.
+// deleteCryptoKeyVersion deletes a crypto key version. This action is permanent and cannot be undone. Once the key version is deleted, it will no longer exist.
 func deleteCryptoKeyVersion(w io.Writer, name string) error {
 	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key/cryptoKeyVersions/1"
 
@@ -42,6 +42,7 @@ func deleteCryptoKeyVersion(w io.Writer, name string) error {
 	}
 
 	// Call the API.
+	// Warning: This operation is permanent and cannot be undone.
 	op, err := client.DeleteCryptoKeyVersion(ctx, req)
 	if err != nil {
 		return fmt.Errorf("failed to delete crypto key version: %w", err)

@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/kms/apiv1/kmspb"
 )
 
-// deleteCryptoKey deletes a crypto key.
+// deleteCryptoKey deletes a crypto key. This action is permanent and cannot be undone. Once the key is deleted, it will no longer exist.
 func deleteCryptoKey(w io.Writer, name string) error {
 	// name := "projects/my-project/locations/us-east1/keyRings/my-key-ring/cryptoKeys/my-key"
 
@@ -42,6 +42,7 @@ func deleteCryptoKey(w io.Writer, name string) error {
 	}
 
 	// Call the API.
+	// Warning: This operation is permanent and cannot be undone.
 	op, err := client.DeleteCryptoKey(ctx, req)
 	if err != nil {
 		return fmt.Errorf("failed to delete crypto key: %w", err)
