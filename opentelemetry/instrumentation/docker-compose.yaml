@@ -13,7 +13,7 @@ services:
     depends_on:
       - "otelcol"
   otelcol:
-    image: otel/opentelemetry-collector-contrib:0.115.1
+    image: otel/opentelemetry-collector-contrib:0.146.1
     volumes:
       - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
       - logs:/var/log:ro
@@ -21,7 +21,7 @@ services:
       - GOOGLE_CLOUD_QUOTA_PROJECT
       - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT?}
   loadgen:
-    image: golang:1.22
+    image: golang:1.26
     command: ["go", "run", "github.com/rakyll/hey@latest", "-c=2", "-q=1", "http://app:8080/multi"]
     depends_on:
       - "app"
