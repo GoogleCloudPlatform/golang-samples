@@ -21,6 +21,7 @@ import (
 	"html/template"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"slices"
@@ -29,6 +30,9 @@ import (
 
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
 var (
@@ -78,9 +82,13 @@ type ReadinessProbeConfig struct {
 	SuccessThreshold int `json:"successThreshold"`
 	FailureThreshold int `json:"failureThreshold"`
 	HttpGetAction    struct {
-		Path string `json:"path"`
-		Port int    `json:"port"`
+		Path *string `json:"path"`
+		Port *int    `json:"port"`
 	} `json:"httpGet"`
+	GrpcAction struct {
+		Service *string `json:"service"`
+		Port    *int    `json:"port"`
+	} `json:"grpc"`
 }
 
 type Service struct {
@@ -95,6 +103,10 @@ type Service struct {
 			} `json:"spec"`
 		} `json:"template"`
 	} `json:"spec"`
+}
+
+type healthServer struct {
+	healthpb.UnimplementedHealthServer
 }
 
 func init() {
@@ -205,6 +217,8 @@ func main() {
 		}
 	}()
 
+	go startGrpcServer(8081)
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
@@ -219,6 +233,33 @@ func main() {
 
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatal(err)
+	}
+}
+
+func startGrpcServer(port int) {
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	if err != nil {
+		log.Fatalf("grpc failed to listen: %v", err)
+	}
+
+	s := grpc.NewServer()
+	healthpb.RegisterHealthServer(s, &healthServer{})
+
+	log.Printf("grpc listening on port %d", port)
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("grpc failed to serve: %v", err)
+	}
+}
+
+func (s *healthServer) Check(ctx context.Context, in *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {
+	if !readinessEnabled {
+		return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_UNKNOWN}, grpc.Errorf(codes.FailedPrecondition, "readiness not enabled")
+	}
+
+	if isHealthy {
+		return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_SERVING}, nil
+	} else {
+		return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_NOT_SERVING}, nil
 	}
 }
 

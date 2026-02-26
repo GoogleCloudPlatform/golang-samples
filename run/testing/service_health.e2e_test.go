@@ -26,7 +26,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func TestServiceHealth(t *testing.T) {
+func TestServiceHealthHttp(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
 	service := cloudrunci.NewService("service-health", tc.ProjectID)
@@ -38,6 +38,66 @@ func TestServiceHealth(t *testing.T) {
 		HttpGet: &cloudrunci.HTTPGetProbe{
 			Path: "/are_you_ready",
 			Port: 8080,
+		},
+	}
+	service.Dir = "../service-health"
+	service.AsBuildpack = true
+	service.Platform.CommandFlags()
+
+	if err := service.Deploy(); err != nil {
+		t.Fatalf("service.Deploy %q: %v", service.Name, err)
+	}
+	defer func(service *cloudrunci.Service) {
+		err := service.Clean()
+		if err != nil {
+			t.Fatalf("service.Clean %q: %v", service.Name, err)
+		}
+	}(service)
+
+	resp, err := service.Request("GET", "/are_you_ready")
+	if err != nil {
+		t.Fatalf("request: %v", err)
+	}
+
+	out, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("io.ReadAll: %v", err)
+	}
+
+	if got, want := string(out), "HEALTHY"; got != want {
+		t.Errorf("body: got %q, want %q", got, want)
+	}
+
+	if got := resp.StatusCode; got != http.StatusOK {
+		t.Errorf("response status: got %d, want %d", got, http.StatusOK)
+	}
+
+	ctx := context.Background()
+	c, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer c.Close()
+	bucketName := os.Getenv("GOLANG_SAMPLES_PROJECT_ID") + "-" + service.Version()
+	t.Logf("Deleting bucket: %s", bucketName)
+
+	err = testutil.DeleteBucketIfExists(ctx, c, bucketName)
+	if err != nil {
+		t.Fatalf("testutil.DeleteBucketIfExists: %v", err)
+	}
+}
+
+func TestServiceHealthGrpc(t *testing.T) {
+	tc := testutil.EndToEndTest(t)
+
+	service := cloudrunci.NewService("service-health", tc.ProjectID)
+	service.Readiness = &cloudrunci.ReadinessProbe{
+		TimeoutSeconds:   1,
+		PeriodSeconds:    1,
+		SuccessThreshold: 1,
+		FailureThreshold: 1,
+		GRPC: &cloudrunci.GRPCProbe{
+			Port: 8081,
 		},
 	}
 	service.Dir = "../service-health"
