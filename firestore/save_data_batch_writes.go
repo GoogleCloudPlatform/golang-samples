@@ -24,8 +24,8 @@ import (
 )
 
 func batchWrite(ctx context.Context, client *firestore.Client) error {
-	// Get a new write batch.
-	batch := client.Batch()
+	// Get a new write bulk.
+	batch := client.BulkWriter(ctx)
 
 	// Set the value of "NYC".
 	nycRef := client.Collection("cities").Doc("NYC")
@@ -43,14 +43,10 @@ func batchWrite(ctx context.Context, client *firestore.Client) error {
 	laRef := client.Collection("cities").Doc("LA")
 	batch.Delete(laRef)
 
-	// Commit the batch.
-	_, err := batch.Commit(ctx)
-	if err != nil {
-		// Handle any errors in an appropriate way, such as returning them.
-		log.Printf("An error has occurred: %s", err)
-	}
-
-	return err
+	// Flush the bulk.
+	batch.Flush()
+	
+	return nil
 }
 
 // [END firestore_data_batch_writes]
