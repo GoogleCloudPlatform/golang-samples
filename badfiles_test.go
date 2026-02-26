@@ -148,6 +148,10 @@ var allowList = []string{
 
 	// Spanner proto data files.
 	"spanner/spanner_snippets/spanner/testdata/protos/descriptors.pb",
+	
+	// Example credential files for custom credential suppliers. These are intended to be checked in.
+	"auth/custom_credential_supplier/aws/custom-credentials-aws-secrets.json.example",
+	"auth/custom_credential_supplier/okta/custom-credentials-okta-secrets.json.example",
 }
 
 // Check whether accidental binary files have been checked in.
