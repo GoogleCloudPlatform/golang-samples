@@ -27,7 +27,7 @@ GOOS=linux GOARCH=amd64 go build -v -o app ../main.go
 # Add the app binary
 tar -cvf app.tar app
 # Copy to GCS bucket
-gsutil cp app.tar gs://"$GCS_BUCKET_NAME"/gce/
+gcloud storage cp app.tar gs://"$GCS_BUCKET_NAME"/gce/
 
 # Create an instance
 gcloud compute instances create my-instance \
