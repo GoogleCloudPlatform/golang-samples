@@ -1,0 +1,57 @@
+/*
+ Copyright 2025 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+*/
+
+{
+  "package-file": [ "go.mod" ],
+  "ci-setup-filename": "ci-setup.json",
+
+  // If these change, please update the .github/config/README.md too!
+  "ci-setup-defaults": {
+    "env": { },
+    "secrets": { },
+    "go-version-earliest": 1.23,
+    "go-version-latest": 1.24,
+    "timeout-minutes": 10
+  },
+
+  "ignore": [
+    ".github/blunderbuss.yaml",
+    ".github/CODEOWNERS",
+    // TODO: do not ignore .github/config once everything is in prod
+    ".github/config/", // prevent changes to exclusions from running all tests
+    ".github/flakybot.yaml",
+    ".github/header-checker-lint.yaml",
+    ".github/ISSUE_TEMPLATE/",
+    ".github/PULL_REQUEST_TEMPLATE.md",
+    ".github/renovate.json",
+    ".github/scripts/",
+    ".github/snippet-bot.yml",
+    ".gitignore",
+    "badfiles_test.go",
+    "cloud-samples-tools", // checked out by GH action in ci-*.yml
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
+    "LICENSE",
+    "Makefile",
+    "README.md",
+    "regiontag_test.go",
+    "SECURITY.md",
+    "Taskfile.yaml"
+  ],
+
+  "exclude-packages": [
+  ]
+}

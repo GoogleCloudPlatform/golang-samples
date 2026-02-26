@@ -1,0 +1,65 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Custard setup
+description: Sets up the testing environment.
+
+inputs:
+  path:
+    description: Path of the package to run.
+    required: true
+  ci-setup:
+    description: The CI setup for the package path.
+    required: true
+  project_id:
+    description: The Google Cloud project ID.
+    required: true
+  workload_identity_provider:
+    description: The Google Cloud workload identity provider.
+    required: true
+  service_account:
+    description: The Google Cloud service account to use for credentials.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: google-github-actions/auth@6fc4af4b145ae7821d527454aa9bd537d1f2dc5f # v2
+      id: auth
+      with:
+        project_id: ${{ inputs.project_id }}
+        workload_identity_provider: ${{ inputs.workload_identity_provider }}
+        service_account: ${{ inputs.service_account }}
+        access_token_lifetime: 600s # 10 minutes
+        token_format: id_token
+        id_token_audience: https://action.test/ # service must have this custom audience
+        id_token_include_email: true
+    - name: Export environment variables
+      uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
+      id: vars
+      with:
+        script: |
+          const { default: setupVars } = await import('${{ github.workspace }}/.github/scripts/setup-vars.js');
+          return await setupVars({
+            core,
+            projectId: '${{ inputs.project_id }}',
+            setup: ${{ inputs.ci-setup }},
+            serviceAccount: '${{ inputs.service_account }}',
+            idToken: '${{ steps.auth.outputs.id_token }}',
+          })
+    - uses: google-github-actions/get-secretmanager-secrets@e5bb06c2ca53b244f978d33348d18317a7f263ce # v2
+      if: ${{ fromJson(steps.vars.outputs.result).secrets }}
+      with:
+        secrets: ${{ fromJson(steps.vars.outputs.result).secrets }}
+        export_to_environment: true
