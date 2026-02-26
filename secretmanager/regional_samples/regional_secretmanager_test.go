@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path"
 	"reflect"
 	"strings"
 	"time"
@@ -31,6 +32,7 @@ import (
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/gofrs/uuid"
+	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc/codes"
 	grpccodes "google.golang.org/grpc/codes"
@@ -62,6 +64,17 @@ func testRegionalClient(tb testing.TB) (*secretmanager.Client, context.Context) 
 
 	if err != nil {
 		tb.Fatalf("testRegionalClient: failed to create regional client: %v", err)
+	}
+	return client, ctx
+}
+
+func testResourceManagerTagBindingsClient(tb testing.TB, endpoint string) (*resourcemanager.TagBindingsClient, context.Context) {
+	tb.Helper()
+	ctx := context.Background()
+
+	client, err := resourcemanager.NewTagBindingsClient(ctx, option.WithEndpoint(endpoint))
+	if err != nil {
+		tb.Fatalf("testResourceManagerTagBindingsClient: failed to create client: %v", err)
 	}
 	return client, ctx
 }
@@ -411,7 +424,7 @@ func testCreateTagKey(tb testing.TB, projectID string) *resourcemanagerpb.TagKey
 
 	client, ctx := testResourceManagerTagsKeyClient(tb)
 	parent := fmt.Sprintf("projects/%s", projectID)
-	tagKeyName := "sm_secret_regional_tag_key_test"
+	tagKeyName := testName(tb)
 	tagKeyDescription := "creating tag key for secretmanager regional tags sample"
 
 	tagKeyOperation, err := client.CreateTagKey(ctx, &resourcemanagerpb.CreateTagKeyRequest{
@@ -437,7 +450,7 @@ func testCreateTagValue(tb testing.TB, tagKeyId string) *resourcemanagerpb.TagVa
 	tb.Helper()
 
 	client, ctx := testResourceManagerTagsValueClient(tb)
-	tagValueName := "sm_secret_regional_tag_value_test"
+	tagValueName := testName(tb)
 	tagKeyDescription := "creating TagValue for secretmanager regional tags sample"
 
 	tagKeyOperation, err := client.CreateTagValue(ctx, &resourcemanagerpb.CreateTagValueRequest{
@@ -479,5 +492,151 @@ func TestCreateRegionalSecretWithTags(t *testing.T) {
 
 	if got, want := b.String(), "Created secret with tags:"; !strings.Contains(got, want) {
 		t.Errorf("createRegionalSecretWithTags: expected %q to contain %q", got, want)
+	}
+}
+
+func TestBindTagToRegionalSecret(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	locationID := testLocation(t)
+
+	tagKey := testCreateTagKey(t, tc.ProjectID)
+	defer testCleanupTagKey(t, tagKey.GetName())
+	tagValue := testCreateTagValue(t, tagKey.GetName())
+	defer testCleanupTagValue(t, tagValue.GetName())
+
+	var b bytes.Buffer
+	if err := bindTagToRegionalSecret(&b, tc.ProjectID, secretID, locationID, tagValue.GetName()); err != nil {
+		t.Fatal(err)
+	}
+	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
+	defer testCleanupRegionalSecret(t, secretName)
+
+	if got, want := b.String(), "Tag binding created"; !strings.Contains(got, want) {
+		t.Errorf("bindTagToRegionalSecret: expected %q to contain %q", got, want)
+	}
+
+	// Verify binding exists with API
+	ctx := context.Background()
+	rmEndpoint := fmt.Sprintf("%s-cloudresourcemanager.googleapis.com:443", locationID)
+	tagBindingsClient, ctx := testResourceManagerTagBindingsClient(t, rmEndpoint)
+	defer tagBindingsClient.Close()
+
+	parent := "//secretmanager.googleapis.com/" + secretName
+	it := tagBindingsClient.ListTagBindings(ctx, &resourcemanagerpb.ListTagBindingsRequest{
+		Parent: parent,
+	})
+
+	found := false
+	for {
+		binding, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			t.Fatalf("Failed to list tag bindings for verification: %v", err)
+		}
+		if binding.TagValue == tagValue.GetName() && path.Base(binding.GetParent()) == path.Base(secretName) {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		t.Errorf("Tag binding for %s with value %s not found after creation", secretName, tagValue.GetName())
+	}
+}
+
+func TestListRegionalSecretTagBindings(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	locationID := testLocation(t)
+
+	tagKey := testCreateTagKey(t, tc.ProjectID)
+	defer testCleanupTagKey(t, tagKey.GetName())
+	tagValue := testCreateTagValue(t, tagKey.GetName())
+	defer testCleanupTagValue(t, tagValue.GetName())
+
+	// Create a secret and bind the tag to it for testing list.
+	var b bytes.Buffer
+	if err := createRegionalSecretWithTags(&b, tc.ProjectID, locationID, secretID, tagKey.GetName(), tagValue.GetName()); err != nil {
+		t.Fatal(err)
+	}
+	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
+	defer testCleanupRegionalSecret(t, secretName)
+
+	b.Reset()
+	if err := listRegionalSecretTagBindings(&b, secretName, locationID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), tagValue.GetName(); !strings.Contains(got, want) {
+		t.Errorf("listRegionalSecretTagBindings: expected %q to contain %q", got, want)
+	}
+}
+
+func TestDetachRegionalTag(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	locationID := testLocation(t)
+
+	tagKey := testCreateTagKey(t, tc.ProjectID)
+	defer testCleanupTagKey(t, tagKey.GetName())
+	tagValue := testCreateTagValue(t, tagKey.GetName())
+	defer testCleanupTagValue(t, tagValue.GetName())
+
+	// Create a secret and bind the tag to it for testing detach.
+	var b bytes.Buffer
+	if err := createRegionalSecretWithTags(&b, tc.ProjectID, locationID, secretID, tagKey.GetName(), tagValue.GetName()); err != nil {
+		t.Fatal(err)
+	}
+	secretName := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID)
+	defer testCleanupRegionalSecret(t, secretName)
+
+	b.Reset()
+	if err := detachRegionalTag(&b, secretName, locationID, tagValue.GetName()); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := b.String(), "Detached tag value"; !strings.Contains(got, want) {
+		t.Errorf("detachRegionalTag: expected %q to contain %q", got, want)
+	}
+
+	b.Reset()
+	if err := listRegionalSecretTagBindings(&b, secretName, locationID); err != nil {
+		t.Fatal(err)
+	}
+	if got, dontwant := b.String(), tagValue.GetName(); strings.Contains(got, dontwant) {
+		t.Errorf("listRegionalSecretTagBindings after detach: expected %q not to contain %q", got, dontwant)
+	}
+}
+
+func TestDeleteRegionalSecretAnnotation(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret, _ := testRegionalSecret(t, tc.ProjectID)
+	defer testCleanupRegionalSecret(t, secret.Name)
+
+	locationID := testLocation(t)
+	annotationKey := "annotationkey"
+
+	var b bytes.Buffer
+	if err := deleteRegionalSecretAnnotation(&b, secret.Name, locationID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Deleted annotation"; !strings.Contains(got, want) {
+		t.Errorf("deleteSecretAnnotation: expected %q to contain %q", got, want)
+	}
+
+	client, ctx := testRegionalClient(t)
+	s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secret.Name,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, ok := s.Annotations[annotationKey]; ok {
+		t.Errorf("deleteRegionalSecretAnnotation: key %q still present after deletion", annotationKey)
 	}
 }
