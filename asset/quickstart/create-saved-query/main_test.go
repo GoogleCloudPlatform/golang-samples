@@ -64,7 +64,6 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreateSavedQuery(t *testing.T) {
-	t.Skip("Skipped while investigating https://github.com/GoogleCloudPlatform/golang-samples/issues/2811")
 	buf := new(bytes.Buffer)
 	err := createSavedQuery(buf, projectID, savedQueryID)
 	if err != nil {
