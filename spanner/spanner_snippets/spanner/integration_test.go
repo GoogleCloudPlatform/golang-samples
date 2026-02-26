@@ -168,6 +168,7 @@ func TestSample(t *testing.T) {
 	mustRunSample(t, createDatabase, dbName, "failed to create a database")
 	runSample(t, createClients, dbName, "failed to create clients")
 	runSample(t, write, dbName, "failed to insert data")
+	runSample(t, applyAtLeastOnce, dbName, "failed to apply mutations at least once")
 	out = runSample(t, batchWrite, dbName, "failed to write data using BatchWrite")
 	assertNotContains(t, out, "could not be applied with error")
 	runSampleWithContext(ctx, t, addNewColumn, dbName, "failed to add new column")
