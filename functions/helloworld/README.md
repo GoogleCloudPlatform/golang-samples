@@ -6,7 +6,7 @@
 
 1. `export BUCKET_NAME=...`
 
-1. `gsutil mb gs://$BUCKET_NAME`
+1. `gcloud storage buckets create gs://$BUCKET_NAME`
 
 1. `gcloud functions deploy HelloGCS --runtime=go113 --entry-point=HelloGCS --trigger-resource=$BUCKET_NAME --trigger-event=providers/cloud.storage/eventTypes/object.change`
 
