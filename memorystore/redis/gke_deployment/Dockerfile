@@ -12,18 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM golang:1.24-alpine
+FROM golang:1.24-bookworm AS builder
 
-RUN apk update && apk add git
+WORKDIR /app
 
-RUN go get github.com/gomodule/redigo/redis
+COPY go.mod go.sum ./
+RUN go mod download
+COPY *.go ./
+RUN CGO_ENABLED=0 go build -o app .
 
-ADD . /go/src/visit-counter
-RUN go install visit-counter
+FROM scratch
 
-ENV REDISHOST redis
-ENV REDISPORT 6379
+WORKDIR /app
 
-ENTRYPOINT /go/bin/visit-counter
+COPY --from=builder /app/app .
 
+ENV REDISHOST=redis
+ENV REDISPORT=6379
+
+ENTRYPOINT ["/app/app"]
 EXPOSE 8080
