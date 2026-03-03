@@ -39,12 +39,12 @@ package spanner
 // [START spanner_read_lock_mode]
 
 import (
-"context"
-"fmt"
-"io"
+	"context"
+	"fmt"
+	"io"
 
-"cloud.google.com/go/spanner"
-pb "cloud.google.com/go/spanner/apiv1/spannerpb"
+	"cloud.google.com/go/spanner"
+	pb "cloud.google.com/go/spanner/apiv1/spannerpb"
 )
 
 func writeWithTransactionUsingReadLockMode(w io.Writer, db string) error {
@@ -111,4 +111,3 @@ func writeWithTransactionUsingReadLockMode(w io.Writer, db string) error {
 }
 
 // [END spanner_read_lock_mode]
-
