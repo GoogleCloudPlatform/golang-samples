@@ -32,7 +32,7 @@ import (
 func writeWithTransactionUsingReadLockMode(w io.Writer, db string) error {
 	ctx := context.Background()
 
-    // Client-level configuration: Applies to all read-write transactions
+	// Client-level configuration: Applies to all read-write transactions
 	// for this client. OPTIMISTIC mode avoids locks during reads and
 	// verifies changes during the commit phase.
 	cfg := spanner.ClientConfig{
@@ -46,7 +46,7 @@ func writeWithTransactionUsingReadLockMode(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
-    // Transaction-level options take precedence over client-level
+	// Transaction-level options take precedence over client-level
 	// configuration. PESSIMISTIC mode is used here to override the
 	// client-level setting and ensure immediate locking during reads.
 	txnOpts := spanner.TransactionOptions{
@@ -54,7 +54,7 @@ func writeWithTransactionUsingReadLockMode(w io.Writer, db string) error {
 	}
 
 	_, err = client.ReadWriteTransactionWithOptions(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-        // In PESSIMISTIC mode with SERIALIZABLE isolation, the transaction
+		// In PESSIMISTIC mode with SERIALIZABLE isolation, the transaction
 		// acquires a shared lock during this read.
 		key := spanner.Key{1, 2}
 		row, err := txn.ReadRow(ctx, "Albums", key, []string{"AlbumTitle"})
