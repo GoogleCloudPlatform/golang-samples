@@ -14,28 +14,6 @@
 
 package spanner
 
-// writeWithTransactionUsingReadLockMode demonstrates how to set the
-// ReadLockMode for Cloud Spanner transactions. It shows how to configure a
-// default mode at the client level and how to override it for specific
-// transactions. The ReadLockMode dictates the locking strategy employed during
-// the transaction's execution, influencing concurrency and performance.
-
-// Key ReadLockMode options:
-// - PESSIMISTIC: Spanner acquires locks on data as it is read, following a
-//   traditional locking model. The exact locking behavior depends on the
-//   isolation level (SERIALIZABLE or REPEATABLE_READ).
-// - OPTIMISTIC: Spanner avoids acquiring locks during the read phase.
-//   Instead, it verifies at commit time whether the data read has remained
-//   unchanged. This can improve concurrency but may result in transaction
-//   aborts if conflicting modifications are detected.
-// - READ_LOCK_MODE_UNSPECIFIED: The default behavior. This typically defaults
-//   to PESSIMISTIC for SERIALIZABLE isolation and OPTIMISTIC for
-//   REPEATABLE_READ isolation.
-
-// Please refer to the official Spanner concurrency control documentation for
-// in-depth details on how ReadLockMode interacts with different isolation
-// levels.
-
 // [START spanner_read_lock_mode]
 
 import (
@@ -47,11 +25,16 @@ import (
 	pb "cloud.google.com/go/spanner/apiv1/spannerpb"
 )
 
+// writeWithTransactionUsingReadLockMode sets the ReadLockMode globally
+// by using ClientConfig and shows how to override it for a specific
+// transaction. ReadLockMode determines the locking strategy used during
+// transaction execution.
 func writeWithTransactionUsingReadLockMode(w io.Writer, db string) error {
 	ctx := context.Background()
 
-	// The read lock mode specified at the client-level will be applied
-	// to all RW transactions.
+    // Client-level configuration: Applies to all read-write transactions
+	// for this client. OPTIMISTIC mode avoids locks during reads and
+	// verifies changes during the commit phase.
 	cfg := spanner.ClientConfig{
 		TransactionOptions: spanner.TransactionOptions{
 			ReadLockMode: pb.TransactionOptions_ReadWrite_OPTIMISTIC,
@@ -63,17 +46,16 @@ func writeWithTransactionUsingReadLockMode(w io.Writer, db string) error {
 	}
 	defer client.Close()
 
-	// The read lock mode specified at the transaction-level takes precedence over
-	// the read lock mode configured at the client-level. PESSIMISTIC is used here
-	// to demonstrate overriding the client-level setting.
+    // Transaction-level options take precedence over client-level
+	// configuration. PESSIMISTIC mode is used here to override the
+	// client-level setting and ensure immediate locking during reads.
 	txnOpts := spanner.TransactionOptions{
 		ReadLockMode: pb.TransactionOptions_ReadWrite_PESSIMISTIC,
 	}
 
 	_, err = client.ReadWriteTransactionWithOptions(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-		// Since PESSIMISTIC lock mode with the default isolation level
-		// (SERIALIZABLE) is used here, the lock will be acquired immediately after
-		// this read.
+        // In PESSIMISTIC mode with SERIALIZABLE isolation, the transaction
+		// acquires a shared lock during this read.
 		key := spanner.Key{1, 2}
 		row, err := txn.ReadRow(ctx, "Albums", key, []string{"AlbumTitle"})
 		if err != nil {
