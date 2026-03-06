@@ -19,7 +19,7 @@ jobs:
     - name: Setup Go
       uses: actions/setup-go@v5
       with:
-        go-version: 'stable'
+        go-version: '1.26'
     - name: Checkout code
       uses: actions/checkout@v2
     - name: Build code
@@ -61,11 +61,12 @@ jobs:
   vet:
     name: Vet
     runs-on: ubuntu-latest
+
     steps:
     - name: Setup Go
       uses: actions/setup-go@v5
       with:
-        go-version: 'stable'
+        go-version: '1.26'
     - name: Checkout code
       uses: actions/checkout@v2
     - name: go vet
@@ -79,11 +80,12 @@ jobs:
   test:
     name: Root tests
     runs-on: ubuntu-latest
+
     steps:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: 'stable'
+          go-version: '1.26' 
       - name: Check code
         uses: actions/checkout@v2
       - run: go test -v

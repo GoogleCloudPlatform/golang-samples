@@ -2,6 +2,8 @@
 
 set -e
 
+export GOTOOLCHAIN=go1.26
+
 mv key.json /tmp/key.json
 export GOOGLE_APPLICATION_CREDENTIALS=/tmp/key.json
 export GOLANG_SAMPLES_KMS_KEYRING=ring1
