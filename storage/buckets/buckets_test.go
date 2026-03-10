@@ -884,3 +884,69 @@ func TestDisableSoftDeletePolicy(t *testing.T) {
 		t.Errorf("Output mismatch: got %q, want %q", got, want)
 	}
 }
+
+func TestBucketEncryptionEnforcement(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	bucketName := testutil.UniqueBucketName(testPrefix)
+	ctx := context.Background()
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	var createBuf bytes.Buffer
+	if err := createBucketEncryptionEnforcement(&createBuf, tc.ProjectID, bucketName); err != nil {
+		t.Fatalf("createBucketEncryptionEnforcement: %v", err)
+	}
+
+	gotCreate := createBuf.String()
+	wantCreate := fmt.Sprintf("Bucket %v created with encryption enforcement policies.", bucketName)
+	if !strings.Contains(gotCreate, wantCreate) {
+		t.Errorf("createBucketEncryptionEnforcement: got %q, want %q", gotCreate, wantCreate)
+	}
+
+	attrs, err := client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+
+	if attrs.GoogleManagedEncryptionEnforcementConfig == nil || attrs.GoogleManagedEncryptionEnforcementConfig.RestrictionMode != storage.FullyRestricted {
+		t.Errorf("GoogleManagedEncryptionEnforcementConfig not set correctly")
+	}
+	if attrs.CustomerManagedEncryptionEnforcementConfig == nil || attrs.CustomerManagedEncryptionEnforcementConfig.RestrictionMode != storage.NotRestricted {
+		t.Errorf("CustomerManagedEncryptionEnforcementConfig not set correctly")
+	}
+	if attrs.CustomerSuppliedEncryptionEnforcementConfig == nil || attrs.CustomerSuppliedEncryptionEnforcementConfig.RestrictionMode != storage.FullyRestricted {
+		t.Errorf("CustomerSuppliedEncryptionEnforcementConfig not set correctly")
+	}
+
+	var updateBuf bytes.Buffer
+	if err := setBucketEncryptionEnforcement(&updateBuf, bucketName); err != nil {
+		t.Fatalf("setBucketEncryptionEnforcement: %v", err)
+	}
+
+	gotUpdate := updateBuf.String()
+	wantUpdate := fmt.Sprintf("Bucket %v encryption enforcement policies updated.", bucketName)
+	if !strings.Contains(gotUpdate, wantUpdate) {
+		t.Errorf("setBucketEncryptionEnforcement: got %q, want %q", gotUpdate, wantUpdate)
+	}
+
+	attrs, err = client.Bucket(bucketName).Attrs(ctx)
+	if err != nil {
+		t.Fatalf("Bucket(%q).Attrs: %v", bucketName, err)
+	}
+
+	if attrs.GoogleManagedEncryptionEnforcementConfig == nil || attrs.GoogleManagedEncryptionEnforcementConfig.RestrictionMode != storage.NotRestricted {
+		t.Errorf("GoogleManagedEncryptionEnforcementConfig not updated correctly")
+	}
+	if attrs.CustomerManagedEncryptionEnforcementConfig == nil || attrs.CustomerManagedEncryptionEnforcementConfig.RestrictionMode != storage.FullyRestricted {
+		t.Errorf("CustomerManagedEncryptionEnforcementConfig not updated correctly")
+	}
+	if attrs.CustomerSuppliedEncryptionEnforcementConfig == nil || attrs.CustomerSuppliedEncryptionEnforcementConfig.RestrictionMode != storage.FullyRestricted {
+		t.Errorf("CustomerSuppliedEncryptionEnforcementConfig not updated correctly")
+	}
+}
