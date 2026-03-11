@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM golang:1.24
+FROM golang:1.25
 
 COPY devflowapp.go .
 COPY services/ /go/src/github.com/GoogleCloudPlatform/golang-samples/getting-started/devflowapp/services/

@@ -131,7 +131,7 @@ gcloud app deploy app.flexible.yaml
 To deploy the service to [Cloud Functions](https://cloud.google.com/functions/docs) run the following command:
 
 ```sh
-gcloud functions deploy votes --gen2 --runtime go120 --trigger-http \
+gcloud functions deploy votes --gen2 --runtime go125 --trigger-http \
   --allow-unauthenticated \
   --entry-point Votes \
   --region <INSTANCE_REGION> \

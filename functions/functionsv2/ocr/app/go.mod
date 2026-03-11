@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/ocr/app
 
-go 1.24.0
+go 1.25.0
 
 require (
 	cloud.google.com/go/pubsub v1.45.3
