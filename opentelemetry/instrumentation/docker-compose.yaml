@@ -21,7 +21,7 @@ services:
       - GOOGLE_CLOUD_QUOTA_PROJECT
       - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT?}
   loadgen:
-    image: golang:1.22
+    image: golang:1.25
     command: ["go", "run", "github.com/rakyll/hey@latest", "-c=2", "-q=1", "http://app:8080/multi"]
     depends_on:
       - "app"

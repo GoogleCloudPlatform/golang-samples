@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/genai
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20251210094219-afaa7f40a550
