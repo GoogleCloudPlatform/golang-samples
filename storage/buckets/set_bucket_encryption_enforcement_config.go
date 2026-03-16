@@ -14,7 +14,7 @@
 
 package buckets
 
-// [START storage_create_bucket_encryption_enforcement]
+// [START storage_set_bucket_encryption_enforcement_config]
 import (
 	"context"
 	"fmt"
@@ -24,9 +24,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// createBucketEncryptionEnforcement creates a bucket with encryption enforcement policies.
-func createBucketEncryptionEnforcement(w io.Writer, projectID, bucketName string) error {
-	// projectID := "my-project-id"
+// setBucketEncryptionEnforcementConfig sets a bucket's encryption enforcement configuration.
+func setBucketEncryptionEnforcementConfig(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -39,21 +38,23 @@ func createBucketEncryptionEnforcement(w io.Writer, projectID, bucketName string
 	defer cancel()
 
 	bucket := client.Bucket(bucketName)
-	if err := bucket.Create(ctx, projectID, &storage.BucketAttrs{
-		GoogleManagedEncryptionEnforcementConfig: &storage.EncryptionEnforcementConfig{
-			RestrictionMode: storage.FullyRestricted,
-		},
-		CustomerManagedEncryptionEnforcementConfig: &storage.EncryptionEnforcementConfig{
-			RestrictionMode: storage.NotRestricted,
-		},
-		CustomerSuppliedEncryptionEnforcementConfig: &storage.EncryptionEnforcementConfig{
-			RestrictionMode: storage.FullyRestricted,
+	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
+		Encryption: &storage.BucketEncryption{
+			GoogleManagedEncryptionEnforcementConfig: &storage.EncryptionEnforcementConfig{
+				RestrictionMode: storage.FullyRestricted,
+			},
+			CustomerManagedEncryptionEnforcementConfig: &storage.EncryptionEnforcementConfig{
+				RestrictionMode: storage.NotRestricted,
+			},
+			CustomerSuppliedEncryptionEnforcementConfig: &storage.EncryptionEnforcementConfig{
+				RestrictionMode: storage.FullyRestricted,
+			},
 		},
 	}); err != nil {
-		return fmt.Errorf("Bucket(%q).Create: %w", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Update: %w", bucketName, err)
 	}
-	fmt.Fprintf(w, "Bucket %v created with encryption enforcement policies.\n", bucketName)
+	fmt.Fprintf(w, "Bucket %v encryption enforcement policies set.\n", bucketName)
 	return nil
 }
 
-// [END storage_create_bucket_encryption_enforcement]
+// [END storage_set_bucket_encryption_enforcement_config]

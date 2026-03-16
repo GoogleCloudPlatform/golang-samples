@@ -14,7 +14,7 @@
 
 package buckets
 
-// [START storage_set_bucket_encryption_enforcement]
+// [START storage_update_bucket_encryption_enforcement_config]
 import (
 	"context"
 	"fmt"
@@ -24,8 +24,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// setBucketEncryptionEnforcement updates a bucket's encryption enforcement policies.
-func setBucketEncryptionEnforcement(w io.Writer, bucketName string) error {
+// updateBucketEncryptionEnforcementConfig updates a bucket's encryption enforcement configuration.
+func updateBucketEncryptionEnforcementConfig(w io.Writer, bucketName string) error {
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -39,14 +39,16 @@ func setBucketEncryptionEnforcement(w io.Writer, bucketName string) error {
 
 	bucket := client.Bucket(bucketName)
 	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
-		GoogleManagedEncryptionEnforcementConfig: &storage.EncryptionEnforcementConfig{
-			RestrictionMode: storage.NotRestricted,
-		},
-		CustomerManagedEncryptionEnforcementConfig: &storage.EncryptionEnforcementConfig{
-			RestrictionMode: storage.FullyRestricted,
-		},
-		CustomerSuppliedEncryptionEnforcementConfig: &storage.EncryptionEnforcementConfig{
-			RestrictionMode: storage.FullyRestricted,
+		Encryption: &storage.BucketEncryption{
+			GoogleManagedEncryptionEnforcementConfig: &storage.EncryptionEnforcementConfig{
+				RestrictionMode: storage.NotRestricted,
+			},
+			CustomerManagedEncryptionEnforcementConfig: &storage.EncryptionEnforcementConfig{
+				RestrictionMode: storage.FullyRestricted,
+			},
+			CustomerSuppliedEncryptionEnforcementConfig: &storage.EncryptionEnforcementConfig{
+				RestrictionMode: storage.FullyRestricted,
+			},
 		},
 	}); err != nil {
 		return fmt.Errorf("Bucket(%q).Update: %w", bucketName, err)
@@ -55,4 +57,4 @@ func setBucketEncryptionEnforcement(w io.Writer, bucketName string) error {
 	return nil
 }
 
-// [END storage_set_bucket_encryption_enforcement]
+// [END storage_update_bucket_encryption_enforcement_config]
