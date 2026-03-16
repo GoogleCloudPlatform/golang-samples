@@ -25,7 +25,8 @@ import (
 )
 
 // setBucketEncryptionEnforcementConfig sets a bucket's encryption enforcement configuration.
-func setBucketEncryptionEnforcementConfig(w io.Writer, bucketName string) error {
+func setBucketEncryptionEnforcementConfig(w io.Writer, projectID, bucketName string) error {
+	// projectID := "my-project-id"
 	// bucketName := "bucket-name"
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -38,7 +39,7 @@ func setBucketEncryptionEnforcementConfig(w io.Writer, bucketName string) error 
 	defer cancel()
 
 	bucket := client.Bucket(bucketName)
-	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
+	if err := bucket.Create(ctx, projectID, &storage.BucketAttrs{
 		GoogleManagedEncryptionEnforcementConfig: &storage.EncryptionEnforcementConfig{
 			RestrictionMode: storage.FullyRestricted,
 		},
@@ -49,7 +50,7 @@ func setBucketEncryptionEnforcementConfig(w io.Writer, bucketName string) error 
 			RestrictionMode: storage.FullyRestricted,
 		},
 	}); err != nil {
-		return fmt.Errorf("Bucket(%q).Update: %w", bucketName, err)
+		return fmt.Errorf("Bucket(%q).Create: %w", bucketName, err)
 	}
 	fmt.Fprintf(w, "Bucket %v encryption enforcement policies set.\n", bucketName)
 	return nil

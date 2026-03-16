@@ -896,13 +896,10 @@ func TestBucketEncryptionEnforcement(t *testing.T) {
 	}
 	defer client.Close()
 
-	if err := client.Bucket(bucketName).Create(ctx, tc.ProjectID, nil); err != nil {
-		t.Fatalf("Bucket(%q).Create: %v", bucketName, err)
-	}
 	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
 
 	var setBuf bytes.Buffer
-	if err := setBucketEncryptionEnforcementConfig(&setBuf, bucketName); err != nil {
+	if err := setBucketEncryptionEnforcementConfig(&setBuf, tc.ProjectID, bucketName); err != nil {
 		t.Fatalf("setBucketEncryptionEnforcementConfig: %v", err)
 	}
 
