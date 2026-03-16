@@ -39,16 +39,14 @@ func updateBucketEncryptionEnforcementConfig(w io.Writer, bucketName string) err
 
 	bucket := client.Bucket(bucketName)
 	if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
-		Encryption: &storage.BucketEncryption{
-			GoogleManagedEncryptionEnforcementConfig: &storage.EncryptionEnforcementConfig{
-				RestrictionMode: storage.NotRestricted,
-			},
-			CustomerManagedEncryptionEnforcementConfig: &storage.EncryptionEnforcementConfig{
-				RestrictionMode: storage.FullyRestricted,
-			},
-			CustomerSuppliedEncryptionEnforcementConfig: &storage.EncryptionEnforcementConfig{
-				RestrictionMode: storage.FullyRestricted,
-			},
+		GoogleManagedEncryptionEnforcementConfig: &storage.EncryptionEnforcementConfig{
+			RestrictionMode: storage.NotRestricted,
+		},
+		CustomerManagedEncryptionEnforcementConfig: &storage.EncryptionEnforcementConfig{
+			RestrictionMode: storage.FullyRestricted,
+		},
+		CustomerSuppliedEncryptionEnforcementConfig: &storage.EncryptionEnforcementConfig{
+			RestrictionMode: storage.FullyRestricted,
 		},
 	}); err != nil {
 		return fmt.Errorf("Bucket(%q).Update: %w", bucketName, err)

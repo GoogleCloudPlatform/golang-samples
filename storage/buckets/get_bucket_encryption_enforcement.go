@@ -42,18 +42,14 @@ func getBucketEncryptionEnforcement(w io.Writer, bucketName string) error {
 		return fmt.Errorf("Bucket(%q).Attrs: %w", bucketName, err)
 	}
 
-	if attrs.Encryption != nil {
-		if attrs.Encryption.GoogleManagedEncryptionEnforcementConfig != nil {
-			fmt.Fprintf(w, "Google Managed Encryption Enforcement Config: %v\n", attrs.Encryption.GoogleManagedEncryptionEnforcementConfig.RestrictionMode)
-		}
-		if attrs.Encryption.CustomerManagedEncryptionEnforcementConfig != nil {
-			fmt.Fprintf(w, "Customer Managed Encryption Enforcement Config: %v\n", attrs.Encryption.CustomerManagedEncryptionEnforcementConfig.RestrictionMode)
-		}
-		if attrs.Encryption.CustomerSuppliedEncryptionEnforcementConfig != nil {
-			fmt.Fprintf(w, "Customer Supplied Encryption Enforcement Config: %v\n", attrs.Encryption.CustomerSuppliedEncryptionEnforcementConfig.RestrictionMode)
-		}
-	} else {
-		fmt.Fprintf(w, "Encryption configuration not found for bucket %v\n", bucketName)
+	if attrs.GoogleManagedEncryptionEnforcementConfig != nil {
+		fmt.Fprintf(w, "Google Managed Encryption Enforcement Config: %v\n", attrs.GoogleManagedEncryptionEnforcementConfig.RestrictionMode)
+	}
+	if attrs.CustomerManagedEncryptionEnforcementConfig != nil {
+		fmt.Fprintf(w, "Customer Managed Encryption Enforcement Config: %v\n", attrs.CustomerManagedEncryptionEnforcementConfig.RestrictionMode)
+	}
+	if attrs.CustomerSuppliedEncryptionEnforcementConfig != nil {
+		fmt.Fprintf(w, "Customer Supplied Encryption Enforcement Config: %v\n", attrs.CustomerSuppliedEncryptionEnforcementConfig.RestrictionMode)
 	}
 	return nil
 }
