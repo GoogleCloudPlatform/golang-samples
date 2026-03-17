@@ -920,6 +920,9 @@ func TestBucketEncryptionEnforcement(t *testing.T) {
 	if !strings.Contains(gotGet, "Customer Supplied Encryption Enforcement Config: FullyRestricted") {
 		t.Errorf("getBucketEncryptionEnforcement: got %q, want to contain %q", gotGet, "Customer Supplied Encryption Enforcement Config: FullyRestricted")
 	}
+	if !strings.Contains(gotGet, "Customer Managed Encryption Enforcement Config: NotRestricted") {
+		t.Errorf("getBucketEncryptionEnforcement: got %q, want to contain %q", gotGet, "Customer Managed Encryption Enforcement Config: NotRestricted")
+	}
 
 	var updateBuf bytes.Buffer
 	if err := updateBucketEncryptionEnforcementConfig(&updateBuf, bucketName); err != nil {
