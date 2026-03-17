@@ -395,6 +395,8 @@ func (s *Service) deployCmd() *exec.Cmd {
 		s.ProjectID,
 		"--image",
 		s.Image,
+		"--ingress",
+		"internal",
 	}, s.Platform.CommandFlags()...)
 
 	if s.Env != nil {
