@@ -124,8 +124,8 @@ func getRandomSharedModule() string {
 	if len(sharedModules) == 0 {
 		return ""
 	}
-	rand.Seed(time.Now().UnixNano())
-	return sharedModules[rand.Intn(len(sharedModules))]
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return sharedModules[r.Intn(len(sharedModules))]
 }
 
 // CustomModuleExists checks if a module exists.
