@@ -12,16 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START bigtable_instanceadmin]
-
 // Instance admin is a sample program demonstrating use of the Cloud Bigtable client
 // library to perform basic instance admin operations.
 package main
 
+// [START bigtable_instanceadmin]
 import (
 	"context"
 	"flag"
-	"log"
+	"fmt"
+	"io"
+	"os"
 
 	"cloud.google.com/go/bigtable"
 )
@@ -38,11 +39,17 @@ func main() {
 	flag.StringVar(&zone, "zone", zone, "The zone for the initial cluster.")
 	flag.Parse()
 
+	if err := createInstance(os.Stdout, projectID, instanceID, clusterID, zone); err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating instance: %v", err)
+	}
+}
+
+func createInstance(w io.Writer, projectID, instanceID, clusterID, zone string) error {
 	ctx := context.Background()
 
 	instanceAdminClient, err := bigtable.NewInstanceAdminClient(ctx, projectID)
 	if err != nil {
-		log.Fatalf("Could not create instance admin client: %v", err)
+		return fmt.Errorf("bigtable.NewInstanceAdminClient: %w", err)
 	}
 	defer instanceAdminClient.Close()
 
@@ -65,12 +72,15 @@ func main() {
 		// Ensure the tagKey and tagValue exist in your GCP project.
 		// Tags: map[string]string{tagKey: tagValue},
 	}
-	log.Printf("Creating instance %s with cluster %s in %s...", instanceID, clusterID, zone)
-	err = instanceAdminClient.CreateInstance(ctx, instanceConf)
 
-	if err != nil {
-		log.Fatalf("Could not start create instance operation: %v", err)
+	fmt.Fprintf(w, "Creating instance %s with cluster %s in %s...\n", instanceID, clusterID, zone)
+
+	if err := instanceAdminClient.CreateInstance(ctx, instanceConf); err != nil {
+		return fmt.Errorf("CreateInstance: %w", err)
 	}
 
-	log.Printf("Instance %s created successfully.\n", instanceID)
+	fmt.Fprintf(w, "Instance %s created successfully.\n", instanceID)
+	return nil
 }
+
+// [END bigtable_instanceadmin]
