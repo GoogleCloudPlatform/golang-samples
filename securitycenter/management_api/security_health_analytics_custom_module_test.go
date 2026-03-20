@@ -233,24 +233,24 @@ func addCustomModule() (string, error) {
 func TestDeleteCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
-	moduleID = getRandomSharedModule()
-	if moduleID == "" {
-		t.Fatalf("No shared modules available")
+	// Create a new module only for this delete test to avoid a race condition with shared modules
+	id, err := addCustomModule()
+	if err != nil {
+		t.Fatalf("addCustomModule() had error: %v", err)
 	}
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
-	err := deleteSecurityHealthAnalyticsCustomModule(&buf, parent, moduleID)
+	err = deleteSecurityHealthAnalyticsCustomModule(&buf, parent, id)
 
 	if err != nil {
 		t.Fatalf("deleteSecurityHealthAnalyticsCustomModule() had error: %v", err)
-		return
 	}
 
 	got := buf.String()
 
-	if !strings.Contains(got, moduleID) {
-		t.Fatalf("deleteSecurityHealthAnalyticsCustomModule() got: %s want %s", got, moduleID)
+	if !strings.Contains(got, id) {
+		t.Fatalf("deleteSecurityHealthAnalyticsCustomModule() got: %s want %s", got, id)
 	}
 }
 
