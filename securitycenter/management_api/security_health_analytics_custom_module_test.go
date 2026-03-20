@@ -29,6 +29,7 @@ import (
 	securitycentermanagement "cloud.google.com/go/securitycentermanagement/apiv1"
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
 	"github.com/google/uuid"
+	iterator "google.golang.org/api/iterator"
 	expr "google.golang.org/genproto/googleapis/type/expr"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -46,6 +47,9 @@ func TestMain(m *testing.M) {
 		log.Fatalf("GCLOUD_ORGANIZATION environment variable is not set.")
 	}
 
+	// Clean up any orphans from previous failed runs
+	cleanupOrphanedModules()
+
 	setupSharedModules()
 
 	// Run the tests
@@ -56,6 +60,44 @@ func TestMain(m *testing.M) {
 
 	// Exit with the appropriate code
 	os.Exit(code)
+}
+
+// cleanupOrphanedModules deletes any modules left over from previous test runs
+func cleanupOrphanedModules() {
+	ctx := context.Background()
+	client, err := securitycentermanagement.NewClient(ctx)
+	if err != nil {
+		log.Printf("CleanupOrphanedModules: failed to create client: %v", err)
+		return
+	}
+	defer client.Close()
+
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+	it := client.ListSecurityHealthAnalyticsCustomModules(ctx, &securitycentermanagementpb.ListSecurityHealthAnalyticsCustomModulesRequest{
+		Parent: parent,
+	})
+
+	fmt.Println("Scanning for orphaned test modules...")
+	for {
+		module, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Printf("CleanupOrphanedModules: error listing modules: %v", err)
+			return
+		}
+
+		if strings.HasPrefix(module.DisplayName, "go_sample_sha_custom_module_test_") {
+			fmt.Printf("Cleaning up orphaned module: %s\n", module.DisplayName)
+			err := client.DeleteSecurityHealthAnalyticsCustomModule(ctx, &securitycentermanagementpb.DeleteSecurityHealthAnalyticsCustomModuleRequest{
+				Name: module.Name,
+			})
+			if err != nil {
+				log.Printf("CleanupOrphanedModules: failed to delete %s: %v", module.Name, err)
+			}
+		}
+	}
 }
 
 func setupSharedModules() {
