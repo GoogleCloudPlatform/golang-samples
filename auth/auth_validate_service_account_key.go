@@ -16,6 +16,8 @@ package snippets
 
 // [START auth_validate_service_account_key]
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -38,20 +40,28 @@ func validateServiceAccountKey(w io.Writer, keyPath string) error {
 	scope := "https://www.googleapis.com/auth/cloud-platform"
 
 	// Use a type-specific credential loader to validate the service account key.
-	// google.JWTConfigFromJSON returns an error if the 'type' field in the JSON
+	// google.CredentialsFromJSONWithType returns an error if the 'type' field in the JSON
 	// is missing or is not 'service_account'.
 	// Note: This validates the format and type locally; it does not verify
 	// the key's status with Google Cloud's authentication server.
-	config, err := google.JWTConfigFromJSON(keyBytes, scope)
-
+	ctx := context.Background()
+	creds, err := google.CredentialsFromJSONWithType(ctx, keyBytes, google.ServiceAccount, scope)
 	if err != nil {
 		fmt.Fprintf(w, "invalid service account key: %v", err)
 		return fmt.Errorf("invalid service account key: %w", err)
 	}
 
-	fmt.Fprintf(w, "Successfully validated service account key for: %s\n", config.Email)
+	var f struct {
+		ClientEmail string `json:"client_email"`
+	}
+	if err := json.Unmarshal(keyBytes, &f); err != nil {
+		fmt.Fprintf(w, "failed to parse service account email: %v", err)
+		return fmt.Errorf("failed to parse service account email: %w", err)
+	}
 
-	// You can use config.TokenSource(ctx) to get a TokenSource for authenticated requests.
+	fmt.Fprintf(w, "Successfully validated service account key for: %s\n", f.ClientEmail)
+
+	_ = creds // You can use creds.TokenSource to get a TokenSource for authenticated requests.
 
 	return nil
 }
