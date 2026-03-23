@@ -486,27 +486,46 @@ func detectLogos(w io.Writer, file string) error {
 		return err
 	}
 
-	f, err := os.Open(file)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	image, err := vision.NewImageFromReader(f)
-	if err != nil {
-		return err
-	}
-	annotations, err := client.DetectLogos(ctx, image, nil, 10)
+	fileBytes, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}
 
-	if len(annotations) == 0 {
-		fmt.Fprintln(w, "No logos found.")
-	} else {
-		fmt.Fprintln(w, "Logos:")
-		for _, annotation := range annotations {
-			fmt.Fprintln(w, annotation.Description)
+	image := &visionpb.Image{
+		Content: fileBytes,
+	}
+
+	feature := &visionpb.Feature{
+		Type:       visionpb.Feature_LOGO_DETECTION,
+		MaxResults: 10,
+	}
+
+	request := &visionpb.BatchAnnotateImagesRequest{
+		Requests: []*visionpb.AnnotateImageRequest{
+			{
+				Image:    image,
+				Features: []*visionpb.Feature{feature},
+			},
+		},
+	}
+
+	response, err := client.BatchAnnotateImages(ctx, request)
+	if err != nil {
+		return err
+	}
+
+	for _, resp := range response.Responses {
+		if resp.Error != nil {
+			fmt.Fprintf(w, "Error: %v\n", resp.Error)
+			continue
+		}
+		if len(resp.LogoAnnotations) == 0 {
+			fmt.Fprintln(w, "No logos found.")
+		} else {
+			fmt.Fprintln(w, "Logos:")
+			for _, annotation := range resp.LogoAnnotations {
+				fmt.Fprintln(w, annotation.Description)
+			}
 		}
 	}
 
@@ -928,18 +947,45 @@ func detectLogosURI(w io.Writer, file string) error {
 		return err
 	}
 
-	image := vision.NewImageFromURI(file)
-	annotations, err := client.DetectLogos(ctx, image, nil, 10)
+	image := &visionpb.Image{
+		Source: &visionpb.ImageSource{
+			// Use GcsImageUri for gs:// links
+			// Use ImageUri for public https:// links
+			GcsImageUri: file,
+		},
+	}
+
+	feature := &visionpb.Feature{
+		Type:       visionpb.Feature_LOGO_DETECTION,
+		MaxResults: 10,
+	}
+
+	request := &visionpb.BatchAnnotateImagesRequest{
+		Requests: []*visionpb.AnnotateImageRequest{
+			{
+				Image:    image,
+				Features: []*visionpb.Feature{feature},
+			},
+		},
+	}
+
+	response, err := client.BatchAnnotateImages(ctx, request)
 	if err != nil {
 		return err
 	}
 
-	if len(annotations) == 0 {
-		fmt.Fprintln(w, "No logos found.")
-	} else {
-		fmt.Fprintln(w, "Logos:")
-		for _, annotation := range annotations {
-			fmt.Fprintln(w, annotation.Description)
+	for _, resp := range response.Responses {
+		if resp.Error != nil {
+			fmt.Fprintf(w, "Error: %v\n", resp.Error)
+			continue
+		}
+		if len(resp.LogoAnnotations) == 0 {
+			fmt.Fprintln(w, "No logos found.")
+		} else {
+			fmt.Fprintln(w, "Logos:")
+			for _, annotation := range resp.LogoAnnotations {
+				fmt.Fprintln(w, annotation.Description)
+			}
 		}
 	}
 
