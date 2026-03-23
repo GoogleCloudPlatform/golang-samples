@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/getting-started/sessions
 
-go 1.24.0
+go 1.25.0
 
 require cloud.google.com/go/firestore v1.18.0
 
