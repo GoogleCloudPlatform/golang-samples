@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/firebase/remoteconfig
 
-go 1.24.0
+go 1.25.0
 
 require github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
 
