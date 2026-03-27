@@ -3,8 +3,8 @@ module github.com/GoogleCloudPlatform/golang-samples/opentelemetry/instrumentati
 go 1.25.0
 
 require (
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	github.com/stretchr/testify v1.10.0
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20260327112451-86091ac227b7
+	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/collector/pdata v1.12.0
 	go.opentelemetry.io/contrib/exporters/autoexport v0.53.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.59.0
@@ -39,7 +39,6 @@ require (
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
