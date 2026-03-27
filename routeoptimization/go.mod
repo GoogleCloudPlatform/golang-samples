@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/routeoptimization
 
-go 1.24.0
+go 1.25.0
 
 require (
 	cloud.google.com/go/maps v1.17.1
