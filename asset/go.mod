@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/asset
 
-go 1.24.0
+go 1.25.0
 
 require (
 	cloud.google.com/go/asset v1.20.4
