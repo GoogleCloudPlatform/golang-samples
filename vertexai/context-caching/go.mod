@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/vertexai/context-caching
 
-go 1.24.0
+go 1.25.0
 
 require (
 	cloud.google.com/go/vertexai v0.13.2
