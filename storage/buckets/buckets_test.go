@@ -884,3 +884,54 @@ func TestDisableSoftDeletePolicy(t *testing.T) {
 		t.Errorf("Output mismatch: got %q, want %q", got, want)
 	}
 }
+
+func TestBucketEncryptionEnforcement(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	bucketName := testutil.UniqueBucketName(testPrefix)
+	ctx := context.Background()
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		t.Fatalf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	defer testutil.DeleteBucketIfExists(ctx, client, bucketName)
+
+	var setBuf bytes.Buffer
+	if err := setBucketEncryptionEnforcementConfig(&setBuf, tc.ProjectID, bucketName); err != nil {
+		t.Fatalf("setBucketEncryptionEnforcementConfig: %v", err)
+	}
+
+	gotSet := setBuf.String()
+	wantSet := fmt.Sprintf("Bucket %v encryption enforcement policies set.", bucketName)
+	if !strings.Contains(gotSet, wantSet) {
+		t.Errorf("setBucketEncryptionEnforcementConfig: got %q, want %q", gotSet, wantSet)
+	}
+
+	var getBuf bytes.Buffer
+	if err := getBucketEncryptionEnforcement(&getBuf, bucketName); err != nil {
+		t.Fatalf("getBucketEncryptionEnforcement: %v", err)
+	}
+	gotGet := getBuf.String()
+	if !strings.Contains(gotGet, "Google Managed Encryption Enforcement Config: FullyRestricted") {
+		t.Errorf("getBucketEncryptionEnforcement: got %q, want to contain %q", gotGet, "Google Managed Encryption Enforcement Config: FullyRestricted")
+	}
+	if !strings.Contains(gotGet, "Customer Supplied Encryption Enforcement Config: FullyRestricted") {
+		t.Errorf("getBucketEncryptionEnforcement: got %q, want to contain %q", gotGet, "Customer Supplied Encryption Enforcement Config: FullyRestricted")
+	}
+	if !strings.Contains(gotGet, "Customer Managed Encryption Enforcement Config: NotRestricted") {
+		t.Errorf("getBucketEncryptionEnforcement: got %q, want to contain %q", gotGet, "Customer Managed Encryption Enforcement Config: NotRestricted")
+	}
+
+	var updateBuf bytes.Buffer
+	if err := updateBucketEncryptionEnforcementConfig(&updateBuf, bucketName); err != nil {
+		t.Fatalf("updateBucketEncryptionEnforcementConfig: %v", err)
+	}
+
+	gotUpdate := updateBuf.String()
+	wantUpdate := fmt.Sprintf("Bucket %v encryption enforcement policies updated.", bucketName)
+	if !strings.Contains(gotUpdate, wantUpdate) {
+		t.Errorf("updateBucketEncryptionEnforcementConfig: got %q, want %q", gotUpdate, wantUpdate)
+	}
+}
