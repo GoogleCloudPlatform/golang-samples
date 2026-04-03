@@ -121,3 +121,48 @@ func TestAuthenticateWithAPIKey(t *testing.T) {
 		t.Errorf("authenticateWithAPIKey got %q, want %q", got, want)
 	}
 }
+
+func TestValidateServiceAccountKey(t *testing.T) {
+	testutil.SystemTest(t)
+
+	t.Run("valid key", func(t *testing.T) {
+		keyPath := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
+		if keyPath == "" {
+			t.Skip("GOOGLE_APPLICATION_CREDENTIALS not set")
+		}
+
+		buf := &bytes.Buffer{}
+		if err := validateServiceAccountKey(buf, keyPath); err != nil {
+			t.Errorf("validateServiceAccountKey(valid) got err: %v", err)
+		}
+
+		want := "Successfully validated service account key"
+		if got := buf.String(); !strings.Contains(got, want) {
+			t.Errorf("validateServiceAccountKey(valid) got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("invalid key type", func(t *testing.T) {
+		tmpFile, err := os.CreateTemp("", "invalid-key-*.json")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer os.Remove(tmpFile.Name())
+
+		// A valid JSON but wrong type ("authorized_user" instead of "service_account").
+		content := []byte(`{"type": "authorized_user"}`)
+		if _, err := tmpFile.Write(content); err != nil {
+			t.Fatal(err)
+		}
+		if err := tmpFile.Close(); err != nil {
+			t.Fatalf("failed to close temp file: %v", err)
+		}
+
+		buf := &bytes.Buffer{}
+		// The function should return an error because JWTConfigFromJSON
+		// specifically expects the "service_account" type.
+		if err := validateServiceAccountKey(buf, tmpFile.Name()); err == nil {
+			t.Error("validateServiceAccountKey(invalid) expected error for 'authorized_user' type, got nil")
+		}
+	})
+}
