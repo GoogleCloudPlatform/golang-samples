@@ -19,6 +19,7 @@ import (
 	"context"
 	"os"
 	"strings"
+	"sync"
 	"testing"
 
 	"cloud.google.com/go/firestore"
@@ -79,25 +80,36 @@ func testQueryFilterOrCleanup(projectID string, refs []*firestore.DocumentRef) e
 	return nil
 }
 
-func TestQueryFilterOr(t *testing.T) {
-	projectID = os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
+var projectIDOnce sync.Once
+
+func getProjectID(t *testing.T) string {
+	projectIDOnce.Do(func() {
+		if projectID == "" {
+			projectID = os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
+		}
+	})
 	if projectID == "" {
 		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
 	}
+	return projectID
+}
 
-	refs, err := testQueryFilterOrSetup(projectID)
+func TestQueryFilterOr(t *testing.T) {
+	pid := getProjectID(t)
+
+	refs, err := testQueryFilterOrSetup(pid)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
-		err := testQueryFilterOrCleanup(projectID, refs)
+		err := testQueryFilterOrCleanup(pid, refs)
 		if err != nil {
 			t.Fatal(err)
 		}
 	})
 
 	var buf bytes.Buffer
-	err = queryFilterOr(&buf, projectID)
+	err = queryFilterOr(&buf, pid)
 	if err != nil {
 		t.Fatal(err)
 	}

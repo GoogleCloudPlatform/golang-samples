@@ -59,7 +59,7 @@ func vectorSearchSetup(t *testing.T) func() {
 	cleanups = append(cleanups, cleanupDocs)
 
 	// Wait for single field indexes to get created
-	time.Sleep(30 * time.Second)
+	waitForDocuments(t, projectID, vectorCollName, 3)
 
 	// Create indexes
 	indexFields := [][]*adminpb.Index_IndexField{
@@ -252,4 +252,33 @@ func deleteTestCollection(t *testing.T, projectID, collName string) {
 			}
 		})
 	}
+}
+
+func waitForDocuments(t *testing.T, projectID, collName string, expectedCount int) {
+	ctx := context.Background()
+	client, err := firestore.NewClient(ctx, projectID)
+	if err != nil {
+		t.Fatalf("Failed to create client: %v", err)
+	}
+	defer client.Close()
+
+	for i := 0; i < 30; i++ {
+		iter := client.Collection(collName).Documents(ctx)
+		count := 0
+		for {
+			_, err := iter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				t.Fatalf("Failed to iterate: %v", err)
+			}
+			count++
+		}
+		if count >= expectedCount {
+			return
+		}
+		time.Sleep(1 * time.Second)
+	}
+	t.Fatalf("Timed out waiting for documents to be indexed")
 }
