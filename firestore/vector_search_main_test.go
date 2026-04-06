@@ -17,8 +17,6 @@ package firestore
 import (
 	"context"
 	"fmt"
-	"log"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -31,12 +29,11 @@ import (
 )
 
 func TestVectorSearchMain(t *testing.T) {
-	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
 	if projectID == "" {
 		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
 	}
 
-	vsCleanup := vectorSearchSetup()
+	vsCleanup := vectorSearchSetup(t)
 	defer vsCleanup()
 
 	t.Run("vector_search_basic", testVectorSearchBasic)
@@ -47,7 +44,7 @@ func TestVectorSearchMain(t *testing.T) {
 	t.Run("store_vectors", testStoreVectors)
 }
 
-func vectorSearchSetup() func() {
+func vectorSearchSetup(t *testing.T) func() {
 	vectorCollName := "coffee-beans"
 	vectorQueryFieldPath := "embedding_field"
 	vectorFieldDimension := int32(3)
@@ -55,10 +52,10 @@ func vectorSearchSetup() func() {
 	cleanups := []func(){}
 
 	// Delete existing documents
-	deleteTestCollection(projectID, vectorCollName)
+	deleteTestCollection(t, projectID, vectorCollName)
 
 	// Create documents
-	cleanupDocs := createCoffeeBeans(projectID, vectorCollName)
+	cleanupDocs := createCoffeeBeans(t, projectID, vectorCollName)
 	cleanups = append(cleanups, cleanupDocs)
 
 	// Wait for single field indexes to get created
@@ -101,7 +98,7 @@ func vectorSearchSetup() func() {
 		},
 	}
 	for _, fields := range indexFields {
-		cleanup := createVectorIndex(projectID, vectorCollName, fields)
+		cleanup := createVectorIndex(t, projectID, vectorCollName, fields)
 		cleanups = append(cleanups, cleanup)
 	}
 
@@ -112,14 +109,14 @@ func vectorSearchSetup() func() {
 	}
 }
 
-func createVectorIndex(projectID, collName string, fields []*adminpb.Index_IndexField) func() {
+func createVectorIndex(t *testing.T, projectID, collName string, fields []*adminpb.Index_IndexField) func() {
 	dbPath := "projects/" + projectID + "/databases/(default)"
 	ctx := context.Background()
 
 	// Create client
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 	defer client.Close()
 
@@ -128,7 +125,7 @@ func createVectorIndex(projectID, collName string, fields []*adminpb.Index_Index
 	// Create admin client
 	adminClient, err := apiv1.NewFirestoreAdminClient(ctx)
 	if err != nil {
-		log.Fatalf("NewFirestoreAdminClient: %v", err)
+		t.Fatalf("NewFirestoreAdminClient: %v", err)
 	}
 	defer adminClient.Close()
 
@@ -148,25 +145,25 @@ func createVectorIndex(projectID, collName string, fields []*adminpb.Index_Index
 			return func() {}
 		}
 
-		log.Fatalf("CreateIndex: %v", createErr)
+		t.Fatalf("CreateIndex: %v", createErr)
 	}
 	createdIndex, waitErr := op.Wait(ctx)
 	if waitErr != nil {
-		log.Fatalf("op.Wait: %v", waitErr)
+		t.Fatalf("op.Wait: %v", waitErr)
 	}
 
 	return func() {
-		deleteIndex(createdIndex.Name)
+		deleteIndex(t, createdIndex.Name)
 	}
 }
 
-func deleteIndex(indexName string) {
+func deleteIndex(t *testing.T, indexName string) {
 	ctx := context.Background()
 
 	// Create admin client
 	adminClient, err := apiv1.NewFirestoreAdminClient(ctx)
 	if err != nil {
-		log.Printf("NewFirestoreAdminClient: %v", err)
+		t.Logf("NewFirestoreAdminClient: %v", err)
 		return
 	}
 	defer adminClient.Close()
@@ -175,15 +172,15 @@ func deleteIndex(indexName string) {
 	if err = adminClient.DeleteIndex(ctx, &adminpb.DeleteIndexRequest{
 		Name: indexName,
 	}); err != nil {
-		log.Printf("Failed to delete index \"%s\": %+v\n", indexName, err)
+		t.Logf("Failed to delete index \"%s\": %+v\n", indexName, err)
 	}
 }
 
-func createCoffeeBeans(projectID string, collName string) func() {
+func createCoffeeBeans(t *testing.T, projectID string, collName string) func() {
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	docs := []CoffeeBean{
@@ -212,7 +209,7 @@ func createCoffeeBeans(projectID string, collName string) func() {
 		ref := client.Collection(collName).NewDoc()
 		docRefs = append(docRefs, ref)
 		if _, err = ref.Set(ctx, doc); err != nil {
-			log.Fatalf("failed to upsert: %v", err)
+			t.Fatalf("failed to upsert: %v", err)
 		}
 	}
 
@@ -221,7 +218,7 @@ func createCoffeeBeans(projectID string, collName string) func() {
 			testutil.RetryWithoutTest(5, 5*time.Second, func(r *testutil.R) {
 				_, err := ref.Delete(ctx)
 				if err != nil {
-					log.Printf("Error deleting document %v: %s", ref, err)
+					t.Logf("Error deleting document %v: %s", ref, err)
 					r.Fail()
 				}
 			})
@@ -229,11 +226,11 @@ func createCoffeeBeans(projectID string, collName string) func() {
 	}
 }
 
-func deleteTestCollection(projectID, collName string) {
+func deleteTestCollection(t *testing.T, projectID, collName string) {
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
+		t.Fatalf("Failed to create client: %v", err)
 	}
 	defer client.Close()
 
@@ -245,12 +242,12 @@ func deleteTestCollection(projectID, collName string) {
 			break
 		}
 		if err != nil {
-			log.Fatalf("Failed to iterate: %v", err)
+			t.Fatalf("Failed to iterate: %v", err)
 		}
 		testutil.RetryWithoutTest(5, 5*time.Second, func(r *testutil.R) {
 			_, err = doc.Ref.Delete(ctx)
 			if err != nil {
-				log.Printf("Error deleting document %v: %s", doc.Ref, err)
+				t.Logf("Error deleting document %v: %s", doc.Ref, err)
 				r.Fail()
 			}
 		})

@@ -15,13 +15,15 @@
 package firestore
 
 import (
+	"os"
 	"testing"
 )
 
 var projectID string
 
 func TestMain(m *testing.M) {
+	projectID = os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
+
 	// Run the test
 	m.Run()
 }
-

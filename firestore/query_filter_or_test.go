@@ -17,7 +17,7 @@ package firestore
 import (
 	"bytes"
 	"context"
-	"log"
+	"os"
 	"strings"
 	"testing"
 
@@ -25,11 +25,13 @@ import (
 )
 
 func testQueryFilterOrSetup(projectID string) ([]*firestore.DocumentRef, error) {
-		ctx := context.Background()
+	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
 		return nil, err
 	}
+	defer client.Close()
+
 	bw := client.BulkWriter(ctx)
 	colName := "users"
 
@@ -48,7 +50,6 @@ func testQueryFilterOrSetup(projectID string) ([]*firestore.DocumentRef, error) 
 		ref := client.Collection(colName).Doc(d.shortName)
 		_, err := bw.Create(ref, map[string]interface{}{"birthYear": d.birthYear})
 		if err != nil {
-			log.Fatal(err)
 			return nil, err
 		}
 		refs = append(refs, ref)
@@ -57,12 +58,13 @@ func testQueryFilterOrSetup(projectID string) ([]*firestore.DocumentRef, error) 
 	return refs, nil
 }
 
-func testQueryFilterOrCleanup(refs []*firestore.DocumentRef) error {
-			ctx := context.Background()
+func testQueryFilterOrCleanup(projectID string, refs []*firestore.DocumentRef) error {
+	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
 	// New BulkWriter instance
 	bw := client.BulkWriter(ctx)
@@ -70,7 +72,6 @@ func testQueryFilterOrCleanup(refs []*firestore.DocumentRef) error {
 	for _, d := range refs {
 		_, err := bw.Delete(d)
 		if err != nil {
-			log.Fatal(err)
 			return err
 		}
 	}
@@ -79,12 +80,17 @@ func testQueryFilterOrCleanup(refs []*firestore.DocumentRef) error {
 }
 
 func TestQueryFilterOr(t *testing.T) {
+	projectID = os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
+	if projectID == "" {
+		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
+	}
+
 	refs, err := testQueryFilterOrSetup(projectID)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
-		err := testQueryFilterOrCleanup(refs)
+		err := testQueryFilterOrCleanup(projectID, refs)
 		if err != nil {
 			t.Fatal(err)
 		}
