@@ -24,7 +24,7 @@ import (
 
 func wherePipeline(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START pipeline_where]
+	// [START firestore_pipeline_where]
 	results1, err := client.Pipeline().
 		Collection("books").
 		Where(firestore.FieldOf("rating").Equal(5)).
@@ -44,7 +44,7 @@ func wherePipeline(w io.Writer, client *firestore.Client) error {
 	if err != nil {
 		return err
 	}
-	// [END pipeline_where]
+	// [END firestore_pipeline_where]
 	fmt.Fprintln(w, results1)
 	fmt.Fprintln(w, results2)
 	return nil
@@ -52,11 +52,11 @@ func wherePipeline(w io.Writer, client *firestore.Client) error {
 
 func whereEqualityExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START where_equality_example]
+	// [START firestore_where_equality_example]
 	snapshot := client.Pipeline().Collection("cities").
 		Where(firestore.FieldOf("state").Equal("CA")).
 		Execute(ctx)
-	// [END where_equality_example]
+	// [END firestore_where_equality_example]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -67,12 +67,12 @@ func whereEqualityExample(w io.Writer, client *firestore.Client) error {
 
 func whereMultipleStagesExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START where_multiple_stages]
+	// [START firestore_where_multiple_stages]
 	snapshot := client.Pipeline().Collection("cities").
 		Where(firestore.FieldOf("location.country").Equal("USA")).
 		Where(firestore.FieldOf("population").GreaterThan(500000)).
 		Execute(ctx)
-	// [END where_multiple_stages]
+	// [END firestore_where_multiple_stages]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -83,7 +83,7 @@ func whereMultipleStagesExample(w io.Writer, client *firestore.Client) error {
 
 func whereComplexExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START where_complex]
+	// [START firestore_where_complex]
 	snapshot := client.Pipeline().Collection("cities").
 		Where(
 			firestore.Or(
@@ -95,7 +95,7 @@ func whereComplexExample(w io.Writer, client *firestore.Client) error {
 			),
 		).
 		Execute(ctx)
-	// [END where_complex]
+	// [END firestore_where_complex]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -106,12 +106,12 @@ func whereComplexExample(w io.Writer, client *firestore.Client) error {
 
 func whereStageOrderExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START where_stage_order]
+	// [START firestore_where_stage_order]
 	snapshot := client.Pipeline().Collection("cities").
 		Limit(10).
 		Where(firestore.FieldOf("location.country").Equal("USA")).
 		Execute(ctx)
-	// [END where_stage_order]
+	// [END firestore_where_stage_order]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -122,7 +122,7 @@ func whereStageOrderExample(w io.Writer, client *firestore.Client) error {
 
 func createWhereData(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START create_where_data]
+	// [START firestore_create_where_data]
 	client.Collection("cities").Doc("SF").Set(ctx, map[string]any{
 		"name":       "San Francisco",
 		"state":      "CA",
@@ -153,6 +153,6 @@ func createWhereData(w io.Writer, client *firestore.Client) error {
 		"country":    "Mexico",
 		"population": 9200000,
 	})
-	// [END create_where_data]
+	// [END firestore_create_where_data]
 	return nil
 }

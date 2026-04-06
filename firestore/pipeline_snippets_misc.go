@@ -24,7 +24,7 @@ import (
 
 func stagesExpressionsExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START stages_expressions_example]
+	// [START firestore_stages_expressions_example]
 	nowMillis := firestore.ConstantOf(1712404800000) // Example timestamp
 	trailing30Days := nowMillis.UnixMillisToTimestamp().TimestampSubtract("day", 30)
 
@@ -37,7 +37,7 @@ func stagesExpressionsExample(w io.Writer, client *firestore.Client) error {
 	if err != nil {
 		return err
 	}
-	// [END stages_expressions_example]
+	// [END firestore_stages_expressions_example]
 	fmt.Fprintln(w, results)
 	return nil
 }

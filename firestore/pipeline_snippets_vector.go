@@ -24,7 +24,7 @@ import (
 
 func cosineDistanceFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START cosine_distance]
+	// [START firestore_cosine_distance]
 	sampleVector := []float64{0.0, 1.0, 2.0, 3.0, 4.0, 5.0}
 	snapshot := client.Pipeline().
 		Collection("books").
@@ -32,7 +32,7 @@ func cosineDistanceFunction(w io.Writer, client *firestore.Client) error {
 			firestore.CosineDistance(firestore.FieldOf("embedding"), sampleVector).As("cosineDistance"),
 		)).
 		Execute(ctx)
-	// [END cosine_distance]
+	// [END firestore_cosine_distance]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -43,7 +43,7 @@ func cosineDistanceFunction(w io.Writer, client *firestore.Client) error {
 
 func dotProductFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START dot_product]
+	// [START firestore_dot_product]
 	sampleVector := []float64{0.0, 1.0, 2.0, 3.0, 4.0, 5.0}
 	snapshot := client.Pipeline().
 		Collection("books").
@@ -51,7 +51,7 @@ func dotProductFunction(w io.Writer, client *firestore.Client) error {
 			firestore.DotProduct(firestore.FieldOf("embedding"), sampleVector).As("dotProduct"),
 		)).
 		Execute(ctx)
-	// [END dot_product]
+	// [END firestore_dot_product]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -62,7 +62,7 @@ func dotProductFunction(w io.Writer, client *firestore.Client) error {
 
 func euclideanDistanceFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START euclidean_distance]
+	// [START firestore_euclidean_distance]
 	sampleVector := []float64{0.0, 1.0, 2.0, 3.0, 4.0, 5.0}
 	snapshot := client.Pipeline().
 		Collection("books").
@@ -70,7 +70,7 @@ func euclideanDistanceFunction(w io.Writer, client *firestore.Client) error {
 			firestore.EuclideanDistance(firestore.FieldOf("embedding"), sampleVector).As("euclideanDistance"),
 		)).
 		Execute(ctx)
-	// [END euclidean_distance]
+	// [END firestore_euclidean_distance]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -81,14 +81,14 @@ func euclideanDistanceFunction(w io.Writer, client *firestore.Client) error {
 
 func vectorLengthFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START vector_length]
+	// [START firestore_vector_length]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.VectorLength(firestore.FieldOf("embedding")).As("vectorLength"),
 		)).
 		Execute(ctx)
-	// [END vector_length]
+	// [END firestore_vector_length]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -99,11 +99,11 @@ func vectorLengthFunction(w io.Writer, client *firestore.Client) error {
 
 func findNearestSyntaxExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START find_nearest_syntax]
+	// [START firestore_find_nearest_syntax]
 	snapshot := client.Pipeline().Collection("cities").
 		FindNearest("embedding", []float64{1.5, 2.345}, firestore.PipelineDistanceMeasureEuclidean).
 		Execute(ctx)
-	// [END find_nearest_syntax]
+	// [END firestore_find_nearest_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -114,11 +114,11 @@ func findNearestSyntaxExample(w io.Writer, client *firestore.Client) error {
 
 func findNearestLimitExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START find_nearest_limit]
+	// [START firestore_find_nearest_limit]
 	snapshot := client.Pipeline().Collection("cities").
 		FindNearest("embedding", []float64{1.5, 2.345}, firestore.PipelineDistanceMeasureEuclidean, firestore.WithFindNearestLimit(10)).
 		Execute(ctx)
-	// [END find_nearest_limit]
+	// [END firestore_find_nearest_limit]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -129,7 +129,7 @@ func findNearestLimitExample(w io.Writer, client *firestore.Client) error {
 
 func findNearestDistanceDataExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START find_nearest_distance_data]
+	// [START firestore_find_nearest_distance_data]
 	client.Collection("cities").Doc("SF").Set(ctx, map[string]any{
 		"name":      "San Francisco",
 		"embedding": []float64{1.0, -1.0},
@@ -142,17 +142,17 @@ func findNearestDistanceDataExample(w io.Writer, client *firestore.Client) error
 		"name":      "Atlantis",
 		"embedding": []float64{2.0, -4.0},
 	})
-	// [END find_nearest_distance_data]
+	// [END firestore_find_nearest_distance_data]
 	return nil
 }
 
 func findNearestDistanceExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START find_nearest_distance]
+	// [START firestore_find_nearest_distance]
 	snapshot := client.Pipeline().Collection("cities").
 		FindNearest("embedding", []float64{1.3, 2.345}, firestore.PipelineDistanceMeasureEuclidean, firestore.WithFindNearestDistanceField("computedDistance")).
 		Execute(ctx)
-	// [END find_nearest_distance]
+	// [END firestore_find_nearest_distance]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err

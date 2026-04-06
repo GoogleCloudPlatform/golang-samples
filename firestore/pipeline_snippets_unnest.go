@@ -24,12 +24,12 @@ import (
 
 func unnestStage(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START unnest_stage]
+	// [START firestore_unnest_stage]
 	snapshot := client.Pipeline().
 		Database().
 		UnnestWithAlias("arrayField", "unnestedArrayField", firestore.WithUnnestIndexField("index")).
 		Execute(ctx)
-	// [END unnest_stage]
+	// [END firestore_unnest_stage]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -40,7 +40,7 @@ func unnestStage(w io.Writer, client *firestore.Client) error {
 
 func unnestStageEmptyOrNonArray(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START unnest_edge_cases]
+	// [START firestore_unnest_edge_cases]
 	// Input
 	// { "identifier" : 1, "neighbors": [ "Alice", "Cathy" ] }
 	// { "identifier" : 2, "neighbors": []                   }
@@ -60,18 +60,18 @@ func unnestStageEmptyOrNonArray(w io.Writer, client *firestore.Client) error {
 	// { "identifier": 1, "neighbors": [ "Alice", "Cathy" ],
 	//   "unnestedNeighbors": "Cathy", "index": 1 }
 	// { "identifier": 3, "neighbors": "Bob", "index": nil}
-	// [END unnest_edge_cases]
+	// [END firestore_unnest_edge_cases]
 	fmt.Fprintln(w, results)
 	return nil
 }
 
 func unnestSyntaxExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START unnest_syntax]
+	// [START firestore_unnest_syntax]
 	snapshot := client.Pipeline().Collection("users").
 		UnnestWithAlias("scores", "userScore", firestore.WithUnnestIndexField("attempt")).
 		Execute(ctx)
-	// [END unnest_syntax]
+	// [END firestore_unnest_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -82,7 +82,7 @@ func unnestSyntaxExample(w io.Writer, client *firestore.Client) error {
 
 func unnestAliasIndexDataExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START unnest_alias_index_data]
+	// [START firestore_unnest_alias_index_data]
 	client.Collection("users").Add(ctx, map[string]any{
 		"name":      "foo",
 		"scores":    []int{5, 4},
@@ -93,17 +93,17 @@ func unnestAliasIndexDataExample(w io.Writer, client *firestore.Client) error {
 		"scores":  []int{1, 3},
 		"attempt": 5,
 	})
-	// [END unnest_alias_index_data]
+	// [END firestore_unnest_alias_index_data]
 	return nil
 }
 
 func unnestAliasIndexExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START unnest_alias_index]
+	// [START firestore_unnest_alias_index]
 	snapshot := client.Pipeline().Collection("users").
 		UnnestWithAlias("scores", "userScore", firestore.WithUnnestIndexField("attempt")).
 		Execute(ctx)
-	// [END unnest_alias_index]
+	// [END firestore_unnest_alias_index]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -114,7 +114,7 @@ func unnestAliasIndexExample(w io.Writer, client *firestore.Client) error {
 
 func unnestNonArrayDataExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START unnest_nonarray_data]
+	// [START firestore_unnest_nonarray_data]
 	client.Collection("users").Add(ctx, map[string]any{
 		"name":   "foo",
 		"scores": 1,
@@ -129,17 +129,17 @@ func unnestNonArrayDataExample(w io.Writer, client *firestore.Client) error {
 			"backupScores": 1,
 		},
 	})
-	// [END unnest_nonarray_data]
+	// [END firestore_unnest_nonarray_data]
 	return nil
 }
 
 func unnestNonArrayExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START unnest_nonarray]
+	// [START firestore_unnest_nonarray]
 	snapshot := client.Pipeline().Collection("users").
 		UnnestWithAlias("scores", "userScore", firestore.WithUnnestIndexField("attempt")).
 		Execute(ctx)
-	// [END unnest_nonarray]
+	// [END firestore_unnest_nonarray]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -150,7 +150,7 @@ func unnestNonArrayExample(w io.Writer, client *firestore.Client) error {
 
 func unnestEmptyArrayDataExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START unnest_empty_array_data]
+	// [START firestore_unnest_empty_array_data]
 	client.Collection("users").Add(ctx, map[string]any{
 		"name":   "foo",
 		"scores": []int{5, 4},
@@ -159,17 +159,17 @@ func unnestEmptyArrayDataExample(w io.Writer, client *firestore.Client) error {
 		"name":   "bar",
 		"scores": []int{},
 	})
-	// [END unnest_empty_array_data]
+	// [END firestore_unnest_empty_array_data]
 	return nil
 }
 
 func unnestEmptyArrayExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START unnest_empty_array]
+	// [START firestore_unnest_empty_array]
 	snapshot := client.Pipeline().Collection("users").
 		UnnestWithAlias("scores", "userScore", firestore.WithUnnestIndexField("attempt")).
 		Execute(ctx)
-	// [END unnest_empty_array]
+	// [END firestore_unnest_empty_array]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -180,7 +180,7 @@ func unnestEmptyArrayExample(w io.Writer, client *firestore.Client) error {
 
 func unnestPreserveEmptyArrayExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START unnest_preserve_empty_array]
+	// [START firestore_unnest_preserve_empty_array]
 	userScore, err := client.Pipeline().
 		Collection("users").
 		Unnest(firestore.Conditional(
@@ -192,14 +192,14 @@ func unnestPreserveEmptyArrayExample(w io.Writer, client *firestore.Client) erro
 	if err != nil {
 		return err
 	}
-	// [END unnest_preserve_empty_array]
+	// [END firestore_unnest_preserve_empty_array]
 	fmt.Fprintln(w, userScore)
 	return nil
 }
 
 func unnestNestedDataExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START unnest_nested_data]
+	// [START firestore_unnest_nested_data]
 	client.Collection("users").Add(ctx, map[string]any{
 		"name": "foo",
 		"record": []any{
@@ -213,18 +213,18 @@ func unnestNestedDataExample(w io.Writer, client *firestore.Client) error {
 			},
 		},
 	})
-	// [END unnest_nested_data]
+	// [END firestore_unnest_nested_data]
 	return nil
 }
 
 func unnestNestedExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START unnest_nested]
+	// [START firestore_unnest_nested]
 	snapshot := client.Pipeline().Collection("users").
 		UnnestWithAlias("record", "record").
 		UnnestWithAlias("record.scores", "userScore", firestore.WithUnnestIndexField("attempt")).
 		Execute(ctx)
-	// [END unnest_nested]
+	// [END firestore_unnest_nested]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err

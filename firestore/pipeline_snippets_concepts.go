@@ -24,20 +24,20 @@ import (
 )
 
 func pipelineConcepts(w io.Writer, client *firestore.Client) error {
-	// [START pipeline_concepts]
+	// [START firestore_pipeline_concepts]
 	pipeline := client.Pipeline().
 		Collection("cities").
 		Where(firestore.FieldOf("population").GreaterThan(100000)).
 		Sort(firestore.Orders(firestore.Ascending(firestore.FieldOf("name")))).
 		Limit(10)
-	// [END pipeline_concepts]
+	// [END firestore_pipeline_concepts]
 	fmt.Fprintln(w, pipeline)
 	return nil
 }
 
 func basicRead(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START basic_read]
+	// [START firestore_basic_read]
 	pipeline := client.Pipeline().Collection("users")
 	snapshot := pipeline.Execute(ctx)
 	results, err := snapshot.Results().GetAll()
@@ -59,35 +59,36 @@ func basicRead(w io.Writer, client *firestore.Client) error {
 		}
 		fmt.Fprintf(w, "%s => %v\n", result.Ref().ID, result.Data())
 	}
-	// [END basic_read]
+	// [END firestore_basic_read]
 	return nil
 }
 
 func pipelineInitialization(w io.Writer, projectID string) error {
 	ctx := context.Background()
-	// [START pipeline_initialization]
+	// [START firestore_pipeline_initialization]
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
 		return err
 	}
 	pipeline := client.Pipeline().Collection("books")
-	// [END pipeline_initialization]
+	// [END firestore_pipeline_initialization]
 	fmt.Fprintln(w, pipeline)
+	defer client.Close()
 	return nil
 }
 
 func fieldVsConstants(w io.Writer, client *firestore.Client) error {
-	// [START field_or_constant]
+	// [START firestore_field_or_constant]
 	pipeline := client.Pipeline().Collection("cities").
 		Where(firestore.FieldOf("name").Equal(firestore.ConstantOf("Toronto")))
-	// [END field_or_constant]
+	// [END firestore_field_or_constant]
 	fmt.Fprintln(w, pipeline)
 	return nil
 }
 
 func inputStages(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START input_stages]
+	// [START firestore_input_stages]
 	// Return all restaurants in San Francisco
 	results1, err := client.Pipeline().Collection("cities/sf/restaurants").Execute(ctx).Results().GetAll()
 	if err != nil {
@@ -117,7 +118,7 @@ func inputStages(w io.Writer, client *firestore.Client) error {
 	if err != nil {
 		return err
 	}
-	// [END input_stages]
+	// [END firestore_input_stages]
 	fmt.Fprintln(w, results1)
 	fmt.Fprintln(w, results2)
 	fmt.Fprintln(w, results3)

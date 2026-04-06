@@ -24,7 +24,7 @@ import (
 
 func sort(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START sort]
+	// [START firestore_sort]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Sort(firestore.Orders(
@@ -32,7 +32,7 @@ func sort(w io.Writer, client *firestore.Client) error {
 			firestore.Ascending(firestore.FieldOf("author")),
 		)).
 		Execute(ctx)
-	// [END sort]
+	// [END firestore_sort]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -42,7 +42,7 @@ func sort(w io.Writer, client *firestore.Client) error {
 }
 
 func sortComparison(w io.Writer, client *firestore.Client) error {
-	// [START sort_comparison]
+	// [START firestore_sort_comparison]
 	query := client.Collection("cities").
 		OrderBy("state", firestore.Asc).
 		OrderBy("population", firestore.Desc)
@@ -53,7 +53,7 @@ func sortComparison(w io.Writer, client *firestore.Client) error {
 			firestore.Descending(firestore.FieldOf("release_date")),
 			firestore.Ascending(firestore.FieldOf("author")),
 		))
-	// [END sort_comparison]
+	// [END firestore_sort_comparison]
 	fmt.Fprintln(w, query)
 	fmt.Fprintln(w, pipeline)
 	return nil
@@ -61,11 +61,11 @@ func sortComparison(w io.Writer, client *firestore.Client) error {
 
 func sortSyntaxExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START sort_syntax]
+	// [START firestore_sort_syntax]
 	snapshot := client.Pipeline().Collection("cities").
 		Sort(firestore.Orders(firestore.Ascending(firestore.FieldOf("population")))).
 		Execute(ctx)
-	// [END sort_syntax]
+	// [END firestore_sort_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -76,11 +76,11 @@ func sortSyntaxExample(w io.Writer, client *firestore.Client) error {
 
 func sortSyntaxExample2(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START sort_syntax_2]
+	// [START firestore_sort_syntax_2]
 	snapshot := client.Pipeline().Collection("cities").
 		Sort(firestore.Orders(firestore.Ascending(firestore.CharLength(firestore.FieldOf("name"))))).
 		Execute(ctx)
-	// [END sort_syntax_2]
+	// [END firestore_sort_syntax_2]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -91,14 +91,14 @@ func sortSyntaxExample2(w io.Writer, client *firestore.Client) error {
 
 func sortDocumentIDExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START sort_document_id]
+	// [START firestore_sort_document_id]
 	snapshot := client.Pipeline().Collection("cities").
 		Sort(firestore.Orders(
 			firestore.Ascending(firestore.FieldOf("country")),
 			firestore.Ascending(firestore.FieldOf("__name__")),
 		)).
 		Execute(ctx)
-	// [END sort_document_id]
+	// [END firestore_sort_document_id]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err

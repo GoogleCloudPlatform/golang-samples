@@ -24,7 +24,7 @@ import (
 
 func creatingIndexes(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START query_example]
+	// [START firestore_query_example]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Where(firestore.FieldOf("published").LessThan(1900)).
@@ -32,7 +32,7 @@ func creatingIndexes(w io.Writer, client *firestore.Client) error {
 		Where(firestore.FieldOf("rating").GreaterThan(4.3)).
 		Sort(firestore.Orders(firestore.Descending(firestore.FieldOf("published")))).
 		Execute(ctx)
-	// [END query_example]
+	// [END firestore_query_example]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -43,12 +43,12 @@ func creatingIndexes(w io.Writer, client *firestore.Client) error {
 
 func sparseIndexes(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START sparse_index_example]
+	// [START firestore_sparse_index_example]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Where(firestore.FieldOf("category").Like("%fantasy%")).
 		Execute(ctx)
-	// [END sparse_index_example]
+	// [END firestore_sparse_index_example]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -59,12 +59,12 @@ func sparseIndexes(w io.Writer, client *firestore.Client) error {
 
 func sparseIndexes2(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START sparse_index_example_2]
+	// [START firestore_sparse_index_example_2]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Sort(firestore.Orders(firestore.Ascending(firestore.FieldOf("release_date")))).
 		Execute(ctx)
-	// [END sparse_index_example_2]
+	// [END firestore_sparse_index_example_2]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -75,7 +75,7 @@ func sparseIndexes2(w io.Writer, client *firestore.Client) error {
 
 func coveredQuery(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START covered_query]
+	// [START firestore_covered_query]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Where(firestore.FieldOf("category").Like("%fantasy%")).
@@ -83,7 +83,7 @@ func coveredQuery(w io.Writer, client *firestore.Client) error {
 		Where(firestore.FieldOf("author").FieldExists()).
 		Select(firestore.Fields("title", "author")).
 		Execute(ctx)
-	// [END covered_query]
+	// [END firestore_covered_query]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -93,7 +93,7 @@ func coveredQuery(w io.Writer, client *firestore.Client) error {
 }
 
 func pagination(w io.Writer, client *firestore.Client) error {
-	// [START pagination_not_supported_preview]
+	// [START firestore_pagination_not_supported_preview]
 	// Existing pagination via `StartAt()`
 	query := client.Collection("cities").OrderBy("population", firestore.Asc).StartAt(1000000)
 
@@ -101,7 +101,7 @@ func pagination(w io.Writer, client *firestore.Client) error {
 		Collection("cities").
 		Where(firestore.FieldOf("population").GreaterThanOrEqual(1000000)).
 		Sort(firestore.Orders(firestore.Descending(firestore.FieldOf("population"))))
-	// [END pagination_not_supported_preview]
+	// [END firestore_pagination_not_supported_preview]
 	fmt.Fprintln(w, query)
 	fmt.Fprintln(w, pipeline)
 	return nil
@@ -109,12 +109,12 @@ func pagination(w io.Writer, client *firestore.Client) error {
 
 func collectionStage(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START collection_example]
+	// [START firestore_collection_example]
 	snapshot := client.Pipeline().
 		Collection("users/bob/games").
 		Sort(firestore.Orders(firestore.Ascending(firestore.FieldOf("name")))).
 		Execute(ctx)
-	// [END collection_example]
+	// [END firestore_collection_example]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -125,12 +125,12 @@ func collectionStage(w io.Writer, client *firestore.Client) error {
 
 func collectionGroupStage(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START collection_group_example]
+	// [START firestore_collection_group_example]
 	snapshot := client.Pipeline().
 		CollectionGroup("games").
 		Sort(firestore.Orders(firestore.Ascending(firestore.FieldOf("name")))).
 		Execute(ctx)
-	// [END collection_group_example]
+	// [END firestore_collection_group_example]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -141,13 +141,13 @@ func collectionGroupStage(w io.Writer, client *firestore.Client) error {
 
 func databaseStage(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START database_example]
+	// [START firestore_database_example]
 	// Count all documents in the database
 	snapshot := client.Pipeline().
 		Database().
 		Aggregate(firestore.Accumulators(firestore.CountAll().As("total"))).
 		Execute(ctx)
-	// [END database_example]
+	// [END firestore_database_example]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -158,7 +158,7 @@ func databaseStage(w io.Writer, client *firestore.Client) error {
 
 func documentsStage(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START documents_example]
+	// [START firestore_documents_example]
 	snapshot := client.Pipeline().
 		Documents([]*firestore.DocumentRef{
 			client.Collection("cities").Doc("SF"),
@@ -166,7 +166,7 @@ func documentsStage(w io.Writer, client *firestore.Client) error {
 			client.Collection("cities").Doc("NY"),
 		}).
 		Execute(ctx)
-	// [END documents_example]
+	// [END firestore_documents_example]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -177,7 +177,7 @@ func documentsStage(w io.Writer, client *firestore.Client) error {
 
 func replaceWithStage(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START initial_data]
+	// [START firestore_initial_data]
 	client.Collection("cities").Doc("SF").Set(ctx, map[string]any{
 		"name":       "San Francisco",
 		"population": 800000,
@@ -206,29 +206,29 @@ func replaceWithStage(w io.Writer, client *firestore.Client) error {
 	client.Collection("cities").Doc("AT").Set(ctx, map[string]any{
 		"name": "Atlantis",
 	})
-	// [END initial_data]
+	// [END firestore_initial_data]
 
-	// [START full_replace]
+	// [START firestore_full_replace]
 	snapshot := client.Pipeline().
 		Collection("cities").
 		ReplaceWith(firestore.FieldOf("location")).
 		Execute(ctx)
-	// [END full_replace]
+	// [END firestore_full_replace]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
 	}
 
-	// [START map_merge_overwrite]
+	// [START firestore_map_merge_overwrite]
 	// unsupported in client SDKs for now
-	// [END map_merge_overwrite]
+	// [END firestore_map_merge_overwrite]
 	fmt.Fprintln(w, results)
 	return nil
 }
 
 func sampleStage(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START sample_example]
+	// [START firestore_sample_example]
 	// Get a sample of 100 documents in a database
 	results1, err := client.Pipeline().Database().Sample(firestore.WithDocLimit(100)).Execute(ctx).Results().GetAll()
 	if err != nil {
@@ -247,7 +247,7 @@ func sampleStage(w io.Writer, client *firestore.Client) error {
 	if err != nil {
 		return err
 	}
-	// [END sample_example]
+	// [END firestore_sample_example]
 	fmt.Fprintln(w, results1)
 	fmt.Fprintln(w, results2)
 	return nil
@@ -255,13 +255,13 @@ func sampleStage(w io.Writer, client *firestore.Client) error {
 
 func samplePercent(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START sample_percent]
+	// [START firestore_sample_percent]
 	// Get a sample of on average 50% of the documents in the database
 	snapshot := client.Pipeline().
 		Database().
 		Sample(firestore.WithPercentage(0.5)).
 		Execute(ctx)
-	// [END sample_percent]
+	// [END firestore_sample_percent]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -272,7 +272,7 @@ func samplePercent(w io.Writer, client *firestore.Client) error {
 
 func sampleSyntaxExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START sample_syntax]
+	// [START firestore_sample_syntax]
 	sampled1, err := client.Pipeline().Database().Sample(firestore.WithDocLimit(50)).Execute(ctx).Results().GetAll()
 	if err != nil {
 		return err
@@ -282,15 +282,15 @@ func sampleSyntaxExample(w io.Writer, client *firestore.Client) error {
 	if err != nil {
 		return err
 	}
-	// [END sample_syntax]
+	// [END firestore_sample_syntax]
 	fmt.Fprintln(w, sampled1)
 	fmt.Fprintln(w, sampled2)
 	return nil
 }
 
-func sampleDocumentsDataExample(w io.Writer, client *firestore.Client) error {
+func sampleDocumentsDataExample(_ io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START sample_documents_data]
+	// [START firestore_sample_documents_data]
 	client.Collection("cities").Doc("SF").Set(ctx, map[string]any{
 		"name":  "San Francisco",
 		"state": "California",
@@ -303,15 +303,15 @@ func sampleDocumentsDataExample(w io.Writer, client *firestore.Client) error {
 		"name":  "Chicago",
 		"state": "Illinois",
 	})
-	// [END sample_documents_data]
+	// [END firestore_sample_documents_data]
 	return nil
 }
 
 func sampleDocumentsExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START sample_documents]
+	// [START firestore_sample_documents]
 	snapshot := client.Pipeline().Collection("cities").Sample(firestore.WithDocLimit(1)).Execute(ctx)
-	// [END sample_documents]
+	// [END firestore_sample_documents]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -322,9 +322,9 @@ func sampleDocumentsExample(w io.Writer, client *firestore.Client) error {
 
 func sampleAllDocumentsExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START sample_all_documents]
+	// [START firestore_sample_all_documents]
 	snapshot := client.Pipeline().Collection("cities").Sample(firestore.WithDocLimit(5)).Execute(ctx)
-	// [END sample_all_documents]
+	// [END firestore_sample_all_documents]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -333,9 +333,9 @@ func sampleAllDocumentsExample(w io.Writer, client *firestore.Client) error {
 	return nil
 }
 
-func samplePercentageDataExample(w io.Writer, client *firestore.Client) error {
+func samplePercentageDataExample(_ io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START sample_percentage_data]
+	// [START firestore_sample_percentage_data]
 	client.Collection("cities").Doc("SF").Set(ctx, map[string]any{
 		"name":  "San Francisco",
 		"state": "California",
@@ -352,15 +352,15 @@ func samplePercentageDataExample(w io.Writer, client *firestore.Client) error {
 		"name":  "Atlanta",
 		"state": "Georgia",
 	})
-	// [END sample_percentage_data]
+	// [END firestore_sample_percentage_data]
 	return nil
 }
 
 func samplePercentageExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START sample_percentage]
+	// [START firestore_sample_percentage]
 	snapshot := client.Pipeline().Collection("cities").Sample(firestore.WithPercentage(0.5)).Execute(ctx)
-	// [END sample_percentage]
+	// [END firestore_sample_percentage]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -371,7 +371,7 @@ func samplePercentageExample(w io.Writer, client *firestore.Client) error {
 
 func unionStage(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START union_stage]
+	// [START firestore_union_stage]
 	snapshot := client.Pipeline().
 		Collection("cities/SF/restaurants").
 		Where(firestore.FieldOf("type").Equal("Chinese")).
@@ -383,7 +383,7 @@ func unionStage(w io.Writer, client *firestore.Client) error {
 		Where(firestore.FieldOf("rating").GreaterThanOrEqual(4.5)).
 		Sort(firestore.Orders(firestore.Descending(firestore.FieldOf("__name__")))).
 		Execute(ctx)
-	// [END union_stage]
+	// [END firestore_union_stage]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -394,7 +394,7 @@ func unionStage(w io.Writer, client *firestore.Client) error {
 
 func unionStageStable(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START union_stage_stable]
+	// [START firestore_union_stage_stable]
 	snapshot := client.Pipeline().
 		Collection("cities/SF/restaurants").
 		Where(firestore.FieldOf("type").Equal("Chinese")).
@@ -406,7 +406,7 @@ func unionStageStable(w io.Writer, client *firestore.Client) error {
 		Where(firestore.FieldOf("rating").GreaterThanOrEqual(4.5)).
 		Sort(firestore.Orders(firestore.Descending(firestore.FieldOf("__name__")))).
 		Execute(ctx)
-	// [END union_stage_stable]
+	// [END firestore_union_stage_stable]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -417,9 +417,9 @@ func unionStageStable(w io.Writer, client *firestore.Client) error {
 
 func offsetSyntaxExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START offset_syntax]
+	// [START firestore_offset_syntax]
 	snapshot := client.Pipeline().Collection("cities").Offset(10).Execute(ctx)
-	// [END offset_syntax]
+	// [END firestore_offset_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -430,9 +430,9 @@ func offsetSyntaxExample(w io.Writer, client *firestore.Client) error {
 
 func collectionInputSyntaxExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START collection_input_syntax]
+	// [START firestore_collection_input_syntax]
 	snapshot := client.Pipeline().Collection("cities/SF/departments").Execute(ctx)
-	// [END collection_input_syntax]
+	// [END firestore_collection_input_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -441,9 +441,9 @@ func collectionInputSyntaxExample(w io.Writer, client *firestore.Client) error {
 	return nil
 }
 
-func collectionInputExampleData(w io.Writer, client *firestore.Client) error {
+func collectionInputExampleData(_ io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START collection_input_data]
+	// [START firestore_collection_input_data]
 	client.Collection("cities").Doc("SF").Set(ctx, map[string]any{
 		"name":  "San Francisco",
 		"state": "California",
@@ -459,17 +459,17 @@ func collectionInputExampleData(w io.Writer, client *firestore.Client) error {
 	client.Collection("states").Doc("CA").Set(ctx, map[string]any{
 		"name": "California",
 	})
-	// [END collection_input_data]
+	// [END firestore_collection_input_data]
 	return nil
 }
 
 func collectionInputExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START collection_input]
+	// [START firestore_collection_input]
 	snapshot := client.Pipeline().Collection("cities").
 		Sort(firestore.Orders(firestore.Ascending(firestore.FieldOf("name")))).
 		Execute(ctx)
-	// [END collection_input]
+	// [END firestore_collection_input]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -478,9 +478,9 @@ func collectionInputExample(w io.Writer, client *firestore.Client) error {
 	return nil
 }
 
-func subcollectionInputExampleData(w io.Writer, client *firestore.Client) error {
+func subcollectionInputExampleData(_ io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START subcollection_input_data]
+	// [START firestore_subcollection_input_data]
 	client.Collection("cities/SF/departments").Doc("building").Set(ctx, map[string]any{
 		"name":      "SF Building Department",
 		"employees": 750,
@@ -497,17 +497,17 @@ func subcollectionInputExampleData(w io.Writer, client *firestore.Client) error 
 		"name":      "NY Finance Department",
 		"employees": 1200,
 	})
-	// [END subcollection_input_data]
+	// [END firestore_subcollection_input_data]
 	return nil
 }
 
 func subcollectionInputExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START subcollection_input]
+	// [START firestore_subcollection_input]
 	snapshot := client.Pipeline().Collection("cities/NY/departments").
 		Sort(firestore.Orders(firestore.Ascending(firestore.FieldOf("employees")))).
 		Execute(ctx)
-	// [END subcollection_input]
+	// [END firestore_subcollection_input]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -518,9 +518,9 @@ func subcollectionInputExample(w io.Writer, client *firestore.Client) error {
 
 func collectionGroupInputSyntaxExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START collection_group_input_syntax]
+	// [START firestore_collection_group_input_syntax]
 	snapshot := client.Pipeline().CollectionGroup("departments").Execute(ctx)
-	// [END collection_group_input_syntax]
+	// [END firestore_collection_group_input_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -529,9 +529,9 @@ func collectionGroupInputSyntaxExample(w io.Writer, client *firestore.Client) er
 	return nil
 }
 
-func collectionGroupInputExampleData(w io.Writer, client *firestore.Client) error {
+func collectionGroupInputExampleData(_ io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START collection_group_data]
+	// [START firestore_collection_group_data]
 	client.Collection("cities/SF/departments").Doc("building").Set(ctx, map[string]any{
 		"name":      "SF Building Department",
 		"employees": 750,
@@ -548,17 +548,17 @@ func collectionGroupInputExampleData(w io.Writer, client *firestore.Client) erro
 		"name":      "NY Finance Department",
 		"employees": 1200,
 	})
-	// [END collection_group_data]
+	// [END firestore_collection_group_data]
 	return nil
 }
 
 func collectionGroupInputExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START collection_group_input]
+	// [START firestore_collection_group_input]
 	snapshot := client.Pipeline().CollectionGroup("departments").
 		Sort(firestore.Orders(firestore.Ascending(firestore.FieldOf("employees")))).
 		Execute(ctx)
-	// [END collection_group_input]
+	// [END firestore_collection_group_input]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -569,9 +569,9 @@ func collectionGroupInputExample(w io.Writer, client *firestore.Client) error {
 
 func databaseInputSyntaxExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START database_syntax]
+	// [START firestore_database_syntax]
 	snapshot := client.Pipeline().Database().Execute(ctx)
-	// [END database_syntax]
+	// [END firestore_database_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -580,9 +580,9 @@ func databaseInputSyntaxExample(w io.Writer, client *firestore.Client) error {
 	return nil
 }
 
-func databaseInputSyntaxExampleData(w io.Writer, client *firestore.Client) error {
+func databaseInputSyntaxExampleData(_ io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START database_input_data]
+	// [START firestore_database_input_data]
 	client.Collection("cities").Doc("SF").Set(ctx, map[string]any{
 		"name":       "San Francisco",
 		"state":      "California",
@@ -596,17 +596,17 @@ func databaseInputSyntaxExampleData(w io.Writer, client *firestore.Client) error
 		"name":       "United States of America",
 		"population": 340000000,
 	})
-	// [END database_input_data]
+	// [END firestore_database_input_data]
 	return nil
 }
 
 func databaseInputExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START database_input]
+	// [START firestore_database_input]
 	snapshot := client.Pipeline().Database().
 		Sort(firestore.Orders(firestore.Ascending(firestore.FieldOf("population")))).
 		Execute(ctx)
-	// [END database_input]
+	// [END firestore_database_input]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -617,14 +617,14 @@ func databaseInputExample(w io.Writer, client *firestore.Client) error {
 
 func documentInputSyntaxExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START document_input_syntax]
+	// [START firestore_document_input_syntax]
 	snapshot := client.Pipeline().
 		Documents([]*firestore.DocumentRef{
 			client.Collection("cities").Doc("SF"),
 			client.Collection("cities").Doc("NY"),
 		}).
 		Execute(ctx)
-	// [END document_input_syntax]
+	// [END firestore_document_input_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -633,9 +633,9 @@ func documentInputSyntaxExample(w io.Writer, client *firestore.Client) error {
 	return nil
 }
 
-func documentInputExampleData(w io.Writer, client *firestore.Client) error {
+func documentInputExampleData(_ io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START document_input_data]
+	// [START firestore_document_input_data]
 	client.Collection("cities").Doc("SF").Set(ctx, map[string]any{
 		"name":  "San Francisco",
 		"state": "California",
@@ -648,13 +648,13 @@ func documentInputExampleData(w io.Writer, client *firestore.Client) error {
 		"name":  "Chicago",
 		"state": "Illinois",
 	})
-	// [END document_input_data]
+	// [END firestore_document_input_data]
 	return nil
 }
 
 func documentInputExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START document_input]
+	// [START firestore_document_input]
 	snapshot := client.Pipeline().
 		Documents([]*firestore.DocumentRef{
 			client.Collection("cities").Doc("SF"),
@@ -662,7 +662,7 @@ func documentInputExample(w io.Writer, client *firestore.Client) error {
 		}).
 		Sort(firestore.Orders(firestore.Ascending(firestore.FieldOf("name")))).
 		Execute(ctx)
-	// [END document_input]
+	// [END firestore_document_input]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -673,9 +673,9 @@ func documentInputExample(w io.Writer, client *firestore.Client) error {
 
 func limitSyntaxExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START limit_syntax]
+	// [START firestore_limit_syntax]
 	snapshot := client.Pipeline().Collection("cities").Limit(10).Execute(ctx)
-	// [END limit_syntax]
+	// [END firestore_limit_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -686,12 +686,12 @@ func limitSyntaxExample(w io.Writer, client *firestore.Client) error {
 
 func unionSyntaxExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START union_syntax]
+	// [START firestore_union_syntax]
 	snapshot := client.Pipeline().
 		Collection("cities/SF/restaurants").
 		Union(client.Pipeline().Collection("cities/NYC/restaurants")).
 		Execute(ctx)
-	// [END union_syntax]
+	// [END firestore_union_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err

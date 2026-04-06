@@ -24,14 +24,14 @@ import (
 
 func mapGetFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START map_get]
+	// [START firestore_map_get]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.MapGet(firestore.FieldOf("awards"), "pulitzer").As("hasPulitzerAward"),
 		)).
 		Execute(ctx)
-	// [END map_get]
+	// [END firestore_map_get]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -42,14 +42,14 @@ func mapGetFunction(w io.Writer, client *firestore.Client) error {
 
 func mapSetFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START map_set]
+	// [START firestore_map_set]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.MapSet(firestore.FieldOf("awards"), "pulitzer", true).As("awards"),
 		)).
 		Execute(ctx)
-	// [END map_set]
+	// [END firestore_map_set]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -60,14 +60,14 @@ func mapSetFunction(w io.Writer, client *firestore.Client) error {
 
 func mapKeysFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START map_keys]
+	// [START firestore_map_keys]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.MapKeys(firestore.FieldOf("awards")).As("award_categories"),
 		)).
 		Execute(ctx)
-	// [END map_keys]
+	// [END firestore_map_keys]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -78,14 +78,14 @@ func mapKeysFunction(w io.Writer, client *firestore.Client) error {
 
 func mapValuesFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START map_values]
+	// [START firestore_map_values]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.MapValues(firestore.FieldOf("awards")).As("award_details"),
 		)).
 		Execute(ctx)
-	// [END map_values]
+	// [END firestore_map_values]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -96,14 +96,14 @@ func mapValuesFunction(w io.Writer, client *firestore.Client) error {
 
 func mapEntriesFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START map_entries]
+	// [START firestore_map_entries]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.MapEntries(firestore.FieldOf("awards")).As("awards_list"),
 		)).
 		Execute(ctx)
-	// [END map_entries]
+	// [END firestore_map_entries]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err

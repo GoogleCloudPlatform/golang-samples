@@ -24,14 +24,14 @@ import (
 
 func selectSyntaxExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START select_syntax]
+	// [START firestore_select_syntax]
 	snapshot := client.Pipeline().Collection("cities").
 		Select(firestore.Fields(
 			firestore.StringConcat(firestore.FieldOf("name"), ", ", firestore.FieldOf("location.country")).As("name"),
 			firestore.FieldOf("population"),
 		)).
 		Execute(ctx)
-	// [END select_syntax]
+	// [END firestore_select_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -40,9 +40,9 @@ func selectSyntaxExample(w io.Writer, client *firestore.Client) error {
 	return nil
 }
 
-func selectPositionDataExample(w io.Writer, client *firestore.Client) error {
+func selectPositionDataExample(_ io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START select_position_data]
+	// [START firestore_select_position_data]
 	client.Collection("cities").Doc("SF").Set(ctx, map[string]any{
 		"name":       "San Francisco",
 		"population": 800000,
@@ -59,13 +59,13 @@ func selectPositionDataExample(w io.Writer, client *firestore.Client) error {
 			"province": "Ontario",
 		},
 	})
-	// [END select_position_data]
+	// [END firestore_select_position_data]
 	return nil
 }
 
 func selectPositionExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START select_position]
+	// [START firestore_select_position]
 	snapshot := client.Pipeline().Collection("cities").
 		Where(firestore.FieldOf("location.country").Equal("Canada")).
 		Select(firestore.Fields(
@@ -73,7 +73,7 @@ func selectPositionExample(w io.Writer, client *firestore.Client) error {
 			firestore.FieldOf("population"),
 		)).
 		Execute(ctx)
-	// [END select_position]
+	// [END firestore_select_position]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -84,7 +84,7 @@ func selectPositionExample(w io.Writer, client *firestore.Client) error {
 
 func selectBadPositionExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START select_bad_position]
+	// [START firestore_select_bad_position]
 	snapshot := client.Pipeline().Collection("cities").
 		Select(firestore.Fields(
 			firestore.StringConcat(firestore.FieldOf("name"), ", ", firestore.FieldOf("location.country")).As("name"),
@@ -92,7 +92,7 @@ func selectBadPositionExample(w io.Writer, client *firestore.Client) error {
 		)).
 		Where(firestore.FieldOf("location.country").Equal("Canada")).
 		Execute(ctx)
-	// [END select_bad_position]
+	// [END firestore_select_bad_position]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -101,9 +101,9 @@ func selectBadPositionExample(w io.Writer, client *firestore.Client) error {
 	return nil
 }
 
-func selectNestedDataExample(w io.Writer, client *firestore.Client) error {
+func selectNestedDataExample(_ io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START select_nested_data]
+	// [START firestore_select_nested_data]
 	client.Collection("cities").Doc("SF").Set(ctx, map[string]any{
 		"name":       "San Francisco",
 		"population": 800000,
@@ -127,13 +127,13 @@ func selectNestedDataExample(w io.Writer, client *firestore.Client) error {
 		"name":       "Atlantis",
 		"population": nil,
 	})
-	// [END select_nested_data]
+	// [END firestore_select_nested_data]
 	return nil
 }
 
 func selectNestedExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START select_nested]
+	// [START firestore_select_nested]
 	snapshot := client.Pipeline().Collection("cities").
 		Select(firestore.Fields(
 			firestore.FieldOf("name").As("city"),
@@ -141,7 +141,7 @@ func selectNestedExample(w io.Writer, client *firestore.Client) error {
 			firestore.ArrayGet(firestore.FieldOf("landmarks"), 0).As("topLandmark"),
 		)).
 		Execute(ctx)
-	// [END select_nested]
+	// [END firestore_select_nested]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -152,13 +152,13 @@ func selectNestedExample(w io.Writer, client *firestore.Client) error {
 
 func addFieldsSyntaxExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START add_fields_syntax]
+	// [START firestore_add_fields_syntax]
 	snapshot := client.Pipeline().Collection("users").
 		AddFields(firestore.Selectables(
 			firestore.StringConcat(firestore.FieldOf("firstName"), " ", firestore.FieldOf("lastName")).As("fullName"),
 		)).
 		Execute(ctx)
-	// [END add_fields_syntax]
+	// [END firestore_add_fields_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -169,12 +169,12 @@ func addFieldsSyntaxExample(w io.Writer, client *firestore.Client) error {
 
 func addFieldsOverlapExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START add_fields_overlap]
+	// [START firestore_add_fields_overlap]
 	snapshot := client.Pipeline().Collection("users").
 		AddFields(firestore.Selectables(firestore.Abs(firestore.FieldOf("age")).As("age"))).
 		AddFields(firestore.Selectables(firestore.Add(firestore.FieldOf("age"), 10).As("age"))).
 		Execute(ctx)
-	// [END add_fields_overlap]
+	// [END firestore_add_fields_overlap]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -185,13 +185,13 @@ func addFieldsOverlapExample(w io.Writer, client *firestore.Client) error {
 
 func addFieldsNestingExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START add_fields_nesting]
+	// [START firestore_add_fields_nesting]
 	snapshot := client.Pipeline().Collection("users").
 		AddFields(firestore.Selectables(
 			firestore.ToLower(firestore.FieldOf("address.city")).As("address.city"),
 		)).
 		Execute(ctx)
-	// [END add_fields_nesting]
+	// [END firestore_add_fields_nesting]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -202,11 +202,11 @@ func addFieldsNestingExample(w io.Writer, client *firestore.Client) error {
 
 func removeFieldsSyntaxExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START remove_fields_syntax]
+	// [START firestore_remove_fields_syntax]
 	snapshot := client.Pipeline().Collection("cities").
 		RemoveFields(firestore.Fields("population", "location.state")).
 		Execute(ctx)
-	// [END remove_fields_syntax]
+	// [END firestore_remove_fields_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -217,7 +217,7 @@ func removeFieldsSyntaxExample(w io.Writer, client *firestore.Client) error {
 
 func removeFieldsNestedDataExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START remove_fields_nested_data]
+	// [START firestore_remove_fields_nested_data]
 	client.Collection("cities").Doc("SF").Set(ctx, map[string]any{
 		"name": "San Francisco",
 		"location": map[string]any{
@@ -232,17 +232,17 @@ func removeFieldsNestedDataExample(w io.Writer, client *firestore.Client) error 
 			"province": "Ontario",
 		},
 	})
-	// [END remove_fields_nested_data]
+	// [END firestore_remove_fields_nested_data]
 	return nil
 }
 
 func removeFieldsNestedExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START remove_fields_nested]
+	// [START firestore_remove_fields_nested]
 	snapshot := client.Pipeline().Collection("cities").
 		RemoveFields(firestore.Fields("location.state")).
 		Execute(ctx)
-	// [END remove_fields_nested]
+	// [END firestore_remove_fields_nested]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err

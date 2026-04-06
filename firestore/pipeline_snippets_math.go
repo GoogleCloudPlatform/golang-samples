@@ -24,7 +24,7 @@ import (
 
 func functionsExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START functions_example]
+	// [START firestore_functions_example]
 	// Type 1: Scalar (for use in non-aggregation stages)
 	// Example: Return the min store price for each book.
 	results1, err := client.Pipeline().
@@ -48,7 +48,7 @@ func functionsExample(w io.Writer, client *firestore.Client) error {
 	if err != nil {
 		return err
 	}
-	// [END functions_example]
+	// [END firestore_functions_example]
 	fmt.Fprintln(w, results1)
 	fmt.Fprintln(w, results2)
 	return nil
@@ -56,14 +56,14 @@ func functionsExample(w io.Writer, client *firestore.Client) error {
 
 func addFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START add_function]
+	// [START firestore_add_function]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.Add(firestore.FieldOf("soldBooks"), firestore.FieldOf("unsoldBooks")).As("totalBooks"),
 		)).
 		Execute(ctx)
-	// [END add_function]
+	// [END firestore_add_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -74,7 +74,7 @@ func addFunction(w io.Writer, client *firestore.Client) error {
 
 func subtractFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START subtract_function]
+	// [START firestore_subtract_function]
 	storeCredit := 7
 	snapshot := client.Pipeline().
 		Collection("books").
@@ -82,7 +82,7 @@ func subtractFunction(w io.Writer, client *firestore.Client) error {
 			firestore.Subtract(firestore.FieldOf("price"), storeCredit).As("totalCost"),
 		)).
 		Execute(ctx)
-	// [END subtract_function]
+	// [END firestore_subtract_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -93,14 +93,14 @@ func subtractFunction(w io.Writer, client *firestore.Client) error {
 
 func multiplyFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START multiply_function]
+	// [START firestore_multiply_function]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.Multiply(firestore.FieldOf("price"), firestore.FieldOf("soldBooks")).As("revenue"),
 		)).
 		Execute(ctx)
-	// [END multiply_function]
+	// [END firestore_multiply_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -111,14 +111,14 @@ func multiplyFunction(w io.Writer, client *firestore.Client) error {
 
 func divideFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START divide_function]
+	// [START firestore_divide_function]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.Divide(firestore.FieldOf("ratings"), firestore.FieldOf("soldBooks")).As("reviewRate"),
 		)).
 		Execute(ctx)
-	// [END divide_function]
+	// [END firestore_divide_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -129,7 +129,7 @@ func divideFunction(w io.Writer, client *firestore.Client) error {
 
 func modFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START mod_function]
+	// [START firestore_mod_function]
 	displayCapacity := 1000
 	snapshot := client.Pipeline().
 		Collection("books").
@@ -137,7 +137,7 @@ func modFunction(w io.Writer, client *firestore.Client) error {
 			firestore.Mod(firestore.FieldOf("unsoldBooks"), displayCapacity).As("warehousedBooks"),
 		)).
 		Execute(ctx)
-	// [END mod_function]
+	// [END firestore_mod_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -148,7 +148,7 @@ func modFunction(w io.Writer, client *firestore.Client) error {
 
 func ceilFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START ceil_function]
+	// [START firestore_ceil_function]
 	booksPerShelf := 100
 	snapshot := client.Pipeline().
 		Collection("books").
@@ -156,7 +156,7 @@ func ceilFunction(w io.Writer, client *firestore.Client) error {
 			firestore.Ceil(firestore.Divide(firestore.FieldOf("unsoldBooks"), booksPerShelf)).As("requiredShelves"),
 		)).
 		Execute(ctx)
-	// [END ceil_function]
+	// [END firestore_ceil_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -167,14 +167,14 @@ func ceilFunction(w io.Writer, client *firestore.Client) error {
 
 func floorFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START floor_function]
+	// [START firestore_floor_function]
 	snapshot := client.Pipeline().
 		Collection("books").
 		AddFields(firestore.Selectables(
 			firestore.Floor(firestore.Divide(firestore.FieldOf("wordCount"), firestore.FieldOf("pages"))).As("wordsPerPage"),
 		)).
 		Execute(ctx)
-	// [END floor_function]
+	// [END firestore_floor_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -185,7 +185,7 @@ func floorFunction(w io.Writer, client *firestore.Client) error {
 
 func roundFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START round_function]
+	// [START firestore_round_function]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
@@ -195,6 +195,7 @@ func roundFunction(w io.Writer, client *firestore.Client) error {
 			firestore.Sum("partialRevenue").As("totalRevenue"),
 		)).
 		Execute(ctx)
+	// [END firestore_round_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -205,7 +206,7 @@ func roundFunction(w io.Writer, client *firestore.Client) error {
 
 func powFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START pow_function]
+	// [START firestore_pow_function]
 	googleplexLat := 37.4221
 	googleplexLng := -122.0853
 	snapshot := client.Pipeline().
@@ -220,7 +221,7 @@ func powFunction(w io.Writer, client *firestore.Client) error {
 				As("approximateDistanceToGoogle"),
 		)).
 		Execute(ctx)
-	// [END pow_function]
+	// [END firestore_pow_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -231,7 +232,7 @@ func powFunction(w io.Writer, client *firestore.Client) error {
 
 func sqrtFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START sqrt_function]
+	// [START firestore_sqrt_function]
 	googleplexLat := 37.4221
 	googleplexLng := -122.0853
 	snapshot := client.Pipeline().
@@ -246,7 +247,7 @@ func sqrtFunction(w io.Writer, client *firestore.Client) error {
 				As("approximateDistanceToGoogle"),
 		)).
 		Execute(ctx)
-	// [END sqrt_function]
+	// [END firestore_sqrt_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -257,14 +258,14 @@ func sqrtFunction(w io.Writer, client *firestore.Client) error {
 
 func expFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START exp_function]
+	// [START firestore_exp_function]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.Exp(firestore.FieldOf("rating")).As("expRating"),
 		)).
 		Execute(ctx)
-	// [END exp_function]
+	// [END firestore_exp_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -275,14 +276,14 @@ func expFunction(w io.Writer, client *firestore.Client) error {
 
 func lnFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START ln_function]
+	// [START firestore_ln_function]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.Ln(firestore.FieldOf("rating")).As("lnRating"),
 		)).
 		Execute(ctx)
-	// [END ln_function]
+	// [END firestore_ln_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -293,14 +294,14 @@ func lnFunction(w io.Writer, client *firestore.Client) error {
 
 func logFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START log_function]
+	// [START firestore_log_function]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.Log(firestore.FieldOf("rating"), 2).As("log2Rating"),
 		)).
 		Execute(ctx)
-	// [END log_function]
+	// [END firestore_log_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -311,14 +312,14 @@ func logFunction(w io.Writer, client *firestore.Client) error {
 
 func maxLogicalFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START max_logical_function]
+	// [START firestore_max_logical_function]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.LogicalMaximum(firestore.FieldOf("rating"), 1).As("flooredRating"),
 		)).
 		Execute(ctx)
-	// [END max_logical_function]
+	// [END firestore_max_logical_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -329,14 +330,14 @@ func maxLogicalFunction(w io.Writer, client *firestore.Client) error {
 
 func minLogicalFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START min_logical_function]
+	// [START firestore_min_logical_function]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.LogicalMinimum(firestore.FieldOf("rating"), 5).As("cappedRating"),
 		)).
 		Execute(ctx)
-	// [END min_logical_function]
+	// [END firestore_min_logical_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err

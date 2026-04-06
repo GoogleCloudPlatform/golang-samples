@@ -24,7 +24,7 @@ import (
 
 func aggregateGroups(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START aggregate_groups]
+	// [START firestore_aggregate_groups]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Aggregate(
@@ -32,7 +32,7 @@ func aggregateGroups(w io.Writer, client *firestore.Client) error {
 			firestore.WithAggregateGroups("genre"),
 		).
 		Execute(ctx)
-	// [END aggregate_groups]
+	// [END firestore_aggregate_groups]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -43,7 +43,7 @@ func aggregateGroups(w io.Writer, client *firestore.Client) error {
 
 func aggregateDistinct(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START aggregate_distinct]
+	// [START firestore_aggregate_distinct]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Distinct(firestore.Fields(
@@ -51,7 +51,7 @@ func aggregateDistinct(w io.Writer, client *firestore.Client) error {
 			firestore.FieldOf("genre"),
 		)).
 		Execute(ctx)
-	// [END aggregate_distinct]
+	// [END firestore_aggregate_distinct]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -62,14 +62,14 @@ func aggregateDistinct(w io.Writer, client *firestore.Client) error {
 
 func aggregateSyntaxExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START aggregate_syntax]
+	// [START firestore_aggregate_syntax]
 	snapshot := client.Pipeline().Collection("cities").
 		Aggregate(firestore.Accumulators(
 			firestore.CountAll().As("total"),
 			firestore.Average("population").As("averagePopulation"),
 		)).
 		Execute(ctx)
-	// [END aggregate_syntax]
+	// [END firestore_aggregate_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -80,7 +80,7 @@ func aggregateSyntaxExample(w io.Writer, client *firestore.Client) error {
 
 func aggregateGroupSyntax(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START aggregate_group_syntax]
+	// [START firestore_aggregate_group_syntax]
 	snapshot := client.Pipeline().CollectionGroup("cities").
 		Aggregate(
 			firestore.Accumulators(
@@ -90,7 +90,7 @@ func aggregateGroupSyntax(w io.Writer, client *firestore.Client) error {
 			firestore.WithAggregateGroups(firestore.FieldOf("location.state").As("state")),
 		).
 		Execute(ctx)
-	// [END aggregate_group_syntax]
+	// [END firestore_aggregate_group_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -99,9 +99,9 @@ func aggregateGroupSyntax(w io.Writer, client *firestore.Client) error {
 	return nil
 }
 
-func aggregateExampleData(w io.Writer, client *firestore.Client) error {
+func aggregateExampleData(_ io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START aggregate_data]
+	// [START firestore_aggregate_data]
 	client.Collection("cities").Doc("SF").Set(ctx, map[string]any{
 		"name":       "San Francisco",
 		"state":      "CA",
@@ -132,20 +132,20 @@ func aggregateExampleData(w io.Writer, client *firestore.Client) error {
 		"country":    "Mexico",
 		"population": 9200000,
 	})
-	// [END aggregate_data]
+	// [END firestore_aggregate_data]
 	return nil
 }
 
 func aggregateWithoutGroupExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START aggregate_without_group]
+	// [START firestore_aggregate_without_group]
 	snapshot := client.Pipeline().Collection("cities").
 		Aggregate(firestore.Accumulators(
 			firestore.CountAll().As("total"),
 			firestore.Average("population").As("averagePopulation"),
 		)).
 		Execute(ctx)
-	// [END aggregate_without_group]
+	// [END firestore_aggregate_without_group]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -156,7 +156,7 @@ func aggregateWithoutGroupExample(w io.Writer, client *firestore.Client) error {
 
 func aggregateGroupExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START aggregate_group_example]
+	// [START firestore_aggregate_group_example]
 	snapshot := client.Pipeline().Collection("cities").
 		Aggregate(
 			firestore.Accumulators(
@@ -166,7 +166,7 @@ func aggregateGroupExample(w io.Writer, client *firestore.Client) error {
 			firestore.WithAggregateGroups("country", "state"),
 		).
 		Execute(ctx)
-	// [END aggregate_group_example]
+	// [END firestore_aggregate_group_example]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -177,14 +177,14 @@ func aggregateGroupExample(w io.Writer, client *firestore.Client) error {
 
 func aggregateGroupComplexExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START aggregate_group_complex]
+	// [START firestore_aggregate_group_complex]
 	snapshot := client.Pipeline().Collection("cities").
 		Aggregate(
 			firestore.Accumulators(firestore.Sum("population").As("totalPopulation")),
 			firestore.WithAggregateGroups(firestore.FieldOf("state").Equal(nil).As("stateIsNull")),
 		).
 		Execute(ctx)
-	// [END aggregate_group_complex]
+	// [END firestore_aggregate_group_complex]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -195,7 +195,7 @@ func aggregateGroupComplexExample(w io.Writer, client *firestore.Client) error {
 
 func distinctSyntaxExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START distinct_syntax]
+	// [START firestore_distinct_syntax]
 	cities1, err := client.Pipeline().Collection("cities").Distinct(firestore.Fields("country")).Execute(ctx).Results().GetAll()
 	if err != nil {
 		return err
@@ -210,15 +210,15 @@ func distinctSyntaxExample(w io.Writer, client *firestore.Client) error {
 	if err != nil {
 		return err
 	}
-	// [END distinct_syntax]
+	// [END firestore_distinct_syntax]
 	fmt.Fprintln(w, cities1)
 	fmt.Fprintln(w, cities2)
 	return nil
 }
 
-func distinctExampleData(w io.Writer, client *firestore.Client) error {
+func distinctExampleData(_ io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START distinct_data]
+	// [START firestore_distinct_data]
 	client.Collection("cities").Doc("SF").Set(ctx, map[string]any{
 		"name":    "San Francisco",
 		"state":   "CA",
@@ -244,15 +244,15 @@ func distinctExampleData(w io.Writer, client *firestore.Client) error {
 		"state":   nil,
 		"country": "Mexico",
 	})
-	// [END distinct_data]
+	// [END firestore_distinct_data]
 	return nil
 }
 
 func distinctExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START distinct_example]
+	// [START firestore_distinct_example]
 	snapshot := client.Pipeline().Collection("cities").Distinct(firestore.Fields("country")).Execute(ctx)
-	// [END distinct_example]
+	// [END firestore_distinct_example]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -263,7 +263,7 @@ func distinctExample(w io.Writer, client *firestore.Client) error {
 
 func distinctExpressionsExample(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START distinct_expressions]
+	// [START firestore_distinct_expressions]
 	results, err := client.Pipeline().Collection("cities").
 		Distinct(firestore.Fields(
 			firestore.ToLower(firestore.FieldOf("state")).As("normalizedState"),
@@ -273,14 +273,14 @@ func distinctExpressionsExample(w io.Writer, client *firestore.Client) error {
 	if err != nil {
 		return err
 	}
-	// [END distinct_expressions]
+	// [END firestore_distinct_expressions]
 	fmt.Fprintln(w, results)
 	return nil
 }
 
 func countFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START count_function]
+	// [START firestore_count_function]
 	// Total number of books in the collection
 	countAll, err := client.Pipeline().Collection("books").
 		Aggregate(firestore.Accumulators(firestore.CountAll().As("count"))).
@@ -297,21 +297,21 @@ func countFunction(w io.Writer, client *firestore.Client) error {
 	if err != nil {
 		return err
 	}
-	// [END count_function]
+	// [END firestore_count_function]
 	fmt.Fprintln(w, countAll, countField)
 	return nil
 }
 
 func countIfFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START count_if]
+	// [START firestore_count_if]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Aggregate(firestore.Accumulators(
 			firestore.CountIf(firestore.FieldOf("rating").GreaterThan(4)).As("filteredCount"),
 		)).
 		Execute(ctx)
-	// [END count_if]
+	// [END firestore_count_if]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -322,14 +322,14 @@ func countIfFunction(w io.Writer, client *firestore.Client) error {
 
 func countDistinctFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START count_distinct]
+	// [START firestore_count_distinct]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Aggregate(firestore.Accumulators(
 			firestore.CountDistinct("author").As("unique_authors"),
 		)).
 		Execute(ctx)
-	// [END count_distinct]
+	// [END firestore_count_distinct]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -340,14 +340,14 @@ func countDistinctFunction(w io.Writer, client *firestore.Client) error {
 
 func sumFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START sum_function]
+	// [START firestore_sum_function]
 	snapshot := client.Pipeline().
 		Collection("cities").
 		Aggregate(firestore.Accumulators(
 			firestore.Sum("population").As("totalPopulation"),
 		)).
 		Execute(ctx)
-	// [END sum_function]
+	// [END firestore_sum_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -358,14 +358,14 @@ func sumFunction(w io.Writer, client *firestore.Client) error {
 
 func avgFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START avg_function]
+	// [START firestore_avg_function]
 	snapshot := client.Pipeline().
 		Collection("cities").
 		Aggregate(firestore.Accumulators(
 			firestore.Average("population").As("averagePopulation"),
 		)).
 		Execute(ctx)
-	// [END avg_function]
+	// [END firestore_avg_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -376,14 +376,14 @@ func avgFunction(w io.Writer, client *firestore.Client) error {
 
 func minFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START min_function]
+	// [START firestore_min_function]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Aggregate(firestore.Accumulators(
 			firestore.Minimum("price").As("minimumPrice"),
 		)).
 		Execute(ctx)
-	// [END min_function]
+	// [END firestore_min_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -394,14 +394,14 @@ func minFunction(w io.Writer, client *firestore.Client) error {
 
 func maxFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START max_function]
+	// [START firestore_max_function]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Aggregate(firestore.Accumulators(
 			firestore.Maximum("price").As("maximumPrice"),
 		)).
 		Execute(ctx)
-	// [END max_function]
+	// [END firestore_max_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err

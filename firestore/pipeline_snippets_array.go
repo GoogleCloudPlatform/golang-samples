@@ -24,14 +24,14 @@ import (
 
 func arrayConcatFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START array_concat]
+	// [START firestore_array_concat]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.ArrayConcat(firestore.FieldOf("genre"), firestore.FieldOf("subGenre")).As("allGenres"),
 		)).
 		Execute(ctx)
-	// [END array_concat]
+	// [END firestore_array_concat]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -42,14 +42,14 @@ func arrayConcatFunction(w io.Writer, client *firestore.Client) error {
 
 func arrayContainsFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START array_contains]
+	// [START firestore_array_contains]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.ArrayContains(firestore.FieldOf("genre"), "mystery").As("isMystery"),
 		)).
 		Execute(ctx)
-	// [END array_contains]
+	// [END firestore_array_contains]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -60,14 +60,14 @@ func arrayContainsFunction(w io.Writer, client *firestore.Client) error {
 
 func arrayContainsAllFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START array_contains_all]
+	// [START firestore_array_contains_all]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.ArrayContainsAll(firestore.FieldOf("genre"), []string{"fantasy", "adventure"}).As("isFantasyAdventure"),
 		)).
 		Execute(ctx)
-	// [END array_contains_all]
+	// [END firestore_array_contains_all]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -78,14 +78,14 @@ func arrayContainsAllFunction(w io.Writer, client *firestore.Client) error {
 
 func arrayContainsAnyFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START array_contains_any]
+	// [START firestore_array_contains_any]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.ArrayContainsAny(firestore.FieldOf("genre"), []string{"fantasy", "nonfiction"}).As("isMysteryOrFantasy"),
 		)).
 		Execute(ctx)
-	// [END array_contains_any]
+	// [END firestore_array_contains_any]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -96,14 +96,14 @@ func arrayContainsAnyFunction(w io.Writer, client *firestore.Client) error {
 
 func arrayLengthFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START array_length]
+	// [START firestore_array_length]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.ArrayLength(firestore.FieldOf("genre")).As("genreCount"),
 		)).
 		Execute(ctx)
-	// [END array_length]
+	// [END firestore_array_length]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -114,14 +114,14 @@ func arrayLengthFunction(w io.Writer, client *firestore.Client) error {
 
 func arrayReverseFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START array_reverse]
+	// [START firestore_array_reverse]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.ArrayReverse(firestore.FieldOf("genre")).As("reversedGenres"),
 		)).
 		Execute(ctx)
-	// [END array_reverse]
+	// [END firestore_array_reverse]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err

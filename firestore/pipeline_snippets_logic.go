@@ -24,14 +24,14 @@ import (
 
 func equalFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START equal_function]
+	// [START firestore_equal_function]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.Equal(firestore.FieldOf("rating"), 5).As("hasPerfectRating"),
 		)).
 		Execute(ctx)
-	// [END equal_function]
+	// [END firestore_equal_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -42,14 +42,14 @@ func equalFunction(w io.Writer, client *firestore.Client) error {
 
 func greaterThanFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START greater_than]
+	// [START firestore_greater_than]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.GreaterThan(firestore.FieldOf("rating"), 4).As("hasHighRating"),
 		)).
 		Execute(ctx)
-	// [END greater_than]
+	// [END firestore_greater_than]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -60,14 +60,14 @@ func greaterThanFunction(w io.Writer, client *firestore.Client) error {
 
 func greaterThanOrEqualToFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START greater_or_equal]
+	// [START firestore_greater_or_equal]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.GreaterThanOrEqual(firestore.FieldOf("published"), 1900).As("publishedIn20thCentury"),
 		)).
 		Execute(ctx)
-	// [END greater_or_equal]
+	// [END firestore_greater_or_equal]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -78,14 +78,14 @@ func greaterThanOrEqualToFunction(w io.Writer, client *firestore.Client) error {
 
 func lessThanFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START less_than]
+	// [START firestore_less_than]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.LessThan(firestore.FieldOf("published"), 1923).As("isPublicDomainProbably"),
 		)).
 		Execute(ctx)
-	// [END less_than]
+	// [END firestore_less_than]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -96,14 +96,14 @@ func lessThanFunction(w io.Writer, client *firestore.Client) error {
 
 func lessThanOrEqualToFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START less_or_equal]
+	// [START firestore_less_or_equal]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.LessThanOrEqual(firestore.FieldOf("rating"), 2).As("hasBadRating"),
 		)).
 		Execute(ctx)
-	// [END less_or_equal]
+	// [END firestore_less_or_equal]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -114,14 +114,14 @@ func lessThanOrEqualToFunction(w io.Writer, client *firestore.Client) error {
 
 func notEqualFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START not_equal]
+	// [START firestore_not_equal]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.NotEqual(firestore.FieldOf("title"), "1984").As("not1984"),
 		)).
 		Execute(ctx)
-	// [END not_equal]
+	// [END firestore_not_equal]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -132,14 +132,14 @@ func notEqualFunction(w io.Writer, client *firestore.Client) error {
 
 func existsFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START exists_function]
+	// [START firestore_exists_function]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.FieldExists(firestore.FieldOf("rating")).As("hasRating"),
 		)).
 		Execute(ctx)
-	// [END exists_function]
+	// [END firestore_exists_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -150,7 +150,7 @@ func existsFunction(w io.Writer, client *firestore.Client) error {
 
 func andFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START and_function]
+	// [START firestore_and_function]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
@@ -160,7 +160,7 @@ func andFunction(w io.Writer, client *firestore.Client) error {
 			).As("under10Recommendation"),
 		)).
 		Execute(ctx)
-	// [END and_function]
+	// [END firestore_and_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -171,7 +171,7 @@ func andFunction(w io.Writer, client *firestore.Client) error {
 
 func orFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START or_function]
+	// [START firestore_or_function]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
@@ -181,7 +181,7 @@ func orFunction(w io.Writer, client *firestore.Client) error {
 			).As("matchesSearchFilters"),
 		)).
 		Execute(ctx)
-	// [END or_function]
+	// [END firestore_or_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -192,7 +192,7 @@ func orFunction(w io.Writer, client *firestore.Client) error {
 
 func xorFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START xor_function]
+	// [START firestore_xor_function]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
@@ -202,7 +202,7 @@ func xorFunction(w io.Writer, client *firestore.Client) error {
 			).As("matchesSearchFilters"),
 		)).
 		Execute(ctx)
-	// [END xor_function]
+	// [END firestore_xor_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -213,14 +213,14 @@ func xorFunction(w io.Writer, client *firestore.Client) error {
 
 func notFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START not_function]
+	// [START firestore_not_function]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.Not(firestore.ArrayContains(firestore.FieldOf("tags"), "nonfiction")).As("isFiction"),
 		)).
 		Execute(ctx)
-	// [END not_function]
+	// [END firestore_not_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -231,7 +231,7 @@ func notFunction(w io.Writer, client *firestore.Client) error {
 
 func condFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START cond_function]
+	// [START firestore_cond_function]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
@@ -245,7 +245,7 @@ func condFunction(w io.Writer, client *firestore.Client) error {
 			).As("extendedTags"),
 		)).
 		Execute(ctx)
-	// [END cond_function]
+	// [END firestore_cond_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -256,14 +256,14 @@ func condFunction(w io.Writer, client *firestore.Client) error {
 
 func equalAnyFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START eq_any]
+	// [START firestore_eq_any]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.EqualAny(firestore.FieldOf("genre"), []string{"Science Fiction", "Psychological Thriller"}).As("matchesGenreFilters"),
 		)).
 		Execute(ctx)
-	// [END eq_any]
+	// [END firestore_eq_any]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -274,14 +274,14 @@ func equalAnyFunction(w io.Writer, client *firestore.Client) error {
 
 func notEqualAnyFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START not_eq_any]
+	// [START firestore_not_eq_any]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
 			firestore.NotEqualAny(firestore.FieldOf("author"), []string{"George Orwell", "F. Scott Fitzgerald"}).As("byExcludedAuthors"),
 		)).
 		Execute(ctx)
-	// [END not_eq_any]
+	// [END firestore_not_eq_any]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err

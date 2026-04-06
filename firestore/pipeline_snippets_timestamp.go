@@ -24,14 +24,14 @@ import (
 
 func unixMicrosToTimestampFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START unix_micros_timestamp]
+	// [START firestore_unix_micros_timestamp]
 	snapshot := client.Pipeline().
 		Collection("documents").
 		Select(firestore.Fields(
 			firestore.UnixMicrosToTimestamp(firestore.FieldOf("createdAtMicros")).As("createdAtString"),
 		)).
 		Execute(ctx)
-	// [END unix_micros_timestamp]
+	// [END firestore_unix_micros_timestamp]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -42,14 +42,14 @@ func unixMicrosToTimestampFunction(w io.Writer, client *firestore.Client) error 
 
 func unixMillisToTimestampFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START unix_millis_timestamp]
+	// [START firestore_unix_millis_timestamp]
 	snapshot := client.Pipeline().
 		Collection("documents").
 		Select(firestore.Fields(
 			firestore.UnixMillisToTimestamp(firestore.FieldOf("createdAtMillis")).As("createdAtString"),
 		)).
 		Execute(ctx)
-	// [END unix_millis_timestamp]
+	// [END firestore_unix_millis_timestamp]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -60,14 +60,14 @@ func unixMillisToTimestampFunction(w io.Writer, client *firestore.Client) error 
 
 func unixSecondsToTimestampFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START unix_seconds_timestamp]
+	// [START firestore_unix_seconds_timestamp]
 	snapshot := client.Pipeline().
 		Collection("documents").
 		Select(firestore.Fields(
 			firestore.UnixSecondsToTimestamp(firestore.FieldOf("createdAtSeconds")).As("createdAtString"),
 		)).
 		Execute(ctx)
-	// [END unix_seconds_timestamp]
+	// [END firestore_unix_seconds_timestamp]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -78,14 +78,14 @@ func unixSecondsToTimestampFunction(w io.Writer, client *firestore.Client) error
 
 func timestampAddFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START timestamp_add]
+	// [START firestore_timestamp_add]
 	snapshot := client.Pipeline().
 		Collection("documents").
 		Select(firestore.Fields(
 			firestore.TimestampAdd(firestore.FieldOf("createdAt"), "day", 3653).As("expiresAt"),
 		)).
 		Execute(ctx)
-	// [END timestamp_add]
+	// [END firestore_timestamp_add]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -96,14 +96,14 @@ func timestampAddFunction(w io.Writer, client *firestore.Client) error {
 
 func timestampSubFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START timestamp_sub]
+	// [START firestore_timestamp_sub]
 	snapshot := client.Pipeline().
 		Collection("documents").
 		Select(firestore.Fields(
 			firestore.TimestampSubtract(firestore.FieldOf("expiresAt"), "day", 14).As("sendWarningTimestamp"),
 		)).
 		Execute(ctx)
-	// [END timestamp_sub]
+	// [END firestore_timestamp_sub]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -114,14 +114,14 @@ func timestampSubFunction(w io.Writer, client *firestore.Client) error {
 
 func timestampToUnixMicrosFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START timestamp_unix_micros]
+	// [START firestore_timestamp_unix_micros]
 	snapshot := client.Pipeline().
 		Collection("documents").
 		Select(firestore.Fields(
 			firestore.TimestampToUnixMicros(firestore.FieldOf("dateString")).As("unixMicros"),
 		)).
 		Execute(ctx)
-	// [END timestamp_unix_micros]
+	// [END firestore_timestamp_unix_micros]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -132,14 +132,14 @@ func timestampToUnixMicrosFunction(w io.Writer, client *firestore.Client) error 
 
 func timestampToUnixMillisFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START timestamp_unix_millis]
+	// [START firestore_timestamp_unix_millis]
 	snapshot := client.Pipeline().
 		Collection("documents").
 		Select(firestore.Fields(
 			firestore.TimestampToUnixMillis(firestore.FieldOf("dateString")).As("unixMillis"),
 		)).
 		Execute(ctx)
-	// [END timestamp_unix_millis]
+	// [END firestore_timestamp_unix_millis]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
@@ -150,14 +150,14 @@ func timestampToUnixMillisFunction(w io.Writer, client *firestore.Client) error 
 
 func timestampToUnixSecondsFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START timestamp_unix_seconds]
+	// [START firestore_timestamp_unix_seconds]
 	snapshot := client.Pipeline().
 		Collection("documents").
 		Select(firestore.Fields(
 			firestore.TimestampToUnixSeconds(firestore.FieldOf("dateString")).As("unixSeconds"),
 		)).
 		Execute(ctx)
-	// [END timestamp_unix_seconds]
+	// [END firestore_timestamp_unix_seconds]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		return err
