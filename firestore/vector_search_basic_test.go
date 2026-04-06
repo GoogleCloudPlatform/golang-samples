@@ -16,16 +16,12 @@ package firestore
 
 import (
 	"bytes"
-	"os"
 	"strings"
 	"testing"
 )
 
 func testVectorSearchBasic(t *testing.T) {
-	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
-	if projectID == "" {
-		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
-	}
+	projectID := getProjectID(t)
 
 	buf := new(bytes.Buffer)
 	if err := vectorSearchBasic(buf, projectID); err != nil {

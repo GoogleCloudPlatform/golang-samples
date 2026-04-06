@@ -16,10 +16,24 @@ package firestore
 
 import (
 	"os"
+	"sync"
 	"testing"
 )
 
 var projectID string
+var projectIDOnce sync.Once
+
+func getProjectID(t *testing.T) string {
+	projectIDOnce.Do(func() {
+		if projectID == "" {
+			projectID = os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
+		}
+	})
+	if projectID == "" {
+		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
+	}
+	return projectID
+}
 
 func TestMain(m *testing.M) {
 	projectID = os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")

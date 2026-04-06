@@ -29,9 +29,7 @@ import (
 )
 
 func TestVectorSearchMain(t *testing.T) {
-	if projectID == "" {
-		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
-	}
+	getProjectID(t)
 
 	vsCleanup := vectorSearchSetup(t)
 	defer vsCleanup()

@@ -17,9 +17,7 @@ package firestore
 import (
 	"bytes"
 	"context"
-	"os"
 	"strings"
-	"sync"
 	"testing"
 
 	"cloud.google.com/go/firestore"
@@ -78,20 +76,6 @@ func testQueryFilterOrCleanup(projectID string, refs []*firestore.DocumentRef) e
 	}
 	bw.End()
 	return nil
-}
-
-var projectIDOnce sync.Once
-
-func getProjectID(t *testing.T) string {
-	projectIDOnce.Do(func() {
-		if projectID == "" {
-			projectID = os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
-		}
-	})
-	if projectID == "" {
-		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
-	}
-	return projectID
 }
 
 func TestQueryFilterOr(t *testing.T) {
