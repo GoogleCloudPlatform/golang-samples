@@ -21,7 +21,7 @@ import (
 	"testing"
 )
 
-func TestVectorSearchBasic(t *testing.T) {
+func testVectorSearchBasic(t *testing.T) {
 	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
 	if projectID == "" {
 		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")

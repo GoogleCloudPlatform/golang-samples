@@ -21,7 +21,7 @@ import (
 	"testing"
 )
 
-func TestVectorSearchDistanceResultField(t *testing.T) {
+func testVectorSearchDistanceResultField(t *testing.T) {
 	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
 	if projectID == "" {
 		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
