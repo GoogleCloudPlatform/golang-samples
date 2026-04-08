@@ -24,7 +24,7 @@ fi
 chmod +x google-fluentd-install.sh && ./google-fluentd-install.sh
 service google-fluentd restart &
 
-gsutil cp gs://"$GCS_BUCKET_NAME"/gce/app.tar /app.tar
+gcloud storage cp gs://"$GCS_BUCKET_NAME"/gce/app.tar /app.tar
 mkdir -p /app
 tar -x -f /app.tar -C /app
 chmod +x /app/app
