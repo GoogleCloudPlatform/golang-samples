@@ -1675,3 +1675,33 @@ func TestCreateSecretWithTags(t *testing.T) {
 	}
 
 }
+
+func TestDeleteSecretAnnotation(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+	annotationKey := "annotationkey"
+
+	var b bytes.Buffer
+
+	if err := deleteSecretAnnotation(&b, secret.Name); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Deleted annotation"; !strings.Contains(got, want) {
+		t.Errorf("deleteSecretAnnotation: expected %q to contain %q", got, want)
+	}
+
+	client, ctx := testClient(t)
+	s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secret.Name,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, ok := s.Annotations[annotationKey]; ok {
+		t.Errorf("deleteSecretAnnotation: key %q still present after deletion", annotationKey)
+	}
+}
