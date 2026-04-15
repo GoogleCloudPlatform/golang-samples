@@ -25,6 +25,7 @@ import (
 )
 
 // renderParamVersion renders a parameter version using the Parameter Manager SDK for GCP.
+// The version can be a version ID as a string (e.g. "parameter1") or an alias (e.g. "latest")
 //
 // w: The io.Writer object used to write the output.
 // projectID: The ID of the project where the parameter is located.
