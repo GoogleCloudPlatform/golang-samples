@@ -34,6 +34,7 @@ func functionsExample(w io.Writer, client *firestore.Client) error {
 		)).
 		Execute(ctx).Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "GetAll failed: %v", err)
 		return err
 	}
 
@@ -46,6 +47,7 @@ func functionsExample(w io.Writer, client *firestore.Client) error {
 		)).
 		Execute(ctx).Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "GetAll failed: %v", err)
 		return err
 	}
 	// [END firestore_functions_example]
@@ -66,6 +68,7 @@ func addFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_add_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -85,6 +88,7 @@ func subtractFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_subtract_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -103,6 +107,7 @@ func multiplyFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_multiply_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -121,6 +126,7 @@ func divideFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_divide_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -140,6 +146,7 @@ func modFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_mod_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -159,6 +166,7 @@ func ceilFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_ceil_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -177,6 +185,7 @@ func floorFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_floor_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -198,6 +207,7 @@ func roundFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_round_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -224,6 +234,7 @@ func powFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_pow_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -250,6 +261,7 @@ func sqrtFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_sqrt_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -268,6 +280,7 @@ func expFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_exp_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -286,6 +299,7 @@ func lnFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_ln_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -304,6 +318,7 @@ func logFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_log_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -322,6 +337,7 @@ func maxLogicalFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_max_logical_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -340,6 +356,7 @@ func minLogicalFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_min_logical_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)

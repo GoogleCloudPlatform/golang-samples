@@ -34,6 +34,7 @@ func equalFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_equal_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -52,6 +53,7 @@ func greaterThanFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_greater_than]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -70,6 +72,7 @@ func greaterThanOrEqualToFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_greater_or_equal]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -88,6 +91,7 @@ func lessThanFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_less_than]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -106,6 +110,7 @@ func lessThanOrEqualToFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_less_or_equal]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -124,6 +129,7 @@ func notEqualFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_not_equal]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -142,6 +148,7 @@ func existsFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_exists_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -163,6 +170,7 @@ func andFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_and_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -184,6 +192,7 @@ func orFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_or_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -205,6 +214,7 @@ func xorFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_xor_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -223,6 +233,7 @@ func notFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_not_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -248,6 +259,7 @@ func condFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_cond_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -266,6 +278,7 @@ func equalAnyFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_eq_any]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -284,6 +297,7 @@ func notEqualAnyFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_not_eq_any]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)

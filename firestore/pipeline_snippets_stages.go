@@ -35,6 +35,7 @@ func creatingIndexes(w io.Writer, client *firestore.Client) error {
 	// [END firestore_query_example]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -51,6 +52,7 @@ func sparseIndexes(w io.Writer, client *firestore.Client) error {
 	// [END firestore_sparse_index_example]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -67,6 +69,7 @@ func sparseIndexes2(w io.Writer, client *firestore.Client) error {
 	// [END firestore_sparse_index_example_2]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -86,6 +89,7 @@ func coveredQuery(w io.Writer, client *firestore.Client) error {
 	// [END firestore_covered_query]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -117,6 +121,7 @@ func collectionStage(w io.Writer, client *firestore.Client) error {
 	// [END firestore_collection_example]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -133,6 +138,7 @@ func collectionGroupStage(w io.Writer, client *firestore.Client) error {
 	// [END firestore_collection_group_example]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -150,6 +156,7 @@ func databaseStage(w io.Writer, client *firestore.Client) error {
 	// [END firestore_database_example]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -169,6 +176,7 @@ func documentsStage(w io.Writer, client *firestore.Client) error {
 	// [END firestore_documents_example]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -216,6 +224,7 @@ func replaceWithStage(w io.Writer, client *firestore.Client) error {
 	// [END firestore_full_replace]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 
@@ -232,6 +241,7 @@ func sampleStage(w io.Writer, client *firestore.Client) error {
 	// Get a sample of 100 documents in a database
 	results1, err := client.Pipeline().Database().Sample(firestore.WithDocLimit(100)).Execute(ctx).Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "GetAll failed: %v", err)
 		return err
 	}
 
@@ -245,6 +255,7 @@ func sampleStage(w io.Writer, client *firestore.Client) error {
 		Sample(firestore.WithDocLimit(3)).
 		Execute(ctx).Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "GetAll failed: %v", err)
 		return err
 	}
 	// [END firestore_sample_example]
@@ -264,6 +275,7 @@ func samplePercent(w io.Writer, client *firestore.Client) error {
 	// [END firestore_sample_percent]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -275,11 +287,13 @@ func sampleSyntaxExample(w io.Writer, client *firestore.Client) error {
 	// [START firestore_sample_syntax]
 	sampled1, err := client.Pipeline().Database().Sample(firestore.WithDocLimit(50)).Execute(ctx).Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "GetAll failed: %v", err)
 		return err
 	}
 
 	sampled2, err := client.Pipeline().Database().Sample(firestore.WithPercentage(0.5)).Execute(ctx).Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "GetAll failed: %v", err)
 		return err
 	}
 	// [END firestore_sample_syntax]
@@ -314,6 +328,7 @@ func sampleDocumentsExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_sample_documents]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -327,6 +342,7 @@ func sampleAllDocumentsExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_sample_all_documents]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -363,6 +379,7 @@ func samplePercentageExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_sample_percentage]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -386,6 +403,7 @@ func unionStage(w io.Writer, client *firestore.Client) error {
 	// [END firestore_union_stage]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -409,6 +427,7 @@ func unionStageStable(w io.Writer, client *firestore.Client) error {
 	// [END firestore_union_stage_stable]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -422,6 +441,7 @@ func offsetSyntaxExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_offset_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -435,6 +455,7 @@ func collectionInputSyntaxExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_collection_input_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -472,6 +493,7 @@ func collectionInputExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_collection_input]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -510,6 +532,7 @@ func subcollectionInputExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_subcollection_input]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -523,6 +546,7 @@ func collectionGroupInputSyntaxExample(w io.Writer, client *firestore.Client) er
 	// [END firestore_collection_group_input_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -561,6 +585,7 @@ func collectionGroupInputExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_collection_group_input]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -574,6 +599,7 @@ func databaseInputSyntaxExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_database_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -609,6 +635,7 @@ func databaseInputExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_database_input]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -627,6 +654,7 @@ func documentInputSyntaxExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_document_input_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -665,6 +693,7 @@ func documentInputExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_document_input]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -678,6 +707,7 @@ func limitSyntaxExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_limit_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -694,6 +724,7 @@ func unionSyntaxExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_union_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)

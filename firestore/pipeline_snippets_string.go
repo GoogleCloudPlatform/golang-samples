@@ -34,6 +34,7 @@ func byteLengthFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_byte_length]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -52,6 +53,7 @@ func charLengthFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_char_length]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -70,6 +72,7 @@ func startsWithFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_starts_with]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -88,6 +91,7 @@ func likeFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_like]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -106,6 +110,7 @@ func regexContainsFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_regex_contains]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -124,6 +129,7 @@ func regexFindFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_regex_find]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -142,6 +148,7 @@ func regexFindAllFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_regex_find_all]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -160,6 +167,7 @@ func regexMatchFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_regex_match]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -178,6 +186,7 @@ func strConcatFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_str_concat]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -196,6 +205,7 @@ func strContainsFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_string_contains]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -214,6 +224,7 @@ func toUpperFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_to_upper]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -232,6 +243,7 @@ func toLowerFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_to_lower]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -251,6 +263,7 @@ func substrFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_substr_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -269,6 +282,7 @@ func strReverseFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_str_reverse]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -287,6 +301,7 @@ func strTrimFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_trim_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -305,6 +320,7 @@ func strLTrimFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_ltrim_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -323,6 +339,7 @@ func strRTrimFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_rtrim_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -341,6 +358,7 @@ func strRepeatFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_string_repeat_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -359,6 +377,7 @@ func strReplaceAllFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_string_replace_all_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -377,6 +396,7 @@ func strReplaceOneFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_string_replace_one_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -395,6 +415,7 @@ func strIndexOfFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_string_index_of_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)

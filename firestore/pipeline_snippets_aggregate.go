@@ -35,6 +35,7 @@ func aggregateGroups(w io.Writer, client *firestore.Client) error {
 	// [END firestore_aggregate_groups]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -54,6 +55,7 @@ func aggregateDistinct(w io.Writer, client *firestore.Client) error {
 	// [END firestore_aggregate_distinct]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -72,6 +74,7 @@ func aggregateSyntaxExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_aggregate_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -148,6 +151,7 @@ func aggregateWithoutGroupExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_aggregate_without_group]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -169,6 +173,7 @@ func aggregateGroupExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_aggregate_group_example]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -187,6 +192,7 @@ func aggregateGroupComplexExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_aggregate_group_complex]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -198,6 +204,7 @@ func distinctSyntaxExample(w io.Writer, client *firestore.Client) error {
 	// [START firestore_distinct_syntax]
 	cities1, err := client.Pipeline().Collection("cities").Distinct(firestore.Fields("country")).Execute(ctx).Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "GetAll failed: %v", err)
 		return err
 	}
 
@@ -208,6 +215,7 @@ func distinctSyntaxExample(w io.Writer, client *firestore.Client) error {
 		)).
 		Execute(ctx).Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "GetAll failed: %v", err)
 		return err
 	}
 	// [END firestore_distinct_syntax]
@@ -255,6 +263,7 @@ func distinctExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_distinct_example]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -271,6 +280,7 @@ func distinctExpressionsExample(w io.Writer, client *firestore.Client) error {
 		)).
 		Execute(ctx).Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "GetAll failed: %v", err)
 		return err
 	}
 	// [END firestore_distinct_expressions]
@@ -286,6 +296,7 @@ func countFunction(w io.Writer, client *firestore.Client) error {
 		Aggregate(firestore.Accumulators(firestore.CountAll().As("count"))).
 		Execute(ctx).Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "GetAll failed: %v", err)
 		return err
 	}
 
@@ -295,6 +306,7 @@ func countFunction(w io.Writer, client *firestore.Client) error {
 		Aggregate(firestore.Accumulators(firestore.Count("ratings").As("count"))).
 		Execute(ctx).Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "GetAll failed: %v", err)
 		return err
 	}
 	// [END firestore_count_function]
@@ -314,6 +326,7 @@ func countIfFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_count_if]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -332,6 +345,7 @@ func countDistinctFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_count_distinct]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -350,6 +364,7 @@ func sumFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_sum_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -368,6 +383,7 @@ func avgFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_avg_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -386,6 +402,7 @@ func minFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_min_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -404,6 +421,7 @@ func maxFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_max_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)

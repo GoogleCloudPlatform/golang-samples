@@ -42,6 +42,7 @@ func basicRead(w io.Writer, client *firestore.Client) error {
 	snapshot := pipeline.Execute(ctx)
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	for _, result := range results {
@@ -55,6 +56,7 @@ func basicRead(w io.Writer, client *firestore.Client) error {
 			break
 		}
 		if err != nil {
+			fmt.Fprintf(w, "it.Next failed: %v", err)
 			return err
 		}
 		fmt.Fprintf(w, "%s => %v\n", result.Ref().ID, result.Data())
@@ -68,6 +70,7 @@ func pipelineInitialization(w io.Writer, projectID string) error {
 	// [START firestore_pipeline_initialization]
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
+		fmt.Fprintf(w, "firestore.NewClient failed: %v", err)
 		return err
 	}
 	pipeline := client.Pipeline().Collection("books")
@@ -92,18 +95,21 @@ func inputStages(w io.Writer, client *firestore.Client) error {
 	// Return all restaurants in San Francisco
 	results1, err := client.Pipeline().Collection("cities/sf/restaurants").Execute(ctx).Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "GetAll failed: %v", err)
 		return err
 	}
 
 	// Return all restaurants
 	results2, err := client.Pipeline().CollectionGroup("restaurants").Execute(ctx).Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "GetAll failed: %v", err)
 		return err
 	}
 
 	// Return all documents across all collections in the database (the entire database)
 	results3, err := client.Pipeline().Database().Execute(ctx).Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "GetAll failed: %v", err)
 		return err
 	}
 
@@ -116,6 +122,7 @@ func inputStages(w io.Writer, client *firestore.Client) error {
 		}).
 		Execute(ctx).Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "GetAll failed: %v", err)
 		return err
 	}
 	// [END firestore_input_stages]

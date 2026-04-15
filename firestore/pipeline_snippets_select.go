@@ -34,6 +34,7 @@ func selectSyntaxExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_select_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -76,6 +77,7 @@ func selectPositionExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_select_position]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -95,6 +97,7 @@ func selectBadPositionExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_select_bad_position]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -144,6 +147,7 @@ func selectNestedExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_select_nested]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -161,6 +165,7 @@ func addFieldsSyntaxExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_add_fields_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -177,6 +182,7 @@ func addFieldsOverlapExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_add_fields_overlap]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -194,6 +200,7 @@ func addFieldsNestingExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_add_fields_nesting]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -209,6 +216,7 @@ func removeFieldsSyntaxExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_remove_fields_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -245,6 +253,7 @@ func removeFieldsNestedExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_remove_fields_nested]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)

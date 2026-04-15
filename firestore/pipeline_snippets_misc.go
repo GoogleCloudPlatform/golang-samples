@@ -35,6 +35,7 @@ func stagesExpressionsExample(w io.Writer, client *firestore.Client) error {
 		Execute(ctx)
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	// [END firestore_stages_expressions_example]

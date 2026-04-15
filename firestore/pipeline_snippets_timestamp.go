@@ -34,6 +34,7 @@ func unixMicrosToTimestampFunction(w io.Writer, client *firestore.Client) error 
 	// [END firestore_unix_micros_timestamp]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -52,6 +53,7 @@ func unixMillisToTimestampFunction(w io.Writer, client *firestore.Client) error 
 	// [END firestore_unix_millis_timestamp]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -70,6 +72,7 @@ func unixSecondsToTimestampFunction(w io.Writer, client *firestore.Client) error
 	// [END firestore_unix_seconds_timestamp]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -88,6 +91,7 @@ func timestampAddFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_timestamp_add]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -106,6 +110,7 @@ func timestampSubFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_timestamp_sub]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -124,6 +129,7 @@ func timestampToUnixMicrosFunction(w io.Writer, client *firestore.Client) error 
 	// [END firestore_timestamp_unix_micros]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -142,6 +148,7 @@ func timestampToUnixMillisFunction(w io.Writer, client *firestore.Client) error 
 	// [END firestore_timestamp_unix_millis]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -160,6 +167,7 @@ func timestampToUnixSecondsFunction(w io.Writer, client *firestore.Client) error
 	// [END firestore_timestamp_unix_seconds]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)

@@ -34,6 +34,7 @@ func arrayConcatFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_array_concat]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -52,6 +53,7 @@ func arrayContainsFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_array_contains]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -70,6 +72,7 @@ func arrayContainsAllFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_array_contains_all]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -88,6 +91,7 @@ func arrayContainsAnyFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_array_contains_any]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -106,6 +110,7 @@ func arrayLengthFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_array_length]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -124,6 +129,7 @@ func arrayReverseFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_array_reverse]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)

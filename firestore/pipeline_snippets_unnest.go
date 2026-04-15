@@ -32,6 +32,7 @@ func unnestStage(w io.Writer, client *firestore.Client) error {
 	// [END firestore_unnest_stage]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -51,6 +52,7 @@ func unnestStageEmptyOrNonArray(w io.Writer, client *firestore.Client) error {
 		UnnestWithAlias("neighbors", "unnestedNeighbors", firestore.WithUnnestIndexField("index")).
 		Execute(ctx).Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "GetAll failed: %v", err)
 		return err
 	}
 
@@ -74,6 +76,7 @@ func unnestSyntaxExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_unnest_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -106,6 +109,7 @@ func unnestAliasIndexExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_unnest_alias_index]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -142,6 +146,7 @@ func unnestNonArrayExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_unnest_nonarray]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -172,6 +177,7 @@ func unnestEmptyArrayExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_unnest_empty_array]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -190,6 +196,7 @@ func unnestPreserveEmptyArrayExample(w io.Writer, client *firestore.Client) erro
 		).As("userScore"), firestore.WithUnnestIndexField("attempt")).
 		Execute(ctx).Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "GetAll failed: %v", err)
 		return err
 	}
 	// [END firestore_unnest_preserve_empty_array]
@@ -227,6 +234,7 @@ func unnestNestedExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_unnest_nested]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)

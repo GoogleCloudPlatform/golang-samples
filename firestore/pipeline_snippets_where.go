@@ -31,6 +31,7 @@ func wherePipeline(w io.Writer, client *firestore.Client) error {
 		Where(firestore.FieldOf("published").LessThan(1900)).
 		Execute(ctx).Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "GetAll failed: %v", err)
 		return err
 	}
 
@@ -42,6 +43,7 @@ func wherePipeline(w io.Writer, client *firestore.Client) error {
 		)).
 		Execute(ctx).Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "GetAll failed: %v", err)
 		return err
 	}
 	// [END firestore_pipeline_where]
@@ -59,6 +61,7 @@ func whereEqualityExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_where_equality_example]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -75,6 +78,7 @@ func whereMultipleStagesExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_where_multiple_stages]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -98,6 +102,7 @@ func whereComplexExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_where_complex]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -114,6 +119,7 @@ func whereStageOrderExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_where_stage_order]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)

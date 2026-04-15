@@ -35,6 +35,7 @@ func sort(w io.Writer, client *firestore.Client) error {
 	// [END firestore_sort]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -68,6 +69,7 @@ func sortSyntaxExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_sort_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -83,6 +85,7 @@ func sortSyntaxExample2(w io.Writer, client *firestore.Client) error {
 	// [END firestore_sort_syntax_2]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -101,6 +104,7 @@ func sortDocumentIDExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_sort_document_id]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)

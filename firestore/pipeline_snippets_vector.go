@@ -35,6 +35,7 @@ func cosineDistanceFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_cosine_distance]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -54,6 +55,7 @@ func dotProductFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_dot_product]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -73,6 +75,7 @@ func euclideanDistanceFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_euclidean_distance]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -91,6 +94,7 @@ func vectorLengthFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_vector_length]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -106,6 +110,7 @@ func findNearestSyntaxExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_find_nearest_syntax]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -121,6 +126,7 @@ func findNearestLimitExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_find_nearest_limit]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -155,6 +161,7 @@ func findNearestDistanceExample(w io.Writer, client *firestore.Client) error {
 	// [END firestore_find_nearest_distance]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)

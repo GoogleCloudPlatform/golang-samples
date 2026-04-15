@@ -34,6 +34,7 @@ func mapGetFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_map_get]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -52,6 +53,7 @@ func mapSetFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_map_set]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -70,6 +72,7 @@ func mapKeysFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_map_keys]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -88,6 +91,7 @@ func mapValuesFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_map_values]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
@@ -106,6 +110,7 @@ func mapEntriesFunction(w io.Writer, client *firestore.Client) error {
 	// [END firestore_map_entries]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
 		return err
 	}
 	fmt.Fprintln(w, results)
