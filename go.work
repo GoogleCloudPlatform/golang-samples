@@ -157,6 +157,7 @@ use (
 	./vertexai/function-calling
 	./vertexai/gemma2
 	./vertexai/multimodal-video-with-audio
+	./vertexai/retail
 	./vertexai/safety-settings
 	./vertexai/snippets
 	./vertexai/stream-multimodality-basic
