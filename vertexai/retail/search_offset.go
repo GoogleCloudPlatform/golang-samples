@@ -24,16 +24,16 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// [START retail_v2_search_request]
-// searchRequest method searches for products using Vertex AI Search for commerce.
-// Performs a search request for a specific placement.
-// Handles both text search (using query) and browse search (using page_categories).
+// [START retail_v2_search_offset]
+// searchOffset method searches for products with an offset using Vertex AI Search for commerce.
+//
+// Performs a search request starting from a specified position.
 //
 // projectID: The Google Cloud project ID.
-// query: The search term for text search.
+// query: The search term.
 // visitorID: A unique identifier for the user.
-// pageCategories: The categories for browse search.
-func searchRequest(projectID, query, visitorID string, pageCategories []string) error {
+// offset: The number of results to skip.for products using Vertex AI Search for commerce.
+func searchOffset(projectID, query, visitorID string, offset int32) error {
 	ctx := context.Background()
 
 	client, err := retail.NewSearchClient(ctx)
@@ -43,10 +43,11 @@ func searchRequest(projectID, query, visitorID string, pageCategories []string) 
 	defer client.Close()
 
 	req := &retailpb.SearchRequest{
-		Placement:      fmt.Sprintf("projects/%s/locations/global/catalogs/default_catalog/placements/default_search", projectID),
-		Query:          query,
-		VisitorId:      visitorID,
-		PageCategories: pageCategories,
+		Placement: fmt.Sprintf("projects/%s/locations/global/catalogs/default_catalog/placements/default_search", projectID),
+		Query:     query,
+		VisitorId: visitorID,
+		PageSize:  10,
+		Offset:    offset,
 	}
 
 	it := client.Search(ctx, req)
@@ -63,4 +64,4 @@ func searchRequest(projectID, query, visitorID string, pageCategories []string) 
 	return nil
 }
 
-// [END retail_v2_search_request]
+// [END retail_v2_search_offset]
