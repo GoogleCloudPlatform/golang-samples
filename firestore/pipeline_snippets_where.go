@@ -162,3 +162,24 @@ func createWhereData(w io.Writer, client *firestore.Client) error {
 	// [END firestore_create_where_data]
 	return nil
 }
+
+func whereHavingExample(w io.Writer, client *firestore.Client) error {
+	ctx := context.Background()
+	// [START firestore_where_having_example]
+	snapshot := client.Pipeline().
+		Collection("cities").
+		Aggregate(
+			firestore.Accumulators(firestore.Sum("population").As("totalPopulation")),
+			firestore.WithAggregateGroups(firestore.FieldOf("state")),
+		).
+		Where(firestore.FieldOf("totalPopulation").GreaterThan(10000000)).
+		Execute(ctx)
+	// [END firestore_where_having_example]
+	results, err := snapshot.Results().GetAll()
+	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
+		return err
+	}
+	fmt.Fprintln(w, results)
+	return nil
+}

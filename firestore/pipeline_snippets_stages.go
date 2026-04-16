@@ -730,3 +730,33 @@ func unionSyntaxExample(w io.Writer, client *firestore.Client) error {
 	fmt.Fprintln(w, results)
 	return nil
 }
+
+func forceIndexExamples(w io.Writer, client *firestore.Client) error {
+	ctx := context.Background()
+	// [START firestore_force_index]
+	// Force Planner to use Index ID CICAgOi36pgK
+	snapshot1 := client.Pipeline().
+		CollectionGroup("customers", firestore.WithForceIndex("CICAgOi36pgK")).
+		Limit(100).
+		Execute(ctx)
+	// [END firestore_force_index]
+	results1, err := snapshot1.Results().GetAll()
+	if err != nil {
+		return err
+	}
+	fmt.Fprintln(w, results1)
+
+	// [START firestore_force_scan]
+	// Force Planner to only do a collection scan
+	snapshot2 := client.Pipeline().
+		CollectionGroup("customers", firestore.WithForceIndex("primary")).
+		Limit(100).
+		Execute(ctx)
+	// [END firestore_force_scan]
+	results2, err := snapshot2.Results().GetAll()
+	if err != nil {
+		return err
+	}
+	fmt.Fprintln(w, results2)
+	return nil
+}

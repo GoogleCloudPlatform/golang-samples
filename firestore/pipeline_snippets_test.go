@@ -1262,4 +1262,101 @@ func TestPipelineSnippets(t *testing.T) {
 		}
 	})
 
+	t.Run("endsWithFunction", func(t *testing.T) {
+		buf.Reset()
+		if err := endsWithFunction(buf, client); err != nil {
+			t.Errorf("endsWithFunction failed: %v", err)
+		}
+	})
+
+	t.Run("whereHavingExample", func(t *testing.T) {
+		buf.Reset()
+		if err := whereHavingExample(buf, client); err != nil {
+			t.Errorf("whereHavingExample failed: %v", err)
+		}
+	})
+
+	t.Run("searchBasic", func(t *testing.T) {
+		t.Skip("Requires a pre-created search index")
+		buf.Reset()
+		if err := searchBasic(buf, client); err != nil {
+			t.Errorf("searchBasic failed: %v", err)
+		}
+	})
+
+	t.Run("searchExact", func(t *testing.T) {
+		t.Skip("Requires a pre-created search index")
+		buf.Reset()
+		if err := searchExact(buf, client); err != nil {
+			t.Errorf("searchExact failed: %v", err)
+		}
+	})
+
+	t.Run("searchTwoTerms", func(t *testing.T) {
+		t.Skip("Requires a pre-created search index")
+		buf.Reset()
+		if err := searchTwoTerms(buf, client); err != nil {
+			t.Errorf("searchTwoTerms failed: %v", err)
+		}
+	})
+
+	t.Run("searchExcludeTerm", func(t *testing.T) {
+		t.Skip("Requires a pre-created search index")
+		buf.Reset()
+		if err := searchExcludeTerm(buf, client); err != nil {
+			t.Errorf("searchExcludeTerm failed: %v", err)
+		}
+	})
+
+	t.Run("searchSpecialFields", func(t *testing.T) {
+		t.Skip("Requires a pre-created search index")
+		buf.Reset()
+		if err := searchSpecialFields(buf, client); err != nil {
+			t.Errorf("searchSpecialFields failed: %v", err)
+		}
+	})
+
+	t.Run("defineExample", func(t *testing.T) {
+		buf.Reset()
+		if err := defineExample(buf, client); err != nil {
+			t.Errorf("defineExample failed: %v", err)
+		}
+	})
+
+	t.Run("toArrayExpression", func(t *testing.T) {
+		buf.Reset()
+		if err := toArrayExpression(buf, client); err != nil {
+			t.Errorf("toArrayExpression failed: %v", err)
+		}
+	})
+
+	t.Run("toScalarExpression", func(t *testing.T) {
+		buf.Reset()
+		if err := toScalarExpression(buf, client); err != nil {
+			t.Errorf("toScalarExpression failed: %v", err)
+		}
+	})
+
+	t.Run("forceIndexExamples", func(t *testing.T) {
+		t.Skip("Requires a pre-created specific index")
+		buf.Reset()
+		if err := forceIndexExamples(buf, client); err != nil {
+			t.Errorf("forceIndexExamples failed: %v", err)
+		}
+	})
+
+	t.Run("pipelineUpdate", func(t *testing.T) {
+		buf.Reset()
+		if err := pipelineUpdate(buf, client); err != nil {
+			t.Errorf("pipelineUpdate failed: %v", err)
+		}
+	})
+
+	t.Run("pipelineDelete", func(t *testing.T) {
+		buf.Reset()
+		if err := pipelineDelete(buf, client); err != nil {
+			t.Errorf("pipelineDelete failed: %v", err)
+		}
+	})
+
 }

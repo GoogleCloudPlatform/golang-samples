@@ -79,6 +79,25 @@ func startsWithFunction(w io.Writer, client *firestore.Client) error {
 	return nil
 }
 
+func endsWithFunction(w io.Writer, client *firestore.Client) error {
+	ctx := context.Background()
+	// [START firestore_ends_with]
+	snapshot := client.Pipeline().
+		Collection("inventory/devices/laptops").
+		Select(firestore.Fields(
+			firestore.EndsWith(firestore.FieldOf("name"), "16 inch").As("`Laptops16in`"),
+		)).
+		Execute(ctx)
+	// [END firestore_ends_with]
+	results, err := snapshot.Results().GetAll()
+	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
+		return err
+	}
+	fmt.Fprintln(w, results)
+	return nil
+}
+
 func likeFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
 	// [START firestore_like]
