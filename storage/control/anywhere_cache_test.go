@@ -27,7 +27,7 @@ import (
 
 func TestAnywhereCache(t *testing.T) {
 	tc := testutil.SystemTest(t)
-	zone := os.Getenv("GOOGLE_CLOUD_CPP_TEST_ZONE")
+	zone := os.Getenv("GOLANG_SAMPLES_ZONE")
 	if zone == "" {
 		zone = "us-central1-a"
 	}
