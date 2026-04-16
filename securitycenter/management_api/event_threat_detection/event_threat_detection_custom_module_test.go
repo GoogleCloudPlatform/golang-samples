@@ -333,6 +333,7 @@ func TestDeleteEtdCustomModule(t *testing.T) {
 			r.Errorf("addCustomModule() had error: %v", err)
 			return
 		}
+		AddModuleToCleanup(id)
 
 		parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
