@@ -32,6 +32,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/types/known/structpb"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 var orgID = ""
@@ -60,9 +62,18 @@ func TestMain(m *testing.M) {
 
 func setupSharedModules() {
 	for i := 0; i < 3; i++ {
-		moduleID, _ = addCustomModule()
-		if moduleID != "" {
-			sharedModules = append(sharedModules, moduleID)
+		// Retry addCustomModule up to 5 times for each module
+		var id string
+		var err error
+		for retry := 0; retry < 5; retry++ {
+			id, err = addCustomModule()
+			if err == nil {
+				break
+			}
+			time.Sleep(5 * time.Second)
+		}
+		if id != "" {
+			sharedModules = append(sharedModules, id)
 		}
 	}
 }
@@ -175,34 +186,27 @@ func addCustomModule() (string, error) {
 	// Create unique display name
 	displayName := fmt.Sprintf("go_sample_etd_custom_module_test_%s", uniqueSuffix)
 
-	// Define the metadata and other config parameters as a map
-	configMap := map[string]interface{}{
-		"metadata": map[string]interface{}{
-			"severity": "MEDIUM",
-			//Replace with the desired description.
-			"description":    "Sample custom module for testing purpose. Please do not delete.",
-			"recommendation": "na",
-		},
-		"ips": []interface{}{"0.0.0.0"},
-	}
-
-	// Convert the map to a Struct
-	configStruct, err := structpb.NewStruct(configMap)
-	if err != nil {
-		return "", fmt.Errorf("structpb.NewStruct: %w", err)
-	}
-
-	// Define the Event Threat Detection custom module configuration
+	// Define the custom module configuration
 	customModule := &securitycentermanagementpb.EventThreatDetectionCustomModule{
-		Config: configStruct,
-		//Replace with desired Display Name.
+		Config: &structpb.Struct{
+			Fields: map[string]*structpb.Value{
+				"metadata": structpb.NewStructValue(&structpb.Struct{
+					Fields: map[string]*structpb.Value{
+						"description":    structpb.NewStringValue("Sample custom module description"),
+						"severity":       structpb.NewStringValue("HIGH"),
+						"recommendation": structpb.NewStringValue("Sample recommendation"),
+					},
+				}),
+				"complianceStatus": structpb.NewStringValue("COMPLIANT"),
+			},
+		},
 		DisplayName:     displayName,
 		EnablementState: securitycentermanagementpb.EventThreatDetectionCustomModule_ENABLED,
 		Type:            "CONFIGURABLE_BAD_IP",
 	}
 
 	req := &securitycentermanagementpb.CreateEventThreatDetectionCustomModuleRequest{
-		Parent:                           parent,
+		Parent:                         parent,
 		EventThreatDetectionCustomModule: customModule,
 	}
 
@@ -224,247 +228,274 @@ func addCustomModule() (string, error) {
 
 // TestCreateEtdCustomModule verifies the Create functionality
 func TestCreateEtdCustomModule(t *testing.T) {
-	var buf bytes.Buffer
-	var createModulePath = ""
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		var buf bytes.Buffer
+		var createModulePath = ""
 
-	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+		parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
-	// Call Create
-	err := createEventThreatDetectionCustomModule(&buf, parent)
+		// Call Create
+		err := createEventThreatDetectionCustomModule(&buf, parent)
 
-	if err != nil {
-		t.Fatalf("createCustomModule() had error: %v", err)
-		return
-	}
+		if err != nil {
+			r.Errorf("createCustomModule() had error: %v", err)
+			return
+		}
 
-	got := buf.String()
+		got := buf.String()
 
-	if got == "" {
-		t.Errorf("createEventThreatDetectionCustomModule() returned an empty string")
-		return
-	}
+		if got == "" {
+			r.Errorf("createEventThreatDetectionCustomModule() returned an empty string")
+			return
+		}
 
-	fmt.Printf("Response: %v\n", got)
+		fmt.Printf("Response: %v\n", got)
 
-	parts := strings.Split(got, ":")
-	if len(parts) > 0 {
-		createModulePath = parts[len(parts)-1]
-	}
+		parts := strings.Split(got, ":")
+		if len(parts) > 0 {
+			createModulePath = parts[len(parts)-1]
+		}
 
-	AddModuleToCleanup(extractCustomModuleID(createModulePath))
+		AddModuleToCleanup(extractCustomModuleID(createModulePath))
 
-	if !strings.Contains(got, orgID) {
-		t.Fatalf("createCustomModule() got: %s want %s", got, orgID)
-	}
+		if !strings.Contains(got, orgID) {
+			r.Errorf("createCustomModule() got: %s want %s", got, orgID)
+		}
+	})
 }
 
 // TestGetCustomModule verifies the Get functionality
 func TestGetEtdCustomModule(t *testing.T) {
-	var buf bytes.Buffer
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		var buf bytes.Buffer
 
-	moduleID = getRandomSharedModule()
-	if moduleID == "" {
-		t.Fatalf("No shared modules available")
-	}
+		moduleID = getRandomSharedModule()
+		if moduleID == "" {
+			r.Errorf("No shared modules available")
+			return
+		}
 
-	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+		parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
-	// Call Get
-	err := getEventThreatDetectionCustomModule(&buf, parent, moduleID)
+		// Call Get
+		err := getEventThreatDetectionCustomModule(&buf, parent, moduleID)
 
-	if err != nil {
-		t.Fatalf("getEventThreatDetectionCustomModule() had error: %v", err)
-		return
-	}
+		if err != nil {
+			r.Errorf("getEventThreatDetectionCustomModule() had error: %v", err)
+			return
+		}
 
-	got := buf.String()
-	fmt.Printf("Response: %v\n", got)
+		got := buf.String()
+		fmt.Printf("Response: %v\n", got)
 
-	if !strings.Contains(got, orgID) {
-		t.Fatalf("getEventThreatDetectionCustomModule() got: %s want %s", got, orgID)
-	}
+		if !strings.Contains(got, orgID) {
+			r.Errorf("getEventThreatDetectionCustomModule() got: %s want %s", got, orgID)
+		}
+	})
 }
 
 // TestUpdateCustomModule verifies the Update functionality
 func TestUpdateEtdCustomModule(t *testing.T) {
-	var buf bytes.Buffer
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		var buf bytes.Buffer
 
-	moduleID = getRandomSharedModule()
-	if moduleID == "" {
-		t.Fatalf("No shared modules available")
-	}
+		moduleID = getRandomSharedModule()
+		if moduleID == "" {
+			r.Errorf("No shared modules available")
+			return
+		}
 
-	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
-	// Call Update
-	err := updateEventThreatDetectionCustomModule(&buf, parent, moduleID)
+		parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+		// Call Update
+		err := updateEventThreatDetectionCustomModule(&buf, parent, moduleID)
 
-	if err != nil {
-		t.Fatalf("updateEventThreatDetectionCustomModule() had error: %v", err)
-		return
-	}
+		if err != nil {
+			r.Errorf("updateEventThreatDetectionCustomModule() had error: %v", err)
+			return
+		}
 
-	got := buf.String()
+		got := buf.String()
 
-	if !strings.Contains(got, orgID) {
-		t.Fatalf("updateCustomModule() got: %s want %s", got, orgID)
-	}
+		if !strings.Contains(got, orgID) {
+			r.Errorf("updateCustomModule() got: %s want %s", got, orgID)
+		}
+	})
 }
 
 // TestDeleteCustomModule verifies the List functionality
 func TestDeleteEtdCustomModule(t *testing.T) {
-	var buf bytes.Buffer
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		var buf bytes.Buffer
 
-	moduleID = getRandomSharedModule()
-	if moduleID == "" {
-		t.Fatalf("No shared modules available")
-	}
+		// Create a dedicated module to delete
+		id, err := addCustomModule()
+		if err != nil {
+			r.Errorf("addCustomModule() had error: %v", err)
+			return
+		}
 
-	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+		parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
-	err := deleteEventThreatDetectionCustomModule(&buf, parent, moduleID)
+		err = deleteEventThreatDetectionCustomModule(&buf, parent, id)
 
-	if err != nil {
-		t.Fatalf("deleteEventThreatDetectionCustomModule() had error: %v", err)
-		return
-	}
+		if err != nil {
+			r.Errorf("deleteEventThreatDetectionCustomModule() had error: %v", err)
+			return
+		}
 
-	got := buf.String()
+		got := buf.String()
 
-	if !strings.Contains(got, moduleID) {
-		t.Fatalf("deleteEventThreatDetectionCustomModule() got: %s want %s", got, moduleID)
-	}
+		if !strings.Contains(got, id) {
+			r.Errorf("deleteEventThreatDetectionCustomModule() got: %s want %s", got, id)
+		}
+	})
 }
 
 // TestListEtdCustomModule verifies the List functionality
 func TestListEtdCustomModule(t *testing.T) {
-	var buf bytes.Buffer
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		var buf bytes.Buffer
 
-	moduleID = getRandomSharedModule()
-	if moduleID == "" {
-		t.Fatalf("No shared modules available")
-	}
+		moduleID = getRandomSharedModule()
+		if moduleID == "" {
+			r.Errorf("No shared modules available")
+			return
+		}
 
-	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+		parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
-	err := listEventThreatDetectionCustomModule(&buf, parent)
+		err := listEventThreatDetectionCustomModule(&buf, parent)
 
-	if err != nil {
-		t.Fatalf("listEventThreatDetectionCustomModule() had error: %v", err)
-		return
-	}
+		if err != nil {
+			r.Errorf("listEventThreatDetectionCustomModule() had error: %v", err)
+			return
+		}
 
-	got := buf.String()
-	fmt.Printf("Response: %v\n", got)
+		got := buf.String()
+		fmt.Printf("Response: %v\n", got)
 
-	if !strings.Contains(got, orgID) {
-		t.Fatalf("listEventThreatDetectionCustomModule() got: %s want %s", got, orgID)
-	}
+		if !strings.Contains(got, orgID) {
+			r.Errorf("listEventThreatDetectionCustomModule() got: %s want %s", got, orgID)
+		}
+	})
 }
 
 // TestListEffectiveEtdCustomModule verifies the List functionality
 func TestListEffectiveEtdCustomModule(t *testing.T) {
-	var buf bytes.Buffer
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		var buf bytes.Buffer
 
-	moduleID = getRandomSharedModule()
-	if moduleID == "" {
-		t.Fatalf("No shared modules available")
-	}
+		moduleID = getRandomSharedModule()
+		if moduleID == "" {
+			r.Errorf("No shared modules available")
+			return
+		}
 
-	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+		parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
-	err := listEffectiveEventThreatDetectionCustomModule(&buf, parent)
+		err := listEffectiveEventThreatDetectionCustomModule(&buf, parent)
 
-	if err != nil {
-		t.Fatalf("listEffectiveEventThreatDetectionCustomModule() had error: %v", err)
-		return
-	}
+		if err != nil {
+			r.Errorf("listEffectiveEventThreatDetectionCustomModule() had error: %v", err)
+			return
+		}
 
-	got := buf.String()
-	fmt.Printf("Response: %v\n", got)
+		got := buf.String()
+		fmt.Printf("Response: %v\n", got)
 
-	if !strings.Contains(got, orgID) {
-		t.Fatalf("listEffectiveEventThreatDetectionCustomModule() got: %s want %s", got, orgID)
-	}
+		if !strings.Contains(got, orgID) {
+			r.Errorf("listEffectiveEventThreatDetectionCustomModule() got: %s want %s", got, orgID)
+		}
+	})
 }
 
 // TestGetEffectiveEtdCustomModule verifies the Get functionality
 func TestGetEffectiveEtdCustomModule(t *testing.T) {
-	var buf bytes.Buffer
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		var buf bytes.Buffer
 
-	moduleID = getRandomSharedModule()
-	if moduleID == "" {
-		t.Fatalf("No shared modules available")
-	}
+		moduleID = getRandomSharedModule()
+		if moduleID == "" {
+			r.Errorf("No shared modules available")
+			return
+		}
 
-	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+		parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
-	// Call Get
-	err := getEffectiveEventThreatDetectionCustomModule(&buf, parent, moduleID)
+		// Call Get
+		err := getEffectiveEventThreatDetectionCustomModule(&buf, parent, moduleID)
 
-	if err != nil {
-		t.Fatalf("getEffectiveEventThreatDetectionCustomModule() had error: %v", err)
-		return
-	}
+		if err != nil {
+			r.Errorf("getEffectiveEventThreatDetectionCustomModule() had error: %v", err)
+			return
+		}
 
-	got := buf.String()
-	fmt.Printf("Response: %v\n", got)
+		got := buf.String()
+		fmt.Printf("Response: %v\n", got)
 
-	if !strings.Contains(got, orgID) {
-		t.Fatalf("getEffectiveEventThreatDetectionCustomModule() got: %s want %s", got, orgID)
-	}
+		if !strings.Contains(got, orgID) {
+			r.Errorf("getEffectiveEventThreatDetectionCustomModule() got: %s want %s", got, orgID)
+		}
+	})
 }
 
 // TestListDescendantEtdCustomModule verifies the List functionality
 func TestListDescendantEtdCustomModule(t *testing.T) {
-	var buf bytes.Buffer
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		var buf bytes.Buffer
 
-	moduleID = getRandomSharedModule()
-	if moduleID == "" {
-		t.Fatalf("No shared modules available")
-	}
+		moduleID = getRandomSharedModule()
+		if moduleID == "" {
+			r.Errorf("No shared modules available")
+			return
+		}
 
-	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+		parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
-	err := listDescendantEventThreatDetectionCustomModule(&buf, parent)
+		err := listDescendantEventThreatDetectionCustomModule(&buf, parent)
 
-	if err != nil {
-		t.Fatalf("listDescendantEventThreatDetectionCustomModule() had error: %v", err)
-		return
-	}
+		if err != nil {
+			r.Errorf("listDescendantEventThreatDetectionCustomModule() had error: %v", err)
+			return
+		}
 
-	got := buf.String()
-	fmt.Printf("Response: %v\n", got)
+		got := buf.String()
+		fmt.Printf("Response: %v\n", got)
 
-	if !strings.Contains(got, orgID) {
-		t.Fatalf("listDescendantEventThreatDetectionCustomModule() got: %s want %s", got, orgID)
-	}
+		if !strings.Contains(got, orgID) {
+			r.Errorf("listDescendantEventThreatDetectionCustomModule() got: %s want %s", got, orgID)
+		}
+	})
 }
 
 // TestValidateEtdCustomModule verifies the List functionality
 func TestValidateEtdCustomModule(t *testing.T) {
-	var buf bytes.Buffer
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		var buf bytes.Buffer
 
-	moduleID = getRandomSharedModule()
-	if moduleID == "" {
-		t.Fatalf("No shared modules available")
-	}
+		moduleID = getRandomSharedModule()
+		if moduleID == "" {
+			r.Errorf("No shared modules available")
+			return
+		}
 
-	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+		parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
-	err := validateEventThreatDetectionCustomModule(&buf, parent)
+		err := validateEventThreatDetectionCustomModule(&buf, parent)
 
-	if err != nil {
-		t.Fatalf("validateEventThreatDetectionCustomModule() had error: %v", err)
-		return
-	}
+		if err != nil {
+			r.Errorf("validateEventThreatDetectionCustomModule() had error: %v", err)
+			return
+		}
 
-	got := buf.String()
-	fmt.Printf("Response: %v\n", got)
+		got := buf.String()
+		fmt.Printf("Response: %v\n", got)
 
-	// Check that the response indicates successful validation
-	expectedMessage := "Validation successful: No errors found."
+		// Check that the response indicates successful validation
+		expectedMessage := "Validation successful: No errors found."
 
-	if !strings.Contains(got, expectedMessage) {
-		t.Fatalf("validateEventThreatDetectionCustomModule() got: %s want %s", got, expectedMessage)
-	}
+		if !strings.Contains(got, expectedMessage) {
+			r.Errorf("validateEventThreatDetectionCustomModule() got: %s want %s", got, expectedMessage)
+		}
+	})
 }

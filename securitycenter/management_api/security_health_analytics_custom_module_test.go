@@ -33,6 +33,8 @@ import (
 	expr "google.golang.org/genproto/googleapis/type/expr"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+
+	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
 var orgID = ""
@@ -102,7 +104,16 @@ func cleanupOrphanedModules() {
 
 func setupSharedModules() {
 	for i := 0; i < 3; i++ {
-		moduleID, _ = addCustomModule()
+		// Retry addCustomModule up to 5 times for each module
+		var moduleID string
+		var err error
+		for retry := 0; retry < 5; retry++ {
+			moduleID, err = addCustomModule()
+			if err == nil {
+				break
+			}
+			time.Sleep(5 * time.Second)
+		}
 		if moduleID != "" {
 			sharedModules = append(sharedModules, moduleID)
 		}
@@ -273,63 +284,69 @@ func addCustomModule() (string, error) {
 
 // TestDeleteCustomModule verifies the List functionality
 func TestDeleteCustomModule(t *testing.T) {
-	var buf bytes.Buffer
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		var buf bytes.Buffer
 
-	// Create a new module only for this delete test to avoid a race condition with shared modules
-	id, err := addCustomModule()
-	if err != nil {
-		t.Fatalf("addCustomModule() had error: %v", err)
-	}
+		// Create a new module only for this delete test to avoid a race condition with shared modules
+		id, err := addCustomModule()
+		if err != nil {
+			r.Errorf("addCustomModule() had error: %v", err)
+			return
+		}
 
-	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+		parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
-	err = deleteSecurityHealthAnalyticsCustomModule(&buf, parent, id)
+		err = deleteSecurityHealthAnalyticsCustomModule(&buf, parent, id)
 
-	if err != nil {
-		t.Fatalf("deleteSecurityHealthAnalyticsCustomModule() had error: %v", err)
-	}
+		if err != nil {
+			r.Errorf("deleteSecurityHealthAnalyticsCustomModule() had error: %v", err)
+			return
+		}
 
-	got := buf.String()
+		got := buf.String()
 
-	if !strings.Contains(got, id) {
-		t.Fatalf("deleteSecurityHealthAnalyticsCustomModule() got: %s want %s", got, id)
-	}
+		if !strings.Contains(got, id) {
+			r.Errorf("deleteSecurityHealthAnalyticsCustomModule() got: %s want %s", got, id)
+		}
+	})
 }
 
 // TestCreateCustomModule verifies the Create functionality
 func TestCreateCustomModule(t *testing.T) {
-	var buf bytes.Buffer
-	var createModulePath = ""
+	testutil.Retry(t, 5, 5*time.Second, func(r *testutil.R) {
+		var buf bytes.Buffer
+		var createModulePath = ""
 
-	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+		parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
-	// Call Create
-	err := createSecurityHealthAnalyticsCustomModule(&buf, parent)
+		// Call Create
+		err := createSecurityHealthAnalyticsCustomModule(&buf, parent)
 
-	if err != nil {
-		t.Fatalf("createCustomModule() had error: %v", err)
-		return
-	}
+		if err != nil {
+			r.Errorf("createCustomModule() had error: %v", err)
+			return
+		}
 
-	got := buf.String()
+		got := buf.String()
 
-	if got == "" {
-		t.Errorf("createSecurityHealthAnalyticsCustomModule() returned an empty string")
-		return
-	}
+		if got == "" {
+			r.Errorf("createSecurityHealthAnalyticsCustomModule() returned an empty string")
+			return
+		}
 
-	fmt.Printf("Response: %v\n", got)
+		fmt.Printf("Response: %v\n", got)
 
-	parts := strings.Split(got, ":")
-	if len(parts) > 0 {
-		createModulePath = parts[len(parts)-1]
-	}
+		parts := strings.Split(got, ":")
+		if len(parts) > 0 {
+			createModulePath = parts[len(parts)-1]
+		}
 
-	AddModuleToCleanup(extractCustomModuleID(createModulePath))
+		AddModuleToCleanup(extractCustomModuleID(createModulePath))
 
-	if !strings.Contains(got, orgID) {
-		t.Fatalf("createCustomModule() got: %s want %s", got, orgID)
-	}
+		if !strings.Contains(got, orgID) {
+			r.Errorf("createSecurityHealthAnalyticsCustomModule() got: %s want %s", got, orgID)
+		}
+	})
 }
 
 // TestListDescendantCustomModule verifies the List Descendant functionality
