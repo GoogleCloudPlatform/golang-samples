@@ -32,7 +32,7 @@ import (
 // projectID: The Google Cloud project ID.
 // query: The search term.
 // visitorID: A unique identifier for the user.
-// offset: The number of results to skip.for products using Vertex AI Search for commerce.
+// offset: The number of results to skip.
 func searchOffset(projectID, query, visitorID string, offset int32) error {
 	ctx := context.Background()
 

@@ -27,7 +27,7 @@ import (
 // [START retail_v2_search_request]
 // searchRequest method searches for products using Vertex AI Search for commerce.
 // Performs a search request for a specific placement.
-// Handles both text search (using query) and browse search (using page_categories).
+// Handles both text search (using query) and browse search (using pageCategories).
 //
 // projectID: The Google Cloud project ID.
 // query: The search term for text search.
