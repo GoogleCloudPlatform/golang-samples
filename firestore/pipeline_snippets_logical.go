@@ -22,120 +22,6 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-func equalFunction(w io.Writer, client *firestore.Client) error {
-	ctx := context.Background()
-	// [START firestore_equal_function]
-	snapshot := client.Pipeline().
-		Collection("books").
-		Select(firestore.Fields(
-			firestore.Equal(firestore.FieldOf("rating"), 5).As("hasPerfectRating"),
-		)).
-		Execute(ctx)
-	// [END firestore_equal_function]
-	results, err := snapshot.Results().GetAll()
-	if err != nil {
-		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
-		return err
-	}
-	fmt.Fprintln(w, results)
-	return nil
-}
-
-func greaterThanFunction(w io.Writer, client *firestore.Client) error {
-	ctx := context.Background()
-	// [START firestore_greater_than]
-	snapshot := client.Pipeline().
-		Collection("books").
-		Select(firestore.Fields(
-			firestore.GreaterThan(firestore.FieldOf("rating"), 4).As("hasHighRating"),
-		)).
-		Execute(ctx)
-	// [END firestore_greater_than]
-	results, err := snapshot.Results().GetAll()
-	if err != nil {
-		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
-		return err
-	}
-	fmt.Fprintln(w, results)
-	return nil
-}
-
-func greaterThanOrEqualToFunction(w io.Writer, client *firestore.Client) error {
-	ctx := context.Background()
-	// [START firestore_greater_or_equal]
-	snapshot := client.Pipeline().
-		Collection("books").
-		Select(firestore.Fields(
-			firestore.GreaterThanOrEqual(firestore.FieldOf("published"), 1900).As("publishedIn20thCentury"),
-		)).
-		Execute(ctx)
-	// [END firestore_greater_or_equal]
-	results, err := snapshot.Results().GetAll()
-	if err != nil {
-		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
-		return err
-	}
-	fmt.Fprintln(w, results)
-	return nil
-}
-
-func lessThanFunction(w io.Writer, client *firestore.Client) error {
-	ctx := context.Background()
-	// [START firestore_less_than]
-	snapshot := client.Pipeline().
-		Collection("books").
-		Select(firestore.Fields(
-			firestore.LessThan(firestore.FieldOf("published"), 1923).As("isPublicDomainProbably"),
-		)).
-		Execute(ctx)
-	// [END firestore_less_than]
-	results, err := snapshot.Results().GetAll()
-	if err != nil {
-		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
-		return err
-	}
-	fmt.Fprintln(w, results)
-	return nil
-}
-
-func lessThanOrEqualToFunction(w io.Writer, client *firestore.Client) error {
-	ctx := context.Background()
-	// [START firestore_less_or_equal]
-	snapshot := client.Pipeline().
-		Collection("books").
-		Select(firestore.Fields(
-			firestore.LessThanOrEqual(firestore.FieldOf("rating"), 2).As("hasBadRating"),
-		)).
-		Execute(ctx)
-	// [END firestore_less_or_equal]
-	results, err := snapshot.Results().GetAll()
-	if err != nil {
-		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
-		return err
-	}
-	fmt.Fprintln(w, results)
-	return nil
-}
-
-func notEqualFunction(w io.Writer, client *firestore.Client) error {
-	ctx := context.Background()
-	// [START firestore_not_equal]
-	snapshot := client.Pipeline().
-		Collection("books").
-		Select(firestore.Fields(
-			firestore.NotEqual(firestore.FieldOf("title"), "1984").As("not1984"),
-		)).
-		Execute(ctx)
-	// [END firestore_not_equal]
-	results, err := snapshot.Results().GetAll()
-	if err != nil {
-		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
-		return err
-	}
-	fmt.Fprintln(w, results)
-	return nil
-}
-
 func existsFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
 	// [START firestore_exists_function]
@@ -266,16 +152,16 @@ func condFunction(w io.Writer, client *firestore.Client) error {
 	return nil
 }
 
-func equalAnyFunction(w io.Writer, client *firestore.Client) error {
+func maxLogicalFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START firestore_eq_any]
+	// [START firestore_max_logical_function]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
-			firestore.EqualAny(firestore.FieldOf("genre"), []string{"Science Fiction", "Psychological Thriller"}).As("matchesGenreFilters"),
+			firestore.LogicalMaximum(firestore.FieldOf("rating"), 1).As("flooredRating"),
 		)).
 		Execute(ctx)
-	// [END firestore_eq_any]
+	// [END firestore_max_logical_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
@@ -285,16 +171,16 @@ func equalAnyFunction(w io.Writer, client *firestore.Client) error {
 	return nil
 }
 
-func notEqualAnyFunction(w io.Writer, client *firestore.Client) error {
+func minLogicalFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START firestore_not_eq_any]
+	// [START firestore_min_logical_function]
 	snapshot := client.Pipeline().
 		Collection("books").
 		Select(firestore.Fields(
-			firestore.NotEqualAny(firestore.FieldOf("author"), []string{"George Orwell", "F. Scott Fitzgerald"}).As("byExcludedAuthors"),
+			firestore.LogicalMinimum(firestore.FieldOf("rating"), 5).As("cappedRating"),
 		)).
 		Execute(ctx)
-	// [END firestore_not_eq_any]
+	// [END firestore_min_logical_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)

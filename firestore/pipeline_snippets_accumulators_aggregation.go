@@ -22,17 +22,42 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-func cosineDistanceFunction(w io.Writer, client *firestore.Client) error {
+func countFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START firestore_cosine_distance]
-	sampleVector := []float64{0.0, 1.0, 2.0, 3.0, 4.0, 5.0}
+	// [START firestore_count_function]
+	// Total number of books in the collection
+	countAll, err := client.Pipeline().Collection("books").
+		Aggregate(firestore.Accumulators(firestore.CountAll().As("count"))).
+		Execute(ctx).Results().GetAll()
+	if err != nil {
+		fmt.Fprintf(w, "GetAll failed: %v", err)
+		return err
+	}
+
+	// Number of books with nonnull `ratings` field
+	countField, err := client.Pipeline().
+		Collection("books").
+		Aggregate(firestore.Accumulators(firestore.Count("ratings").As("count"))).
+		Execute(ctx).Results().GetAll()
+	if err != nil {
+		fmt.Fprintf(w, "GetAll failed: %v", err)
+		return err
+	}
+	// [END firestore_count_function]
+	fmt.Fprintln(w, countAll, countField)
+	return nil
+}
+
+func countIfFunction(w io.Writer, client *firestore.Client) error {
+	ctx := context.Background()
+	// [START firestore_count_if]
 	snapshot := client.Pipeline().
 		Collection("books").
-		Select(firestore.Fields(
-			firestore.CosineDistance(firestore.FieldOf("embedding"), sampleVector).As("cosineDistance"),
+		Aggregate(firestore.Accumulators(
+			firestore.CountIf(firestore.FieldOf("rating").GreaterThan(4)).As("filteredCount"),
 		)).
 		Execute(ctx)
-	// [END firestore_cosine_distance]
+	// [END firestore_count_if]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
@@ -42,17 +67,16 @@ func cosineDistanceFunction(w io.Writer, client *firestore.Client) error {
 	return nil
 }
 
-func dotProductFunction(w io.Writer, client *firestore.Client) error {
+func countDistinctFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START firestore_dot_product]
-	sampleVector := []float64{0.0, 1.0, 2.0, 3.0, 4.0, 5.0}
+	// [START firestore_count_distinct]
 	snapshot := client.Pipeline().
 		Collection("books").
-		Select(firestore.Fields(
-			firestore.DotProduct(firestore.FieldOf("embedding"), sampleVector).As("dotProduct"),
+		Aggregate(firestore.Accumulators(
+			firestore.CountDistinct("author").As("unique_authors"),
 		)).
 		Execute(ctx)
-	// [END firestore_dot_product]
+	// [END firestore_count_distinct]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
@@ -62,36 +86,16 @@ func dotProductFunction(w io.Writer, client *firestore.Client) error {
 	return nil
 }
 
-func euclideanDistanceFunction(w io.Writer, client *firestore.Client) error {
+func avgFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START firestore_euclidean_distance]
-	sampleVector := []float64{0.0, 1.0, 2.0, 3.0, 4.0, 5.0}
+	// [START firestore_avg_function]
 	snapshot := client.Pipeline().
-		Collection("books").
-		Select(firestore.Fields(
-			firestore.EuclideanDistance(firestore.FieldOf("embedding"), sampleVector).As("euclideanDistance"),
+		Collection("cities").
+		Aggregate(firestore.Accumulators(
+			firestore.Average("population").As("averagePopulation"),
 		)).
 		Execute(ctx)
-	// [END firestore_euclidean_distance]
-	results, err := snapshot.Results().GetAll()
-	if err != nil {
-		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
-		return err
-	}
-	fmt.Fprintln(w, results)
-	return nil
-}
-
-func vectorLengthFunction(w io.Writer, client *firestore.Client) error {
-	ctx := context.Background()
-	// [START firestore_vector_length]
-	snapshot := client.Pipeline().
-		Collection("books").
-		Select(firestore.Fields(
-			firestore.VectorLength(firestore.FieldOf("embedding")).As("vectorLength"),
-		)).
-		Execute(ctx)
-	// [END firestore_vector_length]
+	// [END firestore_avg_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)

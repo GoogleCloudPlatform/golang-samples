@@ -22,14 +22,16 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-func searchBasic(w io.Writer, client *firestore.Client) error {
+func equalFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START firestore_search_basic]
+	// [START firestore_equal_function]
 	snapshot := client.Pipeline().
-		Collection("restaurants").
-		Search(firestore.WithSearchQuery(firestore.DocumentMatches("waffles"))).
+		Collection("books").
+		Select(firestore.Fields(
+			firestore.Equal(firestore.FieldOf("rating"), 5).As("hasPerfectRating"),
+		)).
 		Execute(ctx)
-	// [END firestore_search_basic]
+	// [END firestore_equal_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
@@ -39,14 +41,16 @@ func searchBasic(w io.Writer, client *firestore.Client) error {
 	return nil
 }
 
-func searchExact(w io.Writer, client *firestore.Client) error {
+func greaterThanFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START firestore_search_exact]
+	// [START firestore_greater_than]
 	snapshot := client.Pipeline().
-		Collection("restaurants").
-		Search(firestore.WithSearchQuery(firestore.DocumentMatches("\"belgian waffles\""))).
+		Collection("books").
+		Select(firestore.Fields(
+			firestore.GreaterThan(firestore.FieldOf("rating"), 4).As("hasHighRating"),
+		)).
 		Execute(ctx)
-	// [END firestore_search_exact]
+	// [END firestore_greater_than]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
@@ -56,14 +60,16 @@ func searchExact(w io.Writer, client *firestore.Client) error {
 	return nil
 }
 
-func searchTwoTerms(w io.Writer, client *firestore.Client) error {
+func greaterThanOrEqualToFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START firestore_search_two_terms]
+	// [START firestore_greater_or_equal]
 	snapshot := client.Pipeline().
-		Collection("restaurants").
-		Search(firestore.WithSearchQuery(firestore.DocumentMatches("waffles eggs"))).
+		Collection("books").
+		Select(firestore.Fields(
+			firestore.GreaterThanOrEqual(firestore.FieldOf("published"), 1900).As("publishedIn20thCentury"),
+		)).
 		Execute(ctx)
-	// [END firestore_search_two_terms]
+	// [END firestore_greater_or_equal]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
@@ -73,14 +79,16 @@ func searchTwoTerms(w io.Writer, client *firestore.Client) error {
 	return nil
 }
 
-func searchExcludeTerm(w io.Writer, client *firestore.Client) error {
+func lessThanFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START firestore_search_exclude_term]
+	// [START firestore_less_than]
 	snapshot := client.Pipeline().
-		Collection("restaurants").
-		Search(firestore.WithSearchQuery(firestore.DocumentMatches("-waffles"))).
+		Collection("books").
+		Select(firestore.Fields(
+			firestore.LessThan(firestore.FieldOf("published"), 1923).As("isPublicDomainProbably"),
+		)).
 		Execute(ctx)
-	// [END firestore_search_exclude_term]
+	// [END firestore_less_than]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
@@ -90,17 +98,35 @@ func searchExcludeTerm(w io.Writer, client *firestore.Client) error {
 	return nil
 }
 
-func searchSpecialFields(w io.Writer, client *firestore.Client) error {
+func lessThanOrEqualToFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
-	// [START firestore_search_special_fields]
+	// [START firestore_less_or_equal]
 	snapshot := client.Pipeline().
-		Collection("restaurants").
-		Search(
-			firestore.WithSearchQuery(firestore.FieldOf("menu").RegexMatch("waffles")),
-			firestore.WithSearchAddFields(firestore.Score().As("score")),
-		).
+		Collection("books").
+		Select(firestore.Fields(
+			firestore.LessThanOrEqual(firestore.FieldOf("rating"), 2).As("hasBadRating"),
+		)).
 		Execute(ctx)
-	// [END firestore_search_special_fields]
+	// [END firestore_less_or_equal]
+	results, err := snapshot.Results().GetAll()
+	if err != nil {
+		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
+		return err
+	}
+	fmt.Fprintln(w, results)
+	return nil
+}
+
+func notEqualFunction(w io.Writer, client *firestore.Client) error {
+	ctx := context.Background()
+	// [START firestore_not_equal]
+	snapshot := client.Pipeline().
+		Collection("books").
+		Select(firestore.Fields(
+			firestore.NotEqual(firestore.FieldOf("title"), "1984").As("not1984"),
+		)).
+		Execute(ctx)
+	// [END firestore_not_equal]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)

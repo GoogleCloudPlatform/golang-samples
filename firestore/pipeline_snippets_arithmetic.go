@@ -22,40 +22,6 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-func functionsExample(w io.Writer, client *firestore.Client) error {
-	ctx := context.Background()
-	// [START firestore_functions_example]
-	// Type 1: Scalar (for use in non-aggregation stages)
-	// Example: Return the min store price for each book.
-	results1, err := client.Pipeline().
-		Collection("books").
-		Select(firestore.Fields(
-			firestore.LogicalMinimum(firestore.FieldOf("current"), firestore.FieldOf("updated")).As("price_min"),
-		)).
-		Execute(ctx).Results().GetAll()
-	if err != nil {
-		fmt.Fprintf(w, "GetAll failed: %v", err)
-		return err
-	}
-
-	// Type 2: Aggregation (for use in aggregate stages)
-	// Example: Return the min price of all books.
-	results2, err := client.Pipeline().
-		Collection("books").
-		Aggregate(firestore.Accumulators(
-			firestore.Minimum("price").As("min_price"),
-		)).
-		Execute(ctx).Results().GetAll()
-	if err != nil {
-		fmt.Fprintf(w, "GetAll failed: %v", err)
-		return err
-	}
-	// [END firestore_functions_example]
-	fmt.Fprintln(w, results1)
-	fmt.Fprintln(w, results2)
-	return nil
-}
-
 func addFunction(w io.Writer, client *firestore.Client) error {
 	ctx := context.Background()
 	// [START firestore_add_function]
@@ -316,44 +282,6 @@ func logFunction(w io.Writer, client *firestore.Client) error {
 		)).
 		Execute(ctx)
 	// [END firestore_log_function]
-	results, err := snapshot.Results().GetAll()
-	if err != nil {
-		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
-		return err
-	}
-	fmt.Fprintln(w, results)
-	return nil
-}
-
-func maxLogicalFunction(w io.Writer, client *firestore.Client) error {
-	ctx := context.Background()
-	// [START firestore_max_logical_function]
-	snapshot := client.Pipeline().
-		Collection("books").
-		Select(firestore.Fields(
-			firestore.LogicalMaximum(firestore.FieldOf("rating"), 1).As("flooredRating"),
-		)).
-		Execute(ctx)
-	// [END firestore_max_logical_function]
-	results, err := snapshot.Results().GetAll()
-	if err != nil {
-		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
-		return err
-	}
-	fmt.Fprintln(w, results)
-	return nil
-}
-
-func minLogicalFunction(w io.Writer, client *firestore.Client) error {
-	ctx := context.Background()
-	// [START firestore_min_logical_function]
-	snapshot := client.Pipeline().
-		Collection("books").
-		Select(firestore.Fields(
-			firestore.LogicalMinimum(firestore.FieldOf("rating"), 5).As("cappedRating"),
-		)).
-		Execute(ctx)
-	// [END firestore_min_logical_function]
 	results, err := snapshot.Results().GetAll()
 	if err != nil {
 		fmt.Fprintf(w, "snapshot.Results().GetAll failed: %v", err)
