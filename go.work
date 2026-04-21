@@ -21,7 +21,6 @@ use (
 	./appengine_flexible/websockets
 	./asset
 	./auth
-	./automl
 	./batch
 	./bigquery
 	./bigtable
