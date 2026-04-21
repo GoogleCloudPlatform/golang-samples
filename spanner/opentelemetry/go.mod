@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/spanner/opentelemetry
 
-go 1.24.0
+go 1.25.0
 
 require (
 	cloud.google.com/go/spanner v1.73.0

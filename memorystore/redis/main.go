@@ -14,7 +14,7 @@
 
 // [START memorystore_main_go]
 
-// Command redis is a basic app that connects to a managed Redis instance.
+// Package main is a basic app that connects to a managed Redis instance.
 package main
 
 import (
