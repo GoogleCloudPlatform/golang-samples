@@ -16,16 +16,12 @@ package firestore
 
 import (
 	"bytes"
-	"os"
 	"strings"
 	"testing"
 )
 
-func TestVectorSearchDistanceResultField(t *testing.T) {
-	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
-	if projectID == "" {
-		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
-	}
+func testVectorSearchDistanceResultField(t *testing.T) {
+	projectID := getProjectID(t)
 
 	buf := new(bytes.Buffer)
 	if err := vectorSearchDistanceResultField(buf, projectID); err != nil {

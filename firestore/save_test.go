@@ -17,7 +17,6 @@ package firestore
 import (
 	"bytes"
 	"context"
-	"os"
 	"strings"
 	"testing"
 
@@ -29,10 +28,7 @@ func TestSave(t *testing.T) {
 	testutil.EndToEndTest(t)
 	// TODO: revert this to testutil.SystemTest(t).ProjectID
 	// when datastore and firestore can co-exist in a project.
-	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
-	if projectID == "" {
-		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
-	}
+	projectID := getProjectID(t)
 
 	ctx := context.Background()
 
