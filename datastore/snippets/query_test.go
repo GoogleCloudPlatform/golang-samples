@@ -21,6 +21,8 @@ import (
 	"bytes"
 	"context"
 	"log"
+	"os"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -29,15 +31,22 @@ import (
 	"cloud.google.com/go/datastore/admin/apiv1/adminpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
+	"google.golang.org/api/iterator"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var projectID string
 
 func TestMain(m *testing.M) {
+	os.Exit(testMain(m))
+}
+
+func testMain(m *testing.M) int {
 	tc, ok := testutil.ContextMain(m)
 	if !ok {
-		log.Fatal("test project not set up properly")
-		return
+		log.Print("test project not set up properly")
+		return 1
 	}
 
 	projectID = tc.ProjectID
@@ -45,7 +54,8 @@ func TestMain(m *testing.M) {
 	ctx := context.Background()
 	client, err := datastore.NewClient(ctx, projectID)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return 1
 	}
 	defer client.Close()
 
@@ -59,17 +69,22 @@ func TestMain(m *testing.M) {
 	key := datastore.IncompleteKey("TaskList", nil)
 	key, err = client.Put(ctx, key, &task)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return 1
 	}
 
 	// Run the sample test
-	m.Run()
+	code := m.Run()
 
 	// Do teardown tasks
 	err = client.Delete(ctx, key)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		if code == 0 {
+			code = 1
+		}
 	}
+	return code
 }
 
 func TestNotEqualQuery(t *testing.T) {
@@ -176,42 +191,7 @@ func TestMultipleInequalitiesQuery(t *testing.T) {
 	t.Cleanup(func() {
 		adminClient.Close()
 	})
-	createOp, err := adminClient.CreateIndex(ctx, &adminpb.CreateIndexRequest{
-		ProjectId: projectID,
-		Index: &adminpb.Index{
-			Kind:     "Task",
-			Ancestor: adminpb.Index_NONE,
-			Properties: []*adminpb.Index_IndexedProperty{
-				{
-					Name:      "days",
-					Direction: adminpb.Index_ASCENDING,
-				},
-				{
-					Name:      "priority",
-					Direction: adminpb.Index_ASCENDING,
-				},
-			},
-		},
-	})
-	if err != nil {
-		t.Fatalf("CreateIndex: %v", err)
-	}
-	createdIndex, err := createOp.Wait(ctx)
-	if err != nil {
-		t.Fatalf("CreateIndex Wait: %v", err)
-	}
-	t.Cleanup(func() {
-		deleteOp, err := adminClient.DeleteIndex(ctx, &adminpb.DeleteIndexRequest{
-			ProjectId: projectID,
-			IndexId:   createdIndex.IndexId,
-		})
-		if err != nil {
-			t.Errorf("DeleteIndex: %v", err)
-		}
-		if _, err := deleteOp.Wait(ctx); err != nil {
-			t.Errorf("DeleteIndex Wait: %v", err)
-		}
-	})
+	setupIndex(t, ctx, adminClient, projectID)
 
 	// Run query
 	var buf bytes.Buffer
@@ -224,5 +204,63 @@ func TestMultipleInequalitiesQuery(t *testing.T) {
 	want := "Key: /Task," + keyPrefix + "-key3. Entity: {5 2 false Personal Set Up Cloud Datastore}\n"
 	if !strings.Contains(got, want) {
 		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func setupIndex(t *testing.T, ctx context.Context, adminClient *admin.DatastoreAdminClient, projectID string) {
+	t.Helper()
+	index := &adminpb.Index{
+		Kind:     "Task",
+		Ancestor: adminpb.Index_NONE,
+		Properties: []*adminpb.Index_IndexedProperty{
+			{Name: "days", Direction: adminpb.Index_ASCENDING},
+			{Name: "priority", Direction: adminpb.Index_ASCENDING},
+		},
+	}
+	createOp, err := adminClient.CreateIndex(ctx, &adminpb.CreateIndexRequest{
+		ProjectId: projectID,
+		Index:     index,
+	})
+	var indexID string
+	if err != nil {
+		if status.Code(err) == codes.AlreadyExists {
+			it := adminClient.ListIndexes(ctx, &adminpb.ListIndexesRequest{ProjectId: projectID})
+			for {
+				idx, err := it.Next()
+				if err == iterator.Done {
+					break
+				}
+				if err != nil {
+					t.Fatalf("ListIndexes: %v", err)
+				}
+				if idx.Kind == index.Kind && idx.Ancestor == index.Ancestor && reflect.DeepEqual(idx.Properties, index.Properties) {
+					indexID = idx.IndexId
+					break
+				}
+			}
+		} else {
+			t.Fatalf("CreateIndex: %v", err)
+		}
+	} else {
+		createdIndex, err := createOp.Wait(ctx)
+		if err != nil {
+			t.Fatalf("CreateIndex Wait: %v", err)
+		}
+		indexID = createdIndex.IndexId
+	}
+
+	if indexID != "" {
+		t.Cleanup(func() {
+			deleteOp, err := adminClient.DeleteIndex(ctx, &adminpb.DeleteIndexRequest{
+				ProjectId: projectID,
+				IndexId:   indexID,
+			})
+			if err != nil {
+				t.Errorf("DeleteIndex: %v", err)
+			}
+			if _, err := deleteOp.Wait(ctx); err != nil {
+				t.Errorf("DeleteIndex Wait: %v", err)
+			}
+		})
 	}
 }

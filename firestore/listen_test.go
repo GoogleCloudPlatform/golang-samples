@@ -19,7 +19,6 @@ import (
 	"context"
 	"io/ioutil"
 	"log"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -32,10 +31,7 @@ var duration = 20 * time.Second
 
 func setup(ctx context.Context, t *testing.T) (*firestore.Client, string, string) {
 	tc := testutil.SystemTest(t)
-	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
-	if projectID == "" {
-		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
-	}
+	projectID := getProjectID(t)
 	collection := tc.ProjectID + "-collection-cities"
 
 	client, err := firestore.NewClient(ctx, projectID)

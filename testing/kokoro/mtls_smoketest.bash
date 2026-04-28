@@ -29,7 +29,6 @@ done
 
 # List of tests to include during mtls_smoketest.
 scope=(
-  automl/
   bigtable/
   cloudsql/
   container/
