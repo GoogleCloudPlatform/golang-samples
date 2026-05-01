@@ -23,8 +23,8 @@ steps:
   - REPORT_REPO=golang-samples
 
 # Get the credentials for integration tests.
-- name: gcr.io/cloud-builders/gsutil
-  args: ['cp', 'gs://golang-samples-secrets/golang-samples-tests-4fbf85dd0f24.json', 'key.json']
+- name: gcr.io/cloud-builders/gcloud
+  args: ['storage', 'cp', 'gs://golang-samples-secrets/golang-samples-tests-4fbf85dd0f24.json', 'key.json']
 
 # Run the tests
 - name: gcr.io/$PROJECT_ID/go19
