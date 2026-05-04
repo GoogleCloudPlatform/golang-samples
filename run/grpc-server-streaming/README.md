@@ -21,7 +21,7 @@ Once deployed successfully, note the domain name (hostname) of the service.
 
 ## Make a request using the client
 
-1. Ensure Go 1.13 (or higher) is installed on your machine.
+1. Ensure Go 1.25 (or higher) is installed on your machine.
 
 2. Clone this repository.
 
