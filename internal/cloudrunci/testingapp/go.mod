@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci/testing
 
 go 1.25.0
 
-require github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
+require github.com/GoogleCloudPlatform/golang-samples v0.0.0-20260512171945-98923b763b48
 
 require (
 	cel.dev/expr v0.25.1 // indirect
@@ -26,7 +26,6 @@ require (
 	github.com/go-jose/go-jose/v4 v4.1.3 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
