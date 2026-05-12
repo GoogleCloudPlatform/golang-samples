@@ -60,7 +60,7 @@ func TestAnywhereCaches(t *testing.T) {
 	// Create
 	if ok := testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
 		buf := &bytes.Buffer{}
-		if err := createAnywhereCache(buf, bucketName, cacheName, zoneName); err != nil {
+		if err := createAnywhereCache(buf, bucketName, zoneName); err != nil {
 			r.Errorf("createAnywhereCache: %v", err)
 		}
 		// Match partial resource name to handle project numbers/IDs as per memory.
@@ -87,48 +87,72 @@ func TestAnywhereCaches(t *testing.T) {
 	}
 
 	// List
-	buf := &bytes.Buffer{}
-	if err := listAnywhereCaches(buf, bucketName); err != nil {
-		t.Fatalf("listAnywhereCaches: %v", err)
-	}
-	want := fmt.Sprintf("buckets/%s/anywhereCaches/%s", bucketName, zoneName)
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("listAnywhereCaches: got %q, want to contain %q", got, want)
+	if ok := testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := &bytes.Buffer{}
+		if err := listAnywhereCaches(buf, bucketName); err != nil {
+			r.Errorf("listAnywhereCaches: %v", err)
+		}
+		want := fmt.Sprintf("buckets/%s/anywhereCaches/%s", bucketName, zoneName)
+		if got := buf.String(); !strings.Contains(got, want) {
+			r.Errorf("listAnywhereCaches: got %q, want to contain %q", got, want)
+		}
+	}); !ok {
+		t.Errorf("failed to list anywhere caches")
 	}
 
 	// Update
-	buf.Reset()
-	if err := updateAnywhereCache(buf, cacheName, "admit-on-second-miss"); err != nil {
-		t.Fatalf("updateAnywhereCache: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("updateAnywhereCache: got %q, want to contain %q", got, want)
+	if ok := testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := &bytes.Buffer{}
+		if err := updateAnywhereCache(buf, cacheName, "admit-on-second-miss"); err != nil {
+			r.Errorf("updateAnywhereCache: %v", err)
+		}
+		want := fmt.Sprintf("buckets/%s/anywhereCaches/%s", bucketName, zoneName)
+		if got := buf.String(); !strings.Contains(got, want) {
+			r.Errorf("updateAnywhereCache: got %q, want to contain %q", got, want)
+		}
+	}); !ok {
+		t.Errorf("failed to update anywhere cache")
 	}
 
 	// Pause
-	buf.Reset()
-	if err := pauseAnywhereCache(buf, cacheName); err != nil {
-		t.Fatalf("pauseAnywhereCache: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("pauseAnywhereCache: got %q, want to contain %q", got, want)
+	if ok := testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := &bytes.Buffer{}
+		if err := pauseAnywhereCache(buf, cacheName); err != nil {
+			r.Errorf("pauseAnywhereCache: %v", err)
+		}
+		want := fmt.Sprintf("buckets/%s/anywhereCaches/%s", bucketName, zoneName)
+		if got := buf.String(); !strings.Contains(got, want) {
+			r.Errorf("pauseAnywhereCache: got %q, want to contain %q", got, want)
+		}
+	}); !ok {
+		t.Errorf("failed to pause anywhere cache")
 	}
 
 	// Resume
-	buf.Reset()
-	if err := resumeAnywhereCache(buf, cacheName); err != nil {
-		t.Fatalf("resumeAnywhereCache: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("resumeAnywhereCache: got %q, want to contain %q", got, want)
+	if ok := testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := &bytes.Buffer{}
+		if err := resumeAnywhereCache(buf, cacheName); err != nil {
+			r.Errorf("resumeAnywhereCache: %v", err)
+		}
+		want := fmt.Sprintf("buckets/%s/anywhereCaches/%s", bucketName, zoneName)
+		if got := buf.String(); !strings.Contains(got, want) {
+			r.Errorf("resumeAnywhereCache: got %q, want to contain %q", got, want)
+		}
+	}); !ok {
+		t.Errorf("failed to resume anywhere cache")
 	}
 
 	// Disable
-	buf.Reset()
-	if err := disableAnywhereCache(buf, cacheName); err != nil {
-		t.Fatalf("disableAnywhereCache: %v", err)
-	}
-	if got := buf.String(); !strings.Contains(got, want) {
-		t.Errorf("disableAnywhereCache: got %q, want to contain %q", got, want)
+	if ok := testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := &bytes.Buffer{}
+		if err := disableAnywhereCache(buf, cacheName); err != nil {
+			r.Errorf("disableAnywhereCache: %v", err)
+		}
+		want := fmt.Sprintf("buckets/%s/anywhereCaches/%s", bucketName, zoneName)
+		if got := buf.String(); !strings.Contains(got, want) {
+			r.Errorf("disableAnywhereCache: got %q, want to contain %q", got, want)
+		}
+	}); !ok {
+		t.Errorf("failed to disable anywhere cache")
 	}
 }

@@ -26,9 +26,8 @@ import (
 )
 
 // createAnywhereCache creates an anywhere cache in the bucket and zone.
-func createAnywhereCache(w io.Writer, bucket, cacheName, zone string) error {
+func createAnywhereCache(w io.Writer, bucket, zone string) error {
 	// bucket := "bucket-name"
-	// cacheName := "projects/_/buckets/bucket-name/anywhereCaches/us-central1-a"
 	// zone := "us-central1-a"
 
 	ctx := context.Background()
@@ -44,7 +43,6 @@ func createAnywhereCache(w io.Writer, bucket, cacheName, zone string) error {
 	req := &controlpb.CreateAnywhereCacheRequest{
 		Parent: fmt.Sprintf("projects/_/buckets/%s", bucket),
 		AnywhereCache: &controlpb.AnywhereCache{
-			Name: cacheName,
 			Zone: zone,
 		},
 	}
@@ -53,7 +51,7 @@ func createAnywhereCache(w io.Writer, bucket, cacheName, zone string) error {
 	// Blocking with .Wait(ctx) is for simplicity and real applications may prefer callbacks, coroutines, or polling.
 	op, err := client.CreateAnywhereCache(ctx, req)
 	if err != nil {
-		return fmt.Errorf("CreateAnywhereCache(%q): %w", cacheName, err)
+		return fmt.Errorf("CreateAnywhereCache: %w", err)
 	}
 
 	anywhereCache, err := op.Wait(ctx)
