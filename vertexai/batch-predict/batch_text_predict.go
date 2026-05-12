@@ -36,7 +36,7 @@ func batchTextPredict(w io.Writer, projectID, location, name, outputURI string, 
 	ctx := context.Background()
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	// Pretrained text model
-	model := "publishers/google/models/text-bison"
+	model := "publishers/google/models/gemini-2.5-flash"
 	parameters := map[string]interface{}{
 		"temperature":     0.2,
 		"maxOutputTokens": 200,
