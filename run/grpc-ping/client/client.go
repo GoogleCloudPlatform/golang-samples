@@ -23,11 +23,11 @@ import (
 	"os"
 	"time"
 
-	ptypes "github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
 	pb "github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping/pkg/api/v1"
+	insecurecred "google.golang.org/grpc/credentials/insecure"
 )
 
 var (
@@ -48,7 +48,7 @@ func main() {
 		opts = append(opts, grpc.WithAuthority(*serverHost))
 	}
 	if *insecure {
-		opts = append(opts, grpc.WithInsecure())
+		opts = append(opts, grpc.WithTransportCredentials(insecurecred.NewCredentials()))
 	} else {
 		cred := credentials.NewTLS(&tls.Config{
 			InsecureSkipVerify: *skipVerify,
@@ -56,9 +56,9 @@ func main() {
 		opts = append(opts, grpc.WithTransportCredentials(cred))
 	}
 
-	conn, err := grpc.Dial(*serverAddr, opts...)
+	conn, err := grpc.NewClient(*serverAddr, opts...)
 	if err != nil {
-		logger.Printf("Failed to dial: %v", err)
+		logger.Fatalf("Failed to NewClient: %v", err)
 	}
 	defer conn.Close()
 	client := pb.NewPingServiceClient(conn)
@@ -85,8 +85,8 @@ func send(client pb.PingServiceClient) {
 		logger.Fatalf("Error while executing Send: %v", err)
 	}
 
-	respMessage := resp.Pong.GetMessage()
-	timestamp := ptypes.TimestampString(resp.Pong.GetReceivedOn())
+	respMessage := resp.GetPong().GetMessage()
+	timestamp := resp.GetPong().GetReceivedOn().AsTime().Format(time.RFC3339)
 	logger.Println("Unary Request/Unary Response")
 	logger.Printf("  Sent Ping: %s", *message)
 	logger.Printf("  Received:\n    Pong: %s\n    Server Time: %s", respMessage, timestamp)

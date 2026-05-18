@@ -25,11 +25,11 @@ import (
 	"os"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
 	pb "github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming/pkg/api/v1"
+	insecurecred "google.golang.org/grpc/credentials/insecure"
 )
 
 var (
@@ -55,7 +55,7 @@ func main() {
 		opts = append(opts, grpc.WithAuthority(*serverHost))
 	}
 	if *insecure {
-		opts = append(opts, grpc.WithInsecure())
+		opts = append(opts, grpc.WithTransportCredentials(insecurecred.NewCredentials()))
 	} else {
 		cred := credentials.NewTLS(&tls.Config{
 			InsecureSkipVerify: *skipVerify,
@@ -63,9 +63,9 @@ func main() {
 		opts = append(opts, grpc.WithTransportCredentials(cred))
 	}
 
-	conn, err := grpc.Dial(*serverAddr, opts...)
+	conn, err := grpc.NewClient(*serverAddr, opts...)
 	if err != nil {
-		logger.Printf("failed to dial server %s: %v", *serverAddr, err)
+		logger.Fatalf("failed to dial server %s: %v", *serverAddr, err)
 	}
 	defer conn.Close()
 	client := pb.NewTimeServiceClient(conn)
@@ -94,10 +94,7 @@ func streamTime(client pb.TimeServiceClient, duration uint) error {
 			return fmt.Errorf("error receiving message: %w", err)
 		}
 
-		ts, err := ptypes.Timestamp(msg.GetCurrentTime())
-		if err != nil {
-			return fmt.Errorf("failed to parse timestamp %v: %w", msg.GetCurrentTime(), err)
-		}
-		log.Printf("received message: current_timestamp: %v", ts.Format(time.RFC3339))
+		ts := msg.GetCurrentTime().AsTime().Format(time.RFC3339)
+		log.Printf("received message: current_timestamp: %v", ts)
 	}
 }

@@ -22,8 +22,8 @@ import (
 	"strings"
 
 	pb "github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping/pkg/api/v1"
-	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type pingService struct {
@@ -36,7 +36,7 @@ func (s *pingService) Send(ctx context.Context, req *pb.Request) (*pb.Response, 
 		Pong: &pb.Pong{
 			Index:      1,
 			Message:    req.GetMessage(),
-			ReceivedOn: ptypes.TimestampNow(),
+			ReceivedOn: timestamppb.Now(),
 		},
 	}, nil
 }
