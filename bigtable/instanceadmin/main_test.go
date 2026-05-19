@@ -17,7 +17,9 @@ package main
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"cloud.google.com/go/bigtable"
@@ -43,7 +45,12 @@ func TestInstanceAdmin(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	if err = createInstance(buf, project, instance, cluster, zone); err != nil {
-		t.Errorf("Error creating instance: %v", err)
+		t.Fatalf("Error creating instance: %v", err)
+	}
+	want := fmt.Sprintf("Instance %s created successfully.", instance)
+	got := buf.String()
+	if !strings.Contains(got, want) {
+		t.Errorf("Unexpected output string: %q", got)
 	}
 	t.Logf("Instance %s created successfully.\n", instance)
 
