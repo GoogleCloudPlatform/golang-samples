@@ -25,10 +25,6 @@ import (
 // [START bigtable_drop_row_range]
 
 func dropRowRange(w io.Writer, projectID, instanceID, tableName string) error {
-	// projectID := "my-project-id"
-	// instanceID := "my-instance-id"
-	// tableName := "my-table-id"
-
 	ctx := context.Background()
 	adminClient, err := bigtable.NewAdminClient(ctx, projectID, instanceID)
 	if err != nil {

@@ -25,10 +25,6 @@ import (
 // [START bigtable_delete_from_row]
 
 func deleteFromRow(w io.Writer, projectID, instanceID, tableName string) error {
-	// projectID := "my-project-id"
-	// instanceID := "my-instance-id"
-	// tableName := "mobile-time-series"
-
 	ctx := context.Background()
 	client, err := bigtable.NewClient(ctx, projectID, instanceID)
 	if err != nil {

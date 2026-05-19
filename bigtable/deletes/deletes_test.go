@@ -45,7 +45,6 @@ func TestDeletes(t *testing.T) {
 	defer adminClient.Close()
 
 	tableName := "mobile-time-series-" + uuid.New().String()[:8]
-	adminClient.DeleteTable(ctx, tableName)
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
 		if err := adminClient.CreateTable(ctx, tableName); err != nil {
@@ -87,7 +86,9 @@ func TestDeletes(t *testing.T) {
 		for _, k := range keys {
 			mut := bigtable.NewMutation()
 			mut.DeleteRow()
-			tbl.Apply(ctx, k, mut)
+			if err := tbl.Apply(ctx, k, mut); err != nil {
+				t.Fatalf("Failed to delete row %s: %v", k, err)
+			}
 		}
 
 		// Write initial data
