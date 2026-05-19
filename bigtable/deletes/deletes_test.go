@@ -32,7 +32,6 @@ import (
 
 func TestDeletes(t *testing.T) {
 
-
 	ctx := context.Background()
 	project := os.Getenv("GOLANG_SAMPLES_BIGTABLE_PROJECT")
 	instance := os.Getenv("GOLANG_SAMPLES_BIGTABLE_INSTANCE")
