@@ -22,8 +22,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	pb "github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming/pkg/api/v1"
 )
@@ -56,14 +56,18 @@ func (timeService) StreamTime(req *pb.Request, resp pb.TimeService_StreamTimeSer
 	durationSeconds := req.GetDurationSecs()
 	finish := time.Now().Add(time.Second * time.Duration(durationSeconds))
 
+	ticker := time.NewTicker(responseInterval)
+	defer ticker.Stop()
+
 	for time.Now().Before(finish) {
 		if err := resp.Send(&pb.TimeResponse{
-			CurrentTime: ptypes.TimestampNow()}); err != nil {
+			CurrentTime: timestamppb.Now(),
+		}); err != nil {
 			return fmt.Errorf("failed to send message: %w", err)
 		}
 
 		select {
-		case <-time.After(responseInterval):
+		case <-ticker.C:
 		case <-resp.Context().Done():
 			log.Printf("response context closed, exiting response")
 			return resp.Context().Err()
