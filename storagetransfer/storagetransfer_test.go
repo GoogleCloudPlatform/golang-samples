@@ -17,7 +17,6 @@ package storagetransfer
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -31,16 +30,17 @@ import (
 	"cloud.google.com/go/storagetransfer/apiv1/storagetransferpb"
 	azblob "github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
+	sqstypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
 )
 
 var sc *storage.Client
 var sts *storagetransfer.Client
-var sess *session.Session
+var awsCfg aws.Config
 var s3Bucket string
 var azureContainer string
 var gcsSourceBucket string
@@ -93,12 +93,18 @@ func TestMain(m *testing.M) {
 	grantSTSPermissions(gcsSinkBucket, sc)
 
 	s3Bucket = testutil.UniqueBucketName("stss3bucket")
-	sess, err = session.NewSession(&aws.Config{
-		Region: aws.String("us-west-2")},
-	)
-	s3c := s3.New(sess)
-	_, err = s3c.CreateBucket(&s3.CreateBucketInput{
+
+	awsCfg, err = config.LoadDefaultConfig(ctx, config.WithRegion("us-west-2"))
+	if err != nil {
+		log.Fatalf("unable to load AWS config: %v", err)
+	}
+
+	s3c := s3.NewFromConfig(awsCfg)
+	_, err = s3c.CreateBucket(ctx, &s3.CreateBucketInput{
 		Bucket: aws.String(s3Bucket),
+		CreateBucketConfiguration: &s3types.CreateBucketConfiguration{
+			LocationConstraint: s3types.BucketLocationConstraintUsWest2,
+		},
 	})
 	if err != nil {
 		log.Fatalf("couldn't create S3 bucket: %v", err)
@@ -129,10 +135,19 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Printf("couldn't delete GCS Source bucket: %v", err)
 	}
-	s3manager.NewDeleteListIterator(s3c, &s3.ListObjectsInput{
+	listIterator, err := s3c.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
 		Bucket: aws.String(s3Bucket),
 	})
-	_, err = s3c.DeleteBucket(&s3.DeleteBucketInput{
+	if err == nil {
+		for _, object := range listIterator.Contents {
+			s3c.DeleteObject(ctx, &s3.DeleteObjectInput{
+				Bucket: aws.String(s3Bucket),
+				Key:    object.Key,
+			})
+
+		}
+	}
+	_, err = s3c.DeleteBucket(ctx, &s3.DeleteBucketInput{
 		Bucket: aws.String(s3Bucket),
 	})
 	if err != nil {
@@ -234,7 +249,7 @@ func TestGetLatestTransferOperation(t *testing.T) {
 func TestDownloadToPosix(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	rootDirectory, err := ioutil.TempDir("", "download-to-posix-test")
+	rootDirectory, err := os.MkdirTemp("", "download-to-posix-test")
 	if err != nil {
 		t.Fatalf("download_to_posix: %#v", err)
 	}
@@ -263,7 +278,7 @@ func TestDownloadToPosix(t *testing.T) {
 func TestTransferFromPosix(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	rootDirectory, err := ioutil.TempDir("", "transfer-from-posix-test")
+	rootDirectory, err := os.MkdirTemp("", "transfer-from-posix-test")
 	if err != nil {
 		t.Fatalf("transfer_from_posix: %#v", err)
 	}
@@ -291,13 +306,13 @@ func TestTransferFromPosix(t *testing.T) {
 func TestTransferBetweenPosix(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	rootDirectory, err := ioutil.TempDir("", "transfer-between-posix-test-source")
+	rootDirectory, err := os.MkdirTemp("", "transfer-between-posix-test-source")
 	if err != nil {
 		t.Fatalf("transfer_between_posix: %#v", err)
 	}
 	defer os.RemoveAll(rootDirectory)
 
-	destinationDirectory, err := ioutil.TempDir("", "transfer-between-posix-test-sink")
+	destinationDirectory, err := os.MkdirTemp("", "transfer-between-posix-test-sink")
 	if err != nil {
 		t.Fatalf("transfer_between_posix: %#v", err)
 	}
@@ -325,7 +340,7 @@ func TestTransferBetweenPosix(t *testing.T) {
 func TestTransferUsingManifest(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	rootDirectory, err := ioutil.TempDir("", "transfer-using-manifest-test")
+	rootDirectory, err := os.MkdirTemp("", "transfer-using-manifest-test")
 	if err != nil {
 		t.Fatalf("transfer_using_manifest: %#v", err)
 	}
@@ -453,32 +468,35 @@ func TestCreateEventDrivenGCSTransfer(t *testing.T) {
 
 func TestCreateEventDrivenAWSTransfer(t *testing.T) {
 	tc := testutil.SystemTest(t)
+	ctx := context.Background()
 
 	queue := testutil.UniqueBucketName("stssqsqueue")
-	sqsClient := sqs.New(sess)
-	result, err := sqsClient.CreateQueue(&sqs.CreateQueueInput{
+	sqsClient := sqs.NewFromConfig(awsCfg)
+	result, err := sqsClient.CreateQueue(ctx, &sqs.CreateQueueInput{
 		QueueName: &queue,
-		Attributes: map[string]*string{
-			"DelaySeconds":           aws.String("60"),
-			"MessageRetentionPeriod": aws.String("86400"),
+		Attributes: map[string]string{
+			"DelaySeconds":           "60",
+			"MessageRetentionPeriod": "86400",
 		},
 	})
 	if err != nil {
 		log.Fatalf("couldn't create SQS queue: %v", err)
 	}
-	defer sqsClient.DeleteQueue(&sqs.DeleteQueueInput{
+	defer sqsClient.DeleteQueue(ctx, &sqs.DeleteQueueInput{
 		QueueUrl: result.QueueUrl,
 	})
 
-	attributes, err := sqsClient.GetQueueAttributes(&sqs.GetQueueAttributesInput{
-		AttributeNames: []*string{aws.String("QueueArn")},
-		QueueUrl:       result.QueueUrl,
+	attributes, err := sqsClient.GetQueueAttributes(ctx, &sqs.GetQueueAttributesInput{
+		AttributeNames: []sqstypes.QueueAttributeName{
+			sqstypes.QueueAttributeNameQueueArn,
+		},
+		QueueUrl: result.QueueUrl,
 	})
 	if err != nil {
 		log.Fatalf("couldn't get SQS queue attributes: %v", err)
 	}
 
-	sqsQueueARN := *attributes.Attributes["QueueArn"]
+	sqsQueueARN := attributes.Attributes[string(sqstypes.QueueAttributeNameQueueArn)]
 
 	testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
 		buf := new(bytes.Buffer)
