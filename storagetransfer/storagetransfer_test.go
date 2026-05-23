@@ -110,17 +110,24 @@ func TestMain(m *testing.M) {
 		log.Fatalf("couldn't create S3 bucket: %v", err)
 	}
 
-	connectionString := os.Getenv("AZURE_CONNECTION_STRING") +
-		";" + "AccountName=" + os.Getenv("AZURE_STORAGE_ACCOUNT")
-	azClient, err := azblob.NewClientFromConnectionString(connectionString, nil)
-	if err != nil {
-		log.Fatal("Couldn't create Azure client: " + err.Error())
-	}
-	azureContainer = testutil.UniqueBucketName("azurebucket")
+	var azClient *azblob.Client
+	azConnStr := os.Getenv("AZURE_CONNECTION_STRING")
+	azAccount := os.Getenv("AZURE_STORAGE_ACCOUNT")
 
-	azClient.CreateContainer(ctx, azureContainer, nil)
-	if err != nil {
-		log.Fatal(err)
+	if azConnStr == "" || azAccount == "" {
+		log.Println("AZURE_CONNECTION_STRING or AZURE_STORAGE_ACCOUNT not set, Azure test will be skipped.")
+	} else {
+		connectionString := azConnStr + ";" + "AccountName=" + azAccount
+		azClient, err = azblob.NewClientFromConnectionString(connectionString, nil)
+		if err != nil {
+			log.Fatal("Couldn't create Azure client: " + err.Error())
+		}
+		azureContainer = testutil.UniqueBucketName("azurebucket")
+
+		azClient.CreateContainer(ctx, azureContainer, nil)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	// Run tests
@@ -135,15 +142,19 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Printf("couldn't delete GCS Source bucket: %v", err)
 	}
-	listIterator, err := s3c.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
+	listOutput, err := s3c.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
 		Bucket: aws.String(s3Bucket),
 	})
-	if err == nil {
-		for _, object := range listIterator.Contents {
-			s3c.DeleteObject(ctx, &s3.DeleteObjectInput{
+	if err != nil {
+		log.Printf("couldn't list S3 objects: %v", err)
+	} else {
+		for _, object := range listOutput.Contents {
+			if _, err := s3c.DeleteObject(ctx, &s3.DeleteObjectInput{
 				Bucket: aws.String(s3Bucket),
 				Key:    object.Key,
-			})
+			}); err != nil {
+				log.Printf("couldn't delete S3 object %q: %v", *object.Key, err)
+			}
 
 		}
 	}
@@ -154,9 +165,10 @@ func TestMain(m *testing.M) {
 		log.Printf("couldn't delete S3 bucket: %v", err)
 	}
 
-	_, err = azClient.DeleteContainer(ctx, azureContainer, nil)
-	if err != nil {
-		log.Printf("couldn't delete Azure bucket: %v", err)
+	if azClient != nil && azureContainer != "" {
+		if _, err := azClient.DeleteContainer(ctx, azureContainer, nil); err != nil {
+			log.Printf("couldn't delete Azure bucket: %v", err)
+		}
 	}
 
 	os.Exit(exit)
@@ -392,6 +404,9 @@ func TestTransferFromS3CompatibleSource(t *testing.T) {
 }
 
 func TestTransferFromAzure(t *testing.T) {
+	if os.Getenv("AZURE_STORAGE_ACCOUNT") == "" {
+		t.Skip("AZURE_STORAGE_ACCOUNT not set")
+	}
 	tc := testutil.SystemTest(t)
 
 	accountName := os.Getenv("AZURE_STORAGE_ACCOUNT")
