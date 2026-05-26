@@ -14,6 +14,8 @@
 
 package deletes
 
+// [START bigtable_drop_row_range]
+
 import (
 	"context"
 	"fmt"
@@ -21,8 +23,6 @@ import (
 
 	"cloud.google.com/go/bigtable"
 )
-
-// [START bigtable_drop_row_range]
 
 func dropRowRange(w io.Writer, projectID, instanceID, tableName string) error {
 	ctx := context.Background()
@@ -34,7 +34,7 @@ func dropRowRange(w io.Writer, projectID, instanceID, tableName string) error {
 
 	prefix := "phone#4c410523"
 	if err := adminClient.DropRowRange(ctx, tableName, prefix); err != nil {
-		return fmt.Errorf("DropRowRange: %w", err)
+		return fmt.Errorf("adminClient.DropRowRange: %w", err)
 	}
 
 	fmt.Fprintf(w, "Successfully dropped row range with prefix: %s\n", prefix)

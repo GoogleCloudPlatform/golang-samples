@@ -33,10 +33,10 @@ import (
 func TestDeletes(t *testing.T) {
 
 	ctx := context.Background()
-	project := os.Getenv("GOLANG_SAMPLES_BIGTABLE_PROJECT")
+	project := os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
 	instance := os.Getenv("GOLANG_SAMPLES_BIGTABLE_INSTANCE")
 	if project == "" || instance == "" {
-		t.Skip("Skipping bigtable integration test. Set GOLANG_SAMPLES_BIGTABLE_PROJECT and GOLANG_SAMPLES_BIGTABLE_INSTANCE.")
+		t.Skip("Skipping bigtable integration test. Set GOLANG_SAMPLES_PROJECT_ID and GOLANG_SAMPLES_BIGTABLE_INSTANCE.")
 	}
 	adminClient, err := bigtable.NewAdminClient(ctx, project, instance)
 	if err != nil {
@@ -75,7 +75,8 @@ func TestDeletes(t *testing.T) {
 	tbl := client.Open(tableName)
 
 	// Helper to reset data
-	resetData := func() {
+	resetData := func(st *testing.T) {
+		ctx := st.Context()
 		// Delete all rows first
 		keys := []string{
 			"phone#4c410523#20190501",
@@ -87,7 +88,7 @@ func TestDeletes(t *testing.T) {
 			mut := bigtable.NewMutation()
 			mut.DeleteRow()
 			if err := tbl.Apply(ctx, k, mut); err != nil {
-				t.Fatalf("Failed to delete row %s: %v", k, err)
+				st.Fatalf("Failed to delete row %s: %v", k, err)
 			}
 		}
 
@@ -115,13 +116,13 @@ func TestDeletes(t *testing.T) {
 
 		for i, k := range keys {
 			if err := tbl.Apply(ctx, k, muts[i]); err != nil {
-				t.Fatalf("Failed to setup test data for %s: %v", k, err)
+				st.Fatalf("Failed to setup test data for %s: %v", k, err)
 			}
 		}
 	}
 
 	t.Run("DeleteFromColumn", func(t *testing.T) {
-		resetData()
+		resetData(t)
 		buf := new(bytes.Buffer)
 		if err := deleteFromColumn(buf, project, instance, tableName); err != nil {
 			t.Fatalf("deleteFromColumn: %v", err)
@@ -152,7 +153,7 @@ func TestDeletes(t *testing.T) {
 	})
 
 	t.Run("DeleteFromColumnFamily", func(t *testing.T) {
-		resetData()
+		resetData(t)
 		buf := new(bytes.Buffer)
 		if err := deleteFromColumnFamily(buf, project, instance, tableName); err != nil {
 			t.Fatalf("deleteFromColumnFamily: %v", err)
@@ -171,7 +172,7 @@ func TestDeletes(t *testing.T) {
 	})
 
 	t.Run("DeleteFromRow", func(t *testing.T) {
-		resetData()
+		resetData(t)
 		buf := new(bytes.Buffer)
 		if err := deleteFromRow(buf, project, instance, tableName); err != nil {
 			t.Fatalf("deleteFromRow: %v", err)
@@ -190,7 +191,7 @@ func TestDeletes(t *testing.T) {
 	})
 
 	t.Run("StreamingAndBatching", func(t *testing.T) {
-		resetData()
+		resetData(t)
 		buf := new(bytes.Buffer)
 		if err := streamingAndBatching(buf, project, instance, tableName); err != nil {
 			t.Fatalf("streamingAndBatching: %v", err)
@@ -210,7 +211,7 @@ func TestDeletes(t *testing.T) {
 	})
 
 	t.Run("DropRowRange", func(t *testing.T) {
-		resetData()
+		resetData(t)
 		buf := new(bytes.Buffer)
 		if err := dropRowRange(buf, project, instance, tableName); err != nil {
 			t.Fatalf("dropRowRange: %v", err)

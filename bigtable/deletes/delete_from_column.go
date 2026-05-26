@@ -14,6 +14,8 @@
 
 package deletes
 
+// [START bigtable_delete_from_column]
+
 import (
 	"context"
 	"fmt"
@@ -21,8 +23,6 @@ import (
 
 	"cloud.google.com/go/bigtable"
 )
-
-// [START bigtable_delete_from_column]
 
 func deleteFromColumn(w io.Writer, projectID, instanceID, tableName string) error {
 	ctx := context.Background()
@@ -40,7 +40,7 @@ func deleteFromColumn(w io.Writer, projectID, instanceID, tableName string) erro
 	mut.DeleteCellsInColumn(columnFamilyName, columnName)
 
 	if err := tbl.Apply(ctx, rowKey, mut); err != nil {
-		return fmt.Errorf("Apply: %w", err)
+		return fmt.Errorf("tbl.Apply: %w", err)
 	}
 
 	fmt.Fprintf(w, "Successfully deleted cells from column %s:%s for row: %s\n", columnFamilyName, columnName, rowKey)
