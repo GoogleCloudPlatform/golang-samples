@@ -33,6 +33,7 @@ func deleteFromRow(w io.Writer, projectID, instanceID, tableName string) error {
 	defer client.Close()
 	tbl := client.Open(tableName)
 
+	// Use a specific row key that exists in your table.
 	rowKey := "phone#4c410523#20190501"
 	mut := bigtable.NewMutation()
 	mut.DeleteRow()

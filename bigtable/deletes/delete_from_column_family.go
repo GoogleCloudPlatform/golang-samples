@@ -33,6 +33,8 @@ func deleteFromColumnFamily(w io.Writer, projectID, instanceID, tableName string
 	defer client.Close()
 	tbl := client.Open(tableName)
 
+	// Use a specific row key and column family that exists in your table.
+	// This sample assumes a schema with a "stats_summary" column family.
 	rowKey := "phone#5c10102#20190501"
 	columnFamilyName := "stats_summary"
 	mut := bigtable.NewMutation()

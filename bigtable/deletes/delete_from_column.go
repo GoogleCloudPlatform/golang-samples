@@ -33,6 +33,8 @@ func deleteFromColumn(w io.Writer, projectID, instanceID, tableName string) erro
 	defer client.Close()
 	tbl := client.Open(tableName)
 
+	// Use a specific row key, column family, and column name that exists in your table.
+	// This sample assumes a schema with a "cell_plan" column family.
 	rowKey := "phone#4c410523#20190501"
 	columnFamilyName := "cell_plan"
 	columnName := "data_plan_01gb"

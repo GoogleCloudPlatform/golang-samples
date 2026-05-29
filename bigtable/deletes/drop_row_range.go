@@ -32,6 +32,7 @@ func dropRowRange(w io.Writer, projectID, instanceID, tableName string) error {
 	}
 	defer adminClient.Close()
 
+	// Use a specific row key prefix to drop.
 	prefix := "phone#4c410523"
 	if err := adminClient.DropRowRange(ctx, tableName, prefix); err != nil {
 		return fmt.Errorf("adminClient.DropRowRange: %w", err)
