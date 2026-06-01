@@ -26,7 +26,7 @@ import (
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
 	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
-	"github.com/golang/protobuf/ptypes"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 var orgID = ""
@@ -35,10 +35,7 @@ var findingName = ""
 var untouchedFindingName = ""
 
 func createTestFinding(ctx context.Context, client *securitycenter.Client, findingID string, category string) (*securitycenterpb.Finding, error) {
-	eventTime, err := ptypes.TimestampProto(time.Now())
-	if err != nil {
-		return nil, fmt.Errorf("TimestampProto: %w", err)
-	}
+	eventTime := timestamppb.New(time.Now())
 
 	req := &securitycenterpb.CreateFindingRequest{
 		Parent:    sourceName,
