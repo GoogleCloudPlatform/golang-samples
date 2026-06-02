@@ -2,6 +2,10 @@ module github.com/GoogleCloudPlatform/golang-samples/dataflow
 
 go 1.25.0
 
+// TODO(Go1.26): Upgrade github.com/apache/beam/sdks/v2 to v2.73.0 or higher.
+// Currently pinned to v2.71.0 because v2.73.0 strictly requires Go 1.26.
+// Note: Check if the upgraded Beam version natively uses the moby/moby path
+// so we can drop the dependabot/docker workaround.
 require github.com/apache/beam/sdks/v2 v2.71.0
 
 require (
