@@ -1,0 +1,11 @@
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "github.com/docker/docker"
+        # Instructs Dependabot to ignore the broken v29+ tags on the dead module path.
+        # TODO: Remove this ignore when migration to go 1.26 - 1.27
+        versions: [">= 29.0.0"]
