@@ -23,6 +23,7 @@ import (
 
 	control "cloud.google.com/go/storage/control/apiv2"
 	"cloud.google.com/go/storage/control/apiv2/controlpb"
+	"google.golang.org/api/option"
 )
 
 // createAnywhereCache creates an Anywhere Cache for the bucket in the specified zone.
@@ -31,13 +32,13 @@ func createAnywhereCache(w io.Writer, bucket, zone string) error {
 	// zone := "us-central1-f"
 
 	ctx := context.Background()
-	client, err := control.NewStorageControlClient(ctx)
+	client, err := control.NewStorageControlClient(ctx, option.WithQuotaProject(""))
 	if err != nil {
 		return fmt.Errorf("NewStorageControlClient: %w", err)
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
+	ctx, cancel := context.WithTimeout(ctx, time.Minute*5)
 	defer cancel()
 
 	req := &controlpb.CreateAnywhereCacheRequest{
