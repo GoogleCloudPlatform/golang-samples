@@ -15,13 +15,15 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
     - name: Setup Go
       uses: actions/setup-go@v5
       with:
         go-version: 'stable'
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: Build code
       # Use find to build all modules. '-execdir ... ;' doesn't set an exit code
       # based on command results. So, create a file if a build fails and check
@@ -33,13 +35,15 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
     - name: Setup Go
       uses: actions/setup-go@v5
       with:
         go-version: 'stable'
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     # #4374 Pin goimports at v0.22.0
     - name: Install goimports
       run: go install golang.org/x/tools/cmd/goimports@v0.22.0
@@ -61,13 +65,15 @@ jobs:
   vet:
     name: Vet
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
     - name: Setup Go
       uses: actions/setup-go@v5
       with:
         go-version: 'stable'
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: go vet
       # Use find to build all modules. '-execdir ... ;' doesn't set an exit code
       # based on command results. So, create a file if a build fails and check
@@ -79,11 +85,13 @@ jobs:
   test:
     name: Root tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: 'stable'
       - name: Check code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - run: go test -v
