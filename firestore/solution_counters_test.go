@@ -16,7 +16,6 @@ package firestore
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"cloud.google.com/go/firestore"
@@ -25,10 +24,7 @@ import (
 
 func TestDistributedCounter(t *testing.T) {
 	testutil.EndToEndTest(t)
-	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
-	if projectID == "" {
-		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
-	}
+	projectID := getProjectID(t)
 
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectID)

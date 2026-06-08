@@ -53,7 +53,9 @@ func resumePublishWithOrderingKey(w io.Writer, projectID, topicID string) {
 	})
 	_, err = result.Get(ctx)
 	if err != nil {
-		// Error handling code can be added here.
+		// Fix internal state to make sure publishes with errors are not
+		// published out of order. This might mean moving messages to a queue
+		// and retrying those messages before publishing subsquent messages.
 		fmt.Printf("Failed to publish: %s\n", err)
 
 		// Resume publish on an ordering key that has had unrecoverable errors.

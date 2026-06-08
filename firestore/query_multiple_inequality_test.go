@@ -18,13 +18,14 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"os"
+	"reflect"
 	"strings"
 	"testing"
 
 	"cloud.google.com/go/firestore"
 	apiv1 "cloud.google.com/go/firestore/apiv1/admin"
 	"cloud.google.com/go/firestore/apiv1/admin/adminpb"
+	"google.golang.org/api/iterator"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -107,10 +108,7 @@ func setupClientAndCities(t *testing.T, projectID string) (*firestore.Client, fu
 }
 
 func TestMultipleInequalitiesQuery(t *testing.T) {
-	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
-	if projectID == "" {
-		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
-	}
+	projectID := getProjectID(t)
 
 	colName := "cities"
 
@@ -158,6 +156,24 @@ func TestMultipleInequalitiesQuery(t *testing.T) {
 		if !ok || s.Code() != codes.AlreadyExists {
 			// Fail the test only if the index does not already exist
 			t.Fatalf("CreateIndex: %v", createErr)
+		}
+		// Index already exists, find it for cleanup
+		it := adminClient.ListIndexes(ctx, &adminpb.ListIndexesRequest{
+			Parent: req.Parent,
+		})
+		for {
+			idx, err := it.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				t.Fatalf("ListIndexes: %v", err)
+			}
+			// Compare fields to find the right index
+			if reflect.DeepEqual(idx.Fields, adminPbIndexFields) {
+				createdIndex = idx
+				break
+			}
 		}
 	} else {
 		createdIndex, waitErr = op.Wait(ctx)

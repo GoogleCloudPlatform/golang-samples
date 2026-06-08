@@ -36,7 +36,7 @@ func batchCodePredict(w io.Writer, projectID, location, name, outputURI string, 
 	ctx := context.Background()
 	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
 	// Pretrained code model
-	model := "publishers/google/models/code-bison"
+	model := "publishers/google/models/gemini-2.5-flash"
 	parameters := map[string]interface{}{
 		"temperature":     0.2,
 		"maxOutputTokens": 200,

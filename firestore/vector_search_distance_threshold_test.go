@@ -16,17 +16,11 @@ package firestore
 
 import (
 	"bytes"
-	"os"
 	"strings"
 	"testing"
 )
 
-func TestVectorSearchDistanceThreshold(t *testing.T) {
-	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
-	if projectID == "" {
-		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
-	}
-
+func testVectorSearchDistanceThreshold(t *testing.T) {
 	buf := new(bytes.Buffer)
 	if err := vectorSearchDistanceThreshold(buf, projectID); err != nil {
 		t.Errorf("vectorSearchDistanceThreshold: %v", err)

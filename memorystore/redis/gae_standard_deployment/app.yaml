@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # [START memorystore_go_app_yaml_standard]
-runtime: go111
+runtime: go125
 
 # Update with Redis instance details
 env_variables:

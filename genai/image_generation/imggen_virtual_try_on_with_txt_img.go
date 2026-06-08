@@ -37,7 +37,7 @@ func generateImgVirtualTryOnWithTextImg(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "virtual-try-on-preview-08-04"
+	modelName := "virtual-try-on-001"
 
 	// Load local person image
 	personBytes, err := os.ReadFile("man.png")

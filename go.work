@@ -1,6 +1,6 @@
-go 1.24.0
+go 1.25.0
 
-toolchain go1.24.7
+toolchain go1.25.0
 
 use (
 	.
@@ -21,7 +21,6 @@ use (
 	./appengine_flexible/websockets
 	./asset
 	./auth
-	./automl
 	./batch
 	./bigquery
 	./bigtable
@@ -105,7 +104,7 @@ use (
 	./logging
 	./managedkafka
 	./media
-	./memorystore
+	./memorystore/redis
 	./modelarmor
 	./monitoring
 	./opentelemetry/instrumentation/app

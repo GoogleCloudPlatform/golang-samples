@@ -148,7 +148,7 @@ func createKey(t *testing.T, projectID, keyFileName string) (string, string, str
 	})
 
 	if err != nil {
-		log.Fatalf("Failed to wrap key: %v", err)
+		return "", "", "", fmt.Errorf("failed to wrap key: %w", err)
 	}
 
 	wrappedKey := response.Ciphertext
@@ -188,22 +188,73 @@ var (
 func TestMain(m *testing.M) {
 	tc := testutil.Context{}
 	tc.ProjectID = os.Getenv("GOLANG_SAMPLES_PROJECT_ID")
-	createRedactImageTemplate(tc.ProjectID, redactImageTemplate)
-	createDeidentifiedTemplate(tc.ProjectID, deidentifyTemplateID)
-	createStructuredDeidentifiedTemplate(tc.ProjectID, deidentifyStructuredTemplateID)
-	v := []string{bucketForDeidCloudStorageForInput, bucketForDeidCloudStorageForOutput}
-	for _, v := range v {
-		createBucket(tc.ProjectID, v)
+	if tc.ProjectID == "" {
+		log.Print("GOLANG_SAMPLES_PROJECT_ID must be set")
+		os.Exit(1)
 	}
-	filePathtoGCS(tc.ProjectID)
-	createBigQueryDataSetId(tc.ProjectID)
-	createTableInsideDataset(tc.ProjectID, dataSetID)
-	m.Run()
-	deleteBigQueryAssets(tc.ProjectID)
-	for _, v := range v {
-		deleteBucket(tc.ProjectID, v)
+
+	bucketsToClean := []string{bucketForDeidCloudStorageForInput, bucketForDeidCloudStorageForOutput}
+
+	cleanup := func() {
+		log.Println("--- Starting cleanup ---")
+		if err := deleteTemplate(tc.ProjectID); err != nil {
+			log.Printf("cleanup: deleteTemplate failed: %v", err)
+		}
+		for _, b := range bucketsToClean {
+			if err := deleteBucket(tc.ProjectID, b); err != nil {
+				log.Printf("cleanup: deleteBucket(%q) failed: %v", b, err)
+			}
+		}
+		if err := deleteBigQueryAssets(tc.ProjectID); err != nil {
+			log.Printf("cleanup: deleteBigQueryAssets failed: %v", err)
+		}
+		log.Println("--- Cleanup finished ---")
 	}
-	deleteTemplate(tc.ProjectID)
+
+	if err := createRedactImageTemplate(tc.ProjectID, redactImageTemplate); err != nil {
+		log.Printf("createRedactImageTemplate failed: %v", err)
+		cleanup()
+		os.Exit(1)
+	}
+	if err := createDeidentifiedTemplate(tc.ProjectID, deidentifyTemplateID); err != nil {
+		log.Printf("createDeidentifiedTemplate failed: %v", err)
+		cleanup()
+		os.Exit(1)
+	}
+	if err := createStructuredDeidentifiedTemplate(tc.ProjectID, deidentifyStructuredTemplateID); err != nil {
+		log.Printf("createStructuredDeidentifiedTemplate failed: %v", err)
+		cleanup()
+		os.Exit(1)
+	}
+
+	for _, b := range bucketsToClean {
+		if err := createBucket(tc.ProjectID, b); err != nil {
+			log.Printf("createBucket failed for bucket %s: %v", b, err)
+			cleanup()
+			os.Exit(1)
+		}
+	}
+	if err := filePathtoGCS(tc.ProjectID); err != nil {
+		log.Printf("filePathtoGCS failed: %v", err)
+		cleanup()
+		os.Exit(1)
+	}
+	if err := createBigQueryDataSetId(tc.ProjectID); err != nil {
+		log.Printf("createBigQueryDataSetId failed: %v", err)
+		cleanup()
+		os.Exit(1)
+	}
+	if err := createTableInsideDataset(tc.ProjectID, dataSetID); err != nil {
+		log.Printf("createTableInsideDataset failed: %v", err)
+		cleanup()
+		os.Exit(1)
+	}
+
+	code := m.Run()
+
+	cleanup()
+
+	os.Exit(code)
 }
 
 func createDeidentifiedTemplate(projectID, deidentifyTemplateID string) error {
@@ -380,8 +431,7 @@ func createBucket(projectID, bucketName string) error {
 			StorageClass: "STANDARD",
 			Location:     "us-central1",
 		}); err != nil {
-			log.Fatalf("---Failed to create bucket: %v", err)
-			return err
+			return fmt.Errorf("---Failed to create bucket: %w", err)
 		}
 		fmt.Printf("---Bucket '%s' created successfully.\n", bucketName)
 	} else {
@@ -432,7 +482,7 @@ func filePathtoGCS(projectID string) error {
 	if !dirExists {
 		obj := client.Bucket(bucketForDeidCloudStorageForInput).Object(filePathToGCSForDeidTest)
 		if _, err := obj.NewWriter(ctx).Write([]byte("")); err != nil {
-			log.Fatalf("Failed to create directory: %v", err)
+			return fmt.Errorf("Failed to create directory: %w", err)
 		}
 		fmt.Printf("Directory '%s' created successfully in bucket '%s'.\n", filePathToGCSForDeidTest, bucketForDeidCloudStorageForInput)
 	} else {
@@ -444,8 +494,7 @@ func filePathtoGCS(projectID string) error {
 	// Open local file.
 	file, err := os.ReadFile(filePathToGCSForDeidTest)
 	if err != nil {
-		log.Fatalf("Failed to read file: %v", err)
-		return err
+		return fmt.Errorf("Failed to read file: %w", err)
 	}
 
 	// Get a reference to the bucket
@@ -456,13 +505,11 @@ func filePathtoGCS(projectID string) error {
 	writer := object.NewWriter(ctx)
 	_, err = writer.Write(file)
 	if err != nil {
-		log.Fatalf("Failed to write file: %v", err)
-		return err
+		return fmt.Errorf("Failed to write file: %w", err)
 	}
 	err = writer.Close()
 	if err != nil {
-		log.Fatalf("Failed to close writer: %v", err)
-		return err
+		return fmt.Errorf("Failed to close writer: %w", err)
 	}
 	fmt.Printf("File uploaded successfully: %v\n", filePathToGCSForDeidTest)
 
@@ -472,7 +519,7 @@ func filePathtoGCS(projectID string) error {
 		if err == storage.ErrObjectNotExist {
 			fmt.Printf("File %v does not exist in bucket %v\n", filePathToGCSForDeidTest, bucketForDeidCloudStorageForInput)
 		} else {
-			log.Fatalf("Failed to check file existence: %v", err)
+			return fmt.Errorf("Failed to check file existence: %w", err)
 		}
 	} else {
 		fmt.Printf("File %v exists in bucket %v\n", filePathToGCSForDeidTest, bucketForDeidCloudStorageForInput)
@@ -501,17 +548,20 @@ func deleteBucket(projectID, bucketName string) error {
 			break
 		}
 		if err != nil {
-			log.Fatalf("Failed to list objects in bucket: %v", err)
+			return fmt.Errorf("Failed to list objects in bucket: %w", err)
 		}
 
 		// Delete each object in the bucket.
 		if err := bucket.Object(objAttrs.Name).Delete(ctx); err != nil {
-			log.Fatalf("Failed to delete object %s: %v", objAttrs.Name, err)
+			return fmt.Errorf("Failed to delete object %s: %w", objAttrs.Name, err)
 		}
 		fmt.Printf("Deleted object: %s\n", objAttrs.Name)
 	}
 	if err := bucket.Delete(ctx); err != nil {
-		log.Fatalf("Failed to delete bucket: %v", err)
+		if err == storage.ErrBucketNotExist {
+			return nil
+		}
+		return fmt.Errorf("Failed to delete bucket: %w", err)
 	}
 
 	return nil

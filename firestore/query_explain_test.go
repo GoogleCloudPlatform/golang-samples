@@ -16,16 +16,12 @@ package firestore
 
 import (
 	"bytes"
-	"os"
 	"strings"
 	"testing"
 )
 
 func TestQueryExplain(t *testing.T) {
-	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
-	if projectID == "" {
-		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
-	}
+	projectID := getProjectID(t)
 
 	_, cleanup := setupClientAndCities(t, projectID)
 	t.Cleanup(cleanup)

@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: extensions/v1beta1
+# [START memorystore_go_visit_counter_yaml]
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: visit-counter
@@ -20,6 +21,9 @@ metadata:
     app: visit-counter
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: visit-counter
   template:
     metadata:
       labels:
@@ -27,7 +31,7 @@ spec:
     spec:
       containers:
       - name: visit-counter
-        image: "gcr.io/<PROJECT_ID>/visit-counter:v1"
+        image: "<REPO_REGION>-docker.pkg.dev/<PROJECT_ID>/<REPO_ID>/visit-counter:v1"
         env:
         - name: REDISHOST
           valueFrom:
@@ -50,4 +54,4 @@ spec:
   - port: 80
     targetPort: 8080
     protocol: TCP
-
+# [END memorystore_go_visit_counter_yaml]

@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/golang-samples/functions/memorystore/redis
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
@@ -20,5 +20,5 @@ require (
 	github.com/yuin/gopher-lua v1.1.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
-	golang.org/x/time v0.9.0 // indirect
+	golang.org/x/time v0.15.0 // indirect
 )

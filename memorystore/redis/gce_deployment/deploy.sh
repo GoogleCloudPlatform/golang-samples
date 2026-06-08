@@ -27,13 +27,13 @@ GOOS=linux GOARCH=amd64 go build -v -o app ../main.go
 # Add the app binary
 tar -cvf app.tar app
 # Copy to GCS bucket
-gsutil cp app.tar gs://"$GCS_BUCKET_NAME"/gce/
+gcloud storage cp app.tar gs://"$GCS_BUCKET_NAME"/gce/
 
 # Create an instance
 gcloud compute instances create my-instance \
-    --image-family=debian-9 \
+    --image-family=debian-11 \
     --image-project=debian-cloud \
-    --machine-type=g1-small \
+    --machine-type=e2-small \
     --scopes cloud-platform \
     --metadata-from-file startup-script=startup-script.sh \
     --metadata gcs-bucket="$GCS_BUCKET_NAME",redis-host="$REDISHOST",redis-port="$REDISPORT" \

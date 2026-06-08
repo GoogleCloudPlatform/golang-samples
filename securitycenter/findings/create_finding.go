@@ -23,7 +23,7 @@ import (
 
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
 	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
-	"github.com/golang/protobuf/ptypes"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // createFinding demonstrates how to create a new security finding in CSCC.
@@ -39,14 +39,15 @@ func createFinding(w io.Writer, sourceName string) error {
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
 	// Use now as the eventTime for the security finding.
-	eventTime, err := ptypes.TimestampProto(time.Now())
-	if err != nil {
-		return fmt.Errorf("TimestampProto: %w", err)
-	}
+
+	now := time.Now()
+	eventTime := timestamppb.New(now)
+
+	uniqueFindingID := fmt.Sprintf("samplefindingid%d", now.Unix())
 
 	req := &securitycenterpb.CreateFindingRequest{
 		Parent:    sourceName,
-		FindingId: "samplefindingid",
+		FindingId: uniqueFindingID,
 		Finding: &securitycenterpb.Finding{
 			State: securitycenterpb.Finding_ACTIVE,
 			// Resource the finding is associated with. This is an

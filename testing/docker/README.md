@@ -13,11 +13,11 @@ these containers.
 
 Go language version and resulting image name are controlled by the cloud build
 substitutions `_GO_VERSION` and `_IMAGE_NAME` respectively. The command below
-will build Go 1.21 and push the resulting image to
+will build Go 1.25 and push the resulting image to
 `gcr.io/golang-samples-tests/go121`
 
 ```
 gcloud builds submit . \
     --project=golang-samples-tests \
-    --substitutions "_GO_VERSION=1.21,_IMAGE_NAME=go121"
+    --substitutions "_GO_VERSION=1.25,_IMAGE_NAME=go125"
 ```

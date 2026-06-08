@@ -16,7 +16,6 @@ package firestore
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"cloud.google.com/go/firestore"
@@ -27,10 +26,7 @@ func TestUpdateDocumentIncrement(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	// TODO(#559): revert this to testutil.SystemTest(t).ProjectID
 	// when datastore and firestore can co-exist in a project.
-	projectID := os.Getenv("GOLANG_SAMPLES_FIRESTORE_PROJECT")
-	if projectID == "" {
-		t.Skip("Skipping firestore test. Set GOLANG_SAMPLES_FIRESTORE_PROJECT.")
-	}
+	projectID := getProjectID(t)
 
 	ctx := context.Background()
 

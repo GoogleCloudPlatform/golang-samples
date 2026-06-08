@@ -29,6 +29,7 @@ import (
 	securitycentermanagement "cloud.google.com/go/securitycentermanagement/apiv1"
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
 	"github.com/google/uuid"
+	iterator "google.golang.org/api/iterator"
 	expr "google.golang.org/genproto/googleapis/type/expr"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -46,6 +47,9 @@ func TestMain(m *testing.M) {
 		log.Fatalf("GCLOUD_ORGANIZATION environment variable is not set.")
 	}
 
+	// Clean up any orphans from previous failed runs
+	cleanupOrphanedModules()
+
 	setupSharedModules()
 
 	// Run the tests
@@ -56,6 +60,44 @@ func TestMain(m *testing.M) {
 
 	// Exit with the appropriate code
 	os.Exit(code)
+}
+
+// cleanupOrphanedModules deletes any modules left over from previous test runs
+func cleanupOrphanedModules() {
+	ctx := context.Background()
+	client, err := securitycentermanagement.NewClient(ctx)
+	if err != nil {
+		log.Printf("CleanupOrphanedModules: failed to create client: %v", err)
+		return
+	}
+	defer client.Close()
+
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+	it := client.ListSecurityHealthAnalyticsCustomModules(ctx, &securitycentermanagementpb.ListSecurityHealthAnalyticsCustomModulesRequest{
+		Parent: parent,
+	})
+
+	fmt.Println("Scanning for orphaned test modules...")
+	for {
+		module, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Printf("CleanupOrphanedModules: error listing modules: %v", err)
+			return
+		}
+
+		if strings.HasPrefix(module.DisplayName, "go_sample_sha_custom_module_test_") {
+			fmt.Printf("Cleaning up orphaned module: %s\n", module.DisplayName)
+			err := client.DeleteSecurityHealthAnalyticsCustomModule(ctx, &securitycentermanagementpb.DeleteSecurityHealthAnalyticsCustomModuleRequest{
+				Name: module.Name,
+			})
+			if err != nil {
+				log.Printf("CleanupOrphanedModules: failed to delete %s: %v", module.Name, err)
+			}
+		}
+	}
 }
 
 func setupSharedModules() {
@@ -124,8 +166,8 @@ func getRandomSharedModule() string {
 	if len(sharedModules) == 0 {
 		return ""
 	}
-	rand.Seed(time.Now().UnixNano())
-	return sharedModules[rand.Intn(len(sharedModules))]
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return sharedModules[r.Intn(len(sharedModules))]
 }
 
 // CustomModuleExists checks if a module exists.
@@ -233,24 +275,24 @@ func addCustomModule() (string, error) {
 func TestDeleteCustomModule(t *testing.T) {
 	var buf bytes.Buffer
 
-	moduleID = getRandomSharedModule()
-	if moduleID == "" {
-		t.Fatalf("No shared modules available")
+	// Create a new module only for this delete test to avoid a race condition with shared modules
+	id, err := addCustomModule()
+	if err != nil {
+		t.Fatalf("addCustomModule() had error: %v", err)
 	}
 
 	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
 
-	err := deleteSecurityHealthAnalyticsCustomModule(&buf, parent, moduleID)
+	err = deleteSecurityHealthAnalyticsCustomModule(&buf, parent, id)
 
 	if err != nil {
 		t.Fatalf("deleteSecurityHealthAnalyticsCustomModule() had error: %v", err)
-		return
 	}
 
 	got := buf.String()
 
-	if !strings.Contains(got, moduleID) {
-		t.Fatalf("deleteSecurityHealthAnalyticsCustomModule() got: %s want %s", got, moduleID)
+	if !strings.Contains(got, id) {
+		t.Fatalf("deleteSecurityHealthAnalyticsCustomModule() got: %s want %s", got, id)
 	}
 }
 
