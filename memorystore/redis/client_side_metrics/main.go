@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START memorystore_redis_client_side_metrics]
 package main
 
 import (
@@ -160,3 +161,4 @@ func main() {
     log.Printf("Retrieved value: %s", val)
   }
 }
+// [END memorystore_redis_client_side_metrics]
