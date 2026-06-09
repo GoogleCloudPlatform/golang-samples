@@ -24,7 +24,6 @@ import (
 	securitycenter "cloud.google.com/go/securitycenter/apiv1"
 	"cloud.google.com/go/securitycenter/apiv1/securitycenterpb"
 	"google.golang.org/api/iterator"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // listFindingsAtTime prints findings that where present for a specific source
@@ -46,11 +45,12 @@ func listFindingsAtTime(w io.Writer, sourceName string) error {
 		return fmt.Errorf("securitycenter.NewClient: %w", err)
 	}
 	defer client.Close() // Closing the client safely cleans up background resources.
-	fiveDaysAgo := timestamppb.New(time.Now().AddDate(0, 0, -5))
+
+	fiveDaysAgo := time.Now().AddDate(0, 0, -5).Format(time.RFC3339)
 
 	req := &securitycenterpb.ListFindingsRequest{
-		Parent:   sourceName,
-		ReadTime: fiveDaysAgo,
+		Parent: sourceName,
+		Filter: fmt.Sprintf("event_time < %q", fiveDaysAgo),
 	}
 	it := client.ListFindings(ctx, req)
 	for {
