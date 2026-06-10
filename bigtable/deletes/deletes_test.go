@@ -38,6 +38,10 @@ func TestDeletes(t *testing.T) {
 	if project == "" || instance == "" {
 		t.Skip("Skipping bigtable integration test. Set GOLANG_SAMPLES_PROJECT_ID and GOLANG_SAMPLES_BIGTABLE_INSTANCE.")
 	}
+
+	// Ensure the Bigtable instance exists.
+	ensureInstance(t, ctx, project, instance)
+
 	adminClient, err := bigtable.NewAdminClient(ctx, project, instance)
 	if err != nil {
 		t.Skipf("bigtable.NewAdminClient: %v", err)
@@ -239,4 +243,41 @@ func TestDeletes(t *testing.T) {
 			t.Error("phone#4c410524#20190501 should NOT have been dropped")
 		}
 	})
+}
+
+func ensureInstance(t *testing.T, ctx context.Context, project, instance string) {
+	instanceAdminClient, err := bigtable.NewInstanceAdminClient(ctx, project)
+	if err != nil {
+		t.Fatalf("bigtable.NewInstanceAdminClient: %v", err)
+	}
+	t.Cleanup(func() { instanceAdminClient.Close() })
+
+	if _, err := instanceAdminClient.InstanceInfo(ctx, instance); err != nil {
+		if status.Code(err) == codes.NotFound {
+			zone := os.Getenv("GOLANG_SAMPLES_BIGTABLE_ZONE")
+			if zone == "" {
+				zone = "us-central1-b"
+			}
+			clusterID := instance + "-c1"
+			instanceConf := &bigtable.InstanceConf{
+				InstanceId:   instance,
+				DisplayName:  instance,
+				ClusterId:    clusterID,
+				NumNodes:     0,
+				InstanceType: bigtable.DEVELOPMENT,
+				StorageType:  bigtable.SSD,
+				Zone:         zone,
+			}
+			if err := instanceAdminClient.CreateInstance(ctx, instanceConf); err != nil {
+				t.Fatalf("CreateInstance: %v", err)
+			}
+			t.Cleanup(func() {
+				if err := instanceAdminClient.DeleteInstance(context.Background(), instance); err != nil {
+					t.Errorf("DeleteInstance: %v", err)
+				}
+			})
+		} else {
+			t.Fatalf("InstanceInfo check failed: %v", err)
+		}
+	}
 }
