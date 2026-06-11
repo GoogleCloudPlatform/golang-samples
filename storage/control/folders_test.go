@@ -212,3 +212,65 @@ func TestManagedFolders(t *testing.T) {
 		t.Errorf("deleteManagedFolder: got %q, want to contain %q", got, want)
 	}
 }
+
+func TestDeleteFolderRecursive(t *testing.T) {
+	t.Skip("Skipping due to project permissions changes, see: b/445769988")
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	// Create HNS bucket.
+	bucketName := testutil.UniqueBucketName(testPrefix)
+	b := client.Bucket(bucketName)
+	attrs := &storage.BucketAttrs{
+		HierarchicalNamespace: &storage.HierarchicalNamespace{
+			Enabled: true,
+		},
+		UniformBucketLevelAccess: storage.UniformBucketLevelAccess{
+			Enabled: true,
+		},
+	}
+	if err := b.Create(ctx, tc.ProjectID, attrs); err != nil {
+		t.Fatalf("Bucket.Create(%q): %v", bucketName, err)
+	}
+	t.Cleanup(func() {
+		if err := testutil.DeleteBucketIfExists(ctx, client, bucketName); err != nil {
+			log.Printf("Bucket.Delete(%q): %v", bucketName, err)
+		}
+	})
+
+	folderName := "foo-recursive"
+	folderPath := fmt.Sprintf("projects/_/buckets/%v/folders/%v", bucketName, folderName)
+
+	// Create folder. Retry because there is no automatic retry in the client for this op.
+	if ok := testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := &bytes.Buffer{}
+		if err := createFolder(buf, bucketName, folderName); err != nil {
+			r.Errorf("createFolder: %v", err)
+		}
+		if got, want := buf.String(), folderPath; !strings.Contains(got, want) {
+			r.Errorf("createFolder: got %q, want to contain %q", got, want)
+		}
+	}); !ok {
+		t.Fatalf("failed to create folder; can't continue")
+	}
+
+	// Create a subfolder.
+	subFolderName := "foo-recursive/bar"
+	if ok := testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := &bytes.Buffer{}
+		if err := createFolder(buf, bucketName, subFolderName); err != nil {
+			r.Errorf("createFolder: %v", err)
+		}
+	}); !ok {
+		t.Fatalf("failed to create subfolder; can't continue")
+	}
+
+	// Delete folder recursively.
+	buf := &bytes.Buffer{}
+	if err := deleteFolderRecursive(buf, bucketName, folderName); err != nil {
+		t.Fatalf("deleteFolderRecursive: %v", err)
+	}
+	if got, want := buf.String(), folderPath; !strings.Contains(got, want) {
+		t.Errorf("deleteFolderRecursive: got %q, want to contain %q", got, want)
+	}
+}
