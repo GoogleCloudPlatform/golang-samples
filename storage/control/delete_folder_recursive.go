@@ -38,7 +38,7 @@ func deleteFolderRecursive(w io.Writer, bucketName, folderName string) error {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
+	ctx, cancel := context.WithTimeout(ctx, time.Minute*5)
 	defer cancel()
 
 	// Set project to "_" to signify globally scoped bucket
