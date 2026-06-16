@@ -31,6 +31,7 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
+	"github.com/google/uuid"
 )
 
 const (
@@ -274,7 +275,7 @@ func TestObjects(t *testing.T) {
 		t.Errorf("copyFile: %v", err)
 	}
 	t.Run("composeFile", func(t *testing.T) {
-		if err := composeFile(io.Discard, bucket, object1, object2, dstObj); err != nil {
+		if err := composeFile(io.Discard, bucket, object1, object2, dstObj, false); err != nil {
 			t.Errorf("composeFile: %v", err)
 		}
 		bkt := client.Bucket(bucket)
@@ -284,6 +285,34 @@ func TestObjects(t *testing.T) {
 			t.Errorf("Destination object was not created")
 		} else if err != nil {
 			t.Errorf("object.Attrs: %v", err)
+		}
+	})
+
+	t.Run("composeFileWithDeleteSources", func(t *testing.T) {
+		firstObj := "compose-del-1-" + uuid.New().String() + ".txt"
+		secondObj := "compose-del-2-" + uuid.New().String() + ".txt"
+		targetObj := "compose-del-target-" + uuid.New().String() + ".txt"
+
+		if err := uploadFile(io.Discard, bucket, firstObj); err != nil {
+			t.Fatalf("uploadFile: %v", err)
+		}
+		if err := uploadFile(io.Discard, bucket, secondObj); err != nil {
+			t.Fatalf("uploadFile: %v", err)
+		}
+		defer client.Bucket(bucket).Object(targetObj).Delete(ctx)
+
+		if err := composeFile(io.Discard, bucket, firstObj, secondObj, targetObj, true); err != nil {
+			t.Errorf("composeFile: %v", err)
+		}
+
+		bkt := client.Bucket(bucket)
+		_, err1 := bkt.Object(firstObj).Attrs(ctx)
+		if err1 != storage.ErrObjectNotExist {
+			t.Errorf("first source object was not deleted, err: %v", err1)
+		}
+		_, err2 := bkt.Object(secondObj).Attrs(ctx)
+		if err2 != storage.ErrObjectNotExist {
+			t.Errorf("second source object was not deleted, err: %v", err2)
 		}
 	})
 
