@@ -145,8 +145,10 @@ func (a *app) index(w http.ResponseWriter, r *http.Request) {
 
 		// Cookie is set
 		cookie = &http.Cookie{
-			Name:  cookieName,
-			Value: doc.ID,
+			Name:     cookieName,
+			Value:    doc.ID,
+			HttpOnly: true,                 // Prevents client-side scripts from accessing the cookie
+			SameSite: http.SameSiteLaxMode, // Protects the session cookie from Cross-Site Request Forgery (CSRF) attacks
 		}
 		http.SetCookie(w, cookie)
 	} else {
