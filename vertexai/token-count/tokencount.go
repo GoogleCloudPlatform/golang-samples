@@ -16,8 +16,6 @@
 // a given prompt string
 package tokencount
 
-// [START aiplatform_gemini_token_count]
-// [START generativeaionvertexai_gemini_token_count]
 import (
 	"context"
 	"fmt"
@@ -59,6 +57,3 @@ func countTokens(w io.Writer, projectID, location, modelName string) error {
 
 	return nil
 }
-
-// [END generativeaionvertexai_gemini_token_count]
-// [END aiplatform_gemini_token_count]
