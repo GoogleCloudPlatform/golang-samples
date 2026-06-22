@@ -15,7 +15,6 @@
 // contextcaching shows an example of caching the tokens of a multimodal PDF prompt
 package contextcaching
 
-// [START generativeaionvertexai_gemini_create_context_cache]
 import (
 	"context"
 	"fmt"
@@ -77,5 +76,3 @@ func createContextCache(w io.Writer, projectID, location, modelName string) (str
 	fmt.Fprint(w, result.Name)
 	return result.Name, nil
 }
-
-// [END generativeaionvertexai_gemini_create_context_cache]
