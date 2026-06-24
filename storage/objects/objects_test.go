@@ -17,6 +17,7 @@ package objects
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -280,7 +281,7 @@ func TestObjects(t *testing.T) {
 		bkt := client.Bucket(bucket)
 		obj := bkt.Object(dstObj)
 		_, err = obj.Attrs(ctx)
-		if err == storage.ErrObjectNotExist {
+		if errors.Is(err, storage.ErrObjectNotExist) {
 			t.Errorf("Destination object was not created")
 		} else if err != nil {
 			t.Errorf("object.Attrs: %v", err)
@@ -308,10 +309,10 @@ func TestObjects(t *testing.T) {
 		}
 
 		// Verify sources deleted
-		if _, err := client.Bucket(bucket).Object(objA).Attrs(ctx); err != storage.ErrObjectNotExist {
+		if _, err := client.Bucket(bucket).Object(objA).Attrs(ctx); !errors.Is(err, storage.ErrObjectNotExist) {
 			t.Errorf("Expected source object %q to be deleted, got err: %v", objA, err)
 		}
-		if _, err := client.Bucket(bucket).Object(objB).Attrs(ctx); err != storage.ErrObjectNotExist {
+		if _, err := client.Bucket(bucket).Object(objB).Attrs(ctx); !errors.Is(err, storage.ErrObjectNotExist) {
 			t.Errorf("Expected source object %q to be deleted, got err: %v", objB, err)
 		}
 	})
