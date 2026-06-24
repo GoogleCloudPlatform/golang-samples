@@ -25,11 +25,12 @@ import (
 )
 
 // composeFile composes source objects to create a composite object.
-func composeFile(w io.Writer, bucket, object1, object2, toObject string) error {
+func composeFile(w io.Writer, bucket, object1, object2, toObject string, deleteSourceObjects bool) error {
 	// bucket := "bucket-name"
 	// object1 := "object-name-1"
 	// object2 := "object-name-2"
 	// toObject := "object-name-3"
+	// deleteSourceObjects := false
 
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
@@ -51,7 +52,18 @@ func composeFile(w io.Writer, bucket, object1, object2, toObject string) error {
 	if err != nil {
 		return fmt.Errorf("ComposerFrom: %w", err)
 	}
-	fmt.Fprintf(w, "New composite object %v was created by combining %v and %v\n", toObject, object1, object2)
+
+	if deleteSourceObjects {
+		if err := src1.Delete(ctx); err != nil {
+			return fmt.Errorf("src1.Delete: %w", err)
+		}
+		if err := src2.Delete(ctx); err != nil {
+			return fmt.Errorf("src2.Delete: %w", err)
+		}
+		fmt.Fprintf(w, "New composite object %v was created by combining %v and %v and source objects were deleted\n", toObject, object1, object2)
+	} else {
+		fmt.Fprintf(w, "New composite object %v was created by combining %v and %v\n", toObject, object1, object2)
+	}
 	return nil
 }
 

@@ -274,7 +274,7 @@ func TestObjects(t *testing.T) {
 		t.Errorf("copyFile: %v", err)
 	}
 	t.Run("composeFile", func(t *testing.T) {
-		if err := composeFile(io.Discard, bucket, object1, object2, dstObj); err != nil {
+		if err := composeFile(io.Discard, bucket, object1, object2, dstObj, false); err != nil {
 			t.Errorf("composeFile: %v", err)
 		}
 		bkt := client.Bucket(bucket)
@@ -284,6 +284,35 @@ func TestObjects(t *testing.T) {
 			t.Errorf("Destination object was not created")
 		} else if err != nil {
 			t.Errorf("object.Attrs: %v", err)
+		}
+	})
+
+	t.Run("composeFile with delete", func(t *testing.T) {
+		objA := "compose-delete-src-1.txt"
+		objB := "compose-delete-src-2.txt"
+		dstObjDelete := "compose-delete-dst.txt"
+		if err := uploadFile(io.Discard, bucket, objA); err != nil {
+			t.Fatalf("uploadFile(%q): %v", objA, err)
+		}
+		if err := uploadFile(io.Discard, bucket, objB); err != nil {
+			t.Fatalf("uploadFile(%q): %v", objB, err)
+		}
+		if err := composeFile(io.Discard, bucket, objA, objB, dstObjDelete, true); err != nil {
+			t.Errorf("composeFile with delete: %v", err)
+		}
+
+		// Verify destination created
+		_, err := client.Bucket(bucket).Object(dstObjDelete).Attrs(ctx)
+		if err != nil {
+			t.Errorf("Destination object was not created: %v", err)
+		}
+
+		// Verify sources deleted
+		if _, err := client.Bucket(bucket).Object(objA).Attrs(ctx); err != storage.ErrObjectNotExist {
+			t.Errorf("Expected source object %q to be deleted, got err: %v", objA, err)
+		}
+		if _, err := client.Bucket(bucket).Object(objB).Attrs(ctx); err != storage.ErrObjectNotExist {
+			t.Errorf("Expected source object %q to be deleted, got err: %v", objB, err)
 		}
 	})
 
