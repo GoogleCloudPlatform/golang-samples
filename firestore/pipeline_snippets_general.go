@@ -1746,12 +1746,12 @@ func basicRead(w io.Writer, client *firestore.Client) error {
 	return nil
 }
 
-func pipelineInitialization(w io.Writer, projectID string) error {
+func pipelineInitialization(w io.Writer, projectID string, databaseID string) error {
 	ctx := context.Background()
 	// [START firestore_pipeline_initialization]
-	client, err := firestore.NewClient(ctx, projectID)
+	client, err := firestore.NewClientWithDatabase(ctx, projectID, databaseID)
 	if err != nil {
-		fmt.Fprintf(w, "firestore.NewClient failed: %v", err)
+		fmt.Fprintf(w, "firestore.NewClientWithDatabase failed: %v", err)
 		return err
 	}
 	pipeline := client.Pipeline().Collection("books")
