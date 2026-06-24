@@ -1754,10 +1754,10 @@ func pipelineInitialization(w io.Writer, projectID string, databaseID string) er
 		fmt.Fprintf(w, "firestore.NewClientWithDatabase failed: %v", err)
 		return err
 	}
+	defer client.Close()
 	pipeline := client.Pipeline().Collection("books")
 	// [END firestore_pipeline_initialization]
 	fmt.Fprintln(w, pipeline)
-	defer client.Close()
 	return nil
 }
 
