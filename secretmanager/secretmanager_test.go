@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path"
 	"reflect"
 	"strings"
 	"time"
@@ -32,6 +33,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	regional_secretmanager "github.com/GoogleCloudPlatform/golang-samples/secretmanager/regional_samples"
 	"github.com/gofrs/uuid"
+	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc/codes"
 	grpccodes "google.golang.org/grpc/codes"
@@ -102,6 +104,17 @@ func testResourceManagerTagsValueClient(tb testing.TB) (*resourcemanager.TagValu
 
 }
 
+func testResourceManagerTagBindingsClient(tb testing.TB) (*resourcemanager.TagBindingsClient, context.Context) {
+	tb.Helper()
+	ctx := context.Background()
+
+	client, err := resourcemanager.NewTagBindingsClient(ctx)
+	if err != nil {
+		tb.Fatalf("testResourceManagerTagBindingsClient: failed to create client: %v", err)
+	}
+	return client, ctx
+}
+
 func testName(tb testing.TB) string {
 	tb.Helper()
 
@@ -110,6 +123,17 @@ func testName(tb testing.TB) string {
 		tb.Fatalf("testName: failed to generate uuid: %v", err)
 	}
 	return u.String()
+}
+
+func testTopic(tb testing.TB) string {
+	tb.Helper()
+
+	v := os.Getenv("GOLANG_SAMPLES_TOPIC_NAME")
+	if v == "" {
+		tb.Skip("testTopic: missing GOLANG_SAMPLES_TOPIC_NAME")
+	}
+
+	return v
 }
 
 func testSecret(tb testing.TB, projectID string) *secretmanagerpb.Secret {
@@ -1515,7 +1539,7 @@ func testCreateTagKey(tb testing.TB, projectID string) *resourcemanagerpb.TagKey
 
 	client, ctx := testResourceManagerTagsKeyClient(tb)
 	parent := fmt.Sprintf("projects/%s", projectID)
-	tagKeyName := "sm_secret_tag_sample_test2"
+	tagKeyName := testName(tb)
 	tagKeyDescription := "creating tag key for secretmanager tags sample"
 
 	tagKeyOperation, err := client.CreateTagKey(ctx, &resourcemanagerpb.CreateTagKeyRequest{
@@ -1541,7 +1565,7 @@ func testCreateTagValue(tb testing.TB, tagKeyId string) *resourcemanagerpb.TagVa
 	tb.Helper()
 
 	client, ctx := testResourceManagerTagsValueClient(tb)
-	tagValueName := "sm_secret_tag_value_sample_test1"
+	tagValueName := testName(tb)
 	tagKeyDescription := "creating TagValue for secretmanager tags sample"
 
 	tagKeyOperation, err := client.CreateTagValue(ctx, &resourcemanagerpb.CreateTagValueRequest{
@@ -1674,4 +1698,511 @@ func TestCreateSecretWithTags(t *testing.T) {
 		t.Errorf("createSecretWithTags: expected %q to contain %q", got, want)
 	}
 
+}
+
+func TestCreateSecretWithDelayedDestroy(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
+	defer testCleanupSecret(t, secretName)
+
+	ttl := 24 * time.Hour
+
+	var b bytes.Buffer
+	if err := createSecretWithDelayedDestroy(&b, tc.ProjectID, secretID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Created secret"; !strings.Contains(got, want) {
+		t.Errorf("createSecretWithDelayedDestroy: expected %q to contain %q", got, want)
+	}
+
+	// Verify Delayed Destroy with GetSecret.
+	client, ctx := testClient(t)
+
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetVersionDestroyTtl() == nil {
+		t.Fatal("GetSecret: VersionDestroyTtl is nil, expected non-nil")
+	}
+	if secret.GetVersionDestroyTtl().AsDuration() != ttl {
+		t.Errorf("VersionDestroyTtl mismatch: got %v, want %v", secret.GetVersionDestroyTtl().AsDuration(), ttl)
+	}
+}
+
+func TestUpdateSecretWithDelayedDestroy(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
+	defer testCleanupSecret(t, secretName)
+
+	client, ctx := testClient(t)
+
+	var b bytes.Buffer
+	if err := createSecretWithDelayedDestroy(&b, tc.ProjectID, secretID); err != nil {
+		t.Fatal(err)
+	}
+
+	newDelayedDestroy := 48 * time.Hour
+	if err := updateSecretWithDelayedDestroy(&b, secretName); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Updated secret"; !strings.Contains(got, want) {
+		t.Errorf("updateSecretWithDelayedDestroy: expected %q to contain %q", got, want)
+	}
+
+	// Verify TTL with GetSecret.
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetVersionDestroyTtl() == nil {
+		t.Fatal("GetSecret: VersionDestroyTtl is nil, expected non-nil")
+	}
+	if secret.GetVersionDestroyTtl().AsDuration() != newDelayedDestroy {
+		t.Errorf("VersionDestroyTtl mismatch: got %v, want %v", secret.GetVersionDestroyTtl().AsDuration(), newDelayedDestroy)
+	}
+}
+
+func TestDeleteSecretVersionDestroyTTL(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
+	defer testCleanupSecret(t, secretName)
+
+	client, ctx := testClient(t)
+
+	var b bytes.Buffer
+	if err := createSecretWithDelayedDestroy(&b, tc.ProjectID, secretID); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := deleteSecretVersionDestroyTTL(&b, secretName); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "removed version_destroy_ttl"; !strings.Contains(got, want) {
+		t.Errorf("deleteSecretVersionDestroyTTL: expected %q to contain %q", got, want)
+	}
+
+	// Verify TTL with GetSecret.
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetVersionDestroyTtl() != nil {
+		t.Fatal("GetSecret: VersionDestroyTtl is not nil, expected nil")
+	}
+}
+
+func TestCreateSecretWithRotation(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
+	defer testCleanupSecret(t, secretName)
+
+	topicName := testTopic(t)
+	client, ctx := testClient(t)
+
+	rotationPeriod := 24 * time.Hour
+
+	var b bytes.Buffer
+	if err := createSecretWithRotation(&b, tc.ProjectID, secretID, topicName); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := b.String(), "Created secret"; !strings.Contains(got, want) {
+		t.Errorf("createSecretWithRotation: expected %q to contain %q", got, want)
+	}
+
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetRotation() == nil {
+		t.Fatal("GetSecret: Rotation is nil, expected non-nil")
+	}
+	if secret.GetRotation().GetRotationPeriod().AsDuration() != rotationPeriod {
+		t.Errorf("RotationPeriod mismatch: got %v, want %v", secret.GetRotation().GetRotationPeriod().AsDuration(), rotationPeriod)
+	}
+	if secret.GetRotation().GetNextRotationTime() == nil {
+		t.Fatal("GetSecret: NextRotationTime is nil, expected non-nil")
+	}
+}
+
+func TestUpdateSecretRotationPeriod(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
+	defer testCleanupSecret(t, secretName)
+
+	topicName := testTopic(t)
+	client, ctx := testClient(t)
+
+	var b bytes.Buffer
+	if err := createSecretWithRotation(&b, tc.ProjectID, secretID, topicName); err != nil {
+		t.Fatal(err)
+	}
+
+	// Update rotation period.
+	updatedRotationPeriod := 48 * time.Hour
+	b.Reset()
+	if err := updateSecretRotationPeriod(&b, secretName); err != nil {
+		t.Fatal(err)
+	}
+
+	got := b.String()
+	if !strings.Contains(got, secretID) {
+		t.Errorf("updateSecretRotationPeriod: output %q did not contain secretID %q", got, secretID)
+	}
+
+	// Verify rotation period with GetSecret.
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetRotation() == nil {
+		t.Fatal("GetSecret: Rotation is nil, expected non-nil")
+	}
+	if secret.GetRotation().GetRotationPeriod().AsDuration() != updatedRotationPeriod {
+		t.Errorf("RotationPeriod mismatch: got %v, want %v", secret.GetRotation().GetRotationPeriod().AsDuration(), updatedRotationPeriod)
+	}
+}
+
+func TestDeleteSecretRotation(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
+	defer testCleanupSecret(t, secretName)
+
+	topicName := testTopic(t)
+	client, ctx := testClient(t)
+
+	var b bytes.Buffer
+	if err := createSecretWithRotation(&b, tc.ProjectID, secretID, topicName); err != nil {
+		t.Fatal(err)
+	}
+
+	// Remove rotation.
+	if err := deleteSecretRotation(&b, secretName); err != nil {
+		t.Fatal(err)
+	}
+
+	got := b.String()
+	if !strings.Contains(got, secretID) {
+		t.Errorf("deleteSecretRotation: output %q did not contain secretID %q", got, secretID)
+	}
+
+	// Verify rotation is removed with GetSecret.
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetRotation() != nil {
+		t.Errorf("Rotation mismatch: got %v, want nil", secret.GetRotation())
+	}
+}
+
+func TestCreateSecretWithTopic(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
+	defer testCleanupSecret(t, secretName)
+
+	topicName := testTopic(t)
+	client, ctx := testClient(t)
+
+	var b bytes.Buffer
+	if err := createSecretWithTopic(&b, tc.ProjectID, secretID, topicName); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := b.String(), "Created secret"; !strings.Contains(got, want) {
+		t.Errorf("createSecretWithTopic: expected %q to contain %q", got, want)
+	}
+
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if len(secret.GetTopics()) != 1 || secret.GetTopics()[0].GetName() != topicName {
+		t.Errorf("Topics mismatch: got %v, want %s", secret.GetTopics(), topicName)
+	}
+}
+
+func TestCreateSecretWithExpireTime(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
+	defer testCleanupSecret(t, secretName)
+
+	// Expire time in 1 hour.
+	expire := time.Now().Add(time.Hour)
+
+	var b bytes.Buffer
+	if err := createSecretWithExpireTime(&b, tc.ProjectID, secretID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Created secret"; !strings.Contains(got, want) {
+		t.Errorf("createSecretWithExpireTime: expected %q to contain %q", got, want)
+	}
+
+	// Verify expire time with GetSecret.
+	client, ctx := testClient(t)
+
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetExpireTime() == nil {
+		t.Fatal("GetSecret: ExpireTime is nil, expected non-nil")
+	}
+
+	if diff := secret.GetExpireTime().AsTime().Unix() - expire.Unix(); diff > 1 || diff < -1 {
+		t.Errorf("ExpireTime mismatch: got %v, want %v", secret.GetExpireTime().AsTime(), expire)
+	}
+}
+
+func TestUpdateSecretExpiration(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
+	defer testCleanupSecret(t, secretName)
+
+	// Create with expire time in 1 hour.
+	var b bytes.Buffer
+	if err := createSecretWithExpireTime(&b, tc.ProjectID, secretID); err != nil {
+		t.Fatal(err)
+	}
+
+	// Update expire time to 2 hours.
+	newExpire := time.Now().Add(2 * time.Hour)
+	if err := updateSecretExpiration(&b, secretName); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := b.String(), "Updated secret"; !strings.Contains(got, want) {
+		t.Errorf("updateSecretExpiration: expected %q to contain %q", got, want)
+	}
+
+	// Verify expire time with GetSecret.
+	client, ctx := testClient(t)
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetExpireTime() == nil {
+		t.Fatal("GetSecret: ExpireTime is nil, expected non-nil")
+	}
+
+	if diff := secret.GetExpireTime().AsTime().Unix() - newExpire.Unix(); diff > 1 || diff < -1 {
+		t.Errorf("ExpireTime mismatch: got %v, want %v", secret.GetExpireTime().AsTime(), newExpire)
+	}
+}
+
+func TestRemoveExpiration(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
+	defer testCleanupSecret(t, secretName)
+
+	var b bytes.Buffer
+	if err := createSecretWithExpireTime(&b, tc.ProjectID, secretID); err != nil {
+		t.Fatal(err)
+	}
+
+	// Remove expire time.
+	b.Reset()
+	if err := deleteExpiration(&b, secretName); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Removed expiration"; !strings.Contains(got, want) {
+		t.Errorf("deleteExpiration: expected %q to contain %q", got, want)
+	}
+
+	// Verify expire time is removed with GetSecret.
+	client, ctx := testClient(t)
+
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secretName,
+	})
+	if err != nil {
+		t.Fatalf("failed to get secret for verification: %v", err)
+	}
+
+	if secret.GetExpireTime() != nil {
+		t.Errorf("GetSecret: ExpireTime is %v, expected nil", secret.GetExpireTime())
+	}
+}
+
+func TestBindTagsToSecret(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	secretID := testName(t)
+
+	tagKey := testCreateTagKey(t, tc.ProjectID)
+	defer testCleanupTagKey(t, tagKey.GetName())
+	tagValue := testCreateTagValue(t, tagKey.GetName())
+	defer testCleanupTagValue(t, tagValue.GetName())
+
+	var b bytes.Buffer
+	if err := bindTagsToSecret(&b, tc.ProjectID, secretID, tagValue.GetName()); err != nil {
+		t.Fatal(err)
+	}
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
+	defer testCleanupSecret(t, secretName)
+
+	if got, want := b.String(), "Tag binding created"; !strings.Contains(got, want) {
+		t.Errorf("bindTagsToSecret: expected %q to contain %q", got, want)
+	}
+
+	// Verify binding exists with API
+	ctx := context.Background()
+	tagBindingsClient, ctx := testResourceManagerTagBindingsClient(t)
+	defer tagBindingsClient.Close()
+
+	parent := "//secretmanager.googleapis.com/" + secretName
+	it := tagBindingsClient.ListTagBindings(ctx, &resourcemanagerpb.ListTagBindingsRequest{
+		Parent: parent,
+	})
+
+	found := false
+	for {
+		binding, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			t.Fatalf("Failed to list tag bindings for verification: %v", err)
+		}
+		if binding.TagValue == tagValue.GetName() && path.Base(binding.GetParent()) == path.Base(secretName) {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		t.Errorf("Tag binding for %s with value %s not found after creation", secretName, tagValue.GetName())
+	}
+}
+
+func TestListTagBindings(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	tagKey := testCreateTagKey(t, tc.ProjectID)
+	defer testCleanupTagKey(t, tagKey.GetName())
+	tagValue := testCreateTagValue(t, tagKey.GetName())
+	defer testCleanupTagValue(t, tagValue.GetName())
+
+	secretID := testName(t)
+
+	var b bytes.Buffer
+	if err := bindTagsToSecret(&b, tc.ProjectID, secretID, tagValue.GetName()); err != nil {
+		t.Fatal(err)
+	}
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
+	defer testCleanupSecret(t, secretName)
+
+	b.Reset()
+	if err := listTagBindings(&b, secretName); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), tagValue.GetName(); !strings.Contains(got, want) {
+		t.Errorf("listTagBindings: expected %q to contain %q", got, want)
+	}
+}
+
+func TestDetachTag(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	tagKey := testCreateTagKey(t, tc.ProjectID)
+	defer testCleanupTagKey(t, tagKey.GetName())
+	tagValue := testCreateTagValue(t, tagKey.GetName())
+	defer testCleanupTagValue(t, tagValue.GetName())
+
+	secretID := testName(t)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID)
+	defer testCleanupSecret(t, secretName)
+
+	var b bytes.Buffer
+	if err := bindTagsToSecret(&b, tc.ProjectID, secretID, tagValue.GetName()); err != nil {
+		t.Fatal(err)
+	}
+
+	b.Reset()
+	if err := detachTag(&b, secretName, tagValue.GetName()); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := b.String(), "Detached tag value"; !strings.Contains(got, want) {
+		t.Errorf("detachTag: expected %q to contain %q", got, want)
+	}
+
+	b.Reset()
+	if err := listTagBindings(&b, secretName); err != nil {
+		t.Fatal(err)
+	}
+	if got, dontwant := b.String(), tagValue.GetName(); strings.Contains(got, dontwant) {
+		t.Errorf("listTagBindings after detach: expected %q not to contain %q", got, dontwant)
+	}
+}
+
+func TestDeleteSecretAnnotation(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+	annotationKey := "annotationkey"
+
+	var b bytes.Buffer
+
+	if err := deleteSecretAnnotation(&b, secret.Name); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Deleted annotation"; !strings.Contains(got, want) {
+		t.Errorf("deleteSecretAnnotation: expected %q to contain %q", got, want)
+	}
+
+	client, ctx := testClient(t)
+	s, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: secret.Name,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, ok := s.Annotations[annotationKey]; ok {
+		t.Errorf("deleteSecretAnnotation: key %q still present after deletion", annotationKey)
+	}
 }
