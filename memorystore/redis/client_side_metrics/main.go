@@ -27,7 +27,6 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
-	_"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 
 	gcpmetric "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 	gcptrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
