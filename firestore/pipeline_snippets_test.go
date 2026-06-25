@@ -44,6 +44,13 @@ func TestPipelineSnippets(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 
+	t.Run("pipelineInitialization", func(t *testing.T) {
+		buf.Reset()
+		if err := pipelineInitialization(buf, projectID, databaseID); err != nil {
+			t.Errorf("pipelineInitialization failed: %v", err)
+		}
+	})
+
 	t.Run("pipelineConcepts", func(t *testing.T) {
 		buf.Reset()
 		if err := pipelineConcepts(buf, client); err != nil {
