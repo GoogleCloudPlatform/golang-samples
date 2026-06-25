@@ -15,7 +15,7 @@
 // Package content_cache shows examples of using content caching with the GenAI SDK.
 package content_cache
 
-// [START googlegenaisdk_contentcache_get]
+// [START aiplatform_genai_contentcache_get]
 import (
 	"context"
 	"fmt"
@@ -71,4 +71,4 @@ func getContentCache(w io.Writer, contentName string) error {
 	return nil
 }
 
-// [END googlegenaisdk_contentcache_get]
+// [END aiplatform_genai_contentcache_get]
