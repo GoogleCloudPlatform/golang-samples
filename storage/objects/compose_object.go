@@ -17,7 +17,6 @@ package objects
 // [START storage_compose_file]
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"time"
@@ -49,22 +48,14 @@ func composeFile(w io.Writer, bucket, object1, object2, toObject string, deleteS
 
 	// ComposerFrom takes varargs, so you can put as many objects here
 	// as you want.
-	_, err = dst.ComposerFrom(src1, src2).Run(ctx)
+	composer := dst.ComposerFrom(src1, src2)
+	composer.DeleteSourceObjects = deleteSourceObjects
+	_, err = composer.Run(ctx)
 	if err != nil {
 		return fmt.Errorf("ComposerFrom: %w", err)
 	}
 
 	if deleteSourceObjects {
-		var errs []error
-		if err := src1.Delete(ctx); err != nil {
-			errs = append(errs, fmt.Errorf("src1.Delete: %w", err))
-		}
-		if err := src2.Delete(ctx); err != nil {
-			errs = append(errs, fmt.Errorf("src2.Delete: %w", err))
-		}
-		if len(errs) > 0 {
-			return fmt.Errorf("delete source objects: %w", errors.Join(errs...))
-		}
 		fmt.Fprintf(w, "New composite object %v was created by combining %v and %v and source objects were deleted\n", toObject, object1, object2)
 	} else {
 		fmt.Fprintf(w, "New composite object %v was created by combining %v and %v\n", toObject, object1, object2)
