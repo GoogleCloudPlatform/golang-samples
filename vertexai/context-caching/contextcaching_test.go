@@ -28,6 +28,7 @@ import (
 // TestContextCaching tests createContextCache, getContextCache, useContextCache,
 // updateContextCache, deleteContextCache.
 func TestContextCaching(t *testing.T) {
+	t.Skip("Skipped while waiting to decommission vertexai")
 	tc := testutil.SystemTest(t)
 
 	buf := new(bytes.Buffer)
