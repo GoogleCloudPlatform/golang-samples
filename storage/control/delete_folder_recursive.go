@@ -33,7 +33,7 @@ func deleteFolderRecursive(w io.Writer, bucket, folder string) error {
 	ctx := context.Background()
 	client, err := control.NewStorageControlClient(ctx)
 	if err != nil {
-		return fmt.Errorf("control.NewStorageControlClient: %w", err)
+		return fmt.Errorf("NewStorageControlClient: %w", err)
 	}
 	defer client.Close()
 
