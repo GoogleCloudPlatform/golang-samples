@@ -275,8 +275,9 @@ func TestDeleteFolderRecursive(t *testing.T) {
 	if err := deleteFolderRecursive(buf, bucketName, parentFolderName); err != nil {
 		t.Fatalf("deleteFolderRecursive: %v", err)
 	}
-	if got, want := buf.String(), parentFolderPath; !strings.Contains(got, want) {
-		t.Errorf("deleteFolderRecursive: got %q, want to contain %q", got, want)
+	want := fmt.Sprintf("deleted folder %q recursively", parentFolderPath)
+	if got := buf.String(); got != want {
+		t.Errorf("deleteFolderRecursive: got %q, want %q", got, want)
 	}
 
 	// Verify folders are deleted.
@@ -284,5 +285,9 @@ func TestDeleteFolderRecursive(t *testing.T) {
 	// Verify that getting parent folder returns an error.
 	if err := getFolder(&bytes.Buffer{}, bucketName, parentFolderName); err == nil {
 		t.Errorf("getFolder(%q) succeeded, expected error", parentFolderName)
+	}
+	// Verify that getting child folder also returns an error.
+	if err := getFolder(&bytes.Buffer{}, bucketName, childFolderName); err == nil {
+		t.Errorf("getFolder(%q) succeeded, expected error", childFolderName)
 	}
 }
