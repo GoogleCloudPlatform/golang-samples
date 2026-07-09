@@ -41,6 +41,9 @@ var (
 	appBlockHist     metric.Float64Histogram
 	retryCounter     metric.Int64Counter
 	connErrorCounter metric.Int64Counter
+
+	// sleep hook enables lightning-fast unit tests by stubbing out real time.Sleep
+	sleep = time.Sleep
 )
 
 func initTelemetry(ctx context.Context) func() {
@@ -97,7 +100,10 @@ func smartRedisCall(ctx context.Context, pool *redis.Pool, operationName string,
 			retryCounter.Add(ctx, 1, metricOpts)
 			span.RecordError(err) // Attach error to trace
 			attempt++
-			time.Sleep(time.Duration(100<<attempt) * time.Millisecond)
+			if attempt >= maxRetries {
+				break
+			}
+			sleep(time.Duration(100<<attempt) * time.Millisecond)
 			continue
 		}
 
@@ -110,7 +116,10 @@ func smartRedisCall(ctx context.Context, pool *redis.Pool, operationName string,
 			retryCounter.Add(ctx, 1, metricOpts)
 			span.RecordError(err) // Attach error to trace
 			attempt++
-			time.Sleep(time.Duration(100<<attempt) * time.Millisecond)
+			if attempt >= maxRetries {
+				break
+			}
+			sleep(time.Duration(100<<attempt) * time.Millisecond)
 			continue
 		}
 
