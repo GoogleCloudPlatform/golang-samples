@@ -10,7 +10,21 @@ receivers:
     include:
     - "/var/log/app.log"
     operators:
+      - type: router
+        id: log_router
+        routes:
+          - expr: 'body matches "^\\{"'
+            output: json_parser
+        default: bypass_non_json
+
+      - type: add
+        id: bypass_non_json
+        field: attributes.is_json
+        value: false
+        output: end_of_pipeline
+
       - type: json_parser
+        id: json_parser
         parse_to: body
         timestamp:
           parse_from: body.timestamp
@@ -29,47 +43,76 @@ receivers:
             fatal: critical
             fatal3: alert
             fatal4: emergency
+        output: check_trace_context
+
+      # Check if the parsed JSON actually contains trace context before extracting
+      - type: router
+        id: check_trace_context
+        routes:
+          - expr: '"logging.googleapis.com/trace" in body'
+            output: add_trace_flags
+        default: end_of_pipeline
 
       # set trace_flags to SAMPLED if GCP attribute is set to true
       - type: add
+        id: add_trace_flags
         field: body.trace_flags
         value: "01"
         if: body["logging.googleapis.com/trace_sampled"] == true
+        output: regex_parser
 
       # parse the trace context fields from GCP attributes
       - type: regex_parser
+        id: regex_parser
         parse_from: body["logging.googleapis.com/trace"]
         parse_to: body
         regex: (?P<trace_id>.*)
         trace:
           span_id:
             parse_from: body["logging.googleapis.com/spanId"]
+        output: remove_timestamp
 
       # Remove fields that are redundant from translation above
       - type: remove
+        id: remove_timestamp
         field: body.timestamp
+
       - type: remove
+        id: remove_trace_id
         field: body.trace_id
+
       - type: remove
+        id: remove_trace_flags
         field: body.trace_flags
+
       - type: remove
+        id: remove_severity
         field: body.severity
+
       - type: remove
+        id: remove_gcp_trace
         field: body["logging.googleapis.com/trace"]
+
       - type: remove
+        id: remove_gcp_spanid
         field: body["logging.googleapis.com/spanId"]
+
       - type: remove
+        id: remove_gcp_trace_sampled
         field: body["logging.googleapis.com/trace_sampled"]
 
+      - type: add
+        id: end_of_pipeline
+        field: attributes.processed_by_collector
+        value: true
+
 exporters:
-  # Export logs and traces using the standard googelcloud exporter
+  # Export logs using the standard googlecloud exporter
   googlecloud:
     project: ${GOOGLE_CLOUD_PROJECT}
     log:
       default_log_name: "opentelemetry.io/collector-exported-log"
-  # Export metrics to Google Managed service for Prometheus
-  googlemanagedprometheus:
-    project: ${GOOGLE_CLOUD_PROJECT}
+  # Export telemetry using standard OTLP HTTP exporter to Google Cloud
   otlphttp:
     encoding: proto
     endpoint: https://telemetry.googleapis.com
@@ -95,7 +138,8 @@ processors:
       - { key: "cluster", value: "no-cluster", action: "upsert" }
       - { key: "namespace", value: "no-namespace", action: "upsert" }
       - { key: "job", value: "us-job", action: "upsert" }
-      - { key: "instance", value: "us-instance", action: "upsert" }
+      - { key: "instance", from_attribute: "service.instance.id", action: "upsert" }
+      - { key: "instance", value: "us-instance", action: "insert" }
   # If running on GCP (e.g. on GKE), detect resource attributes from the environment.
   resourcedetection:
     detectors: ["env", "gcp"]
@@ -118,12 +162,12 @@ service:
   pipelines:
     traces:
       receivers: ["otlp"]
-      processors: ["batch", "resourcedetection", resource/gcp_project_id]
+      processors: ["batch", "resourcedetection", "resource/gcp_project_id"]
       exporters: ["otlphttp"]
     metrics:
       receivers: ["otlp"]
-      processors: ["batch", "resourcedetection", "resource"]
-      exporters: ["googlemanagedprometheus"]
+      processors: ["batch", "resourcedetection", "resource/gcp_project_id", "resource"]
+      exporters: ["otlphttp"]
     logs:
       receivers: ["filelog"]
       processors: ["batch", "resourcedetection"]
