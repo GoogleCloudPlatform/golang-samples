@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,187 +26,168 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
-	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/trace"
+
+	gcpmetric "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
+	gcptrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"go.opentelemetry.io/otel/trace"
 )
 
-// MetricClient encapsulates OpenTelemetry handlers and the Redis connection pool
+// MetricClient holds the tracer and metric instruments used to record Redis telemetry.
 type MetricClient struct {
-	Tracer           trace.Tracer
-	RTTBridge        metric.Float64Histogram
-	ClientBlockBridge metric.Float64Histogram
-	AppBlockBridge    metric.Float64Histogram
-	RetryCounter     metric.Int64Counter
-	ConnErrorCounter metric.Int64Counter
-	Pool             *redis.Pool
+	tracer           trace.Tracer
+	rttHist          metric.Float64Histogram
+	clientBlockHist  metric.Float64Histogram
+	appBlockHist     metric.Float64Histogram
+	retryCounter     metric.Int64Counter
+	connErrorCounter metric.Int64Counter
 }
 
-// sinceMs calculates elapsed time in fractional milliseconds to preserve sub-millisecond measurements.
+// sleep hook enables lightning-fast unit tests by stubbing out real time.Sleep
+var sleep = time.Sleep
+
+// sinceMs calculates the time elapsed since the given start time
+// and returns it in fractional milliseconds (e.g., 1.5ms).
 func sinceMs(start time.Time) float64 {
 	return float64(time.Since(start).Microseconds()) / 1000.0
 }
 
-func initTelemetry(ctx context.Context) (*MetricClient, *sdktrace.TracerProvider, *sdkmetric.MeterProvider, error) {
-	// 1. Setup Tracing
-	traceExporter, err := stdouttrace.New(stdouttrace.WithPrettyPrint())
+func initTelemetry(ctx context.Context) (*MetricClient, func()) {
+	traceExporter, err := gcptrace.New()
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to create trace exporter: %w", err)
+		log.Fatalf("Failed to create trace exporter: %v", err)
 	}
-
-	tp := sdktrace.NewTracerProvider(
-		sdktrace.WithBatcher(traceExporter),
-	)
+	tp := sdktrace.NewTracerProvider(sdktrace.WithBatcher(traceExporter))
 	otel.SetTracerProvider(tp)
-	tracer := otel.Tracer("redis.client")
 
-	// 2. Setup Metrics
-	metricExporter, err := stdoutmetric.New(stdoutmetric.WithPrettyPrint())
+	metricExporter, err := gcpmetric.New()
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to create metric exporter: %w", err)
+		log.Fatalf("Failed to create metric exporter: %v", err)
 	}
-
-	mp := sdkmetric.NewMeterProvider(
-		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(metricExporter, sdkmetric.WithInterval(10*time.Second))),
-	)
+	mp := sdkmetric.NewMeterProvider(sdkmetric.WithReader(sdkmetric.NewPeriodicReader(metricExporter, sdkmetric.WithInterval(10*time.Second))))
 	otel.SetMeterProvider(mp)
 	meter := mp.Meter("redigo.metrics")
 
 	rttHist, err := meter.Float64Histogram("redis_client_rtt", metric.WithUnit("ms"))
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to create rttHist: %w", err)
+		log.Fatalf("Failed to create rttHist: %v", err)
 	}
-
 	clientBlockHist, err := meter.Float64Histogram("redis_client_blocking_latency", metric.WithUnit("ms"))
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to create clientBlockHist: %w", err)
+		log.Fatalf("Failed to create clientBlockHist: %v", err)
 	}
-
 	appBlockHist, err := meter.Float64Histogram("redis_application_blocking_latency", metric.WithUnit("ms"))
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to create appBlockHist: %w", err)
+		log.Fatalf("Failed to create appBlockHist: %v", err)
 	}
-
 	retryCounter, err := meter.Int64Counter("redis_retry_count")
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to create retryCounter: %w", err)
+		log.Fatalf("Failed to create retryCounter: %v", err)
 	}
-
 	connErrorCounter, err := meter.Int64Counter("redis_connectivity_error_count")
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to create connErrorCounter: %w", err)
+		log.Fatalf("Failed to create connErrorCounter: %v", err)
 	}
-
-	metricOpts := metric.WithAttributes(attribute.String("operation", "startup"))
-	retryCounter.Add(ctx, 0, metricOpts)
-	connErrorCounter.Add(ctx, 0, metricOpts)
 
 	client := &MetricClient{
-		Tracer:           tracer,
-		RTTBridge:        rttHist,
-		ClientBlockBridge: clientBlockHist,
-		AppBlockBridge:    appBlockHist,
-		RetryCounter:     retryCounter,
-		ConnErrorCounter: connErrorCounter,
+		tracer:           tp.Tracer("redigo.client"),
+		rttHist:          rttHist,
+		clientBlockHist:  clientBlockHist,
+		appBlockHist:     appBlockHist,
+		retryCounter:     retryCounter,
+		connErrorCounter: connErrorCounter,
 	}
 
-	return client, tp, mp, nil
-}
+	initAttrs := metric.WithAttributes(attribute.String("operation", "startup"))
+	client.retryCounter.Add(ctx, 0, initAttrs)
+	client.connErrorCounter.Add(ctx, 0, initAttrs)
 
-func initRedisPool() *redis.Pool {
-	redisHost := os.Getenv("REDISHOST")
-	if redisHost == "" {
-		redisHost = "localhost"
-	}
-	redisPort := os.Getenv("REDISPORT")
-	if redisPort == "" {
-		redisPort = "6379"
-	}
-
-	return &redis.Pool{
-		MaxIdle:     10,
-		IdleTimeout: 240 * time.Second,
-		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp", fmt.Sprintf("%s:%s", redisHost, redisPort))
-		},
+	return client, func() {
+		tp.Shutdown(ctx)
+		mp.Shutdown(ctx)
 	}
 }
 
-func (c *MetricClient) smartRedisCall(ctx context.Context, operationName string, pool *redis.Pool, commandName string, args ...interface{}) (interface{}, error) {
+func (c *MetricClient) smartRedisCall(ctx context.Context, pool *redis.Pool, operationName string, commandName string, args ...interface{}) (interface{}, error) {
+	// Create a dedicated child span for the Redis command
+	ctx, span := c.tracer.Start(ctx, operationName)
+	span.SetAttributes(attribute.String("redis.command", commandName))
+	defer span.End()
+
 	maxRetries := 3
 	attempt := 0
 	metricOpts := metric.WithAttributes(attribute.String("operation", operationName))
 	var lastErr error
 
-	span := trace.SpanFromContext(ctx)
-
 	for attempt < maxRetries {
 		poolStart := time.Now()
-		// Get connection using context to avoid blocking indefinitely
+		// Use GetContext so we respect the caller's deadline instead of blocking indefinitely.
 		conn, err := pool.GetContext(ctx)
-		c.ClientBlockBridge.Record(ctx, sinceMs(poolStart), metricOpts)
+		c.clientBlockHist.Record(ctx, sinceMs(poolStart), metricOpts)
 
 		if err != nil {
-			c.ConnErrorCounter.Add(ctx, 1, metricOpts)
-			c.RetryCounter.Add(ctx, 1, metricOpts)
-			span.RecordError(err)
-			span.SetStatus(codes.Error, err.Error())
+			c.connErrorCounter.Add(ctx, 1, metricOpts)
+			c.retryCounter.Add(ctx, 1, metricOpts)
+			span.RecordError(err)                    // Attach error to trace
+			span.SetStatus(codes.Error, err.Error()) // Set span status
 			lastErr = err
 			attempt++
 			if attempt >= maxRetries {
 				break
 			}
-			time.Sleep(time.Duration(attempt) * 100 * time.Millisecond)
+			sleep(time.Duration(100<<attempt) * time.Millisecond)
 			continue
 		}
 
 		// Check if the connection is dead
 		if err := conn.Err(); err != nil {
 			conn.Close()
-			c.ConnErrorCounter.Add(ctx, 1, metricOpts)
-			c.RetryCounter.Add(ctx, 1, metricOpts)
-			span.RecordError(err)
-			span.SetStatus(codes.Error, err.Error())
+			c.connErrorCounter.Add(ctx, 1, metricOpts)
+			c.retryCounter.Add(ctx, 1, metricOpts)
+			span.RecordError(err)                    // Attach error to trace
+			span.SetStatus(codes.Error, err.Error()) // Set span status
 			lastErr = err
 			attempt++
 			if attempt >= maxRetries {
 				break
 			}
-			time.Sleep(time.Duration(attempt) * 100 * time.Millisecond)
+			sleep(time.Duration(100<<attempt) * time.Millisecond)
 			continue
 		}
 
 		reqStart := time.Now()
-		reply, err := conn.Do(commandName, args...)
-		c.RTTBridge.Record(ctx, sinceMs(reqStart), metricOpts)
+		// redigo has no DoContext; honor the context deadline via DoWithTimeout when present.
+		var reply interface{}
+		if deadline, ok := ctx.Deadline(); ok {
+			reply, err = redis.DoWithTimeout(conn, time.Until(deadline), commandName, args...)
+		} else {
+			reply, err = conn.Do(commandName, args...)
+		}
+		c.rttHist.Record(ctx, sinceMs(reqStart), metricOpts)
+		conn.Close()
 
 		if err != nil {
-			conn.Close()
-			c.ConnErrorCounter.Add(ctx, 1, metricOpts)
-			c.RetryCounter.Add(ctx, 1, metricOpts)
-			span.RecordError(err)
-			span.SetStatus(codes.Error, err.Error())
+			c.retryCounter.Add(ctx, 1, metricOpts)
+			span.RecordError(err)                    // Attach error to trace
+			span.SetStatus(codes.Error, err.Error()) // Set span status
 			lastErr = err
 			attempt++
 			if attempt >= maxRetries {
 				break
 			}
-			time.Sleep(time.Duration(attempt) * 100 * time.Millisecond)
+			sleep(time.Duration(100<<attempt) * time.Millisecond)
 			continue
 		}
 
 		appStart := time.Now()
-		// Simulate application processing overhead (replacing FMT formatting)
 		time.Sleep(2 * time.Millisecond)
-		c.AppBlockBridge.Record(ctx, sinceMs(appStart), metricOpts)
+		c.appBlockHist.Record(ctx, sinceMs(appStart), metricOpts)
 
-		// Reset span status to Ok if the operation eventually succeeds
+		// Reset span status to Ok if a retry eventually succeeds
 		span.SetStatus(codes.Ok, "")
 
-		conn.Close()
 		return reply, nil
 	}
 	return nil, fmt.Errorf("max retries reached for %s: %w", operationName, lastErr)
@@ -214,34 +195,41 @@ func (c *MetricClient) smartRedisCall(ctx context.Context, operationName string,
 
 func main() {
 	ctx := context.Background()
-	client, tp, mp, err := initTelemetry(ctx)
-	if err != nil {
-		log.Fatalf("Failed to initialize telemetry: %v", err)
-	}
-	defer tp.Shutdown(ctx)
-	defer mp.Shutdown(ctx)
+	client, shutdown := initTelemetry(ctx)
+	defer shutdown()
 
-	pool := initRedisPool()
+	redisHost := os.Getenv("REDISHOST")
+	redisPort := os.Getenv("REDISPORT")
+	if redisPort == "" {
+		redisPort = "6379"
+	}
+
+	pool := &redis.Pool{
+		MaxIdle:     10,
+		MaxActive:   20,
+		IdleTimeout: 240 * time.Second,
+		Wait:        true,
+		Dial: func() (redis.Conn, error) {
+			return redis.Dial("tcp", fmt.Sprintf("%s:%s", redisHost, redisPort))
+		},
+	}
 	defer pool.Close()
 
-	if client.Tracer != nil {
-		var span trace.Span
-		ctx, span = client.Tracer.Start(ctx, "process_user_span")
-		defer span.End()
+	ctx, span := client.tracer.Start(ctx, "fetch_data_span")
+	defer span.End()
 
-		trySet, err := client.smartRedisCall(ctx, "set_user", pool, "SET", "user:123", "active")
-		if err != nil {
-			fmt.Printf("Error setting key: %v\n", err)
-		} else {
-			fmt.Printf("Set Response: %v\n", trySet)
-		}
+	// Simple write and read operations
+	_, err := client.smartRedisCall(ctx, pool, "set_user", "SET", "user:123", "active")
+	if err != nil {
+		log.Printf("Error setting data: %v", err)
+	}
 
-		result, err := client.smartRedisCall(ctx, "get_user", pool, "GET", "user:123")
-		if err != nil {
-			fmt.Printf("Error getting key: %v\n", err)
-		} else {
-			fmt.Printf("Retrieved: %v\n", result)
-		}
+	val, err := client.smartRedisCall(ctx, pool, "get_user", "GET", "user:123")
+	if err != nil {
+		log.Printf("Error fetching data: %v", err)
+	} else {
+		log.Printf("Retrieved value: %s", val)
 	}
 }
+
 // [END memorystore_redis_client_side_metrics]
