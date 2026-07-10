@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     https://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,29 +16,26 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/trace"
+	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
-// mockRedisConn is a dependency-free fake implementing the redis.Conn interface
 type mockRedisConn struct {
-	data           map[string]interface{}
-	errOnDo        error
-	errOnDoCount   int
-	errOnErr       error
-	errOnErrCount  int
-	errOnDial      error
-	errOnDialCount int
-	closeCalls     int
-	doCalls        int
-	dialCalls      int
+	dialCalls     int
+	doCalls       int
+	closeCalls    int
+	activeConnErr error // Sticky connection error for the active socket lifecycle
+	doErrs        []error
+	doReplies     []interface{}
+	doRepliesIdx  int
+	doErrsIdx     int
 }
 
 func (m *mockRedisConn) Close() error {
@@ -47,187 +44,217 @@ func (m *mockRedisConn) Close() error {
 }
 
 func (m *mockRedisConn) Err() error {
-	if m.errOnErrCount > 0 {
-		m.errOnErrCount--
-		return m.errOnErr
-	}
-	return nil
+	return m.activeConnErr
 }
 
 func (m *mockRedisConn) Do(commandName string, args ...interface{}) (interface{}, error) {
-	// Ignore Redigo's internal Close() sentinel to keep test counters accurate
+	// Ignore the internal Redigo pool Close sentinel command
 	if commandName == "" {
 		return nil, nil
 	}
 
 	m.doCalls++
-	if m.errOnDoCount > 0 {
-		m.errOnDoCount--
-		return nil, m.errOnDo
-	}
-
-	if commandName == "SET" && len(args) >= 2 {
-		key := fmt.Sprintf("%v", args[0])
-		val := args[1]
-		if m.data == nil {
-			m.data = make(map[string]interface{})
+	if m.doErrsIdx < len(m.doErrs) {
+		err := m.doErrs[m.doErrsIdx]
+		m.doErrsIdx++
+		if err != nil {
+			return nil, err
 		}
-		m.data[key] = val
-		return "OK", nil
+	}
+	if m.doRepliesIdx < len(m.doReplies) {
+		reply := m.doReplies[m.doRepliesIdx]
+		m.doRepliesIdx++
+		return reply, nil
+	}
+	return "OK", nil
+}
+
+func (m *mockRedisConn) Send(commandName string, args ...interface{}) error { return nil }
+func (m *mockRedisConn) Flush() error                                       { return nil }
+func (m *mockRedisConn) Receive() (interface{}, error)                      { return nil, nil }
+
+func setupTestTelemetry(t *testing.T) (*MetricClient, func()) {
+	ctx := context.Background()
+	tp := sdktrace.NewTracerProvider()
+	otel.SetTracerProvider(tp)
+	tracer := otel.Tracer("redis.test")
+
+	mp := sdkmetric.NewMeterProvider()
+	otel.SetMeterProvider(mp)
+	meter := mp.Meter("redigo.test")
+
+	rttHist, _ := meter.Float64Histogram("redis_client_rtt")
+	clientBlockHist, _ := meter.Float64Histogram("redis_client_blocking_latency")
+	appBlockHist, _ := meter.Float64Histogram("redis_application_blocking_latency")
+	retryCounter, _ := meter.Int64Counter("redis_retry_count")
+	connErrorCounter, _ := meter.Int64Counter("redis_connectivity_error_count")
+
+	metricClient := &MetricClient{
+		Tracer:           tracer,
+		RTTBridge:        rttHist,
+		ClientBlockBridge: clientBlockHist,
+		AppBlockBridge:    appBlockHist,
+		RetryCounter:     retryCounter,
+		ConnErrorCounter: connErrorCounter,
 	}
 
-	if commandName == "GET" && len(args) >= 1 {
-		key := fmt.Sprintf("%v", args[0])
-		val, ok := m.data[key]
-		if !ok {
-			return nil, nil
-		}
-		return val, nil
+	cleanup := func() {
+		tp.Shutdown(ctx)
+		mp.Shutdown(ctx)
 	}
 
-	return nil, nil
+	return metricClient, cleanup
 }
 
-func (m *mockRedisConn) Send(commandName string, args ...interface{}) error {
-	return nil
-}
+func TestSmartRedisCallTable(t *testing.T) {
+	client, cleanup := setupTestTelemetry(t)
+	defer cleanup()
 
-func (m *mockRedisConn) Flush() error {
-	return nil
-}
-
-func (m *mockRedisConn) Receive() (interface{}, error) {
-	return nil, nil
-}
-
-// initTestTelemetry safely binds package-level OTel globals to hermetic No-op implementations
-func initTestTelemetry() {
-	tp := trace.NewNoopTracerProvider()
-	tracer = tp.Tracer("noop")
-
-	meter := otel.GetMeterProvider().Meter("noop")
-	rttHist, _ = meter.Float64Histogram("redis_client_rtt", metric.WithUnit("ms"))
-	clientBlockHist, _ = meter.Float64Histogram("redis_client_blocking_latency", metric.WithUnit("ms"))
-	appBlockHist, _ = meter.Float64Histogram("redis_application_blocking_latency", metric.WithUnit("ms"))
-	retryCounter, _ = meter.Int64Counter("redis_retry_count")
-	connErrorCounter, _ = meter.Int64Counter("redis_connectivity_error_count")
-
-	// Disable sleeping during unit tests to make the test suite lightning fast
-	sleep = func(d time.Duration) {}
-}
-
-func TestSmartRedisCall_Success(t *testing.T) {
-	initTestTelemetry()
-
-	sharedConn := &mockRedisConn{
-		data: make(map[string]interface{}),
-	}
-
-	pool := &redis.Pool{
-		MaxIdle: 1, // Redigo will pool and reuse this connection
-		Dial: func() (redis.Conn, error) {
-			sharedConn.dialCalls++
-			return sharedConn, nil
+	tests := []struct {
+		name            string
+		operation       string
+		command         string
+		args            []interface{}
+		dialErrs        []error
+		connErrs        []error
+		doErrs          []error
+		doReplies       []interface{}
+		expectErr       bool
+		expectedErrSub  string
+		expectedDials   int
+		expectedCloses  int
+		expectedDoCalls int
+		expectedVal     interface{}
+	}{
+		{
+			name:            "Success_SET_GET",
+			operation:       "set_user",
+			command:         "SET",
+			args:            []interface{}{"user:123", "active"},
+			dialErrs:        nil,
+			connErrs:        nil,
+			doErrs:          []error{nil},
+			doReplies:       []interface{}{"OK"},
+			expectErr:       false,
+			expectedDials:   1,
+			expectedCloses:  0, // Recycled to pool, no TCP socket close called
+			expectedDoCalls: 1,
+			expectedVal:     "OK",
+		},
+		{
+			name:      "RetryOnDialError_ThenSuccess",
+			operation: "get_user",
+			command:   "GET",
+			args:      []interface{}{"user:123"},
+			dialErrs: []error{
+				fmt.Errorf("connection refused attempt 1"),
+				nil,
+			},
+			connErrs:        nil,
+			doErrs:          []error{nil},
+			doReplies:       []interface{}{"active"},
+			expectErr:       false,
+			expectedDials:   2,
+			expectedCloses:  0, // Recycled to pool upon success
+			expectedDoCalls: 1,
+			expectedVal:     "active",
+		},
+		{
+			name:      "RetryOnStaleConn_ThenSuccess",
+			operation: "get_user",
+			command:   "GET",
+			args:      []interface{}{"user:123"},
+			dialErrs:  nil,
+			connErrs: []error{
+				fmt.Errorf("stale socket read error attempt 1"),
+				nil,
+			},
+			doErrs:          []error{nil},
+			doReplies:       []interface{}{"active"},
+			expectErr:       false,
+			expectedDials:   2,
+			expectedCloses:  1, // 1 for the dead pool checkout (destroyed!), 0 for the final success (recycled)
+			expectedDoCalls: 1,
+			expectedVal:     "active",
+		},
+		{
+			name:      "PermanentFailure_AfterMaxRetries",
+			operation: "set_user",
+			command:   "SET",
+			args:      []interface{}{"user:123", "active"},
+			dialErrs: []error{
+				fmt.Errorf("redis cluster offline A"),
+				fmt.Errorf("redis cluster offline B"),
+				fmt.Errorf("redis cluster offline C"),
+			},
+			connErrs:        nil,
+			doErrs:          nil,
+			expectErr:       true,
+			expectedErrSub:  "max retries reached for set_user",
+			expectedDials:   3,
+			expectedCloses:  0, // Dial failures mean GetContext returns nil (no TCP sockets to close)
+			expectedDoCalls: 0,
 		},
 	}
-	defer pool.Close()
 
-	ctx := context.Background()
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := context.Background()
 
-	// 1. Test SET
-	setReply, err := smartRedisCall(ctx, pool, "set_user", "SET", "user:123", "active")
-	if err != nil {
-		t.Fatalf("smartRedisCall SET failed: %v", err)
-	}
-	if s, ok := setReply.(string); !ok || s != "OK" {
-		t.Errorf("SET reply got %v, want 'OK'", setReply)
-	}
+			sharedConn := &mockRedisConn{
+				doErrs:    tc.doErrs,
+				doReplies: tc.doReplies,
+			}
 
-	// 2. Test GET
-	getReply, err := smartRedisCall(ctx, pool, "get_user", "GET", "user:123")
-	if err != nil {
-		t.Fatalf("smartRedisCall GET failed: %v", err)
-	}
-	if s, ok := getReply.(string); !ok || s != "active" {
-		t.Errorf("GET reply got %v, want 'active'", getReply)
-	}
+			pool := &redis.Pool{
+				MaxIdle:     10,
+				IdleTimeout: 240 * time.Second,
+				Dial: func() (redis.Conn, error) {
+					sharedConn.dialCalls++
+					if sharedConn.dialCalls <= len(tc.dialErrs) {
+						err := tc.dialErrs[sharedConn.dialCalls-1]
+						if err != nil {
+							return nil, err
+						}
+					}
+					// Update the sticky active connection error for this socket's lifecycle
+					if sharedConn.dialCalls <= len(tc.connErrs) {
+						sharedConn.activeConnErr = tc.connErrs[sharedConn.dialCalls-1]
+					} else {
+						sharedConn.activeConnErr = nil
+					}
+					return sharedConn, nil
+				},
+			}
 
-	// Adjusted for Redigo pooling: 1 Dial since the GET reuses the SET's idle connection
-	if sharedConn.dialCalls != 1 {
-		t.Errorf("expected 1 Dial call (connection reuse), got %d", sharedConn.dialCalls)
-	}
-	// Pool intercept means Close is deferred until pool.Close()
-	if sharedConn.closeCalls != 0 {
-		t.Errorf("expected 0 Close calls on the underlying mock during runtime, got %d", sharedConn.closeCalls)
-	}
-}
+			val, err := client.smartRedisCall(ctx, tc.operation, pool, tc.command, tc.args...)
 
-func TestSmartRedisCall_RetryOnConnError(t *testing.T) {
-	initTestTelemetry()
+			if tc.expectErr {
+				if err == nil {
+					t.Errorf("%s: expected a permanent failure error but it returned nil", tc.name)
+				} else if !strings.Contains(err.Error(), tc.expectedErrSub) {
+					t.Errorf("%s: expected error to contain '%s', got '%v'", tc.name, tc.expectedErrSub, err)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("%s: unexpected error: %v", tc.name, err)
+				}
+				if val != tc.expectedVal {
+					t.Errorf("%s: expected value %v, got %v", tc.name, tc.expectedVal, val)
+				}
+			}
 
-	sharedConn := &mockRedisConn{
-		data: make(map[string]interface{}),
-		// Force the FIRST conn.Err() call to fail, subsequent calls to succeed
-		errOnErr:      errors.New("connection reset by peer"),
-		errOnErrCount: 1,
-	}
+			if sharedConn.dialCalls != tc.expectedDials {
+				t.Errorf("%s: expected %d Dial attempts, got %d", tc.name, tc.expectedDials, sharedConn.dialCalls)
+			}
 
-	pool := &redis.Pool{
-		MaxIdle: 0, // Disable pooling to accurately track dial/close attempts per retry
-		Dial: func() (redis.Conn, error) {
-			sharedConn.dialCalls++
-			return sharedConn, nil
-		},
-	}
-	defer pool.Close()
+			if sharedConn.doCalls != tc.expectedDoCalls {
+				t.Errorf("%s: expected %d Do calls, got %d", tc.name, tc.expectedDoCalls, sharedConn.doCalls)
+			}
 
-	ctx := context.Background()
-
-	// Configure expected SET response
-	sharedConn.data["user:123"] = "active"
-
-	// Call GET which should trigger the retry logic upon seeing the conn.Err()
-	getReply, err := smartRedisCall(ctx, pool, "get_user", "GET", "user:123")
-	if err != nil {
-		t.Fatalf("smartRedisCall GET failed on retry: %v", err)
-	}
-	if s, ok := getReply.(string); !ok || s != "active" {
-		t.Errorf("GET reply got %v, want 'active'", getReply)
-	}
-
-	t.Logf("RetryOnConnError: dialCalls=%d, closeCalls=%d", sharedConn.dialCalls, sharedConn.closeCalls)
-}
-
-func TestSmartRedisCall_PermanentFailure(t *testing.T) {
-	initTestTelemetry()
-
-	sharedConn := &mockRedisConn{
-		errOnDo:      errors.New("Redis cluster unavailable permanently"),
-		errOnDoCount: 3, // Force all 3 retries to fail
-	}
-
-	pool := &redis.Pool{
-		MaxIdle: 0, // Disable pooling to avoid reuse during retries
-		Dial: func() (redis.Conn, error) {
-			sharedConn.dialCalls++
-			return sharedConn, nil
-		},
-	}
-	defer pool.Close()
-
-	ctx := context.Background()
-
-	reply, err := smartRedisCall(ctx, pool, "set_user", "SET", "user:123", "active")
-
-	// Print precise state to identify the root cause of the nil error
-	t.Logf("PermanentFailure Debug: reply=%v, err=%v, dialCalls=%d, doCalls=%d, remainingErrs=%d",
-		reply, err, sharedConn.dialCalls, sharedConn.doCalls, sharedConn.errOnDoCount)
-
-	if err == nil {
-		t.Error("expected smartRedisCall to return a permanent failure error but it returned nil")
-	}
-
-	if sharedConn.doCalls != 3 {
-		t.Errorf("expected 3 Do attempts before permanent failure, got %d", sharedConn.doCalls)
+			if sharedConn.closeCalls != tc.expectedCloses {
+				t.Errorf("%s: expected %d Close calls, got %d", tc.name, tc.expectedCloses, sharedConn.closeCalls)
+			}
+		})
 	}
 }
