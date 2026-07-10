@@ -38,7 +38,7 @@ func optimizeTours(projectID string) (*rpb.OptimizeToursResponse, error) {
 		Parent: "projects/" + projectID,
 		Model: &rpb.ShipmentModel{
 			Shipments: []*rpb.Shipment{
-				&rpb.Shipment{
+				{
 					Deliveries: []*rpb.Shipment_VisitRequest{
 						{ArrivalLocation: &latlng.LatLng{Latitude: 48.880942, Longitude: 2.323866}},
 					},
