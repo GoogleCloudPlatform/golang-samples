@@ -185,7 +185,7 @@ func (c *MetricClient) smartRedisCall(ctx context.Context, pool *redis.Pool, ope
 
 		appStart := time.Now()
 		// Replace fmt.Sprintf to remove unnecessary string formatting overhead
-		time.Sleep(2 * time.Millisecond)
+		sleep(2 * time.Millisecond)
 		c.appBlockHist.Record(ctx, sinceMs(appStart), metricOpts)
 
 		// Reset span status to Ok if the retry or execution eventually succeeds
