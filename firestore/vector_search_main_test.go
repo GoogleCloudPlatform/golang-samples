@@ -61,7 +61,7 @@ func vectorSearchSetup(t *testing.T) func() {
 
 	// Create indexes
 	indexFields := [][]*adminpb.Index_IndexField{
-		{
+		[]*adminpb.Index_IndexField{
 			{
 				FieldPath: vectorQueryFieldPath,
 				ValueMode: &adminpb.Index_IndexField_VectorConfig_{
@@ -75,7 +75,7 @@ func vectorSearchSetup(t *testing.T) func() {
 			},
 		},
 		// vector indexes required for vector search with prefilter
-		{
+		[]*adminpb.Index_IndexField{
 			{
 				FieldPath: "color",
 				ValueMode: &adminpb.Index_IndexField_Order_{

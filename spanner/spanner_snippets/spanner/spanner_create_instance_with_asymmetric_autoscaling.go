@@ -63,17 +63,17 @@ func createInstanceWithAsymmetricAutoscalingConfig(w io.Writer, projectID, insta
 				// Read-only replicas in europe-west1, europe-west4, and asia-east1 are autoscaled
 				// independly from other replicas based on the usage in the respective region.
 				AsymmetricAutoscalingOptions: []*instancepb.AutoscalingConfig_AsymmetricAutoscalingOption{
-					{
+					&instancepb.AutoscalingConfig_AsymmetricAutoscalingOption{
 						ReplicaSelection: &instancepb.ReplicaSelection{
 							Location: "europe-west1",
 						},
 					},
-					{
+					&instancepb.AutoscalingConfig_AsymmetricAutoscalingOption{
 						ReplicaSelection: &instancepb.ReplicaSelection{
 							Location: "europe-west4",
 						},
 					},
-					{
+					&instancepb.AutoscalingConfig_AsymmetricAutoscalingOption{
 						ReplicaSelection: &instancepb.ReplicaSelection{
 							Location: "asia-east1",
 						},
