@@ -19,6 +19,7 @@ package tools
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 
@@ -71,8 +72,7 @@ func generateWithFuncCallConfig(w io.Writer) error {
 		},
 		ToolConfig: &genai.ToolConfig{
 			FunctionCallingConfig: &genai.FunctionCallingConfig{
-				Mode:                 genai.FunctionCallingConfigModeAny,
-				AllowedFunctionNames: []string{"get_album_sales"},
+				Mode: genai.FunctionCallingConfigModeAuto,
 			},
 		},
 		Temperature: genai.Ptr(float32(0.0)),
@@ -97,41 +97,41 @@ func generateWithFuncCallConfig(w io.Writer) error {
 	}
 
 	funcCalls := resp.FunctionCalls()
-	if len(funcCalls) > 0 {
-		for _, fc := range funcCalls {
-			fmt.Fprintf(w, "Function Call Detected: %s\n", fc.Name)
+	if len(funcCalls) == 0 {
+		return errors.New("no function calls were generated")
+	}
 
-			jsondata, err := json.MarshalIndent(fc.Args, "", " ")
-			if err != nil {
-				return fmt.Errorf("failed to marshal function call args: %w", err)
-			}
+	for _, fc := range funcCalls {
+		fmt.Fprintf(w, "Function Call Detected: %s\n", fc.Name)
 
-			fmt.Fprintln(w, jsondata)
-			// Example response
-			// {
-			//  "albums": [
-			//   {
-			//    "album_name": "Echoes of the Night",
-			//    "copies_sold": 350000
-			//   },
-			//   {
-			//    "album_name": "Reckless Hearts",
-			//    "copies_sold": 120000
-			//   },
-			//   {
-			//    "album_name": "Whispers of Dawn",
-			//    "copies_sold": 75000
-			//   },
-			//   {
-			//    "album_name": "Street Symphony",
-			//    "copies_sold": 100000
-			//   }
-			//  ]
-			// }
-
+		jsondata, err := json.MarshalIndent(fc.Args, "", " ")
+		if err != nil {
+			return fmt.Errorf("failed to marshal function call args: %w", err)
 		}
-	} else {
-		fmt.Fprintln(w, "No function calls were generated")
+
+		fmt.Fprintln(w, jsondata)
+		// Example response
+		// {
+		//  "albums": [
+		//   {
+		//    "album_name": "Echoes of the Night",
+		//    "copies_sold": 350000
+		//   },
+		//   {
+		//    "album_name": "Reckless Hearts",
+		//    "copies_sold": 120000
+		//   },
+		//   {
+		//    "album_name": "Whispers of Dawn",
+		//    "copies_sold": 75000
+		//   },
+		//   {
+		//    "album_name": "Street Symphony",
+		//    "copies_sold": 100000
+		//   }
+		//  ]
+		// }
+
 	}
 
 	return nil
