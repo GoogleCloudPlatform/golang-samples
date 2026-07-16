@@ -24,6 +24,7 @@ import (
 )
 
 func Test_countTokens(t *testing.T) {
+	t.Skip("Skipped while waiting to decommission vertexai")
 	tc := testutil.SystemTest(t)
 
 	location := "us-central1"
@@ -75,6 +76,7 @@ func Test_countTokens(t *testing.T) {
 }
 
 func Test_countTokensMultimodal(t *testing.T) {
+	t.Skip("Skipped while waiting to decommission vertexai")
 	tc := testutil.SystemTest(t)
 
 	location := "us-central1"
