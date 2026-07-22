@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/compute/quickstart/exec
 go 1.25.0
 
 require (
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.1
 	go.mongodb.org/mongo-driver v1.16.0
 )
 
