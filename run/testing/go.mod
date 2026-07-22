@@ -7,7 +7,7 @@ require (
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-00010101000000-000000000000
 	github.com/GoogleCloudPlatform/golang-samples/run/grpc-ping v0.0.0-20240724083556-7f760db013b7
 	github.com/GoogleCloudPlatform/golang-samples/run/grpc-server-streaming v0.0.0-20240724083556-7f760db013b7
-	golang.org/x/net v0.52.0
+	golang.org/x/net v0.54.0
 	google.golang.org/grpc v1.80.0
 )
 
@@ -48,11 +48,11 @@ require (
 	go.opentelemetry.io/otel/sdk v1.43.0 // indirect
 	go.opentelemetry.io/otel/sdk/metric v1.43.0 // indirect
 	go.opentelemetry.io/otel/trace v1.43.0 // indirect
-	golang.org/x/crypto v0.49.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
-	golang.org/x/sys v0.42.0 // indirect
-	golang.org/x/text v0.35.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	google.golang.org/api v0.217.0 // indirect
 	google.golang.org/genproto v0.0.0-20250115164207-1a7da9e5054f // indirect
