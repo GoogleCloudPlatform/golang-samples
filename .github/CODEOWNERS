@@ -11,10 +11,12 @@
 *                                     @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers
 /*                                    @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra
 /.github/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra
+/.github/CODEOWNERS                   @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra @GoogleCloudPlatform/cloud-samples-reviewers
 /docs/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra
 /getting-started/                     @GoogleCloudPlatform/go-samples-reviewers
 /internal/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra
 /testing/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra
+/go.work                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra @GoogleCloudPlatform/cloud-samples-reviewers
 
 # CNDB, Storage, and Infra-DB
 /bigtable/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes @GoogleCloudPlatform/cloud-asset-analysis-team
