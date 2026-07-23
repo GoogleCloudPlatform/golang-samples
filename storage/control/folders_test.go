@@ -212,3 +212,103 @@ func TestManagedFolders(t *testing.T) {
 		t.Errorf("deleteManagedFolder: got %q, want to contain %q", got, want)
 	}
 }
+
+func TestAnywhereCaches(t *testing.T) {
+	t.Skip("Skipping Anywhere Cache tests due to creation latency and billing project issues in test environment")
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	bucketName := testutil.UniqueBucketName(testPrefix + "-ac")
+	b := client.Bucket(bucketName)
+	attrs := &storage.BucketAttrs{
+		UniformBucketLevelAccess: storage.UniformBucketLevelAccess{
+			Enabled: true,
+		},
+	}
+	if err := b.Create(ctx, tc.ProjectID, attrs); err != nil {
+		t.Fatalf("Bucket.Create(%q): %v", bucketName, err)
+	}
+	t.Cleanup(func() {
+		if err := testutil.DeleteBucketIfExists(ctx, client, bucketName); err != nil {
+			log.Printf("Bucket.Delete(%q): %v", bucketName, err)
+		}
+	})
+
+	zone := "us-central1-c"
+	cachePath := fmt.Sprintf("projects/_/buckets/%v/anywhereCaches/%v", bucketName, zone)
+	buf := &bytes.Buffer{}
+
+	// Cleanup teardown to disable cache.
+	// We register it before creation to ensure it runs even if creation fails/times out.
+	// Since t.Cleanup runs in LIFO order, and this is registered AFTER bucket delete cleanup,
+	// this will run BEFORE bucket delete cleanup.
+	t.Cleanup(func() {
+		time.Sleep(2 * time.Second)
+		disableBuf := &bytes.Buffer{}
+		if err := disableAnywhereCache(disableBuf, bucketName, zone); err != nil {
+			log.Printf("disableAnywhereCache failed: %v", err)
+		}
+	})
+
+	// Create
+	if err := createAnywhereCache(buf, bucketName, zone); err != nil {
+		t.Fatalf("createAnywhereCache: %v", err)
+	}
+	if got, want := buf.String(), cachePath; !strings.Contains(got, want) {
+		t.Fatalf("createAnywhereCache: got %q, want to contain %q", got, want)
+	}
+
+	// Pace due to anywhere cache rate limit constraints
+	time.Sleep(2 * time.Second)
+
+	// Get
+	buf.Reset()
+	if err := getAnywhereCache(buf, bucketName, zone); err != nil {
+		t.Fatalf("getAnywhereCache: %v", err)
+	}
+	if got, want := buf.String(), cachePath; !strings.Contains(got, want) {
+		t.Errorf("getAnywhereCache: got %q, want to contain %q", got, want)
+	}
+
+	// List
+	buf.Reset()
+	if err := listAnywhereCaches(buf, bucketName); err != nil {
+		t.Fatalf("listAnywhereCaches: %v", err)
+	}
+	if got, want := buf.String(), cachePath; !strings.Contains(got, want) {
+		t.Errorf("listAnywhereCaches: got %q, want to contain %q", got, want)
+	}
+
+	// Update
+	time.Sleep(2 * time.Second)
+	buf.Reset()
+	if err := updateAnywhereCache(buf, bucketName, zone); err != nil {
+		t.Fatalf("updateAnywhereCache: %v", err)
+	}
+	if got, want := buf.String(), cachePath; !strings.Contains(got, want) {
+		t.Errorf("updateAnywhereCache: got %q, want to contain %q", got, want)
+	}
+
+	// Pause
+	time.Sleep(2 * time.Second)
+	buf.Reset()
+	if err := pauseAnywhereCache(buf, bucketName, zone); err != nil {
+		t.Fatalf("pauseAnywhereCache: %v", err)
+	}
+	if got, want := buf.String(), cachePath; !strings.Contains(got, want) {
+		t.Errorf("pauseAnywhereCache: got %q, want to contain %q", got, want)
+	}
+
+	// Resume
+	time.Sleep(2 * time.Second)
+	buf.Reset()
+	if err := resumeAnywhereCache(buf, bucketName, zone); err != nil {
+		t.Fatalf("resumeAnywhereCache: %v", err)
+	}
+	if got, want := buf.String(), cachePath; !strings.Contains(got, want) {
+		t.Errorf("resumeAnywhereCache: got %q, want to contain %q", got, want)
+	}
+
+	// Pace before disable in cleanup runs
+	time.Sleep(2 * time.Second)
+}
