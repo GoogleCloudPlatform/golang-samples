@@ -16,6 +16,7 @@ package main
 
 import (
 	"context"
+	"net/http"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
@@ -25,9 +26,14 @@ import (
 // http headers.
 // [START opentelemetry_instrumentation_client]
 func callSingle(ctx context.Context) error {
-	// otelhttp.Get makes an http GET request, just like net/http.Get.
-	// In addition, it records a span, records metrics, and propagates context.
-	res, err := otelhttp.Get(ctx, "http://localhost:8080/single")
+	req, err := http.NewRequestWithContext(ctx, "GET", "http://localhost:8080/single", nil)
+	if err != nil {
+		return err
+	}
+	client := http.Client{
+		Transport: otelhttp.NewTransport(http.DefaultTransport),
+	}
+	res, err := client.Do(req)
 	if err != nil {
 		return err
 	}
