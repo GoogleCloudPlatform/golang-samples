@@ -14,7 +14,6 @@
 
 package controlledgeneration
 
-// [START generativeaionvertexai_gemini_controlled_generation_response_schema_6]
 import (
 	"context"
 	"errors"
@@ -85,5 +84,3 @@ func controlledGenerationResponseSchema6(w io.Writer, projectID, location, model
 	fmt.Fprint(w, res.Candidates[0].Content.Parts[0])
 	return nil
 }
-
-// [END generativeaionvertexai_gemini_controlled_generation_response_schema_6]

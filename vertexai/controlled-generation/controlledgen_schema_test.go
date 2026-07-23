@@ -24,6 +24,8 @@ import (
 )
 
 func Test_controlledGenerationResponseSchema6(t *testing.T) {
+	t.Skip("Skipped while waiting to decommission vertexai")
+
 	tc := testutil.SystemTest(t)
 	w := new(bytes.Buffer)
 
@@ -54,6 +56,8 @@ into [][]Item because: %v`, w.Bytes(), err)
 }
 
 func Test_controlledGenerationResponseSchemaEnum(t *testing.T) {
+	t.Skip("Skipped while waiting to decommission vertexai")
+
 	tc := testutil.SystemTest(t)
 	w := new(bytes.Buffer)
 
