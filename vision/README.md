@@ -8,7 +8,7 @@ This directory contains [Cloud Vision API](https://cloud.google.com/vision/) Go 
 
 See the [label detection](https://cloud.google.com/vision/docs/label-tutorial) tutorial in the docs.
 
-[Go Code](label)
+[Go Code](detect)
 
 ### Detect Content
 

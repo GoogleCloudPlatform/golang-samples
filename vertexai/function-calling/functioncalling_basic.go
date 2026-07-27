@@ -16,7 +16,6 @@
 // data sources.
 package functioncalling
 
-// [START generativeaionvertexai_gemini_function_calling]
 import (
 	"context"
 	"encoding/json"
@@ -120,5 +119,3 @@ func functionCalling(w io.Writer, projectID, location, modelName string) error {
 
 	return nil
 }
-
-// [END generativeaionvertexai_gemini_function_calling]
