@@ -23,58 +23,6 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func Test_countTokens(t *testing.T) {
-	t.Skip("Skipped while waiting to decommission vertexai")
-	tc := testutil.SystemTest(t)
-
-	location := "us-central1"
-	modelName := "gemini-2.0-flash-001"
-
-	var buf bytes.Buffer
-	err := countTokens(&buf, tc.ProjectID, location, modelName)
-	if err != nil {
-		t.Fatalf("Test_countTokens: %v", err.Error())
-	}
-
-	answer := buf.String()
-	prints := strings.Split(answer, "\n")
-	prompt_tokens := strings.TrimPrefix(prints[0], "Number of tokens for the prompt: ")
-	pt_int, err := strconv.Atoi(prompt_tokens)
-	if err != nil {
-		t.Fatalf("Test_countTokens: %v", err.Error())
-	}
-	prompt_tokens2 := strings.TrimPrefix(prints[1], "Number of tokens for the prompt: ")
-	pt_int2, err := strconv.Atoi(prompt_tokens2)
-	if err != nil {
-		t.Fatalf("Test_countTokens: %v", err.Error())
-	}
-	candidate_tokens := strings.TrimPrefix(prints[2], "Number of tokens for the candidates: ")
-	ct_int, err := strconv.Atoi(candidate_tokens)
-	if err != nil {
-		t.Fatalf("Test_countTokens: %v", err.Error())
-	}
-	total_tokes := strings.TrimPrefix(prints[3], "Total number of tokens: ")
-	tt_int, err := strconv.Atoi(total_tokes)
-	if err != nil {
-		t.Fatalf("Test_countTokens: %v", err.Error())
-	}
-
-	// "Why is the sky blue?" is expected to account for (more or less) 5 tokens
-	// Extremely low or high values would not be correct
-	if pt_int <= 1 {
-		t.Errorf("Expected more than 1 token, got %d", pt_int)
-	}
-	if pt_int >= 20 {
-		t.Errorf("Expected less than 20 tokens, got %d", pt_int)
-	}
-	if pt_int != pt_int2 {
-		t.Errorf("Expected %d tokens count for prompt, got %d", pt_int, pt_int2)
-	}
-	if pt_int2+ct_int != tt_int {
-		t.Errorf("Total count %d doesn't match input + output tokens, got %d", tt_int, pt_int2+ct_int)
-	}
-}
-
 func Test_countTokensMultimodal(t *testing.T) {
 	t.Skip("Skipped while waiting to decommission vertexai")
 	tc := testutil.SystemTest(t)
