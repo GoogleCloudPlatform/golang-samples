@@ -22,37 +22,12 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func Test_functionCalling(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	var buf bytes.Buffer
-	location := "us-central1"
-	modelName := "gemini-2.0-flash-001"
-
-	err := functionCalling(&buf, tc.ProjectID, location, modelName)
-	if err != nil {
-		t.Errorf("functionCalling failed: %v", err.Error())
-	}
-
-	funcOut := buf.String()
-
-	expOut := `The model suggests to call the function "getCurrentWeather" with args: map[location:Boston]`
-	if !strings.Contains(funcOut, expOut) {
-		t.Errorf("expected output to contain text %q, got: %q", expOut, funcOut)
-	}
-
-	expOut = "weather in Boston"
-	if !strings.Contains(funcOut, expOut) {
-		t.Errorf("expected output to contain text %q, got: %q", expOut, funcOut)
-	}
-}
-
 func Test_functionCallsChat(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	var buf bytes.Buffer
 	location := "us-central1"
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 
 	err := functionCallsChat(&buf, tc.ProjectID, location, modelName)
 	if err != nil {
@@ -61,11 +36,12 @@ func Test_functionCallsChat(t *testing.T) {
 }
 
 func Test_parallelFunctionCalling(t *testing.T) {
+	t.Skip("Skipped while waiting to decommission vertexai")
 	tc := testutil.SystemTest(t)
 
 	var buf bytes.Buffer
 	location := "us-central1"
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 
 	err := parallelFunctionCalling(&buf, tc.ProjectID, location, modelName)
 	if err != nil {
