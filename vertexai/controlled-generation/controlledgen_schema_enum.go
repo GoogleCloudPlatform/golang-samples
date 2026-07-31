@@ -14,7 +14,6 @@
 
 package controlledgeneration
 
-// [START generativeaionvertexai_gemini_controlled_generation_response_schema_7]
 import (
 	"context"
 	"errors"
@@ -66,5 +65,3 @@ into various aspects of reality.
 
 	return nil
 }
-
-// [END generativeaionvertexai_gemini_controlled_generation_response_schema_7]
