@@ -25,7 +25,7 @@ import (
 
 func tryGemini(w io.Writer, projectID string, location string, modelName string) error {
 	// location := "us-central1"
-	// modelName := "gemini-2.0-flash-001"
+	// modelName := "gemini-2.5-flash"
 
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, projectID, location)
