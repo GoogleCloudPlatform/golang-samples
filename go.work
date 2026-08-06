@@ -154,7 +154,6 @@ use (
 	./vertexai/evaluation
 	./vertexai/function-calling
 	./vertexai/gemma2
-	./vertexai/multimodal-video-with-audio
 	./vertexai/token-count
 	./videointelligence
 	./vision
