@@ -22,19 +22,6 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 )
 
-func Test_functionCallsChat(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	var buf bytes.Buffer
-	location := "us-central1"
-	modelName := "gemini-2.5-flash"
-
-	err := functionCallsChat(&buf, tc.ProjectID, location, modelName)
-	if err != nil {
-		t.Errorf("Test_functionCallsChat: %v", err.Error())
-	}
-}
-
 func Test_parallelFunctionCalling(t *testing.T) {
 	t.Skip("Skipped while waiting to decommission vertexai")
 	tc := testutil.SystemTest(t)
