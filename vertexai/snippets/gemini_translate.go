@@ -29,7 +29,7 @@ import (
 func geminiTranslate(w io.Writer, project, location string) error {
 	sourceLanguageCode := "en"
 	targetLanguageCode := "fr"
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, project, location)
