@@ -16,7 +16,6 @@
 // a given prompt string
 package tokencount
 
-// [START generativeaionvertexai_gemini_token_count_multimodal]
 import (
 	"context"
 	"fmt"
@@ -78,5 +77,3 @@ func countTokensMultimodal(w io.Writer, projectID, location, modelName string) e
 
 	return nil
 }
-
-// [END generativeaionvertexai_gemini_token_count_multimodal]
