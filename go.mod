@@ -3,11 +3,11 @@ module github.com/GoogleCloudPlatform/golang-samples
 go 1.25.0
 
 require (
-	cloud.google.com/go/bigquery v1.65.0
-	cloud.google.com/go/errorreporting v0.3.2
-	cloud.google.com/go/logging v1.13.0
-	cloud.google.com/go/redis v1.17.3
-	cloud.google.com/go/storage v1.50.0
+	cloud.google.com/go/bigquery v1.79.1
+	cloud.google.com/go/errorreporting v0.9.0
+	cloud.google.com/go/logging v1.19.1
+	cloud.google.com/go/redis v1.25.0
+	cloud.google.com/go/storage v1.64.0
 	cloud.google.com/go/vision v1.2.0
 	github.com/bmatcuk/doublestar/v2 v2.0.4
 	github.com/go-redis/redis/v8 v8.11.5
@@ -15,8 +15,8 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/h2non/filetype v1.1.3
 	golang.org/x/oauth2 v0.36.0
-	google.golang.org/api v0.217.0
-	google.golang.org/protobuf v1.36.11
+	google.golang.org/api v0.293.0
+	google.golang.org/protobuf v1.36.12
 	gopkg.in/yaml.v2 v2.4.0
 )
 
