@@ -326,7 +326,7 @@ func TestObjects(t *testing.T) {
 		}
 
 		// Clean up dstObjTemp
-		if err := bkt.Object(dstObjTemp).Delete(ctx); err != nil {
+		if err := bkt.Object(dstObjTemp).Delete(ctx); err != nil && !errors.Is(err, storage.ErrObjectNotExist) {
 			t.Errorf("failed to clean up destination object %q: %v", dstObjTemp, err)
 		}
 	})
