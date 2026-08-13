@@ -57,7 +57,7 @@ func composeFile(w io.Writer, bucket, object1, object2, toObject string, deleteS
 	if deleteSourceObjects {
 		fmt.Fprintf(w, "New composite object %v was created by combining %v and %v and the source objects were deleted.\n", toObject, object1, object2)
 	} else {
-		fmt.Fprintf(w, "New composite object %v was created by combining %v and %v\n", toObject, object1, object2)
+		fmt.Fprintf(w, "New composite object %v was created by combining %v and %v. Source objects were not deleted.\n", toObject, object1, object2)
 	}
 	return nil
 }

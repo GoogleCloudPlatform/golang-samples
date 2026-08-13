@@ -275,7 +275,7 @@ func TestObjects(t *testing.T) {
 		t.Errorf("copyFile: %v", err)
 	}
 	t.Run("composeFile", func(t *testing.T) {
-		// Test with deleteSourceObjects = false
+		// Test with deleteSourceObjects = false.
 		if err := composeFile(io.Discard, bucket, object1, object2, dstObj, false); err != nil {
 			t.Errorf("composeFile: %v", err)
 		}
@@ -288,46 +288,48 @@ func TestObjects(t *testing.T) {
 			t.Errorf("object.Attrs: %v", err)
 		}
 
-		// Verify source objects still exist
+		// Verify source objects still exist.
 		for _, src := range []string{object1, object2} {
 			if _, err := bkt.Object(src).Attrs(ctx); err != nil {
 				t.Errorf("Source object %q should still exist, but got err: %v", src, err)
 			}
 		}
 
-		// Test with deleteSourceObjects = true
-		src1Temp := "compose-src-1-temp.txt"
-		src2Temp := "compose-src-2-temp.txt"
-		dstObjTemp := "foobar-temp.txt"
-		if err := uploadFile(io.Discard, bucket, src1Temp); err != nil {
-			t.Fatalf("uploadFile(%q): %v", src1Temp, err)
+		// Test with deleteSourceObjects = true.
+		// Use distinct source objects for this test to avoid deleting the shared test objects
+		// (object1, object2) which are needed for subsequent tests in the suite.
+		composeDeleteSrc1 := "compose-src-1-temp.txt"
+		composeDeleteSrc2 := "compose-src-2-temp.txt"
+		composeDeleteDst := "foobar-temp.txt"
+		if err := uploadFile(io.Discard, bucket, composeDeleteSrc1); err != nil {
+			t.Fatalf("uploadFile(%q): %v", composeDeleteSrc1, err)
 		}
-		if err := uploadFile(io.Discard, bucket, src2Temp); err != nil {
-			t.Fatalf("uploadFile(%q): %v", src2Temp, err)
+		if err := uploadFile(io.Discard, bucket, composeDeleteSrc2); err != nil {
+			t.Fatalf("uploadFile(%q): %v", composeDeleteSrc2, err)
 		}
 
-		if err := composeFile(io.Discard, bucket, src1Temp, src2Temp, dstObjTemp, true); err != nil {
+		if err := composeFile(io.Discard, bucket, composeDeleteSrc1, composeDeleteSrc2, composeDeleteDst, true); err != nil {
 			t.Errorf("composeFile(deleteSourceObjects=true): %v", err)
 		}
 
-		// Verify destination object was created
-		_, err = bkt.Object(dstObjTemp).Attrs(ctx)
+		// Verify destination object was created.
+		_, err = bkt.Object(composeDeleteDst).Attrs(ctx)
 		if errors.Is(err, storage.ErrObjectNotExist) {
-			t.Errorf("Destination object %q was not created", dstObjTemp)
+			t.Errorf("Destination object %q was not created", composeDeleteDst)
 		} else if err != nil {
 			t.Errorf("object.Attrs: %v", err)
 		}
 
-		// Verify source objects are deleted
-		for _, src := range []string{src1Temp, src2Temp} {
+		// Verify source objects are deleted.
+		for _, src := range []string{composeDeleteSrc1, composeDeleteSrc2} {
 			if _, err := bkt.Object(src).Attrs(ctx); !errors.Is(err, storage.ErrObjectNotExist) {
 				t.Errorf("Source object %q should have been deleted, but got err: %v", src, err)
 			}
 		}
 
-		// Clean up dstObjTemp
-		if err := bkt.Object(dstObjTemp).Delete(ctx); err != nil && !errors.Is(err, storage.ErrObjectNotExist) {
-			t.Errorf("failed to clean up destination object %q: %v", dstObjTemp, err)
+		// Clean up the temporary destination object.
+		if err := bkt.Object(composeDeleteDst).Delete(ctx); err != nil && !errors.Is(err, storage.ErrObjectNotExist) {
+			t.Errorf("failed to clean up destination object %q: %v", composeDeleteDst, err)
 		}
 	})
 
