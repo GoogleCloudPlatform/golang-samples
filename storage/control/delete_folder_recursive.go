@@ -23,6 +23,7 @@ import (
 
 	control "cloud.google.com/go/storage/control/apiv2"
 	"cloud.google.com/go/storage/control/apiv2/controlpb"
+	"google.golang.org/api/option"
 )
 
 // deleteFolderRecursive deletes a folder recursively.
@@ -32,7 +33,7 @@ func deleteFolderRecursive(w io.Writer, bucketName, folderName string) error {
 	// folderName := "folder-name"
 
 	ctx := context.Background()
-	client, err := control.NewStorageControlClient(ctx)
+	client, err := control.NewStorageControlClient(ctx, option.WithQuotaProject(""))
 	if err != nil {
 		return fmt.Errorf("NewStorageControlClient: %w", err)
 	}

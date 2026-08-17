@@ -61,7 +61,6 @@ func TestMain(m *testing.M) {
 }
 
 func TestFolders(t *testing.T) {
-	t.Skip("Skipping due to project permissions changes, see: b/445769988")
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
@@ -214,7 +213,6 @@ func TestManagedFolders(t *testing.T) {
 }
 
 func TestDeleteFolderRecursive(t *testing.T) {
-	t.Skip("Skipping due to project permissions changes, see: b/445769988")
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
