@@ -46,8 +46,7 @@ func composeFile(w io.Writer, bucket, object1, object2, toObject string, deleteS
 	src2 := client.Bucket(bucket).Object(object2)
 	dst := client.Bucket(bucket).Object(toObject)
 
-	// ComposerFrom takes varargs, so you can put as many objects here
-	// as you want.
+	// ComposerFrom takes varargs, so you can put up to 32 source objects.
 	composer := dst.ComposerFrom(src1, src2)
 	composer.DeleteSourceObjects = deleteSourceObjects
 	_, err = composer.Run(ctx)
