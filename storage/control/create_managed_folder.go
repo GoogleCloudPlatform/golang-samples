@@ -23,6 +23,7 @@ import (
 
 	control "cloud.google.com/go/storage/control/apiv2"
 	"cloud.google.com/go/storage/control/apiv2/controlpb"
+	"google.golang.org/api/option"
 )
 
 // createManagedFolder creates a managed folder in the bucket with the given name.
@@ -31,7 +32,7 @@ func createManagedFolder(w io.Writer, bucket, folder string) error {
 	// folder := "managed-folder-name"
 
 	ctx := context.Background()
-	client, err := control.NewStorageControlClient(ctx)
+	client, err := control.NewStorageControlClient(ctx, option.WithQuotaProject(""))
 	if err != nil {
 		return fmt.Errorf("NewStorageControlClient: %w", err)
 	}

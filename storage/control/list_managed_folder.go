@@ -24,6 +24,7 @@ import (
 	control "cloud.google.com/go/storage/control/apiv2"
 	"cloud.google.com/go/storage/control/apiv2/controlpb"
 	"google.golang.org/api/iterator"
+	"google.golang.org/api/option"
 )
 
 // listManagedFolders lists all managed folders present in the bucket.
@@ -32,7 +33,7 @@ func listManagedFolders(w io.Writer, bucket string) error {
 	// folder := "managed-folder-name"
 
 	ctx := context.Background()
-	client, err := control.NewStorageControlClient(ctx)
+	client, err := control.NewStorageControlClient(ctx, option.WithQuotaProject(""))
 	if err != nil {
 		return fmt.Errorf("NewStorageControlClient: %w", err)
 	}
