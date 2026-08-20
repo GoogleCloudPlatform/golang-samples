@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rapid
+package bidi
 
 // [START storage_create_and_write_appendable_object]
 import (
@@ -22,16 +22,15 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"cloud.google.com/go/storage/experimental"
 )
 
 // createAndWriteAppendableObject creates and uploads a new appendable object in
-// a rapid bucket. The object will not be finalized.
+// a bucket. The object will not be finalized.
 func createAndWriteAppendableObject(w io.Writer, bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
-	client, err := storage.NewGRPCClient(ctx, experimental.WithZonalBucketAPIs())
+	client, err := storage.NewGRPCClient(ctx, storage.WithAppendableUploads())
 	if err != nil {
 		return fmt.Errorf("storage.NewGRPCClient: %w", err)
 	}
