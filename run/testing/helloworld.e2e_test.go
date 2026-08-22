@@ -15,9 +15,11 @@
 package cloudruntests
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -26,7 +28,9 @@ import (
 func TestHelloworldService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	service := cloudrunci.NewService("helloworld", tc.ProjectID)
+	id := time.Now().Unix()
+	serviceName := fmt.Sprintf("helloworld_%d", id)
+	service := cloudrunci.NewService(serviceName, tc.ProjectID)
 	service.Env = cloudrunci.EnvVars{"NAME": "Override"}
 	service.Dir = "../helloworld"
 	if err := service.Deploy(); err != nil {
