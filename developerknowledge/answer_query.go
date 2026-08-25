@@ -20,31 +20,33 @@ import (
 	"fmt"
 	"io"
 
-	developerknowledge "google.golang.org/api/developerknowledge/v1"
+	developerknowledge "cloud.google.com/go/developerknowledge/apiv1"
+	developerknowledgepb "cloud.google.com/go/developerknowledge/apiv1/developerknowledgepb"
 )
 
 // answerQuery answers a developer question grounded in Google developer documentation.
-func answerQuery(w io.Writer, query string) (*developerknowledge.AnswerQueryResponse, error) {
+func answerQuery(w io.Writer, query string) (*developerknowledgepb.AnswerQueryResponse, error) {
 	ctx := context.Background()
 
-	svc, err := developerknowledge.NewService(ctx)
+	client, err := developerknowledge.NewDeveloperKnowledgeClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("developerknowledge.NewService: %w", err)
+		return nil, fmt.Errorf("developerknowledge.NewDeveloperKnowledgeClient: %w", err)
 	}
+	defer client.Close()
 
-	req := &developerknowledge.AnswerQueryRequest{
+	req := &developerknowledgepb.AnswerQueryRequest{
 		Query: query,
 	}
 
-	resp, err := svc.V1.AnswerQuery(req).Context(ctx).Do()
+	resp, err := client.AnswerQuery(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("AnswerQuery: %w", err)
 	}
 
-	if resp.Answer != nil {
-		fmt.Fprintf(w, "Answer:\n%s\n\n", resp.Answer.AnswerText)
-		fmt.Fprintf(w, "Citations count: %d\n", len(resp.Answer.Citations))
-		fmt.Fprintf(w, "References count: %d\n", len(resp.Answer.References))
+	if resp.GetAnswer() != nil {
+		fmt.Fprintf(w, "Answer:\n%s\n\n", resp.GetAnswer().GetAnswerText())
+		fmt.Fprintf(w, "Citations count: %d\n", len(resp.GetAnswer().GetCitations()))
+		fmt.Fprintf(w, "References count: %d\n", len(resp.GetAnswer().GetReferences()))
 	}
 
 	return resp, nil

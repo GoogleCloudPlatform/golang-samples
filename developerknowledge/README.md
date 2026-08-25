@@ -1,7 +1,7 @@
 # Google Developer Knowledge API Go Samples
 
 This directory contains Go code samples demonstrating how to use the
-[Google Developer Knowledge API](https://developers.google.com/knowledge) client library (`google.golang.org/api/developerknowledge/v1`).
+[Google Developer Knowledge API](https://developers.google.com/knowledge) client library (`cloud.google.com/go/developerknowledge/apiv1`).
 
 ## Setup
 

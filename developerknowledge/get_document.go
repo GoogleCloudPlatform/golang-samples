@@ -20,27 +20,33 @@ import (
 	"fmt"
 	"io"
 
-	developerknowledge "google.golang.org/api/developerknowledge/v1"
+	developerknowledge "cloud.google.com/go/developerknowledge/apiv1"
+	developerknowledgepb "cloud.google.com/go/developerknowledge/apiv1/developerknowledgepb"
 )
 
 // getDocument retrieves a single developer documentation page by its resource name.
-func getDocument(w io.Writer, name string) (*developerknowledge.Document, error) {
+func getDocument(w io.Writer, name string) (*developerknowledgepb.Document, error) {
 	ctx := context.Background()
 
-	svc, err := developerknowledge.NewService(ctx)
+	client, err := developerknowledge.NewDeveloperKnowledgeClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("developerknowledge.NewService: %w", err)
+		return nil, fmt.Errorf("developerknowledge.NewDeveloperKnowledgeClient: %w", err)
+	}
+	defer client.Close()
+
+	req := &developerknowledgepb.GetDocumentRequest{
+		Name: name,
 	}
 
-	doc, err := svc.Documents.Get(name).Context(ctx).Do()
+	doc, err := client.GetDocument(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("GetDocument: %w", err)
 	}
 
-	fmt.Fprintf(w, "Title: %s\n", doc.Title)
-	fmt.Fprintf(w, "URI: %s\n", doc.Uri)
-	fmt.Fprintf(w, "Data Source: %s\n", doc.DataSource)
-	fmt.Fprintf(w, "Content Length: %d bytes\n\n", doc.ContentLengthBytes)
+	fmt.Fprintf(w, "Title: %s\n", doc.GetTitle())
+	fmt.Fprintf(w, "URI: %s\n", doc.GetUri())
+	fmt.Fprintf(w, "Data Source: %s\n", doc.GetDataSource())
+	fmt.Fprintf(w, "Content Length: %d bytes\n\n", doc.GetContentLengthBytes())
 
 	return doc, nil
 }

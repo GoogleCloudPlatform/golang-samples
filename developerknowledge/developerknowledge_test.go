@@ -22,11 +22,11 @@ import (
 
 func TestSearchDocumentChunks(t *testing.T) {
 	var buf bytes.Buffer
-	resp, err := searchDocumentChunks(&buf, "Cloud Storage bucket creation", 3)
+	results, err := searchDocumentChunks(&buf, "Cloud Storage bucket creation", 3)
 	if err != nil {
 		t.Fatalf("searchDocumentChunks: %v", err)
 	}
-	if len(resp.Results) == 0 {
+	if len(results) == 0 {
 		t.Fatalf("expected non-empty search results")
 	}
 	got := buf.String()
@@ -42,10 +42,10 @@ func TestGetDocument(t *testing.T) {
 	if err != nil {
 		t.Fatalf("getDocument: %v", err)
 	}
-	if doc.Name != name {
-		t.Errorf("got name %q, want %q", doc.Name, name)
+	if doc.GetName() != name {
+		t.Errorf("got name %q, want %q", doc.GetName(), name)
 	}
-	if len(doc.Title) == 0 {
+	if len(doc.GetTitle()) == 0 {
 		t.Errorf("expected non-empty title")
 	}
 }
@@ -60,8 +60,8 @@ func TestBatchGetDocuments(t *testing.T) {
 	if err != nil {
 		t.Fatalf("batchGetDocuments: %v", err)
 	}
-	if len(resp.Documents) != 2 {
-		t.Fatalf("got %d documents, want 2", len(resp.Documents))
+	if len(resp.GetDocuments()) != 2 {
+		t.Fatalf("got %d documents, want 2", len(resp.GetDocuments()))
 	}
 }
 
@@ -71,7 +71,7 @@ func TestAnswerQuery(t *testing.T) {
 	if err != nil {
 		t.Fatalf("answerQuery: %v", err)
 	}
-	if resp.Answer == nil || len(resp.Answer.AnswerText) == 0 {
+	if resp.GetAnswer() == nil || len(resp.GetAnswer().GetAnswerText()) == 0 {
 		t.Errorf("expected non-empty answer text")
 	}
 }

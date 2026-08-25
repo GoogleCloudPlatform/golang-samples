@@ -20,35 +20,47 @@ import (
 	"fmt"
 	"io"
 
-	developerknowledge "google.golang.org/api/developerknowledge/v1"
+	developerknowledge "cloud.google.com/go/developerknowledge/apiv1"
+	developerknowledgepb "cloud.google.com/go/developerknowledge/apiv1/developerknowledgepb"
+	"google.golang.org/api/iterator"
 )
 
 // searchDocumentChunks searches developer documentation chunks for a given query.
-func searchDocumentChunks(
-	w io.Writer,
-	query string,
-	pageSize int64,
-) (*developerknowledge.SearchDocumentChunksResponse, error) {
+func searchDocumentChunks(w io.Writer, query string, pageSize int32) ([]*developerknowledgepb.DocumentChunk, error) {
 	ctx := context.Background()
 
-	svc, err := developerknowledge.NewService(ctx)
+	client, err := developerknowledge.NewDeveloperKnowledgeClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("developerknowledge.NewService: %w", err)
+		return nil, fmt.Errorf("developerknowledge.NewDeveloperKnowledgeClient: %w", err)
+	}
+	defer client.Close()
+
+	req := &developerknowledgepb.SearchDocumentChunksRequest{
+		Query:    query,
+		PageSize: pageSize,
 	}
 
-	call := svc.Documents.SearchDocumentChunks().Query(query).PageSize(pageSize).Context(ctx)
-	resp, err := call.Do()
-	if err != nil {
-		return nil, fmt.Errorf("SearchDocumentChunks: %w", err)
+	var results []*developerknowledgepb.DocumentChunk
+	it := client.SearchDocumentChunks(ctx, req)
+	for {
+		chunk, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, fmt.Errorf("SearchDocumentChunks: %w", err)
+		}
+		results = append(results, chunk)
+		fmt.Fprintf(w, "Parent Document: %s\n", chunk.GetParent())
+		fmt.Fprintf(w, "Chunk ID: %s\n", chunk.GetId())
+		fmt.Fprintf(w, "Content: %s\n\n", chunk.GetContent())
+
+		if pageSize > 0 && len(results) >= int(pageSize) {
+			break
+		}
 	}
 
-	for _, chunk := range resp.Results {
-		fmt.Fprintf(w, "Parent Document: %s\n", chunk.Parent)
-		fmt.Fprintf(w, "Chunk ID: %s\n", chunk.Id)
-		fmt.Fprintf(w, "Content: %s\n\n", chunk.Content)
-	}
-
-	return resp, nil
+	return results, nil
 }
 
 // [END developerknowledge_search_document_chunks]
