@@ -59,7 +59,7 @@ func createTemplateNotConsumeReservation(w io.Writer, projectID, templateName st
 				// without specifying a subnetwork.
 				NetworkInterfaces: []*computepb.NetworkInterface{
 					{
-						Name: proto.String("global/networks/default"),
+						Network: proto.String("global/networks/default"),
 						// The template lets the instance use an external IP address.
 						AccessConfigs: []*computepb.AccessConfig{
 							{

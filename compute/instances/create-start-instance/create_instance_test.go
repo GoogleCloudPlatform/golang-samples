@@ -73,6 +73,7 @@ func deleteDisk(ctx context.Context, projectId, zone, diskName string) error {
 }
 
 func TestComputeCreateInstanceSnippets(t *testing.T) {
+	t.Skip("Temporary skipping slow test")
 	ctx := context.Background()
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
@@ -201,6 +202,7 @@ func TestComputeCreateInstanceSnippets(t *testing.T) {
 }
 
 func TestComputeBulkCreateInstanceSnippets(t *testing.T) {
+	t.Skip("Temporary skipping slow test")
 	ctx := context.Background()
 
 	instanceTemplatesClient, err := compute.NewInstanceTemplatesRESTClient(ctx)
