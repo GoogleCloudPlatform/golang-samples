@@ -152,7 +152,6 @@ use (
 	./vertexai/context-caching
 	./vertexai/embeddings
 	./vertexai/evaluation
-	./vertexai/function-calling
 	./vertexai/gemma2
 	./videointelligence
 	./vision
