@@ -271,7 +271,7 @@ func TestDeleteFolderRecursive(t *testing.T) {
 	// Delete folder recursively.
 	buf := &bytes.Buffer{}
 	if err := deleteFolderRecursive(buf, bucketName, parentFolderName); err != nil {
-		if strings.Contains(err.Error(), "Recursive folder delete is not enabled") {
+		if strings.Contains(err.Error(), "Recursive folder delete is not enabled") || strings.Contains(err.Error(), "does not support custom billing projects") {
 			t.Skip("Recursive folder delete is not enabled in this project.")
 		}
 		t.Fatalf("deleteFolderRecursive: %v", err)
