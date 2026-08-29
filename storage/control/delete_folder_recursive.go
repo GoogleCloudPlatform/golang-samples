@@ -52,7 +52,7 @@ func deleteFolderRecursive(w io.Writer, bucket, folder string) error {
 	}
 
 	if err := op.Wait(ctx); err != nil {
-		return fmt.Errorf("Wait: %w", err)
+		return fmt.Errorf("waiting for DeleteFolderRecursive: %w", err)
 	}
 
 	fmt.Fprintf(w, "deleted folder %q recursively", folderPath)
