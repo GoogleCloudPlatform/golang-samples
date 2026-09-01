@@ -62,7 +62,10 @@ func sendAndReceiveQueueMessageSQL(w io.Writer, db string) error {
 		}
 		var id int64
 		var payload []byte
-		if err := row.Columns(&id, &payload); err != nil {
+		if err := row.ColumnByName("Id", &id); err != nil {
+			return err
+		}
+		if err := row.ColumnByName("Payload", &payload); err != nil {
 			return err
 		}
 		fmt.Fprintf(w, "Received message ID: %d, Payload: %s\n", id, string(payload))
