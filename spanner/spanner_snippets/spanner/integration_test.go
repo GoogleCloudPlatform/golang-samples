@@ -1821,3 +1821,40 @@ func parseInstanceName(instanceName string) (project, instance string, err error
 	}
 	return matches[1], matches[2], nil
 }
+
+func TestQueueSample(t *testing.T) {
+	_ = testutil.SystemTest(t)
+	if os.Getenv("SPANNER_EMULATOR_HOST") != "" {
+		t.Skip("Emulator does not support Spanner Queues.")
+	}
+	t.Parallel()
+
+	_, dbName, cleanup := initTest(t, randomID())
+	defer cleanup()
+
+	mustRunSample(t, createDatabaseWithQueue, dbName, "failed to create database with queue")
+
+	// Test Send Mutation
+	runSample(t, sendToQueue, dbName, "failed to send to queue with mutation")
+
+	// Test Send SQL
+	runSample(t, sendToQueueSQL, dbName, "failed to send to queue with SQL")
+
+	// Test Send Mutation Future
+	runSample(t, sendToQueueFuture, dbName, "failed to send to queue with mutation in future")
+
+	// Test Send SQL Future
+	runSample(t, sendToQueueSQLFuture, dbName, "failed to send to queue with SQL in future")
+
+	// Test Ack Mutation (acks message 1)
+	runSample(t, ackQueueMessage, dbName, "failed to ack queue message with mutation")
+
+	// Test Ack SQL (acks message 2)
+	runSample(t, ackQueueMessageSQL, dbName, "failed to ack queue message with SQL")
+
+	// Test Delete SQL (deletes message 3)
+	runSample(t, deleteQueueMessageSQL, dbName, "failed to delete queue message with SQL")
+
+	// Test Send & Receive SQL (sends 5 and receives it)
+	runSample(t, sendAndReceiveQueueMessageSQL, dbName, "failed to send and receive queue message with SQL")
+}
