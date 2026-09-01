@@ -28,7 +28,7 @@ import (
 func createDatabaseWithQueue(ctx context.Context, w io.Writer, db string) error {
 	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {
-		return fmt.Errorf("Invalid database id %s", db)
+		return fmt.Errorf("invalid database id %s", db)
 	}
 
 	adminClient, err := database.NewDatabaseAdminClient(ctx)
