@@ -100,7 +100,7 @@ func TestFolders(t *testing.T) {
 			r.Errorf("createFolder: got %q, want to contain %q", got, want)
 		}
 	}); !ok {
-		t.Fatalf("failed to create folder; can't continue")
+		t.Fatalf("Failed to create folder; can't continue")
 	}
 
 	// Get folder. Retry because there is no automatic retry in the client
@@ -114,7 +114,7 @@ func TestFolders(t *testing.T) {
 			r.Errorf("getFolder: got %q, want to contain %q", got, want)
 		}
 	}); !ok {
-		t.Fatalf("failed to get folder; can't continue")
+		t.Fatalf("Failed to get folder; can't continue")
 	}
 
 	// List folders.
@@ -190,7 +190,7 @@ func TestManagedFolders(t *testing.T) {
 			r.Errorf("getManagedFolder: got %q, want to contain %q", got, want)
 		}
 	}); !ok {
-		t.Fatalf("failed to get managed folder; can't continue")
+		t.Fatalf("Failed to get managed folder; can't continue")
 	}
 
 	// List managed folders.
@@ -252,7 +252,7 @@ func TestDeleteFolderRecursive(t *testing.T) {
 			r.Errorf("createFolder: got %q, want to contain %q", got, want)
 		}
 	}); !ok {
-		t.Fatalf("failed to create parent folder; can't continue")
+		t.Fatalf("Failed to create parent folder; can't continue")
 	}
 
 	// Create child folder.
@@ -265,7 +265,7 @@ func TestDeleteFolderRecursive(t *testing.T) {
 			r.Errorf("createFolder: got %q, want to contain %q", got, want)
 		}
 	}); !ok {
-		t.Fatalf("failed to create child folder; can't continue")
+		t.Fatalf("Failed to create child folder; can't continue")
 	}
 
 	// Delete folder recursively.
@@ -276,7 +276,7 @@ func TestDeleteFolderRecursive(t *testing.T) {
 		}
 		t.Fatalf("deleteFolderRecursive: %v", err)
 	}
-	want := fmt.Sprintf("deleted folder %q recursively", parentFolderPath)
+	want := fmt.Sprintf("Deleted folder %q recursively", parentFolderPath)
 	if got := buf.String(); got != want {
 		t.Errorf("deleteFolderRecursive: got %q, want %q", got, want)
 	}
