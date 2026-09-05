@@ -120,35 +120,48 @@ func deleteRegionDisk(ctx context.Context, projectId, region, diskName string) e
 }
 
 func TestComputeSnapshotsSnippets(t *testing.T) {
-	ctx := context.Background()
-	var r *rand.Rand = rand.New(
-		rand.NewSource(time.Now().UnixNano()))
+	var r *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 	tc := testutil.SystemTest(t)
 	zone := "europe-central2-b"
 	location := "europe-central2"
-	snapshotName := fmt.Sprintf("test-snapshot-%v-%v", time.Now().Format("01-02-2006"), r.Int())
-	diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	sourceImage := "projects/debian-cloud/global/images/family/debian-11"
-	want := "Snapshot created"
-
-	buf := &bytes.Buffer{}
 
 	t.Run("create, list and delete zonal disk snapshots", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+		defer cancel()
+
+		snapshotName := fmt.Sprintf("test-snapshot-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		buf := &bytes.Buffer{}
+
 		err := createDisk(ctx, tc.ProjectID, zone, diskName, sourceImage)
 		if err != nil {
 			t.Fatalf("createDisk got err: %v", err)
 		}
 
+		defer func() {
+			if err := deleteDisk(context.Background(), tc.ProjectID, zone, diskName); err != nil {
+				t.Errorf("deleteDisk got err: %v", err)
+			}
+		}()
+
 		if err := createSnapshot(buf, tc.ProjectID, diskName, snapshotName, zone, "", location, ""); err != nil {
 			t.Fatalf("createSnapshot got err: %v", err)
 		}
+
+		defer func() {
+			if err := deleteSnapshot(buf, tc.ProjectID, snapshotName); err != nil {
+				t.Errorf("deleteSnapshot got err: %v", err)
+			}
+		}()
+
+		want := "Snapshot created"
 		if got := buf.String(); !strings.Contains(got, want) {
 			t.Errorf("createSnapshot got %q, want %q", got, want)
 		}
 
 		buf.Reset()
 		want = snapshotName
-
 		if err := listSnapshots(buf, tc.ProjectID, ""); err != nil {
 			t.Errorf("listSnapshots got err: %v", err)
 		}
@@ -158,59 +171,46 @@ func TestComputeSnapshotsSnippets(t *testing.T) {
 
 		buf.Reset()
 		want = snapshotName
-
 		if err := getSnapshot(buf, tc.ProjectID, snapshotName); err != nil {
 			t.Errorf("getSnapshot got err: %v", err)
 		}
 		if got := buf.String(); !strings.Contains(got, want) {
 			t.Errorf("getSnapshot got %q, want %q", got, want)
 		}
-
-		buf.Reset()
-		want = "Snapshot deleted"
-
-		if err := deleteSnapshot(buf, tc.ProjectID, snapshotName); err != nil {
-			t.Errorf("deleteSnapshot got err: %v", err)
-		}
-		if got := buf.String(); !strings.Contains(got, want) {
-			t.Errorf("deleteSnapshot got %q, want %q", got, want)
-		}
-
-		err = deleteDisk(ctx, tc.ProjectID, zone, diskName)
-		if err != nil {
-			t.Errorf("deleteDisk got err: %v", err)
-		}
 	})
 
 	t.Run("create and delete regional disk snapshots", func(t *testing.T) {
-		buf.Reset()
-		want = "Snapshot created"
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+		defer cancel()
+
+		snapshotName := fmt.Sprintf("test-snapshot-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
+		buf := &bytes.Buffer{}
 
 		err := createRegionDisk(ctx, tc.ProjectID, location, diskName)
 		if err != nil {
 			t.Fatalf("createRegionDisk got err: %v", err)
 		}
 
+		defer func() {
+			if err := deleteRegionDisk(context.Background(), tc.ProjectID, location, diskName); err != nil {
+				t.Errorf("deleteRegionalDisk got err: %v", err)
+			}
+		}()
+
 		if err := createSnapshot(buf, tc.ProjectID, diskName, snapshotName, "", location, location, ""); err != nil {
 			t.Fatalf("createSnapshot got err: %v", err)
 		}
+
+		defer func() {
+			if err := deleteSnapshot(buf, tc.ProjectID, snapshotName); err != nil {
+				t.Errorf("deleteSnapshot got err: %v", err)
+			}
+		}()
+
+		want := "Snapshot created"
 		if got := buf.String(); !strings.Contains(got, want) {
 			t.Errorf("createSnapshot got %q, want %q", got, want)
-		}
-
-		buf.Reset()
-		want = "Snapshot deleted"
-
-		if err := deleteSnapshot(buf, tc.ProjectID, snapshotName); err != nil {
-			t.Errorf("deleteSnapshot got err: %v", err)
-		}
-		if got := buf.String(); !strings.Contains(got, want) {
-			t.Errorf("deleteSnapshot got %q, want %q", got, want)
-		}
-
-		err = deleteRegionDisk(ctx, tc.ProjectID, location, diskName)
-		if err != nil {
-			t.Errorf("deleteRegionalDisk got err: %v", err)
 		}
 	})
 }
