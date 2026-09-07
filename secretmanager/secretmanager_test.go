@@ -33,9 +33,7 @@ import (
 	regional_secretmanager "github.com/GoogleCloudPlatform/golang-samples/secretmanager/regional_samples"
 	"github.com/gofrs/uuid"
 	"google.golang.org/api/option"
-	"google.golang.org/grpc/codes"
 	grpccodes "google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	grpcstatus "google.golang.org/grpc/status"
 )
 
@@ -1515,7 +1513,8 @@ func testCreateTagKey(tb testing.TB, projectID string) *resourcemanagerpb.TagKey
 
 	client, ctx := testResourceManagerTagsKeyClient(tb)
 	parent := fmt.Sprintf("projects/%s", projectID)
-	tagKeyName := "sm_secret_tag_sample_test2"
+	uniqueSuffix := time.Now().Unix()
+	tagKeyName := fmt.Sprintf("sm_secret_tag_sample_test_%d", uniqueSuffix)
 	tagKeyDescription := "creating tag key for secretmanager tags sample"
 
 	tagKeyOperation, err := client.CreateTagKey(ctx, &resourcemanagerpb.CreateTagKeyRequest{
@@ -1603,13 +1602,13 @@ func testCleanupTagValue(tb testing.TB, tagValueName string) {
 		})
 
 		if err != nil {
-			s, ok := status.FromError(err)
-			if ok && s.Code() == codes.NotFound {
+			s, ok := grpcstatus.FromError(err)
+			if ok && s.Code() == grpccodes.NotFound {
 				tb.Logf("Tag value %s already deleted (or never existed) after %v.", tagValueName, time.Since(startTime))
 				return
 			}
 
-			if ok && s.Code() == codes.FailedPrecondition && strings.Contains(s.Message(), "attached to resources") {
+			if ok && s.Code() == grpccodes.FailedPrecondition && strings.Contains(s.Message(), "attached to resources") {
 				delay := initialDelay * time.Duration(1<<uint(attempt-1))
 				if delay > maxBackoffDelay {
 					delay = maxBackoffDelay
@@ -1624,12 +1623,12 @@ func testCleanupTagValue(tb testing.TB, tagValueName string) {
 
 		_, err = tagValueOperation.Wait(ctx)
 		if err != nil {
-			s, ok := status.FromError(err)
-			if ok && s.Code() == codes.NotFound {
+			s, ok := grpcstatus.FromError(err)
+			if ok && s.Code() == grpccodes.NotFound {
 				tb.Logf("Tag value %s was deleted during operation wait (or already gone).", tagValueName)
 				return
 			}
-			if ok && s.Code() == codes.FailedPrecondition && strings.Contains(s.Message(), "attached to resources") {
+			if ok && s.Code() == grpccodes.FailedPrecondition && strings.Contains(s.Message(), "attached to resources") {
 				delay := initialDelay * time.Duration(1<<uint(attempt-1))
 				if delay > maxBackoffDelay {
 					delay = maxBackoffDelay

@@ -11,10 +11,12 @@
 *                                     @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers
 /*                                    @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra
 /.github/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra
+/.github/CODEOWNERS                   @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra @GoogleCloudPlatform/cloud-samples-reviewers
 /docs/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra
 /getting-started/                     @GoogleCloudPlatform/go-samples-reviewers
 /internal/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra
 /testing/                             @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra
+/go.work                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-infra @GoogleCloudPlatform/cloud-samples-reviewers
 
 # CNDB, Storage, and Infra-DB
 /bigtable/                            @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-native-db-dpes @GoogleCloudPlatform/cloud-asset-analysis-team
@@ -38,6 +40,7 @@
 # Other Owners
 /auth/                                 @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/googleapis-auth
 /asset/                                @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-asset-analysis-team
+/bigquery/bigquery_storage_quickstart  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/bigquery-readapi-team
 /billing/                              @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/billing-samples-maintainers
 /dlp/                                  @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/googleapis-dlp
 /modelarmor/                           @GoogleCloudPlatform/go-samples-reviewers @GoogleCloudPlatform/cloud-samples-reviewers @GoogleCloudPlatform/cloud-modelarmor-team

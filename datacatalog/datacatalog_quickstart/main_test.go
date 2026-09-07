@@ -30,6 +30,7 @@ import (
 )
 
 func TestApp(t *testing.T) {
+	t.Skip("Skipped while waiting for decommssioning datacatalog")
 	tc := testutil.SystemTest(t)
 	m := testutil.BuildMain(t)
 	defer m.Cleanup()
