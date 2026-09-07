@@ -21,6 +21,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/metric"
@@ -32,9 +35,10 @@ import (
 var counter metric.Int64Counter
 
 func main() {
-	ctx := context.Background()
-	shutdown := setupCounter(ctx)
-	defer shutdown(ctx)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	shutdownMetrics := setupCounter(ctx)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -43,7 +47,23 @@ func main() {
 	}
 
 	http.HandleFunc("/", handler)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	server := &http.Server{Addr: ":" + port}
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("server failed: %v", err)
+		}
+	}()
+
+	<-ctx.Done()
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		log.Printf("server shutdown failed: %v", err)
+	}
+	if err := shutdownMetrics(shutdownCtx); err != nil {
+		log.Printf("metrics shutdown failed: %v", err)
+	}
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
