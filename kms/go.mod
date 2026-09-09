@@ -4,6 +4,7 @@ go 1.25.0
 
 require (
 	cloud.google.com/go/kms v1.26.0
+	filippo.io/hpke v0.4.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20260211233957-36c1e7bd205a
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/google/tink/go v1.7.0
