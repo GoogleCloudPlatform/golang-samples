@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_queue_ack_message_sql]
+// [START spanner_ack_queue_message_with_sql_api]
 
 import (
 	"context"
@@ -46,4 +46,4 @@ func ackQueueMessageSQL(w io.Writer, db string) error {
 	return nil
 }
 
-// [END spanner_queue_ack_message_sql]
+// [END spanner_ack_queue_message_with_sql_api]

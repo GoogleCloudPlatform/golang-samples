@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_queue_ack_message]
+// [START spanner_ack_queue_message_with_mutation_api]
 
 import (
 	"context"
@@ -42,4 +42,4 @@ func ackQueueMessage(w io.Writer, db string) error {
 	return nil
 }
 
-// [END spanner_queue_ack_message]
+// [END spanner_ack_queue_message_with_mutation_api]

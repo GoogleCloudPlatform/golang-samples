@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_queue_send_and_receive_message_sql]
+// [START spanner_send_and_receive_queue_message_with_sql_api]
 
 import (
 	"context"
@@ -74,4 +74,4 @@ func sendAndReceiveQueueMessageSQL(w io.Writer, db string) error {
 	return nil
 }
 
-// [END spanner_queue_send_and_receive_message_sql]
+// [END spanner_send_and_receive_queue_message_with_sql_api]

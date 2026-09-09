@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_queue_send_future]
+// [START spanner_send_to_queue_with_mutation_api_in_future]
 
 import (
 	"context"
@@ -44,4 +44,4 @@ func sendToQueueFuture(w io.Writer, db string) error {
 	return nil
 }
 
-// [END spanner_queue_send_future]
+// [END spanner_send_to_queue_with_mutation_api_in_future]

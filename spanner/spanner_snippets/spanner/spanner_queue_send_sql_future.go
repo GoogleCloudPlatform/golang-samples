@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_queue_send_sql_future]
+// [START spanner_send_to_queue_with_sql_api_in_future]
 
 import (
 	"context"
@@ -51,4 +51,4 @@ func sendToQueueSQLFuture(w io.Writer, db string) error {
 	return nil
 }
 
-// [END spanner_queue_send_sql_future]
+// [END spanner_send_to_queue_with_sql_api_in_future]

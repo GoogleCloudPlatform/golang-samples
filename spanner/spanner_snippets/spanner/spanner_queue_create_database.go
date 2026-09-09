@@ -14,7 +14,7 @@
 
 package spanner
 
-// [START spanner_queue_create_database]
+// [START spanner_create_database_with_queue]
 import (
 	"context"
 	"fmt"
@@ -57,4 +57,4 @@ func createDatabaseWithQueue(ctx context.Context, w io.Writer, db string) error 
 	return nil
 }
 
-// [END spanner_queue_create_database]
+// [END spanner_create_database_with_queue]
