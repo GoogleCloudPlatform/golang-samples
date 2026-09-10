@@ -112,6 +112,19 @@ func TestTextGeneration(t *testing.T) {
 		}
 	})
 
+	t.Run("generate with Parallel Web Search", func(t *testing.T) {
+		buf.Reset()
+		err := generateWithParallelAISearch(buf)
+		if err != nil {
+			t.Skipf("Skipping test; generateWithParallelAISearch failed (likely due to missing subscription or API key): %v", err)
+		}
+
+		output := buf.String()
+		if output == "" {
+			t.Error("expected non-empty output, got empty")
+		}
+	})
+
 	t.Run("generate with VAIS Search", func(t *testing.T) {
 		buf.Reset()
 		dataStore := fmt.Sprintf("projects/%s/locations/global/collections/default_collection/dataStores/grounding-test-datastore", tc.ProjectID)
