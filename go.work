@@ -95,6 +95,7 @@ use (
 	./healthcare
 	./iam
 	./iap
+	./imagebuilder
 	./internal/cloudrunci/testingapp
 	./internal/gomodversiontest
 	./internal/managedkafka
