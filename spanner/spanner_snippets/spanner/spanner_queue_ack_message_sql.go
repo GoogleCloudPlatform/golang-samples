@@ -24,6 +24,8 @@ import (
 	"cloud.google.com/go/spanner"
 )
 
+// ackQueueMessageSQL acknowledges a received queue message using the SQL API,
+// which removes it from the queue.
 func ackQueueMessageSQL(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
