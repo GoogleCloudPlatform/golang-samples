@@ -41,10 +41,10 @@ func inspectTableWithCustomHotword(w io.Writer, projectID, hotwordRegexPattern s
 			{
 				Values: []*dlppb.Value{
 					{
-						Type: &dlppb.Value_StringValue{StringValue: "111-11-1111"},
+						Type: &dlppb.Value_StringValue{StringValue: "444-55-6666"},
 					},
 					{
-						Type: &dlppb.Value_StringValue{StringValue: "222-22-2222"},
+						Type: &dlppb.Value_StringValue{StringValue: "111-22-3333"},
 					},
 				},
 			},
