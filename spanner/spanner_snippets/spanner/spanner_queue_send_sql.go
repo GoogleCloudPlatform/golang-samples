@@ -24,6 +24,7 @@ import (
 	"cloud.google.com/go/spanner"
 )
 
+// sendToQueueSQL sends a message to a queue using the SQL API.
 func sendToQueueSQL(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)

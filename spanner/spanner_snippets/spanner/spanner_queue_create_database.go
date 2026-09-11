@@ -25,6 +25,7 @@ import (
 	adminpb "cloud.google.com/go/spanner/admin/database/apiv1/databasepb"
 )
 
+// createDatabaseWithQueue creates a database that contains a queue.
 func createDatabaseWithQueue(ctx context.Context, w io.Writer, db string) error {
 	matches := regexp.MustCompile("^(.*)/databases/(.*)$").FindStringSubmatch(db)
 	if matches == nil || len(matches) != 3 {

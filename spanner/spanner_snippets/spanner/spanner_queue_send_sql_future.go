@@ -25,6 +25,8 @@ import (
 	"cloud.google.com/go/spanner"
 )
 
+// sendToQueueSQLFuture schedules a message for future delivery to a queue
+// using the SQL API.
 func sendToQueueSQLFuture(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)

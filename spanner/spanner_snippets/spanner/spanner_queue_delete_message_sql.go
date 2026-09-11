@@ -24,6 +24,8 @@ import (
 	"cloud.google.com/go/spanner"
 )
 
+// deleteQueueMessageSQL deletes a message from a queue using the SQL API
+// without receiving it first.
 func deleteQueueMessageSQL(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
