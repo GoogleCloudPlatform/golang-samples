@@ -30,6 +30,9 @@ import (
 
 	"cloud.google.com/go/spanner"
 	"google.golang.org/api/iterator"
+	"google.golang.org/api/option"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"cloud.google.com/go/iam/apiv1/iampb"
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
@@ -824,14 +827,25 @@ func run(ctx context.Context, w io.Writer, cmd string, db string, arg string) er
 	cfg := spanner.ClientConfig{
 		DatabaseRole: databaseRole,
 	}
+	opts := []option.ClientOption{}
 
-	adminClient, err := database.NewDatabaseAdminClient(ctx)
+	endpoint := os.Getenv("EXPERIMENTAL_HOST")
+	if endpoint != "" {
+		opts = append(opts,
+			option.WithEndpoint(endpoint),
+			option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
+			option.WithoutAuthentication(),
+		)
+		cfg.IsExperimentalHost = true
+	}
+
+	adminClient, err := database.NewDatabaseAdminClient(ctx, opts...)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer adminClient.Close()
 
-	dataClient, err := spanner.NewClientWithConfig(ctx, db, cfg)
+	dataClient, err := spanner.NewClientWithConfig(ctx, db, cfg, opts...)
 	if err != nil {
 		log.Fatal(err)
 	}
