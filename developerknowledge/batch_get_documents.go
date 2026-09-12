@@ -45,8 +45,8 @@ func batchGetDocuments(w io.Writer, names []string) (*developerknowledgepb.Batch
 
 	for _, doc := range resp.GetDocuments() {
 		fmt.Fprintf(w, "Title: %s\n", doc.GetTitle())
-		fmt.Fprintf(w, "URI: %s\n", doc.GetUri())
-		fmt.Fprintf(w, "Content Length: %d bytes\n\n", doc.GetContentLengthBytes())
+		fmt.Fprintf(w, "\tURI: %s\n", doc.GetUri())
+		fmt.Fprintf(w, "\tContent Length: %d bytes\n\n", doc.GetContentLengthBytes())
 	}
 
 	return resp, nil

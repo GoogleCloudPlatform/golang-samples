@@ -20,6 +20,31 @@ import (
 	"testing"
 )
 
+// documentNames uses search to discover the names of real documents so tests
+// don't depend on hard-coded document paths, which may move over time.
+func documentNames(t *testing.T, query string, pageSize int32) []string {
+	t.Helper()
+	var buf bytes.Buffer
+	chunks, err := searchDocumentChunks(&buf, query, pageSize)
+	if err != nil {
+		t.Fatalf("searchDocumentChunks(%q): %v", query, err)
+	}
+	var names []string
+	seen := map[string]bool{}
+	for _, chunk := range chunks {
+		name := chunk.GetParent()
+		if name == "" || seen[name] {
+			continue
+		}
+		seen[name] = true
+		names = append(names, name)
+	}
+	if len(names) == 0 {
+		t.Fatalf("searchDocumentChunks(%q): got 0 parent documents, want at least 1", query)
+	}
+	return names
+}
+
 func TestSearchDocumentChunks(t *testing.T) {
 	var buf bytes.Buffer
 	results, err := searchDocumentChunks(&buf, "Cloud Storage bucket creation", 3)
@@ -27,7 +52,7 @@ func TestSearchDocumentChunks(t *testing.T) {
 		t.Fatalf("searchDocumentChunks: %v", err)
 	}
 	if len(results) == 0 {
-		t.Fatalf("expected non-empty search results")
+		t.Fatalf("searchDocumentChunks: got 0 results, want non-empty")
 	}
 	got := buf.String()
 	if !strings.Contains(got, "Parent Document: documents/") {
@@ -37,31 +62,31 @@ func TestSearchDocumentChunks(t *testing.T) {
 
 func TestGetDocument(t *testing.T) {
 	var buf bytes.Buffer
-	name := "documents/docs.cloud.google.com/storage/docs/creating-buckets"
+	name := documentNames(t, "Cloud Storage bucket creation", 3)[0]
 	doc, err := getDocument(&buf, name)
 	if err != nil {
 		t.Fatalf("getDocument: %v", err)
 	}
 	if doc.GetName() != name {
-		t.Errorf("got name %q, want %q", doc.GetName(), name)
+		t.Errorf("getDocument: got name %q, want %q", doc.GetName(), name)
 	}
 	if len(doc.GetTitle()) == 0 {
-		t.Errorf("expected non-empty title")
+		t.Errorf("getDocument(%q): got empty title, want non-empty", name)
 	}
 }
 
 func TestBatchGetDocuments(t *testing.T) {
 	var buf bytes.Buffer
-	names := []string{
-		"documents/docs.cloud.google.com/storage/docs/creating-buckets",
-		"documents/docs.cloud.google.com/storage/docs/deleting-buckets",
+	names := documentNames(t, "Cloud Storage buckets", 10)
+	if len(names) > 2 {
+		names = names[:2]
 	}
 	resp, err := batchGetDocuments(&buf, names)
 	if err != nil {
 		t.Fatalf("batchGetDocuments: %v", err)
 	}
-	if len(resp.GetDocuments()) != 2 {
-		t.Fatalf("got %d documents, want 2", len(resp.GetDocuments()))
+	if got, want := len(resp.GetDocuments()), len(names); got != want {
+		t.Fatalf("batchGetDocuments: got %d documents, want %d", got, want)
 	}
 }
 
@@ -72,6 +97,6 @@ func TestAnswerQuery(t *testing.T) {
 		t.Fatalf("answerQuery: %v", err)
 	}
 	if resp.GetAnswer() == nil || len(resp.GetAnswer().GetAnswerText()) == 0 {
-		t.Errorf("expected non-empty answer text")
+		t.Errorf("answerQuery: got empty answer text, want non-empty")
 	}
 }
