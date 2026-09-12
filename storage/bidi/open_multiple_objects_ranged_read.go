@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rapid
+package bidi
 
 // [START storage_open_multiple_objects_ranged_read]
 import (
@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"cloud.google.com/go/storage/experimental"
 	"cloud.google.com/go/storage/transfermanager"
 )
 
@@ -32,7 +31,7 @@ func openMultipleObjectsRangedRead(w io.Writer, bucket string, objects []string)
 	// bucket := "bucket-name"
 	// objects := []string{"object-name1", "object-name2"}
 	ctx := context.Background()
-	client, err := storage.NewGRPCClient(ctx, experimental.WithZonalBucketAPIs())
+	client, err := storage.NewGRPCClient(ctx, storage.WithGRPCBidiReads())
 	if err != nil {
 		return nil, fmt.Errorf("storage.NewGRPCClient: %w", err)
 	}

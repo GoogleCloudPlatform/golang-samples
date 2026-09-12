@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rapid
+package bidi
 
 // [START storage_read_appendable_object_tail]
 import (
@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"cloud.google.com/go/storage/experimental"
 )
 
 // readAppendableObjectTail simulates a "tail -f" command on a GCS object. It
@@ -34,7 +33,7 @@ func readAppendableObjectTail(w io.Writer, bucket, object string) ([]byte, error
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
-	client, err := storage.NewGRPCClient(ctx, experimental.WithZonalBucketAPIs())
+	client, err := storage.NewGRPCClient(ctx, storage.WithGRPCBidiReads(), storage.WithAppendableUploads())
 	if err != nil {
 		return nil, fmt.Errorf("storage.NewGRPCClient: %w", err)
 	}
