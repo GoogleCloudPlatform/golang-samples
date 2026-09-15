@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rapid
+package bidi
 
 import (
 	"bytes"
@@ -26,7 +26,6 @@ import (
 	"testing"
 
 	"cloud.google.com/go/storage"
-	"cloud.google.com/go/storage/experimental"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
 )
@@ -39,7 +38,7 @@ const (
 )
 
 var (
-	zonalBucketName string
+	bidiBucketName string
 	client          *storage.Client
 	downloadData    []byte
 )
@@ -48,24 +47,24 @@ func TestMain(m *testing.M) {
 	ctx := context.Background()
 
 	// Skip tests by default for now, until b/452725162 is resolved
-	if os.Getenv("STORAGE_RUN_RAPID_TESTS") == "" {
+	if os.Getenv("STORAGE_RUN_BIDI_TESTS") == "" {
 		os.Exit(0)
 	}
 
 	// Create fixture client & bucket to use across tests.
 	tc, _ := testutil.ContextMain(m)
 	var err error
-	client, err = storage.NewGRPCClient(context.Background(), experimental.WithZonalBucketAPIs())
+	client, err = storage.NewGRPCClient(context.Background(), storage.WithGRPCBidiReads(), storage.WithAppendableUploads())
 	if err != nil {
 		log.Fatalf("storage.NewGRPCClient: %v", err)
 	}
-	zonalBucketName = strings.Join([]string{testPrefix, uuid.NewString()}, "-")
-	if err := client.Bucket(zonalBucketName).Create(ctx, tc.ProjectID, &storage.BucketAttrs{
+	bidiBucketName = strings.Join([]string{testPrefix, uuid.NewString()}, "-")
+	if err := client.Bucket(bidiBucketName).Create(ctx, tc.ProjectID, &storage.BucketAttrs{
 		Location: testZonalLocation,
 		CustomPlacementConfig: &storage.CustomPlacementConfig{
 			DataLocations: []string{testZonalZone},
 		},
-		StorageClass: "RAPID",
+		StorageClass: "STANDARD",
 		HierarchicalNamespace: &storage.HierarchicalNamespace{
 			Enabled: true,
 		},
@@ -78,7 +77,7 @@ func TestMain(m *testing.M) {
 	}
 
 	// Create object fixture for download tests
-	w := client.Bucket(zonalBucketName).Object(downloadObject).If(storage.Conditions{DoesNotExist: true}).NewWriter(ctx)
+	w := client.Bucket(bidiBucketName).Object(downloadObject).If(storage.Conditions{DoesNotExist: true}).NewWriter(ctx)
 	downloadData = make([]byte, 4*1024*1024)
 	_, _ = rand.Read(downloadData)
 	if _, err := io.Copy(w, bytes.NewReader(downloadData)); err != nil {
@@ -92,7 +91,7 @@ func TestMain(m *testing.M) {
 	exit := m.Run()
 
 	// Cleanup bucket and objects.
-	if err := testutil.DeleteBucketIfExists(ctx, client, zonalBucketName); err != nil {
+	if err := testutil.DeleteBucketIfExists(ctx, client, bidiBucketName); err != nil {
 		log.Printf("deleting bucket: %v", err)
 	}
 	os.Exit(exit)
@@ -101,12 +100,12 @@ func TestMain(m *testing.M) {
 func TestCreateAndWriteAppendableObject(t *testing.T) {
 	var b bytes.Buffer
 	object := "obj-appendable"
-	if err := createAndWriteAppendableObject(&b, zonalBucketName, object); err != nil {
+	if err := createAndWriteAppendableObject(&b, bidiBucketName, object); err != nil {
 		t.Fatalf("running sample: %v, output: %v", err, b.String())
 	}
 
 	// Check that object was created & is unfinalized
-	attrs, err := client.Bucket(zonalBucketName).Object(object).Attrs(context.Background())
+	attrs, err := client.Bucket(bidiBucketName).Object(object).Attrs(context.Background())
 	if err != nil {
 		t.Fatalf("object.Attrs: %v", err)
 	}
@@ -118,12 +117,12 @@ func TestCreateAndWriteAppendableObject(t *testing.T) {
 func TestFinalizeAppendableObject(t *testing.T) {
 	var b bytes.Buffer
 	object := "obj-finalize"
-	if err := finalizeAppendableObject(&b, zonalBucketName, object); err != nil {
+	if err := finalizeAppendableObject(&b, bidiBucketName, object); err != nil {
 		t.Fatalf("running sample: %v, output: %v", err, b.String())
 	}
 
 	// Check that object was created & is finalized
-	attrs, err := client.Bucket(zonalBucketName).Object(object).Attrs(context.Background())
+	attrs, err := client.Bucket(bidiBucketName).Object(object).Attrs(context.Background())
 	if err != nil {
 		t.Fatalf("object.Attrs: %v", err)
 	}
@@ -135,12 +134,12 @@ func TestFinalizeAppendableObject(t *testing.T) {
 func TestPauseAndResumeAppendableUpload(t *testing.T) {
 	var b bytes.Buffer
 	object := "obj-pause"
-	if err := pauseAndResumeAppendableUpload(&b, zonalBucketName, object); err != nil {
+	if err := pauseAndResumeAppendableUpload(&b, bidiBucketName, object); err != nil {
 		t.Fatalf("running sample: %v, output: %v", err, b.String())
 	}
 
 	// Check that object was created & is finalized
-	attrs, err := client.Bucket(zonalBucketName).Object(object).Attrs(context.Background())
+	attrs, err := client.Bucket(bidiBucketName).Object(object).Attrs(context.Background())
 	if err != nil {
 		t.Fatalf("object.Attrs: %v", err)
 	}
@@ -151,7 +150,7 @@ func TestPauseAndResumeAppendableUpload(t *testing.T) {
 
 func TestOpenObjectSingleRangedRead(t *testing.T) {
 	var b bytes.Buffer
-	data, err := openObjectSingleRangedRead(&b, zonalBucketName, downloadObject)
+	data, err := openObjectSingleRangedRead(&b, bidiBucketName, downloadObject)
 	if err != nil {
 		t.Fatalf("running sample: %v, output: %v", err, b.String())
 	}
@@ -162,7 +161,7 @@ func TestOpenObjectSingleRangedRead(t *testing.T) {
 
 func TestOpenObjectReadFullObject(t *testing.T) {
 	var b bytes.Buffer
-	data, err := openObjectReadFullObject(&b, zonalBucketName, downloadObject)
+	data, err := openObjectReadFullObject(&b, bidiBucketName, downloadObject)
 	if err != nil {
 		t.Fatalf("running sample: %v, output: %v", err, b.String())
 	}
@@ -173,7 +172,7 @@ func TestOpenObjectReadFullObject(t *testing.T) {
 
 func TestOpenObjectMultipleRangedRead(t *testing.T) {
 	var b bytes.Buffer
-	dataSlices, err := openObjectMultipleRangedRead(&b, zonalBucketName, downloadObject)
+	dataSlices, err := openObjectMultipleRangedRead(&b, bidiBucketName, downloadObject)
 	if err != nil {
 		t.Fatalf("running sample: %v, output: %v", err, b.String())
 	}
@@ -185,7 +184,7 @@ func TestOpenObjectMultipleRangedRead(t *testing.T) {
 
 func TestOpenMultipleObjectsRangedRead(t *testing.T) {
 	var b bytes.Buffer
-	dataSlices, err := openMultipleObjectsRangedRead(&b, zonalBucketName, []string{downloadObject, downloadObject, downloadObject})
+	dataSlices, err := openMultipleObjectsRangedRead(&b, bidiBucketName, []string{downloadObject, downloadObject, downloadObject})
 	if err != nil {
 		t.Fatalf("running sample: %v, output: %v", err, b.String())
 	}
@@ -196,13 +195,14 @@ func TestOpenMultipleObjectsRangedRead(t *testing.T) {
 	}
 }
 
+
 func TestReadAppendableObjectTail(t *testing.T) {
 	// Test passes locally but currently takes too long to run. Skipping
 	// on internal issue which will unblock running in CI.
 	t.Skip("b/440374150")
 	var b bytes.Buffer
 	object := "obj-tail"
-	data, err := readAppendableObjectTail(&b, zonalBucketName, object)
+	data, err := readAppendableObjectTail(&b, bidiBucketName, object)
 	if err != nil {
 		t.Fatalf("running sample: %v, output: %v", err, b.String())
 	}

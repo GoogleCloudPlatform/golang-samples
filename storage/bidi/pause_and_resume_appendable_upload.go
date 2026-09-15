@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rapid
+package bidi
 
 // [START storage_pause_and_resume_appendable_upload]
 import (
@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"cloud.google.com/go/storage/experimental"
 )
 
 // pauseAndResumeAppendableUpload creates a new unfinalized appendable object,
@@ -32,7 +31,7 @@ func pauseAndResumeAppendableUpload(w io.Writer, bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
-	client, err := storage.NewGRPCClient(ctx, experimental.WithZonalBucketAPIs())
+	client, err := storage.NewGRPCClient(ctx, storage.WithAppendableUploads())
 	if err != nil {
 		return fmt.Errorf("storage.NewGRPCClient: %w", err)
 	}
