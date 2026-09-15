@@ -24,6 +24,8 @@ import (
 	"cloud.google.com/go/spanner"
 )
 
+// ackQueueMessage acknowledges a received queue message using the Mutation
+// API, which removes it from the queue.
 func ackQueueMessage(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
