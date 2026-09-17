@@ -24,6 +24,7 @@ import (
 	"cloud.google.com/go/spanner"
 )
 
+// sendToQueue sends a message to a queue using the Mutation API.
 func sendToQueue(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
