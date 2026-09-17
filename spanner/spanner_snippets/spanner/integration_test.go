@@ -116,7 +116,7 @@ func initBackupTest(t *testing.T, id, instName string) (restoreDBName, backupID,
 func initInstancePartitionTest(t *testing.T, id string) (string, string, string, func()) {
 	projectID := getSampleProjectId(t)
 	instancePartitionID := fmt.Sprintf("instance-partition-%s", id)
-	instanceID, cleanup := createTestInstance(t, projectID, "regional-us-central1")
+	instanceID, cleanup := createTestInstance(t, projectID, "nam11")
 
 	return projectID, instanceID, instancePartitionID, cleanup
 }

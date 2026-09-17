@@ -25,6 +25,8 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// sendAndReceiveQueueMessageSQL sends a message to a queue and then receives
+// it using the SQL API.
 func sendAndReceiveQueueMessageSQL(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)

@@ -25,6 +25,8 @@ import (
 	"cloud.google.com/go/spanner"
 )
 
+// sendToQueueFuture schedules a message for future delivery to a queue using
+// the Mutation API.
 func sendToQueueFuture(w io.Writer, db string) error {
 	ctx := context.Background()
 	client, err := spanner.NewClient(ctx, db)
