@@ -364,7 +364,7 @@ func TestComputeDisksSnippets(t *testing.T) {
 	diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	instanceDiskName := fmt.Sprintf("test-instance-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	snapshotName := fmt.Sprintf("test-snapshot-%v-%v", time.Now().Format("01-02-2006"), r.Int())
-	sourceImage := "projects/debian-cloud/global/images/family/debian-11"
+	sourceImage := "projects/debian-cloud/global/images/family/debian-13"
 	diskType := fmt.Sprintf("zones/%s/diskTypes/pd-ssd", zone)
 	diskSnapshotLink := fmt.Sprintf("projects/%s/global/snapshots/%s", tc.ProjectID, snapshotName)
 
