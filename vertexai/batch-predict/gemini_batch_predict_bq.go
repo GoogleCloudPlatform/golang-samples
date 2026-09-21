@@ -33,7 +33,7 @@ func batchPredictBQ(w io.Writer, projectID, location string, inputURI string, ou
 	// location  := "us-central1"
 	// inputURI  := "bq://storage-samples.generative_ai.batch_requests_for_multimodal_input"
 	// outputURI := "bq://<cloud-project-name>.<dataset-name>.<table-name>"
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 	jobName := "batch-predict-bq-test-001"
 
 	ctx := context.Background()
