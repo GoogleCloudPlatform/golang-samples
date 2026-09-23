@@ -53,14 +53,39 @@ func TestFilters(t *testing.T) {
 	if _, err := adminClient.CreateTable(ctx, &adminpb.CreateTableRequest{
 		Parent:  instancePath,
 		TableId: tableName,
-		Table: &adminpb.Table{
-			ColumnFamilies: map[string]*adminpb.ColumnFamily{
-				"stats_summary": {},
-				"cell_plan":     {},
+		Table:   &adminpb.Table{},
+	}); err != nil {
+		t.Fatalf("Could not create table %s: %v", tableName, err)
+	}
+
+	if _, err := adminClient.ModifyColumnFamilies(ctx, &adminpb.ModifyColumnFamiliesRequest{
+		Name: tablePath,
+		Modifications: []*adminpb.ModifyColumnFamiliesRequest_Modification{
+			{
+				Id: "stats_summary",
+				Mod: &adminpb.ModifyColumnFamiliesRequest_Modification_Create{
+					Create: &adminpb.ColumnFamily{},
+				},
 			},
 		},
 	}); err != nil {
-		t.Fatalf("Could not create table %s: %v", tableName, err)
+		adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tablePath})
+		t.Fatalf("ModifyColumnFamilies(%s): %v", "stats_summary", err)
+	}
+
+	if _, err := adminClient.ModifyColumnFamilies(ctx, &adminpb.ModifyColumnFamiliesRequest{
+		Name: tablePath,
+		Modifications: []*adminpb.ModifyColumnFamiliesRequest_Modification{
+			{
+				Id: "cell_plan",
+				Mod: &adminpb.ModifyColumnFamiliesRequest_Modification_Create{
+					Create: &adminpb.ColumnFamily{},
+				},
+			},
+		},
+	}); err != nil {
+		adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tablePath})
+		t.Fatalf("ModifyColumnFamilies(%s): %v", "cell_plan", err)
 	}
 
 	timestamp := bigtable.Now().TruncateToMilliseconds()
@@ -146,33 +171,29 @@ Column Family stats_summary
 			filter: filterLimitCellsPerRow,
 			want: fmt.Sprintf(
 				`Reading data for phone#4c410523#20190501:
-Column Family cell_plan
-	data_plan_01gb: false @%[1]d
-	data_plan_01gb: true @%[2]d
+Column Family stats_summary
+	connected_cell: 1 @%[1]d
+	connected_wifi: 1 @%[1]d
 
 Reading data for phone#4c410523#20190502:
-Column Family cell_plan
-	data_plan_05gb: true @%[1]d
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
+	connected_wifi: 1 @%[1]d
 
 Reading data for phone#4c410523#20190505:
-Column Family cell_plan
-	data_plan_05gb: true @%[1]d
 Column Family stats_summary
 	connected_cell: 0 @%[1]d
+	connected_wifi: 1 @%[1]d
 
 Reading data for phone#5c10102#20190501:
-Column Family cell_plan
-	data_plan_10gb: true @%[1]d
 Column Family stats_summary
 	connected_cell: 1 @%[1]d
+	connected_wifi: 1 @%[1]d
 
 Reading data for phone#5c10102#20190502:
-Column Family cell_plan
-	data_plan_10gb: true @%[1]d
 Column Family stats_summary
-	connected_cell: 1 @%[1]d`, timestamp, timestampMinusHr),
+	connected_cell: 1 @%[1]d
+	connected_wifi: 0 @%[1]d`, timestamp, timestampMinusHr),
 		},
 		{
 			name:   "filterLimitCellsPerRowOffset",
@@ -180,30 +201,34 @@ Column Family stats_summary
 			want: fmt.Sprintf(
 				`Reading data for phone#4c410523#20190501:
 Column Family cell_plan
+	data_plan_01gb: false @%[1]d
+	data_plan_01gb: true @%[2]d
 	data_plan_05gb: true @%[1]d
 Column Family stats_summary
-	connected_cell: 1 @%[1]d
-	connected_wifi: 1 @%[1]d
 	os_build: PQ2A.190405.003 @%[1]d
 
 Reading data for phone#4c410523#20190502:
+Column Family cell_plan
+	data_plan_05gb: true @%[1]d
 Column Family stats_summary
-	connected_wifi: 1 @%[1]d
 	os_build: PQ2A.190405.004 @%[1]d
 
 Reading data for phone#4c410523#20190505:
+Column Family cell_plan
+	data_plan_05gb: true @%[1]d
 Column Family stats_summary
-	connected_wifi: 1 @%[1]d
 	os_build: PQ2A.190406.000 @%[1]d
 
 Reading data for phone#5c10102#20190501:
+Column Family cell_plan
+	data_plan_10gb: true @%[1]d
 Column Family stats_summary
-	connected_wifi: 1 @%[1]d
 	os_build: PQ2A.190401.002 @%[1]d
 
 Reading data for phone#5c10102#20190502:
+Column Family cell_plan
+	data_plan_10gb: true @%[1]d
 Column Family stats_summary
-	connected_wifi: 0 @%[1]d
 	os_build: PQ2A.190406.000 @%[1]d`, timestamp, timestampMinusHr),
 		},
 		{
