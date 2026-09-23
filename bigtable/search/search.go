@@ -41,6 +41,8 @@ import (
 	"unicode"
 
 	"cloud.google.com/go/bigtable"
+	admin "cloud.google.com/go/bigtable/admin/apiv2"
+	"cloud.google.com/go/bigtable/admin/apiv2/adminpb"
 )
 
 var (
@@ -112,9 +114,9 @@ func main() {
 	flag.Parse()
 
 	// Make an admin client.
-	adminClient, err := bigtable.NewAdminClient(context.Background(), *project, *instance)
+	adminClient, err := admin.NewBigtableTableAdminClient(context.Background())
 	if err != nil {
-		log.Fatal("Bigtable NewAdminClient:", err)
+		log.Fatal("Bigtable NewBigtableTableAdminClient:", err)
 	}
 
 	// Make a regular client.
@@ -130,7 +132,9 @@ func main() {
 	http.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) { handleSearch(w, r, table) })
 	http.HandleFunc("/content", func(w http.ResponseWriter, r *http.Request) { handleContent(w, r, table) })
 	http.HandleFunc("/add", func(w http.ResponseWriter, r *http.Request) { handleAddDoc(w, r, table) })
-	http.HandleFunc("/reset", func(w http.ResponseWriter, r *http.Request) { handleReset(w, r, *tableName, adminClient) })
+	http.HandleFunc("/reset", func(w http.ResponseWriter, r *http.Request) {
+		handleReset(w, r, *project, *instance, *tableName, adminClient)
+	})
 	http.HandleFunc("/copy", func(w http.ResponseWriter, r *http.Request) { handleCopy(w, r, *tableName, client, adminClient) })
 	http.HandleFunc("/", handleMain)
 	if err := http.ListenAndServe(":"+strconv.Itoa(*port), nil); err != nil {
@@ -355,7 +359,7 @@ func handleAddDoc(w http.ResponseWriter, r *http.Request, table *bigtable.Table)
 }
 
 // handleReset deletes the table if it exists, creates it again, and creates its column families.
-func handleReset(w http.ResponseWriter, r *http.Request, table string, adminClient *bigtable.AdminClient) {
+func handleReset(w http.ResponseWriter, r *http.Request, project, instance, table string, adminClient *admin.BigtableTableAdminClient) {
 	if r.Method != "POST" {
 		http.Error(w, "POST requests only", http.StatusMethodNotAllowed)
 		return
@@ -363,29 +367,41 @@ func handleReset(w http.ResponseWriter, r *http.Request, table string, adminClie
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
-	adminClient.DeleteTable(ctx, table)
-	if err := adminClient.CreateTable(ctx, table); err != nil {
-		http.Error(w, "Error creating Bigtable: "+err.Error(), http.StatusInternalServerError)
+	instanceName := fmt.Sprintf("projects/%s/instances/%s", project, instance)
+	tableFullName := fmt.Sprintf("%s/tables/%s", instanceName, table)
+
+	adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tableFullName})
+	if _, err := adminClient.CreateTable(ctx, &adminpb.CreateTableRequest{
+		Parent:  instanceName,
+		TableId: table,
+		Table: &adminpb.Table{
+			ColumnFamilies: map[string]*adminpb.ColumnFamily{
+				indexColumnFamily: {
+					GcRule: &adminpb.GcRule{
+						Rule: &adminpb.GcRule_MaxNumVersions{
+							MaxNumVersions: 1,
+						},
+					},
+				},
+				contentColumnFamily: {
+					GcRule: &adminpb.GcRule{
+						Rule: &adminpb.GcRule_MaxNumVersions{
+							MaxNumVersions: 1,
+						},
+					},
+				},
+			},
+		},
+	}); err != nil {
+		http.Error(w, "Error creating table: "+err.Error(), http.StatusInternalServerError)
 		return
-	}
-	time.Sleep(20 * time.Second)
-	// Create two column families, and set the GC policy for each one to keep one version.
-	for _, family := range []string{indexColumnFamily, contentColumnFamily} {
-		if err := adminClient.CreateColumnFamily(ctx, table, family); err != nil {
-			http.Error(w, "Error creating column family: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-		if err := adminClient.SetGCPolicy(ctx, table, family, bigtable.MaxVersionsPolicy(1)); err != nil {
-			http.Error(w, "Error setting GC policy: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
 	}
 	w.Write([]byte("<html><body>Done.</body></html>"))
 	return
 }
 
 // copyTable copies data from one table to another.
-func copyTable(src, dst string, client *bigtable.Client, adminClient *bigtable.AdminClient) error {
+func copyTable(src, dst string, client *bigtable.Client, adminClient *admin.BigtableTableAdminClient) error {
 	if src == "" || src == dst {
 		return nil
 	}
@@ -441,7 +457,7 @@ func copyTable(src, dst string, client *bigtable.Client, adminClient *bigtable.A
 }
 
 // handleCopy copies data from one table to another.
-func handleCopy(w http.ResponseWriter, r *http.Request, dst string, client *bigtable.Client, adminClient *bigtable.AdminClient) {
+func handleCopy(w http.ResponseWriter, r *http.Request, dst string, client *bigtable.Client, adminClient *admin.BigtableTableAdminClient) {
 	if r.Method != "POST" {
 		http.Error(w, "POST requests only", http.StatusMethodNotAllowed)
 		return
