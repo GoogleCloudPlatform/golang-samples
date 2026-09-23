@@ -374,34 +374,27 @@ func handleReset(w http.ResponseWriter, r *http.Request, project, instance, tabl
 	if _, err := adminClient.CreateTable(ctx, &adminpb.CreateTableRequest{
 		Parent:  instanceName,
 		TableId: table,
-		Table:   &adminpb.Table{},
-	}); err != nil {
-		http.Error(w, "Error creating Bigtable: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	time.Sleep(20 * time.Second)
-	// Create two column families, and set the GC policy for each one to keep one version.
-	for _, family := range []string{indexColumnFamily, contentColumnFamily} {
-		if _, err := adminClient.ModifyColumnFamilies(ctx, &adminpb.ModifyColumnFamiliesRequest{
-			Name: tableFullName,
-			Modifications: []*adminpb.ModifyColumnFamiliesRequest_Modification{
-				{
-					Id: family,
-					Mod: &adminpb.ModifyColumnFamiliesRequest_Modification_Create{
-						Create: &adminpb.ColumnFamily{
-							GcRule: &adminpb.GcRule{
-								Rule: &adminpb.GcRule_MaxNumVersions{
-									MaxNumVersions: 1,
-								},
-							},
+		Table: &adminpb.Table{
+			ColumnFamilies: map[string]*adminpb.ColumnFamily{
+				indexColumnFamily: {
+					GcRule: &adminpb.GcRule{
+						Rule: &adminpb.GcRule_MaxNumVersions{
+							MaxNumVersions: 1,
+						},
+					},
+				},
+				contentColumnFamily: {
+					GcRule: &adminpb.GcRule{
+						Rule: &adminpb.GcRule_MaxNumVersions{
+							MaxNumVersions: 1,
 						},
 					},
 				},
 			},
-		}); err != nil {
-			http.Error(w, "Error creating column family: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
+		},
+	}); err != nil {
+		http.Error(w, "Error creating table: "+err.Error(), http.StatusInternalServerError)
+		return
 	}
 	w.Write([]byte("<html><body>Done.</body></html>"))
 	return

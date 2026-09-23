@@ -80,7 +80,11 @@ func main() {
 		if _, err := adminClient.CreateTable(ctx, &adminpb.CreateTableRequest{
 			Parent:  instanceName,
 			TableId: tableName,
-			Table:   &adminpb.Table{},
+			Table: &adminpb.Table{
+				ColumnFamilies: map[string]*adminpb.ColumnFamily{
+					familyName: {},
+				},
+			},
 		}); err != nil {
 			log.Fatalf("Unable to create table: %v. %v", tableName, err)
 		}
