@@ -15,8 +15,10 @@
 package cloudruntests
 
 import (
+	"fmt"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -25,7 +27,8 @@ import (
 func TestLoggingManualService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	service := cloudrunci.NewService("logging-manual", tc.ProjectID)
+	uniqueSuffix := fmt.Sprintf("%d", time.Now().UnixNano())
+	service := cloudrunci.NewService("logging-manual"+uniqueSuffix, tc.ProjectID)
 	service.Dir = "../logging-manual"
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)

@@ -15,8 +15,10 @@
 package cloudruntests
 
 import (
+	"fmt"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -25,7 +27,8 @@ import (
 func TestImageProcessingService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	service := cloudrunci.NewService("imageproc", tc.ProjectID)
+	uniqueSuffix := fmt.Sprintf("%d", time.Now().UnixNano())
+	service := cloudrunci.NewService("imageproc"+uniqueSuffix, tc.ProjectID)
 	service.Dir = "../image-processing"
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)

@@ -15,6 +15,7 @@
 package cloudruntests
 
 import (
+	"fmt"
 	"net/http"
 	"testing"
 	"time"
@@ -26,7 +27,8 @@ import (
 func TestBrokenService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	service := cloudrunci.NewService("hello-broken", tc.ProjectID)
+	uniqueSuffix := fmt.Sprintf("%d", time.Now().UnixNano())
+	service := cloudrunci.NewService("hello-broken"+uniqueSuffix, tc.ProjectID)
 	service.Dir = "../hello-broken"
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)

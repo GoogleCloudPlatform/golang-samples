@@ -15,6 +15,7 @@
 package cloudruntests
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -31,7 +32,8 @@ import (
 func TestHTTP2Server(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	service := cloudrunci.NewService("h2c", tc.ProjectID)
+	uniqueSuffix := fmt.Sprintf("%d", time.Now().UnixNano())
+	service := cloudrunci.NewService("h2c"+uniqueSuffix, tc.ProjectID)
 	service.Dir = "../h2c"
 	service.AllowUnauthenticated = true
 	service.AsBuildpack = true

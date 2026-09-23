@@ -37,15 +37,16 @@ import (
 func TestGRPCPingService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
+	uniqueSuffix := fmt.Sprintf("%d", time.Now().UnixNano())
 	// Prepare the container image for both services.
-	pingService := cloudrunci.NewService("grpc-ping", tc.ProjectID)
+	pingService := cloudrunci.NewService("grpc-ping"+uniqueSuffix, tc.ProjectID)
 	pingService.Dir = "../grpc-ping"
 	if err := pingService.Build(); err != nil {
 		t.Fatalf("Service.Build %q: %v", pingService.Name, err)
 	}
 
 	// Deploy the ping-upstream service.
-	upstreamService := cloudrunci.NewService("grpc-ping-upstream", tc.ProjectID)
+	upstreamService := cloudrunci.NewService("grpc-ping-upstream"+uniqueSuffix, tc.ProjectID)
 	upstreamService.Image = pingService.Image
 	upstreamService.Dir = "../grpc-ping"
 	if err := upstreamService.Deploy(); err != nil {

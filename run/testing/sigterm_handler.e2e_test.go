@@ -28,7 +28,8 @@ import (
 func TestSigtermHandlerService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	service := cloudrunci.NewService("sigterm-handler", tc.ProjectID)
+	uniqueSuffix := fmt.Sprintf("%d", time.Now().UnixNano())
+	service := cloudrunci.NewService("sigterm-handler"+uniqueSuffix, tc.ProjectID)
 	service.Dir = "../sigterm-handler"
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)

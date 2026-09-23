@@ -15,8 +15,10 @@
 package cloudruntests
 
 import (
+	"fmt"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -24,7 +26,8 @@ import (
 
 func TestDiagramService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
-	service := cloudrunci.NewService("diagram", tc.ProjectID)
+	uniqueSuffix := fmt.Sprintf("%d", time.Now().UnixNano())
+	service := cloudrunci.NewService("diagram"+uniqueSuffix, tc.ProjectID)
 	service.Dir = "../system_package"
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)

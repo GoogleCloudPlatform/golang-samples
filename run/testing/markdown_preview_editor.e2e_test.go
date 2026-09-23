@@ -17,6 +17,7 @@ package cloudruntests
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"testing"
@@ -36,14 +37,15 @@ func TestEditorService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 	client = http.Client{Timeout: 10 * time.Second}
 
-	renderService = cloudrunci.NewService("renderer", tc.ProjectID)
+	uniqueSuffix := fmt.Sprintf("%d", time.Now().UnixNano())
+	renderService = cloudrunci.NewService("renderer"+uniqueSuffix, tc.ProjectID)
 	renderService.Dir = "../markdown-preview/renderer"
 	if err := renderService.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", renderService.Name, err)
 	}
 	defer renderService.Clean()
 
-	editorService = cloudrunci.NewService("editor", tc.ProjectID)
+	editorService = cloudrunci.NewService("editor"+uniqueSuffix, tc.ProjectID)
 	editorService.Dir = "../markdown-preview/editor"
 	u, err := renderService.URL("")
 	if err != nil {
