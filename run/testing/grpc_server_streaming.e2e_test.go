@@ -18,6 +18,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
 	"io"
 	"testing"
 	"time"
@@ -35,7 +36,8 @@ import (
 func TestGRPCServerStreamingService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	service := cloudrunci.NewService("grpc-server-streaming", tc.ProjectID)
+	uniqueSuffix := fmt.Sprintf("%d", time.Now().UnixNano())
+	service := cloudrunci.NewService("grpc-server-streaming"+uniqueSuffix, tc.ProjectID)
 	service.Dir = "../grpc-server-streaming"
 	service.AllowUnauthenticated = true
 

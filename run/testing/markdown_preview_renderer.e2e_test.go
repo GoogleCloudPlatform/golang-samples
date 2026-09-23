@@ -15,10 +15,12 @@
 package cloudruntests
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -26,7 +28,9 @@ import (
 
 func TestRendererService(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
-	service := cloudrunci.NewService("render", tc.ProjectID)
+
+	uniqueSuffix := fmt.Sprintf("%d", time.Now().UnixNano())
+	service := cloudrunci.NewService("render"+uniqueSuffix, tc.ProjectID)
 	service.Dir = "../markdown-preview/renderer"
 	if err := service.Deploy(); err != nil {
 		t.Fatalf("service.Deploy %q: %v", service.Name, err)

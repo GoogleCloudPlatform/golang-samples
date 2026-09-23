@@ -15,7 +15,9 @@
 package cloudruntests
 
 import (
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
@@ -24,8 +26,9 @@ import (
 func TestCloudRunJobs(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
+	uniqueSuffix := fmt.Sprintf("%d", time.Now().UnixNano())
 	crj := &cloudrunci.Job{
-		Name:        "runjobs",
+		Name:        "runjobs" + uniqueSuffix,
 		ProjectID:   tc.ProjectID,
 		Dir:         "../jobs",
 		AsBuildpack: true,

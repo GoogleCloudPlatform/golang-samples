@@ -16,10 +16,12 @@ package cloudruntests
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/cloudrunci"
@@ -29,7 +31,8 @@ import (
 func TestServiceHealth(t *testing.T) {
 	tc := testutil.EndToEndTest(t)
 
-	service := cloudrunci.NewService("service-health", tc.ProjectID)
+	uniqueSuffix := fmt.Sprintf("%d", time.Now().UnixNano())
+	service := cloudrunci.NewService("service-health"+uniqueSuffix, tc.ProjectID)
 	service.Readiness = &cloudrunci.ReadinessProbe{
 		TimeoutSeconds:   1,
 		PeriodSeconds:    1,
