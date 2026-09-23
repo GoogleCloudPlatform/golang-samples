@@ -132,7 +132,9 @@ func main() {
 	http.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) { handleSearch(w, r, table) })
 	http.HandleFunc("/content", func(w http.ResponseWriter, r *http.Request) { handleContent(w, r, table) })
 	http.HandleFunc("/add", func(w http.ResponseWriter, r *http.Request) { handleAddDoc(w, r, table) })
-	http.HandleFunc("/reset", func(w http.ResponseWriter, r *http.Request) { handleReset(w, r, *project, *instance, *tableName, adminClient) })
+	http.HandleFunc("/reset", func(w http.ResponseWriter, r *http.Request) {
+		handleReset(w, r, *project, *instance, *tableName, adminClient)
+	})
 	http.HandleFunc("/copy", func(w http.ResponseWriter, r *http.Request) { handleCopy(w, r, *tableName, client, adminClient) })
 	http.HandleFunc("/", handleMain)
 	if err := http.ListenAndServe(":"+strconv.Itoa(*port), nil); err != nil {
