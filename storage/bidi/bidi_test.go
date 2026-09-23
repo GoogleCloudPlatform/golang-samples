@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -207,5 +208,23 @@ func TestReadAppendableObjectTail(t *testing.T) {
 	}
 	if got, want := len(data), 100; got != want {
 		t.Errorf("downloaded %v bytes, want %v", got, want)
+	}
+}
+
+func TestOptimizeWriteLatencyPool(t *testing.T) {
+	var b bytes.Buffer
+	prefix := "obj-pool-" + uuid.NewString()[:8]
+	if err := optimizeWriteLatencyPool(&b, bidiBucketName, prefix); err != nil {
+		t.Fatalf("running sample: %v, output: %v", err, b.String())
+	}
+
+	// Check that the first unfinalized object was created
+	firstObj := fmt.Sprintf("%s_0", prefix)
+	attrs, err := client.Bucket(bidiBucketName).Object(firstObj).Attrs(context.Background())
+	if err != nil {
+		t.Fatalf("object.Attrs: %v", err)
+	}
+	if !attrs.Finalized.IsZero() {
+		t.Errorf("got finalized object, want unfinalized")
 	}
 }
