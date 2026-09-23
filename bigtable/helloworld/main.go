@@ -24,6 +24,9 @@ import (
 	"log"
 
 	"cloud.google.com/go/bigtable"
+	admin "cloud.google.com/go/bigtable/admin/apiv2"
+	"cloud.google.com/go/bigtable/admin/apiv2/adminpb"
+	"google.golang.org/api/iterator"
 )
 
 // [END bigtable_hw_imports]
@@ -61,34 +64,62 @@ func main() {
 	ctx := context.Background()
 
 	// Set up admin client, tables, and column families.
-	// NewAdminClient uses Application Default Credentials to authenticate.
+	// NewBigtableTableAdminClient uses Application Default Credentials to authenticate.
 	// [START bigtable_hw_connect]
-	adminClient, err := bigtable.NewAdminClient(ctx, *project, *instance)
+	adminClient, err := admin.NewBigtableTableAdminClient(ctx)
 	if err != nil {
 		log.Fatalf("Could not create admin client: %v", err)
 	}
 	// [END bigtable_hw_connect]
 
 	// [START bigtable_hw_create_table]
-	tables, err := adminClient.Tables(ctx)
-	if err != nil {
-		log.Fatalf("Could not fetch table list: %v", err)
+	instanceName := fmt.Sprintf("projects/%s/instances/%s", *project, *instance)
+	tableFullName := fmt.Sprintf("%s/tables/%s", instanceName, tableName)
+
+	var tables []string
+	it := adminClient.ListTables(ctx, &adminpb.ListTablesRequest{Parent: instanceName})
+	for {
+		tbl, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatalf("Could not fetch table list: %v", err)
+		}
+		tables = append(tables, tbl.Name)
 	}
 
-	if !sliceContains(tables, tableName) {
+	if !sliceContains(tables, tableFullName) {
 		log.Printf("Creating table %s", tableName)
-		if err := adminClient.CreateTable(ctx, tableName); err != nil {
+		if _, err := adminClient.CreateTable(ctx, &adminpb.CreateTableRequest{
+			Parent:  instanceName,
+			TableId: tableName,
+			Table:   &adminpb.Table{},
+		}); err != nil {
 			log.Fatalf("Could not create table %s: %v", tableName, err)
 		}
 	}
 
-	tblInfo, err := adminClient.TableInfo(ctx, tableName)
+	tblInfo, err := adminClient.GetTable(ctx, &adminpb.GetTableRequest{
+		Name: tableFullName,
+		View: adminpb.Table_SCHEMA_VIEW,
+	})
 	if err != nil {
 		log.Fatalf("Could not read info for table %s: %v", tableName, err)
 	}
 
-	if !sliceContains(tblInfo.Families, columnFamilyName) {
-		if err := adminClient.CreateColumnFamily(ctx, tableName, columnFamilyName); err != nil {
+	if _, ok := tblInfo.ColumnFamilies[columnFamilyName]; !ok {
+		if _, err := adminClient.ModifyColumnFamilies(ctx, &adminpb.ModifyColumnFamiliesRequest{
+			Name: tableFullName,
+			Modifications: []*adminpb.ModifyColumnFamiliesRequest_Modification{
+				{
+					Id: columnFamilyName,
+					Mod: &adminpb.ModifyColumnFamiliesRequest_Modification_Create{
+						Create: &adminpb.ColumnFamily{},
+					},
+				},
+			},
+		}); err != nil {
 			log.Fatalf("Could not create column family %s: %v", columnFamilyName, err)
 		}
 	}
@@ -163,7 +194,7 @@ func main() {
 
 	// [START bigtable_hw_delete_table]
 	log.Printf("Deleting the table")
-	if err = adminClient.DeleteTable(ctx, tableName); err != nil {
+	if err = adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tableFullName}); err != nil {
 		log.Fatalf("Could not delete table %s: %v", tableName, err)
 	}
 

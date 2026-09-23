@@ -24,11 +24,15 @@ import (
 	"bytes"
 	"context"
 	"encoding/binary"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 
 	"cloud.google.com/go/bigtable"
+	admin "cloud.google.com/go/bigtable/admin/apiv2"
+	"cloud.google.com/go/bigtable/admin/apiv2/adminpb"
+	"google.golang.org/api/iterator"
 	"google.golang.org/appengine"
 	aelog "google.golang.org/appengine/log"
 	"google.golang.org/appengine/user"
@@ -52,26 +56,54 @@ func main() {
 	ctx := context.Background()
 
 	// Set up admin client, tables, and column families.
-	// NewAdminClient uses Application Default Credentials to authenticate.
-	adminClient, err := bigtable.NewAdminClient(ctx, project, instance)
+	// NewBigtableTableAdminClient uses Application Default Credentials to authenticate.
+	adminClient, err := admin.NewBigtableTableAdminClient(ctx)
 	if err != nil {
 		log.Fatalf("Unable to create a table admin client. %v", err)
 	}
-	tables, err := adminClient.Tables(ctx)
-	if err != nil {
-		log.Fatalf("Unable to fetch table list. %v", err)
+	instanceName := fmt.Sprintf("projects/%s/instances/%s", project, instance)
+	tableFullName := fmt.Sprintf("%s/tables/%s", instanceName, tableName)
+
+	var tables []string
+	it := adminClient.ListTables(ctx, &adminpb.ListTablesRequest{Parent: instanceName})
+	for {
+		tbl, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatalf("Unable to fetch table list. %v", err)
+		}
+		tables = append(tables, tbl.Name)
 	}
-	if !sliceContains(tables, tableName) {
-		if err := adminClient.CreateTable(ctx, tableName); err != nil {
+	if !sliceContains(tables, tableFullName) {
+		if _, err := adminClient.CreateTable(ctx, &adminpb.CreateTableRequest{
+			Parent:  instanceName,
+			TableId: tableName,
+			Table:   &adminpb.Table{},
+		}); err != nil {
 			log.Fatalf("Unable to create table: %v. %v", tableName, err)
 		}
 	}
-	tblInfo, err := adminClient.TableInfo(ctx, tableName)
+	tblInfo, err := adminClient.GetTable(ctx, &adminpb.GetTableRequest{
+		Name: tableFullName,
+		View: adminpb.Table_SCHEMA_VIEW,
+	})
 	if err != nil {
 		log.Fatalf("Unable to read info for table: %v. %v", tableName, err)
 	}
-	if !sliceContains(tblInfo.Families, familyName) {
-		if err := adminClient.CreateColumnFamily(ctx, tableName, familyName); err != nil {
+	if _, ok := tblInfo.ColumnFamilies[familyName]; !ok {
+		if _, err := adminClient.ModifyColumnFamilies(ctx, &adminpb.ModifyColumnFamiliesRequest{
+			Name: tableFullName,
+			Modifications: []*adminpb.ModifyColumnFamiliesRequest_Modification{
+				{
+					Id: familyName,
+					Mod: &adminpb.ModifyColumnFamiliesRequest_Modification_Create{
+						Create: &adminpb.ColumnFamily{},
+					},
+				},
+			},
+		}); err != nil {
 			log.Fatalf("Unable to create column family: %v. %v", familyName, err)
 		}
 	}

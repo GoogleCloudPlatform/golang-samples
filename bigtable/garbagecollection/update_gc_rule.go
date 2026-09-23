@@ -20,7 +20,9 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/bigtable"
+	admin "cloud.google.com/go/bigtable/admin/apiv2"
+	"cloud.google.com/go/bigtable/admin/apiv2/adminpb"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
 func updateGCRule(w io.Writer, projectID, instanceID string, tableName string) error {
@@ -30,17 +32,37 @@ func updateGCRule(w io.Writer, projectID, instanceID string, tableName string) e
 
 	ctx := context.Background()
 
-	adminClient, err := bigtable.NewAdminClient(ctx, projectID, instanceID)
+	adminClient, err := admin.NewBigtableTableAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("bigtable.NewAdminClient: %w", err)
+		return fmt.Errorf("admin.NewBigtableTableAdminClient: %w", err)
 	}
 	defer adminClient.Close()
 
 	columnFamilyName := "cf1"
 	// Update the column family cf1 to update the GC rule.
-	policy := bigtable.MaxVersionsPolicy(1)
-	if err := adminClient.SetGCPolicy(ctx, tableName, columnFamilyName, policy); err != nil {
-		return fmt.Errorf("SetGCPolicy(%s): %w", policy, err)
+	policy := &adminpb.GcRule{
+		Rule: &adminpb.GcRule_MaxNumVersions{
+			MaxNumVersions: 1,
+		},
+	}
+	req := &adminpb.ModifyColumnFamiliesRequest{
+		Name: fmt.Sprintf("projects/%s/instances/%s/tables/%s", projectID, instanceID, tableName),
+		Modifications: []*adminpb.ModifyColumnFamiliesRequest_Modification{
+			{
+				Id: columnFamilyName,
+				Mod: &adminpb.ModifyColumnFamiliesRequest_Modification_Update{
+					Update: &adminpb.ColumnFamily{
+						GcRule: policy,
+					},
+				},
+				UpdateMask: &fieldmaskpb.FieldMask{
+					Paths: []string{"gc_rule"},
+				},
+			},
+		},
+	}
+	if _, err := adminClient.ModifyColumnFamilies(ctx, req); err != nil {
+		return fmt.Errorf("ModifyColumnFamilies(%s): %w", columnFamilyName, err)
 	}
 
 	fmt.Fprintf(w, "Updated column family %s GC rule with policy: %v\n", columnFamilyName, policy)

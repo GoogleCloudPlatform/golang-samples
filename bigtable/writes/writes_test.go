@@ -17,12 +17,14 @@ package writes
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
-	"cloud.google.com/go/bigtable"
+	admin "cloud.google.com/go/bigtable/admin/apiv2"
+	"cloud.google.com/go/bigtable/admin/apiv2/adminpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -37,19 +39,52 @@ func TestWrites(t *testing.T) {
 	if project == "" || instance == "" {
 		t.Skip("Skipping bigtable integration test. Set GOLANG_SAMPLES_BIGTABLE_PROJECT and GOLANG_SAMPLES_BIGTABLE_INSTANCE.")
 	}
-	adminClient, err := bigtable.NewAdminClient(ctx, project, instance)
+	adminClient, err := admin.NewBigtableTableAdminClient(ctx)
 	if err != nil {
-		t.Skipf("bigtable.NewAdminClient: %v", err)
+		t.Skipf("admin.NewBigtableTableAdminClient: %v", err)
 	}
+	defer adminClient.Close()
 
 	tableName := "mobile-time-series-" + tc.ProjectID
-	adminClient.DeleteTable(ctx, tableName)
+	instancePath := fmt.Sprintf("projects/%s/instances/%s", project, instance)
+	tablePath := fmt.Sprintf("%s/tables/%s", instancePath, tableName)
+	adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tablePath})
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
-		if err := adminClient.CreateTable(ctx, tableName); err != nil {
+		if _, err := adminClient.CreateTable(ctx, &adminpb.CreateTableRequest{
+			Parent:  instancePath,
+			TableId: tableName,
+			Table: &adminpb.Table{
+				ColumnFamilies: map[string]*adminpb.ColumnFamily{
+					"stats_summary": {},
+					"view_count": {
+						ValueType: &adminpb.Type{
+							Kind: &adminpb.Type_AggregateType{
+								AggregateType: &adminpb.Type_Aggregate{
+									InputType: &adminpb.Type{
+										Kind: &adminpb.Type_Int64Type{
+											Int64Type: &adminpb.Type_Int64{
+												Encoding: &adminpb.Type_Int64_Encoding{
+													Encoding: &adminpb.Type_Int64_Encoding_BigEndianBytes_{
+														BigEndianBytes: &adminpb.Type_Int64_Encoding_BigEndianBytes{},
+													},
+												},
+											},
+										},
+									},
+									Aggregator: &adminpb.Type_Aggregate_Sum_{
+										Sum: &adminpb.Type_Aggregate_Sum{},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}); err != nil {
 			// Just in case the table exists, try to delete it again.
 			if status.Code(err) == codes.AlreadyExists {
-				adminClient.DeleteTable(ctx, tableName)
+				adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tablePath})
 				time.Sleep(5 * time.Second)
 			}
 			r.Errorf("Could not create table %s: %v", tableName, err)
@@ -57,27 +92,6 @@ func TestWrites(t *testing.T) {
 	})
 	if t.Failed() {
 		return
-	}
-
-	columnFamilyName := "stats_summary"
-	if err := adminClient.CreateColumnFamily(ctx, tableName, columnFamilyName); err != nil {
-		adminClient.DeleteTable(ctx, tableName)
-		t.Fatalf("CreateColumnFamily(%s): %v", columnFamilyName, err)
-	}
-
-	columnFamilyName = "view_count"
-	if err = adminClient.CreateColumnFamilyWithConfig(
-		ctx,
-		tableName,
-		columnFamilyName,
-		bigtable.Family{
-			ValueType: bigtable.AggregateType{
-				Input:      bigtable.Int64Type{},
-				Aggregator: bigtable.SumAggregator{},
-			},
-		}); err != nil {
-		adminClient.DeleteTable(ctx, tableName)
-		t.Fatalf("CreateColumnFamily(%s): %v", columnFamilyName, err)
 	}
 
 	buf := new(bytes.Buffer)
@@ -121,5 +135,5 @@ func TestWrites(t *testing.T) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 
-	adminClient.DeleteTable(ctx, tableName)
+	adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tablePath})
 }
