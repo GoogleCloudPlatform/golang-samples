@@ -212,13 +212,15 @@ func revokeCloudSQLRole(tb testing.TB, projectID, member string) {
 			if binding.Role != cloudSQLRole {
 				continue
 			}
-			for i, m := range binding.Members {
+			var filtered []string
+			for _, m := range binding.Members {
 				if m == member {
-					binding.Members = append(binding.Members[:i], binding.Members[i+1:]...)
 					changed = true
-					break
+					continue
 				}
+				filtered = append(filtered, m)
 			}
+			binding.Members = filtered
 		}
 		if !changed {
 			return
@@ -723,5 +725,30 @@ func TestRotateRegionalSecret(t *testing.T) {
 
 	if got, want := b.String(), "Rotated secret, created secret version:"; !strings.Contains(got, want) {
 		t.Errorf("RotateRegionalSecret: expected %q to contain %q", got, want)
+	}
+}
+
+func TestUpdateRegionalSecretWithManagedRotationSchedule(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	locationID := testLocation(t)
+	instanceID := testCloudSQLInstanceID(t)
+	username := testCloudSQLUsername(t)
+
+	secretID := testRegionalSecretWithCloudSQLCredentials(t, tc.ProjectID)
+	defer testCleanupRegionalSecret(t, fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID))
+
+	var enableOut bytes.Buffer
+	if err := EnableRegionalSecretManagedRotation(&enableOut, tc.ProjectID, locationID, secretID, instanceID, username); err != nil {
+		t.Fatal(err)
+	}
+
+	var b bytes.Buffer
+	if err := UpdateRegionalSecretWithManagedRotationSchedule(&b, tc.ProjectID, locationID, secretID, 24*time.Hour); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Updated regional secret rotation schedule:"; !strings.Contains(got, want) {
+		t.Errorf("UpdateRegionalSecretWithManagedRotationSchedule: expected %q to contain %q", got, want)
 	}
 }
