@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rapid
+package bidi
 
 // [START storage_pause_and_resume_appendable_upload]
 import (
@@ -22,17 +22,16 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"cloud.google.com/go/storage/experimental"
 )
 
-// pauseAndResumeAppendableUpload creates a new unfinalized appendable object,
-// closes the Writer, then re-opens the object for writing using
-// NewWriterFromAppendableObject.
+// pauseAndResumeAppendableUpload creates a new unfinalized appendable object in
+// a bucket with the Rapid storage class, closes the Writer, then re-opens the
+// object for writing using NewWriterFromAppendableObject.
 func pauseAndResumeAppendableUpload(w io.Writer, bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
-	client, err := storage.NewGRPCClient(ctx, experimental.WithZonalBucketAPIs())
+	client, err := storage.NewGRPCClient(ctx, storage.WithAppendableUploads())
 	if err != nil {
 		return fmt.Errorf("storage.NewGRPCClient: %w", err)
 	}
@@ -67,13 +66,13 @@ func pauseAndResumeAppendableUpload(w io.Writer, bucket, object string) error {
 		},
 	)
 	if err != nil {
-		return fmt.Errorf("NewWriterFromAppendableObject: %v", err)
+		return fmt.Errorf("NewWriterFromAppendableObject: %w", err)
 	}
 	fmt.Fprintf(w, "Resuming upload from offset %v\n", offset)
 
 	// Append the rest of the data and close the Writer to finalize.
 	if _, err := appendWriter.Write([]byte("resumed data\n")); err != nil {
-		return fmt.Errorf("appendWriter.Write: %v", err)
+		return fmt.Errorf("appendWriter.Write: %w", err)
 	}
 	if err := appendWriter.Close(); err != nil {
 		return fmt.Errorf("Writer.Close: %w", err)

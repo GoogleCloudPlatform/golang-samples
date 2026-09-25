@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rapid
+package bidi
 
 // [START storage_open_object_multiple_ranged_read]
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"time"
 
 	"cloud.google.com/go/storage"
-	"cloud.google.com/go/storage/experimental"
 )
 
 // openObjectMultipleRangedRead opens a single object using
@@ -32,7 +32,7 @@ func openObjectMultipleRangedRead(w io.Writer, bucket, object string) ([][]byte,
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
-	client, err := storage.NewGRPCClient(ctx, experimental.WithZonalBucketAPIs())
+	client, err := storage.NewGRPCClient(ctx, storage.WithGRPCBidiReads())
 	if err != nil {
 		return nil, fmt.Errorf("storage.NewGRPCClient: %w", err)
 	}
@@ -49,23 +49,21 @@ func openObjectMultipleRangedRead(w io.Writer, bucket, object string) ([][]byte,
 
 	// Add some 1 KiB ranges to download. This call is non-blocking. The
 	// provided callback is invoked when the range download is complete.
+	// Each range writes to its own buffer and its own error slot, so the
+	// callbacks can run concurrently without any further synchronization.
 	startOffsets := []int64{0, 1024, 2048}
 	var dataBufs [3]bytes.Buffer
-	var errs []error
+	var errs [3]error
 	for i, off := range startOffsets {
 		mrd.Add(&dataBufs[i], off, 1024, func(off, length int64, err error) {
-			if err != nil {
-				errs = append(errs, err)
-			} else {
-				fmt.Fprintf(w, "downloaded range at offset %v", off)
-			}
+			errs[i] = err
 		})
 	}
 
 	// Wait for all downloads to complete.
 	mrd.Wait()
-	if len(errs) > 0 {
-		return nil, fmt.Errorf("one or more downloads failed; errors: %v", errs)
+	if err := errors.Join(errs[:]...); err != nil {
+		return nil, fmt.Errorf("one or more downloads failed: %w", err)
 	}
 	if err := mrd.Close(); err != nil {
 		return nil, fmt.Errorf("MultiRangeDownloader.Close: %w", err)
@@ -75,8 +73,8 @@ func openObjectMultipleRangedRead(w io.Writer, bucket, object string) ([][]byte,
 
 	// Collect the byte slices
 	var byteSlices [][]byte
-	for _, buf := range dataBufs {
-		byteSlices = append(byteSlices, buf.Bytes())
+	for i := range dataBufs {
+		byteSlices = append(byteSlices, dataBufs[i].Bytes())
 	}
 
 	return byteSlices, nil

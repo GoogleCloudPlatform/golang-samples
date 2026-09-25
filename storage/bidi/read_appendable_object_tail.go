@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rapid
+package bidi
 
 // [START storage_read_appendable_object_tail]
 import (
@@ -24,17 +24,17 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"cloud.google.com/go/storage/experimental"
 )
 
 // readAppendableObjectTail simulates a "tail -f" command on a GCS object. It
 // repeatedly polls an appendable object for new content. In a real
 // application, the object would be written to by a separate process.
+// Appendable objects require a bucket with the Rapid storage class.
 func readAppendableObjectTail(w io.Writer, bucket, object string) ([]byte, error) {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
-	client, err := storage.NewGRPCClient(ctx, experimental.WithZonalBucketAPIs())
+	client, err := storage.NewGRPCClient(ctx, storage.WithGRPCBidiReads(), storage.WithAppendableUploads())
 	if err != nil {
 		return nil, fmt.Errorf("storage.NewGRPCClient: %w", err)
 	}
@@ -55,8 +55,10 @@ func readAppendableObjectTail(w io.Writer, bucket, object string) ([]byte, error
 	}
 	gen := writer.Attrs().Generation
 
+	obj := client.Bucket(bucket).Object(object)
+
 	// Create the MultiRangeDownloader, which opens a read stream to the object.
-	mrd, err := client.Bucket(bucket).Object(object).NewMultiRangeDownloader(ctx)
+	mrd, err := obj.NewMultiRangeDownloader(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("NewMultiRangeDownloader: %w", err)
 	}
@@ -69,24 +71,35 @@ func readAppendableObjectTail(w io.Writer, bucket, object string) ([]byte, error
 	done := make(chan bool)
 	go func() {
 		var currOff int64
-		rangeDownloaded := make(chan bool)
+		// The channel is buffered so that the callback never blocks, even if
+		// we stopped waiting for the range below.
+		rangeDownloaded := make(chan error, 1)
 		for buf.Len() < 100 {
-			// Add the current range and wait for it to be downloaded.
-			// Using a length of 0 will read to the current end of the object.
-			// The callback will give the actual number of bytes that were
-			// read in each iteration.
-			mrd.Add(&buf, currOff, 0, func(offset, length int64, err error) {
+			// Check how much data is available. The size of an unfinalized
+			// appendable object grows as more data is appended to it.
+			attrs, err := obj.Attrs(ctx)
+			if err != nil {
+				mrdErr = err
+				break
+			}
+			if attrs.Size <= currOff {
+				// Nothing new was appended yet; wait and check again.
+				time.Sleep(1 * time.Second)
+				continue
+			}
+
+			// Add the range of newly appended bytes and wait for it to be
+			// downloaded. The callback will give the actual number of bytes
+			// that were read in each iteration.
+			mrd.Add(&buf, currOff, attrs.Size-currOff, func(offset, length int64, err error) {
 				// After each range is received, update
 				// the starting offset based on how many bytes were received.
-				if err != nil {
-					mrdErr = err
-				}
 				currOff += length
-				rangeDownloaded <- true
+				rangeDownloaded <- err
 			})
 			// Wait for the range download to complete with a timeout of 10s.
 			select {
-			case <-rangeDownloaded:
+			case mrdErr = <-rangeDownloaded:
 			case <-time.After(10 * time.Second):
 				mrdErr = mrd.Error()
 				if mrdErr == nil {
@@ -108,7 +121,7 @@ func readAppendableObjectTail(w io.Writer, bucket, object string) ([]byte, error
 	}()
 
 	// Meanwhile, continue to write 10 bytes at a time to the object.
-	// This could be done by calling NewWriterFromAppendable object repeatedly
+	// This could be done by calling NewWriterFromAppendableObject repeatedly
 	// (as in the example) or calling Writer.Flush without closing the Writer.
 	for range 9 {
 		appendWriter, offset, err := client.Bucket(bucket).Object(object).Generation(gen).NewWriterFromAppendableObject(ctx, nil)
@@ -121,15 +134,15 @@ func readAppendableObjectTail(w io.Writer, bucket, object string) ([]byte, error
 		if err := appendWriter.Close(); err != nil {
 			return nil, fmt.Errorf("appendWriter.Close: %w", err)
 		}
-		fmt.Fprintf(w, "Wrote 10 bytes at offset %v", offset)
+		fmt.Fprintf(w, "Wrote 10 bytes at offset %v\n", offset)
 	}
 
 	// Wait for tailing goroutine to exit.
 	<-done
 	if mrdErr != nil {
-		return nil, fmt.Errorf("MultiRangeDownloader: %w", err)
+		return nil, fmt.Errorf("MultiRangeDownloader: %w", mrdErr)
 	}
-	fmt.Fprintf(w, "Read %v bytes from object %v", buf.Len(), object)
+	fmt.Fprintf(w, "Read %v bytes from object %v\n", buf.Len(), object)
 	return buf.Bytes(), nil
 }
 
