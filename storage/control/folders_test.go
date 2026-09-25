@@ -61,7 +61,6 @@ func TestMain(m *testing.M) {
 }
 
 func TestFolders(t *testing.T) {
-	t.Skip("Skipping due to project permissions changes, see: b/445769988")
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
 
@@ -101,7 +100,7 @@ func TestFolders(t *testing.T) {
 			r.Errorf("createFolder: got %q, want to contain %q", got, want)
 		}
 	}); !ok {
-		t.Fatalf("failed to create folder; can't continue")
+		t.Fatalf("Failed to create folder; can't continue")
 	}
 
 	// Get folder. Retry because there is no automatic retry in the client
@@ -115,7 +114,7 @@ func TestFolders(t *testing.T) {
 			r.Errorf("getFolder: got %q, want to contain %q", got, want)
 		}
 	}); !ok {
-		t.Fatalf("failed to get folder; can't continue")
+		t.Fatalf("Failed to get folder; can't continue")
 	}
 
 	// List folders.
@@ -191,7 +190,7 @@ func TestManagedFolders(t *testing.T) {
 			r.Errorf("getManagedFolder: got %q, want to contain %q", got, want)
 		}
 	}); !ok {
-		t.Fatalf("failed to get managed folder; can't continue")
+		t.Fatalf("Failed to get managed folder; can't continue")
 	}
 
 	// List managed folders.
@@ -210,5 +209,86 @@ func TestManagedFolders(t *testing.T) {
 	}
 	if got, want := buf.String(), folderPath; !strings.Contains(got, want) {
 		t.Errorf("deleteManagedFolder: got %q, want to contain %q", got, want)
+	}
+}
+
+func TestDeleteFolderRecursive(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	ctx := context.Background()
+
+	// Create HNS bucket.
+	bucketName := testutil.UniqueBucketName(testPrefix)
+	b := client.Bucket(bucketName)
+	attrs := &storage.BucketAttrs{
+		HierarchicalNamespace: &storage.HierarchicalNamespace{
+			Enabled: true,
+		},
+		UniformBucketLevelAccess: storage.UniformBucketLevelAccess{
+			Enabled: true,
+		},
+	}
+	if err := b.Create(ctx, tc.ProjectID, attrs); err != nil {
+		t.Fatalf("Bucket.Create(%q): %v", bucketName, err)
+	}
+	t.Cleanup(func() {
+		if err := testutil.DeleteBucketIfExists(ctx, client, bucketName); err != nil {
+			log.Printf("Bucket.Delete(%q): %v", bucketName, err)
+		}
+	})
+
+	parentFolderName := "foo-recursive"
+	childFolderName := "foo-recursive/bar"
+
+	parentFolderPath := fmt.Sprintf("projects/_/buckets/%v/folders/%v", bucketName, parentFolderName)
+	childFolderPath := fmt.Sprintf("projects/_/buckets/%v/folders/%v", bucketName, childFolderName)
+
+	// Create parent folder.
+	if ok := testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := &bytes.Buffer{}
+		if err := createFolder(buf, bucketName, parentFolderName); err != nil {
+			r.Errorf("createFolder: %v", err)
+		}
+		if got, want := buf.String(), parentFolderPath; !strings.Contains(got, want) {
+			r.Errorf("createFolder: got %q, want to contain %q", got, want)
+		}
+	}); !ok {
+		t.Fatalf("Failed to create parent folder; can't continue")
+	}
+
+	// Create child folder.
+	if ok := testutil.Retry(t, 5, time.Second, func(r *testutil.R) {
+		buf := &bytes.Buffer{}
+		if err := createFolder(buf, bucketName, childFolderName); err != nil {
+			r.Errorf("createFolder: %v", err)
+		}
+		if got, want := buf.String(), childFolderPath; !strings.Contains(got, want) {
+			r.Errorf("createFolder: got %q, want to contain %q", got, want)
+		}
+	}); !ok {
+		t.Fatalf("Failed to create child folder; can't continue")
+	}
+
+	// Delete folder recursively.
+	buf := &bytes.Buffer{}
+	if err := deleteFolderRecursive(buf, bucketName, parentFolderName); err != nil {
+		if strings.Contains(err.Error(), "Recursive folder delete is not enabled") || strings.Contains(err.Error(), "does not support custom billing projects") {
+			t.Skip("Recursive folder delete is not enabled in this project.")
+		}
+		t.Fatalf("deleteFolderRecursive: %v", err)
+	}
+	want := fmt.Sprintf("Deleted folder %q recursively", parentFolderPath)
+	if got := buf.String(); got != want {
+		t.Errorf("deleteFolderRecursive: got %q, want %q", got, want)
+	}
+
+	// Verify folders are deleted.
+	// Since we deleted foo-recursive, both foo-recursive and foo-recursive/bar should be gone.
+	// Verify that getting parent folder returns an error.
+	if err := getFolder(&bytes.Buffer{}, bucketName, parentFolderName); err == nil {
+		t.Errorf("getFolder(%q) succeeded, expected error", parentFolderName)
+	}
+	// Verify that getting child folder also returns an error.
+	if err := getFolder(&bytes.Buffer{}, bucketName, childFolderName); err == nil {
+		t.Errorf("getFolder(%q) succeeded, expected error", childFolderName)
 	}
 }

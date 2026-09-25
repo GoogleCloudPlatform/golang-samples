@@ -33,7 +33,7 @@ func batchPredictGCS(w io.Writer, projectID, location string, inputURIs []string
 	// location := "us-central1"
 	// inputURIs := []string{"gs://cloud-samples-data/batch/prompt_for_batch_gemini_predict.jsonl"}
 	// outputURI := "gs://<cloud-bucket-name>/<prefix-name>"
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-2.5-flash"
 	jobName := "batch-predict-gcs-test-001"
 
 	ctx := context.Background()

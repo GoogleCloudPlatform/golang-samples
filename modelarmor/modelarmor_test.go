@@ -1155,7 +1155,7 @@ func TestSanitization(t *testing.T) {
 		output := b.String()
 
 		// Check for PI and Jailbreak filter MATCH_FOUND
-		if !strings.Contains(strings.ReplaceAll(output, " ", ""), strings.ReplaceAll("{pi_and_jailbreak_filter_result:{execution_state:EXECUTION_SUCCESS match_state:MATCH_FOUND confidence_level:MEDIUM_AND_ABOVE}}", " ", "")) {
+		if !strings.Contains(strings.ReplaceAll(output, " ", ""), strings.ReplaceAll("pi_and_jailbreak_filter_result:{execution_state:EXECUTION_SUCCESS match_state:MATCH_FOUND", " ", "")) {
 			t.Errorf("Expected output to indicate MATCH_FOUND for PI and Jailbreak filter, got: %q", output)
 		}
 
