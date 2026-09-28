@@ -14,7 +14,6 @@
 
 package policytagmanager
 
-// [START data_catalog_ptm_delete_taxonomy]
 import (
 	"context"
 	"fmt"
@@ -38,5 +37,3 @@ func deleteTaxonomy(taxonomyID string) error {
 	}
 	return policyClient.DeleteTaxonomy(ctx, req)
 }
-
-// [END data_catalog_ptm_delete_taxonomy]
