@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"sync"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -32,7 +31,6 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 	// keyPrefix := "pooled-object"
 	ctx := context.Background()
 	poolSize := 3
-	nextObjectName := fmt.Sprintf("%s_%d", keyPrefix, poolSize)
 
 	client, err := storage.NewGRPCClient(ctx, storage.WithAppendableUploads())
 	if err != nil {
@@ -56,9 +54,8 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 	// pre-warmed writers. Flushing incurs operation charges, so size the pool
 	// carefully.
 	pool := make(chan *storage.Writer, poolSize)
-	var wg sync.WaitGroup
+	// On return, close pooled writers; unused objects remain unfinalized.
 	defer func() {
-		wg.Wait() // No more sends once maintenance is done, so it's safe to close.
 		close(pool)
 		for w := range pool {
 			_ = w.Close()
@@ -92,17 +89,19 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 
 	// 3. Pool maintenance (run asynchronously off the critical write path):
 	// Close the used writer without finalizing and refill the pool.
-	wg.Add(1)
-	go func(used *storage.Writer, nextName string) {
-		defer wg.Done()
+	maintenance := make(chan struct{})
+	go func(used *storage.Writer) {
+		defer close(maintenance)
 		_ = used.Close()
-		replacement, err := newPrewarmedWriter(nextName)
+		next, err := newPrewarmedWriter(fmt.Sprintf("%s_%d", keyPrefix, poolSize))
 		if err != nil {
 			fmt.Fprintf(out, "failed to pre-warm replacement writer: %v\n", err)
 			return
 		}
-		pool <- replacement
-	}(w, nextObjectName)
+		pool <- next
+	}(w)
+	// Wait for maintenance on return; runs before the pool cleanup above.
+	defer func() { <-maintenance }()
 
 	// 4. Read: Unfinalized objects are readable after Flush().
 	r, err := bucket.Object(fmt.Sprintf("%s_0", keyPrefix)).NewReader(ctx)
@@ -115,7 +114,6 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 		return fmt.Errorf("io.ReadAll: %w", err)
 	}
 
-	wg.Wait()
 	fmt.Fprintf(out, "Read unfinalized object %s_0: %s\n", keyPrefix, string(contents))
 	return nil
 }
