@@ -41,8 +41,6 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 	bucket := client.Bucket(bucketName)
 	newPrewarmedWriter := func(name string) (*storage.Writer, error) {
 		w := bucket.Object(name).If(storage.Conditions{DoesNotExist: true}).NewWriter(ctx)
-		// TODO(https://github.com/googleapis/google-cloud-go/issues/20580): Flush may
-		// no longer be necessary in the future.
 		if _, err := w.Flush(); err != nil {
 			_ = w.Close()
 			return nil, fmt.Errorf("Writer.Flush(%s): %w", name, err)
