@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	cloud.google.com/go/iam v1.11.0
 	cloud.google.com/go/pubsub v1.50.2
-	cloud.google.com/go/storage v1.64.0
+	cloud.google.com/go/storage v1.68.0
 	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
 	github.com/aws/aws-sdk-go v1.55.8
 	github.com/google/uuid v1.6.0

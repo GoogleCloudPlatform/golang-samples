@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rapid
+package bidi
 
-// [START storage_open_object_read_full_object]
+// [START storage_open_object_single_ranged_read]
 import (
 	"bytes"
 	"context"
@@ -23,16 +23,14 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"cloud.google.com/go/storage/experimental"
 )
 
-// OpenObjectReadFullObject reads a full object's data from a
-// rapid bucket.
-func openObjectReadFullObject(w io.Writer, bucket, object string) ([]byte, error) {
+// openObjectSingleRangedRead reads a single range from an object.
+func openObjectSingleRangedRead(w io.Writer, bucket, object string) ([]byte, error) {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
-	client, err := storage.NewGRPCClient(ctx, experimental.WithZonalBucketAPIs())
+	client, err := storage.NewGRPCClient(ctx, storage.WithGRPCBidiReads())
 	if err != nil {
 		return nil, fmt.Errorf("storage.NewGRPCClient: %w", err)
 	}
@@ -42,19 +40,19 @@ func openObjectReadFullObject(w io.Writer, bucket, object string) ([]byte, error
 	defer cancel()
 
 	// Read the first KiB of the file and copy into a buffer.
-	r, err := client.Bucket(bucket).Object(object).NewReader(ctx)
+	r, err := client.Bucket(bucket).Object(object).NewRangeReader(ctx, 0, 1024)
 	if err != nil {
-		return nil, fmt.Errorf("NewReader: %w", err)
+		return nil, fmt.Errorf("NewRangeReader: %w", err)
 	}
 	defer r.Close()
 	buf := new(bytes.Buffer)
 	if _, err := io.Copy(buf, r); err != nil {
-		return nil, fmt.Errorf("copying data: %v", err)
+		return nil, fmt.Errorf("copying data: %w", err)
 	}
 
-	fmt.Fprintf(w, "Read the data of %v into a buffer\n", object)
+	fmt.Fprintf(w, "Read the first 1024 bytes of %v into a buffer\n", object)
 
 	return buf.Bytes(), nil
 }
 
-// [END storage_open_object_read_full_object]
+// [END storage_open_object_single_ranged_read]
