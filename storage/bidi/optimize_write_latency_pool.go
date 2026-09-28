@@ -17,9 +17,11 @@ package bidi
 // [START storage_optimize_write_latency_pool]
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"sync"
+	"time"
 
 	"cloud.google.com/go/storage"
 )
@@ -41,9 +43,8 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 	bucket := client.Bucket(bucketName)
 	newPrewarmedWriter := func(name string) (*storage.Writer, error) {
 		w := bucket.Object(name).If(storage.Conditions{DoesNotExist: true}).NewWriter(ctx)
-		w.FinalizeOnClose = false // Skip finalization metadata operation on close.
-		// TODO(https://github.com/googleapis/google-cloud-go/issues/20580): Flush() with 0 bytes forces
-		// initial stream creation and creates the 0-byte unfinalized object on the server.
+		// TODO(https://github.com/googleapis/google-cloud-go/issues/20580): Flush may
+		// no longer be necessary in the future.
 		if _, err := w.Flush(); err != nil {
 			_ = w.Close()
 			return nil, fmt.Errorf("Writer.Flush(%s): %w", name, err)
@@ -51,17 +52,17 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 		return w, nil
 	}
 
-	// 1. Init pool: Flushing incurs operation charges, so size the pool carefully.
-	var pool []*storage.Writer
-	var mu sync.Mutex
+	// 1. Init pool: A buffered channel is a thread-safe FIFO queue of
+	// pre-warmed writers. Flushing incurs operation charges, so size the pool
+	// carefully.
+	pool := make(chan *storage.Writer, poolSize)
 	var wg sync.WaitGroup
 	defer func() {
-		wg.Wait()
-		mu.Lock()
-		for _, rem := range pool {
-			_ = rem.Close()
+		wg.Wait() // No more sends once maintenance is done, so it's safe to close.
+		close(pool)
+		for w := range pool {
+			_ = w.Close()
 		}
-		mu.Unlock()
 	}()
 
 	for i := 0; i < poolSize; i++ {
@@ -69,13 +70,17 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 		if err != nil {
 			return err
 		}
-		pool = append(pool, w)
+		pool <- w
 	}
 
-	// 2. Write: Pop a pre-warmed writer and commit with Flush() (~1-2 ms)
-	// instead of blocking on Close().
-	w := pool[0]
-	pool = pool[1:]
+	// 2. Write: Take a pre-warmed writer (waiting for a refill if the pool is
+	// empty) and commit with Flush() (~1-2 ms) instead of blocking on Close().
+	var w *storage.Writer
+	select {
+	case w = <-pool:
+	case <-time.After(10 * time.Second):
+		return errors.New("timed out waiting for a pre-warmed writer")
+	}
 	if _, err := w.Write([]byte("0123456789")); err != nil {
 		_ = w.Close()
 		return fmt.Errorf("Writer.Write: %w", err)
@@ -91,13 +96,12 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 	go func(used *storage.Writer, nextName string) {
 		defer wg.Done()
 		_ = used.Close()
-		if replacement, err := newPrewarmedWriter(nextName); err == nil {
-			mu.Lock()
-			pool = append(pool, replacement)
-			mu.Unlock()
-		} else {
+		replacement, err := newPrewarmedWriter(nextName)
+		if err != nil {
 			fmt.Fprintf(out, "failed to pre-warm replacement writer: %v\n", err)
+			return
 		}
+		pool <- replacement
 	}(w, nextObjectName)
 
 	// 4. Read: Unfinalized objects are readable after Flush().
