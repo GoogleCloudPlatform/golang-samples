@@ -14,7 +14,6 @@
 
 package policytagmanager
 
-// [START data_catalog_ptm_delete_policytag]
 import (
 	"context"
 	"fmt"
@@ -38,5 +37,3 @@ func deletePolicyTag(policyTagID string) error {
 	}
 	return policyClient.DeletePolicyTag(ctx, req)
 }
-
-// [END data_catalog_ptm_delete_policytag]

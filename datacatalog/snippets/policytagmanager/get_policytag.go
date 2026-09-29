@@ -14,7 +14,6 @@
 
 package policytagmanager
 
-// [START data_catalog_ptm_get_policytag]
 import (
 	"context"
 	"fmt"
@@ -51,5 +50,3 @@ func getPolicyTag(w io.Writer, policyTagID string) error {
 	fmt.Fprintln(w)
 	return nil
 }
-
-// [END data_catalog_ptm_get_policytag]
