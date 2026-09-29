@@ -108,6 +108,7 @@ use (
 	./memorystore/redis
 	./modelarmor
 	./monitoring
+	./observability
 	./opentelemetry/instrumentation/app
 	./opentelemetry/trace
 	./parametermanager
