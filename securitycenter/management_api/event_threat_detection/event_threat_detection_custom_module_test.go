@@ -26,6 +26,8 @@ import (
 	"testing"
 	"time"
 
+	"google.golang.org/api/iterator"
+
 	securitycentermanagement "cloud.google.com/go/securitycentermanagement/apiv1"
 	securitycentermanagementpb "cloud.google.com/go/securitycentermanagement/apiv1/securitycentermanagementpb"
 	"github.com/google/uuid"
@@ -46,6 +48,9 @@ func TestMain(m *testing.M) {
 		log.Fatalf("GCLOUD_ORGANIZATION environment variable is not set.")
 	}
 
+	// Clean up any orphans from previous failed runs
+	cleanupOrphanedModules()
+
 	setupSharedModules()
 
 	// Run the tests
@@ -56,6 +61,45 @@ func TestMain(m *testing.M) {
 
 	// Exit with the appropriate code
 	os.Exit(code)
+}
+
+
+// cleanupOrphanedModules deletes any modules left over from previous test runs
+func cleanupOrphanedModules() {
+	ctx := context.Background()
+	client, err := securitycentermanagement.NewClient(ctx)
+	if err != nil {
+		log.Printf("CleanupOrphanedModules: failed to create client: %v", err)
+		return
+	}
+	defer client.Close()
+
+	parent := fmt.Sprintf("organizations/%s/locations/global", orgID)
+	it := client.ListEventThreatDetectionCustomModules(ctx, &securitycentermanagementpb.ListEventThreatDetectionCustomModulesRequest{
+		Parent: parent,
+	})
+
+	fmt.Println("Scanning for orphaned ETD test modules...")
+	for {
+		module, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Printf("CleanupOrphanedModules: error listing modules: %v", err)
+			return
+		}
+
+		if strings.HasPrefix(module.DisplayName, "go_sample_etd_custom_module_") {
+			fmt.Printf("Cleaning up orphaned module: %s\n", module.DisplayName)
+			err := client.DeleteEventThreatDetectionCustomModule(ctx, &securitycentermanagementpb.DeleteEventThreatDetectionCustomModuleRequest{
+				Name: module.Name,
+			})
+			if err != nil {
+				log.Printf("CleanupOrphanedModules: failed to delete %s: %v", module.Name, err)
+			}
+		}
+	}
 }
 
 func setupSharedModules() {
