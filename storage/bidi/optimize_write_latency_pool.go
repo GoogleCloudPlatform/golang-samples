@@ -71,7 +71,7 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 	}
 
 	// 2. Write: Take a pre-warmed writer (waiting for a refill if the pool is
-	// empty) and commit with Flush() instead of blocking on Close().
+	// empty) and commit with the faster Flush() instead of blocking on Close().
 	var w *storage.Writer
 	select {
 	case w = <-pool:
