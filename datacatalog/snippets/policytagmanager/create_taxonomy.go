@@ -14,7 +14,6 @@
 
 package policytagmanager
 
-// [START data_catalog_ptm_create_taxonomy]
 import (
 	"context"
 	"fmt"
@@ -57,5 +56,3 @@ func createTaxonomy(w io.Writer, projectID, location, displayName string) (strin
 	fmt.Fprintf(w, "Taxonomy %s was created.\n", resp.Name)
 	return resp.Name, nil
 }
-
-// [END data_catalog_ptm_create_taxonomy]
