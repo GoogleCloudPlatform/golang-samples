@@ -29,7 +29,8 @@ import (
 func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error {
 	// bucketName := "bucket-name"
 	// keyPrefix := "pooled-object"
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
 	poolSize := 3
 
 	client, err := storage.NewGRPCClient(ctx, storage.WithAppendableUploads())
@@ -42,8 +43,7 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 	newPrewarmedWriter := func(name string) (*storage.Writer, error) {
 		w := bucket.Object(name).If(storage.Conditions{DoesNotExist: true}).NewWriter(ctx)
 		if _, err := w.Flush(); err != nil {
-			_ = w.Close()
-			return nil, fmt.Errorf("Writer.Flush(%s): %w", name, err)
+			return nil, errors.Join(fmt.Errorf("Writer.Flush(%s): %w", name, err), w.Close())
 		}
 		return w, nil
 	}
@@ -56,7 +56,9 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 	defer func() {
 		close(pool)
 		for w := range pool {
-			_ = w.Close()
+			if err := w.Close(); err != nil {
+				fmt.Fprintf(out, "Writer.Close: %v\n", err)
+			}
 		}
 	}()
 
@@ -69,7 +71,7 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 	}
 
 	// 2. Write: Take a pre-warmed writer (waiting for a refill if the pool is
-	// empty) and commit with Flush() (~1-2 ms) instead of blocking on Close().
+	// empty) and commit with Flush() instead of blocking on Close().
 	var w *storage.Writer
 	select {
 	case w = <-pool:
@@ -77,12 +79,10 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 		return errors.New("timed out waiting for a pre-warmed writer")
 	}
 	if _, err := w.Write([]byte("0123456789")); err != nil {
-		_ = w.Close()
-		return fmt.Errorf("Writer.Write: %w", err)
+		return errors.Join(fmt.Errorf("Writer.Write: %w", err), w.Close())
 	}
 	if _, err := w.Flush(); err != nil {
-		_ = w.Close()
-		return fmt.Errorf("Writer.Flush: %w", err)
+		return errors.Join(fmt.Errorf("Writer.Flush: %w", err), w.Close())
 	}
 
 	// 3. Pool maintenance (run asynchronously off the critical write path):
@@ -90,7 +90,9 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 	maintenance := make(chan struct{})
 	go func(used *storage.Writer) {
 		defer close(maintenance)
-		_ = used.Close()
+		if err := used.Close(); err != nil {
+			fmt.Fprintf(out, "Writer.Close: %v\n", err)
+		}
 		next, err := newPrewarmedWriter(fmt.Sprintf("%s_%d", keyPrefix, poolSize))
 		if err != nil {
 			fmt.Fprintf(out, "failed to pre-warm replacement writer: %v\n", err)
@@ -107,9 +109,8 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 		return fmt.Errorf("Object.NewReader: %w", err)
 	}
 	contents, err := io.ReadAll(r)
-	_ = r.Close()
-	if err != nil {
-		return fmt.Errorf("io.ReadAll: %w", err)
+	if err := errors.Join(err, r.Close()); err != nil {
+		return fmt.Errorf("reading %s_0: %w", keyPrefix, err)
 	}
 
 	fmt.Fprintf(out, "Read unfinalized object %s_0: %s\n", keyPrefix, string(contents))
