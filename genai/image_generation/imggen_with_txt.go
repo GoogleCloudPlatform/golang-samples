@@ -38,7 +38,7 @@ func generateImageWithText(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "imagen-4.0-generate-001"
+	modelName := "imagen-3.0-generate-001"
 	prompt := "A dog reading a newspaper"
 	resp, err := client.Models.GenerateImages(ctx,
 		modelName,

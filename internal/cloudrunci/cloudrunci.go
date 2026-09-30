@@ -34,6 +34,8 @@ import (
 	"path"
 	"strings"
 	"time"
+	"crypto/rand"
+	"encoding/hex"
 
 	"cloud.google.com/go/logging/logadmin"
 	"google.golang.org/api/iterator"
@@ -113,7 +115,11 @@ type Service struct {
 }
 
 // runID is an identifier that changes between runs.
-var runID = time.Now().Format("20060102-150405")
+var runID = func() string {
+	b := make([]byte, 2)
+	rand.Read(b)
+	return time.Now().Format("20060102-150405") + "-" + hex.EncodeToString(b)
+}()
 
 // NewService creates a new Service based on the name and projectID provided.
 // It will default to the ManagedPlatform in region us-central1,
@@ -395,8 +401,6 @@ func (s *Service) deployCmd() *exec.Cmd {
 		s.ProjectID,
 		"--image",
 		s.Image,
-		"--ingress",
-		"internal",
 	}, s.Platform.CommandFlags()...)
 
 	if s.Env != nil {
