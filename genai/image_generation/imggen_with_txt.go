@@ -39,28 +39,42 @@ func generateImageWithText(w io.Writer) error {
 	}
 
 	modelName := "gemini-2.5-flash-image"
-	prompt := "A dog reading a newspaper"
-	resp, err := client.Models.GenerateImages(ctx,
+	contents := []*genai.Content{
+		{
+			Parts: []*genai.Part{
+				{Text: "A dog reading a newspaper"},
+			},
+			Role: genai.RoleUser,
+		},
+	}
+
+	resp, err := client.Models.GenerateContent(ctx,
 		modelName,
-		prompt,
-		&genai.GenerateImagesConfig{
-			ImageSize: "2K",
+		contents,
+		&genai.GenerateContentConfig{
+			ResponseModalities: []string{
+				string(genai.ModalityImage),
+			},
 		},
 	)
 	if err != nil {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}
 
-	if len(resp.GeneratedImages) == 0 || resp.GeneratedImages[0].Image == nil {
+	if len(resp.Candidates) == 0 || resp.Candidates[0].Content == nil || len(resp.Candidates[0].Content.Parts) == 0 {
 		return fmt.Errorf("no image generated")
 	}
 
-	img := resp.GeneratedImages[0].Image
-	if err := os.WriteFile(outputFile, img.ImageBytes, 0644); err != nil {
+	part := resp.Candidates[0].Content.Parts[0]
+	if part.InlineData == nil {
+		return fmt.Errorf("no image generated")
+	}
+
+	if err := os.WriteFile(outputFile, part.InlineData.Data, 0644); err != nil {
 		return fmt.Errorf("failed to save image: %w", err)
 	}
 
-	fmt.Fprintln(w, len(img.ImageBytes))
+	fmt.Fprintln(w, len(part.InlineData.Data))
 
 	// Example response:
 	// Created output image using 6098201 bytes
