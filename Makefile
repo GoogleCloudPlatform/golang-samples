@@ -22,7 +22,11 @@ test: check-env
 	# TODO: remove when we've re-built our testing containers to include this
 	go install gotest.tools/gotestsum@latest
 	cd ${dir}
-	gotestsum --rerun-fails=3 --packages="./..." --junitfile sponge_log.xml -f standard-verbose -- --timeout 60m
+	@if [ -n "$$(find . -name '*.go')" ]; then \
+		gotestsum --rerun-fails=3 --packages="./..." --junitfile sponge_log.xml -f standard-verbose -- --timeout 60m; \
+	else \
+		echo "No Go files to test in $${PWD}"; \
+	fi
 
 lint:
 	cd ${dir}
