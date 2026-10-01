@@ -49,7 +49,7 @@ func generateStyleRefWithText(w io.Writer, outputGCSURI string) error {
 
 	// prompt that references the style image with [1]
 	prompt := "generate an image of a neon sign [1] with the words: have a great day"
-	modelName := "imagen-3.0-capability-001"
+	modelName := "gemini-2.5-flash-image"
 
 	// EditImage takes: ctx, model, prompt, referenceImages []ReferenceImage, config *EditImageConfig
 	resp, err := client.Models.EditImage(ctx,
