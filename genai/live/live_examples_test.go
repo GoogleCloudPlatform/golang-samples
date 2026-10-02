@@ -100,6 +100,12 @@ func generateLiveAudioWithTextMock(w io.Writer) error {
 	return err
 }
 
+func generateGroundSearchWithTxtMock(w io.Writer) error {
+	mockOutput := "> Answer to this search: who won the 2024 super bowl?\n\nMocked search response: The Kansas City Chiefs won the 2024 Super Bowl."
+	_, err := fmt.Fprintln(w, mockOutput)
+	return err
+}
+
 func TestLiveGeneration(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -110,7 +116,7 @@ func TestLiveGeneration(t *testing.T) {
 	buf := new(bytes.Buffer)
 	t.Run("generate Content in live ground googsearch", func(t *testing.T) {
 		buf.Reset()
-		err := generateGroundSearchWithTxt(buf)
+		err := generateGroundSearchWithTxtMock(buf)
 		if err != nil {
 			t.Fatalf("generateGroundSearchWithTxt failed: %v", err)
 		}
