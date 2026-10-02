@@ -128,7 +128,7 @@ func TestComputeSnapshotsSnippets(t *testing.T) {
 	location := "europe-central2"
 	snapshotName := fmt.Sprintf("test-snapshot-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	diskName := fmt.Sprintf("test-disk-%v-%v", time.Now().Format("01-02-2006"), r.Int())
-	sourceImage := "projects/debian-cloud/global/images/family/debian-11"
+	sourceImage := "projects/debian-cloud/global/images/family/debian-13"
 	want := "Snapshot created"
 
 	buf := &bytes.Buffer{}

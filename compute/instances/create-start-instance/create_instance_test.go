@@ -99,7 +99,7 @@ func TestComputeCreateInstanceSnippets(t *testing.T) {
 
 	newestDebianReq := &computepb.GetFromFamilyImageRequest{
 		Project: "debian-cloud",
-		Family:  "debian-11",
+		Family:  "debian-13",
 	}
 
 	newestDebian, err := imagesClient.GetFromFamily(ctx, newestDebianReq)
@@ -314,7 +314,7 @@ func TestCreateWithReplica(t *testing.T) {
 
 	newestDebianReq := &computepb.GetFromFamilyImageRequest{
 		Project: "debian-cloud",
-		Family:  "debian-11",
+		Family:  "debian-13",
 	}
 
 	newestDebian, err := imagesClient.GetFromFamily(ctx, newestDebianReq)

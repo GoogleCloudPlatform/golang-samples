@@ -47,7 +47,7 @@ func createSpotInstance(w io.Writer, projectID, zone, instanceName string) error
 
 	req := &computepb.GetFromFamilyImageRequest{
 		Project: "debian-cloud",
-		Family:  "debian-11",
+		Family:  "debian-13",
 	}
 
 	image, err := imagesClient.GetFromFamily(ctx, req)

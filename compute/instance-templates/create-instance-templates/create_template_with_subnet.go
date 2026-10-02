@@ -50,7 +50,7 @@ func createTemplateWithSubnet(w io.Writer, projectID, network, subnetwork, templ
 					{
 						InitializeParams: &computepb.AttachedDiskInitializeParams{
 							DiskSizeGb:  proto.Int64(250),
-							SourceImage: proto.String("projects/debian-cloud/global/images/family/debian-11"),
+							SourceImage: proto.String("projects/debian-cloud/global/images/family/debian-13"),
 						},
 						AutoDelete: proto.Bool(true),
 						Boot:       proto.Bool(true),

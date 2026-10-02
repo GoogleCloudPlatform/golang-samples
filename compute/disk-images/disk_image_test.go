@@ -148,7 +148,7 @@ func TestComputeDiskImageSnippets(t *testing.T) {
 	zone := "us-central1-a"
 	imageName := fmt.Sprintf("test-image-go-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 	diskName := fmt.Sprintf("test-disk-go-%v-%v", time.Now().Format("01-02-2006"), r.Int())
-	sourceImage := "projects/debian-cloud/global/images/family/debian-11"
+	sourceImage := "projects/debian-cloud/global/images/family/debian-13"
 	snapshotName := fmt.Sprintf("test-snapshot-go-%v-%v", time.Now().Format("01-02-2006"), r.Int())
 
 	buf := &bytes.Buffer{}
@@ -192,7 +192,7 @@ func TestComputeDiskImageSnippets(t *testing.T) {
 		buf.Reset()
 		want = "Newest disk image was found"
 
-		_, err = getDiskImageFromFamily(buf, "debian-cloud", "debian-11")
+		_, err = getDiskImageFromFamily(buf, "debian-cloud", "debian-13")
 		if err != nil {
 			t.Errorf("getDiskImageFromFamily got err: %v", err)
 		}
