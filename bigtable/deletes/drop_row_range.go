@@ -21,20 +21,25 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/bigtable"
+	admin "cloud.google.com/go/bigtable/admin/apiv2"
+	"cloud.google.com/go/bigtable/admin/apiv2/adminpb"
 )
 
 func dropRowRange(w io.Writer, projectID, instanceID, tableName string) error {
 	ctx := context.Background()
-	adminClient, err := bigtable.NewAdminClient(ctx, projectID, instanceID)
+	adminClient, err := admin.NewBigtableTableAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("bigtable.NewAdminClient: %w", err)
+		return fmt.Errorf("admin.NewBigtableTableAdminClient: %w", err)
 	}
 	defer adminClient.Close()
 
 	// Use a specific row key prefix to drop.
 	prefix := "phone#4c410523"
-	if err := adminClient.DropRowRange(ctx, tableName, prefix); err != nil {
+	req := &adminpb.DropRowRangeRequest{
+		Name:   fmt.Sprintf("projects/%s/instances/%s/tables/%s", projectID, instanceID, tableName),
+		Target: &adminpb.DropRowRangeRequest_RowKeyPrefix{RowKeyPrefix: []byte(prefix)},
+	}
+	if err := adminClient.DropRowRange(ctx, req); err != nil {
 		return fmt.Errorf("adminClient.DropRowRange: %w", err)
 	}
 

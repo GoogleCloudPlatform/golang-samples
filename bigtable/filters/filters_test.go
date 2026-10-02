@@ -27,6 +27,8 @@ import (
 	"github.com/google/uuid"
 
 	"cloud.google.com/go/bigtable"
+	admin "cloud.google.com/go/bigtable/admin/apiv2"
+	"cloud.google.com/go/bigtable/admin/apiv2/adminpb"
 )
 
 func TestFilters(t *testing.T) {
@@ -36,24 +38,54 @@ func TestFilters(t *testing.T) {
 	if project == "" || instance == "" {
 		t.Skip("Skipping bigtable integration test. Set GOLANG_SAMPLES_BIGTABLE_PROJECT and GOLANG_SAMPLES_BIGTABLE_INSTANCE.")
 	}
-	adminClient, err := bigtable.NewAdminClient(ctx, project, instance)
+	adminClient, err := admin.NewBigtableTableAdminClient(ctx)
+	if err != nil {
+		t.Fatalf("admin.NewBigtableTableAdminClient: %v", err)
+	}
+	defer adminClient.Close()
 
 	uuid, err := uuid.NewRandom()
 	tableName := fmt.Sprintf("mobile-time-series-%s", uuid.String()[:8])
-	adminClient.DeleteTable(ctx, tableName)
+	instancePath := fmt.Sprintf("projects/%s/instances/%s", project, instance)
+	tablePath := fmt.Sprintf("%s/tables/%s", instancePath, tableName)
+	adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tablePath})
 
-	if err := adminClient.CreateTable(ctx, tableName); err != nil {
+	if _, err := adminClient.CreateTable(ctx, &adminpb.CreateTableRequest{
+		Parent:  instancePath,
+		TableId: tableName,
+		Table:   &adminpb.Table{},
+	}); err != nil {
 		t.Fatalf("Could not create table %s: %v", tableName, err)
 	}
 
-	if err := adminClient.CreateColumnFamily(ctx, tableName, "stats_summary"); err != nil {
-		adminClient.DeleteTable(ctx, tableName)
-		t.Fatalf("CreateColumnFamily(%s): %v", "stats_summary", err)
+	if _, err := adminClient.ModifyColumnFamilies(ctx, &adminpb.ModifyColumnFamiliesRequest{
+		Name: tablePath,
+		Modifications: []*adminpb.ModifyColumnFamiliesRequest_Modification{
+			{
+				Id: "stats_summary",
+				Mod: &adminpb.ModifyColumnFamiliesRequest_Modification_Create{
+					Create: &adminpb.ColumnFamily{},
+				},
+			},
+		},
+	}); err != nil {
+		adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tablePath})
+		t.Fatalf("ModifyColumnFamilies(%s): %v", "stats_summary", err)
 	}
 
-	if err := adminClient.CreateColumnFamily(ctx, tableName, "cell_plan"); err != nil {
-		adminClient.DeleteTable(ctx, tableName)
-		t.Fatalf("CreateColumnFamily(%s): %v", "cell_plan", err)
+	if _, err := adminClient.ModifyColumnFamilies(ctx, &adminpb.ModifyColumnFamiliesRequest{
+		Name: tablePath,
+		Modifications: []*adminpb.ModifyColumnFamiliesRequest_Modification{
+			{
+				Id: "cell_plan",
+				Mod: &adminpb.ModifyColumnFamiliesRequest_Modification_Create{
+					Create: &adminpb.ColumnFamily{},
+				},
+			},
+		},
+	}); err != nil {
+		adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tablePath})
+		t.Fatalf("ModifyColumnFamilies(%s): %v", "cell_plan", err)
 	}
 
 	timestamp := bigtable.Now().TruncateToMilliseconds()
@@ -556,7 +588,7 @@ Column Family stats_summary
 		t.Errorf("got %q, want %q", got, want)
 	}
 
-	adminClient.DeleteTable(ctx, tableName)
+	adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tablePath})
 }
 
 func writeTestData(err error, ctx context.Context, project string, instance string, tableName string, timestamp bigtable.Timestamp, t *testing.T) {

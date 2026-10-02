@@ -17,6 +17,7 @@ package deletes
 import (
 	"bytes"
 	"context"
+	"fmt"
 
 	"os"
 	"strings"
@@ -24,6 +25,8 @@ import (
 	"time"
 
 	"cloud.google.com/go/bigtable"
+	admin "cloud.google.com/go/bigtable/admin/apiv2"
+	"cloud.google.com/go/bigtable/admin/apiv2/adminpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
@@ -42,18 +45,29 @@ func TestDeletes(t *testing.T) {
 	// Ensure the Bigtable instance exists.
 	ensureInstance(t, ctx, project, instance)
 
-	adminClient, err := bigtable.NewAdminClient(ctx, project, instance)
+	adminClient, err := admin.NewBigtableTableAdminClient(ctx)
 	if err != nil {
-		t.Skipf("bigtable.NewAdminClient: %v", err)
+		t.Skipf("admin.NewBigtableTableAdminClient: %v", err)
 	}
 	defer adminClient.Close()
 
 	tableName := "mobile-time-series-" + uuid.New().String()[:8]
+	instancePath := fmt.Sprintf("projects/%s/instances/%s", project, instance)
+	tablePath := fmt.Sprintf("%s/tables/%s", instancePath, tableName)
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
-		if err := adminClient.CreateTable(ctx, tableName); err != nil {
+		if _, err := adminClient.CreateTable(ctx, &adminpb.CreateTableRequest{
+			Parent:  instancePath,
+			TableId: tableName,
+			Table: &adminpb.Table{
+				ColumnFamilies: map[string]*adminpb.ColumnFamily{
+					"cell_plan":     {},
+					"stats_summary": {},
+				},
+			},
+		}); err != nil {
 			if status.Code(err) == codes.AlreadyExists {
-				adminClient.DeleteTable(ctx, tableName)
+				adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tablePath})
 				time.Sleep(5 * time.Second)
 			}
 			r.Errorf("Could not create table %s: %v", tableName, err)
@@ -62,14 +76,7 @@ func TestDeletes(t *testing.T) {
 	if t.Failed() {
 		return
 	}
-	defer adminClient.DeleteTable(ctx, tableName)
-
-	if err := adminClient.CreateColumnFamily(ctx, tableName, "cell_plan"); err != nil {
-		t.Fatalf("CreateColumnFamily(cell_plan): %v", err)
-	}
-	if err := adminClient.CreateColumnFamily(ctx, tableName, "stats_summary"); err != nil {
-		t.Fatalf("CreateColumnFamily(stats_summary): %v", err)
-	}
+	defer adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tablePath})
 
 	client, err := bigtable.NewClient(ctx, project, instance)
 	if err != nil {

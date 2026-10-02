@@ -27,6 +27,8 @@ import (
 	"github.com/google/uuid"
 
 	"cloud.google.com/go/bigtable"
+	admin "cloud.google.com/go/bigtable/admin/apiv2"
+	"cloud.google.com/go/bigtable/admin/apiv2/adminpb"
 )
 
 func TestReads(t *testing.T) {
@@ -36,25 +38,31 @@ func TestReads(t *testing.T) {
 	if project == "" || instance == "" {
 		t.Skip("Skipping bigtable integration test. Set GOLANG_SAMPLES_BIGTABLE_PROJECT and GOLANG_SAMPLES_BIGTABLE_INSTANCE.")
 	}
-	adminClient, err := bigtable.NewAdminClient(ctx, project, instance)
+	adminClient, err := admin.NewBigtableTableAdminClient(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer adminClient.Close()
 
 	uuid, err := uuid.NewRandom()
 	if err != nil {
 		t.Fatal(err)
 	}
 	tableName := fmt.Sprintf("mobile-time-series-%s", uuid.String()[:8])
-	adminClient.DeleteTable(ctx, tableName)
+	instancePath := fmt.Sprintf("projects/%s/instances/%s", project, instance)
+	tablePath := fmt.Sprintf("%s/tables/%s", instancePath, tableName)
+	adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tablePath})
 
-	if err := adminClient.CreateTable(ctx, tableName); err != nil {
+	if _, err := adminClient.CreateTable(ctx, &adminpb.CreateTableRequest{
+		Parent:  instancePath,
+		TableId: tableName,
+		Table: &adminpb.Table{
+			ColumnFamilies: map[string]*adminpb.ColumnFamily{
+				"stats_summary": {},
+			},
+		},
+	}); err != nil {
 		t.Fatalf("Could not create table %s: %v", tableName, err)
-	}
-
-	if err := adminClient.CreateColumnFamily(ctx, tableName, "stats_summary"); err != nil {
-		adminClient.DeleteTable(ctx, tableName)
-		t.Fatalf("CreateColumnFamily(%s): %v", "stats_summary", err)
 	}
 
 	timestamp := bigtable.Now().TruncateToMilliseconds()
@@ -230,7 +238,7 @@ Column Family stats_summary
 		})
 	}
 
-	adminClient.DeleteTable(ctx, tableName)
+	adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tablePath})
 }
 
 func writeTestData(ctx context.Context, project string, instance string, tableName string, timestamp bigtable.Timestamp, t *testing.T) {
