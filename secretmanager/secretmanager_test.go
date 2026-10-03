@@ -386,6 +386,24 @@ func TestCreateSecretWithLabels(t *testing.T) {
 	}
 }
 
+func TestCreateSecretWithType(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secretID := "createSecretWithType"
+
+	parent := fmt.Sprintf("projects/%s", tc.ProjectID)
+
+	var b bytes.Buffer
+	if err := createSecretWithType(&b, parent, secretID, secretmanagerpb.Secret_ACCESS_KEY); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupSecret(t, fmt.Sprintf("projects/%s/secrets/%s", tc.ProjectID, secretID))
+
+	if got, want := b.String(), "Created secret with secret type:"; !strings.Contains(got, want) {
+		t.Errorf("createSecretWithType: expected %q to contain %q", got, want)
+	}
+}
+
 func TestCreateSecretWithAnnotations(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -878,6 +896,40 @@ func TestGetRegionalSecret(t *testing.T) {
 
 	if got, want := b.String(), "Found regional secret"; !strings.Contains(got, want) {
 		t.Errorf("getRegionalSecret: expected %q to contain %q", got, want)
+	}
+}
+
+func TestGetSecretType(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret := testSecret(t, tc.ProjectID)
+	defer testCleanupSecret(t, secret.Name)
+
+	var b bytes.Buffer
+	if err := getSecretType(&b, secret.Name); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "with secret type"; !strings.Contains(got, want) {
+		t.Errorf("getSecretType: expected %q to contain %q", got, want)
+	}
+}
+
+func TestGetRegionalSecretType(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret, secretdID := testRegionalSecret(t, tc.ProjectID)
+	defer testCleanupRegionalSecret(t, secret.Name)
+
+	locationID := testLocation(t)
+
+	var b bytes.Buffer
+	if err := regional_secretmanager.GetRegionalSecretType(&b, tc.ProjectID, locationID, secretdID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "with secret type"; !strings.Contains(got, want) {
+		t.Errorf("getRegionalSecretType: expected %q to contain %q", got, want)
 	}
 }
 
