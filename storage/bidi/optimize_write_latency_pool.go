@@ -42,8 +42,7 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 	defer client.Close()
 
 	bucket := client.Bucket(bucketName)
-	// Each pre-warmed writer gets the next unique object number. Atomic because
-	// refills run concurrently.
+	// Each pre-warmed writer gets the next unique object number.
 	var nextID atomic.Int64
 	newPrewarmedWriter := func() (*storage.Writer, error) {
 		name := fmt.Sprintf("%s_%d", keyPrefix, nextID.Add(1)-1)
