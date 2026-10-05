@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sync/atomic"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -41,7 +42,11 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 	defer client.Close()
 
 	bucket := client.Bucket(bucketName)
-	newPrewarmedWriter := func(name string) (*storage.Writer, error) {
+	// Each pre-warmed writer gets the next unique object number. Atomic because
+	// refills run concurrently.
+	var nextID atomic.Int64
+	newPrewarmedWriter := func() (*storage.Writer, error) {
+		name := fmt.Sprintf("%s_%d", keyPrefix, nextID.Add(1)-1)
 		w := bucket.Object(name).If(storage.Conditions{DoesNotExist: true}).NewWriter(ctx)
 		if _, err := w.Flush(); err != nil {
 			return nil, errors.Join(fmt.Errorf("Writer.Flush(%q): %w", name, err), w.Close())
@@ -62,8 +67,8 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 		}
 	}()
 
-	for i := 0; i < poolSize; i++ {
-		w, err := newPrewarmedWriter(fmt.Sprintf("%s_%d", keyPrefix, i))
+	for range poolSize {
+		w, err := newPrewarmedWriter()
 		if err != nil {
 			return err
 		}
@@ -94,9 +99,7 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 		if err := used.Close(); err != nil {
 			fmt.Fprintf(out, "Writer.Close: %v\n", err)
 		}
-		// This sample refills once. A long-running app needs a unique name for
-		// each replacement, such as one from an incrementing counter.
-		next, err := newPrewarmedWriter(fmt.Sprintf("%s_%d", keyPrefix, poolSize))
+		next, err := newPrewarmedWriter()
 		if err != nil {
 			fmt.Fprintf(out, "failed to pre-warm replacement writer: %v\n", err)
 			return
