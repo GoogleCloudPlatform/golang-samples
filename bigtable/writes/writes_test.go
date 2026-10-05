@@ -51,7 +51,7 @@ func TestWrites(t *testing.T) {
 	adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tablePath})
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
-		if _, err := adminClient.CreateTable(ctx, &adminpb.CreateTableRequest{
+		req := &adminpb.CreateTableRequest{
 			Parent:  instancePath,
 			TableId: tableName,
 			Table: &adminpb.Table{
@@ -81,7 +81,8 @@ func TestWrites(t *testing.T) {
 					},
 				},
 			},
-		}); err != nil {
+		}
+		if _, err := adminClient.CreateTable(ctx, req); err != nil {
 			// Just in case the table exists, try to delete it again.
 			if status.Code(err) == codes.AlreadyExists {
 				adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tablePath})

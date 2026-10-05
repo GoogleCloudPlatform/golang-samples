@@ -56,7 +56,7 @@ func TestDeletes(t *testing.T) {
 	tablePath := fmt.Sprintf("%s/tables/%s", instancePath, tableName)
 
 	testutil.Retry(t, 10, 10*time.Second, func(r *testutil.R) {
-		if _, err := adminClient.CreateTable(ctx, &adminpb.CreateTableRequest{
+		req := &adminpb.CreateTableRequest{
 			Parent:  instancePath,
 			TableId: tableName,
 			Table: &adminpb.Table{
@@ -65,7 +65,8 @@ func TestDeletes(t *testing.T) {
 					"stats_summary": {},
 				},
 			},
-		}); err != nil {
+		}
+		if _, err := adminClient.CreateTable(ctx, req); err != nil {
 			if status.Code(err) == codes.AlreadyExists {
 				adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tablePath})
 				time.Sleep(5 * time.Second)

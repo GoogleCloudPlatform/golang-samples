@@ -50,15 +50,16 @@ func TestFilters(t *testing.T) {
 	tablePath := fmt.Sprintf("%s/tables/%s", instancePath, tableName)
 	adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tablePath})
 
-	if _, err := adminClient.CreateTable(ctx, &adminpb.CreateTableRequest{
+	createTableReq := &adminpb.CreateTableRequest{
 		Parent:  instancePath,
 		TableId: tableName,
 		Table:   &adminpb.Table{},
-	}); err != nil {
+	}
+	if _, err := adminClient.CreateTable(ctx, createTableReq); err != nil {
 		t.Fatalf("Could not create table %s: %v", tableName, err)
 	}
 
-	if _, err := adminClient.ModifyColumnFamilies(ctx, &adminpb.ModifyColumnFamiliesRequest{
+	statsSummaryReq := &adminpb.ModifyColumnFamiliesRequest{
 		Name: tablePath,
 		Modifications: []*adminpb.ModifyColumnFamiliesRequest_Modification{
 			{
@@ -68,12 +69,13 @@ func TestFilters(t *testing.T) {
 				},
 			},
 		},
-	}); err != nil {
+	}
+	if _, err := adminClient.ModifyColumnFamilies(ctx, statsSummaryReq); err != nil {
 		adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tablePath})
 		t.Fatalf("ModifyColumnFamilies(%s): %v", "stats_summary", err)
 	}
 
-	if _, err := adminClient.ModifyColumnFamilies(ctx, &adminpb.ModifyColumnFamiliesRequest{
+	cellPlanReq := &adminpb.ModifyColumnFamiliesRequest{
 		Name: tablePath,
 		Modifications: []*adminpb.ModifyColumnFamiliesRequest_Modification{
 			{
@@ -83,7 +85,8 @@ func TestFilters(t *testing.T) {
 				},
 			},
 		},
-	}); err != nil {
+	}
+	if _, err := adminClient.ModifyColumnFamilies(ctx, cellPlanReq); err != nil {
 		adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tablePath})
 		t.Fatalf("ModifyColumnFamilies(%s): %v", "cell_plan", err)
 	}

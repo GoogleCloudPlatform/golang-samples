@@ -26,7 +26,8 @@ import (
 	"cloud.google.com/go/bigtable"
 	admin "cloud.google.com/go/bigtable/admin/apiv2"
 	"cloud.google.com/go/bigtable/admin/apiv2/adminpb"
-	"google.golang.org/api/iterator"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // [END bigtable_hw_imports]
@@ -39,16 +40,6 @@ const (
 )
 
 var greetings = []string{"Hello World!", "Hello Cloud Bigtable!", "Hello Go!"}
-
-// sliceContains reports whether the provided string is present in the given slice of strings.
-func sliceContains(list []string, target string) bool {
-	for _, s := range list {
-		if s == target {
-			return true
-		}
-	}
-	return false
-}
 
 func main() {
 	project := flag.String("project", "", "The Google Cloud Platform project ID. Required.")
@@ -76,40 +67,29 @@ func main() {
 	instanceName := fmt.Sprintf("projects/%s/instances/%s", *project, *instance)
 	tableFullName := fmt.Sprintf("%s/tables/%s", instanceName, tableName)
 
-	var tables []string
-	it := adminClient.ListTables(ctx, &adminpb.ListTablesRequest{Parent: instanceName})
-	for {
-		tbl, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			log.Fatalf("Could not fetch table list: %v", err)
-		}
-		tables = append(tables, tbl.Name)
-	}
-
-	if !sliceContains(tables, tableFullName) {
-		log.Printf("Creating table %s", tableName)
-		if _, err := adminClient.CreateTable(ctx, &adminpb.CreateTableRequest{
-			Parent:  instanceName,
-			TableId: tableName,
-			Table:   &adminpb.Table{},
-		}); err != nil {
-			log.Fatalf("Could not create table %s: %v", tableName, err)
-		}
-	}
-
 	tblInfo, err := adminClient.GetTable(ctx, &adminpb.GetTableRequest{
 		Name: tableFullName,
 		View: adminpb.Table_SCHEMA_VIEW,
 	})
 	if err != nil {
-		log.Fatalf("Could not read info for table %s: %v", tableName, err)
-	}
-
-	if _, ok := tblInfo.ColumnFamilies[columnFamilyName]; !ok {
-		if _, err := adminClient.ModifyColumnFamilies(ctx, &adminpb.ModifyColumnFamiliesRequest{
+		if status.Code(err) != codes.NotFound {
+			log.Fatalf("Could not read info for table %s: %v", tableName, err)
+		}
+		log.Printf("Creating table %s", tableName)
+		req := &adminpb.CreateTableRequest{
+			Parent:  instanceName,
+			TableId: tableName,
+			Table: &adminpb.Table{
+				ColumnFamilies: map[string]*adminpb.ColumnFamily{
+					columnFamilyName: {},
+				},
+			},
+		}
+		if _, err := adminClient.CreateTable(ctx, req); err != nil {
+			log.Fatalf("Could not create table %s: %v", tableName, err)
+		}
+	} else if _, ok := tblInfo.ColumnFamilies[columnFamilyName]; !ok {
+		req := &adminpb.ModifyColumnFamiliesRequest{
 			Name: tableFullName,
 			Modifications: []*adminpb.ModifyColumnFamiliesRequest_Modification{
 				{
@@ -119,7 +99,8 @@ func main() {
 					},
 				},
 			},
-		}); err != nil {
+		}
+		if _, err := adminClient.ModifyColumnFamilies(ctx, req); err != nil {
 			log.Fatalf("Could not create column family %s: %v", columnFamilyName, err)
 		}
 	}

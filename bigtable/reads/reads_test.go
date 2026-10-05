@@ -53,7 +53,7 @@ func TestReads(t *testing.T) {
 	tablePath := fmt.Sprintf("%s/tables/%s", instancePath, tableName)
 	adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tablePath})
 
-	if _, err := adminClient.CreateTable(ctx, &adminpb.CreateTableRequest{
+	createTableReq := &adminpb.CreateTableRequest{
 		Parent:  instancePath,
 		TableId: tableName,
 		Table: &adminpb.Table{
@@ -61,7 +61,8 @@ func TestReads(t *testing.T) {
 				"stats_summary": {},
 			},
 		},
-	}); err != nil {
+	}
+	if _, err := adminClient.CreateTable(ctx, createTableReq); err != nil {
 		t.Fatalf("Could not create table %s: %v", tableName, err)
 	}
 

@@ -371,7 +371,7 @@ func handleReset(w http.ResponseWriter, r *http.Request, project, instance, tabl
 	tableFullName := fmt.Sprintf("%s/tables/%s", instanceName, table)
 
 	adminClient.DeleteTable(ctx, &adminpb.DeleteTableRequest{Name: tableFullName})
-	if _, err := adminClient.CreateTable(ctx, &adminpb.CreateTableRequest{
+	req := &adminpb.CreateTableRequest{
 		Parent:  instanceName,
 		TableId: table,
 		Table: &adminpb.Table{
@@ -392,7 +392,8 @@ func handleReset(w http.ResponseWriter, r *http.Request, project, instance, tabl
 				},
 			},
 		},
-	}); err != nil {
+	}
+	if _, err := adminClient.CreateTable(ctx, req); err != nil {
 		http.Error(w, "Error creating table: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
