@@ -213,18 +213,31 @@ func TestReadAppendableObjectTail(t *testing.T) {
 
 func TestOptimizeWriteLatencyPool(t *testing.T) {
 	var b bytes.Buffer
-	prefix := "obj-pool-" + uuid.NewString()[:8]
+	prefix := "obj-pool"
 	if err := optimizeWriteLatencyPool(&b, bidiBucketName, prefix); err != nil {
 		t.Fatalf("running sample: %v, output: %v", err, b.String())
 	}
 
-	// Check that the first unfinalized object was created
-	firstObj := fmt.Sprintf("%s_0", prefix)
-	attrs, err := client.Bucket(bidiBucketName).Object(firstObj).Attrs(context.Background())
+	// Check that the first object was written and left unfinalized.
+	ctx := context.Background()
+	obj := client.Bucket(bidiBucketName).Object(fmt.Sprintf("%s_0", prefix))
+	attrs, err := obj.Attrs(ctx)
 	if err != nil {
 		t.Fatalf("object.Attrs: %v", err)
 	}
 	if !attrs.Finalized.IsZero() {
 		t.Errorf("got finalized object, want unfinalized")
+	}
+	r, err := obj.NewReader(ctx)
+	if err != nil {
+		t.Fatalf("object.NewReader: %v", err)
+	}
+	defer r.Close()
+	got, err := io.ReadAll(r)
+	if err != nil {
+		t.Fatalf("io.ReadAll: %v", err)
+	}
+	if want := "0123456789"; string(got) != want {
+		t.Errorf("got contents %q, want %q", got, want)
 	}
 }

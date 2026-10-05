@@ -29,9 +29,10 @@ import (
 func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error {
 	// bucketName := "bucket-name"
 	// keyPrefix := "pooled-object"
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	const poolSize = 3
+	// Pool writers live until ctx is canceled (here, on return).
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	poolSize := 3
 
 	client, err := storage.NewGRPCClient(ctx, storage.WithAppendableUploads())
 	if err != nil {
@@ -43,14 +44,13 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 	newPrewarmedWriter := func(name string) (*storage.Writer, error) {
 		w := bucket.Object(name).If(storage.Conditions{DoesNotExist: true}).NewWriter(ctx)
 		if _, err := w.Flush(); err != nil {
-			return nil, errors.Join(fmt.Errorf("Writer.Flush(%s): %w", name, err), w.Close())
+			return nil, errors.Join(fmt.Errorf("Writer.Flush(%q): %w", name, err), w.Close())
 		}
 		return w, nil
 	}
 
-	// 1. Init pool: A buffered channel is a thread-safe FIFO queue of
-	// pre-warmed writers. Flushing incurs operation charges, so size the pool
-	// carefully.
+	// Init pool: A buffered channel is a thread-safe FIFO queue of pre-warmed
+	// writers. Flushing incurs operation charges, so size the pool carefully.
 	pool := make(chan *storage.Writer, poolSize)
 	// On return, close pooled writers; unused objects remain unfinalized.
 	defer func() {
@@ -70,7 +70,7 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 		pool <- w
 	}
 
-	// 2. Write: Take a pre-warmed writer (waiting for a refill if the pool is
+	// Write: Take a pre-warmed writer (waiting for a refill if the pool is
 	// empty) and commit with the faster Flush() instead of blocking on Close().
 	var w *storage.Writer
 	select {
@@ -84,8 +84,9 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 	if _, err := w.Flush(); err != nil {
 		return errors.Join(fmt.Errorf("Writer.Flush: %w", err), w.Close())
 	}
+	fmt.Fprintf(out, "Wrote and flushed %q without finalizing\n", w.Name)
 
-	// 3. Pool maintenance (run asynchronously off the critical write path):
+	// Pool maintenance (run asynchronously off the critical write path):
 	// Close the used writer without finalizing and refill the pool.
 	maintenance := make(chan struct{})
 	go func(used *storage.Writer) {
@@ -93,6 +94,8 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 		if err := used.Close(); err != nil {
 			fmt.Fprintf(out, "Writer.Close: %v\n", err)
 		}
+		// This sample refills once. A long-running app needs a unique name for
+		// each replacement, such as one from an incrementing counter.
 		next, err := newPrewarmedWriter(fmt.Sprintf("%s_%d", keyPrefix, poolSize))
 		if err != nil {
 			fmt.Fprintf(out, "failed to pre-warm replacement writer: %v\n", err)
@@ -103,7 +106,7 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 	// Wait for maintenance on return; runs before the pool cleanup above.
 	defer func() { <-maintenance }()
 
-	// 4. Read: Unfinalized objects are readable after Flush().
+	// Read: Unfinalized objects are readable after Flush().
 	r, err := bucket.Object(fmt.Sprintf("%s_0", keyPrefix)).NewReader(ctx)
 	if err != nil {
 		return fmt.Errorf("Object.NewReader: %w", err)
@@ -113,7 +116,7 @@ func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error
 		return fmt.Errorf("reading %s_0: %w", keyPrefix, err)
 	}
 
-	fmt.Fprintf(out, "Read unfinalized object %s_0: %s\n", keyPrefix, string(contents))
+	fmt.Fprintf(out, "Read unfinalized object %s_0: %s\n", keyPrefix, contents)
 	return nil
 }
 
