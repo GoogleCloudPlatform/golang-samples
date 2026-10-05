@@ -88,7 +88,7 @@ func cleanupOrphanedModules() {
 			return
 		}
 
-		if strings.HasPrefix(module.DisplayName, "go_sample_sha_custom_module_test_") {
+		if strings.HasPrefix(module.DisplayName, "go_sample_sha_custom_module_") {
 			fmt.Printf("Cleaning up orphaned module: %s\n", module.DisplayName)
 			err := client.DeleteSecurityHealthAnalyticsCustomModule(ctx, &securitycentermanagementpb.DeleteSecurityHealthAnalyticsCustomModuleRequest{
 				Name: module.Name,
