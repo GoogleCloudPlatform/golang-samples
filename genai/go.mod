@@ -1,13 +1,13 @@
 module github.com/GoogleCloudPlatform/golang-samples/genai
 
-go 1.25.0
+go 1.26.0
 
 require (
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20251210094219-afaa7f40a550
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20261005175520-598b35766750
 	github.com/go-audio/audio v1.0.0
 	github.com/go-audio/wav v1.1.0
-	golang.org/x/oauth2 v0.36.0
-	google.golang.org/genai v1.40.0
+	golang.org/x/oauth2 v0.37.0
+	google.golang.org/genai v1.72.0
 )
 
 require (
@@ -24,7 +24,7 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.58.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2 // indirect
-	github.com/eliben/go-sentencepiece v0.6.0 // indirect
+	github.com/eliben/go-sentencepiece v0.7.0 // indirect
 	github.com/envoyproxy/go-control-plane/envoy v1.37.0 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.3.3 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect

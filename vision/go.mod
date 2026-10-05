@@ -3,12 +3,12 @@ module github.com/GoogleCloudPlatform/golang-samples/vision
 go 1.25.0
 
 require (
-	cloud.google.com/go/storage v1.50.0
+	cloud.google.com/go/storage v1.69.0
 	cloud.google.com/go/vision v1.2.0
-	cloud.google.com/go/vision/v2 v2.9.3
-	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20240724083556-7f760db013b7
-	google.golang.org/api v0.217.0
-	google.golang.org/genproto v0.0.0-20250115164207-1a7da9e5054f
+	cloud.google.com/go/vision/v2 v2.16.0
+	github.com/GoogleCloudPlatform/golang-samples v0.0.0-20261005175520-598b35766750
+	google.golang.org/api v0.300.0
+	google.golang.org/genproto v0.0.0-20261005182115-fad411399dd8
 )
 
 require (

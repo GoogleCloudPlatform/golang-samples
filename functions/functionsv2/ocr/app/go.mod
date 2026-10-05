@@ -3,16 +3,16 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/functionsv2/ocr/a
 go 1.25.0
 
 require (
-	cloud.google.com/go/pubsub v1.50.2
-	cloud.google.com/go/storage v1.64.0
-	cloud.google.com/go/translate v1.17.0
+	cloud.google.com/go/pubsub v1.51.1
+	cloud.google.com/go/storage v1.69.0
+	cloud.google.com/go/translate v1.19.0
 	cloud.google.com/go/vision v1.2.0
-	cloud.google.com/go/vision/v2 v2.14.0
-	github.com/GoogleCloudPlatform/functions-framework-go v1.8.1
-	github.com/cloudevents/sdk-go/v2 v2.15.2
-	github.com/googleapis/google-cloudevents-go v0.8.0
-	golang.org/x/text v0.41.0
-	google.golang.org/protobuf v1.36.11
+	cloud.google.com/go/vision/v2 v2.16.0
+	github.com/GoogleCloudPlatform/functions-framework-go v1.9.2
+	github.com/cloudevents/sdk-go/v2 v2.16.2
+	github.com/googleapis/google-cloudevents-go v0.10.0
+	golang.org/x/text v0.42.0
+	google.golang.org/protobuf v1.36.12
 )
 
 require (
