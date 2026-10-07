@@ -1371,23 +1371,23 @@ func TestCreateRegionalParamWithTags(t *testing.T) {
 	}
 }
 
-// TestBindRegionalTagsToParam tests the bindRegionalTagsToParam function by creating a parameter, binding an
+// TestBindTagsToRegionalParam tests the bindTagsToRegionalParam function by creating a parameter, binding an
 // existing tag value, then verifies the tag binding through Resource Manager.
-func TestBindRegionalTagsToParam(t *testing.T) {
+func TestBindTagsToRegionalParam(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	_, tagValue := testTag(t)
 
 	parameterID := testName(t)
 	locationId := testLocation(t)
 	var buf bytes.Buffer
-	if err := bindRegionalTagsToParam(&buf, tc.ProjectID, locationId, parameterID, tagValue); err != nil {
+	if err := bindTagsToRegionalParam(&buf, tc.ProjectID, locationId, parameterID, tagValue); err != nil {
 		t.Fatal(err)
 	}
 	name := fmt.Sprintf("%s/parameters/%s", testLocationPath(t, tc.ProjectID), parameterID)
 	defer testCleanupParameter(t, name)
 
 	if got, want := buf.String(), fmt.Sprintf("Bound tag value %s to regional parameter", tagValue); !strings.Contains(got, want) {
-		t.Errorf("bindRegionalTagsToParam: expected %q to contain %q", got, want)
+		t.Errorf("bindTagsToRegionalParam: expected %q to contain %q", got, want)
 	}
 
 	client := testNewClient(t)
@@ -1397,7 +1397,7 @@ func TestBindRegionalTagsToParam(t *testing.T) {
 		t.Fatalf("failed to get parameter: %v", err)
 	}
 	if got := testTagBindings(t, parameter.Name); len(got) != 1 || got[0] != tagValue {
-		t.Errorf("bindRegionalTagsToParam: got tag bindings %v, want [%s]", got, tagValue)
+		t.Errorf("bindTagsToRegionalParam: got tag bindings %v, want [%s]", got, tagValue)
 	}
 }
 

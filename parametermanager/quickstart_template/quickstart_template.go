@@ -14,7 +14,7 @@
 
 package main
 
-// [START parametermanager_regional_templates_quickstart]
+// [START parametermanager_template_quickstart]
 
 // Sample quickstart is a basic program that renders a Parameter Manager
 // template using the values of a parameter version.
@@ -24,14 +24,11 @@ import (
 
 	parametermanager "cloud.google.com/go/parametermanager/apiv1"
 	parametermanagerpb "cloud.google.com/go/parametermanager/apiv1/parametermanagerpb"
-	"google.golang.org/api/option"
 )
 
 func main() {
 	// GCP project in which to store resources in Parameter Manager.
 	projectID := "test-project-id"
-	// Location at which you want to store your resources.
-	locationID := "us-central1"
 	// Id of the template which you want to create.
 	templateID := "test-template-id"
 	// Id of the template version which you want to create.
@@ -48,15 +45,14 @@ func main() {
 
 	// Create a context and a Parameter Manager client.
 	ctx := context.Background()
-	endpoint := fmt.Sprintf("parametermanager.%s.rep.googleapis.com:443", locationID)
-	client, err := parametermanager.NewClient(ctx, option.WithEndpoint(endpoint))
+	client, err := parametermanager.NewClient(ctx)
 	if err != nil {
 		fmt.Printf("Failed to create Parameter Manager client: %v\n", err)
 		return
 	}
 	defer client.Close()
 
-	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
+	parent := fmt.Sprintf("projects/%s/locations/global", projectID)
 
 	// Create a JSON template.
 	template, err := client.CreateTemplate(ctx, &parametermanagerpb.CreateTemplateRequest{
@@ -129,4 +125,4 @@ func main() {
 	fmt.Printf("Rendered payload: %s\n", rendered.RenderedPayload)
 }
 
-// [END parametermanager_regional_templates_quickstart]
+// [END parametermanager_template_quickstart]

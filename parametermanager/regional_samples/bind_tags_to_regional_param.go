@@ -14,7 +14,7 @@
 
 package regional_parametermanager
 
-// [START parametermanager_bind_regional_tags_to_param]
+// [START parametermanager_bind_tags_to_regional_param]
 import (
 	"context"
 	"fmt"
@@ -27,7 +27,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-// bindRegionalTagsToParam creates a parameter and then binds an existing tag value to it using Resource Manager.
+// bindTagsToRegionalParam creates a parameter and then binds an existing tag value to it using Resource Manager.
 //
 // w: The io.Writer object used to write the output.
 // projectID: The ID of the project where the parameter is located.
@@ -36,7 +36,7 @@ import (
 // tagValue: The tag value, in the form tagValues/{id}.
 //
 // The function returns an error if the operation fails.
-func bindRegionalTagsToParam(w io.Writer, projectID, locationID, parameterID, tagValue string) error {
+func bindTagsToRegionalParam(w io.Writer, projectID, locationID, parameterID, tagValue string) error {
 	// Create a context and a Parameter Manager client.
 	ctx := context.Background()
 	endpoint := fmt.Sprintf("parametermanager.%s.rep.googleapis.com:443", locationID)
@@ -92,4 +92,4 @@ func bindRegionalTagsToParam(w io.Writer, projectID, locationID, parameterID, ta
 	return nil
 }
 
-// [END parametermanager_bind_regional_tags_to_param]
+// [END parametermanager_bind_tags_to_regional_param]
