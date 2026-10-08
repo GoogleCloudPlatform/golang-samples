@@ -17,7 +17,10 @@ package regional_parametermanager
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
+	"hash/crc32"
+	"io"
 	"os"
 	"strings"
 	"testing"
@@ -27,13 +30,17 @@ import (
 	"cloud.google.com/go/kms/apiv1/kmspb"
 	parametermanager "cloud.google.com/go/parametermanager/apiv1"
 	parametermanagerpb "cloud.google.com/go/parametermanager/apiv1/parametermanagerpb"
+	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
+	resourcemanagerpb "cloud.google.com/go/resourcemanager/apiv3/resourcemanagerpb"
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	secretmanagerpb "cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"github.com/gofrs/uuid"
+	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	grpccodes "google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
 // testName generates a unique name for testing purposes by creating a new UUID.
@@ -824,5 +831,692 @@ func TestRemoveRegionalParamKmsKey(t *testing.T) {
 	}
 	if got, want := buf.String(), fmt.Sprintf("Removed kms_key for regional parameter %s", parameter.Name); !strings.Contains(got, want) {
 		t.Errorf("createParameter: expected %q to contain %q", got, want)
+	}
+}
+
+// testNewClient creates a Parameter Manager client for the test.
+func testNewClient(t *testing.T) *parametermanager.Client {
+	t.Helper()
+
+	ctx := context.Background()
+	endpoint := fmt.Sprintf("parametermanager.%s.rep.googleapis.com:443", testLocation(t))
+	client, err := parametermanager.NewClient(ctx, option.WithEndpoint(endpoint))
+	if err != nil {
+		t.Fatalf("testNewClient: failed to create client: %v", err)
+	}
+	return client
+}
+
+// testLocationPath returns the parent resource path of the test location.
+func testLocationPath(t *testing.T, projectID string) string {
+	t.Helper()
+
+	return fmt.Sprintf("projects/%s/locations/%s", projectID, testLocation(t))
+}
+
+// testTemplate creates a template with the given format in the specified GCP project.
+// It returns the created template and its ID or fails the test if template creation fails.
+func testTemplate(t *testing.T, projectID string, format parametermanagerpb.TemplateFormat) (*parametermanagerpb.Template, string) {
+	t.Helper()
+
+	templateID := testName(t)
+	client := testNewClient(t)
+	defer client.Close()
+
+	template, err := client.CreateTemplate(context.Background(), &parametermanagerpb.CreateTemplateRequest{
+		Parent:     testLocationPath(t, projectID),
+		TemplateId: templateID,
+		Template: &parametermanagerpb.Template{
+			Format: format,
+		},
+	})
+	if err != nil {
+		t.Fatalf("testTemplate: failed to create template: %v", err)
+	}
+
+	return template, templateID
+}
+
+// testTemplateVersion creates a version of a template with the given payload.
+// It returns the created template version and its ID or fails the test if creation fails.
+func testTemplateVersion(t *testing.T, templateName, payload string) (*parametermanagerpb.TemplateVersion, string) {
+	t.Helper()
+
+	versionID := testName(t)
+	client := testNewClient(t)
+	defer client.Close()
+
+	version, err := client.CreateTemplateVersion(context.Background(), &parametermanagerpb.CreateTemplateVersionRequest{
+		Parent:            templateName,
+		TemplateVersionId: versionID,
+		TemplateVersion: &parametermanagerpb.TemplateVersion{
+			Payload: &parametermanagerpb.TemplateVersionPayload{
+				Data: []byte(payload),
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("testTemplateVersion: failed to create template version: %v", err)
+	}
+
+	return version, versionID
+}
+
+// testCleanupTemplate deletes the specified template in the GCP project.
+// It fails the test if the template deletion fails.
+func testCleanupTemplate(t *testing.T, name string) {
+	t.Helper()
+
+	client := testNewClient(t)
+	defer client.Close()
+
+	err := client.DeleteTemplate(context.Background(), &parametermanagerpb.DeleteTemplateRequest{
+		Name: name,
+	})
+	if err == nil {
+		return
+	}
+	if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
+		t.Fatalf("testCleanupTemplate: failed to delete template: %v", err)
+	}
+}
+
+// testCleanupTemplateVersion deletes the specified template version in the GCP project.
+// It fails the test if the template version deletion fails.
+func testCleanupTemplateVersion(t *testing.T, name string) {
+	t.Helper()
+
+	client := testNewClient(t)
+	defer client.Close()
+
+	err := client.DeleteTemplateVersion(context.Background(), &parametermanagerpb.DeleteTemplateVersionRequest{
+		Name: name,
+	})
+	if err == nil {
+		return
+	}
+	if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
+		t.Fatalf("testCleanupTemplateVersion: failed to delete template version: %v", err)
+	}
+}
+
+// testTag returns the pre-provisioned tag key and tag value used by the tag tests.
+// The tests are skipped if GOLANG_SAMPLES_TAG_KEY or GOLANG_SAMPLES_TAG_VALUE is not set.
+func testTag(t *testing.T) (string, string) {
+	t.Helper()
+
+	key := os.Getenv("GOLANG_SAMPLES_TAG_KEY")
+	value := os.Getenv("GOLANG_SAMPLES_TAG_VALUE")
+	if key == "" || value == "" {
+		t.Skip("testTag: missing GOLANG_SAMPLES_TAG_KEY or GOLANG_SAMPLES_TAG_VALUE")
+	}
+
+	return key, value
+}
+
+// testTagBindings returns the tag values bound to the named parameter, read through Resource Manager.
+func testTagBindings(t *testing.T, parameterName string) []string {
+	t.Helper()
+
+	ctx := context.Background()
+	endpoint := fmt.Sprintf("%s-cloudresourcemanager.googleapis.com:443", testLocation(t))
+	client, err := resourcemanager.NewTagBindingsClient(ctx, option.WithEndpoint(endpoint))
+	if err != nil {
+		t.Fatalf("testTagBindings: failed to create client: %v", err)
+	}
+	defer client.Close()
+
+	var values []string
+	it := client.ListTagBindings(ctx, &resourcemanagerpb.ListTagBindingsRequest{
+		Parent: fmt.Sprintf("//parametermanager.googleapis.com/%s", parameterName),
+	})
+	for {
+		binding, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			t.Fatalf("testTagBindings: failed to list tag bindings: %v", err)
+		}
+		values = append(values, binding.TagValue)
+	}
+	return values
+}
+
+// TestCreateRegionalParamTemplate tests the createRegionalParamTemplate function by creating a template,
+// then verifies if the template was successfully created by checking the output.
+func TestCreateRegionalParamTemplate(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	templateID := testName(t)
+	locationId := testLocation(t)
+	var buf bytes.Buffer
+	if err := createRegionalParamTemplate(&buf, tc.ProjectID, locationId, templateID, parametermanagerpb.TemplateFormat_TEMPLATE_FORMAT_JSON); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupTemplate(t, fmt.Sprintf("%s/templates/%s", testLocationPath(t, tc.ProjectID), templateID))
+
+	if got, want := buf.String(), "Created regional parameter template:"; !strings.Contains(got, want) {
+		t.Errorf("createRegionalParamTemplate: expected %q to contain %q", got, want)
+	}
+	if got, want := buf.String(), "TEMPLATE_FORMAT_JSON"; !strings.Contains(got, want) {
+		t.Errorf("createRegionalParamTemplate: expected %q to contain %q", got, want)
+	}
+}
+
+// TestCreateRegionalParamTemplateVersion tests the createRegionalParamTemplateVersion function by creating a
+// template version with placeholders, then verifies the output and the stored payload.
+func TestCreateRegionalParamTemplateVersion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	template, templateID := testTemplate(t, tc.ProjectID, parametermanagerpb.TemplateFormat_TEMPLATE_FORMAT_JSON)
+	versionID := testName(t)
+	payload := `{"username": "{{.username}}"}`
+	locationId := testLocation(t)
+	defer testCleanupTemplate(t, template.Name)
+	defer testCleanupTemplateVersion(t, fmt.Sprintf("%s/versions/%s", template.Name, versionID))
+
+	var buf bytes.Buffer
+	if err := createRegionalParamTemplateVersion(&buf, tc.ProjectID, locationId, templateID, versionID, payload); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Created regional parameter template version:"; !strings.Contains(got, want) {
+		t.Errorf("createRegionalParamTemplateVersion: expected %q to contain %q", got, want)
+	}
+
+	client := testNewClient(t)
+	defer client.Close()
+	version, err := client.GetTemplateVersion(context.Background(), &parametermanagerpb.GetTemplateVersionRequest{
+		Name: fmt.Sprintf("%s/versions/%s", template.Name, versionID),
+	})
+	if err != nil {
+		t.Fatalf("failed to get template version: %v", err)
+	}
+	if got := string(version.Payload.Data); got != payload {
+		t.Errorf("createRegionalParamTemplateVersion: got payload %q, want %q", got, payload)
+	}
+}
+
+// TestListRegionalParamTemplates tests the listRegionalParamTemplates function by creating templates,
+// then verifies that they are listed.
+func TestListRegionalParamTemplates(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	template1, templateID1 := testTemplate(t, tc.ProjectID, parametermanagerpb.TemplateFormat_TEMPLATE_FORMAT_JSON)
+	template2, templateID2 := testTemplate(t, tc.ProjectID, parametermanagerpb.TemplateFormat_TEMPLATE_FORMAT_YAML)
+	locationId := testLocation(t)
+	defer testCleanupTemplate(t, template1.Name)
+	defer testCleanupTemplate(t, template2.Name)
+
+	var buf bytes.Buffer
+	if err := listRegionalParamTemplates(&buf, tc.ProjectID, locationId); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, id := range []string{templateID1, templateID2} {
+		if got, want := buf.String(), fmt.Sprintf("Found regional parameter template: %s/templates/%s", testLocationPath(t, tc.ProjectID), id); !strings.Contains(got, want) {
+			t.Errorf("listRegionalParamTemplates: expected %q to contain %q", got, want)
+		}
+	}
+}
+
+// TestGetRegionalParamTemplate tests the getRegionalParamTemplate function by creating a template,
+// then verifies that it is retrieved.
+func TestGetRegionalParamTemplate(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	template, templateID := testTemplate(t, tc.ProjectID, parametermanagerpb.TemplateFormat_TEMPLATE_FORMAT_YAML)
+	locationId := testLocation(t)
+	defer testCleanupTemplate(t, template.Name)
+
+	var buf bytes.Buffer
+	if err := getRegionalParamTemplate(&buf, tc.ProjectID, locationId, templateID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), fmt.Sprintf("Found regional parameter template %s with format TEMPLATE_FORMAT_YAML", template.Name); !strings.Contains(got, want) {
+		t.Errorf("getRegionalParamTemplate: expected %q to contain %q", got, want)
+	}
+}
+
+// TestListRegionalParamTemplateVersions tests the listRegionalParamTemplateVersions function by creating
+// template versions, then verifies that they are listed.
+func TestListRegionalParamTemplateVersions(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	template, templateID := testTemplate(t, tc.ProjectID, parametermanagerpb.TemplateFormat_TEMPLATE_FORMAT_JSON)
+	version1, _ := testTemplateVersion(t, template.Name, `{"a": "{{.a}}"}`)
+	version2, _ := testTemplateVersion(t, template.Name, `{"b": "{{.b}}"}`)
+	locationId := testLocation(t)
+	defer testCleanupTemplate(t, template.Name)
+	defer testCleanupTemplateVersion(t, version1.Name)
+	defer testCleanupTemplateVersion(t, version2.Name)
+
+	var buf bytes.Buffer
+	if err := listRegionalParamTemplateVersions(&buf, tc.ProjectID, locationId, templateID); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, name := range []string{version1.Name, version2.Name} {
+		if got, want := buf.String(), fmt.Sprintf("Found regional parameter template version: %s", name); !strings.Contains(got, want) {
+			t.Errorf("listRegionalParamTemplateVersions: expected %q to contain %q", got, want)
+		}
+	}
+}
+
+// TestGetRegionalParamTemplateVersion tests the getRegionalParamTemplateVersion function by creating a
+// template version, then verifies that it and its payload are retrieved.
+func TestGetRegionalParamTemplateVersion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	template, templateID := testTemplate(t, tc.ProjectID, parametermanagerpb.TemplateFormat_TEMPLATE_FORMAT_JSON)
+	payload := `{"username": "{{.username}}"}`
+	version, versionID := testTemplateVersion(t, template.Name, payload)
+	locationId := testLocation(t)
+	defer testCleanupTemplate(t, template.Name)
+	defer testCleanupTemplateVersion(t, version.Name)
+
+	var buf bytes.Buffer
+	if err := getRegionalParamTemplateVersion(&buf, tc.ProjectID, locationId, templateID, versionID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), fmt.Sprintf("Found regional parameter template version %s with disabled state in false", version.Name); !strings.Contains(got, want) {
+		t.Errorf("getRegionalParamTemplateVersion: expected %q to contain %q", got, want)
+	}
+	if got, want := buf.String(), fmt.Sprintf("Payload: %s", payload); !strings.Contains(got, want) {
+		t.Errorf("getRegionalParamTemplateVersion: expected %q to contain %q", got, want)
+	}
+}
+
+// TestUpdateRegionalParamTemplateLabels tests the updateRegionalParamTemplateLabels function by creating a
+// template, then verifies that the label was applied.
+func TestUpdateRegionalParamTemplateLabels(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	template, templateID := testTemplate(t, tc.ProjectID, parametermanagerpb.TemplateFormat_TEMPLATE_FORMAT_JSON)
+	locationId := testLocation(t)
+	defer testCleanupTemplate(t, template.Name)
+
+	var buf bytes.Buffer
+	if err := updateRegionalParamTemplateLabels(&buf, tc.ProjectID, locationId, templateID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "environment:test"; !strings.Contains(got, want) {
+		t.Errorf("updateRegionalParamTemplateLabels: expected %q to contain %q", got, want)
+	}
+}
+
+// TestDeleteRegionalParamTemplate tests the deleteRegionalParamTemplate function by creating a template,
+// deleting it, then verifies that it no longer exists.
+func TestDeleteRegionalParamTemplate(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	template, templateID := testTemplate(t, tc.ProjectID, parametermanagerpb.TemplateFormat_TEMPLATE_FORMAT_JSON)
+	locationId := testLocation(t)
+	defer testCleanupTemplate(t, template.Name)
+
+	var buf bytes.Buffer
+	if err := deleteRegionalParamTemplate(&buf, tc.ProjectID, locationId, templateID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Deleted regional parameter template:"; !strings.Contains(got, want) {
+		t.Errorf("deleteRegionalParamTemplate: expected %q to contain %q", got, want)
+	}
+
+	client := testNewClient(t)
+	defer client.Close()
+	_, err := client.GetTemplate(context.Background(), &parametermanagerpb.GetTemplateRequest{Name: template.Name})
+	if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
+		t.Errorf("deleteRegionalParamTemplate: expected NotFound after deletion, got %v", err)
+	}
+}
+
+// TestDisableRegionalParamTemplateVersion tests the disableRegionalParamTemplateVersion function by creating a
+// template version, disabling it, then verifies the disabled state.
+func TestDisableRegionalParamTemplateVersion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	template, templateID := testTemplate(t, tc.ProjectID, parametermanagerpb.TemplateFormat_TEMPLATE_FORMAT_JSON)
+	version, versionID := testTemplateVersion(t, template.Name, `{"a": "{{.a}}"}`)
+	locationId := testLocation(t)
+	defer testCleanupTemplate(t, template.Name)
+	defer testCleanupTemplateVersion(t, version.Name)
+
+	var buf bytes.Buffer
+	if err := disableRegionalParamTemplateVersion(&buf, tc.ProjectID, locationId, templateID, versionID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Disabled regional parameter template version:"; !strings.Contains(got, want) {
+		t.Errorf("disableRegionalParamTemplateVersion: expected %q to contain %q", got, want)
+	}
+
+	client := testNewClient(t)
+	defer client.Close()
+	got, err := client.GetTemplateVersion(context.Background(), &parametermanagerpb.GetTemplateVersionRequest{Name: version.Name})
+	if err != nil {
+		t.Fatalf("failed to get template version: %v", err)
+	}
+	if !got.Disabled {
+		t.Errorf("disableRegionalParamTemplateVersion: expected template version to be disabled")
+	}
+}
+
+// TestEnableRegionalParamTemplateVersion tests the enableRegionalParamTemplateVersion function by creating a
+// template version, disabling it, enabling it, then verifies the enabled state.
+func TestEnableRegionalParamTemplateVersion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	template, templateID := testTemplate(t, tc.ProjectID, parametermanagerpb.TemplateFormat_TEMPLATE_FORMAT_JSON)
+	version, versionID := testTemplateVersion(t, template.Name, `{"a": "{{.a}}"}`)
+	locationId := testLocation(t)
+	defer testCleanupTemplate(t, template.Name)
+	defer testCleanupTemplateVersion(t, version.Name)
+
+	client := testNewClient(t)
+	defer client.Close()
+	if _, err := client.UpdateTemplateVersion(context.Background(), &parametermanagerpb.UpdateTemplateVersionRequest{
+		TemplateVersion: &parametermanagerpb.TemplateVersion{Name: version.Name, Disabled: true},
+		UpdateMask:      &fieldmaskpb.FieldMask{Paths: []string{"disabled"}},
+	}); err != nil {
+		t.Fatalf("failed to disable template version: %v", err)
+	}
+
+	var buf bytes.Buffer
+	if err := enableRegionalParamTemplateVersion(&buf, tc.ProjectID, locationId, templateID, versionID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Enabled regional parameter template version:"; !strings.Contains(got, want) {
+		t.Errorf("enableRegionalParamTemplateVersion: expected %q to contain %q", got, want)
+	}
+
+	got, err := client.GetTemplateVersion(context.Background(), &parametermanagerpb.GetTemplateVersionRequest{Name: version.Name})
+	if err != nil {
+		t.Fatalf("failed to get template version: %v", err)
+	}
+	if got.Disabled {
+		t.Errorf("enableRegionalParamTemplateVersion: expected template version to be enabled")
+	}
+}
+
+// TestDeleteRegionalParamTemplateVersion tests the deleteRegionalParamTemplateVersion function by creating a
+// template version, deleting it, then verifies that it no longer exists.
+func TestDeleteRegionalParamTemplateVersion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	template, templateID := testTemplate(t, tc.ProjectID, parametermanagerpb.TemplateFormat_TEMPLATE_FORMAT_JSON)
+	version, versionID := testTemplateVersion(t, template.Name, `{"a": "{{.a}}"}`)
+	locationId := testLocation(t)
+	defer testCleanupTemplate(t, template.Name)
+	defer testCleanupTemplateVersion(t, version.Name)
+
+	var buf bytes.Buffer
+	if err := deleteRegionalParamTemplateVersion(&buf, tc.ProjectID, locationId, templateID, versionID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Deleted regional parameter template version:"; !strings.Contains(got, want) {
+		t.Errorf("deleteRegionalParamTemplateVersion: expected %q to contain %q", got, want)
+	}
+
+	client := testNewClient(t)
+	defer client.Close()
+	_, err := client.GetTemplateVersion(context.Background(), &parametermanagerpb.GetTemplateVersionRequest{Name: version.Name})
+	if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.NotFound {
+		t.Errorf("deleteRegionalParamTemplateVersion: expected NotFound after deletion, got %v", err)
+	}
+}
+
+// TestRenderRegionalParamTemplateVersion tests the renderRegionalParamTemplateVersion function. The template
+// references a Secret Manager secret, which the parameter's identity is granted access to, and the
+// test verifies that the secret value appears in the rendered payload.
+func TestRenderRegionalParamTemplateVersion(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	template, templateID := testTemplate(t, tc.ProjectID, parametermanagerpb.TemplateFormat_TEMPLATE_FORMAT_JSON)
+	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
+	secret := testSecret(t, tc.ProjectID)
+	testSecretVersion(t, secret.Name, []byte("very secret data"))
+	if err := testIamGrantAccess(t, secret.Name, parameter.PolicyMember.IamPolicyUidPrincipal); err != nil {
+		t.Fatal(err)
+	}
+	templatePayload := `{"username": "{{.username}}", "password": "{{.password}}"}`
+	templateVersion, templateVersionID := testTemplateVersion(t, template.Name, templatePayload)
+	parameterPayload := fmt.Sprintf(`{"username": "test-user", "password": "__REF__(//secretmanager.googleapis.com/%s/versions/latest)"}`, secret.Name)
+	parameterVersion, _ := testParameterVersion(t, tc.ProjectID, parameterID, parameterPayload)
+	locationId := testLocation(t)
+	defer testCleanupSecret(t, secret.Name)
+	defer testCleanupParameter(t, parameter.Name)
+	defer testCleanupParameterVersion(t, parameterVersion.Name)
+	defer testCleanupTemplate(t, template.Name)
+	defer testCleanupTemplateVersion(t, templateVersion.Name)
+
+	var buf bytes.Buffer
+	time.Sleep(2 * time.Minute)
+	if err := renderRegionalParamTemplateVersion(&buf, tc.ProjectID, locationId, templateID, templateVersionID, parameterVersion.Name); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Rendered regional parameter template version:"; !strings.Contains(got, want) {
+		t.Errorf("renderRegionalParamTemplateVersion: expected %q to contain %q", got, want)
+	}
+	if got, want := buf.String(), fmt.Sprintf("Template payload: %s", templatePayload); !strings.Contains(got, want) {
+		t.Errorf("renderRegionalParamTemplateVersion: expected %q to contain %q", got, want)
+	}
+	expected := `{"username": "test-user", "password": "very secret data"}`
+	if got, want := buf.String(), fmt.Sprintf("Rendered payload: %s", expected); !strings.Contains(got, want) {
+		t.Errorf("renderRegionalParamTemplateVersion: expected %q to contain %q", got, want)
+	}
+}
+
+// TestRenderRegionalParamTemplateVersionMissingSecret verifies that rendering fails when the parameter
+// version references a secret that does not exist.
+func TestRenderRegionalParamTemplateVersionMissingSecret(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	template, templateID := testTemplate(t, tc.ProjectID, parametermanagerpb.TemplateFormat_TEMPLATE_FORMAT_JSON)
+	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_JSON)
+	templateVersion, templateVersionID := testTemplateVersion(t, template.Name, `{"password": "{{.password}}"}`)
+	parameterPayload := fmt.Sprintf(`{"password": "__REF__(//secretmanager.googleapis.com/projects/%s/locations/%s/secrets/%s/versions/latest)"}`, tc.ProjectID, testLocation(t), testName(t))
+	parameterVersion, _ := testParameterVersion(t, tc.ProjectID, parameterID, parameterPayload)
+	locationId := testLocation(t)
+	defer testCleanupParameter(t, parameter.Name)
+	defer testCleanupParameterVersion(t, parameterVersion.Name)
+	defer testCleanupTemplate(t, template.Name)
+	defer testCleanupTemplateVersion(t, templateVersion.Name)
+
+	var buf bytes.Buffer
+	err := renderRegionalParamTemplateVersion(&buf, tc.ProjectID, locationId, templateID, templateVersionID, parameterVersion.Name)
+	if err == nil {
+		t.Fatalf("renderRegionalParamTemplateVersion: expected an error for a missing secret, got output %q", buf.String())
+	}
+	if terr, ok := grpcstatus.FromError(errors.Unwrap(err)); !ok || terr.Code() != grpccodes.FailedPrecondition {
+		t.Errorf("renderRegionalParamTemplateVersion: expected FailedPrecondition for a missing secret, got %v", err)
+	}
+}
+
+// TestCreateRegionalParamWithTags tests the createRegionalParamWithTags function by creating a parameter with
+// a tag, then verifies the tag binding through Resource Manager (tags are never returned by
+// Parameter Manager).
+func TestCreateRegionalParamWithTags(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	tagKey, tagValue := testTag(t)
+
+	parameterID := testName(t)
+	locationId := testLocation(t)
+	var buf bytes.Buffer
+	if err := createRegionalParamWithTags(&buf, tc.ProjectID, locationId, parameterID, tagKey, tagValue); err != nil {
+		t.Fatal(err)
+	}
+	name := fmt.Sprintf("%s/parameters/%s", testLocationPath(t, tc.ProjectID), parameterID)
+	defer testCleanupParameter(t, name)
+
+	if got, want := buf.String(), "Created regional parameter"; !strings.Contains(got, want) {
+		t.Errorf("createRegionalParamWithTags: expected %q to contain %q", got, want)
+	}
+
+	client := testNewClient(t)
+	defer client.Close()
+	parameter, err := client.GetParameter(context.Background(), &parametermanagerpb.GetParameterRequest{Name: name})
+	if err != nil {
+		t.Fatalf("failed to get parameter: %v", err)
+	}
+	if got := testTagBindings(t, parameter.Name); len(got) != 1 || got[0] != tagValue {
+		t.Errorf("createRegionalParamWithTags: got tag bindings %v, want [%s]", got, tagValue)
+	}
+}
+
+// TestBindTagsToRegionalParam tests the bindTagsToRegionalParam function by creating a parameter, binding an
+// existing tag value, then verifies the tag binding through Resource Manager.
+func TestBindTagsToRegionalParam(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	_, tagValue := testTag(t)
+
+	parameterID := testName(t)
+	locationId := testLocation(t)
+	var buf bytes.Buffer
+	if err := bindTagsToRegionalParam(&buf, tc.ProjectID, locationId, parameterID, tagValue); err != nil {
+		t.Fatal(err)
+	}
+	name := fmt.Sprintf("%s/parameters/%s", testLocationPath(t, tc.ProjectID), parameterID)
+	defer testCleanupParameter(t, name)
+
+	if got, want := buf.String(), fmt.Sprintf("Bound tag value %s to regional parameter", tagValue); !strings.Contains(got, want) {
+		t.Errorf("bindTagsToRegionalParam: expected %q to contain %q", got, want)
+	}
+
+	client := testNewClient(t)
+	defer client.Close()
+	parameter, err := client.GetParameter(context.Background(), &parametermanagerpb.GetParameterRequest{Name: name})
+	if err != nil {
+		t.Fatalf("failed to get parameter: %v", err)
+	}
+	if got := testTagBindings(t, parameter.Name); len(got) != 1 || got[0] != tagValue {
+		t.Errorf("bindTagsToRegionalParam: got tag bindings %v, want [%s]", got, tagValue)
+	}
+}
+
+// TestGetRegionalParamTags tests the getRegionalParamTags function by creating a parameter with a tag,
+// then verifies the tag binding is listed.
+func TestGetRegionalParamTags(t *testing.T) {
+	tc := testutil.SystemTest(t)
+	tagKey, tagValue := testTag(t)
+
+	parameterID := testName(t)
+	locationId := testLocation(t)
+	if err := createRegionalParamWithTags(io.Discard, tc.ProjectID, locationId, parameterID, tagKey, tagValue); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupParameter(t, fmt.Sprintf("%s/parameters/%s", testLocationPath(t, tc.ProjectID), parameterID))
+
+	var buf bytes.Buffer
+	if err := getRegionalParamTags(&buf, tc.ProjectID, locationId, parameterID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Found tag binding on regional parameter"; !strings.Contains(got, want) {
+		t.Errorf("getRegionalParamTags: expected %q to contain %q", got, want)
+	}
+	if got, want := buf.String(), tagValue; !strings.Contains(got, want) {
+		t.Errorf("getRegionalParamTags: expected %q to contain %q", got, want)
+	}
+}
+
+// TestCreateRegionalParamVersionWithChecksum tests the createRegionalParamVersionWithChecksum function by
+// creating a version with a client-computed CRC32C, then verifies the checksum source and value.
+func TestCreateRegionalParamVersionWithChecksum(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_UNFORMATTED)
+	versionID := testName(t)
+	payload := "checksum payload"
+	locationId := testLocation(t)
+	defer testCleanupParameter(t, parameter.Name)
+	defer testCleanupParameterVersion(t, fmt.Sprintf("%s/versions/%s", parameter.Name, versionID))
+
+	var buf bytes.Buffer
+	if err := createRegionalParamVersionWithChecksum(&buf, tc.ProjectID, locationId, parameterID, versionID, payload); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Created regional parameter version:"; !strings.Contains(got, want) {
+		t.Errorf("createRegionalParamVersionWithChecksum: expected %q to contain %q", got, want)
+	}
+	if got, want := buf.String(), "checksum source USER_SPECIFIED"; !strings.Contains(got, want) {
+		t.Errorf("createRegionalParamVersionWithChecksum: expected %q to contain %q", got, want)
+	}
+
+	client := testNewClient(t)
+	defer client.Close()
+	version, err := client.GetParameterVersion(context.Background(), &parametermanagerpb.GetParameterVersionRequest{
+		Name: fmt.Sprintf("%s/versions/%s", parameter.Name, versionID),
+		View: parametermanagerpb.View_FULL,
+	})
+	if err != nil {
+		t.Fatalf("failed to get parameter version: %v", err)
+	}
+	want := int64(crc32.Checksum([]byte(payload), crc32.MakeTable(crc32.Castagnoli)))
+	if version.Payload.DataCrc32C == nil || *version.Payload.DataCrc32C != want {
+		t.Errorf("createRegionalParamVersionWithChecksum: got data_crc32c %v, want %d", version.Payload.DataCrc32C, want)
+	}
+}
+
+// TestGetRegionalParamVersionVerifyChecksum tests the getRegionalParamVersionVerifyChecksum function by
+// creating a version without a checksum, then verifies the server-generated checksum.
+func TestGetRegionalParamVersionVerifyChecksum(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameter, parameterID := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_UNFORMATTED)
+	version, versionID := testParameterVersion(t, tc.ProjectID, parameterID, "checksum payload")
+	locationId := testLocation(t)
+	defer testCleanupParameter(t, parameter.Name)
+	defer testCleanupParameterVersion(t, version.Name)
+
+	var buf bytes.Buffer
+	if err := getRegionalParamVersionVerifyChecksum(&buf, tc.ProjectID, locationId, parameterID, versionID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := buf.String(), "Verified checksum of regional parameter version"; !strings.Contains(got, want) {
+		t.Errorf("getRegionalParamVersionVerifyChecksum: expected %q to contain %q", got, want)
+	}
+	if got, want := buf.String(), "SERVER_GENERATED"; !strings.Contains(got, want) {
+		t.Errorf("getRegionalParamVersionVerifyChecksum: expected %q to contain %q", got, want)
+	}
+}
+
+// TestCreateRegionalParamVersionChecksumMismatch verifies that Parameter Manager rejects a version whose
+// client-supplied CRC32C does not match the payload.
+func TestCreateRegionalParamVersionChecksumMismatch(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	parameter, _ := testParameter(t, tc.ProjectID, parametermanagerpb.ParameterFormat_UNFORMATTED)
+	defer testCleanupParameter(t, parameter.Name)
+
+	payload := []byte("checksum payload")
+	wrong := int64(crc32.Checksum(payload, crc32.MakeTable(crc32.Castagnoli))) + 1
+
+	client := testNewClient(t)
+	defer client.Close()
+	_, err := client.CreateParameterVersion(context.Background(), &parametermanagerpb.CreateParameterVersionRequest{
+		Parent:             parameter.Name,
+		ParameterVersionId: testName(t),
+		ParameterVersion: &parametermanagerpb.ParameterVersion{
+			Payload: &parametermanagerpb.ParameterVersionPayload{
+				Data:       payload,
+				DataCrc32C: &wrong,
+			},
+		},
+	})
+	if terr, ok := grpcstatus.FromError(err); !ok || terr.Code() != grpccodes.InvalidArgument {
+		t.Fatalf("expected InvalidArgument for a mismatched checksum, got %v", err)
+	}
+	if !strings.Contains(err.Error(), "CHECKSUM_MISMATCH") {
+		t.Errorf("expected error to contain CHECKSUM_MISMATCH, got %v", err)
 	}
 }
