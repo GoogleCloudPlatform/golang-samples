@@ -20,10 +20,11 @@ import (
 	"fmt"
 	"io"
 
+	"hash/crc32"
+
 	parametermanager "cloud.google.com/go/parametermanager/apiv1"
 	parametermanagerpb "cloud.google.com/go/parametermanager/apiv1/parametermanagerpb"
 	"google.golang.org/api/option"
-	"hash/crc32"
 )
 
 // getRegionalParamVersionVerifyChecksum retrieves a parameter version and verifies the returned CRC32C checksum against the payload.
