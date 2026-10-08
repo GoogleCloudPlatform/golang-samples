@@ -33,8 +33,8 @@ import (
 
 const (
 	testPrefix        = "storage-objects-test"
-	testZonalLocation = "us-west4"
-	testZonalZone     = "us-west4-a"
+	testRapidLocation = "us-west4"
+	testRapidZone     = "us-west4-a"
 	downloadObject    = "obj-download"
 )
 
@@ -61,9 +61,9 @@ func TestMain(m *testing.M) {
 	}
 	bidiBucketName = strings.Join([]string{testPrefix, uuid.NewString()}, "-")
 	if err := client.Bucket(bidiBucketName).Create(ctx, tc.ProjectID, &storage.BucketAttrs{
-		Location: testZonalLocation,
+		Location: testRapidLocation,
 		CustomPlacementConfig: &storage.CustomPlacementConfig{
-			DataLocations: []string{testZonalZone},
+			DataLocations: []string{testRapidZone},
 		},
 		StorageClass: "RAPID",
 		HierarchicalNamespace: &storage.HierarchicalNamespace{
