@@ -27,14 +27,14 @@ import (
 	"google.golang.org/api/option"
 )
 
-// createRegionalParamVersionWithChecksum creates a parameter version with a client-computed CRC32C checksum. Parameter Manager verifies the checksum and rejects the request if it does not match the payload.
+// createRegionalParamVersionWithChecksum creates a parameter version with a checksum.
 //
 // w: The io.Writer object used to write the output.
 // projectID: The ID of the project where the parameter is located.
 // locationID: The region where the resources are located.
 // parameterID: The ID of the parameter.
 // versionID: The ID of the template version.
-// payload: The template payload containing {{.variableName}} placeholders.
+// payload: The payload of the version.
 //
 // The function returns an error if the operation fails.
 func createRegionalParamVersionWithChecksum(w io.Writer, projectID, locationID, parameterID, versionID, payload string) error {
@@ -50,7 +50,7 @@ func createRegionalParamVersionWithChecksum(w io.Writer, projectID, locationID, 
 	// Construct the name of the parent parameter.
 	parent := fmt.Sprintf("projects/%s/locations/%s/parameters/%s", projectID, locationID, parameterID)
 
-	// Compute the CRC32C checksum (Castagnoli polynomial) of the payload.
+	// Compute the checksum of the payload.
 	data := []byte(payload)
 	crc32c := int64(crc32.Checksum(data, crc32.MakeTable(crc32.Castagnoli)))
 

@@ -25,7 +25,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-// createRegionalParamWithTags creates a parameter with a tag. Tags can only be set when the parameter is created and are never returned by Parameter Manager; use Resource Manager tag bindings to read them.
+// createRegionalParamWithTags creates a parameter with a tag.
 //
 // w: The io.Writer object used to write the output.
 // projectID: The ID of the project where the parameter is located.

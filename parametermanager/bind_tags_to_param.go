@@ -26,7 +26,7 @@ import (
 	resourcemanagerpb "cloud.google.com/go/resourcemanager/apiv3/resourcemanagerpb"
 )
 
-// bindTagsToParam creates a parameter and then binds an existing tag value to it using Resource Manager.
+// bindTagsToParam creates a parameter and binds a tag value to it.
 //
 // w: The io.Writer object used to write the output.
 // projectID: The ID of the project where the parameter is located.
@@ -66,8 +66,7 @@ func bindTagsToParam(w io.Writer, projectID, parameterID, tagValue string) error
 	}
 	defer tagBindingsClient.Close()
 
-	// Bind the tag value to the parameter. The parent must use the parameter
-	// name returned by the API, which contains the project number.
+	// Bind the tag value to the parameter.
 	op, err := tagBindingsClient.CreateTagBinding(ctx, &resourcemanagerpb.CreateTagBindingRequest{
 		TagBinding: &resourcemanagerpb.TagBinding{
 			Parent:   fmt.Sprintf("//parametermanager.googleapis.com/%s", parameter.Name),

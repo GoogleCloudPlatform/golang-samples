@@ -61,7 +61,7 @@ func updateRegionalParamTemplateLabels(w io.Writer, projectID, locationID, templ
 		return fmt.Errorf("failed to update template: %w", err)
 	}
 
-	// The update response does not echo the labels, so read them back.
+	// Get the template to read the labels.
 	template, err := client.GetTemplate(ctx, &parametermanagerpb.GetTemplateRequest{Name: name})
 	if err != nil {
 		return fmt.Errorf("failed to get template: %w", err)

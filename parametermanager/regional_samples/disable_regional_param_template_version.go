@@ -48,7 +48,7 @@ func disableRegionalParamTemplateVersion(w io.Writer, projectID, locationID, tem
 	// Construct the name of the template version.
 	name := fmt.Sprintf("projects/%s/locations/%s/templates/%s/versions/%s", projectID, locationID, templateID, versionID)
 
-	// Build the request to update the disabled state of the template version.
+	// Build the request to update the template version.
 	req := &parametermanagerpb.UpdateTemplateVersionRequest{
 		TemplateVersion: &parametermanagerpb.TemplateVersion{
 			Name:     name,

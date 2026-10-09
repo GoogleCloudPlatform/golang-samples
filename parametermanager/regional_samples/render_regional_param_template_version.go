@@ -25,14 +25,14 @@ import (
 	"google.golang.org/api/option"
 )
 
-// renderRegionalParamTemplateVersion renders a template version using the values of a parameter version.
+// renderRegionalParamTemplateVersion renders a template version.
 //
 // w: The io.Writer object used to write the output.
 // projectID: The ID of the project where the parameter is located.
 // locationID: The region where the resources are located.
 // templateID: The ID of the template.
 // versionID: The ID of the template version.
-// parameterVersionName: The full resource name of the parameter version whose values are used for rendering.
+// parameterVersionName: The resource name of the parameter version.
 //
 // The function returns an error if the operation fails.
 func renderRegionalParamTemplateVersion(w io.Writer, projectID, locationID, templateID, versionID, parameterVersionName string) error {
@@ -63,9 +63,6 @@ func renderRegionalParamTemplateVersion(w io.Writer, projectID, locationID, temp
 	fmt.Fprintf(w, "Rendered regional parameter template version: %s\n", rendered.TemplateVersion)
 	fmt.Fprintf(w, "Template payload: %s\n", rendered.Payload.Data)
 
-	// If the parameter contains secret references, they will be resolved
-	// and the actual secret values will be included in the rendered output.
-	// Be cautious with logging or displaying this information.
 	fmt.Fprintf(w, "Rendered payload: %s\n", rendered.RenderedPayload)
 	return nil
 }

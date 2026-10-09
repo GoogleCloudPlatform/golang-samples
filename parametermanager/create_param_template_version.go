@@ -24,13 +24,13 @@ import (
 	parametermanagerpb "cloud.google.com/go/parametermanager/apiv1/parametermanagerpb"
 )
 
-// createParamTemplateVersion creates a new version of a parameter template. The payload may contain {{.variableName}} placeholders that are filled in when the template is rendered.
+// createParamTemplateVersion creates a new version of a parameter template.
 //
 // w: The io.Writer object used to write the output.
 // projectID: The ID of the project where the parameter is located.
 // templateID: The ID of the template.
 // versionID: The ID of the template version.
-// payload: The template payload containing {{.variableName}} placeholders.
+// payload: The payload of the version.
 //
 // The function returns an error if the operation fails.
 func createParamTemplateVersion(w io.Writer, projectID, templateID, versionID, payload string) error {

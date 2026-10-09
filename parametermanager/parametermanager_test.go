@@ -790,8 +790,7 @@ func testLocationPath(t *testing.T, projectID string) string {
 	return fmt.Sprintf("projects/%s/locations/global", projectID)
 }
 
-// testTemplate creates a template with the given format in the specified GCP project.
-// It returns the created template and its ID or fails the test if template creation fails.
+// testTemplate creates a template for the test.
 func testTemplate(t *testing.T, projectID string, format parametermanagerpb.TemplateFormat) (*parametermanagerpb.Template, string) {
 	t.Helper()
 
@@ -813,8 +812,7 @@ func testTemplate(t *testing.T, projectID string, format parametermanagerpb.Temp
 	return template, templateID
 }
 
-// testTemplateVersion creates a version of a template with the given payload.
-// It returns the created template version and its ID or fails the test if creation fails.
+// testTemplateVersion creates a template version for the test.
 func testTemplateVersion(t *testing.T, templateName, payload string) (*parametermanagerpb.TemplateVersion, string) {
 	t.Helper()
 
@@ -838,8 +836,7 @@ func testTemplateVersion(t *testing.T, templateName, payload string) (*parameter
 	return version, versionID
 }
 
-// testCleanupTemplate deletes the specified template in the GCP project.
-// It fails the test if the template deletion fails.
+// testCleanupTemplate deletes a template.
 func testCleanupTemplate(t *testing.T, name string) {
 	t.Helper()
 
@@ -857,8 +854,7 @@ func testCleanupTemplate(t *testing.T, name string) {
 	}
 }
 
-// testCleanupTemplateVersion deletes the specified template version in the GCP project.
-// It fails the test if the template version deletion fails.
+// testCleanupTemplateVersion deletes a template version.
 func testCleanupTemplateVersion(t *testing.T, name string) {
 	t.Helper()
 
@@ -876,8 +872,7 @@ func testCleanupTemplateVersion(t *testing.T, name string) {
 	}
 }
 
-// testTag returns the pre-provisioned tag key and tag value used by the tag tests.
-// The tests are skipped if GOLANG_SAMPLES_TAG_KEY or GOLANG_SAMPLES_TAG_VALUE is not set.
+// testTag returns the tag key and value for the tag tests.
 func testTag(t *testing.T) (string, string) {
 	t.Helper()
 
@@ -890,7 +885,7 @@ func testTag(t *testing.T) (string, string) {
 	return key, value
 }
 
-// testTagBindings returns the tag values bound to the named parameter, read through Resource Manager.
+// testTagBindings returns the tag values bound to a parameter.
 func testTagBindings(t *testing.T, parameterName string) []string {
 	t.Helper()
 
@@ -918,8 +913,7 @@ func testTagBindings(t *testing.T, parameterName string) []string {
 	return values
 }
 
-// TestCreateParamTemplate tests the createParamTemplate function by creating a template,
-// then verifies if the template was successfully created by checking the output.
+// TestCreateParamTemplate tests the createParamTemplate function.
 func TestCreateParamTemplate(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -938,8 +932,7 @@ func TestCreateParamTemplate(t *testing.T) {
 	}
 }
 
-// TestCreateParamTemplateVersion tests the createParamTemplateVersion function by creating a
-// template version with placeholders, then verifies the output and the stored payload.
+// TestCreateParamTemplateVersion tests the createParamTemplateVersion function.
 func TestCreateParamTemplateVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -971,8 +964,7 @@ func TestCreateParamTemplateVersion(t *testing.T) {
 	}
 }
 
-// TestListParamTemplates tests the listParamTemplates function by creating templates,
-// then verifies that they are listed.
+// TestListParamTemplates tests the listParamTemplates function.
 func TestListParamTemplates(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -993,8 +985,7 @@ func TestListParamTemplates(t *testing.T) {
 	}
 }
 
-// TestGetParamTemplate tests the getParamTemplate function by creating a template,
-// then verifies that it is retrieved.
+// TestGetParamTemplate tests the getParamTemplate function.
 func TestGetParamTemplate(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1011,8 +1002,7 @@ func TestGetParamTemplate(t *testing.T) {
 	}
 }
 
-// TestListParamTemplateVersions tests the listParamTemplateVersions function by creating
-// template versions, then verifies that they are listed.
+// TestListParamTemplateVersions tests the listParamTemplateVersions function.
 func TestListParamTemplateVersions(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1035,8 +1025,7 @@ func TestListParamTemplateVersions(t *testing.T) {
 	}
 }
 
-// TestGetParamTemplateVersion tests the getParamTemplateVersion function by creating a
-// template version, then verifies that it and its payload are retrieved.
+// TestGetParamTemplateVersion tests the getParamTemplateVersion function.
 func TestGetParamTemplateVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1059,8 +1048,7 @@ func TestGetParamTemplateVersion(t *testing.T) {
 	}
 }
 
-// TestUpdateParamTemplateLabels tests the updateParamTemplateLabels function by creating a
-// template, then verifies that the label was applied.
+// TestUpdateParamTemplateLabels tests the updateParamTemplateLabels function.
 func TestUpdateParamTemplateLabels(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1077,8 +1065,7 @@ func TestUpdateParamTemplateLabels(t *testing.T) {
 	}
 }
 
-// TestDeleteParamTemplate tests the deleteParamTemplate function by creating a template,
-// deleting it, then verifies that it no longer exists.
+// TestDeleteParamTemplate tests the deleteParamTemplate function.
 func TestDeleteParamTemplate(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1102,8 +1089,7 @@ func TestDeleteParamTemplate(t *testing.T) {
 	}
 }
 
-// TestDisableParamTemplateVersion tests the disableParamTemplateVersion function by creating a
-// template version, disabling it, then verifies the disabled state.
+// TestDisableParamTemplateVersion tests the disableParamTemplateVersion function.
 func TestDisableParamTemplateVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1132,8 +1118,7 @@ func TestDisableParamTemplateVersion(t *testing.T) {
 	}
 }
 
-// TestEnableParamTemplateVersion tests the enableParamTemplateVersion function by creating a
-// template version, disabling it, enabling it, then verifies the enabled state.
+// TestEnableParamTemplateVersion tests the enableParamTemplateVersion function.
 func TestEnableParamTemplateVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1169,8 +1154,7 @@ func TestEnableParamTemplateVersion(t *testing.T) {
 	}
 }
 
-// TestDeleteParamTemplateVersion tests the deleteParamTemplateVersion function by creating a
-// template version, deleting it, then verifies that it no longer exists.
+// TestDeleteParamTemplateVersion tests the deleteParamTemplateVersion function.
 func TestDeleteParamTemplateVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1196,9 +1180,7 @@ func TestDeleteParamTemplateVersion(t *testing.T) {
 	}
 }
 
-// TestRenderParamTemplateVersion tests the renderParamTemplateVersion function. The template
-// references a Secret Manager secret, which the parameter's identity is granted access to, and the
-// test verifies that the secret value appears in the rendered payload.
+// TestRenderParamTemplateVersion tests the renderParamTemplateVersion function.
 func TestRenderParamTemplateVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1236,8 +1218,7 @@ func TestRenderParamTemplateVersion(t *testing.T) {
 	}
 }
 
-// TestRenderParamTemplateVersionMissingSecret verifies that rendering fails when the parameter
-// version references a secret that does not exist.
+// TestRenderParamTemplateVersionMissingSecret verifies the error case.
 func TestRenderParamTemplateVersionMissingSecret(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1261,9 +1242,7 @@ func TestRenderParamTemplateVersionMissingSecret(t *testing.T) {
 	}
 }
 
-// TestCreateParamWithTags tests the createParamWithTags function by creating a parameter with
-// a tag, then verifies the tag binding through Resource Manager (tags are never returned by
-// Parameter Manager).
+// TestCreateParamWithTags tests the createParamWithTags function.
 func TestCreateParamWithTags(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	tagKey, tagValue := testTag(t)
@@ -1291,8 +1270,7 @@ func TestCreateParamWithTags(t *testing.T) {
 	}
 }
 
-// TestBindTagsToParam tests the bindTagsToParam function by creating a parameter, binding an
-// existing tag value, then verifies the tag binding through Resource Manager.
+// TestBindTagsToParam tests the bindTagsToParam function.
 func TestBindTagsToParam(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	_, tagValue := testTag(t)
@@ -1320,8 +1298,7 @@ func TestBindTagsToParam(t *testing.T) {
 	}
 }
 
-// TestGetParamTags tests the getParamTags function by creating a parameter with a tag,
-// then verifies the tag binding is listed.
+// TestGetParamTags tests the getParamTags function.
 func TestGetParamTags(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	tagKey, tagValue := testTag(t)
@@ -1345,8 +1322,7 @@ func TestGetParamTags(t *testing.T) {
 	}
 }
 
-// TestCreateParamVersionWithChecksum tests the createParamVersionWithChecksum function by
-// creating a version with a client-computed CRC32C, then verifies the checksum source and value.
+// TestCreateParamVersionWithChecksum tests the createParamVersionWithChecksum function.
 func TestCreateParamVersionWithChecksum(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1383,8 +1359,7 @@ func TestCreateParamVersionWithChecksum(t *testing.T) {
 	}
 }
 
-// TestGetParamVersionVerifyChecksum tests the getParamVersionVerifyChecksum function by
-// creating a version without a checksum, then verifies the server-generated checksum.
+// TestGetParamVersionVerifyChecksum tests the getParamVersionVerifyChecksum function.
 func TestGetParamVersionVerifyChecksum(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1406,8 +1381,7 @@ func TestGetParamVersionVerifyChecksum(t *testing.T) {
 	}
 }
 
-// TestCreateParamVersionChecksumMismatch verifies that Parameter Manager rejects a version whose
-// client-supplied CRC32C does not match the payload.
+// TestCreateParamVersionChecksumMismatch verifies the error case.
 func TestCreateParamVersionChecksumMismatch(t *testing.T) {
 	tc := testutil.SystemTest(t)
 

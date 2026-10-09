@@ -27,7 +27,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// getParamTags lists the tag bindings of a parameter. Parameter Manager never returns tags on the parameter itself, so they are read through Resource Manager.
+// getParamTags lists the tag bindings of a parameter.
 //
 // w: The io.Writer object used to write the output.
 // projectID: The ID of the project where the parameter is located.
@@ -43,7 +43,7 @@ func getParamTags(w io.Writer, projectID, parameterID string) error {
 	}
 	defer client.Close()
 
-	// Get the parameter to find its name, which contains the project number.
+	// Get the parameter.
 	parameter, err := client.GetParameter(ctx, &parametermanagerpb.GetParameterRequest{
 		Name: fmt.Sprintf("projects/%s/locations/global/parameters/%s", projectID, parameterID),
 	})

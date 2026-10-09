@@ -45,7 +45,7 @@ func enableParamTemplateVersion(w io.Writer, projectID, templateID, versionID st
 	// Construct the name of the template version.
 	name := fmt.Sprintf("projects/%s/locations/global/templates/%s/versions/%s", projectID, templateID, versionID)
 
-	// Build the request to update the disabled state of the template version.
+	// Build the request to update the template version.
 	req := &parametermanagerpb.UpdateTemplateVersionRequest{
 		TemplateVersion: &parametermanagerpb.TemplateVersion{
 			Name:     name,

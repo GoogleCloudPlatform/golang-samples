@@ -24,13 +24,13 @@ import (
 	parametermanagerpb "cloud.google.com/go/parametermanager/apiv1/parametermanagerpb"
 )
 
-// renderParamTemplateVersion renders a template version using the values of a parameter version.
+// renderParamTemplateVersion renders a template version.
 //
 // w: The io.Writer object used to write the output.
 // projectID: The ID of the project where the parameter is located.
 // templateID: The ID of the template.
 // versionID: The ID of the template version.
-// parameterVersionName: The full resource name of the parameter version whose values are used for rendering.
+// parameterVersionName: The resource name of the parameter version.
 //
 // The function returns an error if the operation fails.
 func renderParamTemplateVersion(w io.Writer, projectID, templateID, versionID, parameterVersionName string) error {
@@ -60,9 +60,6 @@ func renderParamTemplateVersion(w io.Writer, projectID, templateID, versionID, p
 	fmt.Fprintf(w, "Rendered parameter template version: %s\n", rendered.TemplateVersion)
 	fmt.Fprintf(w, "Template payload: %s\n", rendered.Payload.Data)
 
-	// If the parameter contains secret references, they will be resolved
-	// and the actual secret values will be included in the rendered output.
-	// Be cautious with logging or displaying this information.
 	fmt.Fprintf(w, "Rendered payload: %s\n", rendered.RenderedPayload)
 	return nil
 }

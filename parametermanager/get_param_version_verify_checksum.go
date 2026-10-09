@@ -26,7 +26,7 @@ import (
 	parametermanagerpb "cloud.google.com/go/parametermanager/apiv1/parametermanagerpb"
 )
 
-// getParamVersionVerifyChecksum retrieves a parameter version and verifies the returned CRC32C checksum against the payload.
+// getParamVersionVerifyChecksum retrieves a parameter version and verifies its checksum.
 //
 // w: The io.Writer object used to write the output.
 // projectID: The ID of the project where the parameter is located.
@@ -46,8 +46,7 @@ func getParamVersionVerifyChecksum(w io.Writer, projectID, parameterID, versionI
 	// Construct the name of the parameter version.
 	name := fmt.Sprintf("projects/%s/locations/global/parameters/%s/versions/%s", projectID, parameterID, versionID)
 
-	// Build the request to get the parameter version. The full view is
-	// required to return the payload and its checksum.
+	// Build the request to get the parameter version.
 	req := &parametermanagerpb.GetParameterVersionRequest{
 		Name: name,
 		View: parametermanagerpb.View_FULL,
@@ -59,7 +58,7 @@ func getParamVersionVerifyChecksum(w io.Writer, projectID, parameterID, versionI
 		return fmt.Errorf("failed to get parameter version: %w", err)
 	}
 
-	// Recompute the CRC32C checksum (Castagnoli polynomial) and compare it.
+	// Verify the checksum.
 	data := version.Payload.Data
 	computed := int64(crc32.Checksum(data, crc32.MakeTable(crc32.Castagnoli)))
 	if version.Payload.DataCrc32C == nil || *version.Payload.DataCrc32C != computed {

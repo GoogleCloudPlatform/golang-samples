@@ -25,14 +25,14 @@ import (
 	"google.golang.org/api/option"
 )
 
-// createRegionalParamTemplateVersion creates a new version of a parameter template. The payload may contain {{.variableName}} placeholders that are filled in when the template is rendered.
+// createRegionalParamTemplateVersion creates a new version of a parameter template.
 //
 // w: The io.Writer object used to write the output.
 // projectID: The ID of the project where the parameter is located.
 // locationID: The region where the resources are located.
 // templateID: The ID of the template.
 // versionID: The ID of the template version.
-// payload: The template payload containing {{.variableName}} placeholders.
+// payload: The payload of the version.
 //
 // The function returns an error if the operation fails.
 func createRegionalParamTemplateVersion(w io.Writer, projectID, locationID, templateID, versionID, payload string) error {

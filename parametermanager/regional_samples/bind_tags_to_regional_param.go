@@ -27,7 +27,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-// bindTagsToRegionalParam creates a parameter and then binds an existing tag value to it using Resource Manager.
+// bindTagsToRegionalParam creates a parameter and binds a tag value to it.
 //
 // w: The io.Writer object used to write the output.
 // projectID: The ID of the project where the parameter is located.
@@ -62,7 +62,7 @@ func bindTagsToRegionalParam(w io.Writer, projectID, locationID, parameterID, ta
 	}
 	fmt.Fprintf(w, "Created regional parameter: %s\n", parameter.Name)
 
-	// Create a Resource Manager tag bindings client using the regional Resource Manager endpoint.
+	// Create a Resource Manager tag bindings client.
 	rmEndpoint := fmt.Sprintf("%s-cloudresourcemanager.googleapis.com:443", locationID)
 	tagBindingsClient, err := resourcemanager.NewTagBindingsClient(ctx, option.WithEndpoint(rmEndpoint))
 	if err != nil {
@@ -70,8 +70,7 @@ func bindTagsToRegionalParam(w io.Writer, projectID, locationID, parameterID, ta
 	}
 	defer tagBindingsClient.Close()
 
-	// Bind the tag value to the parameter. The parent must use the parameter
-	// name returned by the API, which contains the project number.
+	// Bind the tag value to the parameter.
 	op, err := tagBindingsClient.CreateTagBinding(ctx, &resourcemanagerpb.CreateTagBindingRequest{
 		TagBinding: &resourcemanagerpb.TagBinding{
 			Parent:   fmt.Sprintf("//parametermanager.googleapis.com/%s", parameter.Name),

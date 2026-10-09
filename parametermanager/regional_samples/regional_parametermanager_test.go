@@ -854,8 +854,7 @@ func testLocationPath(t *testing.T, projectID string) string {
 	return fmt.Sprintf("projects/%s/locations/%s", projectID, testLocation(t))
 }
 
-// testTemplate creates a template with the given format in the specified GCP project.
-// It returns the created template and its ID or fails the test if template creation fails.
+// testTemplate creates a template for the test.
 func testTemplate(t *testing.T, projectID string, format parametermanagerpb.TemplateFormat) (*parametermanagerpb.Template, string) {
 	t.Helper()
 
@@ -877,8 +876,7 @@ func testTemplate(t *testing.T, projectID string, format parametermanagerpb.Temp
 	return template, templateID
 }
 
-// testTemplateVersion creates a version of a template with the given payload.
-// It returns the created template version and its ID or fails the test if creation fails.
+// testTemplateVersion creates a template version for the test.
 func testTemplateVersion(t *testing.T, templateName, payload string) (*parametermanagerpb.TemplateVersion, string) {
 	t.Helper()
 
@@ -902,8 +900,7 @@ func testTemplateVersion(t *testing.T, templateName, payload string) (*parameter
 	return version, versionID
 }
 
-// testCleanupTemplate deletes the specified template in the GCP project.
-// It fails the test if the template deletion fails.
+// testCleanupTemplate deletes a template.
 func testCleanupTemplate(t *testing.T, name string) {
 	t.Helper()
 
@@ -921,8 +918,7 @@ func testCleanupTemplate(t *testing.T, name string) {
 	}
 }
 
-// testCleanupTemplateVersion deletes the specified template version in the GCP project.
-// It fails the test if the template version deletion fails.
+// testCleanupTemplateVersion deletes a template version.
 func testCleanupTemplateVersion(t *testing.T, name string) {
 	t.Helper()
 
@@ -940,8 +936,7 @@ func testCleanupTemplateVersion(t *testing.T, name string) {
 	}
 }
 
-// testTag returns the pre-provisioned tag key and tag value used by the tag tests.
-// The tests are skipped if GOLANG_SAMPLES_TAG_KEY or GOLANG_SAMPLES_TAG_VALUE is not set.
+// testTag returns the tag key and value for the tag tests.
 func testTag(t *testing.T) (string, string) {
 	t.Helper()
 
@@ -954,7 +949,7 @@ func testTag(t *testing.T) (string, string) {
 	return key, value
 }
 
-// testTagBindings returns the tag values bound to the named parameter, read through Resource Manager.
+// testTagBindings returns the tag values bound to a parameter.
 func testTagBindings(t *testing.T, parameterName string) []string {
 	t.Helper()
 
@@ -983,8 +978,7 @@ func testTagBindings(t *testing.T, parameterName string) []string {
 	return values
 }
 
-// TestCreateRegionalParamTemplate tests the createRegionalParamTemplate function by creating a template,
-// then verifies if the template was successfully created by checking the output.
+// TestCreateRegionalParamTemplate tests the createRegionalParamTemplate function.
 func TestCreateRegionalParamTemplate(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1004,8 +998,7 @@ func TestCreateRegionalParamTemplate(t *testing.T) {
 	}
 }
 
-// TestCreateRegionalParamTemplateVersion tests the createRegionalParamTemplateVersion function by creating a
-// template version with placeholders, then verifies the output and the stored payload.
+// TestCreateRegionalParamTemplateVersion tests the createRegionalParamTemplateVersion function.
 func TestCreateRegionalParamTemplateVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1038,8 +1031,7 @@ func TestCreateRegionalParamTemplateVersion(t *testing.T) {
 	}
 }
 
-// TestListRegionalParamTemplates tests the listRegionalParamTemplates function by creating templates,
-// then verifies that they are listed.
+// TestListRegionalParamTemplates tests the listRegionalParamTemplates function.
 func TestListRegionalParamTemplates(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1061,8 +1053,7 @@ func TestListRegionalParamTemplates(t *testing.T) {
 	}
 }
 
-// TestGetRegionalParamTemplate tests the getRegionalParamTemplate function by creating a template,
-// then verifies that it is retrieved.
+// TestGetRegionalParamTemplate tests the getRegionalParamTemplate function.
 func TestGetRegionalParamTemplate(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1080,8 +1071,7 @@ func TestGetRegionalParamTemplate(t *testing.T) {
 	}
 }
 
-// TestListRegionalParamTemplateVersions tests the listRegionalParamTemplateVersions function by creating
-// template versions, then verifies that they are listed.
+// TestListRegionalParamTemplateVersions tests the listRegionalParamTemplateVersions function.
 func TestListRegionalParamTemplateVersions(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1105,8 +1095,7 @@ func TestListRegionalParamTemplateVersions(t *testing.T) {
 	}
 }
 
-// TestGetRegionalParamTemplateVersion tests the getRegionalParamTemplateVersion function by creating a
-// template version, then verifies that it and its payload are retrieved.
+// TestGetRegionalParamTemplateVersion tests the getRegionalParamTemplateVersion function.
 func TestGetRegionalParamTemplateVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1130,8 +1119,7 @@ func TestGetRegionalParamTemplateVersion(t *testing.T) {
 	}
 }
 
-// TestUpdateRegionalParamTemplateLabels tests the updateRegionalParamTemplateLabels function by creating a
-// template, then verifies that the label was applied.
+// TestUpdateRegionalParamTemplateLabels tests the updateRegionalParamTemplateLabels function.
 func TestUpdateRegionalParamTemplateLabels(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1149,8 +1137,7 @@ func TestUpdateRegionalParamTemplateLabels(t *testing.T) {
 	}
 }
 
-// TestDeleteRegionalParamTemplate tests the deleteRegionalParamTemplate function by creating a template,
-// deleting it, then verifies that it no longer exists.
+// TestDeleteRegionalParamTemplate tests the deleteRegionalParamTemplate function.
 func TestDeleteRegionalParamTemplate(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1175,8 +1162,7 @@ func TestDeleteRegionalParamTemplate(t *testing.T) {
 	}
 }
 
-// TestDisableRegionalParamTemplateVersion tests the disableRegionalParamTemplateVersion function by creating a
-// template version, disabling it, then verifies the disabled state.
+// TestDisableRegionalParamTemplateVersion tests the disableRegionalParamTemplateVersion function.
 func TestDisableRegionalParamTemplateVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1206,8 +1192,7 @@ func TestDisableRegionalParamTemplateVersion(t *testing.T) {
 	}
 }
 
-// TestEnableRegionalParamTemplateVersion tests the enableRegionalParamTemplateVersion function by creating a
-// template version, disabling it, enabling it, then verifies the enabled state.
+// TestEnableRegionalParamTemplateVersion tests the enableRegionalParamTemplateVersion function.
 func TestEnableRegionalParamTemplateVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1244,8 +1229,7 @@ func TestEnableRegionalParamTemplateVersion(t *testing.T) {
 	}
 }
 
-// TestDeleteRegionalParamTemplateVersion tests the deleteRegionalParamTemplateVersion function by creating a
-// template version, deleting it, then verifies that it no longer exists.
+// TestDeleteRegionalParamTemplateVersion tests the deleteRegionalParamTemplateVersion function.
 func TestDeleteRegionalParamTemplateVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1272,9 +1256,7 @@ func TestDeleteRegionalParamTemplateVersion(t *testing.T) {
 	}
 }
 
-// TestRenderRegionalParamTemplateVersion tests the renderRegionalParamTemplateVersion function. The template
-// references a Secret Manager secret, which the parameter's identity is granted access to, and the
-// test verifies that the secret value appears in the rendered payload.
+// TestRenderRegionalParamTemplateVersion tests the renderRegionalParamTemplateVersion function.
 func TestRenderRegionalParamTemplateVersion(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1314,8 +1296,7 @@ func TestRenderRegionalParamTemplateVersion(t *testing.T) {
 	}
 }
 
-// TestRenderRegionalParamTemplateVersionMissingSecret verifies that rendering fails when the parameter
-// version references a secret that does not exist.
+// TestRenderRegionalParamTemplateVersionMissingSecret verifies the error case.
 func TestRenderRegionalParamTemplateVersionMissingSecret(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1340,9 +1321,7 @@ func TestRenderRegionalParamTemplateVersionMissingSecret(t *testing.T) {
 	}
 }
 
-// TestCreateRegionalParamWithTags tests the createRegionalParamWithTags function by creating a parameter with
-// a tag, then verifies the tag binding through Resource Manager (tags are never returned by
-// Parameter Manager).
+// TestCreateRegionalParamWithTags tests the createRegionalParamWithTags function.
 func TestCreateRegionalParamWithTags(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	tagKey, tagValue := testTag(t)
@@ -1371,8 +1350,7 @@ func TestCreateRegionalParamWithTags(t *testing.T) {
 	}
 }
 
-// TestBindTagsToRegionalParam tests the bindTagsToRegionalParam function by creating a parameter, binding an
-// existing tag value, then verifies the tag binding through Resource Manager.
+// TestBindTagsToRegionalParam tests the bindTagsToRegionalParam function.
 func TestBindTagsToRegionalParam(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	_, tagValue := testTag(t)
@@ -1401,8 +1379,7 @@ func TestBindTagsToRegionalParam(t *testing.T) {
 	}
 }
 
-// TestGetRegionalParamTags tests the getRegionalParamTags function by creating a parameter with a tag,
-// then verifies the tag binding is listed.
+// TestGetRegionalParamTags tests the getRegionalParamTags function.
 func TestGetRegionalParamTags(t *testing.T) {
 	tc := testutil.SystemTest(t)
 	tagKey, tagValue := testTag(t)
@@ -1427,8 +1404,7 @@ func TestGetRegionalParamTags(t *testing.T) {
 	}
 }
 
-// TestCreateRegionalParamVersionWithChecksum tests the createRegionalParamVersionWithChecksum function by
-// creating a version with a client-computed CRC32C, then verifies the checksum source and value.
+// TestCreateRegionalParamVersionWithChecksum tests the createRegionalParamVersionWithChecksum function.
 func TestCreateRegionalParamVersionWithChecksum(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1466,8 +1442,7 @@ func TestCreateRegionalParamVersionWithChecksum(t *testing.T) {
 	}
 }
 
-// TestGetRegionalParamVersionVerifyChecksum tests the getRegionalParamVersionVerifyChecksum function by
-// creating a version without a checksum, then verifies the server-generated checksum.
+// TestGetRegionalParamVersionVerifyChecksum tests the getRegionalParamVersionVerifyChecksum function.
 func TestGetRegionalParamVersionVerifyChecksum(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
@@ -1490,8 +1465,7 @@ func TestGetRegionalParamVersionVerifyChecksum(t *testing.T) {
 	}
 }
 
-// TestCreateRegionalParamVersionChecksumMismatch verifies that Parameter Manager rejects a version whose
-// client-supplied CRC32C does not match the payload.
+// TestCreateRegionalParamVersionChecksumMismatch verifies the error case.
 func TestCreateRegionalParamVersionChecksumMismatch(t *testing.T) {
 	tc := testutil.SystemTest(t)
 

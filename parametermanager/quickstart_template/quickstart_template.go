@@ -16,8 +16,7 @@ package main
 
 // [START parametermanager_template_quickstart]
 
-// Sample quickstart is a basic program that renders a Parameter Manager
-// template using the values of a parameter version.
+// Sample quickstart is a basic program that renders a template.
 import (
 	"context"
 	"fmt"
@@ -38,8 +37,7 @@ func main() {
 	// Id of the parameter version which you want to create.
 	parameterVersionID := "test-parameter-version-id"
 
-	// The template payload contains {{.variableName}} placeholders that are
-	// filled in with the values of the parameter version when rendered.
+	// Template payload.
 	templatePayload := `{"username": "{{.username}}", "host": "{{.host}}"}`
 	parameterPayload := `{"username": "test-user", "host": "localhost"}`
 
@@ -68,7 +66,7 @@ func main() {
 	}
 	fmt.Printf("Created template %s with format %s\n", template.Name, template.Format)
 
-	// Create a template version containing the placeholders.
+	// Create a template version.
 	templateVersion, err := client.CreateTemplateVersion(ctx, &parametermanagerpb.CreateTemplateVersionRequest{
 		Parent:            template.Name,
 		TemplateVersionId: templateVersionID,
@@ -84,7 +82,7 @@ func main() {
 	}
 	fmt.Printf("Created template version: %s\n", templateVersion.Name)
 
-	// Create a JSON parameter and a version holding the values to render with.
+	// Create a JSON parameter and a parameter version.
 	parameter, err := client.CreateParameter(ctx, &parametermanagerpb.CreateParameterRequest{
 		Parent:      parent,
 		ParameterId: parameterID,
@@ -113,7 +111,7 @@ func main() {
 	}
 	fmt.Printf("Created parameter version: %s\n", parameterVersion.Name)
 
-	// Render the template version using the parameter version.
+	// Render the template version.
 	rendered, err := client.RenderTemplateVersion(ctx, &parametermanagerpb.RenderTemplateVersionRequest{
 		Name:             templateVersion.Name,
 		ParameterVersion: parameterVersion.Name,

@@ -28,7 +28,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-// getRegionalParamTags lists the tag bindings of a parameter. Parameter Manager never returns tags on the parameter itself, so they are read through Resource Manager.
+// getRegionalParamTags lists the tag bindings of a parameter.
 //
 // w: The io.Writer object used to write the output.
 // projectID: The ID of the project where the parameter is located.
@@ -46,7 +46,7 @@ func getRegionalParamTags(w io.Writer, projectID, locationID, parameterID string
 	}
 	defer client.Close()
 
-	// Get the parameter to find its name, which contains the project number.
+	// Get the parameter.
 	parameter, err := client.GetParameter(ctx, &parametermanagerpb.GetParameterRequest{
 		Name: fmt.Sprintf("projects/%s/locations/%s/parameters/%s", projectID, locationID, parameterID),
 	})
@@ -54,7 +54,7 @@ func getRegionalParamTags(w io.Writer, projectID, locationID, parameterID string
 		return fmt.Errorf("failed to get parameter: %w", err)
 	}
 
-	// Create a Resource Manager tag bindings client using the regional Resource Manager endpoint.
+	// Create a Resource Manager tag bindings client.
 	rmEndpoint := fmt.Sprintf("%s-cloudresourcemanager.googleapis.com:443", locationID)
 	tagBindingsClient, err := resourcemanager.NewTagBindingsClient(ctx, option.WithEndpoint(rmEndpoint))
 	if err != nil {
