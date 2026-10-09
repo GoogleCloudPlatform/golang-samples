@@ -20,7 +20,9 @@ import (
 	"io"
 	"time"
 
-	"cloud.google.com/go/bigtable"
+	admin "cloud.google.com/go/bigtable/admin/apiv2"
+	"cloud.google.com/go/bigtable/admin/apiv2/adminpb"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 func createFamilyGCMaxAge(w io.Writer, projectID, instanceID string, tableName string) error {
@@ -30,22 +32,36 @@ func createFamilyGCMaxAge(w io.Writer, projectID, instanceID string, tableName s
 
 	ctx := context.Background()
 
-	adminClient, err := bigtable.NewAdminClient(ctx, projectID, instanceID)
+	adminClient, err := admin.NewBigtableTableAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("bigtable.NewAdminClient: %w", err)
+		return fmt.Errorf("admin.NewBigtableTableAdminClient: %w", err)
 	}
 	defer adminClient.Close()
 
-	columnFamilyName := "cf1"
-	if err := adminClient.CreateColumnFamily(ctx, tableName, columnFamilyName); err != nil {
-		return fmt.Errorf("CreateColumnFamily(%s): %w", columnFamilyName, err)
-	}
-
 	// Set a garbage collection policy of 5 days.
 	maxAge := time.Hour * 24 * 5
-	policy := bigtable.MaxAgePolicy(maxAge)
-	if err := adminClient.SetGCPolicy(ctx, tableName, columnFamilyName, policy); err != nil {
-		return fmt.Errorf("SetGCPolicy(%s): %w", policy, err)
+	policy := &adminpb.GcRule{
+		Rule: &adminpb.GcRule_MaxAge{
+			MaxAge: durationpb.New(maxAge),
+		},
+	}
+
+	columnFamilyName := "cf1"
+	req := &adminpb.ModifyColumnFamiliesRequest{
+		Name: fmt.Sprintf("projects/%s/instances/%s/tables/%s", projectID, instanceID, tableName),
+		Modifications: []*adminpb.ModifyColumnFamiliesRequest_Modification{
+			{
+				Id: columnFamilyName,
+				Mod: &adminpb.ModifyColumnFamiliesRequest_Modification_Create{
+					Create: &adminpb.ColumnFamily{
+						GcRule: policy,
+					},
+				},
+			},
+		},
+	}
+	if _, err := adminClient.ModifyColumnFamilies(ctx, req); err != nil {
+		return fmt.Errorf("ModifyColumnFamilies(%s): %w", columnFamilyName, err)
 	}
 
 	fmt.Fprintf(w, "created column family %s with policy: %v\n", columnFamilyName, policy)

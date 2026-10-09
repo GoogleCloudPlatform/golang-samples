@@ -24,14 +24,19 @@ import (
 	"bytes"
 	"context"
 	"encoding/binary"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 
 	"cloud.google.com/go/bigtable"
+	admin "cloud.google.com/go/bigtable/admin/apiv2"
+	"cloud.google.com/go/bigtable/admin/apiv2/adminpb"
 	"google.golang.org/appengine"
 	aelog "google.golang.org/appengine/log"
 	"google.golang.org/appengine/user"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // User-provided constants.
@@ -52,26 +57,47 @@ func main() {
 	ctx := context.Background()
 
 	// Set up admin client, tables, and column families.
-	// NewAdminClient uses Application Default Credentials to authenticate.
-	adminClient, err := bigtable.NewAdminClient(ctx, project, instance)
+	// NewBigtableTableAdminClient uses Application Default Credentials to authenticate.
+	adminClient, err := admin.NewBigtableTableAdminClient(ctx)
 	if err != nil {
 		log.Fatalf("Unable to create a table admin client. %v", err)
 	}
-	tables, err := adminClient.Tables(ctx)
+	instanceName := fmt.Sprintf("projects/%s/instances/%s", project, instance)
+	tableFullName := fmt.Sprintf("%s/tables/%s", instanceName, tableName)
+
+	tblInfo, err := adminClient.GetTable(ctx, &adminpb.GetTableRequest{
+		Name: tableFullName,
+		View: adminpb.Table_SCHEMA_VIEW,
+	})
 	if err != nil {
-		log.Fatalf("Unable to fetch table list. %v", err)
-	}
-	if !sliceContains(tables, tableName) {
-		if err := adminClient.CreateTable(ctx, tableName); err != nil {
+		if status.Code(err) != codes.NotFound {
+			log.Fatalf("Unable to read info for table: %v. %v", tableName, err)
+		}
+		req := &adminpb.CreateTableRequest{
+			Parent:  instanceName,
+			TableId: tableName,
+			Table: &adminpb.Table{
+				ColumnFamilies: map[string]*adminpb.ColumnFamily{
+					familyName: {},
+				},
+			},
+		}
+		if _, err := adminClient.CreateTable(ctx, req); err != nil {
 			log.Fatalf("Unable to create table: %v. %v", tableName, err)
 		}
-	}
-	tblInfo, err := adminClient.TableInfo(ctx, tableName)
-	if err != nil {
-		log.Fatalf("Unable to read info for table: %v. %v", tableName, err)
-	}
-	if !sliceContains(tblInfo.Families, familyName) {
-		if err := adminClient.CreateColumnFamily(ctx, tableName, familyName); err != nil {
+	} else if _, ok := tblInfo.ColumnFamilies[familyName]; !ok {
+		req := &adminpb.ModifyColumnFamiliesRequest{
+			Name: tableFullName,
+			Modifications: []*adminpb.ModifyColumnFamiliesRequest_Modification{
+				{
+					Id: familyName,
+					Mod: &adminpb.ModifyColumnFamiliesRequest_Modification_Create{
+						Create: &adminpb.ColumnFamily{},
+					},
+				},
+			},
+		}
+		if _, err := adminClient.ModifyColumnFamilies(ctx, req); err != nil {
 			log.Fatalf("Unable to create column family: %v. %v", familyName, err)
 		}
 	}
@@ -151,16 +177,6 @@ You have visited {{.Visits}}
 </p>
 
 </body></html>`))
-
-// sliceContains reports whether the provided string is present in the given slice of strings.
-func sliceContains(list []string, target string) bool {
-	for _, s := range list {
-		if s == target {
-			return true
-		}
-	}
-	return false
-}
 
 // More info about this method of error handling can be found at: http://blog.golang.org/error-handling-and-go
 type appHandler func(http.ResponseWriter, *http.Request) *appError
