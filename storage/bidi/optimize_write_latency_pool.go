@@ -26,7 +26,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// optimizeWriteLatencyPool uses a pre-warmed pool of writers for a zonal bucket.
+// optimizeWriteLatencyPool uses a pre-warmed pool of writers for appendable
+// objects in a bucket with the Rapid storage class.
 func optimizeWriteLatencyPool(out io.Writer, bucketName, keyPrefix string) error {
 	// bucketName := "bucket-name"
 	// keyPrefix := "pooled-object"
