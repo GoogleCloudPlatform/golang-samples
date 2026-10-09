@@ -25,10 +25,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-// GetRegionalSecretType gets and prints the secret type (e.g.
-// CLOUD_SQL_DB_CREDENTIALS, ACCESS_KEY, CERTIFICATE, OTHER_DB_CREDENTIALS,
-// OTHER, or SECRET_TYPE_UNSPECIFIED for a secret with no type restriction)
-// of the given secret.
+// GetRegionalSecretType gets the secret type of the given regional secret.
 func GetRegionalSecretType(w io.Writer, projectId, locationId, secretId string) error {
 	// name := "projects/my-project/locations/my-location/secrets/my-secret"
 

@@ -25,11 +25,8 @@ import (
 	"google.golang.org/api/option"
 )
 
-// CreateRegionalSecretWithCloudSQLCredentials creates a new secret with the
-// Cloud SQL DB credentials secret type. This type is required to enable
-// Secret Manager's automatic rotation of Cloud SQL passwords. It can only be
-// set when the secret is created, and the secret's location must match the
-// region of the target Cloud SQL instance.
+// CreateRegionalSecretWithCloudSQLCredentials creates a new regional secret with type
+// CLOUD_SQL_DB_CREDENTIALS.
 func CreateRegionalSecretWithCloudSQLCredentials(w io.Writer, projectId, locationId, secretId string) error {
 	// parent := "projects/my-project/locations/my-location"
 	// secretId := "my-secret"
@@ -63,9 +60,7 @@ func CreateRegionalSecretWithCloudSQLCredentials(w io.Writer, projectId, locatio
 	}
 	fmt.Fprintf(w, "Created secret: %s\n", result.Name)
 
-	// This built-in identity is what you grant Cloud SQL IAM permissions to,
-	// so that Secret Manager can rotate the database password on its behalf.
-	fmt.Fprintf(w, "Grant this identity Cloud SQL IAM permissions to enable rotation: %s\n",
+	fmt.Fprintf(w, "Grant the Cloud SQL User rotate IAM permissions to enable managed rotation to: %s\n",
 		result.GetPolicyMember().GetIamPolicyUidPrincipal())
 
 	return nil

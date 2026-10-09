@@ -25,25 +25,16 @@ import (
 	"google.golang.org/api/option"
 )
 
-// EnableRegionalSecretManagedRotation enables managed rotation for a Cloud
-// SQL DB credentials secret. This links the secret to a Cloud SQL instance
-// and database user, and can only be called once per secret. It adds the
-// secret's first version and sets the matching password on the Cloud SQL
-// user, taking the place of a manually added secret version, which this
-// secret type doesn't support. Afterwards, use RotateRegionalSecret to
-// trigger further rotations.
-//
-// instanceId is the bare Cloud SQL instance ID (e.g. "my-instance") -- not a
-// connection name. Neither the project nor the region should be included:
-// passing "PROJECT_ID:INSTANCE_ID" (as gcloud's own
-// `enable-managed-rotation --help` examples misleadingly show) or the full
-// "PROJECT_ID:LOCATION_ID:INSTANCE_ID" connection name both fail -- the
-// service already knows the project from the secret's own path, and prepends
-// it internally, so a qualified value ends up double-prefixed.
+// EnableRegionalSecretManagedRotation enables managed rotation of a
+// CLOUD_SQL_DB_CREDENTIALS typed secret. It validates and enables the
+// rotation, adding a version and sets the passed password.
+// Note: AddSecretVersion is disabled on the CLOUD_SQL_DB_CREDENTIALS
+// currently and for any necessary manual rotations please trigger
+// RotateRegionalSecret.
 func EnableRegionalSecretManagedRotation(w io.Writer, projectId, locationId, secretId, instanceId, username string) error {
 	// parent := "projects/my-project/locations/my-location/secrets/my-secret"
-	// instanceId := "my-cloud-sql-instance"
-	// username := "my-db-user"
+	// instanceId := "my-instance"
+	// username := "my-user"
 
 	// Create the client.
 	ctx := context.Background()
@@ -56,12 +47,9 @@ func EnableRegionalSecretManagedRotation(w io.Writer, projectId, locationId, sec
 	}
 	defer client.Close()
 
-	// Despite the field name, parent holds the full secret resource name,
-	// not a collection parent.
 	parent := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
 
-	// Build the request. Leaving Password unset lets Secret Manager generate
-	// a secure password itself.
+	// Build the request.
 	req := &secretmanagerpb.EnableManagedRotationRequest{
 		Parent: parent,
 		Credentials: &secretmanagerpb.EnableManagedRotationRequest_CloudSqlSingleUserCredentials{
@@ -72,7 +60,7 @@ func EnableRegionalSecretManagedRotation(w io.Writer, projectId, locationId, sec
 		},
 	}
 
-	// Call the API.
+	// Enable managed rotation.
 	result, err := client.EnableManagedRotation(ctx, req)
 	if err != nil {
 		return fmt.Errorf("failed to enable managed rotation for regional secret: %w", err)

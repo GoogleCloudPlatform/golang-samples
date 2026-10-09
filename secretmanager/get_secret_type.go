@@ -24,10 +24,7 @@ import (
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 )
 
-// getSecretType gets and prints the secret type (e.g. CLOUD_SQL_DB_CREDENTIALS,
-// ACCESS_KEY, CERTIFICATE, OTHER_DB_CREDENTIALS, OTHER, or
-// SECRET_TYPE_UNSPECIFIED for a secret with no type restriction) of the given
-// secret.
+// getSecretType gets the secret type of the given secret.
 func getSecretType(w io.Writer, name string) error {
 	// name := "projects/my-project/secrets/my-secret"
 

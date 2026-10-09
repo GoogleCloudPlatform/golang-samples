@@ -24,13 +24,8 @@ import (
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 )
 
-// createSecretWithType creates a new secret with the given secret type
-// restriction (e.g. ACCESS_KEY, CERTIFICATE, OTHER_DB_CREDENTIALS, or OTHER --
-// use CLOUD_SQL_DB_CREDENTIALS only for a secret that will go through
-// EnableManagedRotation, which additionally requires a regional secret; see
-// the regional_samples package). Unlike CLOUD_SQL_DB_CREDENTIALS, these
-// other secret types are plain metadata tags: they don't require any
-// additional credentials payload at creation time.
+// createSecretWithType creates a new secret with the given secret type.
+// Note: CLOUD_SQL_DB_CREDENTIALS is only supported in the regional secret.
 func createSecretWithType(w io.Writer, parent, id string, secretType secretmanagerpb.Secret_SecretType) error {
 	// parent := "projects/my-project"
 	// id := "my-secret"

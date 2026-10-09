@@ -25,11 +25,8 @@ import (
 	"google.golang.org/api/option"
 )
 
-// RotateRegionalSecret triggers a managed rotation for a Cloud SQL DB
-// credentials secret. Managed rotation must already be enabled on the secret
-// (see EnableRegionalSecretManagedRotation). Each call generates a new
-// password, updates the Cloud SQL user, and adds the result as a new secret
-// version.
+// RotateRegionalSecret triggers an adhoc rotation for the managed
+// CLOUD_SQL_DB_CREDENTIALS typed secret.
 func RotateRegionalSecret(w io.Writer, projectId, locationId, secretId string) error {
 	// parent := "projects/my-project/locations/my-location/secrets/my-secret"
 
@@ -44,8 +41,6 @@ func RotateRegionalSecret(w io.Writer, projectId, locationId, secretId string) e
 	}
 	defer client.Close()
 
-	// Despite the field name, parent holds the full secret resource name,
-	// not a collection parent.
 	parent := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
 
 	// Build the request.

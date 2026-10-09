@@ -29,16 +29,8 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// UpdateRegionalSecretWithManagedRotationSchedule reconfigures the recurring
-// rotation schedule on a secret that already has Cloud SQL managed rotation
-// enabled (see EnableRegionalSecretManagedRotation). This only applies to
-// regional secrets of the CLOUD_SQL_DB_CREDENTIALS type -- calling it on any
-// other secret type, or before managed rotation has been enabled, fails.
-//
-// rotationPeriod is the interval between rotations. The service requires it
-// to be at least 1 hour, and the next_rotation_time this function derives
-// from it (now + rotationPeriod) must be at least 5 minutes in the future --
-// both are enforced by the API, not checked client-side here.
+// UpdateRegionalSecretWithManagedRotationSchedule updates the rotation
+// schedule of a CLOUD_SQL_DB_CREDENTIALS typed secret.
 func UpdateRegionalSecretWithManagedRotationSchedule(w io.Writer, projectId, locationId, secretId string, rotationPeriod time.Duration) error {
 	// name := "projects/my-project/locations/my-location/secrets/my-secret"
 	// rotationPeriod := 24 * time.Hour
@@ -55,8 +47,13 @@ func UpdateRegionalSecretWithManagedRotationSchedule(w io.Writer, projectId, loc
 
 	name := fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectId, locationId, secretId)
 
-	// Build the request. next_rotation_time and rotation_period must be set
-	// together.
+	// Build the request.
+	// The rotation schedule of a CLOUD_SQL_DB_CREDENTIALS secret can be set
+	// before or after enabling managed rotation; EnableManagedRotation does
+	// not need to be called first. Other secret types also support a
+	// rotation schedule, but only when Pub/Sub topics are configured.
+	// Pub/Sub topics are not required for CLOUD_SQL_DB_CREDENTIALS.
+	// next_rotation_time and rotation_period must be set together.
 	req := &secretmanagerpb.UpdateSecretRequest{
 		Secret: &secretmanagerpb.Secret{
 			Name: name,
@@ -66,11 +63,7 @@ func UpdateRegionalSecretWithManagedRotationSchedule(w io.Writer, projectId, loc
 			},
 		},
 		UpdateMask: &field_mask.FieldMask{
-			// Mask only the two subfields being set here, not the whole
-			// "rotation" submessage -- that would also include
-			// managed_rotation_status, which is output-only and rejects a
-			// whole-submessage replace with "immutable and cannot be
-			// updated" (confirmed empirically against a live project).
+			// Mask only the rotation subfields being set.
 			Paths: []string{"rotation.next_rotation_time", "rotation.rotation_period"},
 		},
 	}

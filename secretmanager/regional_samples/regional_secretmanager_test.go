@@ -125,11 +125,7 @@ func testRegionalSecret(tb testing.TB, projectID string) (*secretmanagerpb.Secre
 	return secret, secretID
 }
 
-// cloudSQLRole is granted to a Cloud SQL DB credentials secret's built-in
-// identity so that managed rotation can update the Cloud SQL user's
-// password. The grant is per-secret (the member is the secret's own
-// generated principal), so it has to be made fresh for every secret these
-// tests create.
+// cloudSQLRole is granted to the secret's identity to enable managed rotation.
 const cloudSQLRole = "roles/cloudsql.admin"
 
 func testProjectsClient(tb testing.TB) (*resourcemanager.ProjectsClient, context.Context) {
@@ -144,10 +140,6 @@ func testProjectsClient(tb testing.TB) (*resourcemanager.ProjectsClient, context
 }
 
 // grantCloudSQLRole grants cloudSQLRole to member on the project.
-// SetIamPolicy replaces the whole policy, so this reads the current policy,
-// adds member to the existing (or a new) binding for the role, and writes
-// it back with the same etag -- retrying the whole read-modify-write if
-// another writer raced us (Aborted, from an etag mismatch).
 func grantCloudSQLRole(tb testing.TB, projectID, member string) {
 	tb.Helper()
 
@@ -191,8 +183,7 @@ func grantCloudSQLRole(tb testing.TB, projectID, member string) {
 	}
 }
 
-// revokeCloudSQLRole removes member from cloudSQLRole on the project, added
-// by grantCloudSQLRole.
+// revokeCloudSQLRole removes member from cloudSQLRole on the project.
 func revokeCloudSQLRole(tb testing.TB, projectID, member string) {
 	tb.Helper()
 
@@ -266,18 +257,14 @@ func testRegionalSecretWithCloudSQLCredentials(tb testing.TB, projectID string) 
 		tb.Fatalf("testRegionalSecretWithCloudSQLCredentials: failed to get secret: %v", err)
 	}
 
-	// enable_managed_rotation needs this secret's own built-in identity
-	// granted Cloud SQL IAM permissions first -- there's no broader grant
-	// that covers a secret before it exists, so every secret created here
-	// needs its own grant/revoke around the test that uses it.
+	// Grant the secret's identity the Cloud SQL role.
 	member := secret.GetPolicyMember().GetIamPolicyUidPrincipal()
 	grantCloudSQLRole(tb, projectID, member)
 	tb.Cleanup(func() {
 		revokeCloudSQLRole(tb, projectID, member)
 	})
 
-	// IAM grants are eventually consistent; give it a moment before a
-	// caller tries to use it for managed rotation.
+	// Wait for the IAM grant to propagate.
 	time.Sleep(10 * time.Second)
 
 	return secretID
