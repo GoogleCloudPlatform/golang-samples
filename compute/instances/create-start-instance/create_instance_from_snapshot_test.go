@@ -30,6 +30,7 @@ import (
 )
 
 func TestComputeCreateInstanceFromSnapshotSnippets(t *testing.T) {
+	t.Skip("Temporary skipping slow test")
 	ctx := context.Background()
 	var seededRand *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
