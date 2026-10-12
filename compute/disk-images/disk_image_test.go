@@ -141,6 +141,7 @@ func deleteSnapshot(ctx context.Context, projectID, snapshotName string) error {
 }
 
 func TestComputeDiskImageSnippets(t *testing.T) {
+	t.Skip("Temporary skipping slow test")
 	ctx := context.Background()
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))

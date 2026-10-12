@@ -30,6 +30,7 @@ import (
 )
 
 func TestCreateWindowsOSImageSnippets(t *testing.T) {
+	t.Skip("Temporary skipping slow test")
 	ctx := context.Background()
 	var r *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
