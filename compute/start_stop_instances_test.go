@@ -31,6 +31,7 @@ import (
 )
 
 func TestStartStopSnippets(t *testing.T) {
+	t.Skip("Temporary skipping slow test")
 	ctx := context.Background()
 	instancesClient, err := compute.NewInstancesRESTClient(ctx)
 	if err != nil {

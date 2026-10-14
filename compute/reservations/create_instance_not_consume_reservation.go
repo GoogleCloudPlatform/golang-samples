@@ -57,7 +57,7 @@ func createInstanceNotConsumeReservation(w io.Writer, projectID, zone, instanceN
 			Name:           proto.String(instanceName),
 			NetworkInterfaces: []*computepb.NetworkInterface{
 				{
-					Name: proto.String("global/networks/default"),
+					Network: proto.String("global/networks/default"),
 				},
 			},
 			ReservationAffinity: &computepb.ReservationAffinity{
