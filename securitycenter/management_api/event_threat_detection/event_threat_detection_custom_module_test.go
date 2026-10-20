@@ -63,7 +63,6 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-
 // cleanupOrphanedModules deletes any modules left over from previous test runs
 func cleanupOrphanedModules() {
 	ctx := context.Background()
