@@ -17,6 +17,7 @@ package main
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
@@ -25,7 +26,10 @@ import (
 // The provided context is used to propagate the trace context with the
 // http headers.
 // [START opentelemetry_instrumentation_client]
-var httpClient = &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
+var httpClient = &http.Client{
+	Transport: otelhttp.NewTransport(http.DefaultTransport),
+	Timeout:   10 * time.Second,
+}
 
 func callSingle(ctx context.Context) error {
 	// httpClient uses otelhttp.NewTransport, which records a span, records
