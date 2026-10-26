@@ -57,8 +57,8 @@ func TestWriteTelemetry(t *testing.T) {
 		t:               t,
 		expectationsMet: make(chan struct{}),
 		expectations: []*spanExpectation{
-			{name: "/multi"},
-			{name: "/single"},
+			{name: "GET /multi"},
+			{name: "GET /single"},
 		},
 	}
 	http.HandleFunc("/v1/traces", ts.handleTraces)
@@ -68,11 +68,11 @@ func TestWriteTelemetry(t *testing.T) {
 		t:               t,
 		expectationsMet: make(chan struct{}),
 		expectations: []*metricExpectation{
-			{name: "http.client.request.size"},
-			{name: "http.client.duration"},
-			{name: "http.server.response.size"},
-			{name: "http.server.request.size"},
-			{name: "http.server.duration"},
+			{name: "http.client.request.body.size"},
+			{name: "http.client.request.duration"},
+			{name: "http.server.response.body.size"},
+			{name: "http.server.request.body.size"},
+			{name: "http.server.request.duration"},
 			{name: "example.subrequests"},
 			{name: "example.sleep.duration"},
 		},
