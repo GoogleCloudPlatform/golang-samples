@@ -27,6 +27,7 @@ use (
 	./cloudsql/postgres/database-sql
 	./cloudsql/sqlserver/database-sql
 	./compute
+	./compute/imagebuilder
 	./compute/quickstart
 	./connectgateway
 	./container_registry
