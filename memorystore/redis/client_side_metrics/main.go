@@ -78,6 +78,7 @@ func initTelemetry(ctx context.Context) (*MetricClient, func(), error) {
 		ctx,
 		otlptracegrpc.WithEndpoint("telemetry.googleapis.com:443"),
 		otlptracegrpc.WithDialOption(grpc.WithPerRPCCredentials(perRPCCreds)),
+		otlptracegrpc.WithCompressor("gzip"),
 	)
 	if err != nil {
 		return nil, nil, fmt.Errorf("otlptracegrpc.New: %w", err)
@@ -93,6 +94,7 @@ func initTelemetry(ctx context.Context) (*MetricClient, func(), error) {
 		ctx,
 		otlpmetricgrpc.WithEndpoint("telemetry.googleapis.com:443"),
 		otlpmetricgrpc.WithDialOption(grpc.WithPerRPCCredentials(perRPCCreds)),
+		otlpmetricgrpc.WithCompressor("gzip"),
 	)
 	if err != nil {
 		_ = tp.Shutdown(ctx)
