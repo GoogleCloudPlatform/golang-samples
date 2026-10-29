@@ -33,7 +33,7 @@ func writeBatch(w io.Writer, projectID, instanceID string, tableName string) err
 	ctx := context.Background()
 	client, err := bigtable.NewClient(ctx, projectID, instanceID)
 	if err != nil {
-		return fmt.Errorf("bigtable.NewAdminClient: %w", err)
+		return fmt.Errorf("bigtable.NewClient: %w", err)
 	}
 	defer client.Close()
 	tbl := client.Open(tableName)
