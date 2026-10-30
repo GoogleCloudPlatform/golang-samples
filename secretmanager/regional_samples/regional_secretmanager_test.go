@@ -25,6 +25,7 @@ import (
 
 	"testing"
 
+	iampb "cloud.google.com/go/iam/apiv1/iampb"
 	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
 	"cloud.google.com/go/resourcemanager/apiv3/resourcemanagerpb"
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
@@ -66,6 +67,28 @@ func testRegionalClient(tb testing.TB) (*secretmanager.Client, context.Context) 
 	return client, ctx
 }
 
+func testCloudSQLInstanceID(tb testing.TB) string {
+	tb.Helper()
+
+	v := os.Getenv("GOLANG_REGIONAL_SAMPLES_CLOUD_SQL_INSTANCE")
+	if v == "" {
+		tb.Skip("testCloudSQLInstanceID: missing GOLANG_REGIONAL_SAMPLES_CLOUD_SQL_INSTANCE")
+	}
+
+	return v
+}
+
+func testCloudSQLUsername(tb testing.TB) string {
+	tb.Helper()
+
+	v := os.Getenv("GOLANG_REGIONAL_SAMPLES_CLOUD_SQL_USER")
+	if v == "" {
+		tb.Skip("testCloudSQLUsername: missing GOLANG_REGIONAL_SAMPLES_CLOUD_SQL_USER")
+	}
+
+	return v
+}
+
 func testName(tb testing.TB) string {
 	tb.Helper()
 
@@ -100,6 +123,151 @@ func testRegionalSecret(tb testing.TB, projectID string) (*secretmanagerpb.Secre
 	}
 
 	return secret, secretID
+}
+
+// cloudSQLRole is granted to the secret's identity to enable managed rotation.
+const cloudSQLRole = "roles/cloudsql.admin"
+
+func testProjectsClient(tb testing.TB) (*resourcemanager.ProjectsClient, context.Context) {
+	tb.Helper()
+	ctx := context.Background()
+
+	client, err := resourcemanager.NewProjectsClient(ctx)
+	if err != nil {
+		tb.Fatalf("testProjectsClient: failed to create client: %v", err)
+	}
+	return client, ctx
+}
+
+// grantCloudSQLRole grants cloudSQLRole to member on the project.
+func grantCloudSQLRole(tb testing.TB, projectID, member string) {
+	tb.Helper()
+
+	client, ctx := testProjectsClient(tb)
+	defer client.Close()
+
+	resource := fmt.Sprintf("projects/%s", projectID)
+
+	for attempt := 0; ; attempt++ {
+		policy, err := client.GetIamPolicy(ctx, &iampb.GetIamPolicyRequest{Resource: resource})
+		if err != nil {
+			tb.Fatalf("grantCloudSQLRole: failed to get IAM policy: %v", err)
+		}
+
+		found := false
+		for _, binding := range policy.Bindings {
+			if binding.Role != cloudSQLRole {
+				continue
+			}
+			found = true
+			if !containsString(binding.Members, member) {
+				binding.Members = append(binding.Members, member)
+			}
+			break
+		}
+		if !found {
+			policy.Bindings = append(policy.Bindings, &iampb.Binding{
+				Role:    cloudSQLRole,
+				Members: []string{member},
+			})
+		}
+
+		_, err = client.SetIamPolicy(ctx, &iampb.SetIamPolicyRequest{Resource: resource, Policy: policy})
+		if err == nil {
+			return
+		}
+		if s, ok := grpcstatus.FromError(err); ok && s.Code() == grpccodes.Aborted && attempt < 5 {
+			continue
+		}
+		tb.Fatalf("grantCloudSQLRole: failed to set IAM policy: %v", err)
+	}
+}
+
+// revokeCloudSQLRole removes member from cloudSQLRole on the project.
+func revokeCloudSQLRole(tb testing.TB, projectID, member string) {
+	tb.Helper()
+
+	client, ctx := testProjectsClient(tb)
+	defer client.Close()
+
+	resource := fmt.Sprintf("projects/%s", projectID)
+
+	for attempt := 0; ; attempt++ {
+		policy, err := client.GetIamPolicy(ctx, &iampb.GetIamPolicyRequest{Resource: resource})
+		if err != nil {
+			tb.Fatalf("revokeCloudSQLRole: failed to get IAM policy: %v", err)
+		}
+
+		changed := false
+		for _, binding := range policy.Bindings {
+			if binding.Role != cloudSQLRole {
+				continue
+			}
+			var filtered []string
+			for _, m := range binding.Members {
+				if m == member {
+					changed = true
+					continue
+				}
+				filtered = append(filtered, m)
+			}
+			binding.Members = filtered
+		}
+		if !changed {
+			return
+		}
+
+		_, err = client.SetIamPolicy(ctx, &iampb.SetIamPolicyRequest{Resource: resource, Policy: policy})
+		if err == nil {
+			return
+		}
+		if s, ok := grpcstatus.FromError(err); ok && s.Code() == grpccodes.Aborted && attempt < 5 {
+			continue
+		}
+		tb.Fatalf("revokeCloudSQLRole: failed to set IAM policy: %v", err)
+	}
+}
+
+func containsString(s []string, v string) bool {
+	for _, item := range s {
+		if item == v {
+			return true
+		}
+	}
+	return false
+}
+
+func testRegionalSecretWithCloudSQLCredentials(tb testing.TB, projectID string) string {
+	tb.Helper()
+
+	secretID := testName(tb)
+	locationID := testLocation(tb)
+
+	var b bytes.Buffer
+	if err := CreateRegionalSecretWithCloudSQLCredentials(&b, projectID, locationID, secretID); err != nil {
+		tb.Fatalf("testRegionalSecretWithCloudSQLCredentials: failed to create secret: %v", err)
+	}
+
+	client, ctx := testRegionalClient(tb)
+	defer client.Close()
+	secret, err := client.GetSecret(ctx, &secretmanagerpb.GetSecretRequest{
+		Name: fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectID, locationID, secretID),
+	})
+	if err != nil {
+		tb.Fatalf("testRegionalSecretWithCloudSQLCredentials: failed to get secret: %v", err)
+	}
+
+	// Grant the secret's identity the Cloud SQL role.
+	member := secret.GetPolicyMember().GetIamPolicyUidPrincipal()
+	grantCloudSQLRole(tb, projectID, member)
+	tb.Cleanup(func() {
+		revokeCloudSQLRole(tb, projectID, member)
+	})
+
+	// Wait for the IAM grant to propagate.
+	time.Sleep(10 * time.Second)
+
+	return secretID
 }
 
 func testCleanupRegionalSecret(tb testing.TB, name string) {
@@ -479,5 +647,95 @@ func TestCreateRegionalSecretWithTags(t *testing.T) {
 
 	if got, want := b.String(), "Created secret with tags:"; !strings.Contains(got, want) {
 		t.Errorf("createRegionalSecretWithTags: expected %q to contain %q", got, want)
+	}
+}
+
+func TestCreateRegionalSecretWithCloudSQLCredentials(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secretID := testName(t)
+	locationID := testLocation(t)
+
+	var b bytes.Buffer
+	if err := CreateRegionalSecretWithCloudSQLCredentials(&b, tc.ProjectID, locationID, secretID); err != nil {
+		t.Fatal(err)
+	}
+	defer testCleanupRegionalSecret(t, fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID))
+
+	if got, want := b.String(), "Created secret:"; !strings.Contains(got, want) {
+		t.Errorf("CreateRegionalSecretWithCloudSQLCredentials: expected %q to contain %q", got, want)
+	}
+	if got, want := b.String(), "Grant this identity Cloud SQL IAM permissions"; !strings.Contains(got, want) {
+		t.Errorf("CreateRegionalSecretWithCloudSQLCredentials: expected %q to contain %q", got, want)
+	}
+}
+
+func TestEnableRegionalSecretManagedRotation(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	locationID := testLocation(t)
+	instanceID := testCloudSQLInstanceID(t)
+	username := testCloudSQLUsername(t)
+
+	secretID := testRegionalSecretWithCloudSQLCredentials(t, tc.ProjectID)
+	defer testCleanupRegionalSecret(t, fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID))
+
+	var b bytes.Buffer
+	if err := EnableRegionalSecretManagedRotation(&b, tc.ProjectID, locationID, secretID, instanceID, username); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Enabled managed rotation, created secret version:"; !strings.Contains(got, want) {
+		t.Errorf("EnableRegionalSecretManagedRotation: expected %q to contain %q", got, want)
+	}
+}
+
+func TestRotateRegionalSecret(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	locationID := testLocation(t)
+	instanceID := testCloudSQLInstanceID(t)
+	username := testCloudSQLUsername(t)
+
+	secretID := testRegionalSecretWithCloudSQLCredentials(t, tc.ProjectID)
+	defer testCleanupRegionalSecret(t, fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID))
+
+	var enableOut bytes.Buffer
+	if err := EnableRegionalSecretManagedRotation(&enableOut, tc.ProjectID, locationID, secretID, instanceID, username); err != nil {
+		t.Fatal(err)
+	}
+
+	var b bytes.Buffer
+	if err := RotateRegionalSecret(&b, tc.ProjectID, locationID, secretID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Rotated secret, created secret version:"; !strings.Contains(got, want) {
+		t.Errorf("RotateRegionalSecret: expected %q to contain %q", got, want)
+	}
+}
+
+func TestUpdateRegionalSecretWithManagedRotationSchedule(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	locationID := testLocation(t)
+	instanceID := testCloudSQLInstanceID(t)
+	username := testCloudSQLUsername(t)
+
+	secretID := testRegionalSecretWithCloudSQLCredentials(t, tc.ProjectID)
+	defer testCleanupRegionalSecret(t, fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID))
+
+	var enableOut bytes.Buffer
+	if err := EnableRegionalSecretManagedRotation(&enableOut, tc.ProjectID, locationID, secretID, instanceID, username); err != nil {
+		t.Fatal(err)
+	}
+
+	var b bytes.Buffer
+	if err := UpdateRegionalSecretWithManagedRotationSchedule(&b, tc.ProjectID, locationID, secretID, 24*time.Hour); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Updated regional secret rotation schedule:"; !strings.Contains(got, want) {
+		t.Errorf("UpdateRegionalSecretWithManagedRotationSchedule: expected %q to contain %q", got, want)
 	}
 }
