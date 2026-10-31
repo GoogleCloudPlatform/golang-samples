@@ -3,12 +3,12 @@ module github.com/GoogleCloudPlatform/golang-samples/functions/ocr/app
 go 1.25.0
 
 require (
-	cloud.google.com/go/pubsub v1.50.2
-	cloud.google.com/go/storage v1.64.0
-	cloud.google.com/go/translate v1.17.0
+	cloud.google.com/go/pubsub v1.51.1
+	cloud.google.com/go/storage v1.70.0
+	cloud.google.com/go/translate v1.20.1
 	cloud.google.com/go/vision v1.2.0
-	cloud.google.com/go/vision/v2 v2.14.0
-	golang.org/x/text v0.41.0
+	cloud.google.com/go/vision/v2 v2.17.1
+	golang.org/x/text v0.43.0
 )
 
 require (
