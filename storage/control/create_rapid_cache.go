@@ -23,6 +23,7 @@ import (
 
 	control "cloud.google.com/go/storage/control/apiv2"
 	"cloud.google.com/go/storage/control/apiv2/controlpb"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 // createRapidCache creates a Rapid Cache for the bucket in the given zone.
@@ -44,14 +45,20 @@ func createRapidCache(w io.Writer, bucket, zone string) error {
 	// The storage bucket path uses the global access pattern, in which the "_"
 	// denotes this bucket exists in the global namespace.
 	parent := fmt.Sprintf("projects/_/buckets/%v", bucket)
+	// The Rapid Cache ID must be the same as the zone.
+	name := fmt.Sprintf("%v/rapidCaches/%v", parent, zone)
 
 	req := &controlpb.CreateRapidCacheRequest{
 		Parent: parent,
-		// Rapid Cache Ultra requires a bucket with hierarchical namespace
-		// enabled.
 		RapidCache: &controlpb.RapidCache{
-			Zone:      zone,
+			Name: name,
+			Zone: zone,
+			// Rapid Cache Ultra requires a bucket with hierarchical namespace
+			// enabled.
 			CacheType: "rapid-cache-ultra",
+			// How long a cache entry can live. The TTL must be in whole
+			// seconds, between 1 hour and 7 days.
+			Ttl: durationpb.New(24 * time.Hour),
 		},
 	}
 	// Creating a Rapid Cache is a long-running operation.
@@ -67,6 +74,7 @@ func createRapidCache(w io.Writer, bucket, zone string) error {
 	}
 
 	fmt.Fprintf(w, "Created Rapid Cache: %v\n", rc.GetName())
+	fmt.Fprintf(w, "State: %v\n", rc.GetState())
 	return nil
 }
 

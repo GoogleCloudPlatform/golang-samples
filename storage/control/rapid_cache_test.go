@@ -18,10 +18,10 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"path"
 	"strings"
 	"testing"
 	"time"
@@ -34,9 +34,14 @@ import (
 const (
 	defaultRapidCacheZone = "us-central1-a"
 
-	// Poll for up to 2 minutes for the cache to reach the "disabled" state.
-	disablePollAttempts = 12
-	disablePollInterval = 10 * time.Second
+	// Wait for a newly created bucket's metadata to propagate before creating
+	// a Rapid Cache.
+	bucketPropagationDelay = 20 * time.Second
+
+	// The disable operation only completes once the cache has been fully
+	// removed, which can take more than an hour. Bound the wait, then check
+	// the cache state instead.
+	disableTimeout = 10 * time.Minute
 
 	// A bucket cannot be deleted until its disabled Rapid Cache has been
 	// fully removed, which can take more than 30 minutes. Cleanup is
@@ -83,27 +88,19 @@ func TestRapidCache(t *testing.T) {
 		t.Fatalf("Bucket.Create(%q): %v", bucketName, err)
 	}
 	t.Cleanup(func() { deleteRapidCacheBucket(ctx, bucketName) })
+	time.Sleep(bucketPropagationDelay)
+
+	// The Rapid Cache ID must be the same as the zone.
+	cacheID := zone
+	cacheName := fmt.Sprintf("projects/_/buckets/%v/rapidCaches/%v", bucketName, cacheID)
 
 	// Create Rapid Cache.
 	buf := &bytes.Buffer{}
 	if err := createRapidCache(buf, bucketName, zone); err != nil {
 		t.Fatalf("createRapidCache: %v", err)
 	}
-	const prefix = "Created Rapid Cache: "
-	out := buf.String()
-	i := strings.Index(out, prefix)
-	if i < 0 {
-		t.Fatalf("createRapidCache: got %q, want to contain %q", out, prefix)
-	}
-	// The cache ID is assigned by the server; parse it from the cache name.
-	fields := strings.Fields(out[i+len(prefix):])
-	if len(fields) == 0 {
-		t.Fatalf("createRapidCache: no cache name in %q", out)
-	}
-	cacheName := fields[0]
-	cacheID := path.Base(cacheName)
-	if cacheID == "" || cacheID == "." || cacheID == "/" {
-		t.Fatalf("could not parse cache ID from %q", cacheName)
+	if got, want := buf.String(), "Created Rapid Cache: "+cacheName; !strings.Contains(got, want) {
+		t.Fatalf("createRapidCache: got %q, want to contain %q", got, want)
 	}
 
 	// Disable the Rapid Cache even if an intermediate step fails, so the
@@ -113,7 +110,11 @@ func TestRapidCache(t *testing.T) {
 		if disabled {
 			return
 		}
-		if err := disableRapidCache(&bytes.Buffer{}, bucketName, cacheID); err != nil {
+		// Wait at most one minute; the disable request only needs to be
+		// sent.
+		cctx, cancel := context.WithTimeout(ctx, time.Minute)
+		defer cancel()
+		if err := disableRapidCache(cctx, &bytes.Buffer{}, bucketName, cacheID); err != nil {
 			log.Printf("disableRapidCache(%q): %v", cacheName, err)
 		}
 	})
@@ -124,7 +125,7 @@ func TestRapidCache(t *testing.T) {
 		t.Fatalf("getRapidCache: %v", err)
 	}
 	got := buf.String()
-	for _, want := range []string{cacheName, "Zone: " + zone} {
+	for _, want := range []string{cacheName, "Zone: " + zone, "Cache type: rapid-cache-ultra", "State: running"} {
 		if !strings.Contains(got, want) {
 			t.Errorf("getRapidCache: got %q, want to contain %q", got, want)
 		}
@@ -154,26 +155,30 @@ func TestRapidCache(t *testing.T) {
 
 	// Disable Rapid Cache.
 	buf.Reset()
-	if err := disableRapidCache(buf, bucketName, cacheID); err != nil {
-		t.Fatalf("disableRapidCache: %v", err)
-	}
-	disabled = true
-	if got, want := buf.String(), "Disabling Rapid Cache: "+cacheName; !strings.Contains(got, want) {
-		t.Errorf("disableRapidCache: got %q, want to contain %q", got, want)
-	}
-
-	// The cache moves to the "disabled" state shortly after the request.
-	for attempt := 0; attempt < disablePollAttempts; attempt++ {
+	dctx, cancel := context.WithTimeout(ctx, disableTimeout)
+	defer cancel()
+	err := disableRapidCache(dctx, buf, bucketName, cacheID)
+	switch {
+	case err == nil:
+		disabled = true
+		if got, want := buf.String(), "Disabled Rapid Cache: "+cacheName; !strings.Contains(got, want) {
+			t.Errorf("disableRapidCache: got %q, want to contain %q", got, want)
+		}
+	case dctx.Err() != nil:
+		// The operation did not complete in time. The cache moves to the
+		// "disabled" state within seconds, so check the state instead.
+		disabled = true
+		log.Printf("disableRapidCache(%q) did not complete within %v: %v", cacheName, disableTimeout, err)
 		buf.Reset()
 		if err := getRapidCache(buf, bucketName, cacheID); err != nil {
 			t.Fatalf("getRapidCache: %v", err)
 		}
-		if strings.Contains(buf.String(), "State: disabled") {
-			return
+		if got, want := buf.String(), "State: disabled"; !strings.Contains(got, want) {
+			t.Errorf("getRapidCache: got %q, want to contain %q", got, want)
 		}
-		time.Sleep(disablePollInterval)
+	default:
+		t.Fatalf("disableRapidCache: %v", err)
 	}
-	t.Errorf("getRapidCache: got %q, want to contain %q", buf.String(), "State: disabled")
 }
 
 // deleteRapidCacheBucket makes a best-effort attempt to delete a bucket that

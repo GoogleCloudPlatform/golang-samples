@@ -28,7 +28,8 @@ import (
 // getRapidCache gets the metadata of a Rapid Cache.
 func getRapidCache(w io.Writer, bucket, cacheID string) error {
 	// bucket := "bucket-name"
-	// cacheID := "rapid-cache-id"
+	// The Rapid Cache ID is the zone of the cache.
+	// cacheID := "us-central1-a"
 
 	ctx := context.Background()
 	client, err := control.NewStorageControlClient(ctx)
@@ -54,6 +55,7 @@ func getRapidCache(w io.Writer, bucket, cacheID string) error {
 
 	fmt.Fprintf(w, "Got Rapid Cache: %v\n", rc.GetName())
 	fmt.Fprintf(w, "Zone: %v\n", rc.GetZone())
+	fmt.Fprintf(w, "Cache type: %v\n", rc.GetCacheType())
 	fmt.Fprintf(w, "State: %v\n", rc.GetState())
 	return nil
 }

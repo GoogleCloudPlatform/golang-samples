@@ -30,7 +30,8 @@ import (
 // updateRapidCache updates the time to live (TTL) of a Rapid Cache.
 func updateRapidCache(w io.Writer, bucket, cacheID string, ttl time.Duration) error {
 	// bucket := "bucket-name"
-	// cacheID := "rapid-cache-id"
+	// The Rapid Cache ID is the zone of the cache.
+	// cacheID := "us-central1-a"
 	// The TTL must be in whole seconds, between 1 hour and 7 days.
 	// ttl := 48 * time.Hour
 
