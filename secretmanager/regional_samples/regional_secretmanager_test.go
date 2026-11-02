@@ -247,6 +247,9 @@ func testRegionalSecretWithCloudSQLCredentials(tb testing.TB, projectID string) 
 	if err := CreateRegionalSecretWithCloudSQLCredentials(&b, projectID, locationID, secretID); err != nil {
 		tb.Fatalf("testRegionalSecretWithCloudSQLCredentials: failed to create secret: %v", err)
 	}
+	tb.Cleanup(func() {
+		testCleanupRegionalSecret(tb, fmt.Sprintf("projects/%s/locations/%s/secrets/%s", projectID, locationID, secretID))
+	})
 
 	client, ctx := testRegionalClient(tb)
 	defer client.Close()
@@ -665,7 +668,7 @@ func TestCreateRegionalSecretWithCloudSQLCredentials(t *testing.T) {
 	if got, want := b.String(), "Created secret:"; !strings.Contains(got, want) {
 		t.Errorf("CreateRegionalSecretWithCloudSQLCredentials: expected %q to contain %q", got, want)
 	}
-	if got, want := b.String(), "Grant this identity Cloud SQL IAM permissions"; !strings.Contains(got, want) {
+	if got, want := b.String(), "Grant the Cloud SQL User rotate IAM permissions to enable managed rotation to:"; !strings.Contains(got, want) {
 		t.Errorf("CreateRegionalSecretWithCloudSQLCredentials: expected %q to contain %q", got, want)
 	}
 }
@@ -678,10 +681,31 @@ func TestEnableRegionalSecretManagedRotation(t *testing.T) {
 	username := testCloudSQLUsername(t)
 
 	secretID := testRegionalSecretWithCloudSQLCredentials(t, tc.ProjectID)
-	defer testCleanupRegionalSecret(t, fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID))
 
 	var b bytes.Buffer
-	if err := EnableRegionalSecretManagedRotation(&b, tc.ProjectID, locationID, secretID, instanceID, username); err != nil {
+	if err := EnableRegionalSecretManagedRotation(&b, tc.ProjectID, locationID, secretID, instanceID, username, ""); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "Enabled managed rotation, created secret version:"; !strings.Contains(got, want) {
+		t.Errorf("EnableRegionalSecretManagedRotation: expected %q to contain %q", got, want)
+	}
+}
+
+func TestEnableRegionalSecretManagedRotationWithPassword(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	locationID := testLocation(t)
+	instanceID := testCloudSQLInstanceID(t)
+	username := testCloudSQLUsername(t)
+
+	secretID := testRegionalSecretWithCloudSQLCredentials(t, tc.ProjectID)
+
+	// The prefix satisfies the Cloud SQL password policy (upper, lower, number, symbol).
+	password := "Tp1!" + testName(t)
+
+	var b bytes.Buffer
+	if err := EnableRegionalSecretManagedRotation(&b, tc.ProjectID, locationID, secretID, instanceID, username, password); err != nil {
 		t.Fatal(err)
 	}
 
@@ -698,10 +722,9 @@ func TestRotateRegionalSecret(t *testing.T) {
 	username := testCloudSQLUsername(t)
 
 	secretID := testRegionalSecretWithCloudSQLCredentials(t, tc.ProjectID)
-	defer testCleanupRegionalSecret(t, fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID))
 
 	var enableOut bytes.Buffer
-	if err := EnableRegionalSecretManagedRotation(&enableOut, tc.ProjectID, locationID, secretID, instanceID, username); err != nil {
+	if err := EnableRegionalSecretManagedRotation(&enableOut, tc.ProjectID, locationID, secretID, instanceID, username, ""); err != nil {
 		t.Fatal(err)
 	}
 
@@ -723,10 +746,9 @@ func TestUpdateRegionalSecretWithManagedRotationSchedule(t *testing.T) {
 	username := testCloudSQLUsername(t)
 
 	secretID := testRegionalSecretWithCloudSQLCredentials(t, tc.ProjectID)
-	defer testCleanupRegionalSecret(t, fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID))
 
 	var enableOut bytes.Buffer
-	if err := EnableRegionalSecretManagedRotation(&enableOut, tc.ProjectID, locationID, secretID, instanceID, username); err != nil {
+	if err := EnableRegionalSecretManagedRotation(&enableOut, tc.ProjectID, locationID, secretID, instanceID, username, ""); err != nil {
 		t.Fatal(err)
 	}
 

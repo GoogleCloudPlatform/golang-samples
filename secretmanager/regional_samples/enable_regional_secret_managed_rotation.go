@@ -27,14 +27,16 @@ import (
 
 // EnableRegionalSecretManagedRotation enables managed rotation of a
 // CLOUD_SQL_DB_CREDENTIALS typed secret. It validates and enables the
-// rotation, adding a version and sets the passed password.
+// rotation, adding a version and sets the passed password. If password is
+// empty, Secret Manager generates a random password for the Cloud SQL user.
 // Note: AddSecretVersion is disabled on the CLOUD_SQL_DB_CREDENTIALS
 // currently and for any necessary manual rotations please trigger
 // RotateRegionalSecret.
-func EnableRegionalSecretManagedRotation(w io.Writer, projectId, locationId, secretId, instanceId, username string) error {
+func EnableRegionalSecretManagedRotation(w io.Writer, projectId, locationId, secretId, instanceId, username, password string) error {
 	// parent := "projects/my-project/locations/my-location/secrets/my-secret"
 	// instanceId := "my-instance"
 	// username := "my-user"
+	// password := "" // optional; leave empty to have one generated
 
 	// Create the client.
 	ctx := context.Background()
@@ -56,6 +58,7 @@ func EnableRegionalSecretManagedRotation(w io.Writer, projectId, locationId, sec
 			CloudSqlSingleUserCredentials: &secretmanagerpb.EnableManagedRotationRequest_CloudSQLSingleUserCredentials{
 				InstanceId: instanceId,
 				Username:   username,
+				Password:   password,
 			},
 		},
 	}

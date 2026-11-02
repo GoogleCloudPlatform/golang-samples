@@ -389,7 +389,7 @@ func TestCreateSecretWithLabels(t *testing.T) {
 func TestCreateSecretWithType(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	secretID := "createSecretWithType"
+	secretID := testName(t)
 
 	parent := fmt.Sprintf("projects/%s", tc.ProjectID)
 
@@ -918,13 +918,13 @@ func TestGetSecretType(t *testing.T) {
 func TestGetRegionalSecretType(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
-	secret, secretdID := testRegionalSecret(t, tc.ProjectID)
+	secret, secretID := testRegionalSecret(t, tc.ProjectID)
 	defer testCleanupRegionalSecret(t, secret.Name)
 
 	locationID := testLocation(t)
 
 	var b bytes.Buffer
-	if err := regional_secretmanager.GetRegionalSecretType(&b, tc.ProjectID, locationID, secretdID); err != nil {
+	if err := regional_secretmanager.GetRegionalSecretType(&b, tc.ProjectID, locationID, secretID); err != nil {
 		t.Fatal(err)
 	}
 
