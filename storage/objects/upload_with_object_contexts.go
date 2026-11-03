@@ -14,7 +14,7 @@
 
 package objects
 
-// [START storage_set_object_contexts]
+// [START storage_upload_with_object_contexts]
 import (
 	"context"
 	"fmt"
@@ -24,7 +24,7 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-// uploadWithObjectContexts sets an object's contexts.
+// uploadWithObjectContexts uploads a new object with contexts set at write time.
 func uploadWithObjectContexts(w io.Writer, bucket, object string) error {
 	// bucket := "bucket-name"
 	// object := "object-name"
@@ -60,4 +60,4 @@ func uploadWithObjectContexts(w io.Writer, bucket, object string) error {
 	return nil
 }
 
-// [END storage_set_object_contexts]
+// [END storage_upload_with_object_contexts]
