@@ -105,9 +105,9 @@ func TestRapidCache(t *testing.T) {
 
 	// Disable the Rapid Cache even if an intermediate step fails, so the
 	// bucket can eventually be deleted.
-	disabled := false
+	cacheActive := true
 	t.Cleanup(func() {
-		if disabled {
+		if !cacheActive {
 			return
 		}
 		// Wait at most one minute; the disable request only needs to be
@@ -160,14 +160,13 @@ func TestRapidCache(t *testing.T) {
 	err := disableRapidCache(dctx, buf, bucketName, cacheID)
 	switch {
 	case err == nil:
-		disabled = true
+		cacheActive = false
 		if got, want := buf.String(), "Disabled Rapid Cache: "+cacheName; !strings.Contains(got, want) {
 			t.Errorf("disableRapidCache: got %q, want to contain %q", got, want)
 		}
 	case dctx.Err() != nil:
 		// The operation did not complete in time. The cache moves to the
 		// "disabled" state within seconds, so check the state instead.
-		disabled = true
 		log.Printf("disableRapidCache(%q) did not complete within %v: %v", cacheName, disableTimeout, err)
 		buf.Reset()
 		if err := getRapidCache(buf, bucketName, cacheID); err != nil {
@@ -175,6 +174,8 @@ func TestRapidCache(t *testing.T) {
 		}
 		if got, want := buf.String(), "State: disabled"; !strings.Contains(got, want) {
 			t.Errorf("getRapidCache: got %q, want to contain %q", got, want)
+		} else {
+			cacheActive = false
 		}
 	default:
 		t.Fatalf("disableRapidCache: %v", err)

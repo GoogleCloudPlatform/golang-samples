@@ -23,10 +23,11 @@ import (
 
 	control "cloud.google.com/go/storage/control/apiv2"
 	"cloud.google.com/go/storage/control/apiv2/controlpb"
-	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 // createRapidCache creates a Rapid Cache for the bucket in the given zone.
+// Only the required fields are set; optional settings such as the time to
+// live (TTL) use their defaults and can be changed later with an update.
 func createRapidCache(w io.Writer, bucket, zone string) error {
 	// bucket := "bucket-name"
 	// The zone must be in the same region as the bucket.
@@ -46,7 +47,8 @@ func createRapidCache(w io.Writer, bucket, zone string) error {
 	// denotes this bucket exists in the global namespace.
 	parent := fmt.Sprintf("projects/_/buckets/%v", bucket)
 	// The Rapid Cache ID must be the same as the zone.
-	name := fmt.Sprintf("%v/rapidCaches/%v", parent, zone)
+	cacheID := zone
+	name := fmt.Sprintf("%v/rapidCaches/%v", parent, cacheID)
 
 	req := &controlpb.CreateRapidCacheRequest{
 		Parent: parent,
@@ -56,9 +58,6 @@ func createRapidCache(w io.Writer, bucket, zone string) error {
 			// Rapid Cache Ultra requires a bucket with hierarchical namespace
 			// enabled.
 			CacheType: "rapid-cache-ultra",
-			// How long a cache entry can live. The TTL must be in whole
-			// seconds, between 1 hour and 7 days.
-			Ttl: durationpb.New(24 * time.Hour),
 		},
 	}
 	// Creating a Rapid Cache is a long-running operation.
