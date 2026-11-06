@@ -140,6 +140,10 @@ func TestWriteTelemetry(t *testing.T) {
 }
 
 func TestRunServerSIGTERM(t *testing.T) {
+	origMux := http.DefaultServeMux
+	http.DefaultServeMux = http.NewServeMux()
+	t.Cleanup(func() { http.DefaultServeMux = origMux })
+
 	errCh := make(chan error, 1)
 	go func() {
 		errCh <- runServer()
@@ -153,6 +157,12 @@ func TestRunServerSIGTERM(t *testing.T) {
 		}
 		_ = conn.Close()
 	}))
+
+	select {
+	case err := <-errCh:
+		t.Fatalf("server exited early: %v", err)
+	default:
+	}
 
 	require.NoError(t, syscall.Kill(syscall.Getpid(), syscall.SIGTERM))
 
