@@ -183,19 +183,18 @@ func TestRapidCache(t *testing.T) {
 
 // deleteRapidCacheBucket makes a best-effort attempt to delete a bucket that
 // had a Rapid Cache. Deletion fails with 409 Conflict until the disabled cache
-// has been fully removed, so after a short retry the bucket is left behind for
-// the stale bucket sweep in TestMain. The test bucket holds no objects, so the
-// bucket is deleted directly to inspect the returned error code.
+// has been fully removed, so any error is retried briefly and then the bucket
+// is left behind for the stale bucket sweep in TestMain. The test bucket holds
+// no objects, so the bucket is deleted directly to inspect the returned error.
 func deleteRapidCacheBucket(ctx context.Context, bucketName string) {
 	deadline := time.Now().Add(bucketDeleteTimeout)
 	for {
 		err := client.Bucket(bucketName).Delete(ctx)
 		var gErr *googleapi.Error
-		isGErr := errors.As(err, &gErr)
-		if err == nil || errors.Is(err, storage.ErrBucketNotExist) || (isGErr && gErr.Code == http.StatusNotFound) {
+		if err == nil || errors.Is(err, storage.ErrBucketNotExist) || (errors.As(err, &gErr) && gErr.Code == http.StatusNotFound) {
 			return
 		}
-		if !isGErr || gErr.Code != http.StatusConflict || time.Now().After(deadline) {
+		if time.Now().After(deadline) {
 			log.Printf("Could not delete bucket %q; leaving it for later cleanup: %v", bucketName, err)
 			return
 		}
