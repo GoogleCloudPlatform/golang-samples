@@ -22,10 +22,12 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"syscall"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/pmetric/pmetricotlp"
 	"go.opentelemetry.io/collector/pdata/ptrace"
@@ -135,6 +137,31 @@ func TestWriteTelemetry(t *testing.T) {
 	}()
 	// Wait for all checks to complete
 	wg.Wait()
+}
+
+func TestRunServerSIGTERM(t *testing.T) {
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- runServer()
+	}()
+
+	require.True(t, testutil.Retry(t, 10, 100*time.Millisecond, func(r *testutil.R) {
+		conn, err := net.DialTimeout("tcp", "localhost:8080", 100*time.Millisecond)
+		if err != nil {
+			r.Errorf("server not ready: %v", err)
+			return
+		}
+		_ = conn.Close()
+	}))
+
+	require.NoError(t, syscall.Kill(syscall.Getpid(), syscall.SIGTERM))
+
+	select {
+	case err := <-errCh:
+		assert.NoError(t, err)
+	case <-time.After(timeoutSeconds * time.Second):
+		t.Fatal("timeout waiting for runServer to shut down on SIGTERM")
+	}
 }
 
 type expectedLogFormat struct {

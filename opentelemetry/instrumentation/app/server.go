@@ -15,10 +15,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"math/rand"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
@@ -59,8 +63,23 @@ func handleMulti(w http.ResponseWriter, r *http.Request) {
 func runServer() error {
 	handleHTTP("/single", handleSingle)
 	handleHTTP("/multi", handleMulti)
+	srv := &http.Server{Addr: ":8080"}
 
-	return http.ListenAndServe(":8080", nil)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	srvErr := make(chan error, 1)
+	go func() {
+		srvErr <- srv.ListenAndServe()
+	}()
+
+	select {
+	case err := <-srvErr:
+		return err
+	case <-ctx.Done():
+		stop()
+	}
+	return srv.Shutdown(context.Background())
 }
 
 // handleHTTP handles the http HandlerFunc on the specified route, and uses
