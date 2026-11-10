@@ -27,6 +27,8 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
+	control "cloud.google.com/go/storage/control/apiv2"
+	"cloud.google.com/go/storage/control/apiv2/controlpb"
 	"github.com/GoogleCloudPlatform/golang-samples/internal/testutil"
 	"google.golang.org/api/googleapi"
 )
@@ -38,10 +40,10 @@ const (
 	// a Rapid Cache.
 	bucketPropagationDelay = 20 * time.Second
 
-	// The disable operation only completes once the cache has been fully
-	// removed, which can take more than an hour. Bound the wait, then check
-	// the cache state instead.
-	disableTimeout = 10 * time.Minute
+	// The cache state changes to "disabled" within seconds of the disable
+	// request; poll briefly for it.
+	disableStateAttempts = 10
+	disableStateBackoff  = 10 * time.Second
 
 	// A bucket cannot be deleted until its disabled Rapid Cache has been
 	// fully removed, which can take more than 30 minutes. Cleanup is
@@ -59,6 +61,14 @@ func TestRapidCache(t *testing.T) {
 	}
 	tc := testutil.SystemTest(t)
 	ctx := context.Background()
+
+	// The control client is used to clean up the Rapid Cache if a step
+	// fails. It is registered first so that it is closed last.
+	controlClient, err := control.NewStorageControlClient(ctx)
+	if err != nil {
+		t.Fatalf("NewStorageControlClient: %v", err)
+	}
+	t.Cleanup(func() { controlClient.Close() })
 
 	zone := os.Getenv("GOLANG_SAMPLES_RAPID_CACHE_ZONE")
 	if zone == "" {
@@ -110,12 +120,13 @@ func TestRapidCache(t *testing.T) {
 		if !cacheActive {
 			return
 		}
-		// Wait at most one minute; the disable request only needs to be
-		// sent.
-		cctx, cancel := context.WithTimeout(ctx, time.Minute)
+		// Only send the disable request; don't wait for the long-running
+		// operation to complete.
+		cctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 		defer cancel()
-		if err := disableRapidCache(cctx, &bytes.Buffer{}, bucketName, cacheID); err != nil {
-			log.Printf("disableRapidCache(%q): %v", cacheName, err)
+		req := &controlpb.DisableRapidCacheRequest{Name: cacheName}
+		if _, err := controlClient.DisableRapidCache(cctx, req); err != nil {
+			log.Printf("DisableRapidCache(%q): %v", cacheName, err)
 		}
 	})
 
@@ -155,31 +166,30 @@ func TestRapidCache(t *testing.T) {
 
 	// Disable Rapid Cache.
 	buf.Reset()
-	dctx, cancel := context.WithTimeout(ctx, disableTimeout)
-	defer cancel()
-	err := disableRapidCache(dctx, buf, bucketName, cacheID)
-	switch {
-	case err == nil:
-		cacheActive = false
-		if got, want := buf.String(), "Disabled Rapid Cache: "+cacheName; !strings.Contains(got, want) {
-			t.Errorf("disableRapidCache: got %q, want to contain %q", got, want)
-		}
-	case dctx.Err() != nil:
-		// The operation did not complete in time. The cache moves to the
-		// "disabled" state within seconds, so check the state instead.
-		log.Printf("disableRapidCache(%q) did not complete within %v: %v", cacheName, disableTimeout, err)
-		buf.Reset()
-		if err := getRapidCache(buf, bucketName, cacheID); err != nil {
-			t.Fatalf("getRapidCache: %v", err)
-		}
-		if got, want := buf.String(), "State: disabled"; !strings.Contains(got, want) {
-			t.Errorf("getRapidCache: got %q, want to contain %q", got, want)
-		} else {
-			cacheActive = false
-		}
-	default:
+	if err := disableRapidCache(buf, bucketName, cacheID); err != nil {
 		t.Fatalf("disableRapidCache: %v", err)
 	}
+	cacheActive = false
+	got = buf.String()
+	for _, want := range []string{"Disabling Rapid Cache: " + cacheName, "Operation: "} {
+		if !strings.Contains(got, want) {
+			t.Errorf("disableRapidCache: got %q, want to contain %q", got, want)
+		}
+	}
+
+	// The disable operation only completes once the cache has been fully
+	// removed, which can take more than an hour, but the cache state changes
+	// to "disabled" within seconds.
+	testutil.Retry(t, disableStateAttempts, disableStateBackoff, func(r *testutil.R) {
+		buf := &bytes.Buffer{}
+		if err := getRapidCache(buf, bucketName, cacheID); err != nil {
+			r.Errorf("getRapidCache: %v", err)
+			return
+		}
+		if got, want := buf.String(), "State: disabled"; !strings.Contains(got, want) {
+			r.Errorf("getRapidCache: got %q, want to contain %q", got, want)
+		}
+	})
 }
 
 // deleteRapidCacheBucket makes a best-effort attempt to delete a bucket that

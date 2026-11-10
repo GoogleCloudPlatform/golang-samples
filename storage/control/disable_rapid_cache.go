@@ -19,23 +19,28 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	control "cloud.google.com/go/storage/control/apiv2"
 	"cloud.google.com/go/storage/control/apiv2/controlpb"
 )
 
-// disableRapidCache disables a Rapid Cache and waits for the operation to
-// complete. Use ctx to limit how long to wait.
-func disableRapidCache(ctx context.Context, w io.Writer, bucket, cacheID string) error {
+// disableRapidCache starts disabling a Rapid Cache. It does not wait for the
+// long-running operation to complete.
+func disableRapidCache(w io.Writer, bucket, cacheID string) error {
 	// bucket := "bucket-name"
 	// The Rapid Cache ID is the zone of the cache.
 	// cacheID := "us-central1-a"
 
+	ctx := context.Background()
 	client, err := control.NewStorageControlClient(ctx)
 	if err != nil {
 		return fmt.Errorf("NewStorageControlClient: %w", err)
 	}
 	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
+	defer cancel()
 
 	// The storage bucket path uses the global access pattern, in which the "_"
 	// denotes this bucket exists in the global namespace.
@@ -44,20 +49,18 @@ func disableRapidCache(ctx context.Context, w io.Writer, bucket, cacheID string)
 	req := &controlpb.DisableRapidCacheRequest{
 		Name: name,
 	}
-	// Disabling a Rapid Cache is a long-running operation.
+	// Disabling a Rapid Cache starts a long-running operation. The cache state
+	// changes to "disabled" within seconds, but the operation only completes
+	// once the cache has been fully removed, which can take more than an hour.
+	// This sample does not wait for the operation to complete; use
+	// GetRapidCache to check the cache state.
 	op, err := client.DisableRapidCache(ctx, req)
 	if err != nil {
 		return fmt.Errorf("DisableRapidCache(%q): %w", name, err)
 	}
 
-	// Wait for the long-running operation to complete.
-	rc, err := op.Wait(ctx)
-	if err != nil {
-		return fmt.Errorf("waiting for DisableRapidCache: %w", err)
-	}
-
-	fmt.Fprintf(w, "Disabled Rapid Cache: %v\n", rc.GetName())
-	fmt.Fprintf(w, "State: %v\n", rc.GetState())
+	fmt.Fprintf(w, "Disabling Rapid Cache: %v\n", name)
+	fmt.Fprintf(w, "Operation: %v\n", op.Name())
 	return nil
 }
 
