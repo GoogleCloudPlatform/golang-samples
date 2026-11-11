@@ -56,6 +56,7 @@ func getRapidCache(w io.Writer, bucket, cacheID string) error {
 	fmt.Fprintf(w, "Got Rapid Cache: %v\n", rc.GetName())
 	fmt.Fprintf(w, "Zone: %v\n", rc.GetZone())
 	fmt.Fprintf(w, "Cache type: %v\n", rc.GetCacheType())
+	fmt.Fprintf(w, "TTL: %v seconds\n", rc.GetTtl().GetSeconds())
 	fmt.Fprintf(w, "State: %v\n", rc.GetState())
 	return nil
 }

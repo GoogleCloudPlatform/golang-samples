@@ -136,7 +136,7 @@ func TestRapidCache(t *testing.T) {
 		t.Fatalf("getRapidCache: %v", err)
 	}
 	got := buf.String()
-	for _, want := range []string{cacheName, "Zone: " + zone, "Cache type: rapid-cache-ultra", "State: running"} {
+	for _, want := range []string{cacheName, "Zone: " + zone, "Cache type: rapid-cache-ultra", "TTL: ", "State: running"} {
 		if !strings.Contains(got, want) {
 			t.Errorf("getRapidCache: got %q, want to contain %q", got, want)
 		}
