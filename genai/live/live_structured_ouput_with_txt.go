@@ -96,7 +96,7 @@ func generateStructuredOutputWithTxt(w io.Writer) error {
 		ResponseMIMEType: "application/json",
 	}
 
-	modelName := "google/gemini-2.0-flash-001"
+	modelName := "google/gemini-3.8-flash"
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, config)
 	if err != nil {

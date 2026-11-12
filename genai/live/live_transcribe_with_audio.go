@@ -36,7 +36,7 @@ func generateLiveTranscribeWithAudio(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-live-2.5-flash-preview-native-audio"
+	modelName := "gemini-3.8-live"
 
 	config := &genai.LiveConnectConfig{
 		ResponseModalities:       []genai.Modality{genai.ModalityAudio},

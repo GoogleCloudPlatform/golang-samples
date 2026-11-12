@@ -36,7 +36,7 @@ func generateLiveFuncCallWithTxt(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelID := "gemini-2.0-flash-001"
+	modelID := "gemini-3.8-live"
 
 	// Define simple function declarations.
 	turnOnLights := &genai.FunctionDeclaration{Name: "turn_on_the_lights"}

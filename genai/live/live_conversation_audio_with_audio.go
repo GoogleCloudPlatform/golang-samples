@@ -42,7 +42,7 @@ func generateLiveAudioConversation(w io.Writer, audioFilePath string) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-live-2.5-flash-preview-native-audio-09-2025"
+	modelName := "gemini-3.8-live"
 
 	// Configure model to receive and respond with audio, including transcriptions.
 	config := &genai.LiveConnectConfig{
@@ -116,7 +116,7 @@ func generateLiveAudioConversation(w io.Writer, audioFilePath string) error {
 	}
 
 	// Example output:
-	// gemini-live-2.5-flash-preview-native-audio-09-2025
+	// gemini-3.8-live
 	// {'input_transcription': {'text': 'Hello.'}}
 	// {'output_transcription': {}}
 	// {'output_transcription': {'text': 'Hi'}}
