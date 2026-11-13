@@ -166,7 +166,7 @@ func readWithFilter(w io.Writer, projectID, instanceID string, tableName string,
 	ctx := context.Background()
 	client, err := bigtable.NewClient(ctx, projectID, instanceID)
 	if err != nil {
-		return fmt.Errorf("bigtable.NewAdminClient: %w", err)
+		return fmt.Errorf("bigtable.NewClient: %w", err)
 	}
 	tbl := client.Open(tableName)
 	err = tbl.ReadRows(ctx, bigtable.RowRange{},

@@ -19,7 +19,8 @@ import (
 	"fmt"
 	"io"
 
-	"cloud.google.com/go/bigtable"
+	admin "cloud.google.com/go/bigtable/admin/apiv2"
+	"cloud.google.com/go/bigtable/admin/apiv2/adminpb"
 )
 
 func createFamilyGCMaxVersions(w io.Writer, projectID, instanceID string, tableName string) error {
@@ -29,21 +30,35 @@ func createFamilyGCMaxVersions(w io.Writer, projectID, instanceID string, tableN
 
 	ctx := context.Background()
 
-	adminClient, err := bigtable.NewAdminClient(ctx, projectID, instanceID)
+	adminClient, err := admin.NewBigtableTableAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("bigtable.NewAdminClient: %w", err)
+		return fmt.Errorf("admin.NewBigtableTableAdminClient: %w", err)
 	}
 	defer adminClient.Close()
 
-	columnFamilyName := "cf2"
-	if err := adminClient.CreateColumnFamily(ctx, tableName, columnFamilyName); err != nil {
-		return fmt.Errorf("CreateColumnFamily(%s): %w", columnFamilyName, err)
+	// Set a garbage collection policy of 2 versions.
+	policy := &adminpb.GcRule{
+		Rule: &adminpb.GcRule_MaxNumVersions{
+			MaxNumVersions: 2,
+		},
 	}
 
-	// Set a garbage collection policy of 2 versions.
-	policy := bigtable.MaxVersionsPolicy(2)
-	if err := adminClient.SetGCPolicy(ctx, tableName, columnFamilyName, policy); err != nil {
-		return fmt.Errorf("SetGCPolicy(%s): %w", policy, err)
+	columnFamilyName := "cf2"
+	req := &adminpb.ModifyColumnFamiliesRequest{
+		Name: fmt.Sprintf("projects/%s/instances/%s/tables/%s", projectID, instanceID, tableName),
+		Modifications: []*adminpb.ModifyColumnFamiliesRequest_Modification{
+			{
+				Id: columnFamilyName,
+				Mod: &adminpb.ModifyColumnFamiliesRequest_Modification_Create{
+					Create: &adminpb.ColumnFamily{
+						GcRule: policy,
+					},
+				},
+			},
+		},
+	}
+	if _, err := adminClient.ModifyColumnFamilies(ctx, req); err != nil {
+		return fmt.Errorf("ModifyColumnFamilies(%s): %w", columnFamilyName, err)
 	}
 
 	fmt.Fprintf(w, "created column family %s with policy: %v\n", columnFamilyName, policy)

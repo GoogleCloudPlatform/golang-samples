@@ -20,7 +20,9 @@ import (
 	"io"
 	"time"
 
-	"cloud.google.com/go/bigtable"
+	admin "cloud.google.com/go/bigtable/admin/apiv2"
+	"cloud.google.com/go/bigtable/admin/apiv2/adminpb"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 func createFamilyGCUnion(w io.Writer, projectID, instanceID string, tableName string) error {
@@ -30,23 +32,49 @@ func createFamilyGCUnion(w io.Writer, projectID, instanceID string, tableName st
 
 	ctx := context.Background()
 
-	adminClient, err := bigtable.NewAdminClient(ctx, projectID, instanceID)
+	adminClient, err := admin.NewBigtableTableAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("bigtable.NewAdminClient: %w", err)
+		return fmt.Errorf("admin.NewBigtableTableAdminClient: %w", err)
 	}
 	defer adminClient.Close()
 
-	columnFamilyName := "cf3"
-	if err := adminClient.CreateColumnFamily(ctx, tableName, columnFamilyName); err != nil {
-		return fmt.Errorf("CreateColumnFamily(%s): %w", columnFamilyName, err)
-	}
-
 	// Define a GC rule to drop cells older than 5 days or not the most recent version
 	maxAge := time.Hour * 24 * 5
-	maxAgePolicy := bigtable.MaxAgePolicy(maxAge)
-	policy := bigtable.UnionPolicy(bigtable.MaxVersionsPolicy(2), maxAgePolicy)
-	if err := adminClient.SetGCPolicy(ctx, tableName, columnFamilyName, policy); err != nil {
-		return fmt.Errorf("SetGCPolicy(%s): %w", policy, err)
+	policy := &adminpb.GcRule{
+		Rule: &adminpb.GcRule_Union_{
+			Union: &adminpb.GcRule_Union{
+				Rules: []*adminpb.GcRule{
+					{
+						Rule: &adminpb.GcRule_MaxNumVersions{
+							MaxNumVersions: 2,
+						},
+					},
+					{
+						Rule: &adminpb.GcRule_MaxAge{
+							MaxAge: durationpb.New(maxAge),
+						},
+					},
+				},
+			},
+		},
+	}
+
+	columnFamilyName := "cf3"
+	req := &adminpb.ModifyColumnFamiliesRequest{
+		Name: fmt.Sprintf("projects/%s/instances/%s/tables/%s", projectID, instanceID, tableName),
+		Modifications: []*adminpb.ModifyColumnFamiliesRequest_Modification{
+			{
+				Id: columnFamilyName,
+				Mod: &adminpb.ModifyColumnFamiliesRequest_Modification_Create{
+					Create: &adminpb.ColumnFamily{
+						GcRule: policy,
+					},
+				},
+			},
+		},
+	}
+	if _, err := adminClient.ModifyColumnFamilies(ctx, req); err != nil {
+		return fmt.Errorf("ModifyColumnFamilies(%s): %w", columnFamilyName, err)
 	}
 
 	fmt.Fprintf(w, "created column family %s with policy: %v\n", columnFamilyName, policy)
