@@ -1,3 +1,3 @@
 module github.com/GoogleCloudPlatform/golang-samples/eventarc/generic
 
-go 1.25.0
+go 1.26.0
