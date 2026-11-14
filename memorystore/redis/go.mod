@@ -1,6 +1,6 @@
 module visit-counter
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/gomodule/redigo v1.9.3
@@ -12,7 +12,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.45.0
 	go.opentelemetry.io/otel/sdk/metric v1.45.0
 	go.opentelemetry.io/otel/trace v1.45.0
-	golang.org/x/oauth2 v0.36.0
+	golang.org/x/oauth2 v0.38.0
 	google.golang.org/grpc v1.83.0
 )
 
