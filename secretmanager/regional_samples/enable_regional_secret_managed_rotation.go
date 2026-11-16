@@ -33,7 +33,9 @@ import (
 // currently and for any necessary manual rotations please trigger
 // RotateRegionalSecret.
 func EnableRegionalSecretManagedRotation(w io.Writer, projectId, locationId, secretId, instanceId, username, password string) error {
-	// parent := "projects/my-project/locations/my-location/secrets/my-secret"
+	// projectId := "my-project"
+	// locationId := "my-location"
+	// secretId := "my-secret"
 	// instanceId := "my-instance"
 	// username := "my-user"
 	// password := "" // optional; leave empty to have one generated

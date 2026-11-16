@@ -665,7 +665,7 @@ func TestCreateRegionalSecretWithCloudSQLCredentials(t *testing.T) {
 	}
 	defer testCleanupRegionalSecret(t, fmt.Sprintf("projects/%s/locations/%s/secrets/%s", tc.ProjectID, locationID, secretID))
 
-	if got, want := b.String(), "Created secret:"; !strings.Contains(got, want) {
+	if got, want := b.String(), "Created regional secret:"; !strings.Contains(got, want) {
 		t.Errorf("CreateRegionalSecretWithCloudSQLCredentials: expected %q to contain %q", got, want)
 	}
 	if got, want := b.String(), "Grant the Cloud SQL User rotate IAM permissions to enable managed rotation to:"; !strings.Contains(got, want) {
@@ -759,5 +759,23 @@ func TestUpdateRegionalSecretWithManagedRotationSchedule(t *testing.T) {
 
 	if got, want := b.String(), "Updated regional secret rotation schedule:"; !strings.Contains(got, want) {
 		t.Errorf("UpdateRegionalSecretWithManagedRotationSchedule: expected %q to contain %q", got, want)
+	}
+}
+
+func TestGetRegionalSecretType(t *testing.T) {
+	tc := testutil.SystemTest(t)
+
+	secret, secretID := testRegionalSecret(t, tc.ProjectID)
+	defer testCleanupRegionalSecret(t, secret.Name)
+
+	locationID := testLocation(t)
+
+	var b bytes.Buffer
+	if err := GetRegionalSecretType(&b, tc.ProjectID, locationID, secretID); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := b.String(), "with secret type"; !strings.Contains(got, want) {
+		t.Errorf("getRegionalSecretType: expected %q to contain %q", got, want)
 	}
 }

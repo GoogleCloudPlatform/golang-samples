@@ -27,9 +27,10 @@ import (
 
 // CreateRegionalSecretWithCloudSQLCredentials creates a new regional secret with type
 // CLOUD_SQL_DB_CREDENTIALS.
-func CreateRegionalSecretWithCloudSQLCredentials(w io.Writer, projectId, locationId, secretId string) error {
-	// parent := "projects/my-project/locations/my-location"
-	// secretId := "my-secret"
+func CreateRegionalSecretWithCloudSQLCredentials(w io.Writer, projectId, locationId, id string) error {
+	// projectId := "my-project"
+	// locationId := "my-location"
+	// id := "my-secret"
 
 	// Create the client.
 	ctx := context.Background()
@@ -47,7 +48,7 @@ func CreateRegionalSecretWithCloudSQLCredentials(w io.Writer, projectId, locatio
 	// Build the request.
 	req := &secretmanagerpb.CreateSecretRequest{
 		Parent:   parent,
-		SecretId: secretId,
+		SecretId: id,
 		Secret: &secretmanagerpb.Secret{
 			SecretType: secretmanagerpb.Secret_CLOUD_SQL_DB_CREDENTIALS,
 		},
@@ -58,7 +59,7 @@ func CreateRegionalSecretWithCloudSQLCredentials(w io.Writer, projectId, locatio
 	if err != nil {
 		return fmt.Errorf("failed to create regional secret: %w", err)
 	}
-	fmt.Fprintf(w, "Created secret: %s\n", result.Name)
+	fmt.Fprintf(w, "Created regional secret: %s\n", result.Name)
 
 	fmt.Fprintf(w, "Grant the Cloud SQL User rotate IAM permissions to enable managed rotation to: %s\n",
 		result.GetPolicyMember().GetIamPolicyUidPrincipal())

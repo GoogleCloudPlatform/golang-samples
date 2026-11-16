@@ -915,24 +915,6 @@ func TestGetSecretType(t *testing.T) {
 	}
 }
 
-func TestGetRegionalSecretType(t *testing.T) {
-	tc := testutil.SystemTest(t)
-
-	secret, secretID := testRegionalSecret(t, tc.ProjectID)
-	defer testCleanupRegionalSecret(t, secret.Name)
-
-	locationID := testLocation(t)
-
-	var b bytes.Buffer
-	if err := regional_secretmanager.GetRegionalSecretType(&b, tc.ProjectID, locationID, secretID); err != nil {
-		t.Fatal(err)
-	}
-
-	if got, want := b.String(), "with secret type"; !strings.Contains(got, want) {
-		t.Errorf("getRegionalSecretType: expected %q to contain %q", got, want)
-	}
-}
-
 func TestIamGrantAccess(t *testing.T) {
 	tc := testutil.SystemTest(t)
 

@@ -28,7 +28,9 @@ import (
 // RotateRegionalSecret triggers an adhoc rotation for the managed
 // CLOUD_SQL_DB_CREDENTIALS typed secret.
 func RotateRegionalSecret(w io.Writer, projectId, locationId, secretId string) error {
-	// parent := "projects/my-project/locations/my-location/secrets/my-secret"
+	// projectId := "my-project"
+	// locationId := "my-location"
+	// secretId := "my-secret"
 
 	// Create the client.
 	ctx := context.Background()

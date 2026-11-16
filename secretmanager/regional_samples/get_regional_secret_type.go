@@ -27,7 +27,9 @@ import (
 
 // GetRegionalSecretType gets the secret type of the given regional secret.
 func GetRegionalSecretType(w io.Writer, projectId, locationId, secretId string) error {
-	// name := "projects/my-project/locations/my-location/secrets/my-secret"
+	// projectId := "my-project"
+	// locationId := "my-location"
+	// secretId := "my-secret"
 
 	// Create the client.
 	ctx := context.Background()

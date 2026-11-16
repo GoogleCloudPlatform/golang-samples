@@ -32,7 +32,9 @@ import (
 // UpdateRegionalSecretWithManagedRotationSchedule updates the rotation
 // schedule of a CLOUD_SQL_DB_CREDENTIALS typed secret.
 func UpdateRegionalSecretWithManagedRotationSchedule(w io.Writer, projectId, locationId, secretId string, rotationPeriod time.Duration) error {
-	// name := "projects/my-project/locations/my-location/secrets/my-secret"
+	// projectId := "my-project"
+	// locationId := "my-location"
+	// secretId := "my-secret"
 	// rotationPeriod := 24 * time.Hour
 
 	// Create the client.
