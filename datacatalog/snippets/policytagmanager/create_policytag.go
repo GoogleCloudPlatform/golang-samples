@@ -14,7 +14,6 @@
 
 package policytagmanager
 
-// [START data_catalog_ptm_create_policytag]
 import (
 	"context"
 	"fmt"
@@ -57,5 +56,3 @@ func createPolicyTag(w io.Writer, parent, displayName, parentPolicyTag string) (
 	fmt.Fprintf(w, "PolicyTag %s was created.\n", resp.Name)
 	return resp.Name, nil
 }
-
-// [END data_catalog_ptm_create_policytag]

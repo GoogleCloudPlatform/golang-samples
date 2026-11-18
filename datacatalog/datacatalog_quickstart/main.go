@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// [START data_catalog_quickstart]
-
 // The datacatalog_quickstart application demonstrates how to define a tag
 // template, populate values in the template, and attach a tag based on the
 // template to a BigQuery table.
@@ -29,7 +27,7 @@ import (
 
 	datacatalog "cloud.google.com/go/datacatalog/apiv1"
 	"cloud.google.com/go/datacatalog/apiv1/datacatalogpb"
-	"github.com/googleapis/gax-go/v2"
+	gax "github.com/googleapis/gax-go/v2"
 )
 
 func main() {
@@ -135,10 +133,8 @@ func createQuickstartTagTemplate(ctx context.Context, client *datacatalog.Client
 		TagTemplate:   template,
 	}
 
-	// [END data_catalog_quickstart]
 	// To aid testing, we add some uniqueness to the template ID.
 	req.TagTemplateId = fmt.Sprintf("%s_%d", req.GetTagTemplateId(), time.Now().UnixNano())
-	// [START data_catalog_quickstart]
 	return client.CreateTagTemplate(ctx, req)
 
 }
@@ -215,5 +211,3 @@ func LookupEntry(ctx context.Context, client *datacatalog.Client, req *datacatal
 		return entry, err
 	}
 }
-
-// [END data_catalog_quickstart]

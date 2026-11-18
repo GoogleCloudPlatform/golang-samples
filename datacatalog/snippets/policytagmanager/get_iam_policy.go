@@ -14,7 +14,6 @@
 
 package policytagmanager
 
-// [START data_catalog_ptm_get_iam_policy]
 import (
 	"context"
 	"fmt"
@@ -54,5 +53,3 @@ func getIAMPolicy(w io.Writer, resourceID string) error {
 	}
 	return nil
 }
-
-// [END data_catalog_ptm_get_iam_policy]

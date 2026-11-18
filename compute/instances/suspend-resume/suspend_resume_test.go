@@ -74,7 +74,7 @@ func TestSuspendResumeSnippets(t *testing.T) {
 					InitializeParams: &computepb.AttachedDiskInitializeParams{
 						DiskSizeGb: proto.Int64(64),
 						SourceImage: proto.String(
-							"projects/ubuntu-os-cloud/global/images/family/ubuntu-2004-lts",
+							"projects/debian-cloud/global/images/family/debian-12",
 						),
 					},
 					AutoDelete: proto.Bool(true),

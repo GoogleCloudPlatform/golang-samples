@@ -116,7 +116,7 @@ func generateLiveAudioConversation(w io.Writer, audioFilePath string) error {
 	}
 
 	// Example output:
-	// gemini-2.0-flash-live-preview-04-09
+	// gemini-live-2.5-flash-preview-native-audio-09-2025
 	// {'input_transcription': {'text': 'Hello.'}}
 	// {'output_transcription': {}}
 	// {'output_transcription': {'text': 'Hi'}}

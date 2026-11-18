@@ -63,7 +63,7 @@ func consumeSpecificReservation(w io.Writer, projectID, zone, instanceName, rese
 			Name:           proto.String(instanceName),
 			NetworkInterfaces: []*computepb.NetworkInterface{
 				{
-					Name: proto.String("global/networks/default"),
+					Network: proto.String("global/networks/default"),
 				},
 			},
 			// specifies particular reservation, which should be consumed

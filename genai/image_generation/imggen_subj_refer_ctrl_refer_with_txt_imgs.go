@@ -60,7 +60,7 @@ func generateSubjRefCtrlReferWithText(w io.Writer, outputGCSURI string) error {
 
 	// prompt that references the style image with [1]
 	prompt := "a portrait of a woman[1] in the pose of the control image[2] in a watercolor style by a professional artist, light and low-contrast strokes, bright pastel colors, a warm atmosphere, clean background, grainy paper, bold visible brushstrokes, patchy details"
-	modelName := "imagen-3.0-capability-001"
+	modelName := "gemini-2.5-flash-image"
 
 	resp, err := client.Models.EditImage(ctx,
 		modelName,

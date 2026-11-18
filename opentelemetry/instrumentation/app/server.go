@@ -67,7 +67,7 @@ func runServer() error {
 // otelhttp for context propagation, trace instrumentation, and metric
 // instrumentation.
 func handleHTTP(route string, handleFn http.HandlerFunc) {
-	instrumentedHandler := otelhttp.NewHandler(otelhttp.WithRouteTag(route, handleFn), route)
+	instrumentedHandler := otelhttp.NewHandler(handleFn, route)
 
 	http.Handle(route, instrumentedHandler)
 }

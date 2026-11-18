@@ -14,7 +14,6 @@
 
 package policytagmanager
 
-// [START data_catalog_ptm_test_iam_permissions]
 import (
 	"context"
 	"fmt"
@@ -51,5 +50,3 @@ func testIAMPermissions(w io.Writer, resourceID string, permissions []string) er
 	fmt.Fprintln(w)
 	return nil
 }
-
-// [END data_catalog_ptm_test_iam_permissions]

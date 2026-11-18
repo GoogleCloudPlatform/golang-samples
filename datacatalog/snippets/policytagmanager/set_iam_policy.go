@@ -14,7 +14,6 @@
 
 package policytagmanager
 
-// [START data_catalog_ptm_set_iam_policy]
 import (
 	"context"
 	"fmt"
@@ -67,5 +66,3 @@ func setIAMPolicy(w io.Writer, resourceID, member string) error {
 	fmt.Fprintf(w, "set policy on resource %s with Etag %x\n", resourceID, updatedPolicy.Etag)
 	return nil
 }
-
-// [END data_catalog_ptm_set_iam_policy]

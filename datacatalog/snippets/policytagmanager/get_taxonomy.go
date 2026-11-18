@@ -14,7 +14,6 @@
 
 package policytagmanager
 
-// [START data_catalog_ptm_get_taxonomy]
 import (
 	"context"
 	"fmt"
@@ -44,5 +43,3 @@ func getTaxonomy(w io.Writer, taxonomyID string) error {
 	fmt.Fprintf(w, "Taxonomy %s has Display Name %s and Description: %s\n", resp.Name, resp.DisplayName, resp.Description)
 	return nil
 }
-
-// [END data_catalog_ptm_get_taxonomy]

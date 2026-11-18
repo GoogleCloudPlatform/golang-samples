@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -32,8 +33,8 @@ import (
 
 const (
 	testPrefix        = "storage-objects-test"
-	testZonalLocation = "us-west4"
-	testZonalZone     = "us-west4-a"
+	testRapidLocation = "us-west4"
+	testRapidZone     = "us-west4-a"
 	downloadObject    = "obj-download"
 )
 
@@ -60,9 +61,9 @@ func TestMain(m *testing.M) {
 	}
 	bidiBucketName = strings.Join([]string{testPrefix, uuid.NewString()}, "-")
 	if err := client.Bucket(bidiBucketName).Create(ctx, tc.ProjectID, &storage.BucketAttrs{
-		Location: testZonalLocation,
+		Location: testRapidLocation,
 		CustomPlacementConfig: &storage.CustomPlacementConfig{
-			DataLocations: []string{testZonalZone},
+			DataLocations: []string{testRapidZone},
 		},
 		StorageClass: "RAPID",
 		HierarchicalNamespace: &storage.HierarchicalNamespace{
@@ -207,5 +208,36 @@ func TestReadAppendableObjectTail(t *testing.T) {
 	}
 	if got, want := len(data), 100; got != want {
 		t.Errorf("downloaded %v bytes, want %v", got, want)
+	}
+}
+
+func TestOptimizeWriteLatencyPool(t *testing.T) {
+	var b bytes.Buffer
+	prefix := "obj-pool"
+	if err := optimizeWriteLatencyPool(&b, bidiBucketName, prefix); err != nil {
+		t.Fatalf("running sample: %v, output: %v", err, b.String())
+	}
+
+	// Check that the first object was written and left unfinalized.
+	ctx := context.Background()
+	obj := client.Bucket(bidiBucketName).Object(fmt.Sprintf("%s_0", prefix))
+	attrs, err := obj.Attrs(ctx)
+	if err != nil {
+		t.Fatalf("object.Attrs: %v", err)
+	}
+	if !attrs.Finalized.IsZero() {
+		t.Errorf("got finalized object, want unfinalized")
+	}
+	r, err := obj.NewReader(ctx)
+	if err != nil {
+		t.Fatalf("object.NewReader: %v", err)
+	}
+	defer r.Close()
+	got, err := io.ReadAll(r)
+	if err != nil {
+		t.Fatalf("io.ReadAll: %v", err)
+	}
+	if want := "0123456789"; string(got) != want {
+		t.Errorf("got contents %q, want %q", got, want)
 	}
 }

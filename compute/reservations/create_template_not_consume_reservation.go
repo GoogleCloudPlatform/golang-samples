@@ -48,7 +48,7 @@ func createTemplateNotConsumeReservation(w io.Writer, projectID, templateName st
 					{
 						InitializeParams: &computepb.AttachedDiskInitializeParams{
 							DiskSizeGb:  proto.Int64(250),
-							SourceImage: proto.String("projects/debian-cloud/global/images/family/debian-11"),
+							SourceImage: proto.String("projects/debian-cloud/global/images/family/debian-12"),
 						},
 						AutoDelete: proto.Bool(true),
 						Boot:       proto.Bool(true),
@@ -59,7 +59,7 @@ func createTemplateNotConsumeReservation(w io.Writer, projectID, templateName st
 				// without specifying a subnetwork.
 				NetworkInterfaces: []*computepb.NetworkInterface{
 					{
-						Name: proto.String("global/networks/default"),
+						Network: proto.String("global/networks/default"),
 						// The template lets the instance use an external IP address.
 						AccessConfigs: []*computepb.AccessConfig{
 							{

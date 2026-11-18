@@ -47,7 +47,7 @@ func generateScribbleCtrlTypeWithText(w io.Writer, outputGCSURI string) error {
 		Config: controlReference,
 	}
 
-	modelName := "imagen-3.0-capability-001"
+	modelName := "gemini-2.5-flash-image"
 	prompt := "an oil painting showing the side of a red car[1]"
 
 	resp, err := client.Models.EditImage(ctx,

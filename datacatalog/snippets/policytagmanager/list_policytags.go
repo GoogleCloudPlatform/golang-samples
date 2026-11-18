@@ -14,7 +14,6 @@
 
 package policytagmanager
 
-// [START data_catalog_ptm_list_policytags]
 import (
 	"context"
 	"fmt"
@@ -58,5 +57,3 @@ func listPolicyTags(w io.Writer, parentTaxonomyID string) error {
 	}
 	return nil
 }
-
-// [END data_catalog_ptm_list_policytags]

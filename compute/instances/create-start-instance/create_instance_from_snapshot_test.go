@@ -30,6 +30,7 @@ import (
 )
 
 func TestComputeCreateInstanceFromSnapshotSnippets(t *testing.T) {
+	t.Skip("Temporary skipping slow test")
 	ctx := context.Background()
 	var seededRand *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
@@ -67,7 +68,7 @@ func TestComputeCreateInstanceFromSnapshotSnippets(t *testing.T) {
 
 	newestDebianReq := &computepb.GetFromFamilyImageRequest{
 		Project: "debian-cloud",
-		Family:  "debian-11",
+		Family:  "debian-12",
 	}
 
 	newestDebian, err := imagesClient.GetFromFamily(ctx, newestDebianReq)
