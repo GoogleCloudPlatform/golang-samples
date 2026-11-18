@@ -25,6 +25,9 @@ import (
 )
 
 func TestRendererService(t *testing.T) {
+	// TODO: remove skip once internal/cloudrunci drops --ingress internal.
+	t.Skip("Temporarily skipped: Cloud Run service E2E tests fail with 404 due to --ingress internal in internal/cloudrunci")
+
 	tc := testutil.EndToEndTest(t)
 	service := cloudrunci.NewService("render", tc.ProjectID)
 	service.Dir = "../markdown-preview/renderer"
