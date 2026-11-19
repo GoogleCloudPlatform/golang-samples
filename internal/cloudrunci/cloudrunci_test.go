@@ -17,6 +17,7 @@ package cloudrunci
 import (
 	"fmt"
 	"net/url"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -108,6 +109,19 @@ func TestDeployArgs(t *testing.T) {
 		if !contains(cmd.Args, fmt.Sprintf("%s=%s", i, v)) {
 			t.Errorf("Environment variable (%s) missing from deploy command", i)
 		}
+	}
+	if contains(cmd.Args, "--ingress") {
+		t.Errorf("deployCmd() args unexpectedly contained --ingress flag: %v", cmd.Args)
+	}
+}
+
+func TestRunIDFormat(t *testing.T) {
+	matched, err := regexp.MatchString(`^\d{8}-\d{6}-[0-9a-f]{4}$`, runID)
+	if err != nil {
+		t.Fatalf("regexp.MatchString: %v", err)
+	}
+	if !matched {
+		t.Errorf("runID %q does not match expected YYYYMMDD-HHMMSS-xxxx format", runID)
 	}
 }
 
