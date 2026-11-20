@@ -3,9 +3,9 @@ module github.com/GoogleCloudPlatform/golang-samples/run/image-processing
 go 1.25.0
 
 require (
-	cloud.google.com/go/storage v1.68.0
+	cloud.google.com/go/storage v1.71.0
 	cloud.google.com/go/vision v1.2.0
-	cloud.google.com/go/vision/v2 v2.15.0
+	cloud.google.com/go/vision/v2 v2.17.1
 )
 
 require (
