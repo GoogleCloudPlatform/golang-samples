@@ -20,7 +20,9 @@ import (
 	"io"
 	"time"
 
-	"cloud.google.com/go/bigtable"
+	admin "cloud.google.com/go/bigtable/admin/apiv2"
+	"cloud.google.com/go/bigtable/admin/apiv2/adminpb"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 func createFamilyGCNested(w io.Writer, projectID, instanceID string, tableName string) error {
@@ -30,30 +32,65 @@ func createFamilyGCNested(w io.Writer, projectID, instanceID string, tableName s
 
 	ctx := context.Background()
 
-	adminClient, err := bigtable.NewAdminClient(ctx, projectID, instanceID)
+	adminClient, err := admin.NewBigtableTableAdminClient(ctx)
 	if err != nil {
-		return fmt.Errorf("bigtable.NewAdminClient: %w", err)
+		return fmt.Errorf("admin.NewBigtableTableAdminClient: %w", err)
 	}
 	defer adminClient.Close()
-
-	columnFamilyName := "cf5"
-	if err := adminClient.CreateColumnFamily(ctx, tableName, columnFamilyName); err != nil {
-		return fmt.Errorf("CreateColumnFamily(%s): %w", columnFamilyName, err)
-	}
 
 	// Create a nested GC rule:
 	// Drop cells that are either older than the 10 recent versions
 	// OR
 	// Drop cells that are older than a month AND older than the 2 recent versions
 	maxAge := time.Hour * 24 * 5
-	maxAgePolicy := bigtable.MaxAgePolicy(maxAge)
-	policy := bigtable.UnionPolicy(
-		bigtable.MaxVersionsPolicy(10),
-		bigtable.IntersectionPolicy(
-			bigtable.MaxVersionsPolicy(2),
-			maxAgePolicy))
-	if err := adminClient.SetGCPolicy(ctx, tableName, columnFamilyName, policy); err != nil {
-		return fmt.Errorf("SetGCPolicy(%s): %w", policy, err)
+	policy := &adminpb.GcRule{
+		Rule: &adminpb.GcRule_Union_{
+			Union: &adminpb.GcRule_Union{
+				Rules: []*adminpb.GcRule{
+					{
+						Rule: &adminpb.GcRule_MaxNumVersions{
+							MaxNumVersions: 10,
+						},
+					},
+					{
+						Rule: &adminpb.GcRule_Intersection_{
+							Intersection: &adminpb.GcRule_Intersection{
+								Rules: []*adminpb.GcRule{
+									{
+										Rule: &adminpb.GcRule_MaxNumVersions{
+											MaxNumVersions: 2,
+										},
+									},
+									{
+										Rule: &adminpb.GcRule_MaxAge{
+											MaxAge: durationpb.New(maxAge),
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	columnFamilyName := "cf5"
+	req := &adminpb.ModifyColumnFamiliesRequest{
+		Name: fmt.Sprintf("projects/%s/instances/%s/tables/%s", projectID, instanceID, tableName),
+		Modifications: []*adminpb.ModifyColumnFamiliesRequest_Modification{
+			{
+				Id: columnFamilyName,
+				Mod: &adminpb.ModifyColumnFamiliesRequest_Modification_Create{
+					Create: &adminpb.ColumnFamily{
+						GcRule: policy,
+					},
+				},
+			},
+		},
+	}
+	if _, err := adminClient.ModifyColumnFamilies(ctx, req); err != nil {
+		return fmt.Errorf("ModifyColumnFamilies(%s): %w", columnFamilyName, err)
 	}
 
 	fmt.Fprintf(w, "created column family %s with policy: %v\n", columnFamilyName, policy)
