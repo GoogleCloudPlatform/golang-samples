@@ -33,6 +33,9 @@ var (
 )
 
 func TestEditorService(t *testing.T) {
+	// TODO: remove skip once internal/cloudrunci drops --ingress internal.
+	t.Skip("Temporarily skipped: Cloud Run service E2E tests fail with 404 due to --ingress internal in internal/cloudrunci")
+
 	tc := testutil.EndToEndTest(t)
 	client = http.Client{Timeout: 10 * time.Second}
 
