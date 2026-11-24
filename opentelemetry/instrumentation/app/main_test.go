@@ -22,10 +22,12 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"syscall"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/pdata/pmetric/pmetricotlp"
 	"go.opentelemetry.io/collector/pdata/ptrace"
@@ -57,8 +59,8 @@ func TestWriteTelemetry(t *testing.T) {
 		t:               t,
 		expectationsMet: make(chan struct{}),
 		expectations: []*spanExpectation{
-			{name: "/multi"},
-			{name: "/single"},
+			{name: "GET /multi"},
+			{name: "GET /single"},
 		},
 	}
 	http.HandleFunc("/v1/traces", ts.handleTraces)
@@ -68,11 +70,11 @@ func TestWriteTelemetry(t *testing.T) {
 		t:               t,
 		expectationsMet: make(chan struct{}),
 		expectations: []*metricExpectation{
-			{name: "http.client.request.size"},
-			{name: "http.client.duration"},
-			{name: "http.server.response.size"},
-			{name: "http.server.request.size"},
-			{name: "http.server.duration"},
+			{name: "http.client.request.body.size"},
+			{name: "http.client.request.duration"},
+			{name: "http.server.response.body.size"},
+			{name: "http.server.request.body.size"},
+			{name: "http.server.request.duration"},
 			{name: "example.subrequests"},
 			{name: "example.sleep.duration"},
 		},
@@ -135,6 +137,41 @@ func TestWriteTelemetry(t *testing.T) {
 	}()
 	// Wait for all checks to complete
 	wg.Wait()
+}
+
+func TestRunServerSIGTERM(t *testing.T) {
+	origMux := http.DefaultServeMux
+	http.DefaultServeMux = http.NewServeMux()
+	t.Cleanup(func() { http.DefaultServeMux = origMux })
+
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- runServer()
+	}()
+
+	require.True(t, testutil.Retry(t, 10, 100*time.Millisecond, func(r *testutil.R) {
+		conn, err := net.DialTimeout("tcp", "localhost:8080", 100*time.Millisecond)
+		if err != nil {
+			r.Errorf("server not ready: %v", err)
+			return
+		}
+		_ = conn.Close()
+	}))
+
+	select {
+	case err := <-errCh:
+		t.Fatalf("server exited early: %v", err)
+	default:
+	}
+
+	require.NoError(t, syscall.Kill(syscall.Getpid(), syscall.SIGTERM))
+
+	select {
+	case err := <-errCh:
+		assert.NoError(t, err)
+	case <-time.After(timeoutSeconds * time.Second):
+		t.Fatal("timeout waiting for runServer to shut down on SIGTERM")
+	}
 }
 
 type expectedLogFormat struct {

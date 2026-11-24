@@ -15,10 +15,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"math/rand"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
@@ -59,15 +64,32 @@ func handleMulti(w http.ResponseWriter, r *http.Request) {
 func runServer() error {
 	handleHTTP("/single", handleSingle)
 	handleHTTP("/multi", handleMulti)
+	srv := &http.Server{Addr: ":8080"}
 
-	return http.ListenAndServe(":8080", nil)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	srvErr := make(chan error, 1)
+	go func() {
+		srvErr <- srv.ListenAndServe()
+	}()
+
+	select {
+	case err := <-srvErr:
+		return err
+	case <-ctx.Done():
+	}
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	return srv.Shutdown(shutdownCtx)
 }
 
 // handleHTTP handles the http HandlerFunc on the specified route, and uses
 // otelhttp for context propagation, trace instrumentation, and metric
 // instrumentation.
 func handleHTTP(route string, handleFn http.HandlerFunc) {
-	instrumentedHandler := otelhttp.NewHandler(otelhttp.WithRouteTag(route, handleFn), route)
+	instrumentedHandler := otelhttp.NewHandler(handleFn, route)
 
 	http.Handle(route, instrumentedHandler)
 }
