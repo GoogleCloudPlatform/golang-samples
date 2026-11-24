@@ -118,12 +118,14 @@ func main() {
 	if err != nil {
 		log.Fatal("Bigtable NewBigtableTableAdminClient:", err)
 	}
+	defer adminClient.Close()
 
 	// Make a regular client.
 	client, err := bigtable.NewClient(context.Background(), *project, *instance)
 	if err != nil {
 		log.Fatal("Bigtable NewClient:", err)
 	}
+	defer client.Close()
 
 	// Open the table.
 	table := client.Open(*tableName)
