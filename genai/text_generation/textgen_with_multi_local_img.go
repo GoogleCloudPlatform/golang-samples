@@ -46,7 +46,7 @@ func generateWithMultiLocalImages(w io.Writer) error {
 		return fmt.Errorf("failed to read image2: %w", err)
 	}
 
-	modelName := "gemini-2.5-flash"
+	modelName := "gemini-3.8-flash"
 	contents := []*genai.Content{
 		{
 			Role: "user",

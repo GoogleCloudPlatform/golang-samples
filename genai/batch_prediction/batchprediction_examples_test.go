@@ -159,7 +159,7 @@ func generateBatchPredictMock(w io.Writer, outputURI string) error {
 		},
 	}
 
-	modelName := "gemini-2.5-flash"
+	modelName := "gemini-3.8-flash"
 
 	job, err := client.Batches.Create(ctx, modelName, src, config)
 	if err != nil {
@@ -250,7 +250,7 @@ func generateBatchPredictWithBQMock(w io.Writer, outputURI string) error {
 		},
 	}
 
-	modelName := "gemini-2.5-flash"
+	modelName := "gemini-3.8-flash"
 
 	job, err := client.Batches.Create(ctx, modelName, src, config)
 	if err != nil {

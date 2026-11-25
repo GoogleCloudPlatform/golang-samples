@@ -33,7 +33,7 @@ func TestBatchPredict(t *testing.T) {
 
 	ctx := context.Background()
 	bucketName := testutil.TestBucket(ctx, t, tc.ProjectID, "golang-samples-predict")
-	location := "us-central1"
+	location := "global"
 	outputURI := fmt.Sprintf("gs://%s/", bucketName)
 
 	t.Run("code predict", func(t *testing.T) {

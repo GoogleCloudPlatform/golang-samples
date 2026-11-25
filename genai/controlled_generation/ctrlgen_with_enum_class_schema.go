@@ -51,7 +51,7 @@ func generateWithEnumClassSchema(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.5-flash"
+	modelName := "gemini-3.8-flash"
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: "What type of instrument is a guitar?"},

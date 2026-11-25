@@ -63,7 +63,7 @@ func listContentCache(w io.Writer) error {
 	// Example response:
 	// Cache name: projects/111111111111/locations/us-central1/cachedContents/1234567890123456789
 	// Display name: product_recommendations_prompt
-	// Model: models/gemini-2.5-flash
+	// Model: models/gemini-3.8-flash
 	// Create time: 2025-04-08T02:15:23Z
 	// Update time: 2025-04-08T03:05:11Z
 	// Expire time: 2025-04-20T03:05:11Z (in 167h59m59s)

@@ -30,14 +30,17 @@ import (
 
 // batchPredictBQ submits a batch prediction job using BigQuery data source as its input
 func batchPredictBQ(w io.Writer, projectID, location string, inputURI string, outputURI string) error {
-	// location  := "us-central1"
+	// location  := "global"
 	// inputURI  := "bq://storage-samples.generative_ai.batch_requests_for_multimodal_input"
 	// outputURI := "bq://<cloud-project-name>.<dataset-name>.<table-name>"
-	modelName := "gemini-2.5-flash"
+	modelName := "gemini-3.8-flash"
 	jobName := "batch-predict-bq-test-001"
 
 	ctx := context.Background()
-	apiEndpoint := fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
+	apiEndpoint := "aiplatform.googleapis.com:443"
+	if location != "global" {
+		apiEndpoint = fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)
+	}
 	client, err := aiplatform.NewJobClient(ctx, option.WithEndpoint(apiEndpoint))
 	if err != nil {
 		return fmt.Errorf("unable to create aiplatform client: %w", err)
@@ -89,7 +92,7 @@ func batchPredictBQ(w io.Writer, projectID, location string, inputURI string, ou
 	fmt.Fprintf(w, "job id: %q\n", fullJobId)
 	fmt.Fprintf(w, "job state: %s\n", job.GetState())
 	// Example response:
-	// submitted batch predict job for model "publishers/google/models/gemini-2.0-flash-001"
+	// submitted batch predict job for model "publishers/google/models/gemini-3.8-flash"
 	// job id: "projects/.../locations/.../batchPredictionJobs/1234567890000000000"
 	// job state: JOB_STATE_PENDING
 
