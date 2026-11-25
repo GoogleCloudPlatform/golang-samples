@@ -68,7 +68,7 @@ func generateStyleRefWithTextMock(w io.Writer, outputGCSURI string) error {
 	}
 
 	prompt := "generate an image of a neon sign [1] with the words: have a great day"
-	modelName := "imagen-3.0-capability-001"
+	modelName := "gemini-3.1-flash-lite-image"
 
 	resp, err := client.Models.EditImage(
 		ctx,
@@ -138,7 +138,7 @@ func generateCannyCtrlTypeWithTextMock(w io.Writer, outputGCSURI string) error {
 		Config: controlReference,
 	}
 
-	modelName := "imagen-3.0-capability-001"
+	modelName := "gemini-3.1-flash-lite-image"
 	prompt := "a watercolor painting of a red car[1] driving on a road"
 
 	resp, err := client.Models.EditImage(
@@ -210,7 +210,7 @@ func generateScribbleCtrlTypeWithTextMock(w io.Writer, outputGCSURI string) erro
 		Config: controlReference,
 	}
 
-	modelName := "imagen-3.0-capability-001"
+	modelName := "gemini-3.1-flash-lite-image"
 	prompt := "an oil painting showing the side of a red car[1]"
 
 	resp, err := client.Models.EditImage(
@@ -293,7 +293,7 @@ func generateSubjRefCtrlReferWithTextMock(w io.Writer, outputGCSURI string) erro
 	}
 
 	prompt := "a portrait of a woman[1] in the pose of the control image[2] in a watercolor style..."
-	modelName := "imagen-3.0-capability-001"
+	modelName := "gemini-3.1-flash-lite-image"
 
 	resp, err := client.Models.EditImage(
 		ctx,
@@ -359,7 +359,7 @@ func generateRawReferWithTextMock(w io.Writer, outputGCSURI string) error {
 	}
 
 	prompt := "transform the subject in the image so that the teacup[1] is made entirely out of chocolate"
-	modelName := "imagen-3.0-capability-001"
+	modelName := "gemini-3.1-flash-lite-image"
 
 	resp, err := client.Models.EditImage(
 		ctx,
