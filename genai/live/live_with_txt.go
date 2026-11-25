@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 
 	"google.golang.org/genai"
 )
@@ -36,10 +37,12 @@ func generateLiveWithText(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-3.8-live"
 
+	// The model responds with audio. Request a transcript of it to get text.
 	config := &genai.LiveConnectConfig{
-		ResponseModalities: []genai.Modality{genai.ModalityText},
+		ResponseModalities:       []genai.Modality{genai.ModalityAudio},
+		OutputAudioTranscription: &genai.AudioTranscriptionConfig{},
 	}
 
 	// Open a live session
@@ -69,7 +72,7 @@ func generateLiveWithText(w io.Writer) error {
 	}
 
 	// Stream the response
-	var response string
+	var response strings.Builder
 	for {
 		chunk, err := session.Receive()
 		if err != nil {
@@ -79,11 +82,12 @@ func generateLiveWithText(w io.Writer) error {
 			return fmt.Errorf("error receiving response: %w", err)
 		}
 
-		if chunk.ServerContent != nil && chunk.ServerContent.ModelTurn != nil {
-			for _, part := range chunk.ServerContent.ModelTurn.Parts {
-				if part.Text != "" {
-					response += part.Text
-				}
+		if chunk.ServerContent != nil {
+			if chunk.ServerContent.OutputTranscription != nil && chunk.ServerContent.OutputTranscription.Text != "" {
+				response.WriteString(chunk.ServerContent.OutputTranscription.Text)
+			}
+			if chunk.ServerContent.TurnComplete {
+				break
 			}
 		}
 	}
@@ -91,7 +95,7 @@ func generateLiveWithText(w io.Writer) error {
 	// Example output:
 	//  >  Hello? Gemini are you there?
 	//  Yes, I'm here. What would you like to talk about?
-	fmt.Fprintln(w, response)
+	fmt.Fprintln(w, response.String())
 	return nil
 }
 

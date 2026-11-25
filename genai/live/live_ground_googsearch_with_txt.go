@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 
 	"google.golang.org/genai"
 )
@@ -35,10 +36,12 @@ func generateGroundSearchWithTxt(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-3.8-live"
 
+	// The model responds with audio. Request a transcript of it to get text.
 	config := &genai.LiveConnectConfig{
-		ResponseModalities: []genai.Modality{genai.ModalityText},
+		ResponseModalities:       []genai.Modality{genai.ModalityAudio},
+		OutputAudioTranscription: &genai.AudioTranscriptionConfig{},
 		Tools: []*genai.Tool{
 			{GoogleSearch: &genai.GoogleSearch{}},
 		},
@@ -65,7 +68,7 @@ func generateGroundSearchWithTxt(w io.Writer) error {
 		return fmt.Errorf("failed to send client content: %w", err)
 	}
 
-	var response string
+	var response strings.Builder
 
 	// Receive streaming responses
 	for {
@@ -77,17 +80,13 @@ func generateGroundSearchWithTxt(w io.Writer) error {
 			return fmt.Errorf("error receiving stream: %w", err)
 		}
 
-		// Handle the main model output
+		// Handle the main model output transcription
 		if chunk.ServerContent != nil {
-			if chunk.ServerContent.ModelTurn != nil {
-				for _, part := range chunk.ServerContent.ModelTurn.Parts {
-					if part == nil {
-						continue
-					}
-					if part.Text != "" {
-						response += part.Text
-					}
-				}
+			if chunk.ServerContent.OutputTranscription != nil && chunk.ServerContent.OutputTranscription.Text != "" {
+				response.WriteString(chunk.ServerContent.OutputTranscription.Text)
+			}
+			if chunk.ServerContent.TurnComplete {
+				break
 			}
 		}
 
@@ -96,7 +95,7 @@ func generateGroundSearchWithTxt(w io.Writer) error {
 		}
 	}
 
-	fmt.Fprintln(w, response)
+	fmt.Fprintln(w, response.String())
 
 	// Example output:
 	// > When did the last Brazil vs. Argentina soccer match happen?

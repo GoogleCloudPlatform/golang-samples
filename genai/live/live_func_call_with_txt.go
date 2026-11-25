@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 
 	"google.golang.org/genai"
 )
@@ -36,14 +37,16 @@ func generateLiveFuncCallWithTxt(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelID := "gemini-2.0-flash-001"
+	modelID := "gemini-3.8-live"
 
 	// Define simple function declarations.
 	turnOnLights := &genai.FunctionDeclaration{Name: "turn_on_the_lights"}
 	turnOffLights := &genai.FunctionDeclaration{Name: "turn_off_the_lights"}
 
+	// The model responds with audio. Request a transcript of it to get text.
 	config := &genai.LiveConnectConfig{
-		ResponseModalities: []genai.Modality{genai.ModalityText},
+		ResponseModalities:       []genai.Modality{genai.ModalityAudio},
+		OutputAudioTranscription: &genai.AudioTranscriptionConfig{},
 		Tools: []*genai.Tool{
 			{
 				FunctionDeclarations: []*genai.FunctionDeclaration{
@@ -77,6 +80,10 @@ func generateLiveFuncCallWithTxt(w io.Writer) error {
 		return fmt.Errorf("failed to send client content: %w", err)
 	}
 
+	var response strings.Builder
+	sentToolResponse := false
+	hasOutput := false
+
 	for {
 		chunk, err := session.Receive()
 		if err == io.EOF {
@@ -86,27 +93,19 @@ func generateLiveFuncCallWithTxt(w io.Writer) error {
 			return fmt.Errorf("error receiving chunk: %w", err)
 		}
 
-		// Handle model-generated content
-		if chunk.ServerContent != nil && chunk.ServerContent.ModelTurn != nil {
-			for _, part := range chunk.ServerContent.ModelTurn.Parts {
-				if part.Text != "" {
-					fmt.Fprint(w, part.Text)
-				}
-			}
-		}
-
 		// Handle tool (function) calls
 		if chunk.ToolCall != nil {
 			var functionResponses []*genai.FunctionResponse
 			for _, fc := range chunk.ToolCall.FunctionCalls {
 				functionResponse := &genai.FunctionResponse{
+					ID:   fc.ID,
 					Name: fc.Name,
 					Response: map[string]any{
 						"result": "ok",
 					},
 				}
 				functionResponses = append(functionResponses, functionResponse)
-				fmt.Fprintln(w, functionResponse.Response["result"])
+				fmt.Fprintf(w, "%s: %v\n", fc.Name, functionResponse.Response["result"])
 			}
 
 			if err := session.SendToolResponse(genai.LiveToolResponseInput{
@@ -114,12 +113,27 @@ func generateLiveFuncCallWithTxt(w io.Writer) error {
 			}); err != nil {
 				return fmt.Errorf("failed to send tool response: %w", err)
 			}
+			sentToolResponse = true
+		}
+
+		// Collect output transcription from the follow-up turn after sending tool responses.
+		if chunk.ServerContent != nil {
+			if chunk.ServerContent.OutputTranscription != nil && chunk.ServerContent.OutputTranscription.Text != "" {
+				response.WriteString(chunk.ServerContent.OutputTranscription.Text)
+				hasOutput = true
+			}
+			if chunk.ServerContent.TurnComplete && (!sentToolResponse || hasOutput) {
+				break
+			}
 		}
 	}
 
+	fmt.Fprintln(w, response.String())
+
 	// Example output:
 	// >  Turn on the lights please
-	// ok
+	// turn_on_the_lights: ok
+	// I've turned on the lights for you.
 
 	return nil
 }

@@ -42,13 +42,18 @@ func generateLiveAudioConversation(w io.Writer, audioFilePath string) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-live-2.5-flash-preview-native-audio-09-2025"
+	modelName := "gemini-3.8-live"
 
 	// Configure model to receive and respond with audio, including transcriptions.
 	config := &genai.LiveConnectConfig{
 		ResponseModalities:       []genai.Modality{genai.ModalityAudio},
 		InputAudioTranscription:  &genai.AudioTranscriptionConfig{},
 		OutputAudioTranscription: &genai.AudioTranscriptionConfig{},
+		RealtimeInputConfig: &genai.RealtimeInputConfig{
+			AutomaticActivityDetection: &genai.AutomaticActivityDetection{
+				Disabled: true,
+			},
+		},
 	}
 
 	session, err := client.Live.Connect(ctx, modelName, config)
@@ -65,15 +70,25 @@ func generateLiveAudioConversation(w io.Writer, audioFilePath string) error {
 
 	fmt.Fprintf(w, "> Streaming audio from %s to the model\n\n", audioFilePath)
 
-	// Send audio data to the model
+	// Send audio data to the model with explicit activity boundaries
+	if err := session.SendRealtimeInput(genai.LiveRealtimeInput{
+		ActivityStart: &genai.ActivityStart{},
+	}); err != nil {
+		return fmt.Errorf("failed to send activity start: %w", err)
+	}
 	err = session.SendRealtimeInput(genai.LiveRealtimeInput{
-		Media: &genai.Blob{
+		Audio: &genai.Blob{
 			Data:     audioBytes,
 			MIMEType: mimeType,
 		},
 	})
 	if err != nil {
 		return fmt.Errorf("failed to send realtime input: %w", err)
+	}
+	if err := session.SendRealtimeInput(genai.LiveRealtimeInput{
+		ActivityEnd: &genai.ActivityEnd{},
+	}); err != nil {
+		return fmt.Errorf("failed to send activity end: %w", err)
 	}
 
 	// Gather audio response frames
@@ -102,6 +117,9 @@ func generateLiveAudioConversation(w io.Writer, audioFilePath string) error {
 					}
 				}
 			}
+			if chunk.ServerContent.TurnComplete {
+				break
+			}
 		}
 	}
 
@@ -116,7 +134,7 @@ func generateLiveAudioConversation(w io.Writer, audioFilePath string) error {
 	}
 
 	// Example output:
-	// gemini-live-2.5-flash-preview-native-audio-09-2025
+	// gemini-3.8-live
 	// {'input_transcription': {'text': 'Hello.'}}
 	// {'output_transcription': {}}
 	// {'output_transcription': {'text': 'Hi'}}

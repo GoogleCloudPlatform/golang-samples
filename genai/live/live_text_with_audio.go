@@ -38,10 +38,19 @@ func generateLiveTextWithAudio(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-3.8-live"
 
+	// The model responds with audio. Request a transcript of it to get text.
 	config := &genai.LiveConnectConfig{
-		ResponseModalities: []genai.Modality{genai.ModalityText},
+		ResponseModalities:       []genai.Modality{genai.ModalityAudio},
+		OutputAudioTranscription: &genai.AudioTranscriptionConfig{},
+		// Mark the start and end of the audio yourself, because the audio file
+		// doesn't end with the silence that automatic activity detection needs.
+		RealtimeInputConfig: &genai.RealtimeInputConfig{
+			AutomaticActivityDetection: &genai.AutomaticActivityDetection{
+				Disabled: true,
+			},
+		},
 	}
 
 	session, err := client.Live.Connect(ctx, modelName, config)
@@ -65,15 +74,25 @@ func generateLiveTextWithAudio(w io.Writer) error {
 
 	fmt.Fprintf(w, "> Answer to this audio url: %s\n\n", audioURL)
 
-	// Send the audio as Blob media input
+	// Send the audio as Blob input with explicit activity boundaries
+	if err := session.SendRealtimeInput(genai.LiveRealtimeInput{
+		ActivityStart: &genai.ActivityStart{},
+	}); err != nil {
+		return fmt.Errorf("failed to send activity start: %w", err)
+	}
 	err = session.SendRealtimeInput(genai.LiveRealtimeInput{
-		Media: &genai.Blob{
+		Audio: &genai.Blob{
 			Data:     audioBytes,
 			MIMEType: "audio/pcm;rate=16000",
 		},
 	})
 	if err != nil {
 		return fmt.Errorf("failed to send audio input: %w", err)
+	}
+	if err := session.SendRealtimeInput(genai.LiveRealtimeInput{
+		ActivityEnd: &genai.ActivityEnd{},
+	}); err != nil {
+		return fmt.Errorf("failed to send activity end: %w", err)
 	}
 
 	// Stream the response
@@ -91,13 +110,11 @@ func generateLiveTextWithAudio(w io.Writer) error {
 			continue
 		}
 
-		// Handle model turn responses
-		if chunk.ServerContent.ModelTurn != nil {
-			for _, part := range chunk.ServerContent.ModelTurn.Parts {
-				if part != nil && part.Text != "" {
-					response.WriteString(part.Text)
-				}
-			}
+		if chunk.ServerContent.OutputTranscription != nil && chunk.ServerContent.OutputTranscription.Text != "" {
+			response.WriteString(chunk.ServerContent.OutputTranscription.Text)
+		}
+		if chunk.ServerContent.TurnComplete {
+			break
 		}
 	}
 

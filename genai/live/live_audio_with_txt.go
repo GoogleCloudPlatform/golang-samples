@@ -37,7 +37,7 @@ func generateLiveAudioWithText(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-3.8-live"
 
 	voiceName := "Aoede"
 
@@ -88,11 +88,16 @@ func generateLiveAudioWithText(w io.Writer) error {
 			return fmt.Errorf("error receiving stream: %w", err)
 		}
 
-		if chunk.ServerContent != nil && chunk.ServerContent.ModelTurn != nil {
-			for _, part := range chunk.ServerContent.ModelTurn.Parts {
-				if part.InlineData != nil {
-					audioData = append(audioData, part.InlineData.Data...)
+		if chunk.ServerContent != nil {
+			if chunk.ServerContent.ModelTurn != nil {
+				for _, part := range chunk.ServerContent.ModelTurn.Parts {
+					if part.InlineData != nil {
+						audioData = append(audioData, part.InlineData.Data...)
+					}
 				}
+			}
+			if chunk.ServerContent.TurnComplete {
+				break
 			}
 		}
 	}

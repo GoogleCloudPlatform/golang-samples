@@ -37,7 +37,7 @@ func generateLiveRAGWithText(w io.Writer, memoryCorpus string) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.0-flash-001"
+	modelName := "gemini-3.8-live"
 
 	// Configure Vertex RAG store
 	ragStore := &genai.VertexRAGStore{
@@ -48,8 +48,10 @@ func generateLiveRAGWithText(w io.Writer, memoryCorpus string) error {
 		},
 	}
 
+	// The model responds with audio. Request a transcript of it to get text.
 	config := &genai.LiveConnectConfig{
-		ResponseModalities: []genai.Modality{genai.ModalityText},
+		ResponseModalities:       []genai.Modality{genai.ModalityAudio},
+		OutputAudioTranscription: &genai.AudioTranscriptionConfig{},
 		Tools: []*genai.Tool{
 			{
 				Retrieval: &genai.Retrieval{
@@ -98,16 +100,11 @@ func generateLiveRAGWithText(w io.Writer, memoryCorpus string) error {
 			continue
 		}
 
-		// If the server provided a model turn, iterate its parts for text.
-		if chunk.ServerContent.ModelTurn != nil {
-			for _, part := range chunk.ServerContent.ModelTurn.Parts {
-				if part == nil {
-					continue
-				}
-				if part.Text != "" {
-					response.WriteString(part.Text)
-				}
-			}
+		if chunk.ServerContent.OutputTranscription != nil && chunk.ServerContent.OutputTranscription.Text != "" {
+			response.WriteString(chunk.ServerContent.OutputTranscription.Text)
+		}
+		if chunk.ServerContent.TurnComplete {
+			break
 		}
 	}
 

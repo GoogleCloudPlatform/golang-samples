@@ -17,14 +17,15 @@ package live
 
 // [START googlegenaisdk_live_structured_ouput_with_txt]
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 
 	"golang.org/x/oauth2/google"
-	"google.golang.org/genai"
 )
 
 // CalendarEvent represents the structured output we want the model to produce.
@@ -34,8 +35,8 @@ type CalendarEvent struct {
 	Participants []string `json:"participants"`
 }
 
-// generateStructuredOutputWithTxt demonstrates calling the model via an OpenAPI-style
-// endpoint (base_url + api_key) and parsing JSON output into a Go struct.
+// generateStructuredOutputWithTxt demonstrates calling the model via the Vertex AI
+// OpenAI-compatible Chat Completions endpoint and parsing structured JSON into a Go struct.
 func generateStructuredOutputWithTxt(w io.Writer) error {
 	ctx := context.Background()
 
@@ -44,8 +45,8 @@ func generateStructuredOutputWithTxt(w io.Writer) error {
 		return fmt.Errorf("environment variable GOOGLE_CLOUD_PROJECT must be set")
 	}
 
-	location := "us-central1"
-	// Use "openapi" to call the Gemini API via the OpenAPI-compatible endpoint.
+	location := "global"
+	// Use "openapi" to call Gemini via the OpenAI-compatible endpoint.
 	endpointID := "openapi"
 
 	// Programmatically obtain an access token.
@@ -57,69 +58,91 @@ func generateStructuredOutputWithTxt(w io.Writer) error {
 	if err != nil {
 		return fmt.Errorf("failed to fetch token: %w", err)
 	}
-	apiKey := token.AccessToken
 
-	baseURL := fmt.Sprintf("https://%s-aiplatform.googleapis.com/v1/projects/%s/locations/%s/endpoints/%s",
-		location, projectID, location, endpointID)
-
-	// Create a genai client that points to the OpenAPI endpoint, authenticating with the token.
-	client, err := genai.NewClient(ctx, &genai.ClientConfig{
-		APIKey: apiKey,
-		HTTPOptions: genai.HTTPOptions{
-			BaseURL:    baseURL,
-			APIVersion: "v1",
-		},
-	})
-	if err != nil {
-		return fmt.Errorf("failed to create genai client: %w", err)
+	baseURL := fmt.Sprintf("https://aiplatform.googleapis.com/v1/projects/%s/locations/%s/endpoints/%s",
+		projectID, location, endpointID)
+	if location != "global" {
+		baseURL = fmt.Sprintf("https://%s-aiplatform.googleapis.com/v1/projects/%s/locations/%s/endpoints/%s",
+			location, projectID, location, endpointID)
 	}
 
-	// Build the messages (system + user)
-	contents := []*genai.Content{
-		{
-			Role: "system",
-			Parts: []*genai.Part{
-				{Text: "Extract the event information."},
+	modelName := "google/gemini-3.8-flash"
+
+	payload := map[string]any{
+		"model": modelName,
+		"messages": []map[string]string{
+			{"role": "system", "content": "Extract the event information."},
+			{"role": "user", "content": "Alice and Bob are going to a science fair on Friday."},
+		},
+		"response_format": map[string]any{
+			"type": "json_schema",
+			"json_schema": map[string]any{
+				"name":   "CalendarEvent",
+				"strict": true,
+				"schema": map[string]any{
+					"type":                 "object",
+					"additionalProperties": false,
+					"properties": map[string]any{
+						"name":         map[string]any{"type": "string"},
+						"date":         map[string]any{"type": "string"},
+						"participants": map[string]any{"type": "array", "items": map[string]any{"type": "string"}},
+					},
+					"required": []string{"name", "date", "participants"},
+				},
 			},
 		},
-		{
-			Role: genai.RoleUser,
-			Parts: []*genai.Part{
-				{Text: "Alice and Bob are going to a science fair on Friday."},
-			},
-		},
 	}
 
-	// Ask the model to return JSON by setting a strict instruction and also request JSON mime type
-	// to encourage machine-readable output.
-	config := &genai.GenerateContentConfig{
-		ResponseMIMEType: "application/json",
-	}
-
-	modelName := "google/gemini-2.0-flash-001"
-
-	resp, err := client.Models.GenerateContent(ctx, modelName, contents, config)
+	reqBody, err := json.Marshal(payload)
 	if err != nil {
-		return fmt.Errorf("generate content failed: %w", err)
+		return fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	// Resp.Text() returns concatenated text of the top candidate.
-	respText := resp.Text()
-	if respText == "" {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, baseURL+"/chat/completions", bytes.NewReader(reqBody))
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+token.AccessToken)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("chat completions request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response: %w", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("chat completions failed (%s): %s", resp.Status, string(respBody))
+	}
+
+	var completion struct {
+		Choices []struct {
+			Message struct {
+				Content string `json:"content"`
+			} `json:"message"`
+		} `json:"choices"`
+	}
+	if err := json.Unmarshal(respBody, &completion); err != nil {
+		return fmt.Errorf("failed to parse completion response: %w", err)
+	}
+	if len(completion.Choices) == 0 || completion.Choices[0].Message.Content == "" {
 		return fmt.Errorf("empty response text")
 	}
 
-	// Try to parse the JSON into our struct.
 	var event CalendarEvent
-	if err := json.Unmarshal([]byte(respText), &event); err != nil {
-		return fmt.Errorf("Model output was not valid JSON. Raw output:\n%s\n", respText)
+	if err := json.Unmarshal([]byte(completion.Choices[0].Message.Content), &event); err != nil {
+		return fmt.Errorf("Model output was not valid JSON. Raw output:\n%s\n", completion.Choices[0].Message.Content)
 	}
 
 	// Print parsed struct in the same friendly format.
 	fmt.Fprintln(w, event)
 
 	// Example expected output:
-	// Parsed struct: {Name:science fair Date:Friday Participants:[Alice Bob]}
+	// {science fair Friday [Alice Bob]}
 
 	return nil
 }
