@@ -37,7 +37,7 @@ func generateURLContentWithText(w io.Writer) error {
 	}
 
 	// Model and input prompt
-	modelName := "gemini-2.5-flash"
+	modelName := "gemini-3.8-flash"
 	// TODO(developer): Replace with your own URLs
 	url1 := "https://cloud.google.com/vertex-ai/docs/generative-ai/start"
 	url2 := "https://cloud.google.com/docs/overview"

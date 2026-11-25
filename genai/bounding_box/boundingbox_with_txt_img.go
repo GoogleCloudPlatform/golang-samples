@@ -138,7 +138,7 @@ func generateBoundingBoxesWithText(w io.Writer) error {
 		},
 	}
 
-	resp, err := client.Models.GenerateContent(ctx, "gemini-2.5-flash", contents, config)
+	resp, err := client.Models.GenerateContent(ctx, "gemini-3.8-flash", contents, config)
 	if err != nil {
 		return fmt.Errorf("failed to generate content: %w", err)
 	}

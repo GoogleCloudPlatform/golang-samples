@@ -37,7 +37,7 @@ func generateGoogleMapsCoordinatesWithText(w io.Writer) error {
 	}
 
 	// Model and input prompt
-	modelName := "gemini-2.5-flash"
+	modelName := "gemini-3.8-flash"
 	prompt := "Where can I get the best espresso near me?"
 	lat := 40.7128
 	long := -74.0060

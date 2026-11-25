@@ -42,7 +42,7 @@ func generateWithLocalVideo(w io.Writer) error {
 		return fmt.Errorf("failed to read local video: %w", err)
 	}
 
-	modelName := "gemini-2.5-flash"
+	modelName := "gemini-3.8-flash"
 	contents := []*genai.Content{
 		{
 			Role: "user",

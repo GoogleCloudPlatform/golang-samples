@@ -40,7 +40,7 @@ func TestExpressModeGenerationWithMockFunctional(t *testing.T) {
 	buf := new(bytes.Buffer)
 	client := &fakeModels{}
 
-	resp, err := client.GenerateContent(context.Background(), "gemini-2.5-flash", nil, nil)
+	resp, err := client.GenerateContent(context.Background(), "gemini-3.8-flash", nil, nil)
 	if err != nil {
 		t.Fatalf("fake GenerateContent failed: %v", err)
 	}

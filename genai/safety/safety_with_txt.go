@@ -55,7 +55,7 @@ func generateTextWithSafety(w io.Writer) error {
 		SystemInstruction: systemInstruction,
 		SafetySettings:    safetySettings,
 	}
-	modelName := "gemini-2.5-flash"
+	modelName := "gemini-3.8-flash"
 	resp, err := client.Models.GenerateContent(ctx, modelName,
 		[]*genai.Content{{Parts: []*genai.Part{{Text: prompt}}, Role: genai.RoleUser}},
 		config,

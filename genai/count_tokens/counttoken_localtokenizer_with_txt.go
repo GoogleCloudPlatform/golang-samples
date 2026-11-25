@@ -26,6 +26,7 @@ import (
 
 // countTokenLocalWithTxt shows how to count tokens using the local tokenizer with text input.
 func countTokenLocalWithTxt(w io.Writer) error {
+	// LocalTokenizer in google.golang.org/genai supports up to Gemini 2.5 models.
 	modelName := "gemini-2.5-flash"
 	client, err := tokenizer.NewLocalTokenizer(modelName)
 	if err != nil {
