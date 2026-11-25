@@ -45,7 +45,7 @@ func generateWithGoogleVAISMock(w io.Writer, dataStore string) error {
 	ctx := context.Background()
 
 	resp, err := models.GenerateContentMock(ctx,
-		"google/gemini-2.0-flash",
+		"google/gemini-3.8-flash",
 		[]*genai.Content{
 			{
 				Role: "user",
@@ -68,7 +68,7 @@ func TestTextGeneration(t *testing.T) {
 	tc := testutil.SystemTest(t)
 
 	t.Setenv("GOOGLE_GENAI_USE_VERTEXAI", "1")
-	t.Setenv("GOOGLE_CLOUD_LOCATION", "us-central1")
+	t.Setenv("GOOGLE_CLOUD_LOCATION", "global")
 	t.Setenv("GOOGLE_CLOUD_PROJECT", tc.ProjectID)
 
 	buf := new(bytes.Buffer)

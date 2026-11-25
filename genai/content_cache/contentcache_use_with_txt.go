@@ -36,7 +36,7 @@ func useContentCacheWithTxt(w io.Writer, cacheName string) error {
 	}
 
 	resp, err := client.Models.GenerateContent(ctx,
-		"gemini-2.5-flash",
+		"gemini-3.8-flash",
 		genai.Text("Summarize the pdfs"),
 		&genai.GenerateContentConfig{
 			CachedContent: cacheName,

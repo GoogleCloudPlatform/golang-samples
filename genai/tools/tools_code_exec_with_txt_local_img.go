@@ -75,7 +75,7 @@ func generateWithLocalImgAndCodeExec(w io.Writer) error {
 	}
 
 	// Call the model
-	resp, err := client.Models.GenerateContent(ctx, "gemini-2.5-flash", contents, &genai.GenerateContentConfig{
+	resp, err := client.Models.GenerateContent(ctx, "gemini-3.8-flash", contents, &genai.GenerateContentConfig{
 		Tools:       tools,
 		Temperature: genai.Ptr(float32(0.0)),
 	})

@@ -36,7 +36,7 @@ func generateThinkingWithText(w io.Writer) error {
 	}
 
 	resp, err := client.Models.GenerateContent(ctx,
-		"gemini-2.5-flash",
+		"gemini-3.8-flash",
 		genai.Text("solve x^2 + 4x + 4 = 0"),
 		nil,
 	)

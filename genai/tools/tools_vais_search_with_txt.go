@@ -36,7 +36,7 @@ func generateWithGoogleVAIS(w io.Writer, datastore string) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.5-flash"
+	modelName := "gemini-3.8-flash"
 	contents := genai.Text("How do I make an appointment to renew my driver's license?")
 	config := &genai.GenerateContentConfig{
 		Tools: []*genai.Tool{

@@ -89,7 +89,7 @@ func generateWithFuncCallConfig(w io.Writer) error {
 				Overall, Stellar Sounds moved over 645,000 units this year, revealing unexpected 
 				trends in music consumption.`
 
-	modelName := "gemini-2.5-flash"
+	modelName := "gemini-3.8-flash"
 
 	resp, err := client.Models.GenerateContent(ctx, modelName, genai.Text(promptText), config)
 	if err != nil {

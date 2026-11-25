@@ -35,7 +35,7 @@ func generateWithVideo(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.5-flash"
+	modelName := "gemini-3.8-flash"
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: `Analyze the provided video file, including its audio.

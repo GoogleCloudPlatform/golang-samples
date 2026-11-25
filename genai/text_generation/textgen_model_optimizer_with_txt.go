@@ -46,7 +46,7 @@ func generateModelOptimizerWithTxt(w io.Writer) error {
 		ModelSelectionConfig: modelSelectionConfig,
 	}
 
-	modelName := "gemini-2.5-flash"
+	modelName := "gemini-3.8-flash"
 	contents := genai.Text("How does AI work?")
 
 	resp, err := client.Models.GenerateContent(ctx,

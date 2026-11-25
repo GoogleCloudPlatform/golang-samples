@@ -34,7 +34,7 @@ func generateChatWithText(w io.Writer) error {
 	if err != nil {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
-	modelName := "gemini-2.5-flash"
+	modelName := "gemini-3.8-flash"
 	history := []*genai.Content{
 		{
 			Role: genai.RoleUser,

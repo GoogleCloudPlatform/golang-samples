@@ -36,7 +36,7 @@ func generateWithText(w io.Writer) error {
 	}
 
 	resp, err := client.Models.GenerateContent(ctx,
-		"gemini-2.5-flash",
+		"gemini-3.8-flash",
 		genai.Text("How does AI work?"),
 		nil,
 	)

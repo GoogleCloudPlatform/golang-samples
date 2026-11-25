@@ -77,7 +77,7 @@ func generateWithParallelFunctionCalling(w io.Writer) error {
 		},
 	}
 
-	modelName := "gemini-2.5-flash"
+	modelName := "gemini-3.8-flash"
 
 	// First API call: The model determines it needs to call tools based on the prompt.
 	resp, err := client.Models.GenerateContent(ctx, modelName, contents, config)
