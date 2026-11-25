@@ -38,7 +38,7 @@ func generateImageWithText(w io.Writer) error {
 		return fmt.Errorf("failed to create genai client: %w", err)
 	}
 
-	modelName := "gemini-2.5-flash-image"
+	modelName := "gemini-3.1-flash-lite-image"
 	contents := []*genai.Content{
 		{
 			Parts: []*genai.Part{

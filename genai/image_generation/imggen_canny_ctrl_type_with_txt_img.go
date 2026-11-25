@@ -47,7 +47,7 @@ func generateCannyCtrlTypeWithText(w io.Writer, outputGCSURI string) error {
 		Config: controlReference,
 	}
 
-	modelName := "gemini-2.5-flash-image"
+	modelName := "gemini-3.1-flash-lite-image"
 	prompt := "a watercolor painting of a red car[1] driving on a road"
 
 	resp, err := client.Models.EditImage(ctx,
