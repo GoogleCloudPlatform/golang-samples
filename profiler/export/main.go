@@ -101,7 +101,10 @@ func downloadProfiles(ctx context.Context, w io.Writer, project, pageToken strin
 		}
 		fmt.Fprintf(w, "deployment target: %v\n", profile.Deployment.Labels)
 
-		labelBytes, err := json.Marshal(profile.Labels)
+		// Profile.Labels is an input-only field, so ListProfiles never returns
+		// it. The labels that actually describe the profile come back in the
+		// deployment.
+		labelBytes, err := json.Marshal(profile.Deployment.Labels)
 		if err != nil {
 			return err
 		}
