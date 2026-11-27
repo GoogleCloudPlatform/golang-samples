@@ -37,3 +37,8 @@ testing/kokoro/test-env.sh
 .DS_Store
 go.work.sum
 sponge_log.xml
+
+# Secrets files
+secrets.json
+custom-credentials-aws-secrets.json
+custom-credentials-okta-secrets.json
