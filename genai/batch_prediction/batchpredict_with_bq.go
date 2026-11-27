@@ -54,7 +54,7 @@ func generateBatchPredictWithBQ(w io.Writer, outputURI string) error {
 
 	// To use a tuned model, set the model param to your tuned model using the following format:
 	//  modelName:= "projects/{PROJECT_ID}/locations/{LOCATION}/models/{MODEL_ID}
-	modelName := "gemini-2.5-flash"
+	modelName := "gemini-3.8-flash"
 	job, err := client.Batches.Create(ctx, modelName, src, config)
 	if err != nil {
 		return fmt.Errorf("failed to create batch job: %w", err)

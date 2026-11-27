@@ -52,7 +52,7 @@ func createTuningJob(w io.Writer) error {
 	}
 
 	// Start tuning job
-	job, err := client.Tunings.Tune(ctx, "gemini-2.5-flash", training, config)
+	job, err := client.Tunings.Tune(ctx, "gemini-3.8-flash", training, config)
 	if err != nil {
 		return fmt.Errorf("failed to create tuning job: %w", err)
 	}

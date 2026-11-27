@@ -55,7 +55,7 @@ func generateWithFuncCall(w io.Writer) error {
 		Temperature: genai.Ptr(float32(0.0)),
 	}
 
-	modelName := "gemini-2.5-flash"
+	modelName := "gemini-3.8-flash"
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: "What is the weather like in Boston?"},
@@ -97,17 +97,17 @@ func generateWithFuncCall(w io.Writer) error {
 	}
 
 	// Return conversation turns and API response to complete the model's response.
+	// Preserve resp.Candidates[0].Content so thought signatures from Gemini 3.8 are retained.
 	contents = []*genai.Content{
 		{Parts: []*genai.Part{
 			{Text: "What is the weather like in Boston?"},
 		},
 			Role: genai.RoleUser},
-		{Parts: []*genai.Part{
-			{FunctionCall: funcCall},
-		}},
+		resp.Candidates[0].Content,
 		{Parts: []*genai.Part{
 			{FunctionResponse: funcResp},
-		}},
+		},
+			Role: genai.RoleUser},
 	}
 
 	resp, err = client.Models.GenerateContent(ctx, modelName, contents, config)

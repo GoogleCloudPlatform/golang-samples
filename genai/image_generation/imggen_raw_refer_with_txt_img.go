@@ -45,7 +45,7 @@ func generateRawReferWithText(w io.Writer, outputGCSURI string) error {
 	}
 
 	prompt := "transform the subject in the image so that the teacup[1] is made entirely out of chocolate"
-	modelName := "gemini-2.5-flash-image"
+	modelName := "gemini-3.1-flash-lite-image"
 
 	resp, err := client.Models.EditImage(ctx,
 		modelName,
